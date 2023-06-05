@@ -16,7 +16,42 @@ $(function($) {
 		$(this).addClass('active');
 		e.preventDefault();
 	});
-		
+
+    //Utilizzata sulle select o i campi input (non datepicker) per fare il
+    // submit automatico della form 
+	$(document.body).on('change', 'select.auto-submit-parent, input:not([datepicker]).auto-submit-parent',
+	function () {
+	    var $select = $(this);
+		$select.parents("form").submit();
+		return true;
+	});
+
+	//Gestione del campo note nell'inserimento delle assenze nel passato.
+	$(document.body).on('keyup', 'input.absenceRequest_note_input',
+	function () {
+		var $input = $(this);
+		if ($input.val().length > 3) {
+			$("#absenceRequest_insertButton").prop('disabled',false);
+		} else {
+			$("#absenceRequest_insertButton").prop('disabled',true);
+		}
+		$(".absenceRequest_note_hidden").val($input.val());
+		return true;
+	});
+
+	//Non viene utilizzata la auto-submit perché non permette
+	//di scrivere correttamente la data ma effettua la submit
+	//prima di terminare di scrivere la data completa
+	$(document.body).on('change', 'input[datepicker].auto-submit-parent', 
+	function () {
+		var $input = $(this);
+		if ($input.val().length == 10) {
+			$input.parents("form").submit();
+		}
+		return true;
+	});
+
+
 	/**
 	 * evita i doppi invii sulle submit delle form.
 	 */
@@ -246,7 +281,7 @@ $(function($) {
   });
   $.fn.initepas = function() {
 	  
-   this.find('textarea').trumbowyg({
+   this.find('textarea[wysiwyg!="false"]').trumbowyg({
        lang: 'it',
        autogrow: true,
        btns: [
@@ -336,6 +371,8 @@ $(function($) {
       }
       $('[data-target="' + target + '"]').webuiPopover('hide');
     });
+    $.fn.dataTable.moment( 'DD/MM/YYYY', 'it' );
+    $.fn.dataTable.moment( 'DD/MM/YYYY HH:mm:ss', 'it' );
     this.find('[datatable]').DataTable({
       "pageLength": 15,
       "lengthMenu": [
@@ -362,6 +399,20 @@ $(function($) {
         "url": "/public/i18n/DataTablesItalian.json"
       }
     });
+    //le richieste di assenza hanno bisogno di un ordinamento decrescente sulla prima colonna
+    this.find('[datatable-absencerequest]').DataTable({
+      "order": [
+        [0, "desc"]
+      ],
+      "pageLength": 10,
+      "lengthMenu": [
+        [10, 15, 20, 25, 50, 100, -1],
+        [10, 15, 20, 25, 50, 100, "Tutti"]
+      ],
+      "language": {
+        "url": "/public/i18n/DataTablesItalian.json"
+      }
+    });    
     //i buoni pasto hanno bisogno di un doppio ordinamento... per quello hanno una regola speciale.
     this.find('[datatable-mealTicket]').DataTable({
       "order": [

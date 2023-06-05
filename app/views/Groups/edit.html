@@ -1,8 +1,11 @@
-#{modalAsync id:'modalInsertInstitute', button:'Salva', title:'Nuovo gruppo di lavoro' }
+#{modalAsync id:'modalInsertInstitute', button:'Salva', title:group?.persistent ? 'Modifica gruppo di lavoro' : 'Nuovo gruppo di lavoro'}
 
 
 <div class="alert alert-info" role="alert">
-  Compila il form sottostante per creare un nuovo <strong><i class="fa fa-users"></i> gruppo di lavoro</strong>.
+  Compila il form sottostante per 
+  #{if group?.persistent}modificare#{/if}
+  #{else}creare un nuovo#{/else}
+  <strong><i class="fa fa-users"></i> gruppo di lavoro</strong>.
 </div>
 
 <div id="groupData">
@@ -17,9 +20,11 @@
   #{f.input 'group.description' /}
   #{f.hidden 'office.id' /}  
   #{f.selectModel 'group.manager', items: peopleForGroups, required:true /}
-  #{f.selectMultipleModel 'group.people', values: peopleForGroups /}
+  #{f.selectModels 'people', label:messages.get('group.people'), value:group?.people, items: peopleForGroups /}
   #{f.booleanRadio 'group.sendFlowsEmail' /}
 
+  #{f.date 'group.endDate', label:messages.get('endDate') /}
+  #{f.input 'group.externalId' /}
   #{b.buttons center:true}
     
     #{b.save /}

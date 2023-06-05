@@ -1,19 +1,31 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.attestati.dto.internal;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
-
 import lombok.ToString;
-
 import manager.attestati.dto.internal.PeriodoDipendente.PeriodoDipendenteDettagli;
-
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
-
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -23,12 +35,14 @@ import org.testng.collections.Sets;
 /**
  * Json caricato quando si richiede il cruscotto annuale di un dipendente.
  * https://attestativ2.rm.cnr.it/api/rest/dipendente/stato/cruscotto/11028/2017
- * 
- * @author alessandro
+ *
+ * @author Alessandro Martelli
  *
  */
 @ToString
 public class CruscottoDipendente implements Serializable {
+
+  private static final long serialVersionUID = -6418362704585669629L;
 
   public int annoSituazione;                          //2017
   
@@ -36,16 +50,16 @@ public class CruscottoDipendente implements Serializable {
   public SituazioneDipendenteAssenze[] situazioneDipendenteAssenze;
   public SituazioneParametriControllo[] situazioneParametriControllo;
 
-  public static class SituazioneDipendenteCompetenze implements Serializable {
-    
-  }
-  
+  /**
+   * Rappresentazione la situazione delle assenze di un dipendente.
+   */
   @ToString
   public static class SituazioneDipendenteAssenze implements Serializable {
-    
+
+    private static final long serialVersionUID = 7053353712364241891L;
+
     //public int dipendente.id;
     //public int dipendente.matricola;
-    
     public int anno;                                    //2017
     public SituazioneCodiceAssenza codice;
     
@@ -64,10 +78,15 @@ public class CruscottoDipendente implements Serializable {
     
     public Integer qtResiduaOreGiorni;                  //237 
     //presente in missioni
-    
-   
+
+    /**
+     * Rappresentazione la situazione dei codici di assenza.
+     */
     @ToString
     public static class SituazioneCodiceAssenza implements Serializable {
+
+      private static final long serialVersionUID = -3194575384371417800L;
+
       public int id;                                    //255
       public String codice;                             //92
       public String tipoCodice;                         //ASS       sempre ASS...
@@ -91,7 +110,7 @@ public class CruscottoDipendente implements Serializable {
      * Estrae le date della situazione dipendente per quel codice di assenza.
      * Preleva le date dalle chiavi delle due mappe giorniConsolidatiMap e giorniNoConsolidatiMap.
      * Il campo value della mappa è un dato che modella le quantità e non ci interessa. 
-     * 
+     *
      * @return le date utilizzate.
      */
     public Set<LocalDate> codeDates() {
@@ -112,7 +131,12 @@ public class CruscottoDipendente implements Serializable {
     }
   }
 
+  /**
+   * Rappresentala la situazione dei parametri di controllo.
+   */
   public static class SituazioneParametriControllo implements Serializable {
+
+    private static final long serialVersionUID = -5572951752025385326L;
 
     public int id;
     public String descrizione;
@@ -130,7 +154,7 @@ public class CruscottoDipendente implements Serializable {
      * Estrae i codici e le rispettive date utilizzate dal controllo situazione.
      * Le mappe giorniAssenzaConsolidatiMap e giorniAssenzaNoConsolidatiMap hanno come
      * chiavi le date, e come valori il codice.
-     * 
+     *
      * @return le date utilizzate.
      */
     public Map<String, Set<LocalDate>> codesDates() {
@@ -164,9 +188,12 @@ public class CruscottoDipendente implements Serializable {
       
       return codesDates;
     }
-    
+
   }
-  
+
+  /**
+   * Possibili tipologie di importazione delle assenze.
+   */
   public static enum AbsenceImportType {
 
     //Situazioni da prelevare da SituazioneParametriControllo
@@ -195,6 +222,7 @@ public class CruscottoDipendente implements Serializable {
   
   /**
    * Formatta la stringa e aggiunge l'ora utc-roma....
+   *
    * @param time esempio 2017-01-02T09:23:05.366+0000 da trasformare in utc+1
    * @return data
    */

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package helpers.jpa;
 
 import com.google.common.base.Function;
@@ -14,7 +31,9 @@ import play.db.jpa.JPA;
 import play.mvc.Scope;
 
 /**
- * @author marco
+ * Classe per le model query.
+ *
+ * @author Marco Andreini
  */
 public class ModelQuery {
 
@@ -27,10 +46,17 @@ public class ModelQuery {
   private ModelQuery() {
   }
 
+  @SuppressWarnings("rawtypes")
   public static JPQLQuery<?> createQuery() {
     return new JPAQuery(JPA.em());
   }
 
+  /**
+   * Le query paginate.
+   *
+   * @param query la query da paginare
+   * @return le query paginate.
+   */
   public static JPQLQuery<?> paginatedQuery(JPQLQuery<?> query) {
     final Integer page = Optional.fromNullable(Scope.Params.current()
         .get(Paginator.PAGE_PARAM, Integer.class)).or(1);
@@ -45,11 +71,13 @@ public class ModelQuery {
   }
 
   /**
+   * Il simpleresult che wrappa la lista o i listresults.
+   *
    * @return a simplequery object, wrap list or listResults.
    */
   public static <T> SimpleResults<T> wrap(JPQLQuery<?> query,
       Expression<T> expression) {
-    return new SimpleResults<T>(query, expression);
+    return new SimpleResults<T>(query);
   }
 
   /**
@@ -67,6 +95,8 @@ public class ModelQuery {
   }
 
   /**
+   * La funzione di trasformazione da modello a id.
+   *
    * @return la funzione di trasformazione da modello a proprio id.
    */
   public static <T extends BaseModel> Function<T, Long> jpaId() {
@@ -74,6 +104,8 @@ public class ModelQuery {
   }
 
   /**
+   * Funzione di trasformazione da integer a modello.
+   *
    * @return la funzione per ottenere un oggetto via em.find().
    */
   public static <T extends BaseModel> Function<Integer, T> jpaFind(final Class<T> model) {
@@ -81,30 +113,33 @@ public class ModelQuery {
   }
 
   /**
-   * @author marco
+   * Classe simpleResult.
+   *
+   * @author Marco Andreini
    */
   public static class SimpleResults<T> {
 
-    private final Expression<T> expression;
     private final JPQLQuery<?> query;
 
-    SimpleResults(JPQLQuery<?> query, Expression<T> expression) {
+    SimpleResults(JPQLQuery<?> query) {
       this.query = query;
-      this.expression = expression;
     }
 
     public long count() {
       return query.fetchCount();
     }
 
+    @SuppressWarnings("unchecked")
     public List<T> list() {
       return (List<T>) query.fetch();
     }
 
+    @SuppressWarnings("unchecked")
     public List<T> list(long limits) {
       return (List<T>) query.restrict(QueryModifiers.limit(limits)).fetch();
     }
 
+    @SuppressWarnings("unchecked")
     public QueryResults<T> listResults() {
       return (QueryResults<T>) paginatedQuery(query).fetchResults();
     }

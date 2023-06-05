@@ -1,13 +1,33 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.cnr.iit.epas;
 
-import org.joda.time.Hours;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-import org.joda.time.Minutes;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import lombok.NoArgsConstructor;
+import org.joda.time.Hours;
+import org.joda.time.LocalTime;
+import org.joda.time.Minutes;
 
+/**
+ * Classe di utilità per la gestione dei tempi e orari.
+ * 
+ */
 @NoArgsConstructor
 public class TimeInterval {
   
@@ -16,9 +36,9 @@ public class TimeInterval {
 
   /**
    * Un TimeInterval con begin obbligatorio.
+   *
    * @param begin ora inizio intervallo.
    * @param end da fine intervallo.
-   * @return
    */
   public static TimeInterval withBegin(LocalTime begin, Optional<LocalTime> end) {
     TimeInterval timeInterval = new TimeInterval();
@@ -38,19 +58,19 @@ public class TimeInterval {
    * - Se begin è null viene impostata MIN_DATE. <br>
    * - Se end è null viene impostata MAX_DATE. <br>
    * Se begin è successiva a end vengono invertite.
+   *
    * @param begin data inizio intervallo, se null impostata a MIN_DATE
    * @param end data fine intervallo, se null impostata a MAX_DATE
-   * @return
    */
   public static TimeInterval build(LocalTime begin, LocalTime end) {
 
     if (begin == null && end == null) {
       begin = new LocalTime(0, 0, 0);
-      end = new LocalTime(23,59,59);
+      end = new LocalTime(23, 59, 59);
     } else if (begin == null) {
       begin = new LocalTime(0, 0, 0);
     } else if (end == null) {
-      end = new LocalTime(23,59,59);
+      end = new LocalTime(23, 59, 59);
     }
 
     //Non applico il riferimento ma costruisco nuovi oggetti

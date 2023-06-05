@@ -14,7 +14,7 @@
 
 <div class="container">
 
-#{title title: 'Richiesta di '+ competenceRequest.value + ' ore per ' + templateUtility.monthName(competenceRequest.month) + ' ' + competenceRequest.year /}
+#{title title: 'Richiesta di '+ competenceRequest.person.fullName()  /}
 
 <br>
  #{alert color:'info'}
@@ -30,6 +30,9 @@
 <tr>
 	<th>Autore</th>
 	<th>Data e ora sottomissione</th>
+	#{if competenceRequest.type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
+		<th>Quantità richiesta</th>
+	#{/if}
 	<th>Tipo evento</th>
 	<th>Descrizione</th>
 	
@@ -45,6 +48,9 @@
 	>
 	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
 	<td>#{f.value 'item.createdAt', value:item.createdAt /}</td>
+	#{if competenceRequest.type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
+		<td>${competenceRequest.value} ore</td>
+	#{/if}
 	<td>#{f.value 'item.eventType', value:item.eventType /}</td>
 	<td>#{f.value 'item.description', value:item.description != null ? item.description : competenceRequest.note /}</td>
 </tr>
@@ -63,3 +69,5 @@
 		#{/secure.check}
 	#{/b.buttons}
 </div>
+
+

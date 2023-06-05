@@ -17,20 +17,27 @@
       Il dipendente attualmente non ha un contratto attivo.
     #{/if}
     #{else}  
-      #{if wrCurrentContract.initializationMissing() || wrCurrentContract.mealTicketInitBeforeGeneralInit() }
+      #{if wrCurrentContract.initializationMissing()}
         #{alert color:'danger', center:true}
 	      <p><i class="fa fa-2x fa-times bg-danger"></i> Il contratto attuale non è correttamente inizializzato.
 	      </p>
 	      #{b.buttons center:true}
-	        #{if wrCurrentContract.initializationMissing()}
-	          #{b.link @Contracts.initializationsStatus(wrCurrentContract.value.person.office.id), color:'danger', title:'Inizializza'/}
-	        #{/if}
-	        #{else}
-	          #{b.link @Contracts.initializationsMeal(wrCurrentContract.value.person.office.id), color:'danger', title:'Inizializza'/}
-	        #{/else}
+	        #{b.link @Contracts.initializationsStatus(wrCurrentContract.value.person.office.id), color:'danger', title:'Inizializza'/}	                
 	      #{/b.buttons}
         #{/alert}
       #{/if}
+      #{if wrCurrentContract.mealTicketInitBeforeGeneralInit()}
+      	#{alert color:'warning', center:true}
+      		<p><i class="fa fa-2x fa-exclamation bg-warning"></i> 
+      			Le date di inizializzazione del residuo orario e dei buoni pasto non coincidono.<br>
+      			Nel caso in cui le inizializzazioni fossero volutamente diverse per motivi gestionali, ignorare 
+      			il presente alert.
+	      	</p>
+	      	#{b.buttons center:true}
+	      		#{b.link @Contracts.initializationsMeal(wrCurrentContract.value.person.office.id), color:'warning', title:'Inizializza'/}
+      		#{/b.buttons}
+      	#{/alert}
+      #{/if} 
       
       <form class='form-horizontal'>
       <!-- Inizio contratto (beginDate) -->
@@ -88,10 +95,12 @@
       #{/secure.check}
   	  <table class="table table-hover">
 		<tr class="warning">
-			<th>Data inizio contratto</th>
-			<th>Data fine contratto</th>
-			<th>Data terminazione<br>esperienza</th>
+			<th>Inizio contratto</th>
+			<th>Fine contratto</th>
+			<th>Terminazione<br>esperienza</th>
+			<th>Continuativo del<br> precedente</th>
 			<th>Gestisci</th>
+			<th>Storico</th>
 		</tr>
     #{list items:contractList, as:'contract'}
  		<tr>
@@ -110,12 +119,21 @@
 		</td>
 		
 		<td>${contract.value.endContract?.format()}</td>
-		
-		<td>
-			#{b.buttons center:true}
-        #{b.link @Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
-      #{/b.buttons}
-			</td>
+		<td align="center">#{if contract.value.previousContract != null} SI #{/if}</td>
+		<td align="center">
+				#{b.buttons center:true}
+					#{secure.check 'Contracts.merge'}
+					#{b.link @Contracts.merge(contract.value.id), color:'warning', title:'Merge'/}
+					#{/secure.check}
+					#{secure.check 'Contracts.split'}
+					#{b.link @Contracts.split(contract.value.id), color:'danger', title:'Split'/}
+        			#{/secure.check}
+        			#{b.link @Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
+      			#{/b.buttons}
+		</td>
+		<td>#{secure.link @Historicals.contractHistory(contract.value.id, 'CONTRACT'), 'data-async-modal':'#defaultModal'}
+				  	Consulta storico
+				  #{/secure.link}</td>
 		</tr>
 	  #{/list}
 	  </table>

@@ -1,24 +1,39 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.cnr.iit.epas;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import injection.StaticInject;
-
+import common.injection.StaticInject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.exports.MissionFromClient;
-import models.exports.StampingFromClient;
-
-import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
+/**
+ * Binder per l'oggetto json proveniente da Missioni.
+ *
+ * @author dario
+ *
+ */
 @Slf4j
 @Global
 @StaticInject
@@ -41,19 +56,24 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
           LocalDateTime.parse(getDateFromJson(jsonObject.get("data_inizio").getAsString()));
       mission.dataFine = 
           LocalDateTime.parse(getDateFromJson(jsonObject.get("data_fine").getAsString()));
-      if (jsonObject.get("id_ordine").isJsonNull()) {
+      if (jsonObject.get("id_ordine") == null 
+          || jsonObject.get("id_ordine").isJsonNull()) {
         mission.idOrdine = null;
       } else {
         mission.idOrdine = jsonObject.get("id_ordine").getAsLong();
       }
-      mission.anno = jsonObject.get("anno").getAsInt();
-      mission.numero = jsonObject.get("numero").getAsLong();
-      
+      if (jsonObject.get("anno") != null) {
+        mission.anno = jsonObject.get("anno").getAsInt();
+      }
+      if (jsonObject.get("numero") != null) {
+        mission.numero = jsonObject.get("numero").getAsLong();
+      }
+
       log.debug("Effettuato il binding, MissionFromClient = {}", mission);
       return mission;
     } catch (Exception ex) {
       log.error("Problem during binding MissionFromClient: {}, {}, {}, {}, {}",
-          name, annotations, value, actualClass, genericType);
+          name, annotations, value, actualClass, genericType, ex);
       return null;
     }
     
@@ -61,7 +81,7 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
   
   /**
    * Estrazione della data dalla stringa passata.
-   * 
+   *
    * @param string la stringa contenente la data passata nel json
    * @return la sottostringa contenente la data nel formato yyyy-mm-dd.
    */

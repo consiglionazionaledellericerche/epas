@@ -1,8 +1,12 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set title:'ePAS - Istituti contrattuali' /}
+#{set breadcrumbs:['Istituti contrattuali':@list(), (contractualClause.name):null] /}
 
  <div class="container">
+
+    #{breadcrumbs breadcrumbs /}
+
     #{form @save(),class:'form-horizontal'}
 
     #{alert color:'info'}

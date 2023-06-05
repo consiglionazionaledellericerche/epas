@@ -249,6 +249,8 @@
       <th>Tempo R.</th>
       <th>Dal</th>
       <th>Al</th>
+      <th>Comp. reper.</th>
+      <th>Assenza effettiva</th>
      </tr>
     </thead>
     <tbody> 
@@ -270,11 +272,13 @@
         </td>
         <td>${absenceType.justifiedTime}</td>
         <td>${absenceType.consideredWeekEnd}</td>
-        <td>${absenceType.timeForMealTicket}</td>
+        <td>${absenceType.mealTicketBehaviour.description}</td>
         <td>${absenceType.replacingType?.name}</td>
         <td>${absenceType.replacingTime}</td>
         <td>${absenceType.validFrom?.format()}</td>
         <td>${absenceType.validTo?.format()}</td>
+        <td>${absenceType.reperibilityCompatible}</td>
+        <td>${absenceType.isRealAbsence}</td>
       </tr>
       #{/if}
      #{/list}
@@ -296,6 +300,7 @@
       <th>Tempo R.</th>
       <th>Dal</th>
       <th>Al</th>
+      <th>Comp. reper.</th>
      </tr>
     </thead>
     <tbody> 
@@ -314,11 +319,12 @@
         </td>
         <td>${absenceType.justifiedTime}</td>
         <td>${absenceType.consideredWeekEnd}</td>
-        <td>${absenceType.timeForMealTicket}</td>
+        <td>${absenceType.mealTicketBehaviour.description}</td>
         <td>${absenceType.replacingType?.name}</td>
         <td>${absenceType.replacingTime}</td>
         <td>${absenceType.validFrom?.format()}</td>
         <td>${absenceType.validTo?.format()}</td>
+        <td>${absenceType.reperibilityCompatible}</td>
       </tr>
       #{/if}
      #{/list}

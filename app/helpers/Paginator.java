@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package helpers;
 
 import com.google.common.base.Preconditions;
@@ -13,7 +30,9 @@ import play.mvc.Scope;
 import play.mvc.Scope.Params;
 
 /**
- * @author marco
+ * Paginatore.
+ *
+ * @author Marco Andreini
  */
 public class Paginator {
 
@@ -30,6 +49,11 @@ public class Paginator {
   private final Map<String, Object> params;
   private final String action;
 
+  /**
+   * Costruisce un paginatore a partire dai risultati di una query.
+   *
+   * @param results i risultati di una query.
+   */
   public Paginator(QueryResults<?> results) {
     // this.results = results;
     size = results.getResults().size();
@@ -69,6 +93,12 @@ public class Paginator {
     return urlFor(current + 1);
   }
 
+  /**
+   * L'url della pagina.
+   *
+   * @param page il numero della pagina
+   * @return la stringa per l'url della pagina
+   */
   public String urlFor(int page) {
     Preconditions.checkArgument(page >= 0);
     params.put("page", Integer.toString(page));
@@ -85,6 +115,12 @@ public class Paginator {
     return Router.reverse(action).url;
   }
 
+  /**
+   * Aggiorna i params col numero di pagina attuale.
+   *
+   * @param page il numero di pagina
+   * @return l'oggetto params aggiunto delle info sul numero di pagina.
+   */
   public Object dataFor(int page) {
     Preconditions.checkArgument(page >= 0);
     params.put("page", Integer.toString(page));

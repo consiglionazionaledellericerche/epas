@@ -1,39 +1,51 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
-
 import dao.PersonDayInTroubleDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
-
 import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.enumerate.Troubles;
-
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 import play.jobs.Job;
 import play.libs.Mail;
 
+/**
+ * Manager per la gestione dei giorni con problemi di timbrature/assenze.
+ */
 @Slf4j
 public class PersonDayInTroubleManager {
 
@@ -71,8 +83,8 @@ public class PersonDayInTroubleManager {
    */
   public void setTrouble(PersonDay pd, Troubles cause) {
 
-    for (PersonDayInTrouble pdt : pd.troubles) {
-      if (pdt.cause == cause) {
+    for (PersonDayInTrouble pdt : pd.getTroubles()) {
+      if (pdt.getCause() == cause) {
         // Se esiste gia' non faccio nulla
         return;
       }
@@ -81,10 +93,10 @@ public class PersonDayInTroubleManager {
     // Se non esiste lo creo
     PersonDayInTrouble trouble = new PersonDayInTrouble(pd, cause);
     trouble.save();
-    pd.troubles.add(trouble);
+    pd.getTroubles().add(trouble);
 
     log.info("Nuovo PersonDayInTrouble {} - {} - {}",
-        pd.person.getFullname(), pd.date, cause);
+        pd.getPerson().getFullname(), pd.getDate(), cause);
   }
 
 
@@ -94,12 +106,12 @@ public class PersonDayInTroubleManager {
    */
   public void fixTrouble(final PersonDay pd, final Troubles cause) {
 
-    Iterables.removeIf(pd.troubles, pdt -> {
-      if (pdt.cause == cause) {
+    Iterables.removeIf(pd.getTroubles(), pdt -> {
+      if (pdt.getCause() == cause) {
         pdt.delete();
 
         log.info("Rimosso PersonDayInTrouble {} - {} - {}",
-            pd.person.getFullname(), pd.date, cause);
+            pd.getPerson().getFullname(), pd.getDate(), cause);
         return true;
       }
       return false;
@@ -126,7 +138,7 @@ public class PersonDayInTroubleManager {
       final Optional<Contract> currentContract = factory.create(person).getCurrentContract();
       if (!currentContract.isPresent()) {
         log.error("Nessun contratto trovato attivo alla data odierna per {} - {} ", person,
-            person.office);
+            person.getOffice());
         continue;
       }
       DateInterval intervalToCheck = DateUtility.intervalIntersection(
@@ -142,7 +154,7 @@ public class PersonDayInTroubleManager {
           Optional.of(troubleCausesToSend));
 
       if (pdList.isEmpty()) {
-        log.debug("{} (matricola = {})  non ha problemi da segnalare.", person, person.number);
+        log.debug("{} (matricola = {})  non ha problemi da segnalare.", person, person.getNumber());
         continue;
       }
 
@@ -151,22 +163,22 @@ public class PersonDayInTroubleManager {
         log.trace("Preparo invio mail per {}", person.getFullname());
         SimpleEmail simpleEmail = new SimpleEmail();
         String reply = (String) configurationManager
-            .configValue(person.office, EpasParam.EMAIL_TO_CONTACT);
+            .configValue(person.getOffice(), EpasParam.EMAIL_TO_CONTACT);
 
         if (!reply.isEmpty()) {
           simpleEmail.addReplyTo(reply);
         }
-        simpleEmail.addTo(person.email);
+        simpleEmail.addTo(person.getEmail());
         simpleEmail.setSubject("ePas Controllo timbrature");
         simpleEmail.setMsg(troubleEmailBody(person, pdList, troubleCausesToSend));
         Mail.send(simpleEmail);
 
         log.info("Inviata mail a {} (matricola = {})  per segnalare i problemi {}",
-            person, person.number, troubleCausesToSend);
+            person, person.getNumber(), troubleCausesToSend);
 
         // Imposto il campo e-mails inviate ...
         for (PersonDayInTrouble pd : pdList) {
-          pd.emailSent = true;
+          pd.setEmailSent(true);
           pd.save();
         }
 
@@ -197,8 +209,8 @@ public class PersonDayInTroubleManager {
     if (troubleCausesToSend.contains(Troubles.NO_ABS_NO_STAMP)) {
 
       final List<String> formattedDates = daysInTrouble.stream()
-          .filter(pdt -> pdt.cause == Troubles.NO_ABS_NO_STAMP)
-          .map(pdt -> pdt.personDay.date).sorted()
+          .filter(pdt -> pdt.getCause() == Troubles.NO_ABS_NO_STAMP)
+          .map(pdt -> pdt.getPersonDay().getDate()).sorted()
           .map(localDate -> localDate.toString(dateFormatter))
           .collect(Collectors.toList());
 
@@ -214,8 +226,8 @@ public class PersonDayInTroubleManager {
     if (troubleCausesToSend.contains(Troubles.UNCOUPLED_WORKING)) {
 
       final List<String> formattedDates = daysInTrouble.stream()
-          .filter(pdt -> pdt.cause == Troubles.UNCOUPLED_WORKING)
-          .map(pdt -> pdt.personDay.date).sorted()
+          .filter(pdt -> pdt.getCause() == Troubles.UNCOUPLED_WORKING)
+          .map(pdt -> pdt.getPersonDay().getDate()).sorted()
           .map(localDate -> localDate.toString(dateFormatter))
           .collect(Collectors.toList());
 
@@ -248,15 +260,16 @@ public class PersonDayInTroubleManager {
             personDayInTroubleDao.getPersonDayInTroubleInPeriod(
             person, Optional.absent(), Optional.absent(), Optional.absent());
 
-        List<IWrapperContract> wrapperContracts = FluentIterable.from(person.contracts)
+        List<IWrapperContract> wrapperContracts = FluentIterable.from(person.getContracts())
             .transform(wrapperModelFunctionFactory.contract()).toList();
 
         for (PersonDayInTrouble pdt : pdtList) {
           boolean toDelete = wrapperContracts.stream()
-              .noneMatch(wrContract -> DateUtility.isDateIntoInterval(pdt.personDay.date,
+              .noneMatch(wrContract -> DateUtility.isDateIntoInterval(pdt.getPersonDay().getDate(),
                   wrContract.getContractDatabaseInterval()));
           if (toDelete) {
-            log.info("Eliminato Pd-Trouble di {} data {}", person.fullName(), pdt.personDay.date);
+            log.info("Eliminato Pd-Trouble di {} data {}", person.fullName(),
+                pdt.getPersonDay().getDate());
             pdt.delete();
           }
         }         

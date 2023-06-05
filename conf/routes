@@ -8,6 +8,10 @@ GET		/shibboleth/login                  shib.Shibboleth.login
 GET		/shibboleth/authenticate           shib.Shibboleth.authenticate
 GET		/shibboleth/logout                 shib.Shibboleth.logout
 
+# OAUTH
+GET /oauth/login           Resecure.oauthLogin
+GET /oauth/callback        Resecure.oauthCallback
+
 # Home page
 GET     /                                       Application.index
 
@@ -19,7 +23,6 @@ GET     /public/                                staticDir:public
 
 # Import Secure routes
 #*       /                						module:secure
-
 
 #Gestione reperibilità (sist-org)
 GET 	/reperibility/{type}/personList															Reperibility.personList
@@ -73,12 +76,15 @@ GET		/absenceFromJson/frequentAbsence/{yearFrom}/{monthFrom}/{dayFrom}/{yearTo}/
 
 GET     /rest/persons/{email}/{action}          rest.Persons.{action}
 
+*       /rest/v{<[0-9]+>version}/{controller}/{action}/{<[a-z0-9]+>id} rest.v{version}.{controller}.{action}
+*       /rest/v{<[0-9]+>version}/{controller}/{action}             rest.v{version}.{controller}.{action}
+
+#Questi due endpoint potrebbero essere rimossi e utilizzare le rotte corrispondenti
+*       /rest/absences/checkAbsenceByPerseoId             rest.Absences.checkAbsence
+*       /rest/absences/insertAbsenceByPerseoId             rest.Absences.insertAbsence
 
 *       /rest/{controller}/{action}/{<[a-z0-9]+>id} rest.{controller}.{action}
 *       /rest/{controller}/{action}             rest.{controller}.{action}
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
-
-
-

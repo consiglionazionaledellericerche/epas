@@ -1,30 +1,41 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package jobs;
 
-import com.google.common.io.Resources;
-
+import dao.UserDao;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-
+import models.Institute;
 import models.Qualification;
-import models.User;
 import models.WorkingTimeType;
-
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.ext.h2.H2Connection;
 import org.dbunit.operation.DatabaseOperation;
-import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-
 import play.Play;
-import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
@@ -34,13 +45,16 @@ import play.test.Fixtures;
  * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già
  * presenti.
  *
- * @author cristian
+ * @author Cristian Lucchesi
  */
 @OnApplicationStart
 @Slf4j
 public class Bootstrap extends Job<Void> {
 
   static final String JOBS_CONF = "jobs.active";
+
+  @Inject
+  static UserDao userDao;
   
   //Aggiunto qui perché non più presente nella classe Play dalla versione >= 1.4.3
   public static boolean runingInTestMode() {
@@ -50,45 +64,49 @@ public class Bootstrap extends Job<Void> {
   @Override
   public void doJob() throws IOException {
 
-    
     if (runingInTestMode()) {
       log.info("Application in test mode, default boostrap job not started");
       return;
     }
-    
+
     //in modo da inibire l'esecuzione dei job in base alla configurazione
     if (!"true".equals(Play.configuration.getProperty(JOBS_CONF))) {
       log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
       return;
     }
 
-    Session session = (Session) JPA.em().getDelegate();
-
-    if (Qualification.count() == 0) {
-
-      session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
-          .getResource("../db/import/absence-type-and-qualification-phase1.xml")));
-
-      session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources
-          .getResource("../db/import/absence-type-and-qualification-phase2.xml")));
-    }
-
-    if (User.find("byUsername", "developer").fetch().isEmpty()) {
+    //Crea un utente admin con il ruolo di developer se non presente.
+    //Utile per il primo setup dell'applicazione.
+    if (userDao.getUsersWithRoleDeveloper().isEmpty()) {
       Fixtures.loadModels("../db/import/developer.yml");
     }
 
-    //impostare il campo tipo orario orizzondale si/no effettuando una euristica
+    if (Institute.count() == 0) {
+      Fixtures.loadModels("../db/import/fakeInstituteAndOffice.yml");
+    }
+
+    if (Qualification.count() == 0) {
+      Fixtures.loadModels("../db/import/qualifications.yml");
+    }
+
+    //impostare il campo tipo orario orizzontale si/no effettuando una euristica
     List<WorkingTimeType> wttList = WorkingTimeType.findAll();
     for (WorkingTimeType wtt : wttList) {
 
-      if (wtt.horizontal == null) {
-        wtt.horizontal = wtt.horizontalEuristic();
+      if (wtt.getHorizontal() == null) {
+        wtt.setHorizontal(wtt.horizontalEuristic());
         wtt.save();
       }
     }
 
   }
 
+  /**
+   * Classe di utilità.
+   *
+   * @author dario
+   *
+   */
   public static class DatasetImport implements Work {
 
     private final URL url;

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -30,7 +47,7 @@ import play.mvc.Scope;
  * mittente</dd> <dt>report.subject</dt><dd>Oggetto della email</dd> </dl> Comunque ci sono dei
  * default.
  *
- * @author marco
+ * @author Marco Andreini
  */
 @Slf4j
 public class ReportMailer extends Mailer {
@@ -65,10 +82,15 @@ public class ReportMailer extends Mailer {
 
     List<String> dests = Lists.newArrayList();
 
+    boolean toPersonnelAdmin = false;
+
     if (user.isPresent() && !userDao.hasAdminRoles(user.get())) {
-      if (user.get().person != null) {
-        dests = userDao.getUsersWithRoles(user.get().person.office, Role.PERSONNEL_ADMIN).stream()
-            .filter(u -> u.person != null).map(u -> u.person.email).collect(Collectors.toList());
+      if (user.get().getPerson() != null) {
+        dests = userDao.getUsersWithRoles(user.get().getPerson().getOffice(), 
+            Role.PERSONNEL_ADMIN).stream()
+            .filter(u -> u.getPerson() != null).map(u -> u.getPerson().getEmail())
+            .collect(Collectors.toList());
+        toPersonnelAdmin = true;
       }
     } else {
       dests = COMMAS.splitToList(Play.configuration
@@ -82,14 +104,14 @@ public class ReportMailer extends Mailer {
     for (String to : dests) {
       addRecipient(to);
     }
-    if (user.isPresent() && user.get().person != null
-        && !Strings.isNullOrEmpty(user.get().person.email)) {
-      setReplyTo(user.get().person.email);
+    if (user.isPresent() && user.get().getPerson() != null
+        && !Strings.isNullOrEmpty(user.get().getPerson().getEmail())) {
+      setReplyTo(user.get().getPerson().getEmail());
     }
     setFrom(Play.configuration.getProperty(EMAIL_FROM, DEFAULT_EMAIL_FROM));
     val username = user.isPresent() 
-        ? user.get().person != null 
-          ? user.get().person.getFullname() : user.get().username : "utente anonimo"; 
+        ? user.get().getPerson() != null 
+          ? user.get().getPerson().getFullname() : user.get().getUsername() : "utente anonimo"; 
     setSubject(
         String.format("%s: %s", 
             Play.configuration.getProperty(EMAIL_SUBJECT, DEFAULT_SUBJECT),
@@ -117,7 +139,7 @@ public class ReportMailer extends Mailer {
       img.setURL(imgUrl);
       img.setDisposition(EmailAttachment.ATTACHMENT);
       addAttachment(img);
-      send(user, data, session);
+      send(user, data, session, toPersonnelAdmin);
     } catch (MalformedURLException ex) {
       log.error("malformed url", ex);
     } catch (IOException ex) {

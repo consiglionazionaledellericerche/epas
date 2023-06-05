@@ -15,14 +15,16 @@
       #{form @WorkingTimes.saveHorizontal(), class:'form-horizontal'}
 	  
       <input type="hidden" name="office.id" value="${office.id}"/>
-  
+      <input type="hidden" name="horizontalPattern.externalId" value="${externalId}"/>
+
 	  #{f.simpleView 'horizontalPattern.name', label:'Nome Orario', hidden:true /}  
-	  	  
+	  #{f.simpleView 'horizontalPattern.reproportionAbsenceCodesEnabled', label:'Riproporziona quantità codici di assenza', hidden:true /}  
+
 	  <div class="alert alert-success">
 	   Nell'orario orizzontale impostare lo schema giornaliero valido per ogni giorno
 	   della settimana ad eccezione dei giorni festivi.
       </div>	 
-	
+
 	  <!-- Tempo a lavoro -->	 
 
 	  #{workingTime.legend tempoALavoro:'true', wttTips:'true' /}			  
@@ -104,6 +106,8 @@
 		</div>	
 		
 	   </div> 	
+	   
+	   
 	  *{		
 	  <div class="col-sm-12">
 	    #{include './_wttRecap.html' /}

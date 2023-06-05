@@ -79,6 +79,7 @@
 	        		  <i class="fa fa-info-circle" aria-hidden="true" webui-popover-hover data-content="I valori per le reperibilità sono espressi in <strong>giorni</strong>, quelli per straordinari e turni in <strong>ore</strong>."></i>
 	              	</th>
 	        		<th>Modifica</th> 
+	        		<th>Storico modifiche</th>
 	      		</tr>
 	      	  </thead>
 	      	  <tbody>
@@ -105,6 +106,11 @@
 				  #{secure.link @Competences.editCompetence(competence.person.id, competence.competenceCode.id, 
 				  competence.year, competence.month), 'data-async-modal':'#defaultModal'}
 				    <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+				  #{/secure.link}
+				  </td>
+				  <td>
+				  #{secure.link @Historicals.competenceHistory(competence.id), 'data-async-modal':'#defaultModal'}
+				  	Consulta storico
 				  #{/secure.link}
 				  </td>
 				</tr>

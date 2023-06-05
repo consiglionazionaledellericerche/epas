@@ -1,27 +1,51 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.group.GroupBy;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import it.cnr.iit.epas.DateInterval;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import manager.services.mealtickets.MealTicketsServiceImpl.MealTicketOrder;
 import models.Contract;
 import models.MealTicket;
 import models.Office;
+import models.Person;
+import models.PersonDay;
+import models.enumerate.BlockType;
 import models.query.QContract;
 import models.query.QMealTicket;
 import models.query.QPerson;
+import models.query.QPersonDay;
 import org.joda.time.LocalDate;
 
 /**
  * DAO per i MealTicket.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 public class MealTicketDao extends DaoBase {
 
@@ -142,11 +166,38 @@ public class MealTicketDao extends DaoBase {
 
     query.where(mealTicket.block.like("%" + code + "%"));
     if (office.isPresent()) {
-      query.where(person.office.eq(office.get()).and(mealTicket.returned.eq(true)));
+      query.where(person.office.eq(office.get()).and(mealTicket.returned.eq(false)));
     }
 
     return query.orderBy(mealTicket.block.asc()).orderBy(mealTicket.number.asc()).fetch();
 
+  }
+  
+  public List<MealTicket> getUnassignedElectronicMealTickets(Contract contract) {
+    QMealTicket mealTicket = QMealTicket.mealTicket;
+    
+    final JPQLQuery<MealTicket> query = getQueryFactory()
+        .selectFrom(mealTicket);
+    
+    query.where(mealTicket.blockType.eq(BlockType.electronic)
+        .and(mealTicket.mealTicketCard.isNull()).and(mealTicket.contract.eq(contract)));
+    return query.fetch();
+  }
+
+  public Map<Person, Integer> getNumberOfMealTicketAccrued(
+      List<Person> persons, LocalDate from, LocalDate to) {
+    QPersonDay personDay = QPersonDay.personDay;
+    Map<Person, List<PersonDay>> result = getQueryFactory()
+        .from(personDay)
+        .where(personDay.person.in(persons), personDay.date.goe(from),
+            personDay.date.loe(to), personDay.isTicketAvailable.eq(true))
+        .transform(GroupBy.groupBy(personDay.person).as(GroupBy.list(personDay)));
+
+    Map<Person, Integer> ticketsCountMap = new HashMap<>();
+    result.keySet().forEach(person -> {
+      ticketsCountMap.put(person, result.get(person).size());
+    });
+    return ticketsCountMap;
   }
 
 }

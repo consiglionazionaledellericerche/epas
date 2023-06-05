@@ -1,0 +1,28 @@
+<div class="list-group-item-text">
+  <strong><i class="fa fa-user-circle" aria-hidden="true"></i> Inizio-fine lavoro: </strong>
+  #{list items:day.beginEnd, as:'stamp'}
+    #{secure.link @TeleworkStampings.deleteTeleworkStamping(stamp.id), 'data-async-modal':'#modalDeleteStamping',
+      class:'label label-primary'}
+      ${stamp.formattedHour()}
+    #{/secure.link}
+  #{/list}
+
+  <br>
+  <strong><i class="fa fa-cutlery" aria-hidden="true"></i> Pausa pranzo: </strong>
+  #{list items:day.meal, as:'meal'}
+    #{secure.link @TeleworkStampings.deleteTeleworkStamping(meal.id), 'data-async-modal':'#modalDeleteStamping',
+      class:'label label-danger'}
+      ${meal.formattedHour()}
+    #{/secure.link}
+  #{/list}
+
+  <br>
+  <strong><i class="fa fa-hand-paper-o" aria-hidden="true"></i> Interruzioni: </strong>
+  #{list items:day.interruptions, as:'inter'}  
+    #{secure.link @TeleworkStampings.deleteTeleworkStamping(inter.id), 'data-async-modal':'#modalDeleteStamping',
+      class:'label label-info'}
+      ${inter.formattedHour()}
+    #{/secure.link}
+  #{/list}
+
+</div>

@@ -28,13 +28,15 @@
   <table class="table table-hover">
     <tr class="warning">
       <th>&{'badgeSystem'}</th>
+      <th>&{'badgeReader'}</th>
       <th><i class="fa fa-credit-card"></i> Codice</th>
       <th>Elimina</th>
     </tr>
 
-    #{list items:person.badges, as:'badge'}
+    #{list items:person.badges.sort({ a,b -> a.code <=> b.code ?: a.badgeReader.code <=> b.badgeReader.code}), as:'badge'}
     <tr>
       <td>${badge.badgeSystem.name}</td>
+      <td>${badge.badgeReader.code}</td>
       <td>${badge.code}</td>
       <td>
         #{secure.check 'BadgeSystems.deleteBadgePerson'}

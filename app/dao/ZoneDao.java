@@ -1,17 +1,37 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.BadgeReader;
 import models.ZoneToZones;
 import models.query.QZoneToZones;
 
 
+/**
+ * DAO per le Zone.
+ */
 public class ZoneDao extends DaoBase {
 
   @Inject
@@ -20,6 +40,8 @@ public class ZoneDao extends DaoBase {
   }
 
   /**
+   * La lista dei collegamenti tra zone che inviano timbrature allo stesso client.
+   *
    * @param reader il client che recupera le timbrature
    * @return la lista dei collegamenti tra zone che inviano le timbrature allo stesso client.
    */
@@ -32,6 +54,8 @@ public class ZoneDao extends DaoBase {
   }
 
   /**
+   * Il collegamento caratterizzato dall'id passato come parametro.
+   *
    * @param id l'identificativo del collegamento
    * @return il collegamento, se esiste, caratterizzato dall'id passato come parametro.
    */
@@ -41,6 +65,8 @@ public class ZoneDao extends DaoBase {
   }
 
   /**
+   * Il collegamento, se esiste, tra due zone di timbratura.
+   *
    * @param name1 il nome della prima zona
    * @param name2 il nome della seconda zona
    * @return il link, se esiste, tra le zone passate come parametro.

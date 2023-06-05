@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.absences;
 
 import com.google.common.base.Optional;
@@ -15,12 +32,18 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
+import lombok.Setter;
 import models.absences.definitions.DefaultGroup;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
+/**
+ * Tipologia di gruppo di assenze.
+ */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "group_absence_types")
@@ -32,63 +55,64 @@ public class GroupAbsenceType extends BaseModel {
 
   @Required
   @Column
-  public String name;
+  private String name;
   
   //Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni 
   @Required
   @Column
-  public String description;
+  private String description;
 
   //Se i gruppi sono concatenati e si vuole una unica etichetta (da assegnare alla radice)
   // Esempio Congedi primo figlio 100%, Congedi primo figlio 30% hanno una unica chainDescription
   @Column(name = "chain_description")
-  public String chainDescription;
+  private String chainDescription;
   
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_type_id")
-  public CategoryGroupAbsenceType category;
+  private CategoryGroupAbsenceType category;
   
   @Column
-  public int priority;
+  private int priority;
   
   @Required
   @Getter
   @Column(name = "pattern")
   @Enumerated(EnumType.STRING)
-  public GroupAbsenceTypePattern pattern;
+  private GroupAbsenceTypePattern pattern;
   
   @Required
   @Getter
   @Column(name = "period_type")
   @Enumerated(EnumType.STRING)
-  public PeriodType periodType;
+  private PeriodType periodType;
   
   @Getter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "takable_behaviour_id")
-  public TakableAbsenceBehaviour takableAbsenceBehaviour;
+  private TakableAbsenceBehaviour takableAbsenceBehaviour;
   
   @Getter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "complation_behaviour_id")
-  public ComplationAbsenceBehaviour complationAbsenceBehaviour;
+  private ComplationAbsenceBehaviour complationAbsenceBehaviour;
   
   @Getter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "next_group_to_check_id")
-  public GroupAbsenceType nextGroupToCheck;
+  private GroupAbsenceType nextGroupToCheck;
 
   @OneToMany(mappedBy = "nextGroupToCheck", fetch = FetchType.LAZY)
-  public Set<GroupAbsenceType> previousGroupChecked = Sets.newHashSet();
+  private Set<GroupAbsenceType> previousGroupChecked = Sets.newHashSet();
 
   @Column
-  public boolean automatic = false;
+  private boolean automatic = false;
   
   @Column
-  public boolean initializable = false;
+  private boolean initializable = false;
     
   /**
    * Label.
+   *
    * @return label
    */
   public String getLabel() {
@@ -97,6 +121,7 @@ public class GroupAbsenceType extends BaseModel {
   
   /**
    * La stringa che rappresenta la catena cui appartiene il gruppo.
+   *
    * @return chainDescription
    */
   public String computeChainDescription() {
@@ -109,6 +134,7 @@ public class GroupAbsenceType extends BaseModel {
   
   /**
    * Il primo gruppo della catena (quando ho un modo univoco di raggiungerlo).
+   *
    * @return primo gruppo
    */
   public GroupAbsenceType firstOfChain() {
@@ -121,6 +147,12 @@ public class GroupAbsenceType extends BaseModel {
     return this;
   }
   
+  /**
+   * Enumerato che gestisce il tipo di periodo temporale.
+   *
+   * @author dario
+   *
+   */
   public enum PeriodType {
     
     always(0, null, null), year(0, null, null), month(0, null, null),
@@ -131,7 +163,11 @@ public class GroupAbsenceType extends BaseModel {
     child2_3_12(2, 3, 12),
     
     child3_0_3(3, 0, 3), child3_0_6(3, 0, 6), child3_0_12(3, 0, 12), child3_6_12(3, 6, 12), 
-    child3_3_12(3, 3, 12);
+    child3_3_12(3, 3, 12),
+    
+    child4_0_3(4, 0, 3), child4_0_6(4, 0, 6), child4_0_12(4, 0, 12), child4_6_12(4, 6, 12), 
+    child4_3_12(4, 3, 12);
+    
     
     
     public Integer childNumber;
@@ -154,6 +190,7 @@ public class GroupAbsenceType extends BaseModel {
     
     /**
      * L'intervallo figlio.
+     *
      * @param birthDate data di nascita
      * @return intervallo
      */
@@ -167,6 +204,12 @@ public class GroupAbsenceType extends BaseModel {
     }
   }
   
+  /**
+   * Enumerato che determina la tipologia di gruppo (se gestito da un pattern).
+   *
+   * @author dario
+   *
+   */
   public enum GroupAbsenceTypePattern {
     simpleGrouping,              // semplice raggruppamento senza controlli o automatismi
     programmed,                  
@@ -177,6 +220,7 @@ public class GroupAbsenceType extends BaseModel {
   
   /**
    * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   *
    * @return absent se la tab non è presente in enum
    */
   public Optional<Boolean> matchEnum() {
@@ -185,11 +229,11 @@ public class GroupAbsenceType extends BaseModel {
       if (defaultGroup.name().equals(this.name)) {
         if (defaultGroup.description.equals(this.description) 
             && defaultGroup.chainDescription.equals(this.chainDescription)
-            && defaultGroup.category.name().equals(this.category.name)
+            && defaultGroup.category.name().equals(this.category.getName())
             && defaultGroup.priority == this.priority
             && defaultGroup.pattern.equals(this.pattern)
             && defaultGroup.periodType.equals(this.periodType)
-            && defaultGroup.takable.name().equals(this.takableAbsenceBehaviour.name)
+            && defaultGroup.takable.name().equals(this.takableAbsenceBehaviour.getName())
             && defaultGroup.automatic == this.automatic
             && defaultGroup.initializable == this.initializable) {
           //campi nullable complation
@@ -199,7 +243,8 @@ public class GroupAbsenceType extends BaseModel {
             }
           } else {
             if (this.complationAbsenceBehaviour == null 
-                || !defaultGroup.complation.name().equals(this.complationAbsenceBehaviour.name)) {
+                || !defaultGroup.complation.name()
+                .equals(this.complationAbsenceBehaviour.getName())) {
               return Optional.of(false);
             }
           }
@@ -223,7 +268,8 @@ public class GroupAbsenceType extends BaseModel {
     return Optional.absent();
     
   }
-  
+
+  @Override
   public String toString() {
     return description;
   }

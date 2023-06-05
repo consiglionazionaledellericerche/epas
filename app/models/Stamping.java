@@ -1,9 +1,24 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import com.google.common.base.MoreObjects;
-
-import it.cnr.iit.epas.NullStringBinder;
-
+import helpers.validators.StringIsValid;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -14,23 +29,24 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import models.enumerate.StampTypes;
-
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
-
-import play.data.binding.As;
+import play.data.validation.CheckWith;
 import play.data.validation.Required;
 
 
 /**
  * Modello della Timbratura.
- * 
- * @author cristian.
+ *
+ * @author Cristian Lucchesi
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "stampings")
@@ -41,32 +57,31 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "personDay_id", nullable = false, updatable = false)
-  public PersonDay personDay;
+  private PersonDay personDay;
 
   @Column(name = "stamp_type")
   @Enumerated(EnumType.STRING)
-  public StampTypes stampType;
+  private StampTypes stampType;
 
   @ManyToOne(optional = true)
   @JoinColumn(name = "stamp_modification_type_id")
-  public StampModificationType stampModificationType;
+  private StampModificationType stampModificationType;
 
   @Required @NotNull
   @Column(nullable = false)
-  public LocalDateTime date;
+  private LocalDateTime date;
 
   @Required @NotNull
   @Enumerated(EnumType.STRING)
-  public WayType way;
+  private WayType way;
 
-  @As(binder = NullStringBinder.class)
-  public String note;
+  private String note;
   
-  @As(binder = NullStringBinder.class)
-  public String place;
+  @CheckWith(StringIsValid.class)
+  private String place;
   
-  @As(binder = NullStringBinder.class)
-  public String reason;
+  @CheckWith(StringIsValid.class)
+  private String reason;
 
   /**
    * questo campo booleano consente di determinare se la timbratura è stata effettuata dall'utente
@@ -75,14 +90,24 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    * true).
    */
   @Column(name = "marked_by_admin")
-  public boolean markedByAdmin;
+  private boolean markedByAdmin;
+
   /**
    * con la nuova interpretazione delle possibilità del dipendente, questo campo viene settato a
    * true quando è il dipendente a modificare la propria timbratura.
    */
   @Column(name = "marked_by_employee")
-  public boolean markedByEmployee;
+  private boolean markedByEmployee;
   
+  /**
+   * con la nuova interpretazione del telelavoro per i livelli I-III, quando un dipendente si 
+   * inserisce una timbratura in telelavoro, questa deve essere inserita anche sul suo cartellino, 
+   * diventando a tutti gli effetti una timbratura che concorre alla generazione del residuo 
+   * giornaliero.
+   */
+  @Column(name = "marked_by_telework")
+  private boolean markedByTelework;
+
   /**
    * questo nuovo campo si è reso necessario per la sede centrale per capire da quale lettore 
    * proviene la timbratura così da poter applicare un algoritmo che giustifichi le timbrature 
@@ -90,7 +115,8 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    * a un collegamento definito.e all'interno della tolleranza definita per quel collegamento.
    */
   @Column(name = "stamping_zone")
-  public String stampingZone;
+  private String stampingZone;
+
   /**
    * true, cella bianca; false, cella gialla.
    */
@@ -123,14 +149,27 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   /**
    * Verifica se è lavoro fuori sede.
+   *
    * @return @see StampTypes::isOffSiteWork
    */
   @Transient
   public boolean isOffSiteWork() {
     return stampType != null && stampType.isOffSiteWork();
   }
-  
-  // costruttore di default implicitamente utilizzato dal play(controllers)
+
+  /**
+   * Verifica se è motivi di servizio.
+   *
+   * @return @see StampTypes::isServiceReasons
+   */
+  @Transient
+  public boolean isServiceReasons() {
+    return stampType != null && stampType.isServiceReasons();
+  }
+
+  /**
+   * costruttore di default implicitamente utilizzato dal play(controllers).
+   */
   Stamping() {
   }
 
@@ -146,7 +185,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
     date = time;
     if (personDay != null) {
       this.personDay = personDay;
-      personDay.stampings.add(this);
+      personDay.getStampings().add(this);
     }
   }
 
@@ -173,6 +212,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   /**
    * Orario formattato come HH:mm.
+   *
    * @return orario della timbratura formattato come HH:mm.
    */
   @Transient
@@ -186,6 +226,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 
   /**
    * Rappresentazione compatta della timbratura.
+   *
    * @return Una rappresentazione compatta della timbratura.
    */
   @Transient
@@ -202,7 +243,7 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
    * @return Restituisce il proprietario della timbratura.
    */
   public Person getOwner() {
-    return personDay.person;
+    return personDay.getPerson();
   }
 
   /**
@@ -214,6 +255,9 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
     return new YearMonth(date.getYear(), date.getMonthOfYear());
   }
 
+  /**
+   * Ingresso/Uscita.
+   */
   public enum WayType {
     in("in"),
     out("out");

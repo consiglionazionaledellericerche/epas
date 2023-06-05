@@ -1,27 +1,41 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
+import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.UserDao;
-
 import helpers.Web;
-
 import javax.inject.Inject;
-
 import models.Institute;
 import models.Office;
 import models.UsersRolesOffices;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import security.SecurityRules;
-
+/**
+ * Controller per la gestione degli utenti amministratori.
+ */
 @With({Resecure.class})
 public class Administrators extends Controller {
 
@@ -50,7 +64,7 @@ public class Administrators extends Controller {
     rules.checkIfPermitted(office);
 
     UsersRolesOffices uro = new UsersRolesOffices();
-    uro.office = office;
+    uro.setOffice(office);
 
     render(uro);
   }
@@ -71,11 +85,11 @@ public class Administrators extends Controller {
       render("@blank", uro);
     } else {
 
-      rules.checkIfPermitted(uro.office);
+      rules.checkIfPermitted(uro.getOffice());
 
       uro.save();
       flash.success(Web.msgSaved(Institute.class));
-      Offices.edit(uro.office.id);
+      Offices.edit(uro.getOffice().id);
     }
   }
 
@@ -90,11 +104,11 @@ public class Administrators extends Controller {
     final UsersRolesOffices uro = UsersRolesOffices.findById(uroId);
     notFoundIfNull(uro);
 
-    rules.checkIfPermitted(uro.office);
+    rules.checkIfPermitted(uro.getOffice());
 
     uro.delete();
     flash.success(Web.msgDeleted(UsersRolesOffices.class));
-    Offices.edit(uro.office.id);
+    Offices.edit(uro.getOffice().id);
 
   }
 

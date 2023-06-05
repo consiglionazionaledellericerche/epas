@@ -1,18 +1,38 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.absences.Absence;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
+import models.enumerate.StampTypes;
+import models.query.QPerson;
 import models.query.QPersonDay;
 import models.query.QPersonDayInTrouble;
 import models.query.QStamping;
@@ -21,7 +41,9 @@ import org.joda.time.YearMonth;
 
 
 /**
- * @author dario.
+ * Il dao dei personDay.
+ *
+ * @author Dario Tagliaferri
  */
 public class PersonDayDao extends DaoBase {
 
@@ -31,6 +53,8 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
+   * Il personday relativo all'id passato come parametro.
+   *
    * @param personDayId l'id del personday
    * @return il personday relativo all'id passato come parametro.
    */
@@ -45,6 +69,8 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
+   * Il personday, se esiste, per una persona a una certa data.
+   *
    * @param person la persona
    * @param date la data
    * @return un personday se esiste per quella persona in quella data.
@@ -60,8 +86,13 @@ public class PersonDayDao extends DaoBase {
     return Optional.fromNullable(result);
   }
 
+
   /**
    * Il primo personDay esistente precedente a date per person.
+   *
+   * @param person la persona da cercare
+   * @param date la data da cui cercare indietro
+   * @return Il primo personDay esistente precedente a date per person.
    */
   public PersonDay getPreviousPersonDay(Person person, LocalDate date) {
 
@@ -75,6 +106,9 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
+   * La lista di tutti i personday di una persona.
+   *
+   * @param person la persona di cui cercare i personday
    * @return tutti i personDay relativi alla persona person passata come parametro.
    */
   public List<PersonDay> getAllPersonDay(Person person) {
@@ -152,6 +186,8 @@ public class PersonDayDao extends DaoBase {
 
 
   /**
+   * La lista dei personday di una persona tra begin e end.
+   *
    * @param person la persona
    * @param begin la data inizio da cui cercare
    * @param end la data fino a cui cercare
@@ -164,6 +200,8 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
+   * La lista dei personday di una persona tra begin e end (opzionale).
+   *
    * @param person la persona di cui si vogliono i personday
    * @param begin la data di inizio da cui cercare i personday
    * @param end la data di fine (opzionale)
@@ -222,8 +260,10 @@ public class PersonDayDao extends DaoBase {
 
 
   /**
+   * La lista dei personday di un singolo giorno di una lista di persone.
+   *
    * @return la lista dei personDay relativi a un singolo giorno di tutte le persone presenti nella
-   * lista.
+   *     lista.
    */
   public List<PersonDay> getPersonDayForPeopleInDay(List<Person> personList, LocalDate date) {
     final QPersonDay personDay = QPersonDay.personDay;
@@ -233,6 +273,8 @@ public class PersonDayDao extends DaoBase {
   }
 
   /**
+   * Il più vecchio personday presente sul db.
+   *
    * @return il personday facente riferimento al giorno più vecchio presente sul db.
    */
   public PersonDay getOldestPersonDay() {
@@ -240,8 +282,24 @@ public class PersonDayDao extends DaoBase {
     return getQueryFactory().selectFrom(personDay).orderBy(personDay.date.asc()).limit(1)
         .fetchOne();
   }
+  
+  /**
+   * Ritorna il personday più futuro della persona.
+   *
+   * @param person la persona di cui si ricerca l'ultimo personday
+   * @return l'ultimo personday della persona sul db.
+   */
+  public PersonDay getMoreFuturePersonDay(Person person) {
+    final QPersonDay personDay = QPersonDay.personDay;
+    return getQueryFactory().selectFrom(personDay)
+        .where(personDay.person.eq(person)).orderBy(personDay.date.desc()).limit(1)
+        .fetchOne();
+  }
 
   /**
+   * Il personday, se esiste, che contiene l'assenza passata come parametro.
+   *
+   * @param abs l'assenza di cui si cerca il personday che la conteneva
    * @return il personDay che conteneva l'assenza passata come parametro.
    */
   public Optional<PersonDay> getByAbsence(Absence abs) {
@@ -249,5 +307,91 @@ public class PersonDayDao extends DaoBase {
     final PersonDay result = getQueryFactory().selectFrom(personDay)
         .where(personDay.absences.contains(abs)).fetchOne();
     return Optional.fromNullable(result);
+  }
+  
+  /**
+   * Metodo che ritorna la lista dei giorni di lavoro tra begin e date per i dipendenti della 
+   * sede office. 
+   * Usato nel controllers.rest persondays.
+   *
+   * @param office la sede per cui si cercano i giorni di lavoro
+   * @param begin la data di inizio da cui cercare
+   * @param end la data di fine fino a cui cercare
+   * @return la lista dei giorni di lavoro dei dipendenti della sede office tra begin e date.
+   */
+  public List<PersonDay> getPersonDaysByOfficeInPeriod(Office office, 
+      LocalDate begin, LocalDate end) {
+    QPersonDay personDay = QPersonDay.personDay;
+    QPerson person = QPerson.person;
+    
+    return getQueryFactory().selectFrom(personDay)
+        .leftJoin(personDay.person, person)
+        .where(person.office.eq(office).and(personDay.date.between(begin, end)))
+        .orderBy(personDay.date.asc()).fetch();
+  }
+
+  /**
+   * Ritorna la lista dei giorni di lavoro di un dipendente con date tra begin e emd
+   * e che abbia almeno una timbratura per lavoro fuori sede.
+   */
+  public List<PersonDay> getOffSitePersonDaysByPersonInPeriod(
+      Person person, LocalDate begin, LocalDate end) {
+    QPersonDay personDay = QPersonDay.personDay;
+    QStamping stamping = QStamping.stamping;
+    return getQueryFactory().selectFrom(personDay)
+        .leftJoin(personDay.stampings, stamping)
+        .where(personDay.person.eq(person),
+            personDay.date.between(begin, end),
+            stamping.stampType.eq(StampTypes.LAVORO_FUORI_SEDE))
+        .distinct()
+        .orderBy(personDay.date.asc()).fetch();
+  }
+
+  /**
+   * Ritorna la lista dei giorni di lavoro di un dipendente con date tra begin e end
+   * e che abbia almeno una timbratura per lavoro fuori sede o per motivi di servizio con
+   * impostato luogo o motivazione.
+   */
+  public List<PersonDay> getOffSitePersonDaysByOfficeInPeriod(
+      Office office, LocalDate begin, LocalDate end) {
+    QPersonDay personDay = QPersonDay.personDay;
+    QStamping stamping = QStamping.stamping;
+    return getQueryFactory().selectFrom(personDay)
+        .leftJoin(personDay.stampings, stamping)
+        .where(personDay.person.office.eq(office),
+            personDay.date.between(begin, end),
+            stamping.stampType.eq(StampTypes.LAVORO_FUORI_SEDE)
+              .or(
+                  stamping.stampType.eq(StampTypes.MOTIVI_DI_SERVIZIO_FUORI_SEDE)
+                    .and(stamping.reason.isNotEmpty()).or(stamping.place.isNotEmpty())))
+        .distinct()
+        .orderBy(personDay.date.asc()).fetch();
+  }
+
+  /**
+   * Ritorna la lista dei giorni di lavoro di un dipendente con date tra begin e end
+   * e che abbia almeno una timbratura del tipo passato con stampType.
+   */
+  public List<PersonDay> getStampTypePersonDaysByOFficeInPeriod(
+      StampTypes stampType, Office office, LocalDate begin, LocalDate end) {
+    QPersonDay personDay = QPersonDay.personDay;
+    QStamping stamping = QStamping.stamping;
+    return getQueryFactory().selectFrom(personDay)
+        .leftJoin(personDay.stampings, stamping)
+        .where(personDay.person.office.eq(office),
+            personDay.date.between(begin, end),
+            stamping.stampType.eq(stampType))
+        .distinct()
+        .orderBy(personDay.date.asc()).fetch();
+  }
+
+  /**
+   * Ritorna la lista dei giorni di lavoro di un dipendente con date tra begin e end
+   * e che abbia almeno una timbratura del tipo passato con stampType.
+   */
+  public List<PersonDay> getServiceExitPersonDaysByOfficeInPeriod(
+      Office office, LocalDate begin, LocalDate end) {
+    return getStampTypePersonDaysByOFficeInPeriod(
+        StampTypes.MOTIVI_DI_SERVIZIO, office, begin, end);
   }
 }

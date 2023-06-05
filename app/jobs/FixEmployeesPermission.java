@@ -1,17 +1,36 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package jobs;
 
-import injection.StaticInject;
-
+import common.injection.StaticInject;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import manager.OfficeManager;
-
 import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
 
+/**
+ * Classe che fixa eventuali problemi sui permessi degli impiegati.
+ *
+ * @author dario
+ *
+ */
 @StaticInject
 public class FixEmployeesPermission {
 
@@ -41,10 +60,10 @@ public class FixEmployeesPermission {
       boolean exist = false;
       //Cerco se esiste già e controllo che sia relativo all'office di appartentenza
 
-      for (UsersRolesOffices uro : p.user.usersRolesOffices) {
+      for (UsersRolesOffices uro : p.getUser().getUsersRolesOffices()) {
         //Rimuovo ruolo role se non appartiene più all'office
-        if (uro.role.name.equals(employeeRole.name)) {
-          if (uro.office.codeId.equals(p.office.codeId)) {
+        if (uro.getRole().getName().equals(employeeRole.getName())) {
+          if (uro.getOffice().getCodeId().equals(p.getOffice().getCodeId())) {
             exist = true;
           } else {
             uro.delete();
@@ -53,7 +72,7 @@ public class FixEmployeesPermission {
       }
 
       if (!exist) {
-        officeManager.setUro(p.user, p.office, employeeRole);
+        officeManager.setUro(p.getUser(), p.getOffice(), employeeRole);
       }
     }
   }

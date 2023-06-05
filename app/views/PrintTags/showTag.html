@@ -122,9 +122,9 @@
                 ${dayRecap.wttd.get().workingTimeType.description}
               #{/else}
             #{/if}
-	      #{/ifnot}
-	    </td>
-	  </tr>
+         #{/ifnot}
+        </td>
+       </tr>
   #{/list}
 </table>
 <br>
@@ -170,153 +170,65 @@
   <br>Totale monte ore a fine mese: <strong>${(mese.value.remainingMinutesLastYear+mese.value.remainingMinutesCurrentYear).toHourTime()}</strong>
   #{/list}
 
-<p style="text-align: right;margin-top:2em;">
-  AUTOCERTIFICAZIONE
-  <br><br>
-  Firma
-  <br><br>
-  _____________________________
-</p>
+#{if dto.includeStampingDetails == true}
+    #{if !dto.stampingOwnersInDays.isEmpty()}
+		<table>
+		 <caption style="margin-top: 2em; font-weight:bold">Chi ha inserito le timbrature nei giorni</caption>
+		 	<tr>
+		 		<th>Lettore badge e/o utente</th>
+		 		<th style="text-align:center">Numero di giorni</th>
+		 		<th>Dettaglio giorni</th>
 
-<div id="tabelleRiassuntive">
-  #{ifnot dto.psDto.stampModificationTypeSet.isEmpty()}
-  <strong style="margin-top: 2em">Note:</strong>
-  <br>
-  <table>
-    <tr>
-      <th>Codice timbratura</th>
-      <th>Descrizione</th>
-    </tr>
-    #{list dto.psDto.stampModificationTypeSet, as:'smt'}
-    <tr>
-      <td>${smt.code}</td>
-      <td>${smt.description}</td>
-    </tr>
-    #{/list}
-    #{list dto.psDto.stampTypeSet, as:'sts'}
-    <tr>
-      <td>${sts.identifier}</td>
-      <td>${sts.description}</td>
-    </tr>
-    #{/list}
-  </table>
-  #{/ifnot}
+		 	</tr>
+		 	#{list dto.stampingOwnersInDays.keySet(), as:'stampingOwner'}
+		 	  <tr>
+		 	    <td>${stampingOwner != null ? stampingOwner.getLabel() : ' Inserita dal sistema'}</td>
+		 	    <td style="text-align:center">${dto.stampingOwnersInDays.get(stampingOwner).size()}</td>
+		 	    <td>${dto.stampingOwnersInDays.get(stampingOwner)*.dayOfMonth()*.get().sort()}</td>
+		 	  </tr>
+		 	#{/list}
+		</table>
+    #{/if}
+	#{if !dto.historyStampingsList.isEmpty()}
+		<div class="break">
+		  &nbsp;
+		</div>
+		<h2 id="stampingsDetailsTitle">Dettagli Timbrature modificate dall'amministratore</h2>
+		<table>
+		  <tr>
+		    <th>&{'stamping'}</th>
+		    <th>&{'date.modified'}</th>
+		    <th>&{'history.type'}</th>
+		    <th>&{'done.by'}</th>
+		    <th>&{'stamping.way'}</th>
+		    <th>&{'stamping.stampType'}</th>
+		    <th>&{'stamping.note'}</th>
+		    <th>&{'stamping.reason'}</th>
+		    <th>&{'stamping.place'}</th>
+		  </tr>
 
-  #{ifnot dto.psDto.absenceList.isEmpty()}
-  *{Significato codici assenza}*
-  <br>
-  <strong style="margin-top: 2em">Tabella codici di assenza:</strong>
-  <br>
-  <table>
-    <tr>
-      <th>Data</th>
-      <th>Codice assenza</th>
-      <th>Descrizione</th>
-      <th>Ore e minuti</th>
-    </tr>
-    #{list dto.psDto.absenceList, as:'abs'}
-
-    <tr>
-      <td>${abs.personDay.date}</td>
-      <td>${abs.absenceType.code}</td>
-      <td>${abs.absenceType.description}</td>
-      <td>
-      #{if abs.justifiedType.name.equals(models.absences.JustifiedType.JustifiedTypeName.all_day)}
-        Tutto il giorno
-      #{/if}
-      #{elseif abs.justifiedType.name.equals(models.absences.JustifiedType.JustifiedTypeName.complete_day_and_add_overtime)}
-      	A completamento giornaliero
-      #{/elseif}
-      #{elseif abs.justifiedMinutes != null}
-      	${abs.justifiedMinutes} minuti
-      #{/elseif}
-      </td>
-    </tr>
-    #{/list}
-  </table>
-</div>
-#{/ifnot}
-#{if !dto.offSiteWorkingTempList.isEmpty()}
-<h2 id="stampingsDetailsTitle">Dettagli Timbrature lavoro fuori sede</h2>
-<table>
-  <tr>
-    <th>&{'stamping'}</th>
-    <th>&{'stamping.way'}</th>
-    <th>&{'stamping.stampType'}</th>
-    <th>&{'stamping.note'}</th>
-    <th>&{'stamping.reason'}</th>
-    <th>&{'stamping.place'}</th>
-  </tr>
-
-  #{list dto.offSiteWorkingTempList,as:'offSiteStamp'}
-  
-  <tr>
-    <td>${offSiteStamp?.date.format()}</td>
-    <td>${offSiteStamp?.stamping.way.label()}</td>
-    <td>${offSiteStamp?.stamping.stampType.label()}</td>
-    <td>${offSiteStamp?.note}</td>
-    <td>${offSiteStamp?.reason}</td>
-    <td>${offSiteStamp?.place}</td>
-  </tr>
-  
-  #{/list}
-</table>
-
-<p style="text-align: right;margin-top:6em;">
-  AUTOCERTIFICAZIONE
-  <br><br>
-  Firma
-  <br><br>
-  _____________________________
-</p>
-#{/if}
-#{if dto.includeStampingDetails == true && !dto.historyStampingsList.isEmpty()}
-<h2 id="stampingsDetailsTitle">Dettagli Timbrature modificate dall'amministratore</h2>
-<table>
-  <tr>
-    <th>&{'stamping'}</th>
-    <th>&{'date.modified'}</th>
-    <th>&{'history.type'}</th>
-    <th>&{'done.by'}</th>
-    <th>&{'stamping.way'}</th>
-    <th>&{'stamping.stampType'}</th>
-    <th>&{'stamping.note'}</th>
-    <th>&{'stamping.reason'}</th>
-    <th>&{'stamping.place'}</th>
-  </tr>
-
-  #{list dto.historyStampingsList,as:'stampHistory'}
-  <tr>
-    <td colspan="7" class="emptycell"></td>
-  </tr>
-  #{list stampHistory, as:'history'}
-  <tr>
-    <td>${history.value?.date.format()}</td>
-    <td>${history.formattedRevisionDate()}</td>
-    <td>${history.type}</td>
-    <td>${history.formattedOwner()}</td>
-    <td>${history.value?.way.label()}</td>
-    <td>${history.value?.stampType.label()}</td>
-    <td>${history.value?.note}</td>
-    <td>${history.value?.reason}</td>
-    <td>${history.value?.place}</td>
-  </tr>
-  #{/list}
-  #{/list}
-</table>
-
-<p style="text-align: right;margin-top:6em;">
-  AUTOCERTIFICAZIONE
-  <br><br>
-  Firma
-  <br><br>
-  _____________________________
-</p>
-#{/if}
-<div class="break">
-&nbsp;
-</div>
+		  #{list dto.historyStampingsList,as:'stampHistory'}
+			  <tr>
+			    <td colspan="7" class="emptycell"></td>
+			  </tr>
+			  #{list stampHistory, as:'history'}
+				  <tr>
+				    <td>${history.value?.date.format()}</td>
+				    <td>${history.formattedRevisionDate()}</td>
+				    <td>${history.type}</td>
+				    <td>${history.formattedOwner()}</td>
+				    <td>${history.value?.way.label()}</td>
+				    <td>${history.value?.stampType.label()}</td>
+				    <td>${history.value?.note}</td>
+				    <td>${history.value?.reason}</td>
+				    <td>${history.value?.place}</td>
+				  </tr>
+			  #{/list}
+		  #{/list}
+		</table>
+	#{/if}
+  #{/if}
+  <p style="page-break-after: always;">&nbsp;</p>
+  <p style="page-break-before: always;">&nbsp;</p>
 #{/list}
 </body>
-
-</html>

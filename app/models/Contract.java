@@ -1,9 +1,31 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
+import helpers.validators.ContractBeforeSourceResidualAndOverlapingCheck;
+import helpers.validators.ContractEndContractCheck;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -14,121 +36,182 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
+import lombok.Setter;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+import play.data.validation.CheckWith;
 import play.data.validation.Max;
 import play.data.validation.Min;
 import play.data.validation.Required;
 
+/**
+ * Contratto di un dipendente.
+ */
+@Getter
+@Setter
 @Entity
 @Table(name = "contracts")
 @Audited
 public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private static final long serialVersionUID = -4472102414284745470L;
+  
+  private String perseoId;
 
-  public String perseoId;
-
+  private String externalId;
+  
   /**
    * Patch per gestire i contratti con dati mancanti da dcp. E' true unicamente per segnalare tempo
    * determinato senza data fine specificata.
    */
   @Column(name = "is_temporary")
-  public boolean isTemporaryMissing;
+  private boolean isTemporaryMissing;
 
   /*
    * Quando viene valorizzata la sourceDateResidual, deve essere valorizzata
    * anche la sourceDateMealTicket
    */
+  @CheckWith(ContractBeforeSourceResidualAndOverlapingCheck.class)
   @Getter
-  public LocalDate sourceDateResidual = null;
+  private LocalDate sourceDateResidual = null;
   
   @Getter
-  public LocalDate sourceDateVacation = null;
+  private LocalDate sourceDateVacation = null;
 
   @Getter
-  public LocalDate sourceDateMealTicket = null;
+  private LocalDate sourceDateMealTicket = null;
   
   @Getter
-  public LocalDate sourceDateRecoveryDay = null;
+  private LocalDate sourceDateRecoveryDay = null;
 
   public boolean sourceByAdmin = true;
 
   @Getter
   @Max(32)
-  public Integer sourceVacationLastYearUsed = null;
+  private Integer sourceVacationLastYearUsed = null;
 
   @Getter
   @Max(32)
-  public Integer sourceVacationCurrentYearUsed = null;
+  private Integer sourceVacationCurrentYearUsed = null;
 
   @Getter
   @Max(4)
-  public Integer sourcePermissionUsed = null;
+  private Integer sourcePermissionUsed = null;
 
   // Valore puramente indicativo per impedire che vengano inseriti i riposi compensativi in minuti
   @Min(0)
   @Max(100)
-  public Integer sourceRecoveryDayUsed = null;
+  private Integer sourceRecoveryDayUsed = null;
 
-  public Integer sourceRemainingMinutesLastYear = null;
+  private Integer sourceRemainingMinutesLastYear = null;
 
-  public Integer sourceRemainingMinutesCurrentYear = null;
+  private Integer sourceRemainingMinutesCurrentYear = null;
 
   @Getter
-  public Integer sourceRemainingMealTicket = null;
+  private Integer sourceRemainingMealTicket = null;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  public Person person;
+  private Person person;
 
   @Getter
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
-  public List<VacationPeriod> vacationPeriods = Lists.newArrayList();
+  private List<VacationPeriod> vacationPeriods = Lists.newArrayList();
 
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
-  public List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
+  private List<ContractMonthRecap> contractMonthRecaps = Lists.newArrayList();
 
   //data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
 
+  @CheckWith(ContractEndContractCheck.class)
   @Getter
-  public LocalDate endContract;
+  private LocalDate endContract;
 
   @Getter
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
-  public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
+  private Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
 
+  @Getter
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
-  public Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
+  private Set<ContractMandatoryTimeSlot> contractMandatoryTimeSlots = Sets.newHashSet();
+  
+  @Getter
+  @NotAudited
+  @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
+  @OrderBy("beginDate")
+  private Set<PersonalWorkingTime> personalWorkingTimes = Sets.newHashSet();
+  
+  @NotAudited
+  @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
+  @OrderBy("beginDate")
+  private Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
 
   @NotAudited
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
-  public List<MealTicket> mealTickets;
+  private List<MealTicket> mealTickets;
 
   @Required
-  public boolean onCertificate = true;
+  private boolean onCertificate = true;
 
   @Transient
   private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
+   
+  @Getter
+  @Setter
+  @OneToOne
+  private Contract previousContract;
 
+  @NotAudited
+  private LocalDateTime updatedAt;
+
+  @PreUpdate
+  @PrePersist
+  private void onUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
+
+  /**
+   * Ritorna la lista dei vacationPeriods del contratto e del precedente se presente.
+   *
+   * @return i vacationPeriods del contratto più quelli del contratto precedente se presente.
+   * 
+   */
+  @Transient
+  public List<VacationPeriod> getExtendedVacationPeriods() {
+    List<VacationPeriod> vp = new ArrayList<VacationPeriod>(getVacationPeriods());
+    if (getPreviousContract() != null) {
+      vp.addAll(getPreviousContract().getVacationPeriods());
+    }
+    return vp;
+  }
+  
   @Override
   public String toString() {
     return String.format("Contract[%d] - person.id = %d, "
-            + "beginDate = %s, endDate = %s, endContract = %s, perseoId = %s",
-        id, person != null ? person.id : null, beginDate, endDate, endContract,
-            perseoId);
+            + "beginDate = %s, endDate = %s, endContract = %s, calculatedEnd = %s,"
+            + "previousContractId = %s, perseoId = %s",
+        id, person != null ? person.id : null, getBeginDate(), getEndDate(), endContract,
+        calculatedEnd(), previousContract != null ? previousContract.getId() : null, 
+        perseoId);
+  }
+  
+  public String getLabel() {
+    return String.format("Inizio= [%s] - Fine= [%s]", getBeginDate(), getEndDate());
   }
 
   /**
@@ -171,7 +254,13 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
       return Sets.newHashSet(contractStampProfile);
     }
     if (type.equals(VacationPeriod.class)) {
-      return Sets.newHashSet(vacationPeriods);
+      return Sets.newHashSet(getVacationPeriods());
+    }
+    if (type.equals(ContractMandatoryTimeSlot.class)) {
+      return Sets.newHashSet(contractMandatoryTimeSlots);
+    }
+    if (type.equals(PersonalWorkingTime.class)) {
+      return Sets.newHashSet(personalWorkingTimes);
     }
     return null;
   }
@@ -179,14 +268,21 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @Override
   public Collection<Object> types() {
     return ImmutableSet.of(ContractWorkingTimeType.class, ContractStampProfile.class,
-        VacationPeriod.class);
+        VacationPeriod.class, ContractMandatoryTimeSlot.class);
   }
 
   @Override
   public LocalDate calculatedEnd() {
-    return computeEnd(endDate, endContract);
+    return computeEnd(getEndDate(), endContract);
   }
 
+  /**
+   * Ritorna la data di fine contratto.
+   *
+   * @param endDate la data di terminazione contratto (per T.D.)
+   * @param endContract la data di fine esperienza (per T.I. -> pensione)
+   * @return la data di fine contratto.
+   */
   public static LocalDate computeEnd(LocalDate endDate, LocalDate endContract) {
     if (endContract != null) {
       return endContract;
@@ -194,6 +290,11 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     return endDate;
   }
 
+  /**
+   * true se il contratto è correttamente sincronizzato, false altrimenti.
+   *
+   * @return true se il contratto è correttamente sincronizzato, false altrimenti.
+   */
   @Transient
   public boolean isProperSynchronized() {
     if (calculatedEnd() == null || !calculatedEnd().isBefore(LocalDate.now())) {
@@ -202,5 +303,30 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
     return true;
   }
 
+  /**
+   * Il Range che comprende le date di inizio e fine/chiusura del contratto.
+   */
+  public Range<LocalDate> getRange() {
+    if (calculatedEnd() != null) {
+      return Range.closed(getBeginDate(), calculatedEnd());
+    }
+    return Range.atLeast(getBeginDate());
+  }
 
+  /**
+   * Verifica di sovrapposizione con il range di questo contratto.
+   *
+   * @return true se il range passato si sovrappone a quello definito
+   *     in questo contratto.
+   */
+  public boolean overlap(Range<LocalDate> otherRange) {
+    return getRange().isConnected(otherRange);
+  }
+  
+  /**
+   * Verifica di sovrapposizione tra due contratti.
+   */
+  public boolean overlap(Contract otherContract) {
+    return overlap(otherContract.getRange());
+  }
 }

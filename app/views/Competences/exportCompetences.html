@@ -2,6 +2,8 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Esporta competenze'  /}
 
+#{switcher year:true, month:true /}
+
 <div class="container">
 
 #{title title:'Esporta Competenze' /}
@@ -10,13 +12,28 @@
 
 #{alert color:'info'}
   <p>
-   Esporta in formato.csv la situazione annuale degli straordinari per i dipendenti della sede ${office.name}.
+   Esporta in formato.csv la situazione mensile del gruppo di competenza selezionato per i dipendenti della sede ${office.name}.
   </p>
 #{/alert}
  
- 	  	#{form @Competences.getOvertimeInYear(), class:'form-inline'}
+#{panel title:'Esporta gruppo di competenze', color:'primary'}
+
+<div class="col-sm-3"></div>
+<div class="col-sm-6">
+		#{form @Competences.getCompetenceGroupInYearMonth(), class:'form form-horizontal'}
 	  		#{f.hidden 'officeId', value:office.id /}
-      		#{ff.finput 'year', type:'number', sronly:true, value:session.get('yearSelected'), faicon:'calendar' /}  	  
-       		<input class="btn btn-primary" type="submit" value="Esporta straordinari"/>
+			#{f.hidden 'year', value:year /}
+    		#{f.hidden 'month', value:month /}
+    		#{f.booleanRadio 'temporary', label:'Solo tempi determinati' /}
+	  		#{f.selectModel 'group', items:list, label:'Gruppo', required:true /}
+      		
+       		<input class="btn btn-primary" type="submit" value="Esporta"/>
      	#{/form} 
+</div>
+<div class="col-sm-3"></div>
+
+
+
+#{/panel}
+ 	  	
 </div>

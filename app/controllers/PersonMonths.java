@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -6,7 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
-
+import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
@@ -14,34 +31,29 @@ import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-
 import manager.PersonMonthsManager;
-
 import models.Contract;
 import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
 import models.User;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import security.SecurityRules;
-
+/**
+ * Controller per la gestione dei PersonMonths.
+ */
 @With({Resecure.class})
 public class PersonMonths extends Controller {
 
@@ -68,7 +80,7 @@ public class PersonMonths extends Controller {
   public static void hourRecap(int year) {
 
     Optional<User> user = Security.getUser();
-    if (!user.isPresent() || user.get().person == null) {
+    if (!user.isPresent() || user.get().getPerson() == null) {
       flash.error("Accesso negato.");
       renderTemplate("Application/indexAdmin.html");
     }
@@ -78,7 +90,7 @@ public class PersonMonths extends Controller {
       renderTemplate("Application/indexAdmin.html");
     }
 
-    Person person = user.get().person;
+    Person person = user.get().getPerson();
 
     Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
 
@@ -106,7 +118,7 @@ public class PersonMonths extends Controller {
    */
   public static void trainingHours(int year) {
 
-    Person person = Security.getUser().get().person;
+    Person person = Security.getUser().get().getPerson();
 
     List<PersonMonthRecap> personMonthRecapList = personMonthRecapDao
         .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
@@ -126,7 +138,7 @@ public class PersonMonths extends Controller {
    */
   public static void insertTrainingHours(Integer month, Integer year) {
 
-    Person person = Security.getUser().get().person;
+    Person person = Security.getUser().get().getPerson();
 
     rules.checkIfPermitted(person);
     render(person, month, year);
@@ -145,7 +157,7 @@ public class PersonMonths extends Controller {
       @Required @Valid @Min(0) Integer value, Integer month, Integer year, 
       Long personMonthSituationId) {
 
-    Person person = Security.getUser().get().person;
+    Person person = Security.getUser().get().getPerson();
 
     if (personMonthSituationId != null) {
 
@@ -161,7 +173,7 @@ public class PersonMonths extends Controller {
         render("@insertTrainingHours",
             person, month, year, begin, end, value, personMonthSituationId, dateFrom, dateTo);
       }
-      pm.trainingHours = value;
+      pm.setTrainingHours(value);
       pm.save();
       flash.success("Ore di formazione aggiornate.", value);
       trainingHours(year);
@@ -193,13 +205,13 @@ public class PersonMonths extends Controller {
 
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
 
-    int year = pm.year;
-    int month = pm.month;
-    Person person = pm.person;
+    int year = pm.getYear();
+    int month = pm.getMonth();
+    Person person = pm.getPerson();
 
-    int begin = pm.fromDate.getDayOfMonth();
-    int end = pm.toDate.getDayOfMonth();
-    int value = pm.trainingHours;
+    int begin = pm.getFromDate().getDayOfMonth();
+    int end = pm.getToDate().getDayOfMonth();
+    int value = pm.getTrainingHours();
 
     LocalDate dateFrom = new LocalDate(year, month, begin);
     LocalDate dateTo = new LocalDate(year, month, end);
@@ -208,17 +220,22 @@ public class PersonMonths extends Controller {
         dateFrom, dateTo, person, month, year, personMonthSituationId, begin, end, value);
   }
 
+  /**
+   * Modifica le ore di formazione di una persona.
+   *
+   * @param personMonthSituationId l'identificativo delle ore di formazione da modificare
+   */
   public static void modifyPeopleTrainingHours(Long personMonthSituationId) {
 
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
 
-    int year = pm.year;
-    int month = pm.month;
-    Person person = pm.person;
+    int year = pm.getYear();
+    int month = pm.getMonth();
+    Person person = pm.getPerson();
 
-    int begin = pm.fromDate.getDayOfMonth();
-    int end = pm.toDate.getDayOfMonth();
-    int value = pm.trainingHours;
+    int begin = pm.getFromDate().getDayOfMonth();
+    int end = pm.getToDate().getDayOfMonth();
+    int value = pm.getTrainingHours();
 
     LocalDate dateFrom = new LocalDate(year, month, begin);
     LocalDate dateTo = new LocalDate(year, month, end);
@@ -243,6 +260,12 @@ public class PersonMonths extends Controller {
     render(pm);
   }
   
+  /**
+   * Permette la cancellazione delle ore di formazione.
+   *
+   * @param personMonthRecapId l'identificativo delle ore di formazione da cancellare
+   * @param officeId l'identificativo della sede
+   */
   public static void deletePeopleTrainingHours(Long personMonthRecapId, Long officeId) {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -272,10 +295,16 @@ public class PersonMonths extends Controller {
 
     pm.delete();
     flash.error("Ore di formazione eliminate con successo.");
-    PersonMonths.trainingHours(pm.year); 
+    PersonMonths.trainingHours(pm.getYear()); 
 
   }
-  
+
+  /**
+   * Permette la cancellazione delle ore di formazione da parte dell'amministratore del personale.
+   *
+   * @param personMonthRecapId l'identificativo delle ore di formazione da eliminare
+   * @param officeId l'identificativo della sede
+   */
   public static void deletePeopleTrainingHoursConfirmed(Long personMonthRecapId, Long officeId) {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -284,13 +313,14 @@ public class PersonMonths extends Controller {
     
     pm.delete();
     flash.error("Ore di formazione eliminate con successo.");
-    PersonMonths.visualizePeopleTrainingHours(pm.year, pm.month, officeId);
+    PersonMonths.visualizePeopleTrainingHours(pm.getYear(), pm.getMonth(), officeId);
 
   }
 
   /**
    * visualizza il tabellone riepilogativo delle ore di formazione in un determinato mese e anno 
    * per l'ufficio con id officeId.
+   *
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    * @param officeId l'id dell'ufficio di riferimento
@@ -311,6 +341,7 @@ public class PersonMonths extends Controller {
 
   /**
    * visualizza la form di inserimento per l'amministratore delle ore di formazione.
+   *
    * @param officeId l'id dell'ufficio di cui si vuole inserire le ore di formazione
    * @param month il mese di riferimento
    * @param year l'anno di riferimento
@@ -329,6 +360,7 @@ public class PersonMonths extends Controller {
 
   /**
    * salvataggio delle ore di formazione inserite dall'amministratore.
+   *
    * @param begin il giorno di inizio della formazione
    * @param end il giorno di fine della formazione
    * @param value la quantità di ore di formazione
@@ -340,7 +372,7 @@ public class PersonMonths extends Controller {
       @Required @Valid @Min(0) Integer value, Integer month, Integer year, Person person,
       Long personMonthSituationId) {
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
     checkErrors(begin, end, year, month, value);
     if (personMonthSituationId != null) {
       PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
@@ -355,10 +387,10 @@ public class PersonMonths extends Controller {
         render("@insertPeopleTrainingHours",
             person, month, year, begin, end, value, personMonthSituationId, dateFrom, dateTo);
       }
-      pm.trainingHours = value;
+      pm.setTrainingHours(value);
       pm.save();
       flash.success("Ore di formazione aggiornate.", value);
-      visualizePeopleTrainingHours(year, month, pm.person.office.id);
+      visualizePeopleTrainingHours(year, month, pm.getPerson().getOffice().id);
       
     } else {
       checkPerson(person);
@@ -366,20 +398,21 @@ public class PersonMonths extends Controller {
     
     if (Validation.hasErrors()) {
       List<Person> simplePersonList = personDao.listFetched(Optional.<String>absent(),
-          ImmutableSet.of(person.office), false, null, null, false).list();
+          ImmutableSet.of(person.getOffice()), false, null, null, false).list();
       response.status = 400;
       render("@insertPeopleTrainingHours",
-          person, month, year, begin, end, value,simplePersonList);
+          person, month, year, begin, end, value, simplePersonList);
     }
 
     personMonthsManager.saveTrainingHours(person, year, month, begin, end, false, value);
     flash.success("Salvate %d ore di formazione per %s", value, person.fullName());
-    PersonMonths.visualizePeopleTrainingHours(year, month, person.office.id);
+    PersonMonths.visualizePeopleTrainingHours(year, month, person.getOffice().id);
   }
 
   /**
    * metodo privato che aggiunge al validation eventuali errori riscontrati nel passaggio
    * dei parametri.
+   *
    * @param begin il giorno di inizio della formazione
    * @param end il giorno di fine della formazione
    * @param year l'anno di formazione
@@ -419,12 +452,13 @@ public class PersonMonths extends Controller {
   /**
    * aggiunge al validation l'eventuale errore relativo al quantitativo orario che può superare
    * le ore possibili prendibili per quel giorno.
+   *
    * @param value il quantitativo di ore di formazione
    * @param pm il personMonthRecap da modificare con le ore passate come parametro
    */
   private static void checkErrorsInUpdate(Integer value, PersonMonthRecap pm) {
     if (!Validation.hasErrors()) {
-      if (value > 24 * (pm.toDate.getDayOfMonth() - pm.fromDate.getDayOfMonth() + 1)) {
+      if (value > 24 * (pm.getToDate().getDayOfMonth() - pm.getFromDate().getDayOfMonth() + 1)) {
         Validation.addError("value",
             "valore troppo alto");
       }
@@ -435,7 +469,7 @@ public class PersonMonths extends Controller {
    * aggiunge al validation un controllo sulla presenza della persona passata come parametro.
    */
   private static void checkPerson(Person person) {
-    if (person == null || person.name == null || person.surname == null) {
+    if (person == null || person.getName() == null || person.getSurname() == null) {
       Validation.addError("person", "la persona non può essere nulla");
     }
   }

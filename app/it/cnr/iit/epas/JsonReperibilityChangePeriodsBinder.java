@@ -1,29 +1,38 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.cnr.iit.epas;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
+import common.injection.StaticInject;
 import dao.PersonDao;
-
-import injection.StaticInject;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Person;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
-
 import org.joda.time.LocalDate;
-
 import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
@@ -31,7 +40,7 @@ import play.data.binding.TypeBinder;
 /**
  * Binder per il json relativo alle richieste di cambiamento di giorni di reperibilità.
  *
- * @author cristian
+ * @author Cristian Lucchesi
  */
 @Slf4j
 @Global
@@ -42,17 +51,19 @@ public class JsonReperibilityChangePeriodsBinder implements TypeBinder<Reperibil
   private static PersonDao personDao;
 
   /**
+   * Binder per il json relativo alle richieste di cambiamento di giorni di reperibilità.
+   *
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    *     java.lang.String, java.lang.Class, java.lang.reflect.Type)
    *     "mail_req" : "ruberti@iit.cnr.it",  "mail_sub" : "lorenzo.rossi@iit.cnr.it",
    *     "req_start_date" : "2012-12-10",
    *     "req_end_date" :"2012-12-10", "sub_start_date" : "2012-12-10",
    *     "sub_end_date" : "2012-12-10"
-   * <p>
-   * - mail_req: mail richiedente - mail_sub: mail sostituto - req_start_date: data inizio del
-   * periodo del richiedente - req_end_date: data fine del periodo del richiedente - sub_start_date:
-   * data inizio del periodo del sostituto - sub_end_date: data fine del periodo del sostituto
-   * </p>
+   *     <p>
+   *       - mail_req: mail richiedente - mail_sub: mail sostituto - req_start_date: data inizio del
+   *       periodo del richiedente - req_end_date: data fine periodo richiedente - sub_start_date:
+   *       data inizio del periodo del sostituto - sub_end_date: data fine del periodo del sostituto
+   *     </p>
    */
   @SuppressWarnings("rawtypes")
   @Override
@@ -71,8 +82,6 @@ public class JsonReperibilityChangePeriodsBinder implements TypeBinder<Reperibil
       JsonObject jsonObject = null;
       Person reqPerson = null;
       Person subPerson = null;
-
-      //PersonReperibilityType reperibilityType = null;
 
       for (JsonElement jsonElement : jsonArray) {
 

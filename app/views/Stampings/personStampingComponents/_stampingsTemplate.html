@@ -13,11 +13,15 @@
     #{if stampingTemplate.showPopover()} webui-popover-hover data-url="#${stampingTemplate.stamping.id}" #{/if}
     >
 
-      #{if stampingTemplate.date}
-		    #{secure.link @Stampings.edit(stampingTemplate.stampingId), target:stampingTemplate.stamping , 'data-async-modal':'#modalStamping'}
-          ${stampingTemplate.hour}
-		    #{/secure.link}
+      #{if !psDto.canEditStampings}
+        ${stampingTemplate.hour}
       #{/if}
+      #{elseif stampingTemplate.date}
+        #{secure.link @Stampings.edit(stampingTemplate.stampingId), target:stampingTemplate.stamping , 'data-async-modal':'#modalStamping'}
+          ${stampingTemplate.hour}
+        #{/secure.link}
+      #{/elseif}
+
       #{elseif stampingTemplate.pairPosition.equals("center")}
       <a title="Timbratura di servizio mancante" class="initialism">
         <i class="icon-warning-sign"></i>
@@ -50,7 +54,10 @@
       #{secure.check 'Stampings.insert', target: yearMonth }
       <td class="inserisciTimbratura default-single">
         #{if !dayRecap.personDay.future}
-          <a href="@{Stampings.insert(dayRecap.personDay.person.id, dayRecap.personDay.date.format())}" data-async-modal="#modalStamping">
+          <a href="@{Stampings.insert(dayRecap.personDay.person.id, dayRecap.personDay.date.format())}"
+             data-async-modal="#modalStamping"
+             title="Inserimento timbratura ${dayRecap.personDay.date.format()}"
+             aria-label="Inserimento timbratura ${dayRecap.personDay.date.format()}">
         		+++
       		</a>
       	#{/if}

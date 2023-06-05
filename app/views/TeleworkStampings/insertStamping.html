@@ -1,0 +1,55 @@
+%{
+Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
+}%
+
+#{modalAsync id:'modalInsertStamping', title:(Action + ' timbratura del ' + date.format() + ' per ' + person.fullname)}
+
+  	<div id="stampingData">
+	
+	  #{form action:@save(), method:'POST', autocomplete:false, 'data-async':'#page_content',
+	    class:'form form-horizontal', 'data-async-error':'#stampingData', 'data-spinner':'#defaultSpinner'}
+	
+	  <!-- Alert message -->
+	  #{if stamping?.persistent}
+		#{alert color:'info',center:true}
+		  Modifica i dati della timbratura delle ore ${stamping.formattedHour()}
+		#{/alert}
+		<!-- storico ?? -->
+	  #{/if}
+	  #{else}
+	    #{alert color:'info',center:true}
+	      Inserisci orario e motivo della nuova timbratura
+	    #{/alert}
+	  #{/else}
+	
+	  <!-- Fields -->
+	  #{f.hidden 'personId', value:person.id /}
+	  #{f.hidden 'date', value:date.format() /}
+	
+	  #{if stamping?.persistent}
+	    #{f.hidden 'stamping.id', value:stamping.id /}
+	  #{/if}
+	
+	  #{f.input 'time', popover:'true', value:stamping?.isPersistent() ? stamping?.formattedHour() : time, required:true/}
+	
+	  #{set stampTypes: templateUtility.teleworkStampTypes /}
+	  
+      #{f.selectEnum 'stamping.stampType', items:stampTypes /}
+
+
+	  #{f.input 'stamping.note' /}
+
+      <!-- Buttons -->	
+	  #{b.buttons center:true}
+	    #{if stamping?.persistent}
+	      #{b.submit 'Aggiorna'/}
+	    #{/if}#{else}
+	      #{b.submit 'Inserisci'/}
+	    #{/else}
+	  #{/b.buttons}
+	
+	  #{/form}
+	 
+	</div>
+  
+#{/modalAsync}

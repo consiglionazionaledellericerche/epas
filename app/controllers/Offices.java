@@ -1,8 +1,26 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
 import com.google.gdata.util.common.base.Preconditions;
 import com.querydsl.core.QueryResults;
+import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.RoleDao;
 import dao.wrapper.IWrapperFactory;
@@ -21,8 +39,10 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
+/**
+ * Controller per la gestione degli uffici.
+ */
 @With({Resecure.class})
 public class Offices extends Controller {
 
@@ -98,7 +118,7 @@ public class Offices extends Controller {
     notFoundIfNull(institute);
 
     Office office = new Office();
-    office.institute = institute;
+    office.setInstitute(institute);
     render(office);
   }
 
@@ -109,7 +129,7 @@ public class Offices extends Controller {
    */
   public static void save(@Valid Office office) {
 
-    Preconditions.checkNotNull(office.institute);
+    Preconditions.checkNotNull(office.getInstitute());
 
     if (Validation.hasErrors()) {
       response.status = 400;
@@ -122,9 +142,11 @@ public class Offices extends Controller {
         render("@edit", office, wrOffice);
       }
     } else {
-      if (office.beginDate == null) {
-        office.beginDate = new LocalDate(LocalDate.now().getYear() - 1, 12, 31);
+      if (office.getBeginDate() == null) {
+        office.setBeginDate(new LocalDate(LocalDate.now().getYear() - 1, 12, 31));
       }
+
+      office.setCode(Optional.fromNullable(office.getCode()).orNull());
       office.save();
 
       // Configurazione iniziale di default ...

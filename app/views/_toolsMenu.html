@@ -2,7 +2,9 @@
 
   #{set actions:[
   'Administration.utilities',
-  'Administration.playConfiguration',
+  'Administration.internalSearch',
+  'Administration.adjustSeats',
+  'Administration.generalSetting',
   'Synchronizations.institutes',
   'Synchronizations.people',
   'Synchronizations.badges',
@@ -22,7 +24,7 @@
       #{secure.li @Administration.utilities() }
       <i class="fa fa-wrench" aria-hidden="true"></i>
       #{/secure.li}
-      
+
       #{secure.li @Administration.internalSearch() }
       <i class="fa fa-search" aria-hidden="true"></i>
       #{/secure.li}
@@ -47,12 +49,15 @@
         <i class="fa fa-refresh" aria-hidden="true"></i>
       #{/secure.li}
       
-      #{secure.li @AbsenceGroups.certificationsAbsenceCodes() }
-      <i class="fa fa-cloud" aria-hidden="true"></i>
-      #{/secure.li}
-      #{secure.li @AbsenceGroups.certificationsAbsences(session.get("personSelected"), session.get("yearSelected")) }
-      <i class="fa fa-cloud" aria-hidden="true"></i>
-      #{/secure.li}
+      #{if attestatiActive}
+        #{secure.li @AbsenceGroups.certificationsAbsenceCodes() }
+          <i class="fa fa-cloud" aria-hidden="true"></i>
+        #{/secure.li}
+        #{secure.li @AbsenceGroups.certificationsAbsences(session.get("personSelected"), session.get("yearSelected")) }
+          <i class="fa fa-cloud" aria-hidden="true"></i>
+        #{/secure.li}
+      #{/if}
+
       #{secure.li @Stats.general() }
       <i class="fa fa-bar-chart" aria-hidden="true"></i>
       #{/secure.li}

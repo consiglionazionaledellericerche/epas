@@ -1,22 +1,34 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.attestati.service;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-import dao.AbsenceDao;
 import dao.CertificationDao;
-import dao.CompetenceDao;
-import dao.PersonDayDao;
-import dao.PersonMonthRecapDao;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import manager.PersonDayManager;
 import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.dto.internal.PeriodoDipendente;
 import manager.attestati.dto.internal.StatoAttestatoMese;
@@ -29,11 +41,8 @@ import manager.attestati.dto.show.RispostaAttestati;
 import manager.attestati.dto.show.SeatCertification;
 import manager.attestati.dto.show.SeatCertification.PersonCertification;
 import models.Certification;
-import models.Competence;
 import models.Office;
 import models.Person;
-import models.PersonMonthRecap;
-import models.absences.Absence;
 import models.enumerate.CertificationType;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -43,47 +52,34 @@ import play.mvc.Http;
 /**
  * Funzionalità integrazione ePAS - Nuovo Attestati.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 @Slf4j
 public class CertificationService implements ICertificationService {
 
   private final CertificationsComunication certificationsComunication;
-
-  private final PersonMonthRecapDao personMonthRecapDao;
-  private final PersonDayDao personDayDao;
-  private final PersonDayManager personDayManager;
-  private final CompetenceDao competenceDao;
-  private final AbsenceDao absenceDao;
   private final CertificationDao certificationDao;
+  private final PersonMonthlySituationData monthData;
 
 
   /**
    * Constructor.
    *
    * @param certificationsComunication injected.
-   * @param absenceDao injected.
-   * @param competenceDao injected.
-   * @param personMonthRecapDao injected.
-   * @param personDayManager injected.
-   * @param personDayDao injected.
    * @param certificationDao injected.
+   * @param monthData injected.
    */
   @Inject
   public CertificationService(CertificationsComunication certificationsComunication,
-      AbsenceDao absenceDao, CompetenceDao competenceDao, PersonMonthRecapDao personMonthRecapDao,
-      PersonDayManager personDayManager, PersonDayDao personDayDao,
-      CertificationDao certificationDao) {
+      CertificationDao certificationDao, PersonMonthlySituationData monthData) {
     this.certificationsComunication = certificationsComunication;
-    this.absenceDao = absenceDao;
-    this.competenceDao = competenceDao;
-    this.personDayManager = personDayManager;
-    this.personDayDao = personDayDao;
-    this.personMonthRecapDao = personMonthRecapDao;
     this.certificationDao = certificationDao;
+    this.monthData = monthData;
   }
 
-  /* (non-Javadoc)
+  /**
+   * Verifica se il token è abilitato alla sede.
+   *
    * @see manager.attestati.service.ICertificationService#authentication(models.Office, boolean)
    */
   @Override
@@ -111,12 +107,12 @@ public class CertificationService implements ICertificationService {
     for (RigaAssenza rigaAssenza : personCertification.righeAssenza) {
 
       Certification certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.ABSENCE;
-      certification.content = rigaAssenza.serializeContent();
-      certification.attestatiId = rigaAssenza.id;
+      certification.setPerson(person);
+      certification.setYear(year);
+      certification.setMonth(month);
+      certification.setCertificationType(CertificationType.ABSENCE);
+      certification.setContent(rigaAssenza.serializeContent());
+      certification.setAttestatiId(rigaAssenza.id);
 
       certifications.put(certification.aMapKey(), certification);
     }
@@ -125,12 +121,12 @@ public class CertificationService implements ICertificationService {
     for (RigaCompetenza rigaCompetenza : personCertification.righeCompetenza) {
 
       Certification certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.COMPETENCE;
-      certification.content = rigaCompetenza.serializeContent();
-      certification.attestatiId = rigaCompetenza.id;
+      certification.setPerson(person);
+      certification.setYear(year);
+      certification.setMonth(month);
+      certification.setCertificationType(CertificationType.COMPETENCE);
+      certification.setContent(rigaCompetenza.serializeContent());
+      certification.setAttestatiId(rigaCompetenza.id);
 
       certifications.put(certification.aMapKey(), certification);
     }
@@ -139,30 +135,32 @@ public class CertificationService implements ICertificationService {
     for (RigaFormazione rigaFormazione : personCertification.righeFormazione) {
 
       Certification certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.FORMATION;
-      certification.content = rigaFormazione.serializeContent();
-      certification.attestatiId = rigaFormazione.id;
+      certification.setPerson(person);
+      certification.setYear(year);
+      certification.setMonth(month);
+      certification.setCertificationType(CertificationType.FORMATION);
+      certification.setContent(rigaFormazione.serializeContent());
+      certification.setAttestatiId(rigaFormazione.id);
 
       certifications.put(certification.aMapKey(), certification);
     }
 
     // Buoni pasto
     Certification certification = new Certification();
-    certification.person = person;
-    certification.year = year;
-    certification.month = month;
-    certification.certificationType = CertificationType.MEAL;
-    certification.content = personCertification.numBuoniPasto + "";
-
+    certification.setPerson(person);
+    certification.setYear(year);
+    certification.setMonth(month);
+    certification.setCertificationType(CertificationType.MEAL);
+    certification.setContent(String.format("%s;%s", 
+        personCertification.numBuoniPasto, personCertification.numBuoniPastoElettronici));
     certifications.put(certification.aMapKey(), certification);
 
     return certifications;
   }
 
-  /* (non-Javadoc)
+  /**
+   * Costruisce la situazione attestati di una persona.
+   *
    * @see manager.attestati.service.ICertificationService#buildPersonStaticStatus(
    *    models.Person, int, int)
    */
@@ -198,11 +196,9 @@ public class CertificationService implements ICertificationService {
     }
 
     // Lo stato attuale epas
+    // chiamare qui il manager che genera lo stato attuale di epas
     Map<String, Certification> actualCertifications = Maps.newHashMap();
-    actualCertifications = trainingHours(person, year, month, actualCertifications);
-    actualCertifications = absences(person, year, month, actualCertifications);
-    actualCertifications = competences(person, year, month, actualCertifications);
-    actualCertifications = mealTicket(person, year, month, actualCertifications);
+    actualCertifications = monthData.getCertification(person, year, month);
 
     if (attestatiCertifications != null) {
       // Riesco a scaricare gli attestati della persona
@@ -250,7 +246,7 @@ public class CertificationService implements ICertificationService {
       Certification attestatiCertification = attestatiCertifications.get(key);
 
       if (epasCertification == null) {
-        attestatiCertification.warnings = "Master Attestati";
+        attestatiCertification.setWarnings("Master Attestati");
         attestatiCertification.save();
         epasCertifications.put(key, attestatiCertification);
         continue;
@@ -264,13 +260,14 @@ public class CertificationService implements ICertificationService {
       }
 
       if (epasCertification.containProblems()) {
-        epasCertification.problems = null;
-        epasCertification.warnings = "Problems fixed by Attestati";
+        epasCertification.setProblems(null);
+        epasCertification.setWarnings("Problems fixed by Attestati");
         epasCertification.save();
       }
 
-      if (!Objects.equals(epasCertification.attestatiId, attestatiCertification.attestatiId)) {
-        epasCertification.attestatiId = attestatiCertification.attestatiId;
+      if (!Objects.equals(
+          epasCertification.getAttestatiId(), attestatiCertification.getAttestatiId())) {
+        epasCertification.setAttestatiId(attestatiCertification.getAttestatiId());
         epasCertification.save();
       }
 
@@ -280,7 +277,9 @@ public class CertificationService implements ICertificationService {
 
   }
 
-  /* (non-Javadoc)
+  /**
+   * Se le due mappe contententi certificazioni sono equivalenti e non contengono errori.
+   *
    * @see manager.attestati.service.ICertificationService#certificationsEquivalent(
    *    java.util.Map, java.util.Map)
    */
@@ -299,17 +298,19 @@ public class CertificationService implements ICertificationService {
       if (certification1 == null || certification2 == null) {
         return false;
       }
-      if (certification1.problems != null && !certification1.problems.isEmpty()) {
+      if (certification1.getProblems() != null && !certification1.getProblems().isEmpty()) {
         return false;
       }
-      if (certification2.problems != null && !certification2.problems.isEmpty()) {
+      if (certification2.getProblems() != null && !certification2.getProblems().isEmpty()) {
         return false;
       }
     }
     return true;
   }
 
-  /* (non-Javadoc)
+  /**
+   * Elaborazione persona.
+   *
    * @see manager.attestati.service.ICertificationService#process(
    *    manager.attestati.service.PersonCertData)
    */
@@ -380,7 +381,9 @@ public class CertificationService implements ICertificationService {
   }
 
 
-  /* (non-Javadoc)
+  /**
+   * Invia la certificazione ad attestati.
+   *
    * @see manager.attestati.service.ICertificationService#sendCertification(models.Certification)
    */
   @Override
@@ -390,15 +393,15 @@ public class CertificationService implements ICertificationService {
       HttpResponse httpResponse;
       Optional<RispostaAttestati> rispostaAttestati;
 
-      if (certification.certificationType == CertificationType.ABSENCE) {
+      if (certification.getCertificationType() == CertificationType.ABSENCE) {
         httpResponse = certificationsComunication.sendRigaAssenza(certification);
         rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-      } else if (certification.certificationType == CertificationType.FORMATION) {
+      } else if (certification.getCertificationType() == CertificationType.FORMATION) {
         httpResponse = certificationsComunication.sendRigaFormazione(certification);
         rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-      } else if (certification.certificationType == CertificationType.MEAL) {
+      } else if (certification.getCertificationType() == CertificationType.MEAL) {
         httpResponse = certificationsComunication.sendRigaBuoniPasto(certification, false);
         rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
@@ -408,7 +411,7 @@ public class CertificationService implements ICertificationService {
           rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
         }
 
-      } else if (certification.certificationType == CertificationType.COMPETENCE) {
+      } else if (certification.getCertificationType() == CertificationType.COMPETENCE) {
         httpResponse = certificationsComunication.sendRigaCompetenza(certification);
         rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
@@ -419,19 +422,19 @@ public class CertificationService implements ICertificationService {
 
       // Esito 
       if (httpResponse.getStatus() == Http.StatusCode.OK) {
-        certification.problems = "";
+        certification.setProblems("");
       } else if (httpResponse.getStatus() == Http.StatusCode.INTERNAL_ERROR) {
 
         if (rispostaAttestati.isPresent()) {
-          certification.problems = rispostaAttestati.get().message;
+          certification.setProblems(rispostaAttestati.get().message);
         } else {
-          certification.problems = "Errore interno al server";
+          certification.setProblems("Errore interno al server");
         }
       } else {
         if (rispostaAttestati.isPresent()) {
-          certification.problems = rispostaAttestati.get().message;
+          certification.setProblems(rispostaAttestati.get().message);
         } else {
-          certification.problems = "Impossibile prelevare l'esito dell'invio. Riprovare.";
+          certification.setProblems("Impossibile prelevare l'esito dell'invio. Riprovare.");
         }
       }
 
@@ -439,12 +442,14 @@ public class CertificationService implements ICertificationService {
 
     } catch (Exception ex) {
       log.error(ex.toString());
-      certification.problems = "Eccezione: " + ex.getMessage();
+      certification.setProblems("Eccezione: " + ex.getMessage());
       return certification;
     }
   }
 
-  /* (non-Javadoc)
+  /**
+   * Rimuove il record in attestati. (Non usare per buoni pasto).
+   *
    * @see manager.attestati.service.ICertificationService#removeAttestati(models.Certification)
    */
   @Override
@@ -454,20 +459,20 @@ public class CertificationService implements ICertificationService {
     HttpResponse httpResponse;
     Optional<RispostaAttestati> rispostaAttestati;
 
-    if (certification.certificationType == CertificationType.ABSENCE) {
+    if (certification.getCertificationType() == CertificationType.ABSENCE) {
       httpResponse = certificationsComunication.deleteRigaAssenza(certification);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-    } else if (certification.certificationType == CertificationType.FORMATION) {
+    } else if (certification.getCertificationType() == CertificationType.FORMATION) {
       httpResponse = certificationsComunication.deleteRigaFormazione(certification);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-    } else if (certification.certificationType == CertificationType.COMPETENCE) {
+    } else if (certification.getCertificationType() == CertificationType.COMPETENCE) {
       httpResponse = certificationsComunication.deleteRigaCompetenza(certification);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
 
-    } else if (certification.certificationType == CertificationType.MEAL) {
-      certification.content = "0";
+    } else if (certification.getCertificationType() == CertificationType.MEAL) {
+      certification.setContent("0");
       httpResponse = certificationsComunication.sendRigaBuoniPasto(certification, false);
       rispostaAttestati = certificationsComunication.parseRispostaAttestati(httpResponse);
       if (rispostaAttestati.isPresent()
@@ -485,162 +490,8 @@ public class CertificationService implements ICertificationService {
   }
 
   /**
-   * Produce le certification delle ore di formazione per la persona.
+   * La lista dei codici assenza.
    *
-   * @param person persona
-   * @param year anno
-   * @param month mese
-   * @return certificazioni (sotto forma di mappa)
-   */
-  private Map<String, Certification> trainingHours(Person person, int year, int month,
-      Map<String, Certification> certifications) {
-
-    List<PersonMonthRecap> trainingHoursList = personMonthRecapDao
-        .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
-            Optional.fromNullable(month), Optional.absent());
-    for (PersonMonthRecap personMonthRecap : trainingHoursList) {
-
-      // Nuova certificazione
-      Certification certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.FORMATION;
-      certification.content = Certification
-          .serializeTrainingHours(personMonthRecap.fromDate.getDayOfMonth(),
-              personMonthRecap.toDate.getDayOfMonth(), personMonthRecap.trainingHours);
-
-      certifications.put(certification.aMapKey(), certification);
-    }
-
-    return certifications;
-  }
-
-
-  /**
-   * Produce le certification delle assenze per la persona.
-   *
-   * @param person persona
-   * @param year anno
-   * @param month mese
-   * @return certificazioni (sotto forma di mappa)
-   */
-  private Map<String, Certification> absences(Person person, int year, int month,
-      Map<String, Certification> certifications) {
-
-    //log.info("Persona {}", person);
-
-    List<Absence> absences = absenceDao
-        .getAbsencesNotInternalUseInMonth(person, year, month);
-    if (absences.isEmpty()) {
-      return certifications;
-    }
-
-    Certification certification = null;
-    LocalDate previousDate = null;
-    String previousAbsenceCode = null;
-    Integer dayBegin = null;
-
-    for (Absence absence : absences) {
-
-      //codici a uso interno li salto
-      if (absence.absenceType.internalUse) {
-        continue;
-      }
-
-      //Codice per attestati
-      String absenceCodeToSend = absence.absenceType.code.toUpperCase();
-      if (absence.absenceType.certificateCode != null
-          && !absence.absenceType.certificateCode.trim().isEmpty()) {
-        absenceCodeToSend = absence.absenceType.certificateCode.toUpperCase();
-      }
-
-      // 1) Continua Assenza più giorni
-      Integer dayEnd;
-      if (previousDate != null && previousDate.plusDays(1).equals(absence.personDay.date)
-          && previousAbsenceCode.equals(absenceCodeToSend)) {
-        dayEnd = absence.personDay.date.getDayOfMonth();
-        previousDate = absence.personDay.date;
-        certification.content = absenceCodeToSend + ";" + dayBegin + ";" + dayEnd;
-        continue;
-      }
-
-      // 2) Fine Assenza più giorni
-      if (previousDate != null) {
-
-        certifications.put(certification.aMapKey(), certification);
-        previousDate = null;
-      }
-
-      // 3) Nuova Assenza  
-      dayBegin = absence.personDay.date.getDayOfMonth();
-      dayEnd = absence.personDay.date.getDayOfMonth();
-      previousDate = absence.personDay.date;
-      previousAbsenceCode = absenceCodeToSend;
-
-      certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.ABSENCE;
-      certification.content = Certification.serializeAbsences(absenceCodeToSend,
-          dayBegin, dayEnd);
-    }
-
-    certifications.put(certification.aMapKey(), certification);
-
-    return certifications;
-  }
-
-  private Map<String, Certification> competences(Person person, int year, int month,
-      Map<String, Certification> certifications) {
-
-    List<Competence> competences = competenceDao
-        .getCompetenceInMonthForUploadSituation(person, year, month);
-
-    for (Competence competence : competences) {
-      Certification certification = new Certification();
-      certification.person = person;
-      certification.year = year;
-      certification.month = month;
-      certification.certificationType = CertificationType.COMPETENCE;
-      certification.content = Certification.serializeCompetences(competence.competenceCode.code,
-          competence.valueApproved);
-
-      certifications.put(certification.aMapKey(), certification);
-    }
-
-    return certifications;
-  }
-
-  /**
-   * Produce la certificazione buoni pasto della persona.
-   *
-   * @param person persona
-   * @param year anno
-   * @param month mese
-   * @return certification (sotto forma di mappa)
-   */
-  private Map<String, Certification> mealTicket(Person person, int year, int month,
-      Map<String, Certification> certifications) {
-
-    Certification certification = new Certification();
-    certification.person = person;
-    certification.year = year;
-    certification.month = month;
-    certification.certificationType = CertificationType.MEAL;
-
-    Integer mealTicket = personDayManager.numberOfMealTicketToUse(personDayDao
-        .getPersonDayInMonth(person, new YearMonth(year, month)));
-
-    certification.content = String.valueOf(mealTicket);
-
-    certifications.put(certification.aMapKey(), certification);
-
-    return certifications;
-  }
-
-  /* (non-Javadoc)
    * @see manager.attestati.service.ICertificationService#absenceCodes()
    */
   @Override
@@ -654,6 +505,9 @@ public class CertificationService implements ICertificationService {
     return map;
   }
 
+  /**
+   * I dati contrattuali in attestati.
+   */
   @Override
   public Map<String, ContrattoAttestati> getCertificationContracts(Office office, int year,
       int month) throws ExecutionException, NoSuchFieldException {
@@ -677,6 +531,10 @@ public class CertificationService implements ICertificationService {
 
   }
 
+  /**
+   * Il periodo dipendente, solo per fare le prove. Questo metodo dovrà progressivamente 
+   * diventare il metodo che scarica le assenze degli ultimi due anni di una persona.
+   */
   @Override
   public CruscottoDipendente getCruscottoDipendente(Person person, int year)
       throws ExecutionException, NoSuchFieldException {
@@ -701,8 +559,8 @@ public class CertificationService implements ICertificationService {
 
       try {
         for (StatoAttestatoMese item : certificationsComunication
-            .getStatoAttestatoMese(person.office, year, yearMonth.getMonthOfYear())) {
-          if (person.number.equals(item.dipendente.matricola)) {
+            .getStatoAttestatoMese(person.getOffice(), year, yearMonth.getMonthOfYear())) {
+          if (person.getNumber().equals(item.dipendente.matricola)) {
             statoAttestatoMese = item;
           }
         }
@@ -715,7 +573,7 @@ public class CertificationService implements ICertificationService {
     PeriodoDipendente periodoDipendente = certificationsComunication
         .getPeriodoDipendente(statoAttestatoMese.id);
 
-    log.info(periodoDipendente.toString());
+    log.debug(periodoDipendente.toString());
 
     //scarico il cruscotto
     CruscottoDipendente cruscottoDipendente = certificationsComunication

@@ -6,7 +6,9 @@
 
   #{alert color:'info'}
     
-    <p>Elenco delle persone di <strong>${office.name}</strong> 
+    <p>Elenco delle persone 
+    #{if !allOffices}di <strong>${office.name}</strong>#{/if}
+    #{else}<strong>di tutti gli uffici</strong>#{/else}
     con attualmente associato l'orario <strong>${wtt.description}</strong>.</p>
     
   #{/alert}
@@ -14,6 +16,9 @@
 	  <thead>
 		<tr class="warning">
 			<th>Nome</th>
+			#{if allOffices}
+				<th>Ufficio</th>th>
+			#{/if}
 			<th>Inizio Contratto</th>
 			<th>Fine Contratto</th>
 		</tr>
@@ -22,6 +27,9 @@
 		#{list items:contractList, as:'contract'}
 		<tr>
 			<td>${contract.person.surname} ${contract.person.name}</td>
+			#{if allOffices}
+				<td>${contract.person.office.name}</td>
+			#{/if}
 			<td  data-order="${contract.beginDate}">${contract.beginDate?.format()}</td>
 			<td data-order="${contract.endDate}">
 				${contract.endDate?.format()}

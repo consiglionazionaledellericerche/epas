@@ -1,0 +1,57 @@
+version: 2
+
+jobs:
+  docs-build:
+    docker:
+      - image: consiglionazionalericerche/sphinx-latex:latest
+    steps:
+      - checkout
+      - run:
+          name: Compile SPHINX
+          command: |
+            apt update
+            apt install -y tex-gyre
+            pip install -r requirements.txt
+            make html
+            make epub
+            make latexpdf
+            cp _build/epub/*.epub _build/html/
+            cp _build/latex/*.pdf _build/html/
+            touch _build/html/.nojekyll
+      - persist_to_workspace:
+          root: _build
+          paths:
+            - html
+  docs-deploy:
+    docker:
+      - image: node:8.10.0
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "b1:58:9b:2f:7c:c2:a8:13:17:00:ff:54:de:6e:87:01"
+      - checkout
+      - attach_workspace:
+          at: _build
+      - run:
+          name: Install and configure dependencies
+          command: |
+            npm install -g --silent gh-pages@2.0.1
+            git config user.email "cristian.lucchesi@iit.cnr.it"
+            git config user.name "cristian.lucchesi"
+      - run:
+          name: Deploy docs to gh-pages branch
+          command: gh-pages --dotfiles --message "[skip ci] Updates" --dist _build/html
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - docs-build:
+          filters:
+            branches:
+              only: main
+      - docs-deploy:
+          requires:
+            - docs-build
+          filters:
+            branches:
+              only: main

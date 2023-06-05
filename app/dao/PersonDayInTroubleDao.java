@@ -1,11 +1,28 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Person;
 import models.PersonDay;
@@ -14,6 +31,9 @@ import models.enumerate.Troubles;
 import models.query.QPersonDayInTrouble;
 import org.joda.time.LocalDate;
 
+/**
+ * DAO per i PersonDayInTrouble.
+ */
 public class PersonDayInTroubleDao extends DaoBase {
 
   @Inject
@@ -22,8 +42,16 @@ public class PersonDayInTroubleDao extends DaoBase {
   }
 
   /**
-   * @return la lista dei personDayInTrouble relativi alla persona person nel periodo begin-end. E'
-   * possibile specificare se si vuole ottenere quelli fixati (fixed = true) o no (fixed = false).
+   * La lista dei trouble relativi alla persona nel periodo (opzionale) tra begin e end
+   * appartenenti alla lista di tipi troubles.
+   *
+   * @param person la persona di cui si vogliono i trouble
+   * @param begin (opzionale) da quando si cerca
+   * @param end (opzionale) fino a quando si cerca
+   * @param troubles la lista dei tipi di trouble da cercare
+   * @return la lista dei personDayInTrouble relativi alla persona person nel periodo begin-end. 
+   *     E possibile specificare se si vuole ottenere quelli fixati (fixed = true) o no 
+   *     (fixed = false).
    */
   public List<PersonDayInTrouble> getPersonDayInTroubleInPeriod(
       Person person, Optional<LocalDate> begin, Optional<LocalDate> end,
@@ -46,6 +74,8 @@ public class PersonDayInTroubleDao extends DaoBase {
   }
 
   /**
+   * Il persondayintrouble, se esiste, relativo ai parametri passati.
+   *
    * @param pd il personDay per cui si ricerca il trouble
    * @param trouble la causa per cui si ricerca il trouble
    * @return il personDayInTrouble, se esiste, relativo ai parametri passati al metodo.

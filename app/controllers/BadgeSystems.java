@@ -1,9 +1,27 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.querydsl.core.QueryResults;
+import common.security.SecurityRules;
 import dao.BadgeDao;
 import dao.BadgeReaderDao;
 import dao.BadgeSystemDao;
@@ -12,27 +30,27 @@ import helpers.Web;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.BadgeManager;
 import models.Badge;
 import models.BadgeReader;
 import models.BadgeSystem;
 import models.Person;
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 
+/**
+ * Controller per la gestione dei BadgeSystem.
+ */
+@Slf4j
 @With(Resecure.class)
 public class BadgeSystems extends Controller {
-
-  private static final Logger log = LoggerFactory.getLogger(BadgeSystems.class);
 
   @Inject
   private static BadgeSystemDao badgeSystemDao;
@@ -47,12 +65,17 @@ public class BadgeSystems extends Controller {
   @Inject
   private static PersonDao personDao;
 
+  /**
+   * Lista dei gruppi badge.
+   */
   public static void index() {
     flash.keep();
     list(null);
   }
 
   /**
+   * Ritorna la lista dei gruppi badge.
+   *
    * @param name nome del lettore badge su cui si vuole filtrare.
    */
   public static void list(String name) {
@@ -65,6 +88,8 @@ public class BadgeSystems extends Controller {
   }
 
   /**
+   * Ritorna le informazioni del gruppo badge.
+   *
    * @param id identificativo del gruppo badge.
    */
   public static void show(Long id) {
@@ -74,13 +99,15 @@ public class BadgeSystems extends Controller {
   }
 
   /**
+   * Permette la modifica del gruppo badge.
+   *
    * @param id identificativo del gruppo badge.
    */
   public static void edit(Long id) {
 
     final BadgeSystem badgeSystem = badgeSystemDao.byId(id);
     notFoundIfNull(badgeSystem);
-    rules.checkIfPermitted(badgeSystem.office);
+    rules.checkIfPermitted(badgeSystem.getOffice());
 
     QueryResults<?> badgeReadersResults = badgeReaderDao.badgeReaders(Optional.absent(),
         Optional.fromNullable(badgeSystem)).listResults();
@@ -92,12 +119,17 @@ public class BadgeSystems extends Controller {
 
   }
 
+  /**
+   * Form per la creazione di un nuovo gruppo badge.
+   */
   public static void blank() {
     render();
   }
 
 
   /**
+   * Permette l'aggiornamento delle info sul gruppo badge.
+   *
    * @param badgeSystem l'oggetto per cui si vogliono cambiare le impostazioni.
    */
   public static void updateInfo(@Valid BadgeSystem badgeSystem) {
@@ -109,7 +141,7 @@ public class BadgeSystems extends Controller {
       render("@edit", badgeSystem);
     }
 
-    rules.checkIfPermitted(badgeSystem.office);
+    rules.checkIfPermitted(badgeSystem.getOffice());
     badgeSystem.save();
 
     flash.success(Web.msgSaved(BadgeSystem.class));
@@ -118,6 +150,8 @@ public class BadgeSystems extends Controller {
 
 
   /**
+   * Salva il gruppo badge.
+   *
    * @param badgeSystem badgeSystem da salvare.
    */
   public static void save(@Valid BadgeSystem badgeSystem) {
@@ -129,7 +163,7 @@ public class BadgeSystems extends Controller {
       render("@blank", badgeSystem);
     }
 
-    rules.checkIfPermitted(badgeSystem.office);
+    rules.checkIfPermitted(badgeSystem.getOffice());
 
     badgeSystem.save();
 
@@ -137,15 +171,17 @@ public class BadgeSystems extends Controller {
   }
 
   /**
+   * Cancella il gruppo badge.
+   *
    * @param id identificativo del badge reader da eliminare.
    */
   public static void delete(Long id) {
     final BadgeSystem badgeSystem = badgeSystemDao.byId(id);
     notFoundIfNull(badgeSystem);
-    rules.checkIfPermitted(badgeSystem.office);
+    rules.checkIfPermitted(badgeSystem.getOffice());
 
     //elimino il gruppo se non è associato ad alcuna sorgente.
-    if (badgeSystem.badgeReaders.isEmpty()) {
+    if (badgeSystem.getBadgeReaders().isEmpty()) {
       badgeSystem.delete();
       flash.success(Web.msgDeleted(BadgeSystem.class));
       index();
@@ -155,14 +191,19 @@ public class BadgeSystems extends Controller {
     edit(badgeSystem.id);
   }
 
+  /**
+   * Permette l'apertura della pagina per il salvataggio dei badge sul gruppo.
+   *
+   * @param badgeSystemId l'identificativo del gruppo badge
+   */
   public static void joinBadges(Long badgeSystemId) {
 
     final BadgeSystem badgeSystem = badgeSystemDao.byId(badgeSystemId);
     notFoundIfNull(badgeSystem);
 
-    rules.checkIfPermitted(badgeSystem.office);
+    rules.checkIfPermitted(badgeSystem.getOffice());
 
-    /**
+    /*
      * Dato che nell'edit della singola persona non viene inibito per nessuno l'inserimento dei
      * badge, anche qui recupero la lista completa del personale dell'ufficio.
      * Decidere se c'è la necessità di impedirlo per qualcuno e uniformare questa decisione sia
@@ -170,40 +211,53 @@ public class BadgeSystems extends Controller {
      * controllo anche nella save).
      */
     List<Person> officePeople = personDao.list(Optional.absent(),
-        Sets.newHashSet(badgeSystem.office), false, null, null, false).list();
+        Sets.newHashSet(badgeSystem.getOffice()), false, null, null, false).list();
 
     render("@joinBadges", badgeSystem, officePeople);
   }
 
+  /**
+   * Permette la join del badge alla persona.
+   *
+   * @param personId l'identificativo della persona
+   */
   public static void joinBadgesPerson(Long personId) {
 
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     boolean personFixed = true;
 
     BadgeSystem badgeSystem = null;
-    if (!person.office.badgeSystems.isEmpty()) {
-      badgeSystem = person.office.badgeSystems.get(0);
+    if (!person.getOffice().getBadgeSystems().isEmpty()) {
+      badgeSystem = person.getOffice().getBadgeSystems().get(0);
     }
 
     render("@joinBadges", person, badgeSystem, personFixed);
 
   }
 
+  /**
+   * Salva il badge alla persona nel gruppo badge.
+   *
+   * @param badgeSystem il gruppo badge
+   * @param code il numero del badge
+   * @param person la persona cui salvare il badge
+   * @param personFixed se è fixata la persona
+   */
   public static void saveBadges(
       @Valid BadgeSystem badgeSystem, @Required String code, @Valid Person person,
       boolean personFixed) {
 
-    rules.checkIfPermitted(badgeSystem.office);
+    rules.checkIfPermitted(badgeSystem.getOffice());
 
     List<Person> activePersons = Lists.newArrayList();
     if (!Validation.hasError("badgeSystem")) {
       activePersons =
           personDao.list(
               Optional.absent(),
-              Sets.newHashSet(badgeSystem.office), false,
+              Sets.newHashSet(badgeSystem.getOffice()), false,
               LocalDate.now(), LocalDate.now(), true).list();
     }
 
@@ -215,17 +269,17 @@ public class BadgeSystems extends Controller {
     List<Badge> violatedBadges = Lists.newArrayList();
     List<Badge> validBadges = Lists.newArrayList();
 
-    for (BadgeReader badgeReader : badgeSystem.badgeReaders) {
+    for (BadgeReader badgeReader : badgeSystem.getBadgeReaders()) {
       Badge badge = new Badge();
-      badge.person = person;
-      badge.code = code;
+      badge.setPerson(person);
+      badge.setCode(code);
       badgeManager.normalizeBadgeCode(badge, false);
-      badge.badgeSystem = badgeSystem;
-      badge.badgeReader = badgeReader;
+      badge.setBadgeSystem(badgeSystem);
+      badge.setBadgeReader(badgeReader);
 
       Optional<Badge> alreadyExists = badgeDao.byCode(code, badgeReader);
       if (alreadyExists.isPresent()) {
-        if (!alreadyExists.get().person.equals(badge.person)) {
+        if (!alreadyExists.get().getPerson().equals(badge.getPerson())) {
           violatedBadges.add(alreadyExists.get());
         }
       } else {
@@ -252,15 +306,15 @@ public class BadgeSystems extends Controller {
 
 
   /**
-   * Associa nel gruppo per tutti i dipendenti il vecchio campo person.number
+   * Associa nel gruppo per tutti i dipendenti il vecchio campo person.number.
    */
   public static void joinPersonNumbers(Long badgeSystemId) {
 
     BadgeSystem badgeSystem = badgeSystemDao.byId(badgeSystemId);
     notFoundIfNull(badgeSystem);
-    rules.checkIfPermitted(badgeSystem.office);
+    rules.checkIfPermitted(badgeSystem.getOffice());
 
-    List<Person> personsOldBadge = personDao.activeWithNumber(badgeSystem.office);
+    List<Person> personsOldBadge = personDao.activeWithNumber(badgeSystem.getOffice());
 
     int personsInError = 0;
 
@@ -269,16 +323,16 @@ public class BadgeSystems extends Controller {
       List<Badge> violatedBadges = Lists.newArrayList();
       List<Badge> validBadges = Lists.newArrayList();
 
-      for (BadgeReader badgeReader : badgeSystem.badgeReaders) {
+      for (BadgeReader badgeReader : badgeSystem.getBadgeReaders()) {
         Badge badge = new Badge();
-        badge.person = person;
-        badge.code = person.number.replaceFirst("^0+(?!$)", "");
-        badge.badgeSystem = badgeSystem;
-        badge.badgeReader = badgeReader;
+        badge.setPerson(person);
+        badge.setCode(person.getNumber().replaceFirst("^0+(?!$)", ""));
+        badge.setBadgeSystem(badgeSystem);
+        badge.setBadgeReader(badgeReader);
 
-        Optional<Badge> alreadyExists = badgeDao.byCode(badge.code, badgeReader);
+        Optional<Badge> alreadyExists = badgeDao.byCode(badge.getCode(), badgeReader);
         if (alreadyExists.isPresent()) {
-          if (!alreadyExists.get().person.equals(badge.person)) {
+          if (!alreadyExists.get().getPerson().equals(badge.getPerson())) {
             violatedBadges.add(alreadyExists.get());
           }
         } else {
@@ -308,45 +362,62 @@ public class BadgeSystems extends Controller {
     edit(badgeSystem.id);
   }
 
+  /**
+   * Render dei badge della persona.
+   *
+   * @param personId l'id della persona
+   */
   public static void personBadges(Long personId) {
 
     Person person = personDao.getPersonById(personId);
-    notFoundIfNull(person.office);
-    rules.checkIfPermitted(person.office);
+    notFoundIfNull(person.getOffice());
+    rules.checkIfPermitted(person.getOffice());
 
     render(person);
   }
 
+  /**
+   * Permette la cancellazione di un badge.
+   *
+   * @param badgeId identificativo del badge
+   */
   public static void deleteBadgePerson(Long badgeId) {
 
     final Badge badge = badgeDao.byId(badgeId);
     notFoundIfNull(badge);
-    rules.checkIfPermitted(badge.badgeSystem.office);
+    rules.checkIfPermitted(badge.getBadgeSystem().getOffice());
 
     boolean personFixed = true;
     boolean confirmed = true;
     render("@delete", badge, personFixed, confirmed);
   }
 
+  /**
+   * Cancella il badge.
+   *
+   * @param badgeId l'identificativo del badge da cancellare
+   * @param confirmed se è confermata la cancellazione
+   * @param personFixed se la persona è fixata
+   */
   public static void deleteBadge(Long badgeId, boolean confirmed, boolean personFixed) {
 
     final Badge badge = badgeDao.byId(badgeId);
     notFoundIfNull(badge);
-    rules.checkIfPermitted(badge.badgeSystem.office);
+    rules.checkIfPermitted(badge.getBadgeSystem().getOffice());
     if (!confirmed) {
       confirmed = true;
       render("@delete", badge, confirmed);
     }
 
-    badgeDao.byCodeAndPerson(badge.code, badge.person).forEach(GenericModel::delete);
+    badgeDao.byCodeAndPerson(badge.getCode(), badge.getPerson()).forEach(GenericModel::delete);
 
     flash.success("Badge Rimosso con successo");
 
     if (personFixed) {
-      personBadges(badge.person.id);
+      personBadges(badge.getPerson().id);
     }
 
-    edit(badge.badgeSystem.id);
+    edit(badge.getBadgeSystem().id);
   }
 
 }

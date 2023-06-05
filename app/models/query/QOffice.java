@@ -75,7 +75,11 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final ListPath<models.MealTicket, QMealTicket> tickets = this.<models.MealTicket, QMealTicket>createList("tickets", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
 
+    public final ListPath<models.TimeSlot, QTimeSlot> timeSlots = this.<models.TimeSlot, QTimeSlot>createList("timeSlots", models.TimeSlot.class, QTimeSlot.class, PathInits.DIRECT2);
+
     public final ListPath<models.TotalOvertime, QTotalOvertime> totalOvertimes = this.<models.TotalOvertime, QTotalOvertime>createList("totalOvertimes", models.TotalOvertime.class, QTotalOvertime.class, PathInits.DIRECT2);
+
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
 
     public final ListPath<models.User, QUser> users = this.<models.User, QUser>createList("users", models.User.class, QUser.class, PathInits.DIRECT2);
 

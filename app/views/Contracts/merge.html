@@ -1,0 +1,70 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Modifica ' + person.fullname /}
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (person.fullname):@Contracts.personContracts(person.id), 
+  'Gestisci Contratto':null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+<div class="container">
+
+	#{title title:'Fondi i contratti di ' + contract.person.fullName() /}
+	  #{alert color:'info'}
+  
+  		<p>Utilizzare questa form per fondere due contratti in un contratto unico.</p>
+  		
+  		<p>In caso di prolungamento della data <strong>Fine Contratto</strong> ePAS attrubirà a tale prolungamento
+     	il tipo orario attribuito alla parte conclusiva del contratto.
+     	</p>     	
+	
+  	  #{/alert}
+  	  
+  	  #{if previousContract == null}
+  	  	#{alert color: 'warning'}
+  	  		<h3>Non esiste un contratto precedente con cui poter fondere il contratto attuale!!  </h3>
+  	  	#{/alert}
+  	  #{/if}
+  	  
+  	  #{else}
+  	    <div id="modifyContract">
+		#{form @Contracts.mergeContract(), class:'form-horizontal', 
+		'data-async':'#page_content', 'data-async-error':'#modifyContract', 
+		'data-spinner':'#defaultSpinner' } 
+		
+		<div class="col-sm-6">
+		<h3>Contratto attuale</h3>
+		<br>
+		#{if contract?.persistent}
+	    	#{f.hidden 'contract.id', value:contract.id /}
+	  	#{/if}
+		#{f.simpleView 'contract.beginDate', value:contract.beginDate?.format() /}
+		#{f.simpleView 'contract.endDate', value:contract.endDate != null ? contract.endDate.format() : 'Indeterminato' /}
+		#{f.simpleView 'contract.endContract', value:contract.endContract?.format() /}
+		</div>
+		<div class="col-sm-6">
+		<h3>Contratto precedente</h3>
+		<br>
+		#{if previousContract?.persistent}
+	    	#{f.hidden 'previousContract.id', value:previousContract.id /}
+	  	#{/if}
+		#{f.simpleView 'previousContract.beginDate', value:previousContract.beginDate?.format() /}
+		#{f.simpleView 'previousContract.endDate', value:previousContract.endDate?.format() /}
+		#{f.simpleView 'previousContract.endContract', value:previousContract.endContract?.format() /}
+		</div>
+		<div class="col-sm-4 col-sm-offset-4">
+		#{f.booleanRadio 'attestatiSync', value:attestatiSync /}
+		</div>
+		<div class="col-sm-4 col-sm-offset-4">
+		#{b.buttons center:true}
+		   #{b.submit 'Fondi'/}
+		   #{b.cancel @edit(contract.id) /}
+		#{/b.buttons}
+		</div>
+
+		#{/form}
+
+  	  	</div>
+  	  #{/else}
+
+</div>

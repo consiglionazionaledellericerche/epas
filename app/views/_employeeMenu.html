@@ -2,6 +2,7 @@
 
   #{set actions:[
   'Stampings.stampings',
+  'TeleworkStampings.teleworkStampings',
   'Absences.absences',
   'Absences.absencesPerPerson',
   'Vacations.show',
@@ -9,29 +10,29 @@
   'PersonMonths.trainingHours',
   'PersonMonths.hourRecap',
   'MealTickets.mealTickets',
+  'Charts.excelFile',
   'PrintTags.showTag',
+  'PrintTags.autocertOffsite',
   'Persons.changePassword',
   'Absences.absencesVisibleForEmployee'] /}
 
   <li class="dropdown #{if request.action in actions}active#{/if}">
 
-                
-
     *{ responsività dropDown }*
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-     
+
      <!-- popover element che indicano la tipologia di connessione -->
      <div class="webui-popover-content" id="loginShibboleth">
        <p class="text-success">Connessione effettuata tramite credenziali CNR</p>
-  	 </div>
-  	 <div class="webui-popover-content" id="loginLocal">
+     </div>
+     <div class="webui-popover-content" id="loginLocal">
        <p>Connessione effettuata tramite credenziali locali ePAS</p>
-  	 </div>
+     </div>
      
      <!-- selezione icona e popover a seconda della tipologia di connessione -->
      #{if session.get('shibboleth')}  
        <span webui-popover-hover data-url="#loginShibboleth"> 
-  	     <i class="fa fa-id-card" aria-hidden="true"></i>
+         <i class="fa fa-id-card" aria-hidden="true"></i>
        </span>
      #{/if}
      #{else}
@@ -39,88 +40,103 @@
         <i class="fa fa-user"></i>
       </span>  
      #{/else}
-     
+
      <!-- visualizza l'username -->
      <div class="visible-lg-inline visible-xs-inline"> ${session.username}
         <span class="caret"></span>
      </div>
-      
+
     </a>
 
     *{ items }*
     <ul class="dropdown-menu">
 
-      #{secure.li @Stampings.stampings(session.get("yearSelected"), session.get("monthSelected")) }
+      #{navbar.li @Stampings.stampings(session.get("yearSelected"), session.get("monthSelected")) }
         <i class="fa fa-calendar" aria-hidden="true"></i>
-      #{/secure.li}
+      #{/navbar.li}
+      #{if teleworkStampingsActive}
+        #{secure.li @TeleworkStampings.teleworkStampings(session.get("yearSelected"), session.get("monthSelected")) }
+          <i class="fa fa-calendar-times-o" aria-hidden="true"></i>
+        #{/secure.li}
 
-      #{secure.li @Absences.absences(session.get("yearSelected"), session.get("monthSelected")) }
-      <i class="fa fa-user-times" aria-hidden="true"></i>
-      #{/secure.li}
+        #{secure.li @InformationRequests.teleworks()}
+        <i class="fa fa-laptop" aria-hidden="true"></i>
+        #{/secure.li}
 
-      #{secure.li @Absences.absencesPerPerson(session.get("yearSelected")) }
-      <i class="fa fa-calendar-o" aria-hidden="true"></i>
-      #{/secure.li}
+      #{/if}
       
-      #{secure.li @TimeVariations.personShow() }
-      <i class="fa fa-search-plus" aria-hidden="true"></i>
-      #{/secure.li}
+      #{navbar.li @Absences.absences(session.get("yearSelected"), session.get("monthSelected")) }
+        <i class="fa fa-user-times" aria-hidden="true"></i>
+      #{/navbar.li}
 
-      #{secure.li @Vacations.show(session.get("yearSelected")) }
-      <i class="fa fa-plane" aria-hidden="true"></i>
-      #{/secure.li}
+      #{navbar.li @Absences.absencesPerPerson(session.get("yearSelected")) }
+        <i class="fa fa-calendar-o" aria-hidden="true"></i>
+      #{/navbar.li}
 
-      #{secure.li @Competences.competences(session.get("yearSelected"), session.get("monthSelected")) }
-      <i class="fa fa-money" aria-hidden="true"></i>
-      #{/secure.li}
-      
+      #{navbar.li @Vacations.show(session.get("yearSelected")) }
+        <i class="fa fa-plane" aria-hidden="true"></i>
+      #{/navbar.li}
+
+      #{navbar.li @Competences.competences(session.get("yearSelected"), session.get("monthSelected")) }
+        <i class="fa fa-money" aria-hidden="true"></i>
+      #{/navbar.li}
+
       #{if currentUser.person != null && currentUser.person.personShifts.size() > 0}
-       	#{secure.li @Calendar.show() }
-      		<i class="fa fa-calendar-check-o" aria-hidden="true"></i>
-      	#{/secure.li}
+        #{secure.li @Calendar.show() }
+          <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+        #{/secure.li}
       #{/if}
-      
+
       #{if currentUser.person != null && templateUtility.isAvailable(currentUser.person)}
-      	#{secure.li @ReperibilityCalendar.show()}
-      		<i class="fa fa-calendar-check-o" aria-hidden="true"></i>
-      	#{/secure.li}
+        #{secure.li @ReperibilityCalendar.show()}
+          <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+        #{/secure.li}
       #{/if}
 
-      #{secure.li @PersonMonths.trainingHours(session.get("yearSelected")) }
-      <i class="fa fa-graduation-cap" aria-hidden="true"></i>
-      #{/secure.li}
+      #{navbar.li @PersonMonths.trainingHours(session.get("yearSelected")) }
+        <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+      #{/navbar.li}
 
-      #{secure.li @PersonMonths.hourRecap(session.get("yearSelected")) }
-      <i class="fa fa-clock-o" aria-hidden="true"></i>
-      #{/secure.li}
+      #{navbar.li @PersonMonths.hourRecap(session.get("yearSelected")) }
+        <i class="fa fa-clock-o" aria-hidden="true"></i>
+      #{/navbar.li}
 
       #{secure.li @MealTickets.mealTickets() }
       <i class="fa fa-cutlery" aria-hidden="true"></i>
       #{/secure.li}
-
-      #{secure.check 'PrintTags.showTag'}
-      <li class="divider"></li>
-      #{/secure.check}
-
-      #{secure.li @PrintTags.showTag('id':session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"), true) }
-      <i class="fa fa-print" aria-hidden="true"></i>
+      
+      #{secure.li @Groups.seatOrganizationChart() }
+      <i class="fa fa-users" aria-hidden="true"></i>
       #{/secure.li}
 
-      #{secure.check 'Persons.changePassword'}
       <li class="divider"></li>
-      #{/secure.check}
 
-      #{secure.li @Persons.changePassword() }
-      <i class="fa fa-key" aria-hidden="true"></i>
+      #{navbar.li @Charts.excelFile(session.get("yearSelected"), session.get("monthSelected"))}
+        <i class="fa fa-print" aria-hidden="true"></i>
+      #{/navbar.li}
+
+      #{navbar.li @PrintTags.showTag('id':session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"), true) }
+        <i class="fa fa-print" aria-hidden="true"></i>
+      #{/navbar.li}
+
+      #{secure.li @PrintTags.autocertOffsite(session.get("yearSelected"), session.get("monthSelected")) }
+        <i class="fa fa-print" aria-hidden="true"></i>
       #{/secure.li}
 
-      #{secure.check 'Absences.absencesVisibleForEmployee'}
       <li class="divider"></li>
-      #{/secure.check}
+
+      #{navbar.li @Persons.changePassword() }
+        <i class="fa fa-key" aria-hidden="true"></i>
+      #{/navbar.li}
 
       #{secure.li @Absences.absencesVisibleForEmployee(session.get("yearSelected"), session.get("monthSelected"), session.get("daySelected")) }
-      <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+        <li class="divider"></li>
+        <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
       #{/secure.li}
+      
+	  
+	  
+	  
 
     </ul>
     *{ end items }*

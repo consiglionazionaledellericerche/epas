@@ -2,7 +2,7 @@
     #{if recap.dateRunOut }
 		 #{alert color:'danger'}
 		    <p>Tutti i buoni pasto consegnati sono stati maturati in data ${recap.dateRunOut?.format()}.</p>
-		    <p>Sono stati maturati <strong>${recap.negativeResidual}</strong> buoni pasto oltre quelli consegnati.</p>
+		    <p>Sono stati maturati <strong>${recap.remaining}</strong> buoni pasto oltre quelli consegnati.</p>
 		    <p>Contattare l'amministrazione per ricevere i nuovi blocchetti.</p>
 		 #{/alert}   
 	 #{/if}

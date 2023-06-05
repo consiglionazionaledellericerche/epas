@@ -1,23 +1,38 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences.errors;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.services.absences.errors.CriticalError.CriticalProblem;
-
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
-
 import org.joda.time.LocalDate;
 
+/**
+ * Contenitore delle varie tipologie di warning, errori ed errori critici sulle assenze.
+ */
 @Slf4j
 public class ErrorsBox {
 
@@ -56,6 +71,9 @@ public class ErrorsBox {
 
   }
 
+  /**
+   * Aggiunge un errore relativo ad un'assenza.
+   */
   public void addAbsenceError(Absence absence, AbsenceProblem absenceProblem) {
     addAbsenceErrorIntoMap(absence, absenceProblem, null, absenceErrorsSuperMap);
   }
@@ -104,6 +122,13 @@ public class ErrorsBox {
     log.trace("Aggiunto errore critico alla mappa {}", criticalProblem);
   }
   
+  /**
+   * Verifica che un certo absenceProblem sia contenuto nella mappa absenceErrorsSuperMap.
+   *
+   * @param absenceProblem l'oggetto contenente il tipo di problema sull'assenza
+   * @return true se quel problema è contenuto nella mappa absenceErrorsSuperMap, 
+   *     false altrimenti.
+   */
   public boolean containsAbsenceProblem(AbsenceProblem absenceProblem) {
     for (Map<AbsenceProblem, AbsenceError>  map : absenceErrorsSuperMap.values()) {
       if (map.containsKey(absenceProblem)) {
@@ -113,40 +138,68 @@ public class ErrorsBox {
     return false;
   }
 
+  /**
+   * Aggiunge un errore critico ad un certa data.
+   */
   public void addCriticalError(LocalDate date, CriticalProblem criticalProblem) {
     addCriticalErrorIntoMap(date, null, null, null, criticalProblem);
   }
 
+  /**
+   * Aggiunge un errore critico relativo ad un'assenza.
+   */
   public void addCriticalError(Absence absence, CriticalProblem criticalProblem) {
     addCriticalErrorIntoMap(absence.getAbsenceDate(), absence, null, null, criticalProblem);
   }
 
+  /**
+   * Aggiunge un errore relativo ad una tipologia di assenza e data.
+   */
   public void addCriticalError(LocalDate date, AbsenceType absenceType,
       CriticalProblem criticalProblem) {
     addCriticalErrorIntoMap(date, null, absenceType, null, criticalProblem);
   }
 
+  /**
+   * Aggiunge un errore relativo ad una tipologia di assenza e data specificando il 
+   * tipo di assenza che fa in conflitto.
+   */
   public void addCriticalError(LocalDate date, AbsenceType absenceType,
       AbsenceType conflictingAbsenceType, CriticalProblem criticalProblem) {
     addCriticalErrorIntoMap(date, null, absenceType, conflictingAbsenceType, criticalProblem);
   }
 
+  /**
+   * Aggiunge un warning relativo ad un'assenza.
+   */
   public void addAbsenceWarning(Absence absence, AbsenceProblem absenceProblem) {
     addAbsenceErrorIntoMap(absence, absenceProblem, null, absenceWarningsSuperMap);
   }
 
+  /**
+   * Verifica se ci sono errori critici.
+   */
   public boolean containsCriticalErrors() {
     return !criticalErrorsMap.keySet().isEmpty();
   }
 
+  /**
+   * Verifica se ci sono errori.
+   */
   public boolean containsAbsencesErrors() {
     return !absenceErrorsSuperMap.keySet().isEmpty();
   }
 
+  /**
+   * Verifica se ci sono errori relativamente ad un'assenza specifica.
+   */
   public boolean containAbsenceErrors(Absence absence) {
     return absenceErrorsSuperMap.get(absence) != null;
   }
 
+  /**
+   * Verifica se ci sono errori di un certo tipo relativamente ad un'assenza specifica.
+   */
   public boolean containAbsenceError(Absence absence, AbsenceProblem absenceProblem) {
     return absenceError(absence, absenceProblem) != null;
   }

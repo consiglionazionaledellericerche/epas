@@ -6,7 +6,7 @@
   	#{title title:'Attiva servizi', administration:true /}
   
   	#{tabList}
-  		#{tabItem id:'reperibility', title:'Reperibilità', active:true /}
+  		#{tabItem id:'reperibility', title:'Servizi giornalieri', active:true /}
   		#{tabItem id:'shift', title:'Turni' /}
   	#{/tabList}
 
@@ -26,7 +26,7 @@
   		#{secure.check 'Competences.addService'}
   		#{b.buttons center:true}
     		<a class="btn btn-success" href="@{addReperibility(currentData.officeId)}" data-async-modal="#modalActivateService">
-      			<i class="fa fa-plus"></i> Nuovo servizio per reperibilità
+      			<i class="fa fa-plus"></i> Nuovo servizio giornaliero
     		</a>
   		#{/b.buttons}
   		#{/secure.check}
@@ -40,7 +40,8 @@
     		<thead>
     		<tr>
       			<th>Servizio</th>
-      			<th>Supervisore</th>
+      			<th>Tipologia</th>
+      			<th>Responsabile</th>
       			<th>Gestisci persone</th>
       			<th>Elimina</th>
     		</tr>
@@ -51,7 +52,8 @@
     		<td>
       			#{secure.link @Competences.editReperibility(prt.id), 'data-async-modal':'#defaultModal'}
         			${prt.description}
-      			#{/secure.link}
+      			#{/secure.link}</td>
+      		<td>${prt.monthlyCompetenceType != null ? prt.monthlyCompetenceType.name : 'non presente'}</td>
     		<td>${prt.supervisor}</td>
     		<td>
     			#{secure.link @Competences.manageReperibility(prt.id)}	    	  	

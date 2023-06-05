@@ -1,0 +1,12 @@
+--- 
+document:
+  name: "Electronic Personnel Attendance System"
+  description: "ePAS - Electronic Personnel Attendance System -  sistema di rilevazione e gestione delle presenze del personale"
+  github_user: consiglionazionaledellericerche
+  github_repo: epas
+  github_version: master/docs
+  downloads:
+    - type: epub
+      url: Manuale-ePAS.epub
+    - type: pdf
+      url: Manuale-ePAS.pdf

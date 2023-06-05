@@ -26,6 +26,7 @@
 	 #{else}
 	   <span class="text-default" webui-popover-hover data-url="#${id}"><strong>${_absence.absenceType.code}</strong></span>
 	 #{/else}
+	 <span class="sr-only"> ${_absence.absenceType.description}</span>
  #{/if}
  
  <div class="webui-popover-content" id="${id}">
@@ -56,12 +57,23 @@
       </p>
     #{/if}
     #{else}
-      <p>
+    	#{if _absence.absenceType.code.equals(_absence.absenceType.certificateCode)}
+    	<p>
         <span class="fa-stack fa-lg">
           <i class="fa fa-paper-plane-o fa-stack-1x"></i>
         </span>
         <strong class="text-success">Il codice ${_absence.absenceType.code} verrà inviato ad attestati.</strong>
-      </p>
+      	</p>
+    	#{/if}
+    	#{else}
+    	<p>
+        <span class="fa-stack fa-lg">
+          <i class="fa fa-paper-plane-o fa-stack-1x"></i>
+        </span>
+        <strong class="text-success">Il codice ${_absence.absenceType.certificateCode} verrà inviato ad attestati.</strong>
+      	</p>
+    	#{/else}
+      
     #{/else}
    #{/secure.check}
   

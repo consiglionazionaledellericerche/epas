@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -15,6 +32,11 @@ import play.libs.MimeTypes;
 import play.mvc.Controller;
 import play.mvc.With;
 
+/**
+ * Controller per la gestione dei riferimenti contrattuali.
+ *
+ * @author Cristian Lucchesi
+ */
 @With({Resecure.class})
 public class ContractualReferences extends Controller {
 
@@ -64,10 +86,10 @@ public class ContractualReferences extends Controller {
       render("@editContractualClause", contractualReference);
     }
 
-    contractualReference.filename = file.getName();
+    contractualReference.setFilename(file.getName());
     Blob blob = new Blob();
     blob.set(new FileInputStream(file), MimeTypes.getContentType(file.getName()));
-    contractualReference.file = blob;
+    contractualReference.setFile(blob);
     
     contractualReference.save();
     flash.success("Operazione eseguita.");
@@ -90,6 +112,7 @@ public class ContractualReferences extends Controller {
   
   /**
    * Cancella il file associato ad un Riferimento normativo/contrattuale.
+   *
    * @param contractualReferenceId id del riferimento di cui cancellare
    *     l'allegato.
    */
@@ -97,8 +120,8 @@ public class ContractualReferences extends Controller {
     ContractualReference contractualReference = 
         ContractualReference.findById(contractualReferenceId);
     notFoundIfNull(contractualReference);
-    contractualReference.file.getFile().delete();
-    contractualReference.filename = null;
+    contractualReference.getFile().getFile().delete();
+    contractualReference.setFilename(null);
     contractualReference.save();
     flash.success("Operazione effettuata.");
     edit(contractualReferenceId);    
@@ -106,14 +129,15 @@ public class ContractualReferences extends Controller {
   
   /**
    * Restituisce il file associato al riferimento contrattuale.
+   *
    * @param contractualReferenceId id del riferimento contrattuale.
    */
   public static void getFile(Long contractualReferenceId) {
     final ContractualReference contractualReference = 
         ContractualReference.findById(contractualReferenceId);
     notFoundIfNull(contractualReference);
-    notFoundIfNull(contractualReference.file);
-    renderBinary(contractualReference.file.get(), contractualReference.filename, false);
+    notFoundIfNull(contractualReference.getFile());
+    renderBinary(contractualReference.getFile().get(), contractualReference.getFilename(), false);
   }
 
 }

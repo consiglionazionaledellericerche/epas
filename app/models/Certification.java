@@ -1,9 +1,24 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import com.google.common.base.MoreObjects;
-
 import java.util.Comparator;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,15 +27,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
+import lombok.Getter;
+import lombok.Setter;
 import manager.attestati.dto.show.SeatCertification.PersonCertification;
-
 import models.base.BaseModel;
 import models.enumerate.CertificationType;
-
 import org.hibernate.envers.Audited;
 import org.joda.time.YearMonth;
-
 import play.data.validation.Required;
 
 
@@ -28,8 +41,10 @@ import play.data.validation.Required;
  * Contiene le informazioni relative alla richiesta/risposta di elaborazione dati delle
  * assenze/competenze/buoni mensa inviati al nuovo sistema degli attestati del CNR.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "certifications")
@@ -40,26 +55,26 @@ public class Certification extends BaseModel {
   @Required
   @ManyToOne(optional = false)
   @JoinColumn(name = "person_id", nullable = false)
-  public Person person;
+  private Person person;
 
-  public int year;
+  private int year;
 
-  public int month;
+  private int month;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "certification_type")
-  public CertificationType certificationType;
+  private CertificationType certificationType;
 
-  public String content;
+  private String content;
 
   @Column(name = "problems")
-  public String problems = null;
+  private String problems = null;
 
   @Column(name = "warnings")
-  public String warnings = null;
+  private String warnings = null;
 
   @Column(name = "attestati_id")
-  public Integer attestatiId;
+  private Integer attestatiId;
 
   @Transient
   public boolean containProblems() {
@@ -96,24 +111,28 @@ public class Certification extends BaseModel {
   public String toString() {
     return MoreObjects.toStringHelper(PersonCertification.class)
         .add("person", person.fullName())
-        .add("matricola", person.number)
+        .add("matricola", person.getNumber())
         .add("year", year)
         .add("month", month)
         .add("key", aMapKey())
         .toString();
   }
 
+  /**
+   * YearMonth costruito da anno e mese.
+   */
   public YearMonth getYearMonth() {
     return new YearMonth(year, month);
   }
 
   /**
+   * Comparatore.
+   *
    * @return un Comparator che compara per fullname poi id.
    */
   public static Comparator<Certification> comparator() {
     return Comparator.comparing(Certification::getYearMonth);
 
   }
-
 
 }

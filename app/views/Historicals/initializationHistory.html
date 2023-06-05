@@ -1,0 +1,44 @@
+#{modalAsync id:'defaultModal',  title:'Storico inizializzazione' }
+
+<div class="container-fluid">
+
+#{if found}
+	#{panel title:'Storico inizializzazione ' + contract.person.surname + '-' +contract.person.name, color:'primary'}
+	#{if initializationModifications.empty } Non ci sono modifiche alla inizializzazione in oggetto. #{/if}
+	#{else}
+	  <!-- Tabella riepilogativa -->	  
+	
+	  <table class="table table-condensed table-bordered">
+	
+	    <tr class="success">
+	      
+	      <th>&{'modification.date'}</th>
+	      <th>&{'done.by'}</th>
+	      <th>&{'modification.type'}</th>
+	      <th>Data inizializzazione</th>
+	      <th>Residuo anno passato</th>
+	      <th>Residuo anno corrente</th>
+	      
+	    </tr>
+	
+	    #{list items:initializationModifications, as:'contract'}
+	    <tr class="warning">
+	      
+	      <td>${contract.formattedRevisionDate()}</td>
+	      <td>${contract.formattedOwner()}</td>
+	      <td class="${contract.type}">&{contract.type}</td>
+	      <td>${contract.value.sourceDateResidual}</td>
+	      <td>${contract.value.sourceRemainingMinutesLastYear.toHourTime()}</td>
+	      <td>${contract.value.sourceRemainingMinutesCurrentYear.toHourTime()}</td>
+	    </tr>
+	    #{/list}
+	  </table>
+	  #{/else}
+	#{/panel}
+
+#{/if}
+
+
+</div>
+
+#{/modalAsync}

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -14,6 +31,9 @@ import models.exports.PersonsList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Manager per la gestione degli straordinari.
+ */
 public class OvertimesManager {
 
   private static final Logger log = LoggerFactory.getLogger(OvertimesManager.class);
@@ -25,6 +45,12 @@ public class OvertimesManager {
   }
 
   /**
+   * Ritorna la tabella contenente le associazioni persona-reason competenza-codice.
+   *
+   * @param body l'oggetto contenente la lista di persone
+   * @param code il codice di competenza
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
    * @return la tabella contenente la struttura di persona-reason della competenza-codice
    *        competenza.
    */
@@ -39,35 +65,43 @@ public class OvertimesManager {
       log.debug("find  Competence {} per person={}, year={}, month={}, competenceCode={}",
           new Object[]{competence, person, year, month, code});
 
-      if ((competence.isPresent()) && (competence.get().valueApproved != 0)) {
+      if ((competence.isPresent()) && (competence.get().getValueApproved() != 0)) {
 
         overtimesMonth.put(
-            person.surname + " " + person.name, competence.get().reason != null
-                ? competence.get().reason : "", competence.get().valueApproved);
+            person.getSurname() + " " + person.getName(), competence.get().getReason() != null
+                ? competence.get().getReason() : "", competence.get().getValueApproved());
         log.debug("Inserita riga person={} reason={} and valueApproved={}",
-            new Object[]{person, competence.get().reason, competence.get().valueApproved});
+            new Object[]{person, competence.get().getReason(), 
+                competence.get().getValueApproved()});
       }
     }
 
     return overtimesMonth;
   }
 
-
+  /**
+   * Assegna la quantità di straordinari richiesti nell'anno/mese.
+   *
+   * @param body la lista dei personsCompetences
+   * @param year l'anno 
+   * @param month il mese
+   */
   public void setRequestedOvertime(PersonsCompetences body, int year, int month) {
     for (Competence competence : body.competences) {
       Optional<Competence> oldCompetence =
-          competenceDao.getCompetence(competence.person, year, month, competence.competenceCode);
+          competenceDao.getCompetence(
+              competence.getPerson(), year, month, competence.getCompetenceCode());
       if (oldCompetence.isPresent()) {
         // update the requested hours
-        oldCompetence.get().valueApproved = competence.valueApproved;
-        oldCompetence.get().reason = competence.reason;
+        oldCompetence.get().setValueApproved(competence.getValueApproved());
+        oldCompetence.get().setReason(competence.getReason());
         oldCompetence.get().save();
 
         log.debug("Aggiornata competenza {}", oldCompetence);
       } else {
         // insert a new competence with the requested hours an reason
-        competence.year = year;
-        competence.month = month;
+        competence.setYear(year);
+        competence.setMonth(month);
         competence.save();
 
         log.debug("Creata competenza {}", competence);

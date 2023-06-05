@@ -1,19 +1,34 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.mealtickets;
 
+import com.google.common.base.Optional;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
-
 import models.Contract;
 import models.MealTicket;
 import models.PersonDay;
 
-import org.joda.time.LocalDate;
-
 /**
  * Costruisce il recap dei buoni pasto.
- * @author alessandro
+ *
+ * @author Alessandro Martelli
  */
 public class MealTicketRecapBuilder {
 
@@ -25,6 +40,7 @@ public class MealTicketRecapBuilder {
    * 2) MEAL_TICKET_EXPIRED: in error finisce la data in cui si inizia a consumare buoni pasto 
    * scaduti.<br>
    * Se non ci sono errori viene salvato il numero di buoni pasto rimanenti.
+   *
    * @param contract contract
    * @param mealTicketInterval intervallo buoni pasto da considerare
    * @param personDays giorni da considerare
@@ -44,7 +60,7 @@ public class MealTicketRecapBuilder {
     mealTicketRecap.setContract(contract);
     
     mealTicketRecap.setMealTicketInterval(
-        new DateInterval(mealTicketInterval.getBegin(), LocalDate.now()));
+        DateInterval.withBegin(mealTicketInterval.getBegin(), Optional.absent()));
 
     mealTicketRecap.setPersonDaysMealTickets(personDays);
 
@@ -92,7 +108,7 @@ public class MealTicketRecapBuilder {
       //Non ho altri buoni pasto da assegnare. Run Out.
       if (nextTicketToAssign 
           >= mealTicketRecap.getMealTicketsReceivedExpireOrderedAscPostInit().size()) {
-        mealTicketRecap.setDateRunOut(personDay.date);
+        mealTicketRecap.setDateRunOut(personDay.getDate());
         return mealTicketRecap;
       }
       
@@ -102,11 +118,11 @@ public class MealTicketRecapBuilder {
       
       //Mi salvo la data in cui ho iniziato a consumare buoni pasto scaduti 
       if (mealTicketRecap.getDateExpire() == null  
-          && personDay.date.isAfter(mealTicket.expireDate)) {
-        mealTicketRecap.setDateExpire(personDay.date);
+          && personDay.getDate().isAfter(mealTicket.getExpireDate())) {
+        mealTicketRecap.setDateExpire(personDay.getDate());
       }
       
-      personDay.mealTicketAssigned = mealTicket;
+      personDay.setMealTicketAssigned(mealTicket);
       mealTicket.used = true;
     }
 

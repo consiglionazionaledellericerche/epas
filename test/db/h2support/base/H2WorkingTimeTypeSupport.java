@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package db.h2support.base;
 
 import com.google.common.base.Optional;
@@ -26,13 +43,13 @@ public class H2WorkingTimeTypeSupport {
       WorkingDayDefinition workingDayDefinition, WorkingTimeType workingTimeType) {
     
     WorkingTimeTypeDay workingTimeTypeDay = new WorkingTimeTypeDay();
-    workingTimeTypeDay.workingTimeType = workingTimeType;
-    workingTimeTypeDay.dayOfWeek = workingDayDefinition.dayOfWeek;
-    workingTimeTypeDay.workingTime = workingDayDefinition.workingTime;
-    workingTimeTypeDay.holiday = workingDayDefinition.holiday;
-    workingTimeTypeDay.mealTicketTime = workingDayDefinition.mealTicketTime;
-    workingTimeTypeDay.breakTicketTime = workingDayDefinition.breakTicketTime;
-    workingTimeTypeDay.ticketAfternoonThreshold = workingDayDefinition.ticketAfternoonThreshold;
+    workingTimeTypeDay.setWorkingTimeType(workingTimeType);
+    workingTimeTypeDay.setDayOfWeek(workingDayDefinition.dayOfWeek);
+    workingTimeTypeDay.setWorkingTime(workingDayDefinition.workingTime);
+    workingTimeTypeDay.setHoliday(workingDayDefinition.holiday);
+    workingTimeTypeDay.setMealTicketTime(workingDayDefinition.mealTicketTime);
+    workingTimeTypeDay.setBreakTicketTime(workingDayDefinition.breakTicketTime);
+    workingTimeTypeDay.setTicketAfternoonThreshold(workingDayDefinition.ticketAfternoonThreshold);
     workingTimeTypeDay.ticketAfternoonWorkingTime = workingDayDefinition.ticketAfternoonWorkingTime;
     workingTimeTypeDay.save();
     return workingTimeTypeDay;
@@ -49,6 +66,7 @@ public class H2WorkingTimeTypeSupport {
 
   /**
    * Costruisce e persiste una istanza del tipo orario secondo definizione.
+   *
    * @param workingDefinition definizione 
    * @return persisted entity
    */
@@ -63,11 +81,11 @@ public class H2WorkingTimeTypeSupport {
     
     log.debug("Costruisco il workingTimeType {}", workingDefinition);
     workingTimeType = new WorkingTimeType();
-    workingTimeType.description = workingDefinition.name();
-    workingTimeType.horizontal = workingDefinition.horizontal;
+    workingTimeType.setDescription(workingDefinition.name());
+    workingTimeType.setHorizontal(workingDefinition.horizontal);
     workingTimeType.save();
-    workingTimeType.workingTimeTypeDays = 
-        createWorkingTimeTypeDays(workingDefinition.orderedWorkingDayDefinition, workingTimeType);
+    workingTimeType.setWorkingTimeTypeDays(
+        createWorkingTimeTypeDays(workingDefinition.orderedWorkingDayDefinition, workingTimeType));
     return workingTimeType;
   }
   

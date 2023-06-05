@@ -1,15 +1,33 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences.errors;
 
 import lombok.Builder;
-
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
-
 import org.joda.time.LocalDate;
 
-@Builder    
+/**
+ * Rappresenta gli errori critici durante la gestione di un'assenza.
+ */
+@Builder
 public class CriticalError {
   
   public CriticalProblem criticalProblem;
@@ -20,6 +38,9 @@ public class CriticalError {
   public AbsenceType conflictingAbsenceType;
   public Absence absence;
   
+  /**
+   * Tipolog di errori critici.
+   */
   public enum CriticalProblem {
 
     //Errori 

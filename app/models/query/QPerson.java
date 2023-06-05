@@ -26,6 +26,8 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final models.base.query.QPeriodModel _super = new models.base.query.QPeriodModel(this);
 
+    public final ListPath<models.flows.Affiliation, models.flows.query.QAffiliation> affiliations = this.<models.flows.Affiliation, models.flows.query.QAffiliation>createList("affiliations", models.flows.Affiliation.class, models.flows.query.QAffiliation.class, PathInits.DIRECT2);
+
     public final SetPath<models.Badge, QBadge> badges = this.<models.Badge, QBadge>createSet("badges", models.Badge.class, QBadge.class, PathInits.DIRECT2);
 
     //inherited
@@ -38,6 +40,8 @@ public class QPerson extends EntityPathBase<Person> {
     public final ListPath<models.CertificatedData, QCertificatedData> certificatedData = this.<models.CertificatedData, QCertificatedData>createList("certificatedData", models.CertificatedData.class, QCertificatedData.class, PathInits.DIRECT2);
 
     public final ListPath<models.Certification, QCertification> certifications = this.<models.Certification, QCertification>createList("certifications", models.Certification.class, QCertification.class, PathInits.DIRECT2);
+
+    public final SetPath<models.CheckGreenPass, QCheckGreenPass> checkGreenPass = this.<models.CheckGreenPass, QCheckGreenPass>createSet("checkGreenPass", models.CheckGreenPass.class, QCheckGreenPass.class, PathInits.DIRECT2);
 
     public final ListPath<models.Competence, QCompetence> competences = this.<models.Competence, QCompetence>createList("competences", models.Competence.class, QCompetence.class, PathInits.DIRECT2);
 
@@ -55,9 +59,9 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final StringPath fax = createString("fax");
 
-    public final StringPath fullname = createString("fullname");
+    public final StringPath fiscalCode = createString("fiscalCode");
 
-    public final ListPath<models.flows.Group, models.flows.query.QGroup> groups = this.<models.flows.Group, models.flows.query.QGroup>createList("groups", models.flows.Group.class, models.flows.query.QGroup.class, PathInits.DIRECT2);
+    public final StringPath fullname = createString("fullname");
 
     public final ListPath<models.flows.Group, models.flows.query.QGroup> groupsPeople = this.<models.flows.Group, models.flows.query.QGroup>createList("groupsPeople", models.flows.Group.class, models.flows.query.QGroup.class, PathInits.DIRECT2);
 
@@ -65,6 +69,8 @@ public class QPerson extends EntityPathBase<Person> {
     public final NumberPath<Long> id = _super.id;
 
     public final SetPath<models.absences.InitializationGroup, models.absences.query.QInitializationGroup> initializationGroups = this.<models.absences.InitializationGroup, models.absences.query.QInitializationGroup>createSet("initializationGroups", models.absences.InitializationGroup.class, models.absences.query.QInitializationGroup.class, PathInits.DIRECT2);
+
+    public final SetPath<models.MealTicketCard, QMealTicketCard> mealTicketCards = this.<models.MealTicketCard, QMealTicketCard>createSet("mealTicketCards", models.MealTicketCard.class, QMealTicketCard.class, PathInits.DIRECT2);
 
     public final ListPath<models.MealTicket, QMealTicket> mealTicketsAdmin = this.<models.MealTicket, QMealTicket>createList("mealTicketsAdmin", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
 
@@ -99,6 +105,8 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final ListPath<models.PersonShift, QPersonShift> personShifts = this.<models.PersonShift, QPersonShift>createList("personShifts", models.PersonShift.class, QPersonShift.class, PathInits.DIRECT2);
 
+    public final ListPath<Person, QPerson> personsInCharge = this.<Person, QPerson>createList("personsInCharge", Person.class, QPerson.class, PathInits.DIRECT2);
+
     public final QQualification qualification;
 
     public final ListPath<models.PersonReperibilityType, QPersonReperibilityType> reperibilities = this.<models.PersonReperibilityType, QPersonReperibilityType>createList("reperibilities", models.PersonReperibilityType.class, QPersonReperibilityType.class, PathInits.DIRECT2);
@@ -112,6 +120,10 @@ public class QPerson extends EntityPathBase<Person> {
     public final StringPath surname = createString("surname");
 
     public final StringPath telephone = createString("telephone");
+
+    public final SetPath<models.TeleworkValidation, QTeleworkValidation> teleworkValidations = this.<models.TeleworkValidation, QTeleworkValidation>createSet("teleworkValidations", models.TeleworkValidation.class, QTeleworkValidation.class, PathInits.DIRECT2);
+
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
 
     public final QUser user;
 

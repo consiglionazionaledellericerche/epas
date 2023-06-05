@@ -1,0 +1,19 @@
+*{
+	activeAction: la action tab attiva
+}*
+
+%{ year = session.get("yearSelected");
+   month = session.get("monthSelected");
+   personId = session.get("personSelected"); }%
+   
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    <li #{if _activeAction.equals("manageTimeSlots")} class="active" #{/if}>
+      <a href="@{TimeSlots.manageTimeSlots()}">Fasce orarie predefinite</a>
+    </li>
+    <li #{if _activeAction.equals("manageOfficeTimeSlots")} class="active" #{/if}>
+      <a href="@{TimeSlots.manageOfficeTimeSlots(session.get("officeSelected"))}">Fasce orarie particolari</a>
+    </li>
+  </ul>
+</div>
+<br>

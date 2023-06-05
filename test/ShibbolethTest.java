@@ -1,12 +1,30 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+import common.injection.StaticInject;
 import controllers.shib.MockShibboleth;
 import dao.PersonDao;
-import injection.StaticInject;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.hamcrest.core.Is;
 import org.junit.AfterClass;
 import org.junit.Test;
+import play.Play;
 import play.mvc.Http;
 import play.mvc.Http.Response;
 import play.mvc.Router;
@@ -34,10 +52,11 @@ public class ShibbolethTest extends FunctionalTest {
     // will be used to authenticate the next user which
     // logins in.
     MockShibboleth.removeAll();
-    MockShibboleth.set("eppn",DEFAULT_USER_EMAIL);
+    MockShibboleth.set("eppn", DEFAULT_USER_EMAIL);
+    Play.configuration.setProperty("shib.login", "true");
 
     final String loginUrl = Router.reverse("shib.Shibboleth.login").url;
-    Response response = httpGet(loginUrl,true);
+    Response response = httpGet(loginUrl, true);
     assertIsOk(response);
     log.debug("response.contentType = {}", response.contentType);
     assertContentType("text/html", response);
@@ -58,7 +77,7 @@ public class ShibbolethTest extends FunctionalTest {
     Response response = GET(url);
     if (Http.StatusCode.FOUND == response.status && followRedirect) {
       String redirectedTo = response.getHeader("Location");
-      response = httpGet(redirectedTo,followRedirect);
+      response = httpGet(redirectedTo, followRedirect);
     }
     return response;
   }

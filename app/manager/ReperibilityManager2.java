@@ -1,21 +1,31 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
-
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-
-import controllers.ReperibilityCalendar;
 import controllers.Security;
-
-import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
-import dao.ReperibilityTypeMonthDao;
 import dao.history.HistoricalDao;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -23,11 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
@@ -35,85 +44,84 @@ import models.PersonDay;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
-import models.PersonShiftDay;
-import models.PersonShiftShiftType;
 import models.ReperibilityTypeMonth;
 import models.Role;
-import models.ShiftType;
-import models.ShiftTypeMonth;
 import models.User;
 import models.dto.HolidaysReperibilityDto;
 import models.dto.WorkDaysReperibilityDto;
-import models.enumerate.ShiftTroubles;
-
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
-
 import play.i18n.Messages;
 
 /**
- * Gestiore delle operazioni sulla reperibilità ePAS.
+ * Gestore delle operazioni sulla reperibilità ePAS.
  *
- * @author dario
+ * @author Dario Tagliaferri
  */
 
 @Slf4j
 public class ReperibilityManager2 {
 
-  private static final String REPERIBILITY_WORKDAYS = "207";
-  private static final String REPERIBILITY_HOLIDAYS = "208";
-
   private final PersonReperibilityDayDao reperibilityDayDao;
   private final PersonDayDao personDayDao;
   private final PersonDayManager personDayManager;
-  private final CompetenceCodeDao competenceCodeDao;
-  
   private final CompetenceDao competenceDao;
   private final PersonReperibilityDayDao reperibilityDao;
+  private final ConfigurationManager configurationManager;
 
-
+  /**
+   * Injection.
+   *
+   * @param reperibilityDayDao il dao sui giorni di reperibilità
+   * @param personDayDao il dao sui personday
+   * @param personDayManager il manager coi metodi sul personday
+   * @param competenceDao il dao sulle competenze
+   * @param reperibilityDao il dao sulla reperibilità
+   */
   @Inject
   public ReperibilityManager2(PersonReperibilityDayDao reperibilityDayDao, 
       PersonDayDao personDayDao, PersonDayManager personDayManager, 
-      CompetenceCodeDao competenceCodeDao, CompetenceDao competenceDao, 
-      PersonReperibilityDayDao reperibilityDao) {
+      CompetenceDao competenceDao, 
+      PersonReperibilityDayDao reperibilityDao, ConfigurationManager configurationManager) {
     this.reperibilityDayDao = reperibilityDayDao;
     this.personDayDao = personDayDao;
-    this.personDayManager = personDayManager;
-    this.competenceCodeDao = competenceCodeDao;    
+    this.personDayManager = personDayManager;   
     this.competenceDao = competenceDao;
     this.reperibilityDao = reperibilityDao;
+    this.configurationManager = configurationManager;
   }
 
   /**
-   * 
+   * La lista delle attività di reperibilità visibili all'utente che ne fa la richiesta.
+   *
    * @return la lista delle attività di reperibilità visibili all'utente che ne fa la richiesta.
    */
   public List<PersonReperibilityType> getUserActivities() {
     List<PersonReperibilityType> activities = Lists.newArrayList();
     User currentUser = Security.getUser().get();
-    Person person = currentUser.person;
+    Person person = currentUser.getPerson();
     if (person != null) {
-      if (!person.reperibilityTypes.isEmpty()) {
-        activities.addAll(person.reperibilityTypes.stream()
-            .sorted(Comparator.comparing(o -> o.description))
+      if (!person.getReperibilityTypes().isEmpty()) {
+        activities.addAll(person.getReperibilityTypes().stream()
+            .sorted(Comparator.comparing(o -> o.getDescription()))
             .collect(Collectors.toList()));
       }
-      if (!person.reperibilities.isEmpty()) {
-        activities.addAll(person.reperibilities.stream()            
+      if (!person.getReperibilities().isEmpty()) {
+        activities.addAll(person.getReperibilities().stream()            
             .collect(Collectors.toList()));
       }
-      if (!person.reperibility.isEmpty()) {
-        for (PersonReperibility rep : person.reperibility) {
-          activities.add(rep.personReperibilityType);
+      if (!person.getReperibility().isEmpty()) {
+        for (PersonReperibility rep : person.getReperibility()) {
+          activities.add(rep.getPersonReperibilityType());
         }        
       }
       if (currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
-        activities.addAll(currentUser.usersRolesOffices.stream()
-            .flatMap(uro -> uro.office.personReperibilityTypes.stream().filter(prt -> !prt.disabled)
-                .sorted(Comparator.comparing(o -> o.description)))
-                .collect(Collectors.toList()));
+        activities.addAll(currentUser.getUsersRolesOffices().stream()
+            .flatMap(uro -> uro.getOffice().getPersonReperibilityTypes()
+                .stream().filter(prt -> !prt.isDisabled())
+                .sorted(Comparator.comparing(o -> o.getDescription())))
+            .collect(Collectors.toList()));
       }
     } else {
       if (currentUser.isSystemUser()) {
@@ -124,6 +132,9 @@ public class ReperibilityManager2 {
   }
 
   /**
+   * La lista di tutte le persone abilitate su quell'attività nell'intervallo di tempo
+   * specificato.
+   *
    * @param reperibilityType attività di reperibilità
    * @param start data di inizio del periodo
    * @param end data di fine del periodo
@@ -134,7 +145,7 @@ public class ReperibilityManager2 {
       PersonReperibilityType reperibilityType, LocalDate start,
       LocalDate end) {
     if (reperibilityType.isPersistent() && start != null && end != null) {
-      return reperibilityType.personReperibilities.stream()
+      return reperibilityType.getPersonReperibilities().stream()
           .filter(pr -> pr.dateRange().isConnected(
               Range.closed(start, end)))
           .collect(Collectors.toList());
@@ -144,7 +155,8 @@ public class ReperibilityManager2 {
   }
 
   /**
-   * salva il personReperibilityDay ed effettua i ricalcoli.
+   * Salva il personReperibilityDay ed effettua i ricalcoli.
+   *
    * @param personReperibilityDay il personReperibilityDay da salvare
    */
   public void save(PersonReperibilityDay personReperibilityDay) {
@@ -154,7 +166,8 @@ public class ReperibilityManager2 {
   }
 
   /**
-   * cancella il personReperibilityDay.
+   * Cancella il personReperibilityDay.
+   *
    * @param personReperibilityDay il personReperibilityDay da cancellare
    */
   public void delete(PersonReperibilityDay personReperibilityDay) {
@@ -166,7 +179,7 @@ public class ReperibilityManager2 {
 
   private void recalculate(PersonReperibilityDay personReperibilityDay) {
 
-    final PersonReperibilityType reperibilityType = personReperibilityDay.reperibilityType;
+    final PersonReperibilityType reperibilityType = personReperibilityDay.getReperibilityType();
 
     // Aggiornamento del ReperibilityTypeMonth
     if (reperibilityType != null) {
@@ -178,7 +191,7 @@ public class ReperibilityManager2 {
       }
 
       // Ricalcoli sui giorni coinvolti dalle modifiche
-      checkReperibilityDayValid(personReperibilityDay.date, reperibilityType);
+      checkReperibilityDayValid(personReperibilityDay.getDate(), reperibilityType);
 
       /*
        *  Recupera la data precedente dallo storico e verifica se c'è stato un 
@@ -188,23 +201,23 @@ public class ReperibilityManager2 {
       HistoricalDao.lastRevisionsOf(PersonReperibilityDay.class, personReperibilityDay.id)
           .stream().limit(1).map(historyValue -> {
             PersonReperibilityDay pd = (PersonReperibilityDay) historyValue.value;
-            return pd.date;
+            return pd.getDate();
           }).filter(Objects::nonNull).distinct().forEach(localDate -> {
-            if (!localDate.equals(personReperibilityDay.date)) {
+            if (!localDate.equals(personReperibilityDay.getDate())) {
               checkReperibilityDayValid(localDate, reperibilityType);
             }
           });
 
       // Aggiornamento del relativo ReperibilityTypeMonth (per incrementare il campo version)
       ReperibilityTypeMonth newStatus = 
-          reperibilityType.monthStatusByDate(personReperibilityDay.date)
+          reperibilityType.monthStatusByDate(personReperibilityDay.getDate())
           .orElse(new ReperibilityTypeMonth());
 
-      if (newStatus.personReperibilityType != null) {
+      if (newStatus.getPersonReperibilityType() != null) {
         newStatus.updatedAt = LocalDateTime.now();
       } else {
-        newStatus.yearMonth = new YearMonth(personReperibilityDay.date);
-        newStatus.personReperibilityType = reperibilityType;
+        newStatus.setYearMonth(new YearMonth(personReperibilityDay.getDate()));
+        newStatus.setPersonReperibilityType(reperibilityType);
       }
       newStatus.save();
 
@@ -219,7 +232,7 @@ public class ReperibilityManager2 {
    */
   public Optional<String> reperibilityPermitted(PersonReperibilityDay personReperibilityDay) {
 
-    /**
+    /*
      * 0. Verificare se la persona è segnata in quell'attività in quel giorno
      *    return shift.personInactive
      * 1. La Persona non deve essere già reperibile per quel giorno
@@ -230,8 +243,8 @@ public class ReperibilityManager2 {
 
     //Verifica se la persona è attiva in quell'attività in quel giorno
     Optional<PersonReperibility> rep = reperibilityDao
-        .byPersonDateAndType(personReperibilityDay.personReperibility.person, 
-            personReperibilityDay.date, personReperibilityDay.reperibilityType);
+        .byPersonDateAndType(personReperibilityDay.getPersonReperibility().getPerson(), 
+            personReperibilityDay.getDate(), personReperibilityDay.getReperibilityType());
     if (!rep.isPresent()) {
       return Optional.of(Messages.get("reperibility.personInactive"));
     }
@@ -239,16 +252,19 @@ public class ReperibilityManager2 {
     // Verifica che la persona non abbia altre reperibilità nello stesso giorno 
     final Optional<PersonReperibilityDay> personReperibility = reperibilityDayDao
         .getPersonReperibilityDay(
-            personReperibilityDay.personReperibility.person, personReperibilityDay.date);
+            personReperibilityDay.getPersonReperibility().getPerson(),
+            personReperibilityDay.getDate());
 
     if (personReperibility.isPresent()) {
       return Optional.of(Messages.get("reperibility.alreadyInReperibility", 
-          personReperibility.get().reperibilityType));
+          personReperibility.get().getReperibilityType()));
     }
 
     // verifica che la persona non sia assente nel giorno
-    final Optional<PersonDay> personDay = personDayDao
-        .getPersonDay(personReperibilityDay.personReperibility.person, personReperibilityDay.date);
+    final Optional<PersonDay> personDay = 
+        personDayDao.getPersonDay(
+            personReperibilityDay.getPersonReperibility().getPerson(),
+            personReperibilityDay.getDate());
 
     if (personDay.isPresent() 
         && !personDayManager.isAbsenceCompatibleWithReperibility(personDay.get())) {
@@ -257,20 +273,20 @@ public class ReperibilityManager2 {
 
     List<PersonReperibilityDay> list = reperibilityDayDao
         .getPersonReperibilityDayFromPeriodAndType(
-            personReperibilityDay.date, personReperibilityDay.date,
-            personReperibilityDay.reperibilityType, Optional.absent());
+            personReperibilityDay.getDate(), personReperibilityDay.getDate(),
+            personReperibilityDay.getReperibilityType(), Optional.absent());
 
     //controlla che la reperibilità nel giorno sia già stata assegnata ad un'altra persona
     if (!list.isEmpty()) {
       return Optional.of(Messages
           .get("reperibility.dayAlreadyAssigned", 
-              personReperibilityDay.personReperibility.person.fullName()));
+              personReperibilityDay.getPersonReperibility().getPerson().fullName()));
     }
 
     return Optional.absent();
   }
 
-  
+
   public void checkReperibilityValid(PersonReperibilityDay personReperibilityDay) {
     /*
      * 0. Dev'essere una reperibilità persistente.
@@ -286,6 +302,7 @@ public class ReperibilityManager2 {
   }
 
   /**
+   * Ritorna una mappa con i giorni maturati di reperibilità per persona.
    *
    * @param reperibility attività sulla quale effettuare i calcoli
    * @param from data di inizio da cui calcolare
@@ -297,19 +314,22 @@ public class ReperibilityManager2 {
 
     final Map<Person, Integer> reperibilityWorkDaysCompetences = new HashMap<>();
 
-
     final LocalDate today = LocalDate.now();
 
     final LocalDate lastDay;
 
-    if (to.isAfter(today)) {
-      lastDay = today;
-    } else {
+    if ((Boolean) configurationManager.configValue(reperibility.getOffice(), 
+        EpasParam.ENABLE_REPERIBILITY_APPROVAL_BEFORE_END_MONTH)) {
       lastDay = to;
+    } else {
+      if (to.isAfter(today)) {
+        lastDay = today;
+      } else {
+        lastDay = to;
+      }
     }
-    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_WORKDAYS);
+    CompetenceCode code = reperibility.getMonthlyCompetenceType().getWorkdaysCode();        
     involvedReperibilityWorkers(reperibility, from, to).forEach(person -> {
-
       int competences = 
           calculatePersonReperibilityCompetencesInPeriod(reperibility, person, from, lastDay, code);
       reperibilityWorkDaysCompetences.put(person, competences);
@@ -319,6 +339,9 @@ public class ReperibilityManager2 {
   }
 
   /**
+   * Una lista di persone che sono effettivamente coinvolte in reperibilità in un 
+   * determinato periodo (Dipendenti con le reperibilità attive in quel periodo).
+   *
    * @param reperibility attività di reperibilità
    * @param from data di inizio
    * @param to data di fine
@@ -328,10 +351,13 @@ public class ReperibilityManager2 {
   public List<Person> involvedReperibilityWorkers(PersonReperibilityType reperibility, 
       LocalDate from, LocalDate to) {
     return reperibilityDayDao.byTypeAndPeriod(reperibility, from, to)
-        .stream().map(rep -> rep.person).distinct().collect(Collectors.toList());
+        .stream().map(rep -> rep.getPerson()).distinct().collect(Collectors.toList());
   }
 
   /**
+   * Il numero di giorni di competenza maturati in base alle reperibilità effettuate
+   * nel periodo selezionato (di norma serve calcolarli su un intero mese al massimo).
+   *
    * @param reperibility attività di turno
    * @param person Persona sulla quale effettuare i calcoli
    * @param from data iniziale
@@ -349,19 +375,20 @@ public class ReperibilityManager2 {
     final List<PersonReperibilityDay> reperibilities = reperibilityDayDao
         .getPersonReperibilityDaysByPeriodAndType(from, to, reperibility, person);
 
-    if (code.codeToPresence.equalsIgnoreCase(REPERIBILITY_WORKDAYS)) {
+    if (code.equals(reperibility.getMonthlyCompetenceType().getWorkdaysCode())) {
       reperibilityCompetences = (int) reperibilities.stream()
-          .filter(rep -> !personDayManager.isHoliday(person, rep.date)).count();
+          .filter(rep -> !personDayManager.isHoliday(person, rep.getDate())).count();
     } else {
       reperibilityCompetences = (int) reperibilities.stream()
-          .filter(rep -> personDayManager.isHoliday(person, rep.date)).count();
+          .filter(rep -> personDayManager.isHoliday(person, rep.getDate())).count();
     }
 
     return reperibilityCompetences;
   }
 
   /**
-   * 
+   * La mappa contenente i giorni di reperibilità festiva per ogni dipendente reperibile.
+   *
    * @param reperibility il tipo di reperibilità 
    * @param start la data di inizio da cui conteggiare
    * @param end la data di fine entro cui conteggiare
@@ -376,14 +403,18 @@ public class ReperibilityManager2 {
 
     final LocalDate lastDay;
 
-    if (end.isAfter(today)) {
-      lastDay = today;
-    } else {
+    if ((Boolean) configurationManager.configValue(reperibility.getOffice(), 
+        EpasParam.ENABLE_REPERIBILITY_APPROVAL_BEFORE_END_MONTH)) {
       lastDay = end;
+    } else {
+      if (end.isAfter(today)) {
+        lastDay = today;
+      } else {
+        lastDay = end;
+      }
     }
-    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_HOLIDAYS);
+    CompetenceCode code = reperibility.getMonthlyCompetenceType().getHolidaysCode();        
     involvedReperibilityWorkers(reperibility, start, end).forEach(person -> {
-
       int competences = calculatePersonReperibilityCompetencesInPeriod(reperibility, 
           person, start, lastDay, code);
       reperibilityHolidaysCompetences.put(person, competences);
@@ -405,52 +436,60 @@ public class ReperibilityManager2 {
   public void assignReperibilityCompetences(ReperibilityTypeMonth reperibilityTypeMonth) {
     Verify.verifyNotNull(reperibilityTypeMonth);
     //stabilisco le date di inizio e fine periodo da considerare per i calcoli
-    final LocalDate monthBegin = reperibilityTypeMonth.yearMonth.toLocalDate(1);
+    final LocalDate monthBegin = reperibilityTypeMonth.getYearMonth().toLocalDate(1);
     final LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
-    final int year = reperibilityTypeMonth.yearMonth.getYear();
-    final int month = reperibilityTypeMonth.yearMonth.getMonthOfYear();
+    final int year = reperibilityTypeMonth.getYearMonth().getYear();
+    final int month = reperibilityTypeMonth.getYearMonth().getMonthOfYear();
 
     final LocalDate today = LocalDate.now();
 
     final LocalDate lastDay;
-
-    if (monthEnd.isAfter(today)) {
-      lastDay = today;
-    } else {
+    
+    if ((Boolean) configurationManager.configValue(reperibilityTypeMonth
+        .getPersonReperibilityType().getOffice(), 
+        EpasParam.ENABLE_REPERIBILITY_APPROVAL_BEFORE_END_MONTH)) {
       lastDay = monthEnd;
+    } else {
+      if (monthEnd.isAfter(today)) {
+        lastDay = today;
+      } else {
+        lastDay = monthEnd;
+      }
     }
+    
     //cerco le persone reperibili nel periodo di interesse
     final List<Person> involvedReperibilityPeople = involvedReperibilityWorkers(
-        reperibilityTypeMonth.personReperibilityType, monthBegin, monthEnd);
-    CompetenceCode reperibilityHoliday = competenceCodeDao
-        .getCompetenceCodeByCode(REPERIBILITY_HOLIDAYS);
-    CompetenceCode reperibilityWorkdays = competenceCodeDao
-        .getCompetenceCodeByCode(REPERIBILITY_WORKDAYS);
+        reperibilityTypeMonth.getPersonReperibilityType(), monthBegin, monthEnd);
+    CompetenceCode reperibilityHoliday = reperibilityTypeMonth.getPersonReperibilityType()
+        .getMonthlyCompetenceType().getHolidaysCode();        
+    CompetenceCode reperibilityWorkdays = reperibilityTypeMonth.getPersonReperibilityType()
+        .getMonthlyCompetenceType().getWorkdaysCode();
+
     //per ogni persona approvo le reperibilità feriali e festive 
     involvedReperibilityPeople.forEach(person ->  {
       WorkDaysReperibilityDto dto = new WorkDaysReperibilityDto();
       dto.person = person;
       dto.workdaysReperibility = calculatePersonReperibilityCompetencesInPeriod(
-          reperibilityTypeMonth.personReperibilityType, person, 
+          reperibilityTypeMonth.getPersonReperibilityType(), person, 
           monthBegin, lastDay, reperibilityWorkdays);
       dto.workdaysPeriods = getReperibilityPeriod(person, monthBegin, monthEnd, 
-          reperibilityTypeMonth.personReperibilityType, false);
+          reperibilityTypeMonth.getPersonReperibilityType(), false);
 
       HolidaysReperibilityDto dto2 = new HolidaysReperibilityDto();
       dto2.person = person;
       dto2.holidaysReperibility = calculatePersonReperibilityCompetencesInPeriod(
-          reperibilityTypeMonth.personReperibilityType, person, 
+          reperibilityTypeMonth.getPersonReperibilityType(), person, 
           monthBegin, lastDay, reperibilityHoliday);
       dto2.holidaysPeriods = getReperibilityPeriod(person, monthBegin, monthEnd, 
-          reperibilityTypeMonth.personReperibilityType, true);
+          reperibilityTypeMonth.getPersonReperibilityType(), true);
 
       Optional<Competence> reperibilityHolidayCompetence = competenceDao
           .getCompetence(person, year, month, reperibilityHoliday);
 
       Competence holidayCompetence = reperibilityHolidayCompetence
           .or(new Competence(person, reperibilityHoliday, year, month));
-      holidayCompetence.valueApproved = dto2.holidaysReperibility;
-      holidayCompetence.reason = getReperibilityDates(dto2.holidaysPeriods);
+      holidayCompetence.setValueApproved(dto2.holidaysReperibility);
+      holidayCompetence.setReason(getReperibilityDates(dto2.holidaysPeriods));
       holidayCompetence.save();
 
       log.info("Salvata {}", holidayCompetence);
@@ -460,19 +499,18 @@ public class ReperibilityManager2 {
 
       Competence workdayCompetence = reperibilityWorkdaysCompetence
           .or(new Competence(person, reperibilityWorkdays, year, month));
-      workdayCompetence.valueApproved = dto.workdaysReperibility;
-      workdayCompetence.reason = getReperibilityDates(dto.workdaysPeriods);
+      workdayCompetence.setValueApproved(dto.workdaysReperibility);
+      workdayCompetence.setReason(getReperibilityDates(dto.workdaysPeriods));
       workdayCompetence.save();
 
       log.info("Salvata {}", workdayCompetence);
     });
 
-
-
   }
 
   /**
-   * 
+   * La lista dei range di date in cui un dipendente è stato reperibile.
+   *
    * @param person il reperibile
    * @param begin la data da cui cercare i giorni di reperibilità
    * @param end la data entro cui cercare i giorni di reperibilità
@@ -489,27 +527,27 @@ public class ReperibilityManager2 {
     List<PersonReperibilityDay> newList = null;
     if (holidays) {
       newList = days.stream().filter(
-          day -> personDayManager.isHoliday(person, day.date)).collect(Collectors.toList());
+          day -> personDayManager.isHoliday(person, day.getDate())).collect(Collectors.toList());
     } else {
       newList = days.stream().filter(
-          day -> !personDayManager.isHoliday(person, day.date)).collect(Collectors.toList());
+          day -> !personDayManager.isHoliday(person, day.getDate())).collect(Collectors.toList());
     }
     if (newList.isEmpty()) {
       return null;
     }
-    LocalDate first = newList.get(0).date;
+    LocalDate first = newList.get(0).getDate();
     List<Range<LocalDate>> list = Lists.newArrayList();
     Range<LocalDate> range = null;
 
     for (PersonReperibilityDay day : newList) {
-      if (first.equals(day.date)) {
-        range = Range.closed(day.date, day.date);
+      if (first.equals(day.getDate())) {
+        range = Range.closed(day.getDate(), day.getDate());
       } else {
-        if (day.date.equals(range.upperEndpoint().plusDays(1))) {
-          range = Range.closed(range.lowerEndpoint(), day.date);
+        if (day.getDate().equals(range.upperEndpoint().plusDays(1))) {
+          range = Range.closed(range.lowerEndpoint(), day.getDate());
         } else {
           list.add(range);
-          range = Range.closed(day.date, day.date);
+          range = Range.closed(day.getDate(), day.getDate());
         }
       }
     }
@@ -518,7 +556,8 @@ public class ReperibilityManager2 {
   }
 
   /**
-   * 
+   * La stringa formattata contenente le date dei giorni di reperibilità effettuati.
+   *
    * @param list la lista dei periodi di reperibilità all'interno del mese
    * @return la stringa formattata contenente le date dei giorni di reperibilità effettuati.
    */

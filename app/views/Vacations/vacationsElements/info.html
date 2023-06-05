@@ -78,6 +78,102 @@
       #{/if}#{else}
       <p>Nessun dato da visualizzare.</p>
       #{/else}  
+	#{/panel}
+	
+	#{panel title:'Permessi personali (661)', dim:12, color:'primary' }
+		<ul class="list-group">
+		#{list items:periodChain.periods, as:'absencePeriod' }
+		<li class="list-group-item list-group-item-info">
+	      <p>
+	        <strong>${absencePeriod.groupAbsenceType.description}</strong>
+	      </p>
+
+    	</li>
+        <li class="list-group-item">
+     <p>
+        #{if absencePeriod.isTakableWithLimit() }
+           <strong>Tipo periodo</strong> &{absencePeriod.groupAbsenceType.periodType}<br>
+           <strong>Validità periodo</strong> ${absencePeriod.from.format()} - ${absencePeriod.to.format()}
+       
+           <br><strong>Totale utilizzabile</strong> 
+           ${templateUtility.formatAmount(absencePeriod.getPeriodTakableAmount(), absencePeriod.takeAmountType)}<br>
+       #{/if}
+     </p>
+     
+     <p>
+     #{secure.check 'AbsenceGroups.initialization'}
+     #{if absencePeriod.groupAbsenceType.initializable }
+     #{if absencePeriod.initialization}
+       %{ initializationGroup = absencePeriod.initialization; }%
+       #{include '/AbsenceGroups/_initializationStatus.html' /}       
+       <a class="btn btn-sm btn-warning pull-right" href="@{AbsenceGroups.initialization(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, initializationGroup.date.format(), true)}" data-async-modal="#defaultModal">Modifica Inizializzazione</a>       
+     #{/if}
+     #{else}
+       Per questo periodo non è stata definita alcuna inizializzazione. 
+       <a class="btn btn-sm btn-warning pull-right" href="@{AbsenceGroups.initialization(absencePeriod.person.id, absencePeriod.groupAbsenceType.id, periodChain.date, true)}" data-async-modal="#defaultModal">Inizializzazione</a>      
+     #{/else}
+     #{/if}
+     #{/secure.check}
+     </p>
+     
+     <p>  
+       #{if absencePeriod.isTakableWithLimit() }
+           <i class="fa fa-exclamation-circle" aria-hidden="true"></i> Rimangono 
+           <strong><span class="text-success">${templateUtility.formatAmount(absencePeriod.getRemainingAmount(), absencePeriod.takeAmountType)}</span></strong>
+           da utilizzare entro il <strong class="text-success">${absencePeriod.to.format()}</strong>
+       #{/if}
+     </p> 
+     
+    
+    #{if absencePeriod.daysInPeriod.values().empty }
+        <p><em>Non ci sono assenze utilizzate per questo gruppo nel periodo selezionato.</em></p>
+    #{/if}
+    #{else}
+
+     <table class="table table-condensed table-bordered">
+      <tr class="bg-warning">
+        <th>Data</th>
+        <th>Assenza</th>
+        #{if absencePeriod.isTakableWithLimit() }
+          <th>Limite<br>Utilizzabile</th>
+          <th>Limite<br>Consumato</th>
+        #{/if}
+        <th>Completamento<br>Precedente<br></th>
+        <th>Completamento<br>Assenza</th>
+        <th>Completamento<br>Residuo<br></th>
+      </tr>
+      
+      #{list items:absencePeriod.daysInPeriod.values(), as:'dayInPeriod'}
+      #{list items:dayInPeriod.allTemplateRows(), as:'rowRecap' }
+        <tr #{if rowRecap.beforeInitialization} class="bg-grey" #{/if}>
+          <td>
+            #{if rowRecap.date}
+              ${rowRecap.date.format()}
+            #{/if}  
+          </td>
+          <td>
+	        #{absences.absence-popover absence:rowRecap.absence, groupSelected:absencePeriod.groupAbsenceType /}
+          </td>
+          #{if absencePeriod.isTakableWithLimit() }
+            <td>${rowRecap.usableLimit}</td>
+            <td>${rowRecap.usableTaken}</td>
+          #{/if}
+          <td>${rowRecap.consumedComplationBefore}</td>
+          <td>${rowRecap.consumedComplationAbsence}</td>
+          <td>${rowRecap.consumedComplationNext}</td>
+        </tr>
+      #{/list}
+      #{/list}
+
+      </table>
+      
+     #{/else}
+     
+     #{if absencePeriod.groupAbsenceType.nextGroupToCheck}
+     <i class="fa fa-2x fa-arrow-down" aria-hidden="true"></i>
+     #{/if}
+		#{/list}
+		</ul>
 	#{/panel}      
     #{if showVacationPeriods}
     <div class="col-md-12">

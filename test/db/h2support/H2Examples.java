@@ -1,34 +1,46 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package db.h2support;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
-
 import db.h2support.base.H2WorkingTimeTypeSupport;
 import db.h2support.base.WorkingTimeTypeDefinitions.WorkingDefinition;
-
 import java.util.UUID;
-
 import manager.ContractManager;
 import manager.configurations.ConfigurationManager;
-
 import models.Contract;
 import models.Office;
 import models.Person;
 import models.Qualification;
 import models.User;
 import models.WorkingTimeType;
-
 import org.joda.time.LocalDate;
 
 /**
  * Costruzione rapida di entity per test standard.
- * 
- * @author alessandro
+ *
+ * @author Alessandro Martelli
  *
  */
 public class H2Examples {
 
-  public final static long DEFAULT_PERSON_QUALIFICATION = 4L;
+  public static final long DEFAULT_PERSON_QUALIFICATION = 4L;
   
   private final H2WorkingTimeTypeSupport h2WorkingTimeTypeSupport;
   private final ConfigurationManager configurationManager;
@@ -47,6 +59,7 @@ public class H2Examples {
 
   /**
    * Costruisce e persiste il contratto.
+   *
    * @param person person
    * @param beginDate data inizio
    * @param endDate data fine
@@ -56,13 +69,13 @@ public class H2Examples {
   private Contract buildContract(Person person, LocalDate beginDate, Optional<LocalDate> endDate, 
       Optional<LocalDate> endContract, WorkingTimeType workingTimeType) {
     Contract contract = new Contract();
-    contract.person = person;
-    contract.beginDate = beginDate;
+    contract.setPerson(person);
+    contract.setBeginDate(beginDate);
     if (endDate.isPresent()) {
-      contract.endDate = endDate.get();
+      contract.setEndDate(endDate.get());
     }
     if (endContract.isPresent()) {
-      contract.endContract = endContract.get();
+      contract.setEndContract(endContract.get());
     }
     contractManager.properContractCreate(contract, Optional.of(workingTimeType), false);
     return contract;
@@ -70,22 +83,23 @@ public class H2Examples {
 
   /**
    * Costruisce e persiste una persona.
+   *
    * @param office office
    * @param username username
    * @return persisted entity
    */
   private Person createPerson(Office office, String username) {
 
-    User user = new User();    
-    user.username = username;
-    user.password = "UnaPasswordQualsiasi";
+    User user = new User();
+    user.setUsername(username);
+    user.updatePassword("UnaPasswordQualsiasi");
     user.save();
     Person person = new Person();
-    person.name = "Name " + username;
-    person.surname = "Surname " + username;
-    person.user = user;
-    person.office = office;
-    person.qualification = Qualification.findById(DEFAULT_PERSON_QUALIFICATION);
+    person.setName("Name " + username);
+    person.setSurname("Surname " + username);
+    person.setUser(user);
+    person.setOffice(office);
+    person.setQualification(Qualification.findById(DEFAULT_PERSON_QUALIFICATION));
     person.save();
     configurationManager.updateConfigurations(person);
     return person;
@@ -93,6 +107,7 @@ public class H2Examples {
   
   /**
    * Costruisce e persiste una sede.
+   *
    * @param beginDate inizio sede
    * @param name nome 
    * @param codeId codeId
@@ -102,10 +117,10 @@ public class H2Examples {
   private Office buildOffice(LocalDate beginDate, String name, String codeId, String code) {
 
     Office office = new Office();
-    office.name = name;
-    office.beginDate = beginDate;
-    office.codeId = codeId;
-    office.code = code;
+    office.setName(name);
+    office.setBeginDate(beginDate);
+    office.setCodeId(codeId);
+    office.setCode(code);
     office.save();
     configurationManager.updateConfigurations(office);
     return office;

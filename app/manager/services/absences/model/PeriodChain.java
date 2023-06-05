@@ -1,23 +1,43 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences.model;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.ToString;
 import manager.services.absences.errors.CriticalError;
 import manager.services.absences.errors.ErrorsBox;
-
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
-
 import org.joda.time.LocalDate;
 import org.testng.collections.Maps;
 
+/**
+ * Rappresenta una catena di assenze.
+ *
+ * @author Alessandro Martelli
+ *
+ */
 @ToString
 public class PeriodChain {
   
@@ -56,6 +76,7 @@ public class PeriodChain {
 
   /**
    * Constructor PeriodChain.
+   *
    * @param person persona
    * @param groupAbsenceType gruppo
    * @param date data
@@ -68,6 +89,7 @@ public class PeriodChain {
   
   /**
    * La descrizione della catena.
+   *
    * @return string
    */
   public String getChainDescription() {
@@ -76,6 +98,7 @@ public class PeriodChain {
   
   /**
    * Il primo periodo della catena.
+   *
    * @return absencePeriod
    */
   public AbsencePeriod firstPeriod() {
@@ -87,6 +110,7 @@ public class PeriodChain {
   
   /**
    * L'ultimo periodo della catena.
+   *
    * @return absencePeriod
    */
   public AbsencePeriod lastPeriod() {
@@ -98,6 +122,7 @@ public class PeriodChain {
   
   /**
    * I codici coinvolti nella periodChain.
+   *
    * @return set
    */
   public Set<AbsenceType> periodChainInvolvedCodes() {
@@ -127,17 +152,18 @@ public class PeriodChain {
     List<Absence> absences = Lists.newArrayList();
     for (AbsencePeriod period : this.periods) {
       for (DayInPeriod day : period.daysInPeriod.values()) {
-        if (period.initialization != null && !day.getDate().isAfter(period.initialization.date)) {
+        if (period.initialization != null && !day.getDate()
+            .isAfter(period.initialization.getDate())) {
           continue;
         }
         for (TakenAbsence takenAbsence : day.getTakenAbsences()) { //sia complation che non
-          if (onlyOnCertificate && takenAbsence.absence.absenceType.internalUse) {
+          if (onlyOnCertificate && takenAbsence.absence.getAbsenceType().isInternalUse()) {
             continue;
           }
           absences.add(takenAbsence.absence);
         }
         for (Absence absence : day.getExistentReplacings()) {
-          if (onlyOnCertificate && absence.absenceType.internalUse) {
+          if (onlyOnCertificate && absence.getAbsenceType().isInternalUse()) {
             continue;
           }
           absences.add(absence);
@@ -149,6 +175,7 @@ public class PeriodChain {
   
   /**
    * Tutti gli errori verificatisi nella catena.
+   *
    * @return list
    */
   public List<ErrorsBox> allErrorsInPeriods() {
@@ -163,7 +190,7 @@ public class PeriodChain {
   }
   
   public boolean childIsMissing() {
-    return periods.isEmpty() && groupAbsenceType.periodType.isChildPeriod();
+    return periods.isEmpty() && groupAbsenceType.getPeriodType().isChildPeriod();
   }
   
   public boolean containsCriticalErrors() {

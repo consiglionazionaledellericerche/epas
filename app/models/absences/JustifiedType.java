@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.absences;
 
 import com.google.common.collect.Lists;
@@ -11,9 +28,18 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 
+/**
+ * Classe dei tipi di giustificazione delle assenze.
+ *
+ * @author dario
+ *
+ */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "justified_types")
@@ -21,6 +47,11 @@ public class JustifiedType extends BaseModel {
 
   private static final long serialVersionUID = -3532986170397408935L;
 
+  /**
+   * Enumerato che gestisce i nomi dei tipi di giustificazione dell'assenza.
+   *
+   * @author dario
+   */
   public enum JustifiedTypeName {
 
     nothing,
@@ -54,13 +85,13 @@ public class JustifiedType extends BaseModel {
   @Getter
   @Column
   @Enumerated(EnumType.STRING)
-  public JustifiedTypeName name;
+  private JustifiedTypeName name;
 
   @ManyToMany(mappedBy = "justifiedTypesPermitted")
-  public Set<AbsenceType> absenceTypes;
+  private Set<AbsenceType> absenceTypes;
 
   @OneToMany(mappedBy = "justifiedType")
-  public List<Absence> absences = Lists.newArrayList();
+  private List<Absence> absences = Lists.newArrayList();
 
   @Override
   public String toString() {

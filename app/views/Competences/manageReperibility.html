@@ -30,13 +30,13 @@
 		<thead>
 	    <tr>
 	      <th>Nome</th>
-	      <th>Inizio attività di reperibilità</th>
-	      <th>Fine attività di reperibilità</th>
+	      <th>Inizio servizio su attività mensile</th>
+	      <th>Fine servizio attività mensile</th>
 	      <th>Termina</th>
 	    </tr>
 	    </thead>
 	    <tbody>
-		#{list items:people, as:'person'}
+		#{list items:linkedPeople, as:'person'}
 		<tr>
 			<td>${person.person.fullName()}</td>
 			<td>${person.startDate}</td>

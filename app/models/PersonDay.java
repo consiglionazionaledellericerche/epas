@@ -1,9 +1,25 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,28 +30,25 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-
 import models.absences.Absence;
 import models.base.BaseModel;
+import models.enumerate.MealTicketBehaviour;
 import models.enumerate.Troubles;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 
 
 /**
  * Classe che rappresenta un giorno, sia esso lavorativo o festivo di una persona.
  *
- * @author cristian
- * @author dario
+ * @author Cristian Lucchesi
+ * @author Dario Tagliaferri
  */
 @Entity
 @Audited
@@ -51,112 +64,112 @@ public class PersonDay extends BaseModel {
   @Required
   @ManyToOne(optional = false)
   @JoinColumn(name = "person_id", nullable = false)
-  public Person person;
+  private Person person;
 
   @Getter
   @Required
-  public LocalDate date;
+  private LocalDate date;
 
   @Column(name = "time_at_work")
-  public Integer timeAtWork = 0;
+  private Integer timeAtWork = 0;
 
   /**
    * Tempo all'interno di timbrature valide.
    */
   @Column(name = "stamping_time")
-  public Integer stampingsTime = 0;
+  private Integer stampingsTime = 0;
   
   /**
    * Tempo lavorato al di fuori della fascia apertura/chiusura.
    */
   @Column(name = "out_opening")
-  public Integer outOpening = 0;
+  private Integer outOpening = 0;
   
   /**
    * Tempo lavorato al di fuori della fascia apertura/chiusura ed approvato.
    */
   @Column(name = "approved_out_opening")
-  public Integer approvedOutOpening = 0;
+  private Integer approvedOutOpening = 0;
 
   /**
    * Tempo giustificato da assenze che non contribuiscono al tempo per buono pasto.
    */
   @Column(name = "justified_time_no_meal")
-  public Integer justifiedTimeNoMeal = 0;
+  private Integer justifiedTimeNoMeal = 0;
 
   /**
    * Tempo giustificato da assenze che contribuiscono al tempo per buono pasto.
    */
   @Column(name = "justified_time_meal")
-  public Integer justifiedTimeMeal = 0;
+  private Integer justifiedTimeMeal = 0;
   
   /**
    * Tempo giustificato per uscita/ingresso da zone diverse opportunamente definite.
    */
   @Column(name = "justified_time_between_zones")
-  public Integer justifiedTimeBetweenZones = 0;
+  private Integer justifiedTimeBetweenZones = 0;
   
   /**
    * Tempo di lavoro in missione. Si può aggiungere in fase di modifica del codice missione 
    * dal tabellone timbrature.
    */
   @Column(name = "working_time_in_mission")
-  public Integer workingTimeInMission = 0;
+  private Integer workingTimeInMission = 0;
 
-  public Integer difference = 0;
+  private Integer difference = 0;
 
-  public Integer progressive = 0;
+  private Integer progressive = 0;
 
   /**
    * Minuti tolti per pausa pranzo breve.
    */
   @Column(name = "decurted_meal")
-  public Integer decurtedMeal = 0;
+  private Integer decurtedMeal = 0;
 
   @Column(name = "is_ticket_available")
-  public boolean isTicketAvailable;
+  private boolean isTicketAvailable;
 
   @Column(name = "is_ticket_forced_by_admin")
-  public boolean isTicketForcedByAdmin;
+  private boolean isTicketForcedByAdmin;
 
   @Column(name = "is_working_in_another_place")
-  public boolean isWorkingInAnotherPlace;
+  private boolean isWorkingInAnotherPlace;
 
   @Column(name = "is_holiday")
-  public boolean isHoliday;
+  private boolean isHoliday;
   
   /**
    * Tempo lavorato in un giorno di festa.
    */
   @Column(name = "on_holiday")
-  public Integer onHoliday = 0;
+  private Integer onHoliday = 0;
   
   /**
    * Tempo lavorato in un giorni di festa ed approvato.
    */
   @Column(name = "approved_on_holiday")
-  public Integer approvedOnHoliday = 0;
+  private Integer approvedOnHoliday = 0;
 
   @OneToMany(mappedBy = "personDay", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
   @OrderBy("date ASC")
-  public List<Stamping> stampings = new ArrayList<Stamping>();
+  private List<Stamping> stampings = new ArrayList<Stamping>();
 
   @OneToMany(mappedBy = "personDay", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-  public List<Absence> absences = new ArrayList<Absence>();
+  private List<Absence> absences = new ArrayList<Absence>();
 
   @NotAudited
   @OneToMany(mappedBy = "personDay", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-  public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
-
+  private List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
+  
   @ManyToOne
   @JoinColumn(name = "stamp_modification_type_id")
-  public StampModificationType stampModificationType;
+  private StampModificationType stampModificationType;
 
   @Transient
-  public MealTicket mealTicketAssigned;
+  private MealTicket mealTicketAssigned;
 
   @Transient
-  public boolean isConsideredExitingNow;
+  private boolean isConsideredExitingNow;
 
   /**
    * Costruttore.
@@ -194,6 +207,8 @@ public class PersonDay extends BaseModel {
   }
 
   /**
+   * Controlla se la data del personDay è passata rispetto a LocalDate.now().
+   *
    * @return true se la data del personDay è passata, false altrimenti.
    */
   public boolean isPast() {
@@ -201,6 +216,8 @@ public class PersonDay extends BaseModel {
   }
 
   /**
+   * Controlla se la data del personDay è futura rispetto a LocalDate.now().
+   *
    * @return true se la data del personDay è futura, false altrimenti.
    */
   public boolean isFuture() {
@@ -234,6 +251,26 @@ public class PersonDay extends BaseModel {
     return this.timeAtWork - this.justifiedTimeMeal - this.justifiedTimeNoMeal;
   }
 
+  /**
+   * Verifica ed imposta che il buono pasto è disponibile.
+   */
+  @Transient
+  public void setTicketAvailable(MealTicketBehaviour mealTicketBehaviour) {
+    switch (mealTicketBehaviour) {
+      case allowMealTicket:
+        this.isTicketAvailable = true;
+        break;
+      case notAllowMealTicket:
+        this.isTicketAvailable = false;
+        break;
+      case preventMealTicket:
+        this.isTicketAvailable = false;
+        break;
+      default:
+        break;
+    }
+  }
+
 
   /**
    * metodo che resetta un personday azzerando i valori in esso contenuti.
@@ -254,9 +291,9 @@ public class PersonDay extends BaseModel {
   
   @Transient
   public boolean hasError(Troubles trouble) {
-    return this.troubles.stream().anyMatch(error -> error.cause == trouble);
+    return this.troubles.stream().anyMatch(error -> error.getCause() == trouble);
   }
-
+  
   @Override
   public String toString() {
     return String.format(

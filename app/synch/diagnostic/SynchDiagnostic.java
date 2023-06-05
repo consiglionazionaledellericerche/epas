@@ -1,12 +1,27 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package synch.diagnostic;
 
-import com.google.common.collect.Maps;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import models.Contract;
-import models.Institute;
 import models.Office;
 import models.Person;
 import org.joda.time.LocalDate;
@@ -31,67 +46,9 @@ import org.joda.time.LocalDate;
  * associata è aggiornata. Data inizio, Data Fine (con gestione caso determinato)
  * </p>
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 public class SynchDiagnostic {
-
-
-  /**
-   * Comparazione Institute epas <-> perseo.
-   */
-  private boolean instituteEquals(Institute epasInstitute, Institute perseoInstitute) {
-
-    return epasInstitute.cds.equals(perseoInstitute.cds)
-        && epasInstitute.name.equals(perseoInstitute.name)
-        && epasInstitute.code.equals(perseoInstitute.code);
-  }
-
-
-  private boolean isInstituteSynchronized(Institute epasInstitute, Institute perseoInstitute,
-      Map<String, Person> perseoPeople) {
-
-    if (epasInstitute.perseoId == null) {
-      return false;
-    }
-    if (!instituteEquals(epasInstitute, perseoInstitute)) {
-      return false;
-    }
-
-    for (Office epasOffice : epasInstitute.seats) {
-
-      //il perseoOffice
-      Office perseoOffice = null;
-      for (Office office : perseoInstitute.seats) {
-        if (Objects.equals(office.perseoId, epasOffice.perseoId)) {
-          perseoOffice = office;
-        }
-      }
-      if (perseoOffice == null) {
-        return false;
-      }
-
-      //le persone epas con matricola nel epasOffice Map(number -> Person)
-      Map<String, Person> epasPeople = Maps.newHashMap();
-      for (Person person : epasOffice.persons) {
-        if (person.number != null) {
-          epasPeople.put(person.number, person);
-        }
-      }
-
-      //le persone perseo nel perseoOffice Map(number -> Person)
-      //Map<Integer, Person> perseoPeople = null;
-
-      //i contratti perseo delle persone Map(number -> List(contract)) //può essere unica...
-      Map<String, List<Contract>> perseoContracts = null;
-
-      if (!isSeatSynchronized(epasOffice, perseoOffice,
-          epasPeople, perseoPeople, perseoContracts)) {
-
-      }
-    }
-
-    return false;
-  }
 
   /**
    * Comparazione seat epas <-> perseo.
@@ -100,25 +57,29 @@ public class SynchDiagnostic {
    */
   private boolean seatEquals(Office epasOffice, Office perseoOffice) {
 
-    if (!epasOffice.perseoId.equals(perseoOffice.perseoId)
-        || !epasOffice.codeId.equals(perseoOffice.codeId)
-        || !epasOffice.code.equals(perseoOffice.code)
-        || !epasOffice.name.equals(perseoOffice.name)
-        || !epasOffice.address.equals(perseoOffice.address)) {
+    if (!epasOffice.getPerseoId().equals(perseoOffice.getPerseoId())
+        || !epasOffice.getCodeId().equals(perseoOffice.getCodeId())
+        || !epasOffice.getCode().equals(perseoOffice.getCode())
+        || !epasOffice.getName().equals(perseoOffice.getName())
+        || !epasOffice.getAddress().equals(perseoOffice.getAddress())) {
       return false;
     }
 
     //Stesso istituto ...
-    return epasOffice.institute.perseoId != null
-        && perseoOffice.institute.perseoId != null
-        && Objects.equals(epasOffice.institute.perseoId, perseoOffice.institute.perseoId);
+    return epasOffice.getInstitute().getPerseoId() != null
+        && perseoOffice.getInstitute().getPerseoId() != null
+        && Objects.equals(epasOffice.getInstitute().getPerseoId(), 
+            perseoOffice.getInstitute().getPerseoId());
   }
 
+  /**
+   * Verifica se l'ufficio su ePAS e su Perseo contengono gli stessi dati.
+   */
   public boolean isSeatSynchronized(Office epasOffice, Office perseoOffice,
       Map<String, Person> epasPeople, Map<String, Person> perseoPeople,
       Map<String, List<Contract>> perseoContracts) {
 
-    if (epasOffice.perseoId == null) {
+    if (epasOffice.getPerseoId() == null) {
       return false;
     }
     if (!seatEquals(epasOffice, perseoOffice)) {
@@ -127,13 +88,13 @@ public class SynchDiagnostic {
 
     //Tutte le persone con matricola in perseo sono caricate in epas e sincronizzate.
     for (Person perseoPerson : perseoPeople.values()) {
-      Person epasPerson = epasPeople.get(perseoPerson.number);
+      Person epasPerson = epasPeople.get(perseoPerson.getNumber());
       if (epasPerson == null) {
         return false;
       }
 
       if (!isPersonSynchronized(epasPerson, perseoPerson,
-          perseoContracts.get(perseoPerson.number))) {
+          perseoContracts.get(perseoPerson.getNumber()))) {
         return false;
       }
     }
@@ -146,22 +107,22 @@ public class SynchDiagnostic {
    */
   public boolean personEquals(Person epasPerson, Person perseoPerson) {
 
-    if (epasPerson.qualification == null) {
+    if (epasPerson.getQualification() == null) {
       return false;
     }
 
-    if (!epasPerson.name.equals(perseoPerson.name)
-        || !epasPerson.surname.equals(perseoPerson.surname)
-        || !epasPerson.number.equals(perseoPerson.number)
-        || !epasPerson.qualification.equals(perseoPerson.qualification)) {
+    if (!epasPerson.getName().equals(perseoPerson.getName())
+        || !epasPerson.getSurname().equals(perseoPerson.getSurname())
+        || !epasPerson.getNumber().equals(perseoPerson.getNumber())
+        || !epasPerson.getQualification().equals(perseoPerson.getQualification())) {
 
       return false;
     }
 
     //Stessa sede ...
-    return epasPerson.office.perseoId != null
-        && perseoPerson.perseoOfficeId != null
-        && Objects.equals(epasPerson.office.perseoId, perseoPerson.perseoOfficeId);
+    return epasPerson.getOffice().getPerseoId() != null
+        && perseoPerson.getPerseoOfficeId() != null
+        && Objects.equals(epasPerson.getOffice().getPerseoId(), perseoPerson.getPerseoOfficeId());
   }
 
   /**
@@ -174,7 +135,7 @@ public class SynchDiagnostic {
     Contract perseoActiveContract = null;
 
     //Se ha il perseoId popolato allora l'entità di perseo associata è aggiornata
-    if (epasPerson.perseoId != null) {
+    if (epasPerson.getPerseoId() != null) {
       if (!personEquals(epasPerson, perseoPerson)) {
         return false;
       }
@@ -190,11 +151,11 @@ public class SynchDiagnostic {
 
     //Tutti i contratti con perseoId popolato sono sincronizzati
     // Contemporaneamente mi prelevo il contratto attivo epas
-    for (Contract epasContract : epasPerson.contracts) {
+    for (Contract epasContract : epasPerson.getContracts()) {
       if (DateUtility.isDateIntoInterval(LocalDate.now(), epasContract.periodInterval())) {
         epasActiveContract = epasContract;
       }
-      if (epasContract.perseoId != null) {
+      if (epasContract.getPerseoId() != null) {
         if (!isContractSynchronized(epasContract, perseoContracts)) {
           return false;
         }
@@ -204,11 +165,11 @@ public class SynchDiagnostic {
     //Se su perseo è attiva
     if (perseoActiveContract != null) {
       //Ha il perseoId popolato
-      if (epasPerson.perseoId == null) {
+      if (epasPerson.getPerseoId() == null) {
         return false;
       }
       //Il contratto epas attivo è correttamente sincronizzato
-      return epasActiveContract != null && epasActiveContract.perseoId != null;
+      return epasActiveContract != null && epasActiveContract.getPerseoId() != null;
     }
 
     return true;
@@ -219,22 +180,22 @@ public class SynchDiagnostic {
    */
   private boolean contractEquals(Contract epasContract, Contract perseoContract) {
 
-    if (!epasContract.perseoId.equals(perseoContract.perseoId)) {
+    if (!epasContract.getPerseoId().equals(perseoContract.getPerseoId())) {
       return false;
     }
 
     //Controllo data inizio
-    if (!epasContract.beginDate.isEqual(perseoContract.beginDate)) {
+    if (!epasContract.getBeginDate().isEqual(perseoContract.getBeginDate())) {
       return false;
     }
 
     //Stesso tipo fine
-    if (epasContract.isTemporaryMissing != perseoContract.isTemporaryMissing) {
+    if (epasContract.isTemporaryMissing() != perseoContract.isTemporaryMissing()) {
       return false;
     }
 
     //Controllo data fine
-    if (perseoContract.isTemporaryMissing && perseoContract.calculatedEnd() == null) {
+    if (perseoContract.isTemporaryMissing() && perseoContract.calculatedEnd() == null) {
       // Unico caso in cui comanda il dato in epas che è corretto.
       return true;
     }
@@ -256,12 +217,12 @@ public class SynchDiagnostic {
    */
   public boolean isContractSynchronized(Contract epasContract, List<Contract> perseoContracts) {
 
-    if (epasContract.perseoId == null) {
+    if (epasContract.getPerseoId() == null) {
       return false;
     }
 
     for (Contract perseoContract : perseoContracts) {
-      if (Objects.equals(perseoContract.perseoId, epasContract.perseoId)) {
+      if (Objects.equals(perseoContract.getPerseoId(), epasContract.getPerseoId())) {
         return contractEquals(epasContract, perseoContract);
       }
     }

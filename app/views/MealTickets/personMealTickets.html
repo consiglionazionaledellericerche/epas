@@ -28,8 +28,8 @@
     'data-async':'#page_content', 'data-async-error':'#insertMeal', 'data-spinner':'#defaultSpinner' }
     <input type="hidden" name="contractId" value="${recap.contract.id}"/>
 	#{f.view 'office', value:person.office?.name /}
-    #{f.input 'codeBlock', type:'text', required:'true' /}
-
+	#{f.input 'codeBlock', type:'text', required:'true' /}
+	#{f.selectEnum 'blockType',items:models.enumerate.BlockType,select2:'off', required:'true' /}
     #{f.input 'ticketNumberFrom', type:'number', required:'true' /}
     #{f.input 'ticketNumberTo', type:'number', required:'true' /}
 
@@ -79,6 +79,7 @@
     <table class="table center">
       <tr>
         <th>Codice</th>
+        <th>Tipo</th>
         <th>Consegnato il</th>
         <th>Scadenza</th>
       </tr>
@@ -86,6 +87,7 @@
       #{if block_index <= 3 }
       <tr>
         <td><strong>${block.codeBlock}</strong> (${block.first}-${block.last})</td>
+        <td>${block.blockType.description}</td>
         <td>${block.getDate()?.format()}</td>
         <td>${block.getExpireDate()?.format()}</td>
       </tr>

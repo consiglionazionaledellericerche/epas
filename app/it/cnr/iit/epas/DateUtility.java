@@ -1,11 +1,26 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.cnr.iit.epas;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -17,6 +32,10 @@ import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+/**
+ * Classe di utilità per la gestione delle date.
+ *
+ */
 public class DateUtility {
 
   public static final int DECEMBER = 12;
@@ -25,23 +44,30 @@ public class DateUtility {
   static final LocalDate MAX_DATE = new LocalDate(9999, 12, 1);
 
   /**
-   * @return il giorno in cui cade la pasqua.
+   * Metodo che calcola la data della pasqua nell'anno passato come parametro.
+   *
+   * @param year l'anno di riferimento
+   * @return la data in cui cade la pasqua.
    */
   private static final LocalDate findEaster(int year) {
     if (year <= 1582) {
       throw new IllegalArgumentException("Algorithm invalid before April 1583");
     }
-    int golden, century, x, z, d, epact, n;
+
     LocalDate easter = null;
-    golden = (year % 19) + 1; /* E1: metonic cycle */
-    century = (year / 100) + 1; /* E2: e.g. 1984 was in 20th C */
-    x = (3 * century / 4) - 12; /* E3: leap year correction */
+    int golden = (year % 19) + 1; /* E1: metonic cycle */
+    int century = (year / 100) + 1; /* E2: e.g. 1984 was in 20th C */
+    int z;
+    int x = (3 * century / 4) - 12; /* E3: leap year correction */
     z = ((8 * century + 5) / 25) - 5; /* E3: sync with moon's orbit */
+    int d;
     d = (5 * year / 4) - x - 10;
+    int epact;
     epact = (11 * golden + 20 + z - x) % 30; /* E5: epact */
     if ((epact == 25 && golden > 11) || epact == 24) {
       epact++;
     }
+    int n;
     n = 44 - epact;
     n += 30 * (n < 21 ? 1 : 0); /* E6: */
     n += 7 - ((d + n) % 7);
@@ -59,6 +85,7 @@ public class DateUtility {
 
   /**
    * Festività generale.
+   *
    * @param officePatron giorno del patrono
    * @param date data da verificare
    * @return esito
@@ -76,8 +103,6 @@ public class DateUtility {
             && date.getMonthOfYear() == easterMonday.getMonthOfYear()) {
       return true;
     }
-    // if((date.getDayOfWeek() == 7)||(date.getDayOfWeek() == 6))
-    // return true;
     if ((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 25)) {
       return true;
     }
@@ -115,7 +140,7 @@ public class DateUtility {
               && date.getDayOfMonth() == officePatron.get().getDayOfMonth());
     }
 
-    /**
+    /*
      * ricorrenza centocinquantenario dell'unità d'Italia.
      */
     if (date.isEqual(new LocalDate(2011, 3, 17))) {
@@ -126,6 +151,8 @@ public class DateUtility {
   }
 
   /**
+   * Metodo che ritorna la lista dei giorni contenuti nell'intervallo begin-end.
+   *
    * @param begin data iniziale.
    * @param end   data finale
    * @return lista di tutti i giorni fisici contenuti nell'intervallo [begin,end] estremi compresi,
@@ -147,6 +174,7 @@ public class DateUtility {
 
   /**
    * Se la data è contenuta nell'intervallo.
+   *
    * @param date     data
    * @param interval intervallo
    * @return true se la data ricade nell'intervallo estremi compresi
@@ -169,6 +197,7 @@ public class DateUtility {
 
   /**
    * L'intervallo di date contenente l'intersezione fra inter1 e inter2.
+   *
    * @param inter1 primo intervallo
    * @param inter2 secondo intervallo
    * @return l'intervallo contenente l'intersezione fra inter1 e inter2, null in caso di
@@ -207,28 +236,11 @@ public class DateUtility {
       return new DateInterval(copy2.getBegin(), copy1.getEnd());
     }
   }
-  
-  /**
-   * Conta il numero di giorni appartenenti all'intervallo estremi compresi.
-   * @param inter l'intervallo
-   * @return numero di giorni
-   */
-  public static int daysInInterval(final DateInterval inter) {
-
-    int days = Days.daysBetween(inter.getBegin(), inter.getEnd()).getDays() + 1;
-
-    //controllo compatibilità con vecchio algoritmo.
-    if (inter.getBegin().getYear() == inter.getEnd().getYear()) {
-      int oldDays = inter.getEnd().getDayOfYear() - inter.getBegin().getDayOfYear() + 1;
-      Preconditions.checkState(days == oldDays);
-    }
-
-    return days;
-
-  }
+    
   
   /**
    * L'intervallo orario contenente l'intersezione fra inter1 e inter2.
+   *
    * @param inter1 primo intervallo
    * @param inter2 secondo intervallo
    * @return l'intervallo contenente l'intersezione fra inter1 e inter2, null in caso di
@@ -267,9 +279,30 @@ public class DateUtility {
       return new TimeInterval(copy2.getBegin(), copy1.getEnd());
     }
   }
+  
+  /**
+   * Conta il numero di giorni appartenenti all'intervallo estremi compresi.
+   *
+   * @param inter l'intervallo
+   * @return numero di giorni
+   */
+  public static int daysInInterval(final DateInterval inter) {
+
+    int days = Days.daysBetween(inter.getBegin(), inter.getEnd()).getDays() + 1;
+
+    //controllo compatibilità con vecchio algoritmo.
+    if (inter.getBegin().getYear() == inter.getEnd().getYear()) {
+      int oldDays = inter.getEnd().getDayOfYear() - inter.getBegin().getDayOfYear() + 1;
+      Preconditions.checkState(days == oldDays);
+    }
+
+    return days;
+
+  }
 
   /**
    * Conta il numero di mesi appartenenti all'intervallo, estremi compresi.
+   *
    * @param inter intervallo
    * @return numero di mesi
    */
@@ -279,6 +312,7 @@ public class DateUtility {
 
   /**
    * Se il primo intervallo di date è contenuto nel secondo intervallo.
+   *
    * @param first  il primo intervallo
    * @param second il secondo intervallo
    * @return se il primo intervallo di date è contenuto nel secondo intervallo.
@@ -294,6 +328,7 @@ public class DateUtility {
   
   /**
    * Se il primo intervallo di orari è contenuto nel secondo intervallo.
+   *
    * @param first  il primo intervallo
    * @param second il secondo intervallo
    * @return se il primo intervallo di orari è contenuto nel secondo intervallo.
@@ -309,6 +344,7 @@ public class DateUtility {
   
   /**
    * Se i due inervalli coincidono.
+   *
    * @param first first
    * @param second second
    * @return esito
@@ -323,6 +359,7 @@ public class DateUtility {
 
   /**
    * La data massima che equivale a infinito.
+   *
    * @return la data infinito
    */
   public static LocalDate setInfinity() {
@@ -330,6 +367,8 @@ public class DateUtility {
   }
 
   /**
+   * Controlla se la data passata come parametro è molto lontana nel tempo.
+   *
    * @param date la data da confrontare
    * @return se la data è molto molto lontana...
    */
@@ -339,6 +378,7 @@ public class DateUtility {
   
   /**
    * L'intervallo dell'anno.
+   *
    * @param year anno
    * @return l'intervallo
    */
@@ -348,6 +388,7 @@ public class DateUtility {
   
   /**
    * L'intervallo del mese.
+   *
    * @param year anno
    * @param month mese
    * @return intervallo
@@ -358,8 +399,10 @@ public class DateUtility {
   }
 
   /**
+   * Trasforma in nome il numero del mese passato come parametro.
+   *
    * @param monthNumber mese da formattare.
-   * @return il nome del mese con valore monthNumber, null in caso di argomento non valido
+   * @return il nome del mese con valore monthNumber, null in caso di argomento non valido.
    */
   public static String fromIntToStringMonth(final Integer monthNumber) {
     LocalDate date = new LocalDate().withMonthOfYear(monthNumber);
@@ -367,19 +410,22 @@ public class DateUtility {
   }
   
   /**
-   * 
+   * Trasforma in stringa il numero del mese aggiungendo '""' davanti.
+   *
    * @param month il mese da formattare
    * @return il mese se maggiore di 10, con lo 0 davanti se minore di 10.
    */
   public static String checkMonth(int month) {
     if (month < 10) {
-      return "0"+month;
+      return "0" + month;
     } else {
-      return ""+month;
+      return "" + month;
     }
   }
 
   /**
+   * Ritorna la stringa nel formato HH:MM della quantità di minuti passata come parametro.
+   *
    * @param minute minuti da formattare.
    * @return stringa contente la formattazione -?HH:MM
    */
@@ -412,6 +458,8 @@ public class DateUtility {
 
 
   /**
+   * Parser della stringa contenente la data in un oggetto LocalDate.
+   *
    * @param date data.
    * @param pattern : default dd/MM
    * @return effettua il parsing di una stringa che contiene solo giorno e Mese
@@ -428,6 +476,8 @@ public class DateUtility {
   }
 
   /**
+   * Ritorna la data del primo giorno del mese.
+   *
    * @param yearMonth il mese da considerare.
    * @return il primo giorno del mese da considerare formato LocalDate.
    */
@@ -436,6 +486,8 @@ public class DateUtility {
   }
 
   /**
+   * Ritorna la data dell'ultimo giorno del mese.
+   *
    * @param yearMonth il mese da considerare.
    * @return l'ultimo giorno del mese da considerare formato LocalDate.
    */
@@ -445,6 +497,8 @@ public class DateUtility {
   }
 
   /**
+   * Ritorna la quantità di minuti trascorsi dall'inizio del giorno all'ora.
+   *
    * @param time ora.
    * @return il numero di minuti trascorsi dall'inizio del giorno all'ora.
    */
@@ -454,7 +508,8 @@ public class DateUtility {
   
   
   /**
-   * Il tempo dalla mezzanotte. 
+   * Il tempo dalla mezzanotte.
+   *
    * @param time orario
    * @return tempo
    */
@@ -469,6 +524,8 @@ public class DateUtility {
   }
 
   /**
+   * Ritorna la differenza in minuti tra due orari.
+   *
    * @param begin orario di ingresso.
    * @param end   orario di uscita.
    * @return minuti lavorati.

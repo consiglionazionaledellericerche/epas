@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.absences;
 
 import javax.persistence.Entity;
@@ -6,13 +23,17 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
 import lombok.Builder;
-
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
 
+/**
+ * Problema su un'assenza.
+ */
+@Getter
+@Setter
 @Builder
 @Audited
 @Entity
@@ -22,13 +43,15 @@ public class AbsenceTrouble extends BaseModel {
   private static final long serialVersionUID = -5066077912284859060L;
 
   @Enumerated(EnumType.STRING)
-  public AbsenceProblem trouble;
+  private AbsenceProblem trouble;
 
   @ManyToOne//(fetch = FetchType.LAZY)
   @JoinColumn(name = "absence_id", nullable = false, updatable = false)
-  public Absence absence;
+  private Absence absence;
 
- 
+  /**
+   * Tipo di problemi sulle assenze che si possono verificare.
+   */
   public enum AbsenceProblem {
     
     //Ignorata dal controllo

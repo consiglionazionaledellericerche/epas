@@ -10,10 +10,10 @@
   #{alert color:'warning', dismissible: true}
   <p>
     Le competenze per il mese ${reperibilityTypeMonth.yearMonth.asText()} risultano già approvate.
-    La rimozione dell'approvazione comporterà un ricalcolo delle competenze assegnate ai reperibili
+    La rimozione dell'approvazione comporterà un ricalcolo delle competenze assegnate agli assegnatari
     di questa attività.
     Inoltre una volta rimossa l'approvazione sarà nuovamente possibile effettuare le modifiche
-    sulle reperibilità del calendario.
+    sulle attività del calendario.
   </p>
   #{/alert}
   #{/if}
@@ -23,17 +23,22 @@
   #{alert color:'info', dismissible: true}
   <p>
     Le competenze per il mese ${reperibilityTypeMonth.yearMonth.asText()} risultano da approvare.
-    L'approvazione comporterà l'assegnamento delle competenze riportate qui sotto ai reperibili di
+    L'approvazione comporterà l'assegnamento delle competenze riportate qui sotto agli assegnatari di
     questa attività.<br>
-    Una volta approvate, non sarà possibile apportare ulteriori modifiche alle reperibilità dal calendario
+    Una volta approvate, non sarà possibile apportare ulteriori modifiche alle attività dal calendario
     salvo annullamento dell'approvazione.
   </p>
   #{/alert}
   #{/else}
-  
+  <!-- Stampa calendario di reperibilità -->
+<div class="row"></div>
+<div class="row">
+    
+</div>
+<div class="row"><br></div>
 <div class="col-sm-6">
   	<span class="text-success">
-  	<h4>Reperibilità feriali</h4>
+  	<h4>Attività feriali</h4>
   	</span>
   	<ul class="list-group">
     #{list items:listWorkdaysRep, as:'item'}
@@ -53,7 +58,7 @@
   </div>
   <div class="col-sm-6">
   	<span class="text-danger">
-  	<h4>Reperibilità festive</h4>
+  	<h4>Attività festive</h4>
   	</span>
   	<ul class="list-group">
     #{list items:listHolidaysRep, as:'item'}

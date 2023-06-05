@@ -1,9 +1,24 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao.wrapper;
 
 import com.google.common.base.Optional;
-
 import java.util.List;
-
 import models.CertificatedData;
 import models.Competence;
 import models.CompetenceCode;
@@ -13,14 +28,13 @@ import models.ContractWorkingTimeType;
 import models.Person;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 /**
  * Oggetto persone con molte funzionalità aggiuntive.
  *
- * @author marco
+ * @author Marco Andreini
  */
 public interface IWrapperPerson extends IWrapperModel<Person> {
 
@@ -38,6 +52,11 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
    * Il contratto attuale. Istanzia una variabile Lazy.
    */
   Optional<Contract> getCurrentContract();
+  
+  /**
+   * Il contratto precedente, se esiste.
+   */
+  Optional<Contract> getPreviousContract();
 
 
   /**
@@ -126,21 +145,26 @@ public interface IWrapperPerson extends IWrapperModel<Person> {
   
   /**
    * Il contratto della persona con quel perseoId.
+   *
    * @param perseoId perseoId
    * @return contratto
    */
   Contract perseoContract(String perseoId);
   
   /**
-   * 
+   * Se una persona è IV-VIII livello.
+   *
    * @return true se la persona è un tecnico (liv. IV - VIII), false altrimenti
    */
   boolean isTechnician();
-  
+
   /**
    * L'ultimo invio attestati effettuato tramite ePAS.
    */
   Optional<YearMonth> lastUpload();
+
+  public List<IWrapperContractMonthRecap> getWrapperContractMonthRecaps(YearMonth yearMonth);
   
+  public int getNumberOfMealTicketsPreviousMonth(YearMonth yearMonth);
 
 }

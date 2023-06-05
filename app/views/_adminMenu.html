@@ -4,9 +4,11 @@
   'Persons.list',
   'Stampings.personStamping',
   'Absences.showGeneralMonthlyAbsences',
+  'InformationRequests.handleTeleworkApproval',
   'Vacations.list',
   'Competences.showCompetences',
   'MealTickets.recapMealTickets',
+  'MealTicketCards.recapElectronicMealTickets',
   'PersonMonths.visualizePeopleTrainingHours',
   'Stampings.missingStamping',
   'Stampings.dailyPresence',
@@ -47,13 +49,18 @@
       #{secure.li @Stampings.personStamping(currentData.personId, currentData.year, currentData.month) }
       <i class="fa fa-clock-o" aria-hidden="true"></i>
       #{/secure.li}
+      
+      #{if teleworkStampingsActive}
+	      #{secure.li @TeleworkStampings.personTeleworkStampings(currentData.personId, currentData.year, currentData.month) }
+	      	<i class="fa fa-clock-o" aria-hidden="true"></i>
+	      #{/secure.li}
+	      #{secure.li @InformationRequests.handleTeleworkApproval(currentData.personId) }
+	      	<i class="fa fa-laptop" aria-hidden="true"></i>
+	      #{/secure.li}
+      #{/if}
 
       #{secure.li @Absences.showGeneralMonthlyAbsences(currentData.year, currentData.month, currentData.officeId) }
       <i class="fa fa-user-times" aria-hidden="true"></i>
-      #{/secure.li}
-      
-      #{secure.li @TimeVariations.show(currentData.officeId)}
-	  <i class="fa fa-search-plus" aria-hidden="true"></i>
       #{/secure.li}
       
       #{secure.li @Vacations.list(currentData.year, currentData.officeId) }
@@ -62,6 +69,10 @@
 
       #{secure.li @Competences.showCompetences(currentData.year, currentData.month, currentData.officeId) }
       <i class="fa fa-money" aria-hidden="true"></i>
+      #{/secure.li}
+      
+      #{secure.li @MealTicketCards.mealTicketCards(currentData.officeId) }
+      <i class="fa fa-id-card" aria-hidden="true"></i>
       #{/secure.li}
 
       #{secure.li @MealTickets.recapMealTickets(currentData.year, currentData.month, currentData.officeId) }

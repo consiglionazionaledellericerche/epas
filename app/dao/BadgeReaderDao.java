@@ -1,8 +1,24 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
@@ -10,6 +26,7 @@ import com.querydsl.jpa.JPQLQueryFactory;
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
 import java.util.List;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.BadgeReader;
 import models.BadgeSystem;
@@ -22,7 +39,7 @@ import models.query.QUser;
 /**
  * Dao per l'accesso alle informazioni dei BadgeReader.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 public class BadgeReaderDao extends DaoBase {
 
@@ -34,6 +51,8 @@ public class BadgeReaderDao extends DaoBase {
   }
 
   /**
+   * Ritorna il lettore badge identificato dall'id passato.
+   *
    * @return il badgereader associato al codice passato come parametro.
    */
   public BadgeReader byId(Long id) {
@@ -43,6 +62,8 @@ public class BadgeReaderDao extends DaoBase {
   }
 
   /**
+   * Ritorna il badgereader associato al codice passato.
+   *
    * @return il badgereader associato al codice passato come parametro.
    */
   public BadgeReader byCode(String code) {
@@ -105,6 +126,8 @@ public class BadgeReaderDao extends DaoBase {
   }
 
   /**
+   * Ritorna la lista di lettori badge associati alla sede.
+   *
    * @return la lista di badgeReader di cui l'ufficio è proprietario.
    */
   public List<BadgeReader> getBadgeReaderByOffice(Office office) {

@@ -15,24 +15,41 @@
      #{alert color:'info'}
       <p>Seleziona il tipo di orario da creare per la sede ${office.name} e il nome descrittivo</p>
      #{/alert}
-     
+
      <!-- Switcher horizontal / vertical -->
      #{form action:@WorkingTimes.insertWorkingTimeBaseInformation(), method:'POST', autocomplete:false,
 		    class:'form form-horizontal' }
-		
+
 	   #{f.hidden 'officeId', value:office.id /}
        #{f.hidden 'compute', value:true /}    
-       
+
       #{f.selectEnum 'workingTimeTypePattern', items:models.enumerate.WorkingTimeTypePattern, 
 		value:workingTimeTypePattern, byEquals:true /}
 		
   	   #{f.input 'name', required:true /}
   	   
+  	   #{alert color:'warning'}
+  	   <p>
+  	   <strong>ATTENZIONE</strong> <i class="fa fa-exclamation" aria-hidden="true"></i> Il parametro sottostante consente di specificare se l'orario di lavoro che stiamo definendo è soggetto al
+  	   riproporzionamento dei codici di assenza quali, ad esempio, i codici per legge 104 (cod. 18/19). <br> 
+  	   Mettere a "SI" in caso di:
+  	   <ul>
+  	   <li><strong>Qualsiasi</strong> tipo di part time ORIZZONTALE (ad eccezione di un orario <em>maternità/allattamento</em>)</li>
+  	   <li>In caso di part time VERTICALE con percentuale della prestazione lavorativa <strong>INFERIORE AL 50%</strong></li>
+  	   </ul>
+  	   </p>
+  	   #{/alert}
+  	   #{f.booleanRadio 'reproportionEnabled', required:true /}
+  	   
+  	   #{secure.check 'WorkingTimeType.externalId'}
+  	     #{f.input 'externalId' /}
+  	   #{/secure.check}
+
   	   <!--bottoni -->
 	   #{b.buttons center:true}   
 	     #{b.submit 'Inizia'/}
 	   #{/b.buttons}
-  	    
+
 	 #{/form}
 	 	 
  </div> 

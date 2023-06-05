@@ -1,27 +1,43 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
-
 import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
 import dao.wrapper.IWrapperContractMonthRecap;
-
 import java.util.List;
-
+import javax.inject.Inject;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
-
 import models.Competence;
+import models.CompetenceCodeGroup;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
 import models.absences.Absence;
-
 import play.Play;
 
+/**
+ * Manager per la generazione del file da caricare su Attestati.
+ */
 public class UploadSituationManager {
 
   
@@ -35,7 +51,7 @@ public class UploadSituationManager {
   private PersonStampingRecapFactory stampingsRecapFactory;
   
   /**
-   * Generatore del file da carica su attestati con le assenze/compentenze del personale.
+   * Generatore del file da caricare su attestati con le assenze/compentenze del personale.
    */
   @Inject
   public UploadSituationManager(PersonDao personDao, AbsenceDao absenceDao, 
@@ -50,7 +66,8 @@ public class UploadSituationManager {
   
   /**
    * Produce il contenuto del file per attestati circa mese e anno per tutti i dipendenti della
-   *  sede passata come paramemtro.
+   * sede passata come paramemtro.
+   *
    * @param office office
    * @param year anno 
    * @param month mese 
@@ -61,34 +78,35 @@ public class UploadSituationManager {
     List<Person> personList = personDao.getPersonsWithNumber(Optional.of(office));
     
     String body = Play.configuration.getProperty(HEADING) + "\r\n" 
-        + office.codeId + " " + year + " " + month + "\r\n";
+        + office.getCodeId() + " " + year + " " + month + "\r\n";
     
     for (Person person : personList) {
       // la parte delle assenze
       List<Absence> absenceList  = absenceDao.getAbsencesNotInternalUseInMonth(person, year, month);
       for (Absence abs : absenceList) {
-        body = body + person.number + " A " + abs.absenceType.code + " " 
-             + abs.personDay.date.getDayOfMonth() 
-             + " " + abs.personDay.date.getDayOfMonth() + " \r\n"; 
+        body = body + person.getNumber() + " A " + abs.getAbsenceType().getCode() + " " 
+             + abs.getPersonDay().getDate().getDayOfMonth() 
+             + " " + abs.getPersonDay().getDate().getDayOfMonth() + " \r\n"; 
       }
       //la parte delle competenze
       List<Competence> competenceList = competenceDao
-          .getCompetenceInMonthForUploadSituation(person, year, month);
+          .getCompetenceInMonthForUploadSituation(person, year, month, 
+              Optional.<CompetenceCodeGroup>absent());
       for (Competence comp : competenceList) {
-        body = body + person.number + " C " + comp.competenceCode.code + " " 
-            + comp.valueApproved + " \r\n";
+        body = body + person.getNumber() + " C " + comp.getCompetenceCode().getCode() + " " 
+            + comp.getValueApproved() + " \r\n";
       }
       List<PersonMonthRecap> pmrList = 
           personMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(
-              person, year, Optional.fromNullable(month),Optional.<Boolean>absent());
+              person, year, Optional.fromNullable(month), Optional.<Boolean>absent());
       for (PersonMonthRecap pmr : pmrList) {
-        body = body + person.number + " F " + pmr.fromDate.getDayOfMonth() + " " 
-            + pmr.toDate.getDayOfMonth() + " " + pmr.trainingHours + " \r\n";
+        body = body + person.getNumber() + " F " + pmr.getFromDate().getDayOfMonth() + " " 
+            + pmr.getToDate().getDayOfMonth() + " " + pmr.getTrainingHours() + " \r\n";
       }
       PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
       for (IWrapperContractMonthRecap cmr : psDto.contractMonths) {
-        body = body + person.number + " B " + cmr.getValue().buoniPastoUsatiNelMese + " " 
-            + cmr.getValue().buoniPastoUsatiNelMese + " \r\n";
+        body = body + person.getNumber() + " B " + cmr.getValue().getBuoniPastoUsatiNelMese() + " " 
+            + cmr.getValue().getBuoniPastoUsatiNelMese() + " \r\n";
       }
     }
     

@@ -1,8 +1,26 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences.model;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import dao.AbsenceTypeDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Collections;
@@ -10,9 +28,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import manager.PersonDayManager;
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.ErrorsBox;
 import models.Person;
+import models.PersonDay;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
@@ -20,12 +40,18 @@ import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
 import models.absences.InitializationGroup;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
+import models.absences.definitions.DefaultAbsenceType;
 import models.enumerate.VacationCode;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
 
+
+/**
+ * Rappresenta un insieme di assenza all'interno di un periodo temporale.
+ */
 public class AbsencePeriod {
-  
+
   // Period
   public Person person;
   public GroupAbsenceType groupAbsenceType;
@@ -33,10 +59,10 @@ public class AbsencePeriod {
   public LocalDate to;                        // Data fine
   public InitializationGroup initialization;  // Inizializazione period (se presente)
   public SortedMap<LocalDate, DayInPeriod> daysInPeriod = Maps.newTreeMap();
-  
+
   //AllPeriods
   public List<AbsencePeriod> subPeriods;
-  
+
   // Takable
   public AmountType takeAmountType;                // Il tipo di ammontare del periodo
   public TakeCountBehaviour takableCountBehaviour; // Come contare il tetto totale
@@ -45,25 +71,25 @@ public class AbsencePeriod {
   public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
   public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
   public LocalDate limitExceedDate;
-  
+
   // Complation
   public AmountType complationAmountType;                      // Tipo di ammontare completamento
-  
+
   // I codici di rimpiazzamento ordinati per il loro tempo di completamento (decrescente)
   public SortedMap<Integer, List<AbsenceType>> replacingCodesDesc = 
       Maps.newTreeMap(Collections.reverseOrder());              
-                                                                                    
+
   //I tempi di rimpiazzamento per ogni assenza
   public Map<AbsenceType, Integer> replacingTimes = Maps.newHashMap();              
   public Set<AbsenceType> complationCodes;                             // Codici di completamento
-  
+
   //Errori del periodo
   public ErrorsBox errorsBox = new ErrorsBox();
   public boolean ignorePeriod = false;
-  
+
   //Tentativo di inserimento assenza nel periodo
   public Absence attemptedInsertAbsence;
-  
+
   //Supporto alla gestione ferie e permessi 
   //Assenze che hanno provocato una riduzione della quantità 
   public List<Absence> reducingAbsences = Lists.newArrayList();
@@ -76,31 +102,61 @@ public class AbsencePeriod {
   // Se il period è stato splittato perchè a cavallo del primo anno contratto
   public AbsencePeriod splittedWith;
   
-  AbsencePeriod(Person person, GroupAbsenceType groupAbsenceType) {
+  public AbsenceTypeDao absenceTypeDao;
+  public PersonDayManager personDayManager;  
+
+  
+  /**
+   * Costruttore.
+   */
+  AbsencePeriod(Person person, GroupAbsenceType groupAbsenceType, PersonDayManager personDayManager,
+      AbsenceTypeDao absenceTypeDao) {
     this.person = person;
     this.groupAbsenceType = groupAbsenceType;
+    this.absenceTypeDao = absenceTypeDao;
+    this.personDayManager = personDayManager;
   }
 
+
+  /**
+   * Intervallo temporale.
+   */
   public DateInterval periodInterval() {
     return new DateInterval(from, to);
   }
-  
+
+
+  /**
+   * Verifica se l'assenza è prendibile nel periodo.
+   */
   public boolean isTakable() {
     return takeAmountType != null; 
   }
-  
+
+  /**
+   * Verifica se l'assenza è prendibile nel periodo e non ci sono limiti di prendibilità.
+   */
   public boolean isTakableNoLimit() {
     return takeAmountType != null && getPeriodTakableAmount() < 0;
   }
-  
+
+  /**
+   * Verifica se l'assenza è prendibile nel periodo ma ci sono dei limiti di prendibilità.
+   */
   public boolean isTakableWithLimit() {
     return isTakable() && !isTakableNoLimit();
   }
-  
+
+  /**
+   * Verifica se l'assenza è prendibile nel periodo e se è prendibile ad unità di tempo predefinite.
+   */
   public boolean isTakableUnits() {
     return isTakableWithLimit() && this.takeAmountType == AmountType.units;
   }
-  
+
+  /**
+   * Verifica se l'assenza è prendibile nel periodo e se è prendibile a minuti.
+   */
   public boolean isTakableMinutes() {
     return isTakableWithLimit() && this.takeAmountType == AmountType.minutes;
   }
@@ -108,6 +164,7 @@ public class AbsencePeriod {
   /**
    * Imposta l'ammontare fisso del periodo.
    * ex. 150 ore (che possono poi essere decurtate in modo variabile)
+   *
    * @param amount ammontare fisso
    */
   public void setFixedPeriodTakableAmount(int amount) {
@@ -119,10 +176,16 @@ public class AbsencePeriod {
     }
   }
   
+  /**
+   * Il fixedPeriodTakableAmount.
+   */
   public Integer getFixedPeriodTakableAmount() {
     return this.fixedPeriodTakableAmount;
   }
 
+  /**
+   * Le assenza prese nel periodo.
+   */
   private List<TakenAbsence> takenAbsences() {
     List<TakenAbsence> takenAbsences = Lists.newArrayList();
     for (DayInPeriod daysInPeriod : this.daysInPeriod.values()) {
@@ -133,6 +196,7 @@ public class AbsencePeriod {
   
   /**
    * L'ammontare totale prendibile nel periodo.
+   *
    * @return int
    */
   public int getPeriodTakableAmount() {
@@ -141,12 +205,34 @@ public class AbsencePeriod {
   }
   
   /**
-   * Calcola l'ammontare in funzione del tipo di conteggio. 
+   * Calcola l'ammontare in funzione del tipo di conteggio.
+   *
    * @return int
    */
   public int computePeriodTakableAmount(TakeCountBehaviour countBehaviour, LocalDate date) {
-    
     if (countBehaviour.equals(TakeCountBehaviour.period)) {
+      if (this.takableCodes.contains(absenceTypeDao
+          .getAbsenceTypeByCode(DefaultAbsenceType.A_LAGILE.getCode()).get())) {
+        /* Caso di febbraio: secondo la nota del DG i giorni di lavoro agile a febbraio
+         * non possono essere più di 8. Quindi sottraggo 2 giorni nella modalità 
+         * prevista dall'algoritmo (2 * 100) al quantitativo di giorni previsto per il 
+         * gruppo del codice LAGILE (this.fixexPeriodTakableAmount).
+         */
+        int quantity = 0;
+        if (from.monthOfYear().get() == DateTimeConstants.FEBRUARY) {
+          return this.fixedPeriodTakableAmount - 2 * 100;
+        }
+        List<PersonDay> workingDays = personDayManager.workingDaysInMonth(person, from, to);
+        int count = (workingDays.size() * 100 / 2);
+        if (count % 100 != 0) {
+          quantity = count - count % 100;
+        } else {
+          quantity = count - (1 * 100);
+        }
+        if (quantity <= this.fixedPeriodTakableAmount) {
+          return quantity;
+        }
+      } 
       return this.fixedPeriodTakableAmount;
     }
 
@@ -174,6 +260,7 @@ public class AbsencePeriod {
   
   /**
    * L'ammontare utilizzato nel periodo.
+   *
    * @return int
    */
   public int getPeriodTakenAmount() {
@@ -224,11 +311,13 @@ public class AbsencePeriod {
 
   /**
    * Aggiunge al period l'assenza takable nel periodo.
+   *
    * @param absence assenza
    * @param takenAmount ammontare
    * @return l'assenza takable
    */
   public TakenAbsence buildTakenAbsence(Absence absence, int takenAmount) {
+    
     int periodTakableAmount = this.getPeriodTakableAmount();
     int periodTakenAmount = this.getPeriodTakenAmount();
     TakenAbsence takenAbsence = TakenAbsence.builder()
@@ -239,12 +328,15 @@ public class AbsencePeriod {
         .takenAmount(takenAmount)
         .build();
     if (this.initialization != null 
-        && !absence.getAbsenceDate().isAfter(this.initialization.date)) {
+        && !absence.getAbsenceDate().isAfter(this.initialization.getDate())) {
       takenAbsence.beforeInitialization = true;
     }  
     return takenAbsence;
   }
   
+  /**
+   * Aggiunge un'assenza tra quelle prese.
+   */
   public void addTakenAbsence(TakenAbsence takenAbsence) {
     DayInPeriod dayInPeriod = getDayInPeriod(takenAbsence.absence.getAbsenceDate());
     dayInPeriod.getTakenAbsences().add(takenAbsence);
@@ -252,6 +344,7 @@ public class AbsencePeriod {
   
   /**
    * Aggiunge l'assenza di completamento al periodo.
+   *
    * @param absence assenza di completamento
    */
   public void addComplationAbsence(Absence absence) {
@@ -262,6 +355,9 @@ public class AbsencePeriod {
     dayInPeriod.getExistentComplations().add(absence);
   }
   
+  /**
+   * Aggiunge un'assenza che sta rimpiazzando un'altra assenza.
+   */
   public void addReplacingAbsence(Absence absence) {
     DayInPeriod dayInPeriod = getDayInPeriod(absence.getAbsenceDate());
     dayInPeriod.getExistentReplacings().add(absence);
@@ -269,6 +365,7 @@ public class AbsencePeriod {
    
   /**
    * Tagga il periodo come limite superato alla data.
+   *
    * @param date data
    */
   public void setLimitExceededDate(LocalDate date) {
@@ -276,15 +373,24 @@ public class AbsencePeriod {
       this.limitExceedDate = date;
     }
   }
-  
+
+  /**
+   * Verifica se è a completamento.
+   */
   public boolean isComplation() {
     return this.complationAmountType != null;
   }
-  
+
+  /**
+   * Verifica se è a completamento ed il completamente è a unità prefissate.
+   */
   public boolean isComplationUnits() {
     return isComplation() && this.complationAmountType == AmountType.units; 
   }
-  
+
+  /**
+   * Verifica se è a completamento ed il completamente è a minuti.
+   */
   public boolean isComplationMinutes() {
     return isComplation() && this.complationAmountType == AmountType.minutes; 
   }
@@ -292,6 +398,7 @@ public class AbsencePeriod {
   
   /**
    * Calcola i rimpiazzamenti corretti nel periodo.
+   *
    * @param absenceEngineUtility inject dep
    */
   public void computeCorrectReplacingInPeriod(AbsenceEngineUtility absenceEngineUtility) {
@@ -302,7 +409,8 @@ public class AbsencePeriod {
 
     int complationAmount = getInitializationComplationUsed(absenceEngineUtility);
     for (DayInPeriod dayInPeriod : this.daysInPeriod.values()) {
-      if (this.initialization != null && !dayInPeriod.getDate().isAfter(this.initialization.date)) {
+      if (this.initialization != null && !dayInPeriod.getDate()
+          .isAfter(this.initialization.getDate())) {
         continue;
       }
       if (dayInPeriod.getExistentComplations().isEmpty()) {
@@ -333,6 +441,7 @@ public class AbsencePeriod {
   
   /**
    * Seleziona dalla lista le assenze appartenenti al period.
+   *
    * @param absences assenze
    * @return list
    */
@@ -349,6 +458,7 @@ public class AbsencePeriod {
   
   /**
    * La struttura dati DayInPeriod per quella data. Se non esiste la crea.
+   *
    * @param date data
    * @return il dayInPeriod
    */
@@ -361,6 +471,9 @@ public class AbsencePeriod {
     return dayInPeriod;
   }
   
+  /**
+   * Verifica se ci sono degli errori critici.
+   */
   public boolean containsCriticalErrors() {
     return ErrorsBox.boxesContainsCriticalErrors(Lists.newArrayList(this.errorsBox));
   }
@@ -371,6 +484,7 @@ public class AbsencePeriod {
   
   /**
    * L'inizializzazione nella parte takable.
+   *
    * @return int
    */
   public int getInitializationTakableUsed() {
@@ -381,14 +495,14 @@ public class AbsencePeriod {
       return 0;
     }
     
-    int minutes = this.initialization.hoursInput * 60 + this.initialization.minutesInput;
+    int minutes = this.initialization.getHoursInput() * 60 + this.initialization.getMinutesInput();
     //Takable used
     if (this.isTakableMinutes()) {
       return minutes;
     } else if (this.isTakableUnits()) {
-      int units = (this.initialization.unitsInput * 100);
+      int units = (this.initialization.getUnitsInput() * 100);
       if (minutes > 0) {
-        units = units + workingTypePercent(minutes, this.initialization.averageWeekTime); 
+        units = units + workingTypePercent(minutes, this.initialization.getAverageWeekTime()); 
       }
       return units; 
     }
@@ -398,6 +512,7 @@ public class AbsencePeriod {
   
   /**
    * L'inizializzazione nella parte completamento.
+   *
    * @param absenceEngineUtility inject
    * @return int
    */
@@ -409,17 +524,17 @@ public class AbsencePeriod {
       return 0;
     }
     
-    int minutes = this.initialization.hoursInput * 60 + this.initialization.minutesInput;
+    int minutes = this.initialization.getHoursInput() * 60 + this.initialization.getMinutesInput();
     
     //Complation used
     if (this.isComplationUnits()) {
-      return workingTypePercentModule(minutes, this.initialization.averageWeekTime);
+      return workingTypePercentModule(minutes, this.initialization.getAverageWeekTime());
     } else if (this.isComplationMinutes()) {
       
       //completare finchè si può minutes
       while (true) {
         Optional<AbsenceType> absenceType = absenceEngineUtility
-            .whichReplacingCode(this.replacingCodesDesc, this.initialization.date, minutes);
+            .whichReplacingCode(this.replacingCodesDesc, this.initialization.getDate(), minutes);
         if (!absenceType.isPresent()) {
           break;
         }
@@ -441,10 +556,50 @@ public class AbsencePeriod {
     int workTimePercent = workingTypePercent(minutes, workTime); 
     return workTimePercent % 100;
   }
-  
+
+  @Override
   public String toString() {
     return from + " " + to + " " + fixedPeriodTakableAmount + takableCodes;  
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof AbsencePeriod)) {
+      return false;
+    }
+    
+    AbsencePeriod other = (AbsencePeriod) o;
+    
+    boolean isEqual = false;
+    
+    if ((from == null && other.from != null) 
+        || from != null && other.from == null) {
+      return false; 
+    }
+    if ((to == null && other.to != null) 
+        || to != null && other.to == null) {
+      return false; 
+    }
+    
+    isEqual = person.id.equals(other.person.id) 
+        && groupAbsenceType.id.equals(groupAbsenceType.id);
+    
+    if (from != null && other.from != null) {
+      isEqual = isEqual && from.isEqual(other.from);
+    }
+    if (to != null && other.to != null) {
+      isEqual = isEqual && to.isEqual(other.to);
+    }
+    
+    return isEqual;
+  }
+  
+  @Override
+  public int hashCode() {
+    return (from != null ? from.hashCode() : 0) 
+        +  (to != null ? to.hashCode() : 0) 
+        + (person != null ? person.hashCode() : 0) 
+        + (groupAbsenceType != null ? groupAbsenceType.hashCode() : 0);
+  }
+
 }
-
-

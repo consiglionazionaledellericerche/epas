@@ -1,10 +1,26 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.attestati.service;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
-import com.google.inject.Inject;
 import helpers.CacheValues;
 import helpers.rest.ApiRequestException;
 import java.util.Arrays;
@@ -15,6 +31,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.attestati.dto.drop.CancellazioneRigaAssenza;
 import manager.attestati.dto.drop.CancellazioneRigaCompetenza;
@@ -26,6 +43,7 @@ import manager.attestati.dto.insert.InserimentoRigaFormazione;
 import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.dto.internal.PeriodoDipendente;
 import manager.attestati.dto.internal.StatoAttestatoMese;
+import manager.attestati.dto.internal.TipoBlocchettoSede;
 import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.dto.show.ListaDipendenti;
 import manager.attestati.dto.show.RispostaAttestati;
@@ -41,7 +59,7 @@ import play.mvc.Http;
 /**
  * Componente che si occupa di inviare e ricevere dati verso Nuovo Attestati.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 @Slf4j
 public class CertificationsComunication {
@@ -63,7 +81,7 @@ public class CertificationsComunication {
   private static final String API_INT_STATO_ATTESTATO_MESE = "/sede/listaDipendenti";
   private static final String API_INT_PERIODO_DIPENDENTE = "/dipendente/periodo";  // /145872
   private static final String API_INT_CRUSCOTTO = "/dipendente/stato/cruscotto";   // /11028/2017"
-
+  
   private static final String JSON_CONTENT_TYPE = "application/json";
 
   //OAuth
@@ -85,7 +103,8 @@ public class CertificationsComunication {
 
   /**
    * Per l'ottenenere il Bearer Token: curl -s -X POST -H "Content-Type:
-   * application/x-www-form-urlencoded" -H "Authorization: Basic YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ="
+   * application/x-www-form-urlencoded" 
+   * -H "Authorization: Basic YXR0ZXN0YXRpYXBwOm15U2VjcmV0T0F1dGhTZWNyZXQ="
    * -d 'username=app.epas&password=............. &grant_type=password&scope=read%20write
    * &client_secret=mySecretOAuthSecret&client_id=attestatiapp' "http://as2dock.si.cnr.it/oauth/token"
    *
@@ -124,6 +143,8 @@ public class CertificationsComunication {
   }
 
   /**
+   * Nuovo token con validità estesa.
+   *
    * @param token token precedente (già ottenuto dal server).
    * @return Un nuovo token Oauth con validità estesa
    */
@@ -196,7 +217,7 @@ public class CertificationsComunication {
 
     String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
-    final String url = API_URL + API_URL_LISTA_DIPENDENTI + "/" + office.codeId
+    final String url = API_URL + API_URL_LISTA_DIPENDENTI + "/" + office.getCodeId()
         + "/" + year + "/" + month;
 
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -236,8 +257,8 @@ public class CertificationsComunication {
     }
 
     try {
-      String url = ATTESTATI_API_URL + "/" + person.office.codeId
-          + "/" + person.number + "/" + year + "/" + month;
+      String url = ATTESTATI_API_URL + "/" + person.getOffice().getCodeId()
+          + "/" + person.getNumber() + "/" + year + "/" + month;
 
       WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
       HttpResponse httpResponse = wsRequest.get();
@@ -252,7 +273,8 @@ public class CertificationsComunication {
       SeatCertification seatCertification =
           new Gson().fromJson(httpResponse.getJson(), SeatCertification.class);
 
-      Verify.verify(Objects.equals(seatCertification.dipendenti.get(0).matricola, person.number));
+      Verify.verify(Objects.equals(seatCertification.dipendenti.get(0).matricola, 
+          person.getNumber()));
 
       return Optional.of(seatCertification);
 
@@ -478,7 +500,7 @@ public class CertificationsComunication {
 
     String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
 
-    final String url = API_URL_INT + API_INT_STATO_ATTESTATO_MESE + "/" + office.codeId
+    final String url = API_URL_INT + API_INT_STATO_ATTESTATO_MESE + "/" + office.getCodeId()
         + "/" + year + "/" + month;
 
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
@@ -561,6 +583,39 @@ public class CertificationsComunication {
     log.info("Recuperato il CruscottoDipendente con id  {} e anno {}", dipendenteId, year);
 
     return cruscottoDipendente;
+  }
+  
+  /**
+   * Metodo rest per chiedere il tipo di blocchetti di buono pasto usati nella sede.
+   *
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @param office la sede di riferimento
+   * @return un oggetto contenente il tipo di blocchetto usato nella sede.
+   */
+  public TipoBlocchettoSede getTipoBlocchetto(int year, int month, Office office) 
+      throws ExecutionException, NoSuchFieldException {
+    
+    String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+    
+    final String url = ATTESTATI_API_URL + "/sede" + "/" + office.getCodeId()
+        + "/" + year + "/" + month;
+    
+    WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
+    HttpResponse httpResponse = wsRequest.get();
+    
+    // Caso di token non valido
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      cacheValues.oauthToken.invalidateAll();
+      log.error("Token Oauth non valido: {}", token);
+      throw new ApiRequestException("Invalid token");      
+    }
+    TipoBlocchettoSede tipoBlocchetto = new Gson()
+        .fromJson(httpResponse.getJson(), TipoBlocchettoSede.class);
+    
+    log.info("Recuperato la tipologia di blocchetto utilizzato per la sede", office.getName());
+    
+    return tipoBlocchetto;
   }
 
 }

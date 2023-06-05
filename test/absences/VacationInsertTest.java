@@ -1,19 +1,31 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package absences;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-
+import common.injection.StaticInject;
 import dao.absences.AbsenceComponentDao;
-
 import db.h2support.H2Examples;
 import db.h2support.base.H2AbsenceSupport;
-
-import injection.StaticInject;
-
 import manager.services.absences.AbsenceService;
 import manager.services.absences.AbsenceService.InsertReport;
-
 import models.Person;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
@@ -21,13 +33,17 @@ import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
-
 import org.joda.time.LocalDate;
 import org.junit.Test;
-
 import play.test.UnitTest;
 
-
+/**
+ * Test vari sull'inserimento delle ferie.
+ *
+ * @author Alessandro Martelli
+ * @author Cristian Lucchesi
+ *
+ */
 @StaticInject
 public class VacationInsertTest extends UnitTest {
   

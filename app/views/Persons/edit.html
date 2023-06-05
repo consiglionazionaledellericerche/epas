@@ -17,8 +17,10 @@
 
 				#{f.input 'person.surname'/}
 				#{f.input 'person.name'/}
-				#{f.input 'person.number',type:'number'/}
+				#{f.input 'person.number' /}
 				#{f.input 'person.email'/}
+				#{f.input 'person.fiscalCode'/}
+				
 				#{f.input 'person.user.username', disabled:true /}
 
 				#{f.selectModel 'person.qualification',items:templateUtility.allQualifications /}
@@ -26,6 +28,10 @@
 			#{secure.check 'Persons.updateBeginDate'}
 				#{f.date 'person.beginDate' /}
 			#{/secure.check}
+			#{secure.check 'Persons.updatedAt'}
+				#{f.simpleView 'person.updatedAt', value:person.updatedAt?.format() /}
+			#{/secure.check}
+
 	      #{f.booleanRadio 'person.wantEmail' /}
 	<div class="col-sm-6 col-sm-offset-3">
 		#{alert color:'info'}
@@ -41,9 +47,9 @@
 
 	#{panel title:'Altre informazioni', color:'primary'}
 		#{f.input 'person.telephone'/}
-		#{f.date 'person.birthday',view:'year'/}
+		#{f.date 'person.birthday', view:'year'/}
 		#{secure.check 'Persons.updatePerseoId'}
-       		#{f.input 'person.perseoId', popover: true/}
+       		#{f.input 'person.perseoId', popover: true /}
        	#{/secure.check}
 
    		#{f.input 'person.eppn', popover: true, disabled:!controllers.Resecure.check('Persons.updateEppn', person) /} 

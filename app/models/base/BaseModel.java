@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,7 +38,7 @@ import play.db.jpa.GenericModel;
 /**
  * Default base class per sovrascrivere la generazione delle nuove chiavi primarie.
  *
- * @author marco
+ * @author Marco Andreini
  */
 @TypeDefs(@TypeDef(name = "YearMonth", defaultForType = YearMonth.class,
     typeClass = PersistentYearMonthAsString.class))
@@ -61,7 +78,7 @@ public abstract class BaseModel extends GenericModel {
    * @return wrapper model
    */
   @Transient
-  public IWrapperModel getWrapper(IWrapperFactory wrapperFactory) {
+  public IWrapperModel<?> getWrapper(IWrapperFactory wrapperFactory) {
     if (this instanceof Person) {
       return wrapperFactory.create((Person) this);
     }

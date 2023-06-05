@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package synch.perseoconsumers.people;
 
 import com.google.common.base.Optional;
@@ -10,18 +27,22 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.google.inject.Inject;
 import dao.QualificationDao;
 import helpers.rest.ApiRequestException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.Person;
 import models.Qualification;
 import play.libs.WS;
 import synch.perseoconsumers.AnagraficaApis;
 
+/**
+ * Classe di supporto per prelevare via REST le informazioni da Perseo.
+ *
+ */
 @Slf4j
 public class PeoplePerseoConsumer {
 
@@ -33,6 +54,8 @@ public class PeoplePerseoConsumer {
   }
 
   /**
+   * Preleva da Perseo i dati di una persona a partire dal suo perseoId.
+   *
    * @param perseoId id di Perseo della persona richiesta
    * @return La persona recuperata da Perseo.
    */
@@ -92,7 +115,8 @@ public class PeoplePerseoConsumer {
       if (departmentPerseoId.isPresent()) {
         url = AnagraficaApis.getAllDepartmentPeopleForEpasEndpoint() + departmentPerseoId.get();
       } else {
-        url = AnagraficaApis.getPeople();
+        throw new ApiRequestException(
+            "Impossibile prelevare le persone di una sede senza personId");
       }
       user = AnagraficaApis.getPerseoUser();
       pass = AnagraficaApis.getPerseoPass();
@@ -102,6 +126,8 @@ public class PeoplePerseoConsumer {
       throw new ApiRequestException(error);
     }
 
+    log.debug("Sto per effettuare la richiesta all'url {} con credenziali {}:{}", 
+        url, user, pass);
     final WS.WSRequest request = WS.url(url).authenticate(user, pass);
 
     log.info("Invio richiesta lista persone a Perseo: {}", request.url);
@@ -141,19 +167,19 @@ public class PeoplePerseoConsumer {
       Map<Integer, Qualification> qualificationsMap) {
 
     Person person = new Person();
-    person.name = perseoPerson.firstname;
-    person.surname = perseoPerson.surname;
-    person.number = perseoPerson.number;
-    person.email = perseoPerson.email; //per adesso le email non combaciano @iit.cnr.it vs @cnr.it
+    person.setName(perseoPerson.firstname);
+    person.setSurname(perseoPerson.surname);
+    person.setNumber(perseoPerson.number);
+    person.setEmail(perseoPerson.email); //per adesso le email non combaciano @iit.cnr.it vs @cnr.it
     if (perseoPerson.eppn != null) {
-      person.eppn = perseoPerson.eppn;
+      person.setEppn(perseoPerson.eppn);
     } else {
-      person.eppn = perseoPerson.email;
+      person.setEppn(perseoPerson.email);
     }
-    person.qualification = qualificationsMap.get(perseoPerson.qualification);
-    person.perseoId = perseoPerson.id;
+    person.setQualification(qualificationsMap.get(perseoPerson.qualification));
+    person.setPerseoId(perseoPerson.id);
 
-    person.perseoOfficeId = perseoPerson.departmentId;
+    person.setPerseoOfficeId(perseoPerson.departmentId);
 
     return person;
   }
@@ -169,7 +195,7 @@ public class PeoplePerseoConsumer {
     List<Person> people = Lists.newArrayList();
     for (PerseoPerson perseoPerson : perseoPeople) {
       Person person = epasConverter(perseoPerson, qualificationsMap);
-      if (person.number == null) {
+      if (person.getNumber() == null) {
         //non dovrebbe succedere...
         log.warn("Ricevuta dall'anagrafica una persona senza matricola... {}.", person.toString());
       } else {
@@ -198,7 +224,7 @@ public class PeoplePerseoConsumer {
     }
     Map<Long, Person> perseoPeopleMap = Maps.newHashMap();
     for (Person person : epasConverter(perseoPeople)) {
-      perseoPeopleMap.put(person.perseoId, person);
+      perseoPeopleMap.put(person.getPerseoId(), person);
     }
     return perseoPeopleMap;
   }
@@ -212,7 +238,7 @@ public class PeoplePerseoConsumer {
 
     Map<String, Person> perseoPeopleMap = Maps.newHashMap();
     for (Person person : perseoPeopleByPerseoId(departmentPerseoId).values()) {
-      perseoPeopleMap.put(person.number, person);
+      perseoPeopleMap.put(person.getNumber(), person);
     }
     return perseoPeopleMap;
   }
@@ -240,6 +266,9 @@ public class PeoplePerseoConsumer {
     return Optional.fromNullable(epasConverter(perseoPerson, qualificationsMap));
   }
 
+  /**
+   * Preleva le informazioni sui badge di una persona.
+   */
   public ListenableFuture<PersonBadge> getPersonBadge(Long personId) {
 
     final String url;
@@ -283,6 +312,9 @@ public class PeoplePerseoConsumer {
   }
 
 
+  /**
+   * Preleva le informazioni su tutti i badge associati ad un ufficio.
+   */
   public ListenableFuture<List<PersonBadge>> getOfficeBadges(Long departmentPerseoId) {
 
     final String url;

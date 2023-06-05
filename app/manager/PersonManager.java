@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Function;
@@ -17,12 +34,12 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.persistence.Query;
-import lombok.val;
-import lombok.var;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
+import models.Role;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
@@ -31,6 +48,9 @@ import org.assertj.core.util.Lists;
 import org.joda.time.LocalDate;
 import play.db.jpa.JPA;
 
+/**
+ * Manager per la gestione delle persone.
+ */
 @Slf4j
 public class PersonManager {
 
@@ -39,7 +59,8 @@ public class PersonManager {
   public final PersonDayManager personDayManager;
   private final IWrapperFactory wrapperFactory;
   private final AbsenceDao absenceDao;
-  
+  private final OfficeManager officeManager;
+  private final UserManager userManager;
 
   /**
    * Costrutture.
@@ -56,13 +77,16 @@ public class PersonManager {
       AbsenceDao absenceDao,
       PersonDayManager personDayManager,
       IWrapperFactory wrapperFactory,
-      UsersRolesOfficesDao uroDao) {
+      UsersRolesOfficesDao uroDao,
+      OfficeManager officeManager,
+      UserManager userManager) {
     this.contractDao = contractDao;
     this.personDayDao = personDayDao;
     this.absenceDao = absenceDao;
     this.personDayManager = personDayManager;
     this.wrapperFactory = wrapperFactory;
-    
+    this.officeManager = officeManager;
+    this.userManager = userManager;
   }
 
   /**
@@ -104,8 +128,8 @@ public class PersonManager {
 
     final Map<AbsenceType, Integer> absenceCodeMap = Maps.newHashMap();
 
-    personDays.stream().flatMap(personDay -> personDay.absences.stream()
-        .<AbsenceType>map(absence -> absence.absenceType)).forEach(absenceType -> {
+    personDays.stream().flatMap(personDay -> personDay.getAbsences().stream()
+        .<AbsenceType>map(absence -> absence.getAbsenceType())).forEach(absenceType -> {
           Integer count = absenceCodeMap.get(absenceType);
           absenceCodeMap.put(absenceType, (count == null) ? 1 : count + 1);
         });
@@ -115,13 +139,14 @@ public class PersonManager {
   
   /**
    * Metodo utile per il calcolo dei codici di assenza presenti in un certo arco temporale
-   *     derivante dalla lista dei personday.
+   * derivante dalla lista dei personday.
+   *
    * @param personDays la lista dei personDay
    * @return la lista dei codici di assenza presenti nella lista dei personDay.
    */
   public List<Absence> listAbsenceCodes(List<PersonDay> personDays) {
     final List<Absence> list = Lists.newArrayList();
-    personDays.stream().flatMap(personDay -> personDay.absences.stream()
+    personDays.stream().flatMap(personDay -> personDay.getAbsences().stream()
         .<Absence>map(absence -> absence)).forEach(absence -> {          
           list.add(absence);
         });
@@ -132,8 +157,9 @@ public class PersonManager {
 
   /**
    * Metodo che determina quanti giorni di lavoro in sede sono stati effettuati. Controlla anche
-   *     che tra questi giorni non ci siano giorni di lavoro FUORI SEDE che vengono sottratti
-   *     dal conteggio.
+   * che tra questi giorni non ci siano giorni di lavoro FUORI SEDE che vengono sottratti
+   * dal conteggio.
+   *
    * @param personDays la lista dei personDay
    * @param contracts la lista dei contratti
    * @param end la data di fine
@@ -146,12 +172,12 @@ public class PersonManager {
 
     for (PersonDay pd : personDays) {
 
-      if (pd.isHoliday) {
+      if (pd.isHoliday()) {
         continue;
       }
       boolean find = false;
       for (Contract contract : contracts) {
-        if (DateUtility.isDateIntoInterval(pd.date, contract.periodInterval())) {
+        if (DateUtility.isDateIntoInterval(pd.getDate(), contract.periodInterval())) {
           find = true;
         }
       }
@@ -161,18 +187,20 @@ public class PersonManager {
       }
       IWrapperPersonDay day = wrapperFactory.create(pd);
       boolean fixed = day.isFixedTimeAtWork();
-
+      
       if (fixed && !personDayManager.isAllDayAbsences(pd)) {
         basedDays++;
-      } else if (!fixed && pd.stampings.size() > 0 
+      } else if (!fixed && pd.getStampings().size() > 0 
+          && !pd.getStampings().stream().anyMatch(st -> st.isMarkedByTelework())
           && !personDayManager.isAllDayAbsences(pd) 
-          && pd.person.qualification.qualification < 4) {
+          && pd.getPerson().getQualification().getQualification() < 4) {
         basedDays++;
-      } else if (!fixed && pd.stampings.size() > 0
+      } else if (!fixed && pd.getStampings().size() > 0
+          && !pd.getStampings().stream().anyMatch(st -> st.isMarkedByTelework())
           && !personDayManager.isAllDayAbsences(pd) 
-          && personDayManager.enoughTimeInSeat(pd.stampings, day)) {
+          && personDayManager.enoughTimeInSeat(pd.getStampings(), day)) {
         basedDays++;
-      }
+      } 
 
     }
 
@@ -189,14 +217,15 @@ public class PersonManager {
         .getActiveContractsInPeriod(person, begin, Optional.of(end));
 
     Contract newerContract = contractsInPeriod.stream().filter(contract ->
-        contract.sourceDateResidual != null).max(Comparator
+        contract.getSourceDateResidual() != null).max(Comparator
         .comparing(Contract::getSourceDateResidual)).orElse(null);
 
-    if (newerContract != null && newerContract.sourceDateRecoveryDay != null
-        && !newerContract.sourceDateRecoveryDay.isBefore(begin)
-        && !newerContract.sourceDateRecoveryDay.isAfter(end)) {
-      return newerContract.sourceRecoveryDayUsed + absenceDao
-          .absenceInPeriod(person, newerContract.sourceDateRecoveryDay, end, "91").size();
+    if (newerContract != null && newerContract.getSourceDateRecoveryDay() != null
+        && !newerContract.getSourceDateRecoveryDay().isBefore(begin)
+        && !newerContract.getSourceDateRecoveryDay().isAfter(end)) {
+      return newerContract.getSourceRecoveryDayUsed() + absenceDao
+          .absenceInPeriod(person, newerContract.getSourceDateRecoveryDay().plusDays(1), end, "91")
+      .size();
     }
 
     return absenceDao.absenceInPeriod(person, begin, end, "91").size();
@@ -266,7 +295,7 @@ public class PersonManager {
         .getHolidayWorkingTime(person, year, month);
     int value = 0;
     for (PersonDay pd : pdList) {
-      value += pd.timeAtWork;
+      value += pd.getTimeAtWork();
     }
     return value;
   }
@@ -274,6 +303,7 @@ public class PersonManager {
   /**
    * Metodo che ritorna la lista delle assenze di tipo recover_time non ancora evase nell'arco 
    * temporale compreso tra from e to.
+   *
    * @param person la persona di cui si cercano le assenze
    * @param from la data da cui si cercano le assenze
    * @param to la data fino a cui si cercano le assenze
@@ -287,8 +317,8 @@ public class PersonManager {
         Optional.absent(), from, to, Optional.fromNullable(justifiedTypeName), 
         false, false);
     for (Absence abs : absences) {
-      int sum = abs.timeVariations.stream().mapToInt(o -> o.timeVariation).sum();
-      if (sum < abs.timeToRecover) {
+      int sum = abs.getTimeVariations().stream().mapToInt(o -> o.getTimeVariation()).sum();
+      if (sum < abs.getTimeToRecover()) {
         absencesToRecover.add(abs);
       }
     }
@@ -298,6 +328,7 @@ public class PersonManager {
   
   /**
    * Metodo di utilità per trasformare una lista di assenze in lista di dto per il template.
+   *
    * @param list lista di assenze a giustificazione recover_time
    * @return la lista di dto da ritornare alla vista.
    */
@@ -309,11 +340,12 @@ public class PersonManager {
               @Override
               public AbsenceToRecoverDto apply(Absence absence) {
                 return new AbsenceToRecoverDto(
-                absence, absence.personDay.date, absence.expireRecoverDate,
-                absence.timeToRecover,
-                absence.timeVariations.stream().mapToInt(i -> i.timeVariation).sum(),
-                Math.round(absence.timeVariations.stream().mapToInt(i -> i.timeVariation).sum() 
-                / (float) absence.timeToRecover * 100)
+                absence, absence.getPersonDay().getDate(), absence.getExpireRecoverDate(),
+                absence.getTimeToRecover(),
+                absence.getTimeVariations().stream().mapToInt(i -> i.getTimeVariation()).sum(),
+                Math.round(
+                    absence.getTimeVariations().stream().mapToInt(i -> i.getTimeVariation()).sum() 
+                / (float) absence.getTimeToRecover() * 100)
                 );
               }
             }
@@ -326,9 +358,9 @@ public class PersonManager {
    * eppn viene calcolato come username @ ultimi due livelli 
    * del nome a dominio dell'email.
    * Per esempio se l'username è giuseppe.verdi e l'mail è g.verdi@iit.cnr.it
-   * il campo ePPN viene impostato a giuseppe.verdi@cnr.it
+   * il campo ePPN viene impostato a giuseppe.verdi@cnr.it.
   */ 
-  public static String eppn(String username, String email) {
+  public String eppn(String username, String email) {
     Verify.verifyNotNull(username);
     Verify.verifyNotNull(email);
     
@@ -338,13 +370,31 @@ public class PersonManager {
           + "Email non valida.", username, email);
       return null;
     }
-    var domain = emailParts[1];
+    String domain = emailParts[1];
     if (domain.split("\\.").length > 2) {
       val domainTokens = domain.split("\\.");
       domain = String.format("%s.%s",
           domainTokens[domainTokens.length - 2], domainTokens[domainTokens.length - 1]);
     }
     return String.format("%s@%s", username, domain);
+  }
+  
+  /**
+   * Si occupa di creare l'utente collegato alla persona,
+   * di impostare i ruoli corretti e creare l'epp se
+   * non passato.
+   *
+   * @param person l'oggetto Person da configurare con
+   *     gli attributi ed oggetti correlati opportuni.
+   */
+  public void properPersonCreate(Person person) {
+    userManager.createUser(person);
+    // Se il campo eppn è vuoto viene calcolato euristicamente...
+    if (person.getEmail() != null && person.getEppn() == null) {
+      person.setEppn(eppn(person.getUser().getUsername(), person.getEmail()));
+    }
+    Role employee = Role.find("byName", Role.EMPLOYEE).first();
+    officeManager.setUro(person.getUser(), person.getOffice(), employee);
   }
 
 }

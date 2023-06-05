@@ -21,24 +21,42 @@
       flowsActive = true;
     }
     if (paramCategory.equals(manager.configurations.EpasParam.EpasParamCategory.COMPETENCE_FLOWS)) {
-      flowsActive = true;
+      competenceflowsActive = true;
     }
+    if (paramCategory.equals(manager.configurations.EpasParam.EpasParamCategory.INFORMATION_FLOWS)) {
+      informationflowsActive = true;
+    }
+
   }%
   
   #{title title:('Parametri configurazione ' + office.name), administration:true /}
 
   #{tabList}
-  #{tabItem id:'GENERAL', title:'Generali', active:generalActive /}
-  #{tabItem id:'YEARLY', title:'Annuali', active:yearlyActive /}
-  #{tabItem id:'PERIODIC', title:'Periodici', active:periodicActive /}
-  #{tabItem id:'AUTOCERTIFICATION', title:'Autocertificazioni', active:autocertificationActive /}
-  #{if templateUtility.isFlowsActive()}
-  #{tabItem id:'FLOWS', title:'Flussi di lavoro', active:flowsActive /}
-  #{/if}
-  #{if templateUtility.isFlowsActive()}
-  #{tabItem id:'COMPETENCE_FLOWS', title:'Flussi di richiesta straordinari', active:flowsActive /}
-  #{/if}
   
+  #{tabItem id:'GENERAL', title:'Generali', active:generalActive /}
+  
+  #{secure.check 'Configurations.administrativeEditParams'}
+  #{tabItem id:'YEARLY', title:'Annuali', active:yearlyActive /}
+  #{/secure.check}
+  #{secure.check 'Configurations.administrativeEditParams'}
+  #{tabItem id:'PERIODIC', title:'Periodici', active:periodicActive /}
+  #{/secure.check}
+  #{secure.check 'Configurations.administrativeEditParams'}
+  #{tabItem id:'AUTOCERTIFICATION', title:'Autocertificazioni', active:autocertificationActive /}
+  #{/secure.check}  
+  #{if templateUtility.isFlowsActive()}
+  #{secure.check 'Configurations.administrativeEditParams'}
+  #{tabItem id:'FLOWS', title:'Flussi di lavoro', active:flowsActive /}
+  #{/secure.check}
+  #{/if}
+  #{secure.check 'Configurations.administrativeEditParams'}
+  #{tabItem id:'COMPETENCE_FLOWS', title:'Flussi di richiesta competenze', active:competenceflowsActive /}
+  #{/secure.check}
+  #{/if}
+  #{secure.check 'Configurations.administrativeEditParams'}
+  #{tabItem id:'INFORMATION_FLOWS', title:'Flussi informativi', active:informationflowsActive /}
+  #{/secure.check}
+
   #{/tabList}
 
   <br>
@@ -70,9 +88,24 @@
       </tr>
       #{/secure.check}
       #{/if}
-      #{else}
+      #{elseif conf.epasParam == manager.configurations.EpasParam.DATE_START_MEAL_TICKET}
+      #{secure.check 'Configurations.disableDateStartMealTicket'} 
       <tr>
         <td>        		
+        	#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
+        		&{conf.epasParam}
+        	#{/secure.link}        	
+        </td>
+        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+      </tr>
+      #{/secure.check}
+      #{/elseif}
+      #{else}
+      <tr>
+        <td>   
+        #{if conf.epasParam.equals(manager.configurations.EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM)}  
+        	<p style="color:red;">New! <i class="fa fa-check"></i></p>
+        #{/if}   		
         	#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
         		&{conf.epasParam}
         	#{/secure.link}        	
@@ -99,7 +132,7 @@
       </tr>
       #{list yearlies , as:'conf'}
       <tr>
-        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
         </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
@@ -125,11 +158,8 @@
       </tr>
       #{list periodics, as:'conf'}
       <tr>
-        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link} 
-          #{if conf.epasParam.equals(manager.configurations.EpasParam.WORK_INTERVAL_MISSION_DAY)}
-           <p style="color:red;">New! <i class="fa fa-check"></i></p>
-          #{/if}
         </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
         <td>${conf.beginDate.format()}</td>
@@ -173,6 +203,7 @@
       #{/list}
     </table>
 
+	#{if stampingsAutocertification}
     <div class="panel panel-default">
       <div class="panel-body">
         #{if autocert}
@@ -206,6 +237,7 @@
         #{/else}
       </div>
     </div>
+    #{/if}
   </div>
   #{/tabContentItem}
 	
@@ -224,7 +256,7 @@
       </tr>
       #{list flows.findAll({it.epasParam.general}), as:'conf'}
       <tr>
-        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
         </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
@@ -242,7 +274,7 @@
       </tr>
       #{list flows.findAll({!it.epasParam.general}), as:'conf'}
       <tr>
-        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
         </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
@@ -254,6 +286,108 @@
   </div>
   #{/tabContentItem}
   #{/if}
+  
+  
+  #{if templateUtility.isFlowsActive()}	
+  #{tabContentItem id:'COMPETENCE_FLOWS', active:competenceflowsActive}
+  <div id="editFlows">
+    #{alert color:'info'}
+    <p>Elenco dei parametri di configurazione a cadenza periodica relativi ai flussi di richiesta competenze per la sede
+      <strong>${office.name}</strong>, il loro valore attuale ed il periodo di riferimento.</p>
+    #{/alert}
+
+    <table class="table">
+      <tr>
+        <th>Attivazione</th>
+        <th>Valore</th>
+      </tr>
+      #{list competenceFlows.findAll({it.epasParam.general}), as:'conf'}
+      <tr>
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
+          &{conf.epasParam}#{/secure.link}
+        </td>
+        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+      </tr>
+      #{/list}
+    </table>
+
+
+    <table class="table">
+      <tr>
+        <th>Parametri specifici</th>
+        <th>Valore</th>
+        <th>Dal</th>
+        <th>Al</th>
+      </tr>
+      #{list competenceFlows.findAll({!it.epasParam.general}), as:'conf'}
+      <tr>
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
+          &{conf.epasParam}#{/secure.link}
+        </td>
+        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+        <td>${conf.beginDate.format()}</td>
+        <td>${conf.calculatedEnd()?.format()}</td>
+      </tr>
+      #{/list}
+    </table>
+  </div>
+  #{/tabContentItem}
+  #{/if}
+  
+  
+  #{tabContentItem id:'INFORMATION_FLOWS', active:informationflowsActive}
+  <div id="editFlows">
+    #{alert color:'info'}
+    <p>Elenco dei parametri di configurazione a cadenza periodica relativi ai flussi informativi per la sede
+      <strong>${office.name}</strong>, il loro valore attuale ed il periodo di riferimento.</p>
+    #{/alert}
+
+    <table class="table">
+      <tr>
+        <th>Attivazione</th>
+        <th>Valore</th>
+      </tr>
+      #{list informationFlows.findAll({it.epasParam.general}), as:'conf'}
+      <tr>
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
+          &{conf.epasParam}#{/secure.link}
+        </td>
+        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+      </tr>
+      #{/list}
+    </table>
+
+
+    <table class="table">
+      <tr>
+        <th>Parametri specifici</th>
+        <th>Valore</th>
+        <th>Dal</th>
+        <th>Al</th>
+      </tr>
+      #{list informationFlows.findAll({!it.epasParam.general}), as:'conf'}
+        #{if !(conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED
+      	|| conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED
+      	|| conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED
+      	|| conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED
+      	|| conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_I_III_MANAGER_APPROVAL_REQUIRED
+		|| conf.epasParam == manager.configurations.EpasParam.ILLNESS_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED)
+      	|| templateUtility.enableIllnessFlow()}
+      	#{if !(conf.epasParam == manager.configurations.EpasParam.SERVICE_INFORMATION_I_III_OFFICE_HEAD_APPROVAL_REQUIRED)}
+      <tr>
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
+          &{conf.epasParam}#{/secure.link}
+        </td>
+        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+        <td>${conf.beginDate.format()}</td>
+        <td>${conf.calculatedEnd()?.format()}</td>
+      </tr>
+         #{/if}
+      #{/if}
+      #{/list}
+    </table>
+  </div>
+  #{/tabContentItem}
 
   #{if templateUtility.isFlowsActive()}	
   #{tabContentItem id:'COMPETENCE_FLOWS', active:flowsActive}

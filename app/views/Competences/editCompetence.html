@@ -111,9 +111,9 @@ title:person.fullname + ' - ' + code.description + ' ' + code.code}
 	    #{f.hidden 'officeId', value:office.id /}
 		#{f.hidden 'personId', value:person.id /}
 		#{f.input 'valueApproved',type:'number', value:competence?.valueApproved, required:true /}
-		
+		#{f.input 'competence.reason' /}
 		#{if competence?.persistent}
-	    	#{f.hidden 'competence.id', value:competence.id /}
+	    	#{f.hidden 'competence.id', value:competence.id /}	    	
 	  	#{/if}
 	  	#{else}
 	  		#{f.hidden 'competence.month', value:month /}

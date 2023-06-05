@@ -1,0 +1,39 @@
+Qualification(livello1):
+  qualification: 1
+  description: livello 1
+  
+Qualification(livello2):
+  qualification: 2
+  description: livello 2
+
+Qualification(livello3):
+  qualification: 3
+  description: livello 3
+
+Qualification(livello4):
+  qualification: 4
+  description: livello 4
+
+Qualification(livello5):
+  qualification: 5
+  description: livello 5
+
+Qualification(livello6):
+  qualification: 6
+  description: livello 6
+
+Qualification(livello7):
+  qualification: 7
+  description: livello 7
+
+Qualification(livello8):
+  qualification: 8
+  description: livello 8
+
+Qualification(livello9):
+  qualification: 9
+  description: livello 9
+
+Qualification(livello10):
+  qualification: 10
+  description: livello 10

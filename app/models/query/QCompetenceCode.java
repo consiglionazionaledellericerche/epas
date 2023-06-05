@@ -41,6 +41,8 @@ public class QCompetenceCode extends EntityPathBase<CompetenceCode> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final ListPath<models.MonthlyCompetenceType, QMonthlyCompetenceType> holidaysCodes = this.<models.MonthlyCompetenceType, QMonthlyCompetenceType>createList("holidaysCodes", models.MonthlyCompetenceType.class, QMonthlyCompetenceType.class, PathInits.DIRECT2);
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
@@ -57,6 +59,8 @@ public class QCompetenceCode extends EntityPathBase<CompetenceCode> {
 
     //inherited
     public final NumberPath<Integer> version = _super.version;
+
+    public final ListPath<models.MonthlyCompetenceType, QMonthlyCompetenceType> workdaysCodes = this.<models.MonthlyCompetenceType, QMonthlyCompetenceType>createList("workdaysCodes", models.MonthlyCompetenceType.class, QMonthlyCompetenceType.class, PathInits.DIRECT2);
 
     public QCompetenceCode(String variable) {
         this(CompetenceCode.class, forVariable(variable), INITS);

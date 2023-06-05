@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences.model;
 
 import com.google.common.collect.Lists;
@@ -15,7 +32,8 @@ import org.joda.time.LocalDate;
 
 /**
  * Contiene lo stato ferie annuale di un contratto.
- * @author alessandro
+ *
+ * @author Alessandro Martelli
  *
  */
 public class VacationSituation {
@@ -51,6 +69,9 @@ public class VacationSituation {
   }
   
   
+  /**
+   * DTO contenente il resoconto della situazione delle ferie.
+   */
   public static class VacationSummary {
     
     public TypeSummary type;
@@ -70,15 +91,22 @@ public class VacationSituation {
       this.contract = contract;
       this.absencePeriod = absencePeriod;
     }
-    
+
+    /**
+     * Tipologia di resconto: ferie o permessi.
+     */
     public static enum TypeSummary {
       VACATION, PERMISSION;
     }
     
+    /**
+     * Numero di giorni totali di ferie/permessi.
+     */
     public int total() {
       return computeTotal(absencePeriod);
     }
     
+
     /**
      * Nuova implementazione: posPartum anno passato.
      */
@@ -97,6 +125,19 @@ public class VacationSituation {
       return isContractLowerLimit(absencePeriod.from);
     }
     
+    /**
+     * Verifica la data di partenza del contratto in base a date.
+     *
+     * @param date la data da verificare
+     * @return true se date è il limite inferiore del contratto, false altrimenti.
+     */
+    private boolean isContractLowerLimit(LocalDate date) {
+      if (contract.getBeginDate().isEqual(date)) {
+        return true;
+      }
+      return false;
+    }
+    
     public LocalDate lowerLimit() {
       return absencePeriod.from;
     }
@@ -105,6 +146,21 @@ public class VacationSituation {
       return isContractUpperLimit(lastNaturalSubPeriod(absencePeriod).to);
     }
     
+    /**
+     * Verifica la data di terminazione del contratto in base a date.
+     *
+     * @param date la data da verificare
+     * @return true se date è il limite superiore del contratto, false altrimenti.
+     */
+    private boolean isContractUpperLimit(LocalDate date) {
+      if (contract.calculatedEnd() != null 
+          && contract.calculatedEnd().isEqual(date)) {
+        return true;
+      }
+      return false;
+    }
+
+
     public LocalDate upperLimit() {
       return lastNaturalSubPeriod(absencePeriod).to;
     }
@@ -120,7 +176,7 @@ public class VacationSituation {
       if (expired()) {
         return 0;
       }
-      if (date.isBefore(contract.beginDate.plusYears(1))) {
+      if (date.isBefore(contract.getBeginDate().plusYears(1))) {
         return accrued() - used();
       } else {
         return total() - used();
@@ -157,21 +213,7 @@ public class VacationSituation {
               TakeCountBehaviour.sumAllPeriod, lastSubPeriod(period).to) / 100;
     }
     
-    private boolean isContractUpperLimit(LocalDate date) {
-      if (contract.calculatedEnd() != null 
-          && contract.calculatedEnd().isEqual(date)) {
-        return true;
-      }
-      return false;
-    }
 
-    private boolean isContractLowerLimit(LocalDate date) {
-      if (contract.beginDate.isEqual(date)) {
-        return true;
-      }
-      return false;
-    }
-    
     /**
      * L'ultimo subPeriodo non prorogato (per la data fine). 
      * Se l'ultimo subPeriod è l'estensione 37 seleziono quello ancora precedente.
@@ -179,7 +221,7 @@ public class VacationSituation {
     private AbsencePeriod lastNaturalSubPeriod(AbsencePeriod period) {
       AbsencePeriod lastPeriod = period.subPeriods.get(period.subPeriods.size() - 1);
       for (AbsenceType taken : lastPeriod.takenCodes) {
-        if (taken.code.equals(DefaultAbsenceType.A_37.getCode())) {
+        if (taken.getCode().equals(DefaultAbsenceType.A_37.getCode())) {
           return period.subPeriods.get(period.subPeriods.size() - 2);
         }
       }
@@ -214,7 +256,7 @@ public class VacationSituation {
       int sourced = 0;
       for (AbsencePeriod period : absencePeriod.subPeriods) {
         if (period.initialization != null) {
-          sourced += period.initialization.unitsInput;
+          sourced += period.initialization.getUnitsInput();
         }
       }
       return sourced;
@@ -266,10 +308,16 @@ public class VacationSituation {
       return days;
     }
     
+    /**
+     * Verifica se dopo un anno di contratto la data ricade nel periodo.
+     *
+     * @param period il periodo da considerare per l'assenza
+     * @return la data in cui termina il primo anno di contratto se ricade nel periodo.
+     */
     public LocalDate contractEndFirstYearInPeriod(AbsencePeriod period) {
       if (DateUtility
-          .isDateIntoInterval(contract.beginDate.plusYears(1), period.periodInterval())) {
-        return contract.beginDate.plusYears(1);
+          .isDateIntoInterval(contract.getBeginDate().plusYears(1), period.periodInterval())) {
+        return contract.getBeginDate().plusYears(1);
       }
       return null;
     }
@@ -408,20 +456,23 @@ public class VacationSituation {
      */
     public String title() {
       if (this.type.equals(TypeSummary.VACATION)) {
-        return this.contract.person.fullName() + " - " + "Riepilogo Ferie " + this.year;  
+        return this.contract.getPerson().fullName() + " - " + "Riepilogo Ferie " + this.year;  
       } else {
-        return this.contract.person.fullName() + " - " + "Riepilogo Permessi Legge " + this.year;
+        return this.contract.getPerson().fullName() + " - " 
+            + "Riepilogo Permessi Legge " + this.year;
       }
     }
   }
   
   /**
    * Versione cachata del riepilogo.
-   * @author alessandro
    *
+   * @author Alessandro Martelli
    */
   public static class VacationSummaryCached implements Serializable {
-    
+
+    private static final long serialVersionUID = -8968069510648138668L;
+
     public boolean exists = true;
     public TypeSummary type;
     public int year;
@@ -472,8 +523,7 @@ public class VacationSituation {
         this.isContractUpperLimit = vacationSummary.isContractUpperLimit();
         this.upperLimit = vacationSummary.upperLimit();
       }
-      
     }
   }
-  
+
 }

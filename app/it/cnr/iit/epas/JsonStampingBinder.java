@@ -1,9 +1,26 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.cnr.iit.epas;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import injection.StaticInject;
+import common.injection.StaticInject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +32,8 @@ import play.data.binding.TypeBinder;
 
 /**
  * Classe per il binding delle timbrature ricevute via Json.
- * 
- * @author cristian.
+ *
+ * @author Cristian Lucchesi
  */
 @Slf4j
 @Global
@@ -25,7 +42,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
   /**
    * Binding dal Json in un DTO con le info della timbratura.
-   * 
+   *
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */
@@ -92,6 +109,14 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
       }
       if (jsonObject.get("note") != null) {
         stamping.note =  jsonObject.get("note").getAsString();  
+      }
+      
+      if (jsonObject.get("luogo") != null) {
+        stamping.place = jsonObject.get("luogo").getAsString();
+      }
+      
+      if (jsonObject.get("motivazione") != null) {
+        stamping.reason = jsonObject.get("motivazione").getAsString();
       }
       
       if (jsonObject.has("matricolaFirma") && !jsonObject.get("matricolaFirma").isJsonNull()) {

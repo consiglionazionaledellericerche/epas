@@ -1,20 +1,34 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.absences.definitions;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-
 import java.util.List;
 import java.util.Set;
-
 import models.absences.AmountType;
 import models.absences.ComplationAbsenceBehaviour;
-
 import org.assertj.core.util.Lists;
 
 /**
  * Comportamenti di completamento di default.
- * 
- * @author alessandro
+ *
+ * @author Alessandro Martelli
  *
  */
 public enum DefaultComplation {
@@ -66,6 +80,17 @@ public enum DefaultComplation {
   C_19P(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_19PM), 
       ImmutableSet.of(DefaultAbsenceType.A_19PH7)),
+  
+  C_7(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_7M), 
+      ImmutableSet.of(DefaultAbsenceType.A_71, 
+          DefaultAbsenceType.A_72, 
+          DefaultAbsenceType.A_73, 
+          DefaultAbsenceType.A_74, 
+          DefaultAbsenceType.A_75, 
+          DefaultAbsenceType.A_76, 
+          DefaultAbsenceType.A_77, 
+          DefaultAbsenceType.A_78)),
 
   C_661(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_661MO, DefaultAbsenceType.A_661M), 
@@ -87,6 +112,18 @@ public enum DefaultComplation {
           DefaultAbsenceType.A_92H5, 
           DefaultAbsenceType.A_92H6, 
           DefaultAbsenceType.A_92H7)),
+  
+  C_20(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_20M), 
+      ImmutableSet.of(DefaultAbsenceType.A_20H1, 
+          DefaultAbsenceType.A_20H2, 
+          DefaultAbsenceType.A_20H3, 
+          DefaultAbsenceType.A_20H4, 
+          DefaultAbsenceType.A_20H5, 
+          DefaultAbsenceType.A_20H6, 
+          DefaultAbsenceType.A_20H7)),
+  
+ 
   C_92E(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_92E),
       ImmutableSet.of(DefaultAbsenceType.A_92E)),  
@@ -126,15 +163,34 @@ public enum DefaultComplation {
       ImmutableSet.of(DefaultAbsenceType.A_43), 
       ImmutableSet.of(DefaultAbsenceType.A_43)),
   
+  C_45(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_45), 
+      ImmutableSet.of(DefaultAbsenceType.A_45)),
+  
+  //  C_COV50(AmountType.units, 
+  //      ImmutableSet.of(DefaultAbsenceType.A_COV50M), 
+  //      ImmutableSet.of(DefaultAbsenceType.A_COV50H)),
+  //  
+  //  C_COV00(AmountType.units, 
+  //      ImmutableSet.of(DefaultAbsenceType.A_COV00M), 
+  //      ImmutableSet.of(DefaultAbsenceType.A_COV00H)),
+
   C_23(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_23M), 
       ImmutableSet.of(DefaultAbsenceType.A_23H7)),
+  C_25O(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_25OM), 
+      ImmutableSet.of(DefaultAbsenceType.A_25OH7)),
   C_25(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_25M), 
       ImmutableSet.of(DefaultAbsenceType.A_25H7)),
+  C_25A(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_25AM), 
+      ImmutableSet.of(DefaultAbsenceType.A_25AH7)),
   C_24(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_24M), 
       ImmutableSet.of(DefaultAbsenceType.A_24H7)),
+ 
   
   C_25P(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_25PM), 
@@ -143,9 +199,15 @@ public enum DefaultComplation {
   C_232(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_232M), 
       ImmutableSet.of(DefaultAbsenceType.A_232H7)),
+  C_252O(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_252OM), 
+      ImmutableSet.of(DefaultAbsenceType.A_252OH7)),
   C_252(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_252M), 
       ImmutableSet.of(DefaultAbsenceType.A_252H7)),
+  C_252A(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_252AM), 
+      ImmutableSet.of(DefaultAbsenceType.A_252AH7)),
   C_242(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_242M), 
       ImmutableSet.of(DefaultAbsenceType.A_242H7)),
@@ -153,12 +215,34 @@ public enum DefaultComplation {
   C_233(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_233M), 
       ImmutableSet.of(DefaultAbsenceType.A_233H7)),
+  C_253O(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_253OM), 
+      ImmutableSet.of(DefaultAbsenceType.A_253OH7)),
   C_253(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_253M), 
       ImmutableSet.of(DefaultAbsenceType.A_253H7)),
+  C_253A(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_253AM), 
+      ImmutableSet.of(DefaultAbsenceType.A_253AH7)),
   C_243(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_243M), 
-      ImmutableSet.of(DefaultAbsenceType.A_243H7));
+      ImmutableSet.of(DefaultAbsenceType.A_243H7)),
+  
+  C_234(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_234M), 
+      ImmutableSet.of(DefaultAbsenceType.A_234H7)),
+  C_254O(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_254OM), 
+      ImmutableSet.of(DefaultAbsenceType.A_254OH7)),
+  C_254(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_254M), 
+      ImmutableSet.of(DefaultAbsenceType.A_254H7)),
+  C_254A(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_254AM), 
+      ImmutableSet.of(DefaultAbsenceType.A_254AH7)),
+  C_244(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_244M), 
+      ImmutableSet.of(DefaultAbsenceType.A_244H7));
   
   public AmountType amountType;
   public Set<DefaultAbsenceType> complationCodes;
@@ -172,7 +256,8 @@ public enum DefaultComplation {
   }
   
   /**
-   * Ricerca i completamenti modellati e non presenti fra quelle passate in arg (db). 
+   * Ricerca i completamenti modellati e non presenti fra quelle passate in arg (db).
+   *
    * @return list
    */
   public static List<DefaultComplation> missing(List<ComplationAbsenceBehaviour> allComplations) {
@@ -180,7 +265,7 @@ public enum DefaultComplation {
     for (DefaultComplation defaultComplation : DefaultComplation.values()) {
       boolean found = false;
       for (ComplationAbsenceBehaviour complation : allComplations) {
-        if (defaultComplation.name().equals(complation.name)) {
+        if (defaultComplation.name().equals(complation.getName())) {
           found = true;
           break;
         }
@@ -193,12 +278,13 @@ public enum DefaultComplation {
   }
   
   /**
-   * L'enumerato corrispettivo del takable (se esiste...) 
+   * L'enumerato corrispettivo del takable (se esiste...).
+   *
    * @return optional dell'enumerato
    */
   public static Optional<DefaultComplation> byName(ComplationAbsenceBehaviour complation) {
     for (DefaultComplation defaultComplation : DefaultComplation.values()) {
-      if (defaultComplation.name().equals(complation.name)) {
+      if (defaultComplation.name().equals(complation.getName())) {
         return Optional.of(defaultComplation);
       }
     }

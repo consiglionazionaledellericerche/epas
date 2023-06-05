@@ -1,0 +1,49 @@
+#{modalAsync id:'defaultModal',  title:'Storico contratto' }
+
+<div class="container-fluid">
+
+#{if found}
+	#{panel title:'Storico contratto ' + contract.person.surname + ' ' +contract.person.name, color:'primary'}
+	#{if contractModifications == null || contractModifications.empty } Non ci sono modifiche al contratto in oggetto presenti nello storico. #{/if}
+	#{else}
+	  <!-- Tabella riepilogativa -->	  
+	
+	  <table class="table table-condensed table-bordered">
+	
+	    <tr class="success">
+	      
+	      <th>&{'modification.date'}</th>
+	      <th>&{'done.by'}</th>
+	      <th>&{'modification.type'}</th>
+	      <th>Data inizio</th>
+	      <th>Data fine</th>
+	      <th>Data terminazione contratto</th>
+	      <th>In attestati</th>
+	      <th>Continuazione di contratto precedente</th>
+	      
+	      
+	    </tr>
+	
+	    #{list items:contractModifications, as:'contract'}
+	    <tr class="warning">
+	      
+	      <td>${contract.formattedRevisionDate()}</td>
+	      <td>${contract.formattedOwner()}</td>
+	      <td class="${contract.type}">&{contract.type}</td>
+	      <td>${contract.value.beginDate}</td>
+	      <td>${contract.value.endDate}</td>
+	      <td>${contract.value.endContract}</td>
+	      <td>${messages.get('contract.onCertificate.' + contract.value.onCertificate)}</td>
+	      <td>${contract.value.getPreviousContract() != null ? 'Si' : 'No'}</td>
+	    </tr>
+	    #{/list}
+	  </table>
+	  #{/else}
+	#{/panel}
+
+#{/if}
+
+
+</div>
+
+#{/modalAsync}

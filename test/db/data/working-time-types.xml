@@ -18,16 +18,16 @@
       working_time_types.id := office_id IS NULL
 -->
 <dataset>
-  <working_time_types id="1" description="Normale" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true"/>
-  <working_time_types id="2" description="Maternità" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true"/>
-  <working_time_types id="3" description="Normale-old" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true"/>
-  <working_time_types id="4" description="50%" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true"/>
-  <working_time_types id="5" description="60%" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true"/>
-  <working_time_types id="6" description="Maternità Gemellare" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true"/>
-  <working_time_types id="7" description="Mamone" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="false"/>
-  <working_time_types id="8" description="80%" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true"/>
-  <working_time_types id="9" description="85%" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true"/>
-  <working_time_types id="10" description="antonella" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true"/>
+  <working_time_types id="1" description="Normale" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true" enable_adjustment_for_quantity="true"/>
+  <working_time_types id="2" description="Maternità" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true" enable_adjustment_for_quantity="false"/>
+  <working_time_types id="3" description="Normale-old" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true" enable_adjustment_for_quantity="true"/>
+  <working_time_types id="4" description="50%" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true" enable_adjustment_for_quantity="true"/>
+  <working_time_types id="5" description="60%" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true" enable_adjustment_for_quantity="true"/>
+  <working_time_types id="6" description="Maternità Gemellare" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true" enable_adjustment_for_quantity="false"/>
+  <working_time_types id="7" description="Mamone" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="false" enable_adjustment_for_quantity="true"/>
+  <working_time_types id="8" description="80%" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true" enable_adjustment_for_quantity="true"/>
+  <working_time_types id="9" description="85%" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true" enable_adjustment_for_quantity="true"/>
+  <working_time_types id="10" description="antonella" shift="false" meal_ticket_enabled="true" disabled="false" horizontal="true" enable_adjustment_for_quantity="true"/>
 
   <working_time_type_days id="1" break_ticket_time="30" day_of_week="1" holiday="false" meal_ticket_time="360" time_meal_from="0" time_meal_to="0" time_slot_entrance_from="0" time_slot_entrance_to="0" time_slot_exit_from="0" time_slot_exit_to="0" working_time="432" working_time_type_id="1" ticket_afternoon_threshold="0" ticket_afternoon_working_time="0"/>
   <working_time_type_days id="2" break_ticket_time="30" day_of_week="2" holiday="false" meal_ticket_time="360" time_meal_from="0" time_meal_to="0" time_slot_entrance_from="0" time_slot_entrance_to="0" time_slot_exit_from="0" time_slot_exit_to="0" working_time="432" working_time_type_id="1" ticket_afternoon_threshold="0" ticket_afternoon_working_time="0"/>

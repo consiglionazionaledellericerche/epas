@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -6,21 +23,15 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 import com.google.gdata.util.common.base.Preconditions;
-
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
-
 import it.cnr.iit.epas.JsonRequestedOvertimeBinder;
 import it.cnr.iit.epas.JsonRequestedPersonsBinder;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.OvertimesManager;
-
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
@@ -29,10 +40,8 @@ import models.PersonHourForOvertime;
 import models.exports.OvertimesData;
 import models.exports.PersonsCompetences;
 import models.exports.PersonsList;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.Logger;
 import play.data.binding.As;
 import play.mvc.Controller;
@@ -41,7 +50,7 @@ import play.mvc.Controller;
 /**
  * Implements methods used by sist-org in order to keep overtime information.
  *
- * @autor arianna
+ * @autor Arianna Del Soldato
  *
  */
 @Slf4j
@@ -79,7 +88,7 @@ public class Overtimes extends Controller {
     if (person == null) {
       notFound(String.format("Person with email = %s doesn't exist", email));
     }
-    Logger.debug("Find persons %s with email %s", person.name, email);
+    Logger.debug("Find persons %s with email %s", person.getName(), email);
 
     Optional<Contract> contract = wrapperFactory.create(person).getCurrentContract();
 
@@ -92,11 +101,11 @@ public class Overtimes extends Controller {
       // TODO:
     }
 
-    int totaleResiduoAnnoCorrenteAFineMese = recap.get().remainingMinutesCurrentYear;
-    int residuoDelMese = recap.get().progressivoFinaleMese;
+    int totaleResiduoAnnoCorrenteFineMese = recap.get().getRemainingMinutesCurrentYear();
+    int residuoDelMese = recap.get().getProgressivoFinaleMese();
     int tempoDisponibilePerStraordinari = recap.get().getPositiveResidualInMonth();
     OvertimesData personOvertimesData =
-            new OvertimesData(totaleResiduoAnnoCorrenteAFineMese,
+            new OvertimesData(totaleResiduoAnnoCorrenteFineMese,
                     residuoDelMese, tempoDisponibilePerStraordinari);
 
     render(personOvertimesData);
@@ -118,7 +127,7 @@ public class Overtimes extends Controller {
     if (person == null) {
       notFound(String.format("Person with email = %s doesn't exist", email));
     }
-    Logger.debug("Find persons %s with email %s", person.name, email);
+    Logger.debug("Find persons %s with email %s", person.getName(), email);
 
 
     PersonHourForOvertime personHourForOvertime = competenceDao.getPersonHourForOvertime(person);
@@ -127,7 +136,7 @@ public class Overtimes extends Controller {
     }
 
     Logger.debug("Trovato personHourForOvertime con person=%s, numberOfHourForOvertime=%s",
-        personHourForOvertime.person, personHourForOvertime.numberOfHourForOvertime);
+        personHourForOvertime.getPerson(), personHourForOvertime.getNumberOfHourForOvertime());
 
     render(personHourForOvertime);
   }
@@ -135,6 +144,7 @@ public class Overtimes extends Controller {
 
   /**
    * Set the overtimes requested by the responsible.
+   *
    * @param year l'anno
    * @param month il mese
    * @param body l'oggetto in cui serializzare quel che recupero dal binder
@@ -155,6 +165,7 @@ public class Overtimes extends Controller {
 
   /**
    * Set personnel overtimes requested by the supervisor.
+   *
    * @param hours ore di straordinario da impostare
    * @param email email della persona a cui impostare le ore di straordinario
    */
@@ -163,7 +174,7 @@ public class Overtimes extends Controller {
     //response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
     Optional<Person> person = personDao.byEmail(email);
     notFoundIfNull(person.orNull());
-    log.debug("Find persons %s with email %s", person.get().name, email);
+    log.debug("Find persons %s with email %s", person.get().getName(), email);
 
     overtimesManager.setSupervisorOvertime(person.get(), hours);
 
@@ -175,13 +186,13 @@ public class Overtimes extends Controller {
    * curl -H "Content-Type: application/json" -X POST -d '[ {"email" :
    *    "stefano.ruberti@iit.cnr.it"}, { "email" : "andrea.vivaldi@iit.cnr.it"} , { "email" :
    *    "lorenzo.luconi@iit.cnr.it" } ]' http://scorpio.nic.it:9001/overtimes/exportMonthAsPDF/2013/05
-   * @author arianna
+   *
+   * @author Arianna Del Soldato
    *
    */
   public static void exportMonthAsPDF(Integer year, Integer month,
       @As(binder = JsonRequestedPersonsBinder.class) PersonsList body) {
     response.accessControl("*");
-    //response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
     log.debug("update: Received PersonsCompetences %s", body);
     if (body == null) {
@@ -193,7 +204,7 @@ public class Overtimes extends Controller {
 
     CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeByCode("S1");
     log.debug("find  CompetenceCode %s con CompetenceCode.code=%s",
-        competenceCode, competenceCode.code);
+        competenceCode, competenceCode.getCode());
 
     overtimesMonth = overtimesManager.buildMonthForExport(body, competenceCode, year, month);
 

@@ -1,0 +1,34 @@
+<h2 id="stampingsDetailsTitle">Dettagli Timbrature lavoro fuori sede di ${person.fullName()}</h2>
+<table>
+  <tr>
+    <th>&{'stamping.date'}</th>
+    <th>&{'stamping.hour'}</th>
+    <th>&{'stamping.way'}</th>
+    <th>&{'stamping.stampType'}</th>
+    <th>&{'stamping.note'}</th>
+    <th>&{'stamping.reason'}</th>
+    <th>&{'stamping.place'}</th>
+  </tr>
+
+  #{list offSiteWorkingTemp,as:'offSiteStamp'}
+  
+  <tr>
+    <td>${offSiteStamp?.date.format()}</td>
+    <td>${offSiteStamp?.stamping.formattedHour()}</td>
+    <td>${offSiteStamp?.stamping.way.label()}</td>
+    <td>${offSiteStamp?.stamping.stampType.label()}</td>
+    <td>${offSiteStamp?.note}</td>
+    <td>${offSiteStamp?.reason}</td>
+    <td>${offSiteStamp?.place}</td>
+  </tr>
+  
+  #{/list}
+</table>
+
+<p style="text-align: right;margin-top:6em;">
+  AUTOCERTIFICAZIONE
+  <br><br>
+  Firma
+  <br><br>
+  _____________________________
+</p>

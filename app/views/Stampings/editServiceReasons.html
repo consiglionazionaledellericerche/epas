@@ -1,0 +1,53 @@
+#{modalAsync id:'modalStamping', title:('Modifica timbratura entrata/uscita di servizio del ' + date.format() + ' per ' + person.fullname)}
+
+#{if stamping}
+  #{tabList}
+    #{tabItem id:'edit', title:'Modifica', active:true /}
+  #{/tabList}
+  <br>
+#{/if}
+
+#{tabContent}
+
+  <!-- Inserimento / Modifica Timbratura -->
+  #{tabContentItem id:'edit', active:true}
+	<div id="stampingData">
+	
+	  #{form action:@saveServiceReasons(), method:'POST', autocomplete:false, 'data-async':'#page_content',
+	    class:'form form-horizontal', 'data-async-error':'#stampingData', 'data-spinner':'#defaultSpinner'}
+
+	  <!-- Alert message -->
+	  
+	  #{alert color:'warning',center:true}
+		  Modifica i dati della timbratura per entrato/uscita di servizio delle ore ${stamping.formattedHour()}
+	  #{/alert}
+		<!-- storico ?? -->
+
+	  <!-- Fields -->
+	  #{f.hidden 'stampingId', value:stamping?.id /}
+	
+	  #{f.view 'time', popover:'true', value:stamping?.isPersistent() ? stamping?.formattedHour() : time /}
+	  #{f.view 'stamping.way', items:models.Stamping.WayType /}
+	
+	  
+	  #{f.view messages.get('stamping.stampType'), value:stamping.stampType /}
+	  
+	  #{f.input 'stamping.place' /}
+	  #{f.input 'stamping.reason' /}
+	
+	  #{f.input 'stamping.note' /}
+
+      <!-- Buttons -->	
+	  #{b.buttons center:true}
+        #{b.submit 'Aggiorna'/}
+	  #{/b.buttons}
+	
+	  #{/form}
+	 
+	</div>
+  #{/tabContentItem}
+
+
+#{/tabContent}
+
+#{/modalAsync}

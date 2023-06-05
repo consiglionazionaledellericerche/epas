@@ -48,12 +48,16 @@ public class QAbsenceRequest extends EntityPathBase<AbsenceRequest> {
 
     public final BooleanPath fullyApproved = createBoolean("fullyApproved");
 
+    public final NumberPath<Integer> hours = createNumber("hours", Integer.class);
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
     public final BooleanPath managerApprovalRequired = createBoolean("managerApprovalRequired");
 
     public final DateTimePath<org.joda.time.LocalDateTime> managerApproved = createDateTime("managerApproved", org.joda.time.LocalDateTime.class);
+
+    public final NumberPath<Integer> minutes = createNumber("minutes", Integer.class);
 
     public final StringPath note = createString("note");
 

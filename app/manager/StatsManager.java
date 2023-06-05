@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.collect.Sets;
@@ -25,8 +42,8 @@ import org.joda.time.YearMonth;
 
 /**
  * Fornisce statistiche sui dati presenti nell'anagrafica di ePAS.
- * 
- * @author cristian
+ *
+ * @author Cristian Lucchesi
  *
  */
 public class StatsManager {
@@ -65,8 +82,8 @@ public class StatsManager {
    */
   public List<Institute> getInstitutes() {
     return getAllInstitutes().stream()
-        .filter(i -> !i.name.startsWith(DIPARTIMENTO_NAME_PREFIX) 
-            && !i.cds.startsWith(CDS_HEAD_QUARTER_PREFIX))
+        .filter(i -> !i.getName().startsWith(DIPARTIMENTO_NAME_PREFIX) 
+            && !i.getCds().startsWith(CDS_HEAD_QUARTER_PREFIX))
         .collect(Collectors.toList());
   }
   
@@ -75,7 +92,7 @@ public class StatsManager {
    */
   public List<Institute> getDepartments() {
     return getAllInstitutes().stream()
-        .filter(o -> o.name.startsWith(DIPARTIMENTO_NAME_PREFIX))
+        .filter(o -> o.getName().startsWith(DIPARTIMENTO_NAME_PREFIX))
         .collect(Collectors.toList());
   }
   
@@ -91,7 +108,7 @@ public class StatsManager {
    */
   public Set<Office> getHeadQuarterOffices() {
     return getAllOffices().stream()
-    .filter(o -> o.code.startsWith(CDS_HEAD_QUARTER_PREFIX))
+    .filter(o -> o.getCode().startsWith(CDS_HEAD_QUARTER_PREFIX))
     .collect(Collectors.toSet());
   }
 
@@ -100,7 +117,7 @@ public class StatsManager {
    */
   public Set<Office> getInstitutesOffices() {
     return getAllOffices().stream()
-    .filter(o -> !o.code.startsWith(CDS_HEAD_QUARTER_PREFIX))
+    .filter(o -> !o.getCode().startsWith(CDS_HEAD_QUARTER_PREFIX))
     .collect(Collectors.toSet());
   }
   
@@ -176,7 +193,7 @@ public class StatsManager {
     row.createCell(0).setCellValue("Numero dipendenti della SAC");
     row.createCell(1).setCellValue(numberOfHeadQuarterPersons);
     
-    IntStream.of(0,1).forEach(column -> sheet.autoSizeColumn(column));
+    IntStream.of(0, 1).forEach(column -> sheet.autoSizeColumn(column));
     
   }
   
@@ -198,13 +215,13 @@ public class StatsManager {
     for (Institute institute : institutes) {
       row = sheet.createRow(rowNumber++);
       cellCode = row.createCell(0);
-      cellCode.setCellValue(institute.code);
+      cellCode.setCellValue(institute.getCode());
       cellName = row.createCell(1);
-      cellName.setCellValue(institute.name);
+      cellName.setCellValue(institute.getName());
       cellCds = row.createCell(2);
-      cellCds.setCellValue(institute.cds);
+      cellCds.setCellValue(institute.getCds());
     }
-    IntStream.of(0,1,2).forEach(column -> sheet.autoSizeColumn(column));
+    IntStream.of(0, 1, 2).forEach(column -> sheet.autoSizeColumn(column));
   }
   
   private void buildOfficesSheet(Workbook wb, String sheetName, Set<Office> offices) {
@@ -226,15 +243,15 @@ public class StatsManager {
     for (Office office : offices) {
       row = sheet.createRow(rowNumber++);
       cellCode = row.createCell(0);
-      cellCode.setCellValue(office.code);
+      cellCode.setCellValue(office.getCode());
       cellName = row.createCell(1);
-      cellName.setCellValue(office.name);
+      cellName.setCellValue(office.getName());
       cellCds = row.createCell(2);
-      cellCds.setCellValue(office.codeId);
+      cellCds.setCellValue(office.getCodeId());
       cellCds = row.createCell(3);
-      cellCds.setCellValue(office.address);      
+      cellCds.setCellValue(office.getAddress());      
     }
-    IntStream.of(0,1,2,3).forEach(column -> sheet.autoSizeColumn(column));
+    IntStream.of(0, 1, 2, 3).forEach(column -> sheet.autoSizeColumn(column));
   }
 
 }

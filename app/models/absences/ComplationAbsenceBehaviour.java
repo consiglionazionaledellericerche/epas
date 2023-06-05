@@ -1,10 +1,25 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.absences;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-
 import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -16,15 +31,18 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
-
 import lombok.Getter;
-
+import lombok.Setter;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultComplation;
 import models.base.BaseModel;
-
 import org.hibernate.envers.Audited;
 
+/**
+ * Modella il comportamente delle assenze con completamento dell'orario di lavoro.
+ */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "complation_absence_behaviours")
@@ -34,35 +52,32 @@ public class ComplationAbsenceBehaviour extends BaseModel {
   public static final String NAME_PREFIX = "C_";
 
   @Column(name = "name")
-  public String name;
+  private String name;
   
   @OneToMany(mappedBy = "complationAbsenceBehaviour", fetch = FetchType.LAZY)
-  public Set<GroupAbsenceType> groupAbsenceTypes = Sets.newHashSet();
+  private Set<GroupAbsenceType> groupAbsenceTypes = Sets.newHashSet();
   
-  @Getter
   @Column(name = "amount_type")
   @Enumerated(EnumType.STRING)
-  public AmountType amountType;
+  private AmountType amountType;
 
-  @Getter
   @ManyToMany
   @JoinTable(name = "complation_codes_group", 
         joinColumns = { @JoinColumn(name = "complation_behaviour_id") }, 
         inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
   @OrderBy("code")
-  public Set<AbsenceType> complationCodes = Sets.newHashSet();
+  private Set<AbsenceType> complationCodes = Sets.newHashSet();
 
-  @Getter
   @ManyToMany
   @JoinTable(name = "replacing_codes_group", 
         joinColumns = { @JoinColumn(name = "complation_behaviour_id") }, 
         inverseJoinColumns = { @JoinColumn(name = "absence_types_id") })
   @OrderBy("code")
-  public Set<AbsenceType> replacingCodes = Sets.newHashSet();
+  private Set<AbsenceType> replacingCodes = Sets.newHashSet();
 
-  
   /**
    * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   *
    * @return absent se il completamento non è presente in enum
    */
   public Optional<Boolean> matchEnum() {
@@ -83,9 +98,10 @@ public class ComplationAbsenceBehaviour extends BaseModel {
     }
     return Optional.absent();
   }
-  
+
   /**
-   * Confronta le due liste...
+   * Confronta le due liste.
+   *
    * @return se le due liste contengono gli stessi codici
    */
   public static boolean matchTypes(Set<DefaultAbsenceType> enumSet, Set<AbsenceType> set) {
@@ -99,7 +115,7 @@ public class ComplationAbsenceBehaviour extends BaseModel {
     }
     Set<String> codes2 = Sets.newHashSet();
     for (AbsenceType type : set) {
-      codes2.add(type.code);
+      codes2.add(type.getCode());
     }
     for (String code : codes1) {
       if (!codes2.contains(code)) {

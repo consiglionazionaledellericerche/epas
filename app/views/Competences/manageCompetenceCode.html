@@ -14,6 +14,9 @@
   		#{/secure.link}
   		#{secure.link @Competences.configureShiftTimeTable(), class:'btn btn-success', fa:'calendar' }
   		<em>Definisci nuova timetable per turni</em>
+  		#{/secure.link}<br>
+  		#{secure.link @MonthlyCompetenceTypes.insertMonthlyCompetenceType(), 'data-async-modal':'#modalMonthlyCompetenceType', class:'btn btn-warning', fa:'calendar' }
+  		<em>Definisci nuovo tipo di competenza mensile per servizi</em>
   		#{/secure.link}
   	#{/b.buttons}
   #{/secure.check}
@@ -123,3 +126,4 @@
 
 <div id="modalCompetenceCode" class="modal fade container" tabindex="-1"></div>
 <div id="modalAddCompetenceCodeToGroup" class="modal fade container" tabindex="-1"></div>
+<div id="modalMonthlyCompetenceType" class="modal fade container" tabindex="-1"></div>

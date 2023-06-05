@@ -41,13 +41,16 @@
 
  		#{f.booleanRadio 'absenceType.consideredWeekEnd',popover:'true' /}
  		
- 		#{f.selectModels 'absenceType.justifiedTypesPermitted.id', label:'absenceType.justifiedTypesPermitted', 
+ 		#{f.selectModels 'absenceType.justifiedTypesPermitted.id', label:'Tipo di giustificazione permessa', 
  		  value:absenceType.justifiedTypesPermitted,
                items:allJustifiedType, placeholder:'Come giustifica' /}
         #{f.input 'absenceType.justifiedTime', type:'number' /}   
         #{f.input 'absenceType.replacingTime', type:'number' /}
-           
-        #{f.booleanRadio 'absenceType.timeForMealTicket', popover:'true' /}
+                
+        #{f.selectEnum 'absenceType.mealTicketBehaviour', items:models.enumerate.MealTicketBehaviour.values(), popover:'true' /}
+        #{f.booleanRadio 'absenceType.reperibilityCompatible', popover:'true' /}
+        
+        #{f.booleanRadio 'absenceType.toUpdate', popover:'true' /}
        
         <div class="container center">
           #{secure.check 'AbsenceGroups.saveAbsenceType' }

@@ -1,29 +1,42 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao.wrapper;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import dao.ContractDao;
-
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.stream.Collectors;
+import javax.inject.Inject;
 import manager.ContractManager;
-
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.WorkingTimeType;
-
 import org.joda.time.LocalDate;
-import org.testng.collections.Lists;
 
 
 /**
  * WrapperWorkingTimeType con alcune funzionalità aggiuntive.
  *
- * @author alessandro
+ * @author Alessandro Martelli
+ * @author Cristian Lucchesi
  */
 public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
@@ -45,6 +58,14 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
   }
 
   /**
+   * La lista dei contratti attivi che hanno un periodo attivo con associato
+   * il tipo di orario di lavoro indicato.
+   */
+  public List<Contract> getAllAssociatedActiveContract() {
+    return contractDao.getAllAssociatedActiveContracts(getValue());
+  }
+
+  /**
    * I contratti attivi che attualmente hanno impostato il WorkingTimeType.
    */
   @Override
@@ -58,7 +79,7 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
     for (Contract contract : activeContract) {
       ContractWorkingTimeType current = contractManager
               .getContractWorkingTimeTypeFromDate(contract, today);
-      if (current.workingTimeType.equals(this.value)) {
+      if (current.getWorkingTimeType().equals(this.value)) {
         list.add(contract);
       }
     }
@@ -78,8 +99,8 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
     List<ContractWorkingTimeType> list = new ArrayList<ContractWorkingTimeType>();
     for (Contract contract : activeContract) {
-      for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
-        if (cwtt.workingTimeType.equals(this.value)) {
+      for (ContractWorkingTimeType cwtt : contract.getContractWorkingTimeType()) {
+        if (cwtt.getWorkingTimeType().equals(this.value)) {
           list.add(cwtt);
         }
       }
@@ -90,10 +111,7 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
   @Override
   public List<Contract> getAssociatedContract() {
-    List<Contract> contracts = Lists.newArrayList();
-    for (ContractWorkingTimeType cwtt : this.value.contractWorkingTimeType) {
-      contracts.add(cwtt.contract);
-    }
-    return contracts;
+    return value.getContractWorkingTimeType().stream().map(cwtt -> cwtt.getContract())
+        .collect(Collectors.toList());
   }
 }

@@ -1,9 +1,30 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
+import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.UploadSituationManager;
@@ -15,13 +36,12 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Contiene i metodi necessari per estrarre i dati per la generazione delle buste paga.
  * Lasciato per eventuli utilizzi futuri (vedi INAF).
  *
- * @author cristian
+ * @author Cristian Lucchesi
  */
 @Slf4j
 @With({Resecure.class})
@@ -66,9 +86,10 @@ public class UploadSituation extends Controller {
    * @param office sede
    * @param year   anno
    * @param month  mese
+   * @throws IOException sollevata in caso non sia possibile chiudere il file.
    */
   public static void computeCreateFile(@Valid Office office,
-      @Required Integer year, @Required Integer month) {
+      @Required Integer year, @Required Integer month) throws IOException {
 
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
@@ -91,8 +112,10 @@ public class UploadSituation extends Controller {
     }
 
     String body = updloadSituationManager.createFile(office, year, month);
-    String fileName = FILE_PREFIX + office.codeId + " - " + year + month + FILE_SUFFIX;
-    renderBinary(IOUtils.toInputStream(body), fileName);
+    String fileName = FILE_PREFIX + office.getCodeId() + " - " + year + month + FILE_SUFFIX;
+    try (InputStream inputStream = IOUtils.toInputStream(body, Charset.defaultCharset())) {
+      renderBinary(inputStream, fileName);
+    }
   }
 
 }

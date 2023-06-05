@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -11,11 +28,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
-import com.google.inject.internal.Messages;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import dao.CompetenceCodeDao;
 import dao.ContractDao;
 import dao.GeneralSettingDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.UserDao;
@@ -32,6 +50,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -44,8 +64,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.validation.Valid;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.ContractManager;
@@ -74,6 +94,7 @@ import models.UsersRolesOffices;
 import models.absences.Absence;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.enumerate.LimitType;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -82,9 +103,14 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
+import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
 
+/**
+ * Controller per alcuni metodi di amministrazione dell'applicazione.
+ *
+ */
 @Slf4j
 @With({Resecure.class})
 public class Administration extends Controller {
@@ -136,19 +162,41 @@ public class Administration extends Controller {
   static AbsenceComponentDao absenceComponentDao;
   @Inject
   static GeneralSettingDao generalSettingDao;
-  
+  @Inject
+  static CompetenceCodeDao competenceCodeDao;
+  @Inject
+  static OfficeDao officeDao;
+ 
   /**
-   * metodo che renderizza la pagina di utilities.
+   * metodo che renderizza la pagina di utilities senza parametri passati.
    */
   public static void utilities() {
-
+    log.debug("Chiamata utilities senza parametri");
     final List<Person> personList = personDao.list(
         Optional.<String>absent(),
         secureManager.officesWriteAllowed(Security.getUser().get()),
         false, LocalDate.now(), LocalDate.now(), true)
         .list();
+    val officeList = officeDao.allEnabledOffices().stream()
+        .sorted((o, o1) -> o.getName().compareTo(o1.getName()))
+        .collect(Collectors.toList());
+    render(personList, officeList);
+  }
 
-    render(personList);
+  /**
+   * metodo che renderizza la pagina di utilities.
+   */
+  public static void utilities(Person person, Office office, Integer year, Integer month) {
+    log.debug("Chiamata utilities con parametri");
+    final List<Person> personList = personDao.list(
+        Optional.<String>absent(),
+        secureManager.officesWriteAllowed(Security.getUser().get()),
+        false, LocalDate.now(), LocalDate.now(), true)
+        .list();
+    val officeList = officeDao.allEnabledOffices().stream()
+        .sorted((o, o1) -> o.getName().compareTo(o1.getName()))
+        .collect(Collectors.toList());
+    render(personList, officeList, person, office, year, month);
   }
 
   /**
@@ -175,23 +223,48 @@ public class Administration extends Controller {
    * @param year   l'anno dal quale far partire il fix
    * @param month  il mese dal quale far partire il fix
    */
-  public static void fixPersonSituation(Person person, int year, int month, boolean onlyRecap) {
+  public static void fixPersonSituation(Person person, Office office, 
+      @Required Integer year, @Required Integer month, boolean onlyRecap) {
+
+    if (person == null && office == null || (!person.isPersistent() && !office.isPersistent())) {
+      Validation.addError("person", "Obbligatorio specificare un utente o un ufficio");
+      Validation.addError("office", "Obbligatorio specificare un utente o un ufficio");
+    }
+    
+    if (Validation.hasErrors()) {
+      flash.error("Correggere gli errori evidenziati");
+      log.debug("Errori di validazione in fixPersonSituation, person={}, "
+          + "office={}, year={}, month={}", person, office, year, month);
+      Validation.keep();
+      utilities(person, office, year, month);
+    }
+
+    log.info("Richiesto ricalcolo situazione mensile di {}/{} per la persona {} o l'ufficio {}",
+        month, year, person, office);
 
     LocalDate date = new LocalDate(year, month, 1);
 
-    Optional<Person> optPerson = Optional.<Person>absent();
-    if (person.isPersistent()) {
-      optPerson = Optional.fromNullable(person);
-    }
-    consistencyManager.fixPersonSituation(optPerson, Security.getUser(), date, onlyRecap);
+    // (0) Costruisco la lista di persone su cui voglio operare
+    List<Person> personList = Lists.newArrayList();
 
-    flash.success("Esecuzione terminata");
+    if (person != null && person.isPersistent()) {
+      personList = Lists.newArrayList(person);      
+    }
+    if (office != null && office.isPersistent()) {
+      office = Office.findById(office.id);
+      personList = personDao.getActivePersonInMonth(
+          Sets.newHashSet(office), new YearMonth(date.getYear(), date.getMonthOfYear()));
+    }    
+    
+    consistencyManager.fixPersonSituation(personList, date, onlyRecap);
+
+    flash.success("Esecuzione avviata in background");
 
     utilities();
   }
 
   /**
-   * 
+   * Metodo che resetta i codici 92H.
    */
   public static void reset92H() {
     List<HistoryValue<Absence>> allAbsences = historyDao.oldMissions();
@@ -201,33 +274,33 @@ public class Administration extends Controller {
     for (HistoryValue<Absence> val : allAbsences) {
 
       Absence abs = val.value;
-      long id = val.value.personDay.id;
-      log.info("Id del personDay = {}", id);
+      long id = val.value.getPersonDay().id;
+      log.debug("Id del personDay = {}", id);
       PersonDay pd = personDayDao.getPersonDayById(id);
       if (pd != null) {
-        if (pd.absences.contains(abs)) {
-          log.info("l'assenza {} è già nel personday, non la inserisco", abs.id);
+        if (pd.getAbsences().contains(abs)) {
+          log.debug("l'assenza {} è già nel personday, non la inserisco", abs.id);
           continue;
         }
         pd.save();
         log.info("Assenza con revisione {}, con id {} in data {} di tipo {}", val.type.name(), 
-            val.value.id, val.value.personDay.date, val.value.absenceType.code);
+            val.value.id, val.value.getPersonDay().getDate(), val.value.getAbsenceType().getCode());
         List<HistoryValue<Absence>> absenceDeleted = historyDao.specificAbsence(val.value.id);
         if (!absenceDeleted.isEmpty()) {
 
           log.debug("L'assenza è stata anche cancellata, la ricreo");
 
           Absence absence = new Absence();
-          absence.absenceType = abs.absenceType;  
+          absence.setAbsenceType(abs.getAbsenceType());  
           JustifiedType type = 
               absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.absence_type_minutes);
-          absence.justifiedType = type;
-          absence.justifiedMinutes = abs.justifiedMinutes;
-          absence.personDay = pd;
+          absence.setJustifiedType(type);
+          absence.setJustifiedMinutes(abs.getJustifiedMinutes());
+          absence.setPersonDay(pd);
           absence.save(); 
           JPA.em().flush();       
 
-          pd.absences.add(absence);
+          pd.getAbsences().add(absence);
           pd.save();
           log.info("Salvo il personday"); 
         }
@@ -269,7 +342,7 @@ public class Administration extends Controller {
       List<Contract> contracts = contractDao
           .getActiveContractsInPeriod(begin, Optional.fromNullable(end), Optional.absent());
       for (Contract contract : contracts) {
-        people.add(contract.person);
+        people.add(contract.getPerson());
       }
     }
 
@@ -283,9 +356,9 @@ public class Administration extends Controller {
           .getPersonDayInPeriod(person, begin, Optional.of(end));
       int count = 0;
       for (PersonDay pd : persondays) {
-        personDayManager.setValidPairStampings(pd.stampings);
+        personDayManager.setValidPairStampings(pd.getStampings());
 
-        for (Stamping stamping : pd.stampings) {
+        for (Stamping stamping : pd.getStampings()) {
           if (!stamping.valid) {
             stamping.delete();
             count++;
@@ -331,8 +404,8 @@ public class Administration extends Controller {
     List<Person> people = Person.findAll();
     for (Person person : people) {
 
-      person.name = WordUtils.capitalizeFully(person.name);
-      person.surname = WordUtils.capitalizeFully(person.surname);
+      person.setName(WordUtils.capitalizeFully(person.getName()));
+      person.setSurname(WordUtils.capitalizeFully(person.getSurname()));
 
       person.save();
     }
@@ -347,12 +420,13 @@ public class Administration extends Controller {
    * Mostra i parametri generali dell'applicazione.
    */
   public static void generalSetting() {
-    val generalSetting = generalSettingDao.generalSetting();    
+    val generalSetting = generalSettingDao.generalSetting();
     render("@data", generalSetting);
   }
 
   /**
    * Salvataggio delle impostazioni generali.
+   *
    * @param generalSetting impostazioni generali da salvare.
    */
   public static void saveGeneralSetting(@Required @Valid GeneralSetting generalSetting) {
@@ -360,6 +434,7 @@ public class Administration extends Controller {
       render("@data", generalSetting);
     } else {
       generalSetting.save();
+      generalSettingDao.generalSettingInvalidate();
       flash.success(Web.msgSaved(GeneralSetting.class));
       generalSetting();
     }
@@ -399,17 +474,29 @@ public class Administration extends Controller {
 
     final int mb = 1024 * 1024;
     final Runtime runtime = Runtime.getRuntime();
+    val load = ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
 
-    final Set<Entry<String, String>> entries = ImmutableMap.of(
+    final Set<Entry<String, String>> entrySet = ImmutableMap.of(
         "Available Processors", String.format("%s", runtime.availableProcessors()),
         "Used Memory", String.format("%s Mb", (runtime.totalMemory() - runtime.freeMemory()) / mb),
         "Free Memory", String.format("%s Mb", runtime.freeMemory() / mb),
         "Max Memory", String.format("%s Mb", runtime.maxMemory() / mb),
         "Total Memory", String.format("%s Mb", runtime.totalMemory() / mb)).entrySet();
-
+    
+    final Set<Entry<String, String>> entries = Sets.newHashSet(entrySet);
+    entries.add(new SimpleEntry<String, String>("Load", String.format("%s", load)));
     render("@data", entries);
   }
 
+  /**
+   * Mostra le informazioni su thread correnti.
+   */
+  public static void threadsData() {
+    val threads = ManagementFactory.getThreadMXBean();
+    val threadsData = threads.dumpAllThreads(true, true);
+    render("@threadsData", threadsData);
+  }
+  
   /**
    * Render del modale per l'aggiunta di un nuovo parametro di configurazione.
    */
@@ -418,6 +505,8 @@ public class Administration extends Controller {
   }
 
   /**
+   * Metodo che permette di salvare la configurazione.
+   *
    * @param name     Nome del parametro
    * @param value    Valore del parametro
    * @param newParam booleano che discrimina un nuovo inserimento da una modifica.
@@ -447,14 +536,14 @@ public class Administration extends Controller {
 
     final User user = Administrators.userDao.getUserByIdAndPassword(id, Optional.<String>absent());
 
-    if (user == null || user.disabled) {
+    if (user == null || user.isDisabled()) {
       notFound();
     }
 
     // salva il precedente
     session.put(SUDO_USERNAME, session.get(USERNAME));
     // recupera
-    session.put(USERNAME, user.username);
+    session.put(USERNAME, user.getUsername());
     // redirect alla radice
     session.remove("officeSelected");
     redirect(Play.ctxPath + "/");
@@ -467,8 +556,8 @@ public class Administration extends Controller {
 
     final Person person = Administrators.personDao.getPersonById(id);
     notFoundIfNull(person);
-    Preconditions.checkNotNull(person.user);
-    switchUserTo(person.user.id);
+    Preconditions.checkNotNull(person.getUser());
+    switchUserTo(person.getUser().id);
   }
 
   /**
@@ -509,7 +598,7 @@ public class Administration extends Controller {
     final List<Person> people = personDao.byOffice(office);
 
     people.forEach(person -> {
-      person.email = person.email.substring(0, person.email.indexOf("@") + 1) + domain;
+      person.setEmail(person.getEmail().substring(0, person.getEmail().indexOf("@") + 1) + domain);
       person.save();
       if (sendMail) {
         userManager.generateRecoveryToken(person);
@@ -531,8 +620,10 @@ public class Administration extends Controller {
     List<UsersRolesOffices> uros = UsersRolesOffices.findAll();
 
     List<String> emails = uros.stream().filter(uro ->
-        uro.role.name.equals(Role.PERSONNEL_ADMIN) && uro.user.person != null)
-        .map(uro -> uro.user.person.email).distinct().collect(Collectors.toList());
+        uro.getRole().getName().equals(Role.PERSONNEL_ADMIN) 
+        && uro.getUser().getPerson() != null)
+        .map(uro -> uro.getUser().getPerson().getEmail())
+        .distinct().collect(Collectors.toList());
 
     renderText(emails);
 
@@ -549,44 +640,45 @@ public class Administration extends Controller {
     List<PersonReperibility> list = PersonReperibility.findAll();
     List<PersonReperibility> repList = null;
     log.info("Inizio la normalizzazione delle date...");
-    log.info("Creo la mappa persona-personreperibility");
+    log.debug("Creo la mappa persona-personreperibility");
     for (PersonReperibility pr : list) {
-      if (pr.startDate != null && pr.endDate == null) {
-        if (!map.containsKey(pr.person)) {
+      if (pr.getStartDate() != null && pr.getEndDate() == null) {
+        if (!map.containsKey(pr.getPerson())) {
           repList = Lists.newArrayList();                  
         } else {
-          repList = map.get(pr.person);                  
+          repList = map.get(pr.getPerson());                  
         }
         repList.add(pr);
-        map.put(pr.person, repList);
+        map.put(pr.getPerson(), repList);
       }      
     }
-    log.info("Valuto la mappa per controllare le date dei personreperibilities");
+    log.debug("Valuto la mappa per controllare le date dei personreperibilities");
     for (Map.Entry<Person, List<PersonReperibility>> entry : map.entrySet()) {
 
       if (entry.getValue().size() > 1) {
         List<PersonReperibility> multipleReps = entry.getValue();
-        log.info("Ordino le person reperibilities");
+        log.debug("Ordino le person reperibilities");
         Collections.sort(multipleReps, PersonReperibility.PersonReperibilityComparator);       
         PersonReperibility pr = null;
-        log.info("Controllo le personreperibilities");
+        log.debug("Controllo le personreperibilities");
         for (PersonReperibility rep : multipleReps) {
           if (pr == null) {
             pr = rep;
             continue;
           }
-          if (rep.personReperibilityType.equals(pr.personReperibilityType)) {
+          if (rep.getPersonReperibilityType().equals(pr.getPersonReperibilityType())) {
             log.warn("Ho due person reperibilities relativi allo stesso tipo");
-            if (rep.startDate != null && pr.startDate != null 
-                && rep.endDate == null && pr.endDate == null) {
+            if (rep.getStartDate() != null && pr.getStartDate() != null 
+                && rep.getEndDate() == null && pr.getEndDate() == null) {
               log.warn("Sono nel caso di due person reperibilities con data fine nulla "
                   + "per lo stesso tipo");
-              if (rep.startDate.isBefore(pr.startDate)) {
-                log.info("Cancello quello più futuro di {} con data {}", pr.person, pr.startDate);
+              if (rep.getStartDate().isBefore(pr.getStartDate())) {
+                log.debug("Cancello quello più futuro di {} con data {}",
+                    pr.getPerson(), pr.getStartDate());
                 pr.delete();                
               } else {
-                log.info("Cancello quello più futuro di {} con data {}", 
-                    rep.person, rep.startDate);
+                log.debug("Cancello quello più futuro di {} con data {}", 
+                    rep.getPerson(), rep.getStartDate());
                 rep.delete();
               }
             }
@@ -607,11 +699,11 @@ public class Administration extends Controller {
    */
   public static void normalizationShifts() {
     List<PersonShiftShiftType> psstList = PersonShiftShiftType.findAll();
-    log.info("Recupero tutte le associazioni tra persone e attività di turno.");
+    log.debug("Recupero tutte le associazioni tra persone e attività di turno.");
     for (PersonShiftShiftType psst : psstList) {
-      if (psst.beginDate == null && psst.endDate == null) {
-        log.info("Rimuovo l'occorrenza di {} sull'attività {} perchè ha date nulle", 
-            psst.personShift.person.fullName(), psst.shiftType.description);
+      if (psst.getBeginDate() == null && psst.getEndDate() == null) {
+        log.debug("Rimuovo l'occorrenza di {} sull'attività {} perchè ha date nulle", 
+            psst.getPersonShift().getPerson().fullName(), psst.getShiftType().getDescription());
         psst.delete();
       }
     }    
@@ -619,7 +711,28 @@ public class Administration extends Controller {
   }
 
   /**
+   * Metodo che applica le competenze a presenza mensile/giornaliera a tutti gli
+   * uffici (come per il BonusJob).
+   *
+   * @param year l'anno
+   * @param month il mese
+   */
+  public static void applyBonusAllOffices(int year, int month) {
+    YearMonth yearMonth = new YearMonth(year, month);
+    List<CompetenceCode> codeList = competenceCodeDao
+        .getCompetenceCodeByLimitType(LimitType.onMonthlyPresence);
+    codeList.forEach(item -> {
+      competenceManager.applyBonus(Optional.absent(), item, yearMonth);
+    });
+    codeList = competenceCodeDao.getCompetenceCodeByLimitType(LimitType.entireMonth);
+    codeList.forEach(item -> {
+      competenceManager.applyBonus(Optional.absent(), item, yearMonth);
+    });
+  }
+  
+  /**
    * Metodo che applica le competenze a presenza mensile/giornaliera.
+   *
    * @param office la sede 
    * @param code il codice di assenza
    * @param year l'anno
@@ -645,9 +758,11 @@ public class Administration extends Controller {
    * Imposta la data fine per i soli contratti attivi epas:
    * - con stessa data inizio
    * - con data fine nulla
-   * - segnalati come temporary
+   * - segnalati come temporary.
+   *
    * @param office sede
    */
+  @SuppressWarnings("deprecation")
   public static void importCertificationContracts(Office office) {
 
     notFoundIfNull(office);
@@ -702,15 +817,15 @@ public class Administration extends Controller {
       }
       log.info("{}", person.fullName());
       Optional<Contract> currentContract = wrapperFactory.create(person).getCurrentContract();
-      if (!currentContract.isPresent() || currentContract.get().endDate != null) {
+      if (!currentContract.isPresent() || currentContract.get().getEndDate() != null) {
         continue;
       }
-      if (!currentContract.get().beginDate.equals(contrattoAttestati.beginContract)) {
+      if (!currentContract.get().getBeginDate().equals(contrattoAttestati.beginContract)) {
         continue;
       }
-      if (currentContract.get().isTemporaryMissing) {
+      if (currentContract.get().isTemporaryMissing()) {
         log.info("******************** contratto attivo {} è stato determinato", person.fullName());
-        currentContract.get().endDate = contrattoAttestati.endContract;
+        currentContract.get().setEndDate(contrattoAttestati.endContract);
         contractManager.properContractUpdate(currentContract.get(), null, false);
         defined++;
       }
@@ -726,11 +841,11 @@ public class Administration extends Controller {
       }
 
       //non più appartenenti (ex. David Rossi)
-      if (contrattiAttestati.get(wrPerson.getValue().number) == null) {
+      if (contrattiAttestati.get(wrPerson.getValue().getNumber()) == null) {
         log.info("************* contratto attivo {} è stato terminato (dipendente non più in sede)",
             wrPerson.getValue().fullName());
-        wrPerson.getCurrentContract().get().endDate = LocalDate.now().minusDays(1);
-        wrPerson.getCurrentContract().get().endContract = LocalDate.now().minusDays(1);
+        wrPerson.getCurrentContract().get().setEndDate(LocalDate.now().minusDays(1));
+        wrPerson.getCurrentContract().get().setEndContract(LocalDate.now().minusDays(1));
         contractManager.properContractUpdate(wrPerson.getCurrentContract().get(), null, true);
         terminatedInactive++;
         continue;
@@ -751,17 +866,18 @@ public class Administration extends Controller {
       }
 
       //non più appartenenti (ex. David Rossi)
-      if (contrattiAttestati.get(wrPerson.getValue().number) == null) {
+      if (contrattiAttestati.get(wrPerson.getValue().getNumber()) == null) {
         continue;
       }
 
       Contract contract = wrPerson.getCurrentContract().get();
-      ContrattoAttestati contrattoAttestati = contrattiAttestati.get(wrPerson.getValue().number);
+      ContrattoAttestati contrattoAttestati = 
+          contrattiAttestati.get(wrPerson.getValue().getNumber());
 
       //contratto attestati iniziato dopo di quello attivo epas (chiudere)
-      if (contrattoAttestati.beginContract.isAfter(contract.beginDate)) {
-        contract.endContract = contrattoAttestati.beginContract.minusDays(1);
-        contract.endDate = contrattoAttestati.beginContract.minusDays(1);
+      if (contrattoAttestati.beginContract.isAfter(contract.getBeginDate())) {
+        contract.setEndContract(contrattoAttestati.beginContract.minusDays(1));
+        contract.setEndDate(contrattoAttestati.beginContract.minusDays(1));
         contractManager.properContractUpdate(contract, null, true);
         log.info("******** contratto attivo {} è stato terminato (perchè attivato altro contratto)",
             wrPerson.getValue().fullName());
@@ -770,9 +886,9 @@ public class Administration extends Controller {
       }
 
       //contratto attestati iniziato prima di quello attivo epas  (update contract)
-      if (contrattoAttestati.beginContract.isBefore(contract.beginDate)) {
-        contract.beginDate = contrattoAttestati.beginContract;
-        contract.endDate = contrattoAttestati.endContract;
+      if (contrattoAttestati.beginContract.isBefore(contract.getBeginDate())) {
+        contract.setBeginDate(contrattoAttestati.beginContract);
+        contract.setEndDate(contrattoAttestati.endContract);
         contractManager.properContractUpdate(contract, null, true);
         log.info("******* contratto attivo {} è stato aggiornato (perchè attestati iniziava prec.)",
             wrPerson.getValue().fullName());
@@ -796,9 +912,9 @@ public class Administration extends Controller {
       }
 
       Contract contract = new Contract();
-      contract.person = person;
-      contract.beginDate = contrattoAttestati.beginContract;
-      contract.endDate = contrattoAttestati.endContract;
+      contract.setPerson(person);
+      contract.setBeginDate(contrattoAttestati.beginContract);
+      contract.setEndDate(contrattoAttestati.endContract);
       contractManager.properContractCreate(contract, Optional.absent(), true);
 
     }
@@ -824,14 +940,14 @@ public class Administration extends Controller {
 
     List<ContractMonthRecap> list = ContractMonthRecap.findAll();
     for (ContractMonthRecap cmr : list) {
-      if (cmr.year != LocalDate.now().minusMonths(1).getYear()) {
+      if (cmr.getYear() != LocalDate.now().minusMonths(1).getYear()) {
         continue;
       }
-      if (cmr.month != LocalDate.now().minusMonths(1).getMonthOfYear()) {
+      if (cmr.getMonth() != LocalDate.now().minusMonths(1).getMonthOfYear()) {
         continue;
       }
 
-      map.put(cmr.contract.id, cmr);
+      map.put(cmr.getContract().id, cmr);
     }
 
     File tempFile = File.createTempFile("cmr-situation-temp", ".csv");
@@ -839,11 +955,11 @@ public class Administration extends Controller {
     BufferedWriter out = new BufferedWriter(new FileWriter(tempFile, true));
     for (ContractMonthRecap cmr : map.values()) {
 
-      out.write(cmr.contract.person.fullName()
-          + "," + cmr.contract.id 
-          + "," + cmr.remainingMinutesLastYear
-          + "," + cmr.remainingMinutesCurrentYear
-          + "," + cmr.remainingMealTickets);
+      out.write(cmr.getContract().getPerson().fullName()
+          + "," + cmr.getContract().id 
+          + "," + cmr.getRemainingMinutesLastYear()
+          + "," + cmr.getRemainingMinutesCurrentYear()
+          + "," + cmr.getRemainingMealTickets());
       out.newLine();
     }
     out.close();
@@ -853,16 +969,24 @@ public class Administration extends Controller {
 
 
   /**
-   * @see manager.configurations.ConfigurationManager::updateAllOfficeConfigurations
+   * Aggiorna la configurazione di tutti gli uffici.
+   *
+   * @see: manager.configurations.ConfigurationManager::updateAllOfficeConfigurations
    */
   public static void updateAllOfficeConfigurations() {
     configurationManager.updateAllOfficesConfigurations();
     renderText("Aggiornati i parametri di configuratione di tutti gli uffici.");
   }
+  
+  public static void updatePeopleConfigurations() {
+    configurationManager.updatePeopleConfigurations();
+    renderText("Aggiornati i parametri di configurazione di tutte le persone.");
+  }
 
 
   /**
    * Metodo che riposiziona una sede in un nuovo istituto in caso di accorpamenti.
+   *
    * @param office la sede da spostare
    * @param institute l'istituto in cui spostare la sede
    */
@@ -876,7 +1000,7 @@ public class Administration extends Controller {
       changeSeatLocation(office, institute, sedeId, codiceSede);
       officeList = Office.findAll();
       instituteList = Institute.findAll();
-      flash.success("Aggiornato rapporto tra %s e %s", office.name, institute.code);
+      flash.success("Aggiornato rapporto tra %s e %s", office.getName(), institute.getCode());
       render(officeList, instituteList);
     }    
 
@@ -884,30 +1008,98 @@ public class Administration extends Controller {
 
   /**
    * Metodo privato che fa il cambio di appartenenza di una sede.
+   *
    * @param office la sede da spostare
    * @param institute l'istituto in cui spostare la sede
    */
   private static void changeSeatLocation(Office office, Institute institute, 
       String sedeId, String codiceSede) {
-    Institute oldInstitute = office.institute;
-    oldInstitute.seats.remove(office);
-    office.institute = institute;
-    int separatorChar = office.name.indexOf("-");
+    Institute oldInstitute = office.getInstitute();
+    oldInstitute.getSeats().remove(office);
+    office.setInstitute(institute);
+    int separatorChar = office.getName().indexOf("-");
     if (separatorChar == -1) {
-      separatorChar = office.name.indexOf(" ");
+      separatorChar = office.getName().indexOf(" ");
     }
-    String city = office.name.substring(separatorChar, office.name.length());
-    office.name = institute.code + city;
+    String city = office.getName().substring(separatorChar, office.getName().length());
+    office.setName(institute.getCode() + city);
     if (!Strings.isNullOrEmpty(sedeId)) {
-      office.codeId = sedeId;
+      office.setCodeId(sedeId);
     }
     if (!Strings.isNullOrEmpty(codiceSede)) {
-      office.code = codiceSede;
+      office.setCode(codiceSede);
     }
-    institute.seats.add(office);
+    institute.getSeats().add(office);
     oldInstitute.save();
     office.save();
     institute.save();
 
+  }
+  
+  public static void emergency(Boolean confirm) {
+    render(confirm);
+  }
+  
+  /**
+   * Il peggior hack di sempre per uccidere il play.
+   * È da utilizzare in casi disperati come quando sta finendo la 
+   * RAM e non si riesce a fare altre operazioni.
+   * Da usare solo nella versione con Docker che effettua il 
+   * riavvio del servizio.
+   */
+  public static void shutdown(Boolean confirm) {
+    if (confirm == null || !confirm) {
+      flash.success("Conferma lo shutdown selezionando la casella di conferma");
+      confirm = false;
+      render("@emergency", confirm);
+      return;
+    }
+    new Job<Void>() {
+      public void doJob() {
+        log.warn("Killing ePAS -> bye bye, see you soon :-)");
+        System.exit(0);
+      }
+    }.afterRequest();
+    redirect("/");
+  }
+
+  /**
+   * Controlla che se è presente un previousContract e che
+   * sia effettivamento il contratto precedente, altrimenti 
+   * lo corregge.
+   *
+   * @param id l'id del contratto da verificare e correggere se necessario
+   */
+  public static void fixPreviousContract(Long id) {
+    val contract = contractDao.byId(id);
+    notFoundIfNull(contract);
+    boolean fixed = contractManager.fixPreviousContract(contract);
+    if (fixed) {
+      flash.success("Precedente contratto di %s corretto", contract.getLabel());
+    } else {
+      flash.error("Correzione del contratto %s non necessaria", contract.getLabel());
+    }
+    contractsToFix();
+  }
+
+  /**
+   * Controlla tutti i contratti con previousContract impostato
+   * che potrebbero avere dei problemi e li corregge se necessario.
+   */
+  public static void fixContractsWithWrongPreviousContract(Optional<Integer> maxSize) {
+    log.info("Richiesto il fix del previousContract di max {} contratti", maxSize);
+    int fixedContracts = contractManager.fixContractsWithWrongPreviousContract(maxSize);
+    log.info("Corretti {} contratti", fixedContracts);
+    if (fixedContracts > 0) {
+      flash.success("Corretti %s contratti", fixedContracts);
+    } else {
+      flash.error("Non ci sono contratti da correggere");
+    }
+    redirect("Administration.contractsToFix");
+  }
+
+  public static void contractsToFix() {
+    val contracts = contractDao.getContractsWithWrongPreviousContract();
+    render(contracts);
   }
 }

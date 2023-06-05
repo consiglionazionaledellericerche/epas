@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.attestati.dto.internal;
 
 import java.io.Serializable;
@@ -9,8 +26,8 @@ import java.io.Serializable;
  * Scarica lo stato attestati del periodo (inerente anno e mese) del dipendente.
  * Attivati solo i campi utili:
  * 1) dipendente.id -> id dipendente in attestati, necessario per aprire il suo cruscotto
- * 
- * @author alessandro
+ *
+ * @author Alessandro Martelli
  *
  */
 public class PeriodoDipendente {
@@ -31,8 +48,13 @@ public class PeriodoDipendente {
   //public boolean datiParttimeAssenti;               //false
   
   
+  /**
+   * Rappresenta i dettagli di un periodo di un dipendente.
+   */
   public static class PeriodoDipendenteDettagli implements Serializable {
-    
+
+    private static final long serialVersionUID = 8981830602033609237L;
+
     public int id;                                  //id dipendente 
     public int matricola;                         //17162
     //public SedePeriodoDipendente sede;
@@ -45,20 +67,6 @@ public class PeriodoDipendente {
     //public String lastPeriodoConsolidato;         //"201701"
     //public String currentCodiceOrario;            //"55"
 
-    
-    public static class SedePeriodoDipendente {
-      //public int id;                              //79
-      //public String codiceSede;                   //"223400"
-      //public String descrizioneSede;              //"ISTITUTO DI INFORMATICA E TELEMATICA"
-      //public boolean sedeDisagiata;               //false  
-    }
-    
-    public static class ContrattoPeriodoDipendente {
-      //public String id;                           //"CL0609"
-    }
-
   }
-
-
 
 }

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
@@ -36,6 +53,7 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonShiftDay;
+import models.PersonalWorkingTime;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
@@ -46,6 +64,7 @@ import models.absences.Absence;
 import models.absences.GroupAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import models.base.IPropertiesInPeriodOwner;
+import models.enumerate.MealTicketBehaviour;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
@@ -56,6 +75,11 @@ import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.libs.F.Promise;
 
+/**
+ * Manager per la gestione della consistenza tra timbrature ed assenze.
+ *
+ * @author Alessandro Martelli
+ */
 public class ConsistencyManager {
 
   private static final Logger log = LoggerFactory.getLogger(ConsistencyManager.class);
@@ -175,6 +199,40 @@ public class ConsistencyManager {
   }
 
   /**
+   * Ricalcolo della situazione di una lista di persone dal mese e anno specificati ad oggi.
+   *
+   * @param personList la lista delle persone da ricalcolare
+   * @param fromDate dalla data
+   * @param onlyRecap se si vuole aggiornare solo i riepiloghi
+   */
+  public void fixPersonSituation(List<Person> personList, LocalDate fromDate, boolean onlyRecap) {
+
+    final List<Promise<Void>> results = new ArrayList<>();
+    for (Person p : personList) {
+
+      results.add(new Job<Void>() {
+
+        @Override
+        public void doJob() {
+          final Person person = Person.findById(p.id);
+
+          if (onlyRecap) {
+            updatePersonRecaps(person.id, fromDate);
+          } else {
+            updatePersonSituation(person.id, fromDate);
+          }
+
+          personDayInTroubleManager.cleanPersonDayInTrouble(person);
+          log.debug("Elaborata la persona ... {}", person);
+        }
+      }.now());
+
+    }
+    Promise.waitAll(results);
+    log.info("Conclusa procedura FixPersonsSituation con parametri!");
+  }
+
+  /**
    * Ricalcola i riepiloghi mensili del contratto a partire dalla data from.
    *
    * @param personId id della persona
@@ -203,7 +261,7 @@ public class ConsistencyManager {
   public void updateContractSituation(Contract contract, LocalDate from) {
 
     LocalDate to = wrapperFactory.create(contract).getContractDatabaseInterval().getEnd();
-    updatePersonSituationEngine(contract.person.id, from, Optional.fromNullable(to), false);
+    updatePersonSituationEngine(contract.getPerson().id, from, Optional.fromNullable(to), false);
   }
 
   /**
@@ -215,7 +273,7 @@ public class ConsistencyManager {
   public void updateContractRecaps(Contract contract, LocalDate from) {
 
     LocalDate to = wrapperFactory.create(contract).getContractDatabaseInterval().getEnd();
-    updatePersonSituationEngine(contract.person.id, from, Optional.fromNullable(to), true);
+    updatePersonSituationEngine(contract.getPerson().id, from, Optional.fromNullable(to), true);
   }
 
   /**
@@ -234,7 +292,7 @@ public class ConsistencyManager {
     List<Person> personToRecompute = Lists.newArrayList();
 
     if (target instanceof Office) {
-      personToRecompute = ((Office) target).persons;
+      personToRecompute = ((Office) target).getPersons();
     } else if (target instanceof Person) {
       personToRecompute.add((Person) target);
     }
@@ -260,7 +318,7 @@ public class ConsistencyManager {
     
     log.debug("Lanciato aggiornamento situazione {} da {} a oggi", person.getFullname(), from);
 
-    if (person.qualification == null) {
+    if (person.getQualification() == null) {
       log.warn("... annullato ricalcolo per {} in quanto priva di qualifica", person.getFullname());
       return;
     }
@@ -280,7 +338,7 @@ public class ConsistencyManager {
     // Costruire la tabella hash
     HashMap<LocalDate, PersonDay> personDaysMap = Maps.newHashMap();
     for (PersonDay personDay : personDays) {
-      personDaysMap.put(personDay.date, personDay);
+      personDaysMap.put(personDay.getDate(), personDay);
     }
 
     log.trace("... fetch dei dati conclusa, inizio dei ricalcoli.");
@@ -363,10 +421,10 @@ public class ConsistencyManager {
    */
   private LocalDate personFirstDateForEpasComputation(Person person, Optional<LocalDate> from) {
 
-    LocalDate officeLimit = person.office.getBeginDate();
+    LocalDate officeLimit = person.getOffice().getBeginDate();
 
     // Calcolo a partire da
-    LocalDate lowerBoundDate = new LocalDate(person.beginDate);
+    LocalDate lowerBoundDate = new LocalDate(person.getBeginDate());
 
     if (officeLimit.isAfter(lowerBoundDate)) {
       lowerBoundDate = officeLimit;
@@ -390,45 +448,60 @@ public class ConsistencyManager {
 
     // il contratto non esiste più nel giorno perchè è stata inserita data terminazione
     if (!pd.getPersonDayContract().isPresent()) {
-      pd.getValue().isHoliday = false;
-      pd.getValue().timeAtWork = 0;
-      pd.getValue().progressive = 0;
-      pd.getValue().difference = 0;
-      personDayManager.setTicketStatusIfNotForced(pd.getValue(), false);
-      pd.getValue().stampModificationType = null;
+      pd.getValue().setHoliday(false);
+      pd.getValue().setTimeAtWork(0);
+      pd.getValue().setProgressive(0);
+      pd.getValue().setDifference(0);
+      personDayManager.setTicketStatusIfNotForced(pd.getValue(), 
+          MealTicketBehaviour.notAllowMealTicket);
+      pd.getValue().setStampModificationType(null);
       pd.getValue().save();
       return;
     }
 
     // Nel caso in cui il personDay non sia successivo a sourceContract imposto i valori a 0
     if (pd.getPersonDayContract().isPresent()
-        && pd.getPersonDayContract().get().sourceDateResidual != null
-        && pd.getValue().date.isBefore(pd.getPersonDayContract().get().sourceDateResidual)) {
+        && pd.getPersonDayContract().get().getSourceDateResidual() != null
+        && pd.getValue().getDate().isBefore(pd.getPersonDayContract()
+            .get().getSourceDateResidual())) {
 
-      pd.getValue().isHoliday = false;
-      pd.getValue().timeAtWork = 0;
-      pd.getValue().progressive = 0;
-      pd.getValue().difference = 0;
-      personDayManager.setTicketStatusIfNotForced(pd.getValue(), false);
-      pd.getValue().stampModificationType = null;
+      pd.getValue().setHoliday(false);
+      pd.getValue().setTimeAtWork(0);
+      pd.getValue().setProgressive(0);
+      pd.getValue().setDifference(0);
+      personDayManager.setTicketStatusIfNotForced(pd.getValue(), 
+          MealTicketBehaviour.notAllowMealTicket);
+      pd.getValue().setStampModificationType(null);
       pd.getValue().save();
       return;
     }
 
     // decido festivo / lavorativo
-    pd.getValue().isHoliday = personDayManager.isHoliday(pd.getValue().person, pd.getValue().date);
+    pd.getValue().setHoliday(personDayManager
+        .isHoliday(pd.getValue().getPerson(), pd.getValue().getDate()));
     pd.getValue().save();
 
     // controllo uscita notturna
     handlerNightStamp(pd);
 
-    Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent());
+    log.trace("populatePersonDay {}", pd.getValue());
+    Preconditions.checkArgument(pd.getWorkingTimeTypeDay().isPresent(),
+        String.format("getWorkingTimeTypeDay di %s non presente per il giorno %s",
+            pd.getValue().getPerson().getFullname(), pd.getValue().getDate()));
 
     LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
-        pd.getValue().person.office, EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
+        pd.getValue().getPerson().getOffice(), EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
 
-    LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
-        pd.getValue().person.office, EpasParam.WORK_INTERVAL, pd.getValue().getDate());
+    
+    LocalTimeInterval workInterval = null;
+    Optional<PersonalWorkingTime> pwt = pd.getPersonalWorkingTime();
+    if (pwt.isPresent()) {
+      workInterval = new LocalTimeInterval(pwt.get().getTimeSlot().getBeginSlot(), 
+          pwt.get().getTimeSlot().getEndSlot());
+    } else {
+      workInterval = (LocalTimeInterval) configurationManager.configValue(
+        pd.getValue().getPerson().getOffice(), EpasParam.WORK_INTERVAL, pd.getValue().getDate());
+    }
     
     personDayManager.updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
         pd.isFixedTimeAtWork(), lunchInterval.from, lunchInterval.to, workInterval.from,
@@ -440,10 +513,10 @@ public class ConsistencyManager {
    
     personDayManager.updateProgressive(pd.getValue(), pd.getPreviousForProgressive());
     
-    personDayManager.handleShortPermission(pd);
+    personDayManager.checkAndManageMandatoryTimeSlot(pd.getValue());
 
     // controllo problemi strutturali del person day
-    if (pd.getValue().date.isBefore(LocalDate.now())) {
+    if (pd.getValue().getDate().isBefore(LocalDate.now())) {
       personDayManager.checkForPersonDayInTrouble(pd);
     }
 
@@ -474,30 +547,32 @@ public class ConsistencyManager {
     if (lastStampingPreviousDay != null && lastStampingPreviousDay.isIn()) {
 
       // TODO: controllare, qui esiste un caso limite. Considero pd.date o previous.date?
-      LocalTime maxHour = (LocalTime) configurationManager.configValue(pd.getValue().person.office,
+      LocalTime maxHour = (LocalTime) configurationManager
+          .configValue(pd.getValue().getPerson().getOffice(),
           EpasParam.HOUR_MAX_TO_CALCULATE_WORKTIME, pd.getValue().getDate());
 
-      Collections.sort(pd.getValue().stampings);
+      Collections.sort(pd.getValue().getStampings());
 
-      if (pd.getValue().stampings.size() > 0 && pd.getValue().stampings.get(0).way == WayType.out
-          && maxHour.isAfter(pd.getValue().stampings.get(0).date.toLocalTime())) {
+      if (pd.getValue().getStampings().size() > 0 
+          && pd.getValue().getStampings().get(0).getWay() == WayType.out
+          && maxHour.isAfter(pd.getValue().getStampings().get(0).getDate().toLocalTime())) {
 
         StampModificationType smtMidnight = stampTypeManager.getStampMofificationType(
             StampModificationTypeCode.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT);
 
         // timbratura chiusura giorno precedente
-        Stamping exitStamp = new Stamping(previous, new LocalDateTime(previous.date.getYear(),
-            previous.date.getMonthOfYear(), previous.date.getDayOfMonth(), 23, 59));
+        Stamping exitStamp = new Stamping(previous, new LocalDateTime(previous.getDate().getYear(),
+            previous.getDate().getMonthOfYear(), previous.getDate().getDayOfMonth(), 23, 59));
 
-        exitStamp.way = WayType.out;
-        exitStamp.markedByAdmin = false;
-        exitStamp.stampModificationType = smtMidnight;
-        exitStamp.note =
+        exitStamp.setWay(WayType.out);
+        exitStamp.setMarkedByAdmin(false);
+        exitStamp.setStampModificationType(smtMidnight);
+        exitStamp.setNote(
             "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della "
-                + "mezzanotte";
-        exitStamp.personDay = previous;
+                + "mezzanotte");
+        exitStamp.setPersonDay(previous);
         exitStamp.save();
-        previous.stampings.add(exitStamp);
+        previous.getStampings().add(exitStamp);
         previous.save();
 
         populatePersonDay(wrapperFactory.create(previous));
@@ -505,17 +580,18 @@ public class ConsistencyManager {
         // timbratura apertura giorno attuale
         Stamping enterStamp =
             new Stamping(
-                pd.getValue(), new LocalDateTime(pd.getValue().date.getYear(),
-                pd.getValue().date.getMonthOfYear(), pd.getValue().date.getDayOfMonth(), 0, 0));
+                pd.getValue(), new LocalDateTime(pd.getValue().getDate().getYear(),
+                pd.getValue().getDate().getMonthOfYear(),
+                pd.getValue().getDate().getDayOfMonth(), 0, 0));
 
-        enterStamp.way = WayType.in;
-        enterStamp.markedByAdmin = false;
+        enterStamp.setWay(WayType.in);
+        enterStamp.setMarkedByAdmin(false);
 
-        enterStamp.stampModificationType = smtMidnight;
+        enterStamp.setStampModificationType(smtMidnight);
 
-        enterStamp.note =
+        enterStamp.setNote(
             "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo "
-                + "della mezzanotte";
+                + "della mezzanotte");
 
         enterStamp.save();
       }
@@ -527,7 +603,7 @@ public class ConsistencyManager {
    */
   private void populateContractMonthRecapByPerson(Person person, YearMonth yearMonthFrom) {
     
-    for (Contract contract : person.contracts) {
+    for (Contract contract : person.getContracts()) {
 
       IWrapperContract wrContract = wrapperFactory.create(contract);
       DateInterval contractDateInterval = wrContract.getContractDateInterval();
@@ -536,20 +612,20 @@ public class ConsistencyManager {
       // Se yearMonthFrom non è successivo alla fine del contratto...
       if (!yearMonthFrom.isAfter(endContractYearMonth)) {
 
-        if (contract.vacationPeriods.isEmpty()) {
+        if (contract.getExtendedVacationPeriods().isEmpty()) {
           log.error("No vacation period {}", contract.toString());
           continue;
         }
         
-        LocalDate begin = person.office.getBeginDate();
+        LocalDate begin = person.getOffice().getBeginDate();
         LocalDate end = new LocalDate(yearMonthFrom.getYear(), 
             yearMonthFrom.getMonthOfYear(), 1).dayOfMonth().withMaximumValue();
         
         List<Absence> absences = absenceDao.absenceInPeriod(person, begin, end, "91CE");
         List<TimeVariation> list = absences.stream()
-            .flatMap(abs -> abs.timeVariations.stream()
-                .filter(tv -> !tv.dateVariation.isBefore(begin) 
-                    && !tv.dateVariation.isAfter(end)))
+            .flatMap(abs -> abs.getTimeVariations().stream()
+                .filter(tv -> !tv.getDateVariation().isBefore(begin) 
+                    && !tv.getDateVariation().isAfter(end)))
             .collect(Collectors.toList());
         
         
@@ -575,9 +651,9 @@ public class ConsistencyManager {
     }
 
     ContractMonthRecap cmr = new ContractMonthRecap();
-    cmr.year = yearMonth.getYear();
-    cmr.month = yearMonth.getMonthOfYear();
-    cmr.contract = contract.getValue();
+    cmr.setYear(yearMonth.getYear());
+    cmr.setMonth(yearMonth.getMonthOfYear());
+    cmr.setContract(contract.getValue());
 
     return cmr;
   }
@@ -617,8 +693,8 @@ public class ConsistencyManager {
         // per costruirlo. Soluzione: costruisco tutti i riepiloghi del contratto.
         populateContractMonthRecap(contract, Optional.<YearMonth>absent(), timeVariationList);
       }
-    } else if (contract.getValue().sourceDateResidual != null
-        && yearMonthToCompute.isEqual(new YearMonth(contract.getValue().sourceDateResidual))) {
+    } else if (contract.getValue().getSourceDateResidual() != null
+        && yearMonthToCompute.isEqual(new YearMonth(contract.getValue().getSourceDateResidual()))) {
 
       // Il calcolo del riepilogo del mese che ricade nel sourceDateResidual
       // è particolare e va gestito con un metodo dedicato.
@@ -651,7 +727,7 @@ public class ConsistencyManager {
               Optional.fromNullable(timeVariationList));
 
       recap.get().save();
-      contract.getValue().contractMonthRecaps.add(recap.get());
+      contract.getValue().getContractMonthRecaps().add(recap.get());
       contract.getValue().save();
 
       previousMonthRecap = Optional.fromNullable(currentMonthRecap);
@@ -671,27 +747,29 @@ public class ConsistencyManager {
 
     // Caso semplice ultimo giorno del mese
     LocalDate lastDayInSourceMonth =
-        contract.getValue().sourceDateResidual.dayOfMonth().withMaximumValue();
+        contract.getValue().getSourceDateResidual().dayOfMonth().withMaximumValue();
 
-    if (lastDayInSourceMonth.isEqual(contract.getValue().sourceDateResidual)) {
+    if (lastDayInSourceMonth.isEqual(contract.getValue().getSourceDateResidual())) {
       ContractMonthRecap cmr = buildContractMonthRecap(contract, yearMonthToCompute);
 
-      cmr.remainingMinutesCurrentYear = contract.getValue().sourceRemainingMinutesCurrentYear;
-      cmr.remainingMinutesLastYear = contract.getValue().sourceRemainingMinutesLastYear;
-      cmr.recoveryDayUsed = contract.getValue().sourceRecoveryDayUsed;
+      cmr.setRemainingMinutesCurrentYear(
+          contract.getValue().getSourceRemainingMinutesCurrentYear());
+      cmr.setRemainingMinutesLastYear(contract.getValue().getSourceRemainingMinutesLastYear());
+      cmr.setRecoveryDayUsed(contract.getValue().getSourceRecoveryDayUsed());
 
-      if (contract.getValue().sourceDateMealTicket != null && contract.getValue().sourceDateResidual
-          .isEqual(contract.getValue().sourceDateMealTicket)) {
-        cmr.buoniPastoDaInizializzazione = contract.getValue().sourceRemainingMealTicket;
-        cmr.remainingMealTickets = contract.getValue().sourceRemainingMealTicket;
+      if (contract.getValue().getSourceDateMealTicket() != null 
+          && contract.getValue().getSourceDateResidual()
+          .isEqual(contract.getValue().getSourceDateMealTicket())) {
+        cmr.setBuoniPastoDaInizializzazione(contract.getValue().getSourceRemainingMealTicket());
+        cmr.setRemainingMealTickets(contract.getValue().getSourceRemainingMealTicket());
       } else {
         // Non hanno significato, il riepilogo dei residui dei buoni pasto
         // inizia successivamente.
-        cmr.buoniPastoDaInizializzazione = 0;
-        cmr.remainingMealTickets = 0;
+        cmr.setBuoniPastoDaInizializzazione(0);
+        cmr.setRemainingMealTickets(0);
       }
       cmr.save();
-      contract.getValue().contractMonthRecaps.add(cmr);
+      contract.getValue().getContractMonthRecaps().add(cmr);
       contract.getValue().save();
       return cmr;
     }
@@ -700,7 +778,7 @@ public class ConsistencyManager {
 
     ContractMonthRecap cmr = buildContractMonthRecap(contract, yearMonthToCompute);
 
-    contract.getValue().contractMonthRecaps.add(cmr);
+    contract.getValue().getContractMonthRecaps().add(cmr);
     cmr.save();
 
     // Informazioni relative ai residui

@@ -1,76 +1,8 @@
-# ---!Ups
+# --- !Ups
 
-create table competence_requests (
-	id BIGSERIAL PRIMARY KEY,
-	type TEXT,
-	person_id BIGINT NOT NULL REFERENCES persons(id),
-	value INTEGER,
-	year INTEGER,
-	month INTEGER,
-	date_to_change DATE,
-	start_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-	end_to TIMESTAMP WITHOUT TIME ZONE,
-	note TEXT,	
-	employee_approved TIMESTAMP,
-	manager_approved TIMESTAMP,
-	administrative_approved TIMESTAMP,
-	office_head_approved TIMESTAMP,
-	employee_approval_required BOOLEAN DEFAULT FALSE,
-	manager_approval_required BOOLEAN DEFAULT TRUE,
-	administrative_approval_required BOOLEAN DEFAULT TRUE,
-	office_head_approval_required BOOLEAN DEFAULT TRUE,	
-	flow_started BOOLEAN DEFAULT FALSE,
-	flow_ended BOOLEAN DEFAULT FALSE,
-	created_at TIMESTAMP WITHOUT TIME ZONE,
-	updated_at TIMESTAMP WITHOUT TIME ZONE,
-	version INT DEFAULT 0
-);
-CREATE INDEX competence_requests_person_id_idx ON competence_requests (person_id);
+ALTER TABLE organization_shift_time_table ADD COLUMN consider_every_slot BOOLEAN default true;
+ALTER TABLE organization_shift_time_table_history ADD COLUMN consider_every_slot BOOLEAN;
 
-CREATE TABLE competence_requests_history (
-	id BIGINT NOT NULL,
-  	_revision INTEGER NOT NULL REFERENCES revinfo(rev),
-  	_revision_type SMALLINT NOT NULL,
-  	type TEXT,
-	person_id BIGINT,
-	value INTEGER,
-	year INTEGER,
-	month INTEGER,
-	date_to_change DATE,
-	start_at TIMESTAMP WITHOUT TIME ZONE,
-	end_to TIMESTAMP WITHOUT TIME ZONE,
-	note TEXT,	
-	employee_approved TIMESTAMP,
-	manager_approved TIMESTAMP,
-	administrative_approved TIMESTAMP,
-	office_head_approved TIMESTAMP,
-	employee_approval_required BOOLEAN,
-	manager_approval_required BOOLEAN,
-	administrative_approval_required BOOLEAN,
-	office_head_approval_required BOOLEAN,	
-	flow_started BOOLEAN,
-	flow_ended BOOLEAN,
-	PRIMARY KEY (id, _revision, _revision_type)
-);
-create table competence_request_events (
-	id BIGSERIAL PRIMARY KEY,
-	competence_request_id BIGINT NOT NULL REFERENCES competence_requests(id),
-	owner_id BIGINT NOT NULL REFERENCES users(id),
-	description TEXT,	
-	event_type TEXT,
-	created_at TIMESTAMP WITHOUT TIME ZONE, 
-	version INT DEFAULT 0
-);
 
-CREATE INDEX competence_requests_events_competence_request_id_idx ON competence_request_events(competence_request_id);
-CREATE INDEX competence_requests_events_owner_id_idx ON competence_request_events(owner_id);
-
-# ---!Downs
-
-DROP INDEX competence_requests_person_id_idx;
-DROP INDEX competence_requests_events_competence_request_id_idx;
-DROP INDEX competence_requests_events_owner_id_idx;
-
-DROP TABLE competence_request_events;
-DROP TABLE competence_requests_history;
-DROP TABLE competence_requests;
+# --- !Downs
+-- non è necessaria una down

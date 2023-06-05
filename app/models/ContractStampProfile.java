@@ -1,18 +1,40 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import com.google.common.collect.Range;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
+import lombok.Getter;
+import lombok.Setter;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.PropertyInPeriod;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
+/**
+ * Tipologia di orario di lavoro associata ad un contratto in un certo periodo temporale.
+ */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "contract_stamp_profiles")
@@ -21,48 +43,51 @@ public class ContractStampProfile extends PropertyInPeriod {
   private static final long serialVersionUID = 3503562995113282540L;
 
   @Column(name = "fixed_working_time")
-  public boolean fixedworkingtime;
+  private boolean fixedworkingtime;
 
   @ManyToOne
   @JoinColumn(name = "contract_id", nullable = false)
-  public Contract contract;
+  private Contract contract;
 
   /**
    * TODO: questa implementazione andrebbe spostata nel PeriodModel
    * Se la data è contenuta nel periodo.
+   *
    * @param date data da verificare
    * @return esito
    */
   public boolean includeDate(LocalDate date) {
-    if (beginDate == null && endDate == null) {
+    if (getBeginDate() == null && getEndDate() == null) {
       //TODO decidere se considerare l'intervallo infinito, oppure nullo
       return false;
     }
-    if (beginDate == null) {
-      return !endDate.isAfter(date);
+    if (getBeginDate() == null) {
+      return !getEndDate().isAfter(date);
     }
-    if (endDate == null) {
-      return !beginDate.isBefore(date);
+    if (getEndDate() == null) {
+      return !getBeginDate().isBefore(date);
     }
-    return !beginDate.isBefore(date) && !endDate.isAfter(date);
+    return !getBeginDate().isBefore(date) && !getEndDate()
+        .isAfter(date);
   }
 
   /**
    * TODO: questa implementazione andrebbe spostata nel PeriodModel.
    * Il range del periodo.
+   *
    * @return range
    */
   public Range<LocalDate> dateRange() {
-    if (beginDate == null && endDate == null) {
+    if (getBeginDate() == null && getEndDate() == null) {
       return Range.all();
     }
-    if (beginDate == null) {
-      return Range.atMost(endDate);
+    if (getBeginDate() == null) {
+      return Range.atMost(getEndDate());
     }
-    if (endDate == null) {
-      return Range.atLeast(beginDate);
+    if (getEndDate() == null) {
+      return Range.atLeast(getBeginDate());
     }
-    return Range.closed(beginDate, endDate);
+    return Range.closed(getBeginDate(), getEndDate());
   }
 
   @Override
@@ -72,7 +97,7 @@ public class ContractStampProfile extends PropertyInPeriod {
 
   @Override
   public void setOwner(IPropertiesInPeriodOwner owner) {
-    this.contract = (Contract)owner;
+    this.contract = (Contract) owner;
   }
 
   @Override
@@ -92,14 +117,14 @@ public class ContractStampProfile extends PropertyInPeriod {
 
   @Override
   public void setValue(Object value) {
-    this.fixedworkingtime = (Boolean)value;
+    this.fixedworkingtime = (Boolean) value;
 
   }
 
   @Override
   public boolean periodValueEquals(Object otherValue) {
     if (otherValue instanceof Boolean) {
-      return this.getValue() == (Boolean)otherValue;
+      return this.getValue() == (Boolean) otherValue;
     }
     return false;
   }

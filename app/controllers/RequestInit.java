@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -16,10 +33,14 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.val;
 import manager.SecureManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import models.Office;
 import models.User;
 import models.flows.enumerate.CompetenceRequestType;
+import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
+import play.Play;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -29,7 +50,10 @@ import play.mvc.With;
 
 
 /**
- * @author cristian.
+ * Injector di dati nel menu e nei dropdown.
+ *
+ * @author dario
+ *
  */
 @With(TemplateDataInjector.class)
 public class RequestInit extends Controller {
@@ -42,23 +66,43 @@ public class RequestInit extends Controller {
   static PersonDao personDao;
   @Inject
   static UserDao userDao;
+  @Inject
+  static ConfigurationManager configurationManager;
+
+  static final String TELEWORK_ACTIVE = "telework.stampings.active";
+  
+  static final String GREENPASS_ACTIVE = "greenpass.active";
+
+  static final String ATTESTATI_ACTIVE = "attestati.active";
 
   @Before(priority = 1)
   static void injectMenu() {
+
+    if ("true".equals(Play.configuration.getProperty(TELEWORK_ACTIVE, "false"))) {
+      renderArgs.put("teleworkStampingsActive", true);
+    }
+
+    if ("true".equals(Play.configuration.getProperty(GREENPASS_ACTIVE, "false"))) {
+      renderArgs.put("greenPassActive", true);
+    }
+
+    if ("true".equals(Play.configuration.getProperty(ATTESTATI_ACTIVE, "false"))) {
+      renderArgs.put("attestatiActive", true);
+    }
 
     Optional<User> user = Security.getUser();
 
     if (!user.isPresent()) {
       return;
     }
-
+    
     final User currentUser = user.get();
 
     renderArgs.put("currentUser", currentUser);
 
     // year init /////////////////////////////////////////////////////////////////
     Integer year;
-    if (params.get("year") != null) {
+    if (params.get("year") != null && !params.get("year").isEmpty()) {
       year = Integer.valueOf(params.get("year"));
     } else if (session.get("yearSelected") != null) {
       year = Integer.valueOf(session.get("yearSelected"));
@@ -70,7 +114,7 @@ public class RequestInit extends Controller {
 
     // month init ////////////////////////////////////////////////////////////////
     Integer month;
-    if (params.get("month") != null) {
+    if (params.get("month") != null && !params.get("month").isEmpty()) {
       month = Integer.valueOf(params.get("month"));
     } else if (session.get("monthSelected") != null) {
       month = Integer.valueOf(session.get("monthSelected"));
@@ -82,7 +126,7 @@ public class RequestInit extends Controller {
 
     // day init //////////////////////////////////////////////////////////////////
     Integer day;
-    if (params.get("day") != null) {
+    if (params.get("day") != null && !params.get("day").isEmpty()) {
       day = Integer.valueOf(params.get("day"));
     } else if (session.get("daySelected") != null) {
       day = Integer.valueOf(session.get("daySelected"));
@@ -101,10 +145,10 @@ public class RequestInit extends Controller {
       personId = Long.parseLong(params.get("personId"));
     } else if (session.get("personSelected") != null) {
       personId = Long.parseLong(session.get("personSelected"));
-    } else if (currentUser.person != null) {
-      personId = currentUser.person.id;
+    } else if (currentUser.getPerson() != null) {
+      personId = currentUser.getPerson().id;
     } else {
-      val personList = personDao.liteList(offices, year, month);
+      val personList = personDao.liteList(offices, year, month, false);
       if (!personList.isEmpty()) {
         personId = personList.iterator().next().id;
         session.put("personSelected", personId);
@@ -126,13 +170,13 @@ public class RequestInit extends Controller {
     List<Integer> years = Lists.newArrayList();
     int minYear = LocalDate.now().getYear();
     for (Office office : offices) {
-      if (office.beginDate.getYear() < minYear) {
-        minYear = office.beginDate.getYear();
+      if (office.getBeginDate().getYear() < minYear) {
+        minYear = office.getBeginDate().getYear();
       }
     }
     // Oltre alle sedi amminisitrate anche gli anni della propria sede per le viste dipendente.
-    if (user.get().person != null && user.get().person.office != null) {
-      minYear = user.get().person.office.beginDate.getYear();
+    if (user.get().getPerson() != null && user.get().getPerson().getOffice() != null) {
+      minYear = user.get().getPerson().getOffice().getBeginDate().getYear();
     }
     for (int i = minYear; i <= LocalDate.now().plusYears(1).getYear(); i++) {
       years.add(i);
@@ -149,23 +193,33 @@ public class RequestInit extends Controller {
         && !session.get("officeSelected").equals("null")) {
       officeId = Long.valueOf(session.get("officeSelected"));
     } else if (!offices.isEmpty()) {
-      officeId = offices.stream()
-            .sorted((o, o1) -> o.name.compareTo(o1.name)).findFirst().get().id;        
-    } else if (currentUser.person != null && currentUser.person.office != null) {
-      officeId = currentUser.person.office.id;      
+      officeId = offices.stream().filter(off -> off.getEndDate() == null)
+            .sorted((o, o1) -> o.getName().compareTo(o1.getName())).findFirst().get().id;        
+    } else if (currentUser.getPerson() != null && currentUser.getPerson().getOffice() != null) {
+      officeId = currentUser.getPerson().getOffice().id;
     }
     
     session.put("officeSelected", officeId);
 
     //TODO: Da offices rimuovo la sede di cui ho solo il ruolo employee
+    if (user.get().getPerson() != null) {
+      BlockType type = (BlockType) configurationManager
+          .configValue(
+              officeDao.getOfficeById(officeId), 
+              EpasParam.MEAL_TICKET_BLOCK_TYPE, LocalDate.now());
+      if (type != null && type.equals(BlockType.electronic)) {
+        renderArgs.put("electronicMealTicket", true);
+      }
+    }
+    
+    computeActionSelected(currentUser, offices, year, month, day, personId, officeId);
+    renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId));
 
-    computeActionSelected(currentUser, offices, year, month, day, personId, officeId, competenceType);
-    renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId, competenceType));
   }
 
   private static void computeActionSelected(
       User user, Set<Office> offices, Integer year, Integer month, Integer day, 
-      Long personId, Long officeId, CompetenceRequestType type) {
+      Long personId, Long officeId) {
 
     final String currentAction = Http.Request.current().action;
 
@@ -174,18 +228,30 @@ public class RequestInit extends Controller {
 
     final Collection<String> dayMonthYearSwitcher = ImmutableList.of(
         "Stampings.dailyPresence",
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.checkPerson",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.save",
         "Absences.absencesVisibleForEmployee",
         "Stampings.dailyPresenceForPersonInCharge");
 
     final Collection<String> monthYearSwitcher = ImmutableList.of(
         "Stampings.stampings",
         "Stampings.insertWorkingOffSitePresence",
+        "TeleworkStampings.teleworkStampings",
         "Absences.absences",
         "Competences.competences",
         "Competences.enabledCompetences",
+        "Competences.exportCompetences",
+        "Competences.getCompetenceGroupInYearMonth",
         "Stampings.personStamping",
+        "TeleworkStampings.personTeleworkStampings",
         "Absences.manageAttachmentsPerPerson",
         "Stampings.missingStamping", "Stampings.dailyPresence",
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.checkPerson",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.save",
         "Stampings.dailyPresenceForPersonInCharge",
         "Absences.manageAttachmentsPerCode",
         "Absences.showGeneralMonthlyAbsences",
@@ -195,6 +261,7 @@ public class RequestInit extends Controller {
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
         "MealTickets.recapMealTickets",
+        "MealTicketCards.recapElectronicMealTickets",
         "Certifications.certifications",
         "Certifications.processAll",
         "Certifications.emptyCertifications",
@@ -241,10 +308,19 @@ public class RequestInit extends Controller {
         "MealTickets.editPersonMealTickets",
         "MealTickets.recapPersonMealTickets",
         "AbsenceGroups.certificationsAbsences");
+    
+    final Collection<String> personTeleworkSwitcher = ImmutableList.of(
+        "TeleworkStampings.personTeleworkStampings",
+        "InformationRequests.handleTeleworkApproval"
+        );
 
     final Collection<String> officeSwitcher = ImmutableList.of(
         "Stampings.missingStamping",
         "Stampings.dailyPresence",
+        "CheckGreenPasses.dailySituation",
+        "CheckGreenPasses.checkPerson",
+        "CheckGreenPasses.deletePerson",
+        "CheckGreenPasses.save",
         "Vacations.list",
         "Absences.showGeneralMonthlyAbsences",
         "Absences.manageAttachmentsPerCode",
@@ -253,12 +329,13 @@ public class RequestInit extends Controller {
         "Competences.enabledCompetences",
         "Competences.approvedCompetenceInYear",
         "Competences.exportCompetences",
-        "Competences.getOvertimeInYear",
+        "Competences.getCompetenceGroupInYearMonth",
         "MonthRecaps.showRecaps",
         "MonthRecaps.customRecap",
         "WorkingTimes.manageWorkingTime",
         "WorkingTimes.manageOfficeWorkingTime",
         "MealTickets.recapMealTickets",
+        "MealTicketCards.recapElectronicMealTickets",
         "MealTickets.returnedMealTickets",
         "Configurations.show",
         "Synchronizations.people",
@@ -287,7 +364,8 @@ public class RequestInit extends Controller {
         "AbsenceGroups.importCertificationsAbsences",
         "Stampings.stampingsByAdmin",
         "PrintTags.listPersonForPrintTags",
-        "TimeVariations.show");
+        "TimeVariations.show",
+        "MealTicketCards.mealTicketCards");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.insertWorkingOffSitePresence",
@@ -306,6 +384,7 @@ public class RequestInit extends Controller {
         "Stampings.missingStamping",
         "Stampings.holidaySituation",
         "Stampings.dailyPresence",
+        "CheckGreenPasses.dailySituation",
         "Vacations.list",
         "Persons.list",
         "Persons.edit",
@@ -324,6 +403,7 @@ public class RequestInit extends Controller {
         "MonthRecaps.customRecap",
         "UploadSituation.uploadData",
         "MealTickets.recapMealTickets",
+        "MealTicketCards.recapElectronicMealTickets",
         "MealTickets.returnedMealTickets",
         "Configurations.show",
         "Certifications.certifications",
@@ -353,14 +433,14 @@ public class RequestInit extends Controller {
     }
 
     if (personSwitcher.contains(currentAction) && userDao.hasAdminRoles(user)) {
-      List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month);
+      List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month, false);
       renderArgs.put("navPersons", persons);
       renderArgs.put("switchPerson", true);
       //Patch: caso in cui richiedo una operazione con switch person (ex il tabellone timbrature) 
       //su me stesso, ma la mia sede non appartiene alle sedi che amministro
       //OSS: le action switch person sono tutte in sola lettura quindi il redirect è poco rischioso
-      if (!offices.isEmpty() && user.person != null && user.person.id.equals(personId)) {
-        if (!offices.contains(user.person.office)) {
+      if (!offices.isEmpty() && user.getPerson() != null && user.getPerson().id.equals(personId)) {
+        if (!offices.contains(user.getPerson().getOffice())) {
           Long personSelected = persons.iterator().next().id;
           session.put("personSelected", personSelected);
           Map<String, Object> args = Maps.newHashMap();
@@ -373,9 +453,16 @@ public class RequestInit extends Controller {
         }
       }
     }
+    
+    if (personTeleworkSwitcher.contains(currentAction) && userDao.hasAdminRoles(user)) {
+      List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month, true);
+      renderArgs.put("navPersons", persons);
+      renderArgs.put("switchPerson", true);
+    }
     if (officeSwitcher.contains(currentAction)) {
 
-      renderArgs.put("navOffices", offices.stream().sorted((o, o1) -> o.name.compareTo(o1.name))
+      renderArgs.put("navOffices", offices.stream()
+          .sorted((o, o1) -> o.getName().compareTo(o1.getName()))
           .collect(Collectors.toList()));
       renderArgs.put("switchOffice", true);
     }
@@ -394,7 +481,7 @@ public class RequestInit extends Controller {
   /**
    * Contiene i dati di sessione raccolti per il template.
    *
-   * @author alessandro
+   * @author Alessandro Martelli
    */
   public static class CurrentData {
     public final Integer year;
@@ -402,16 +489,15 @@ public class RequestInit extends Controller {
     public final Integer day;
     public final Long personId;
     public final Long officeId;
-    public final CompetenceRequestType competenceType;
+    
 
-    CurrentData(Integer year, Integer month, Integer day, Long personId, Long officeId,
-        CompetenceRequestType competenceType) {
+    CurrentData(Integer year, Integer month, Integer day, Long personId, Long officeId) {
       this.year = year;
       this.month = month;
       this.day = day;
       this.personId = personId;
       this.officeId = officeId;
-      this.competenceType = competenceType;
+      
     }
 
     /**

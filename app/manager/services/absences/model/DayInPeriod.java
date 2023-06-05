@@ -1,14 +1,27 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences.model;
 
 import com.google.common.collect.Lists;
-
 import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
-
 import manager.services.absences.errors.AbsenceError;
-
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
@@ -16,9 +29,15 @@ import models.absences.AmountType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
-
 import org.joda.time.LocalDate;
 
+/**
+ * Rappresenta una specifica giornata all'interno di un periodo di assenze,
+ * giornata con le specifiche informazioni utili per i controlli sulle assenze.
+ *
+ * @author Alessandro Martelli
+ *
+ */
 @Getter
 @Setter
 public class DayInPeriod {
@@ -67,7 +86,7 @@ public class DayInPeriod {
     }
     List<Absence> wrong = Lists.newArrayList();
     for (Absence existentReplacing : existentReplacings) {
-      if (!existentReplacing.absenceType.equals(correctReplacing)) {
+      if (!existentReplacing.getAbsenceType().equals(correctReplacing)) {
         wrong.add(existentReplacing);
       }
     }
@@ -84,7 +103,7 @@ public class DayInPeriod {
       return false;
     }
     for (Absence existentReplacing : existentReplacings) {
-      if (existentReplacing.absenceType.equals(correctReplacing)) {
+      if (existentReplacing.getAbsenceType().equals(correctReplacing)) {
         return false;
       }
     }
@@ -124,6 +143,12 @@ public class DayInPeriod {
   }
 
 
+  /**
+   * Classe per la riga da ritornare in fase di inserimento assenza nell'interfaccia.
+   *
+   * @author Alessandro
+   *
+   */
   public static class TemplateRow {
 
     public LocalDate date;
@@ -161,7 +186,7 @@ public class DayInPeriod {
     
     //FIXME: questo justifiedType serve per i replacing. Injettarlo
     JustifiedType nothing = new JustifiedType();
-    nothing.name = JustifiedTypeName.nothing;   
+    nothing.setName(JustifiedTypeName.nothing);   
 
     List<TemplateRow> templateRows = Lists.newArrayList();
 
@@ -285,8 +310,8 @@ public class DayInPeriod {
     replacingRow.complationColumn = true;
     Absence absence = new Absence();
     absence.date = this.date;
-    absence.absenceType = this.correctReplacing;
-    absence.justifiedType = nothing;
+    absence.setAbsenceType(this.correctReplacing);
+    absence.setJustifiedType(nothing);
     replacingRow.absence = absence;
     replacingRow.groupAbsenceType = absencePeriod.groupAbsenceType;
     replacingRow.consumedComplationNext = formatAmount(complationAbsence.residualComplationAfter,
@@ -302,7 +327,7 @@ public class DayInPeriod {
     String format = "";
     if (amountType.equals(AmountType.units)) {
       if (amount == 0) {
-        return "0 giorni";// giorno lavorativo";
+        return "0 giorni"; // giorno lavorativo";
       }
       int units = amount / 100;
       int percent = amount % 100;

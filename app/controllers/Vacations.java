@@ -1,9 +1,27 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
+import common.security.SecurityRules;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -16,7 +34,9 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import manager.services.absences.AbsenceForm;
 import manager.services.absences.AbsenceService;
+import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.VacationSituation;
 import manager.services.absences.model.VacationSituation.VacationSummary;
 import manager.services.absences.model.VacationSituation.VacationSummary.TypeSummary;
@@ -29,8 +49,10 @@ import models.absences.definitions.DefaultGroup;
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
+/**
+ * Controller per la gestione delle ferie.
+ */
 @With({Resecure.class})
 @Slf4j
 public class Vacations extends Controller {
@@ -59,9 +81,9 @@ public class Vacations extends Controller {
 
     Optional<User> currentUser = Security.getUser();
     Preconditions.checkState(currentUser.isPresent());
-    Preconditions.checkNotNull(currentUser.get().person);
+    Preconditions.checkNotNull(currentUser.get().getPerson());
 
-    IWrapperPerson person = wrapperFactory.create(currentUser.get().person);
+    IWrapperPerson person = wrapperFactory.create(currentUser.get().getPerson());
 
     if (year == null) {
       year = LocalDate.now().getYear();
@@ -78,12 +100,21 @@ public class Vacations extends Controller {
           vacationGroup, Optional.absent(), false);
       vacationSituations.add(vacationSituation);
     }
+    
+    GroupAbsenceType permissionGroup = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
+    PeriodChain periodChain = absenceService
+        .residual(person.getValue(), permissionGroup, LocalDate.now());
+    AbsenceForm categorySwitcher = absenceService
+        .buildForCategorySwitch(person.getValue(), LocalDate.now(), permissionGroup);
+    
     boolean showVacationPeriods = true;
-    render(vacationSituations, year, showVacationPeriods);
+    render(vacationSituations, year, showVacationPeriods, periodChain, categorySwitcher);
   }
   
   /**
    * Situazione di riepilogo contratto per il dipendente.
+   *
    * @param contractId contratto
    * @param year anno
    * @param type VACATION/PERMISSION
@@ -93,8 +124,8 @@ public class Vacations extends Controller {
     Contract contract = contractDao.getContractById(contractId);
     Optional<User> currentUser = Security.getUser();
     if (contract == null || type == null 
-        || !currentUser.isPresent() || currentUser.get().person == null 
-        || !contract.person.equals(currentUser.get().person)) {
+        || !currentUser.isPresent() || currentUser.get().getPerson() == null 
+        || !contract.getPerson().equals(currentUser.get().getPerson())) {
       forbidden();
     }
     
@@ -138,7 +169,7 @@ public class Vacations extends Controller {
     List<VacationSituation> vacationSituations = Lists.newArrayList();
     
     for (Person person : personList) {
-      for (Contract contract : person.contracts) {
+      for (Contract contract : person.getContracts()) {
 
         IWrapperContract cwrContract = wrapperFactory.create(contract);
         if (DateUtility.intervalIntersection(cwrContract.getContractDateInterval(),
@@ -154,7 +185,7 @@ public class Vacations extends Controller {
               year, vacationGroup, Optional.absent(), true);
           vacationSituations.add(vacationSituation);
         } catch (Exception ex) {
-          log.info("");
+          log.info("Impossibile creare la situazione delle ferie di {}", person.getFullname());
         }
 
       }
@@ -176,6 +207,7 @@ public class Vacations extends Controller {
   
   /**
    * Situazione di riepilogo contratto.
+   *
    * @param contractId contratto
    * @param year anno
    * @param type VACATION/PERMISSION
@@ -185,7 +217,7 @@ public class Vacations extends Controller {
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
     notFoundIfNull(type);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
     
     GroupAbsenceType vacationGroup = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();

@@ -40,9 +40,15 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 	  #{if stamping?.persistent}
 	    #{f.hidden 'stamping.id', value:stamping.id /}
 	  #{/if}
-	
-	  #{f.input 'time', popover:'true', value:stamping?.isPersistent() ? stamping?.formattedHour() : time, required:true/}
-	  #{f.radioEnum 'stamping.way', items:models.Stamping.WayType, required:true /}
+	  #{if ownStamping}
+	  	#{f.view 'time', value:stamping?.isPersistent() ? stamping?.formattedHour() : time /}
+	  	#{f.view 'stamping.way', value: stamping.way /}
+	  #{/if}
+	  #{else}
+	  	#{f.input 'time', popover:'true', value:stamping?.isPersistent() ? stamping?.formattedHour() : time, required:true/}
+	  	#{f.radioEnum 'stamping.way', items:models.Stamping.WayType, required:true /}
+	  #{/else}
+	  
 	
 	  #{set stampTypes: templateUtility.stampTypes /}
 	  #{if stampTypes.size() == 1}
@@ -51,6 +57,17 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 	  #{/if}
 	  #{else}
 	    #{f.selectEnum 'stamping.stampType', items:stampTypes /}
+	  #{/else}
+	  
+	  #{if stampTypes.size() == 1 && stampTypes.get(0).equals(models.enumerate.StampTypes.MOTIVI_DI_SERVIZIO)}
+	  	#{f.input 'stamping.reason' /}
+	  	#{f.input 'stamping.place' /}
+	  #{/if}
+	  
+	  #{if stamping.stampingZone != null}
+	  	#{f.view 'stamping.stampingZone' /}
+	  #{/if}
+	  #{else}
 	  #{/else}
 
 	  #{f.input 'stamping.note' /}

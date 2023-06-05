@@ -1,11 +1,30 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.enumerate;
 
 import com.google.common.collect.Lists;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Tipologie di possibili problemi nei controlli effettuati sui turni.
+ */
 public enum ShiftTroubles {
 
   //persona non assegnata all'attività
@@ -32,10 +51,14 @@ public enum ShiftTroubles {
   SHIFT_INCOMPLETED,
   // la persona è assente nel giorno
   PERSON_IS_ABSENT, 
+  // eccessiva disparità tra slot di turno
+  TOO_MANY_DIFFERENCE_BETWEEN_SLOTS,
   // Giorno futuro
   FUTURE_DAY;
 
   /**
+   * La lista degli errori specifici per un singolo turno.
+   *
    * @return la lista degli errori che sono specifici di un singolo turno (non include quelli
    *        derivanti dai controlli sul giorno di turno).
    */
@@ -55,6 +78,8 @@ public enum ShiftTroubles {
   }
 
   /**
+   * La lista degli errori che invalidano il turno.
+   *
    * @return la lista degli errori che invalidano il turno.
    */
   public static List<ShiftTroubles> invalidatingTroubles() {
@@ -68,10 +93,13 @@ public enum ShiftTroubles {
         PERSON_NOT_ASSIGNED,
         FUTURE_DAY,
         PROBLEMS_ON_OTHER_SLOT,
+        TOO_MANY_DIFFERENCE_BETWEEN_SLOTS,
         SHIFT_INCOMPLETED);
   }
   
   /**
+   * La lista degli warning sul turno.
+   *
    * @return la lista degli errori che invalidano il turno.
    */
   public static List<ShiftTroubles> warningTroubles() {

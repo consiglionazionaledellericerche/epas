@@ -1,7 +1,26 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 package models.flows;
 
 import com.beust.jcommander.internal.Lists;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,6 +31,8 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import models.Person;
 import models.base.MutableModel;
@@ -25,8 +46,8 @@ import play.db.jpa.Blob;
 
 /**
  * Richiesta di assenza.
- * 
- * @author cristian
+ *
+ * @author Cristian Lucchesi
  *
  */
 @ToString(of = {"type", "person", "startAt", "endTo", 
@@ -36,6 +57,8 @@ import play.db.jpa.Blob;
 @Audited
 @Entity
 @Table(name = "absence_requests")
+@Getter
+@Setter
 public class AbsenceRequest extends MutableModel {
 
   private static final long serialVersionUID = 328199210648734558L;
@@ -43,12 +66,12 @@ public class AbsenceRequest extends MutableModel {
   @Required
   @NotNull
   @Enumerated(EnumType.STRING)
-  public AbsenceRequestType type;
+  private AbsenceRequestType type;
 
   @Required
   @NotNull
   @ManyToOne(optional = false)
-  public Person person;
+  private Person person;
 
   /**
    * Data e ora di inizio.
@@ -56,78 +79,85 @@ public class AbsenceRequest extends MutableModel {
   @Required
   @NotNull
   @Column(name = "start_at")
-  public LocalDateTime startAt;
+  private LocalDateTime startAt;
 
   @Column(name = "end_to")
-  public LocalDateTime endTo;
+  private LocalDateTime endTo;
 
+  /*
+   * Campi ore e minuti per le assenze orarie
+   */
+  private Integer hours;
+  
+  private Integer minutes;
+  
   /**
    * Descrizione facoltativa della richiesta.
    */
-  public String note;
+  private String note;
 
   /**
    * Eventuale allegato alla richiesta.
    */
   @Column(name = "attachment", nullable = true)
-  public Blob attachment;
+  private Blob attachment;
 
 
   /**
    * Data di approvazione del responsabile.
    */
   @Column(name = "manager_approved")
-  public LocalDateTime managerApproved;
+  private LocalDateTime managerApproved;
 
   /**
    * Data di approvazione dell'amministrativo.
    */
   @Column(name = "administrative_approved")
-  public LocalDateTime administrativeApproved;
+  private LocalDateTime administrativeApproved;
 
   /**
    * Data di approvazione del responsabili sede.
    */
   @Column(name = "office_head_approved")
-  public LocalDateTime officeHeadApproved;
+  private LocalDateTime officeHeadApproved;
 
   /**
    * Indica se è richieta l'approvazione da parte del responsabile.
    */
   @Column(name = "manager_approval_required")
-  public boolean managerApprovalRequired = true;
+  private boolean managerApprovalRequired = true;
 
   /**
    * Indica se è richieta l'approvazione da parte dell'amministrativo.
    */
   @Column(name = "administrative_approval_required")
-  public boolean administrativeApprovalRequired = true;
+  private boolean administrativeApprovalRequired = true;
 
   /**
    * Indica se è richieta l'approvazione da parte del responsabile di sede.
    */
   @Column(name = "office_head_approval_required")
-  public boolean officeHeadApprovalRequired = true;
+  private boolean officeHeadApprovalRequired = true;
   
   @Column(name = "office_head_approval_for_manager_required")
-  public boolean officeHeadApprovalForManagerRequired = true;
+  private boolean officeHeadApprovalForManagerRequired = true;
 
   @NotAudited
-  @OneToMany(mappedBy = "absenceRequest")
+  @OneToMany(mappedBy = "absenceRequest", cascade = CascadeType.REMOVE)
   @OrderBy("createdAt DESC")
-  public List<AbsenceRequestEvent> events = Lists.newArrayList();
+  private List<AbsenceRequestEvent> events = Lists.newArrayList();
 
   /**
    * Se il flusso è avviato.
    */
   @Column(name = "flow_started")
-  public boolean flowStarted = false; 
+  private boolean flowStarted = false; 
 
   /**
    * Se il flusso è terminato.
    */
   @Column(name = "flow_ended")
-  public boolean flowEnded = false;
+  private boolean flowEnded = false;
 
   @Transient
   public LocalDate startAtAsDate() {
@@ -157,6 +187,7 @@ public class AbsenceRequest extends MutableModel {
   /**
    * Se non sono state già rilasciate approvazioni necessarie allora il possessore 
    * può cancellare o modificare la richiesta.
+   *
    * @return true se la richiesta di permesso è ancora modificabile o cancellabile.
    */
   @Transient
@@ -175,7 +206,7 @@ public class AbsenceRequest extends MutableModel {
   /**
    * Un flusso è completato se tutte le approvazioni richieste sono state
    * impostate.
-   * 
+   *
    * @return true se è completato, false altrimenti.
    */
   public boolean isFullyApproved() {

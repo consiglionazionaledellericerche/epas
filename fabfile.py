@@ -1,92 +1,79 @@
 #!python
 # require fabric
 
-from fabric.api import *
-from hashlib import md5
+import os.path
 
-env.hosts = ["epas@epas-r2.tools.iit.cnr.it"]
-#env.hosts = ["epas@epas-r1.tools.iit.cnr.it"]
-
-APP = "epas"
-PLAY = "/home/epas/bin/play/play"
+from fabric import task
 
 BACKUP_DIR= "/data/backups/epas"
 
 @task
-def update():
-    with cd(APP):
-        run("git pull origin master")
-        run("git describe --all --long > VERSION")
-    dependencies()
-
-@task
-def dependencies():
-    with cd(APP):
-        run(PLAY + " deps --sync")
-        run(PLAY + " precompile")
-
-@task
-def stop():
-    with cd(APP):
-        with warn_only():
-            run(PLAY + " stop")
-
-@task
-def start():
-    with cd(APP):
-        run("nohup " + PLAY + " start -Dprecompiled=true")
-    logtail()
-
-@task
-def evolutions():
-    stop()
-    with cd(APP):
-        run(PLAY + " evolutions:apply")
-    start()
-
-@task
-def logtail():
-    with cd(APP):
-        run("tail -f logs/epas.log")
-
-@task
-def changepassword(username, password, dbname="epas-devel", dbuser="epas"):
+def localbackup(c, dbname="epas-devel", dbuser="epas", destination="/tmp/epas.pgsql"):
     """
-    change password of the user identified by username
+    create a database backup using custom postgresql format
     """
 
-    # using obsolete md5... please migrate to sha512 or bcrypt.
-    sql = "update users set password = '%s' where username = '%s'" % \
-        (md5(password).hexdigest(), username)
-    local("psql -U %s -c \"%s\" %s" % (dbuser, sql, dbname))
-
-def recreatedb(dbname, dbuser):
-    try:
-        local("psql -lqt | cut -d \| -f 1 | grep -w %s" % (dbname, ))
-    except:
-        pass
-    else:
-        local("dropdb %s" % (dbname, ))
-    local("createdb -O %s %s" % (dbuser, dbname))
+    c.local("pg_dump -U %s -O %s -Fc -n public -T spatial_ref_sys -f %s" %(dbuser, dbname, destination))
 
 @task
-def copydb(dbname, dbuser="epas", remotedb="epas"):
+def restorebackup(c, dbname="epas-devel", dbuser="epas", source="/tmp/epas.pgsql"):
+    """
+    restore a previous database backup using custom postgresql format
+    """
+
+    recreatedb(c, dbname, dbuser)
+    c.local("zcat %s | psql -U %s %s" % (source, dbuser, dbname))
+
+@task
+def copydb(c, dbname="epas-devel", dbuser="epas", remotedb="epas"):
     """
     copy production db into local database
     """
-    run("pg_dump -U %s -O %s | gzip -c > /tmp/db.sql.gz" % (remotedb, remotedb))
-    get("/tmp/db.sql.gz", "/tmp")
-    recreatedb(dbname, dbuser)
-    local("zcat /tmp/db.sql.gz | psql -U %s %s" % (dbuser, dbname))
+
+    c.run("pg_dump -U %s -O %s -n public -T spatial_ref_sys | gzip -c > /tmp/db.sql.gz" % (remotedb, remotedb))
+    c.get("/tmp/db.sql.gz", "/tmp/db.sql.gz")
+    recreatedb(c, dbname, dbuser)
+    c.local("zcat /tmp/db.sql.gz | psql -U %s %s" % (dbuser, dbname))
 
 @task
-def copybackup(dbname, dbuser="epas"):
+def fastrestoredb(c, dbname="epas-devel", dbuser="epas"):
+    """
+    restore backup from a pgsql format file
+    """
+
+    recreatedb(c, dbname, dbuser)
+    c.local("pg_restore -U %s -n public -d %s -j 2 /tmp/db.pgsql" % (dbuser, dbname))
+    
+@task
+def fastcopydb(c, dbname="epas-devel", dbuser="epas", remotedb="epas"):
+    """
+    copy database using custom postgresql format
+    """
+    c.run("pg_dump -U %s -O %s -Fc -n public -T spatial_ref_sys -f /tmp/db.pgsql" % (remotedb, remotedb))
+    c.get("/tmp/db.pgsql", "/tmp/db.pgsql")
+    fastrestoredb(c, dbname, dbuser)
+
+@task
+def copybackup(c, dbname="epas-devel", dbuser="epas", force=False):
     """
     restore local database from last server backup
-
     """
-    with cd(BACKUP_DIR):
-        lastbackup = run("ls -lt | head -2 | tail -1 | awk '{print $9}'")
-        get(lastbackup, "/tmp")
-    recreatedb(dbname, dbuser)
-    local("zcat %s | psql -U %s %s" % ("/tmp/" + lastbackup, dbuser, dbname))
+    with c.cd(BACKUP_DIR):
+        lastbackup = c.run("ls -lt | head -2 | tail -1 | awk '{print $9}'").stdout.strip()
+        if force or not os.path.exists("/tmp/" + lastbackup):
+            c.get(os.path.join(BACKUP_DIR, lastbackup), "/tmp/" + lastbackup)
+
+    recreatedb(c, dbname, dbuser)
+    c.local("zcat %s | psql -U %s %s" % ("/tmp/" + lastbackup, dbuser, dbname))
+
+def recreatedb(c, dbname, dbuser):
+    try:
+        c.local("psql -lqt | cut -d \| -f 1 | grep -w %s" % (dbname, ))
+    except:
+        pass
+    else:
+        try:
+            c.local("dropdb %s" % (dbname, ))
+        except:
+            print("database non presente?")
+    c.local("createdb -O %s %s" % (dbuser, dbname))

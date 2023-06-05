@@ -1,25 +1,38 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao.wrapper;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import dao.RoleDao;
-
 import java.util.List;
-
+import javax.inject.Inject;
 import models.Office;
 import models.Role;
 import models.UsersRolesOffices;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 /**
  * Wrapper sede.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 public class WrapperOffice implements IWrapperOffice {
 
@@ -79,7 +92,8 @@ public class WrapperOffice implements IWrapperOffice {
   }
   
   /**
-   * 
+   * Lista di gestori buoni basto.
+   *
    * @return i gestori dei buoni pasto
    */
   public List<UsersRolesOffices> getMealTicketManagers() {
@@ -88,7 +102,8 @@ public class WrapperOffice implements IWrapperOffice {
   }
   
   /**
-   * 
+   * Lista di gestori anagrafica.
+   *
    * @return i gestori dell'anagrafica
    */
   public List<UsersRolesOffices> getRegistryManagers() {
@@ -190,10 +205,10 @@ public class WrapperOffice implements IWrapperOffice {
   
   private List<UsersRolesOffices> filterUros(Role role) {
     List<UsersRolesOffices> uroList = Lists.newArrayList();
-    for (UsersRolesOffices uro : this.value.usersRolesOffices) {
+    for (UsersRolesOffices uro : this.value.getUsersRolesOffices()) {
 
-      if (uro.office.id.equals(this.value.id) && uro.role.id.equals(role.id)
-          && uro.user.person != null) {
+      if (uro.getOffice().id.equals(this.value.id) && uro.getRole().id.equals(role.id)
+          && uro.getUser().getPerson() != null) {
         uroList.add(uro);
       }
     }

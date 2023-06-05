@@ -1,0 +1,29 @@
+<div class="container-fluid">
+#{alert color: 'info' }
+<p>Compila il form sottostante per avviare un flusso di informazione di assenza per malattia.
+Specifica la <strong>data di inizio</strong> , la <strong>data di fine</strong> e il tipo di malattia.<br>  
+</p>
+#{/alert}
+</div>
+
+
+#{form action:@saveIllnessRequest(), method:'POST', autocomplete:false, class:'form form-horizontal',
+	  'data-spinner':'#defaultSpinner'}
+	  
+	#{f.hidden 'illnessRequest.id' /}
+	#{f.hidden 'illnessRequest.person.id' /}
+	#{f.hidden 'illnessRequest.informationType' /}
+	#{f.hidden 'persist', value:persist /}
+	
+	#{f.date 'illnessRequest.beginDate', required:true, value:illnessRequest.beginDate?.format() /}
+	#{f.date 'illnessRequest.endDate', required:true, value:illnessRequest.endDate?.format() /}
+	
+	#{f.input 'illnessRequest.name', required:true /}
+            
+	#{b.buttons center:true}
+		 #{b.link @list(type), color:'default', title:'Indietro' /}
+		 
+         #{b.submit 'Inserisci'/}
+         
+    #{/b.buttons}
+#{/form}

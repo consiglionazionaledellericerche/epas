@@ -2,7 +2,7 @@
 
 <html>
 <head>
-	<title>Istituto di Informatica e Telematica - Reperibilità di ${month} ${year}</title>
+	<title>${office.name} - Reperibilità di ${month} ${year}</title>
 	<link rel="stylesheet" href="@{'/public/stylesheets/calendars/sistorgReportPDF.css'}" type="text/css" />
 	<link rel="stylesheet" href="@{'/public/stylesheets/calendars/reperibilityPDF.css'}" type="text/css" />
 </head>
@@ -12,7 +12,7 @@
 	mese = firstOfMonth.plusMonths(mm).monthOfYear().getAsText();
 	anno = firstOfMonth.plusMonths(mm).year().getAsText();
 }%
-<h1>Istituto di Informatica e Telematica </h1>
+<h1>${office.institute.name}</h1>
 
 <div class="table">
 	<table class="mensile">
@@ -50,12 +50,12 @@
 
 <div class="firma dir">
 	<strong>Il Direttore</strong> <br />
-	Dott. Marco Conti
+	${seatSupervisor}
 </div>
 
 <div class="firma resp">
 	<strong>Il Responsabile</strong><br />
-	Dott. ${supervisor}
+	${supervisor}
 </div>
 
 #{ifnot inconsistentAbsence.isEmpty()}

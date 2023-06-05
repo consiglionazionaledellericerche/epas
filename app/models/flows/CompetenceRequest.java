@@ -1,5 +1,23 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.flows;
 
+import com.google.common.collect.Lists;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,53 +29,89 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+import models.Person;
+import models.base.MutableModel;
+import models.enumerate.ShiftSlot;
+import models.flows.enumerate.CompetenceRequestType;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import com.beust.jcommander.internal.Lists;
-import models.Person;
-import models.base.MutableModel;
-import models.flows.enumerate.CompetenceRequestType;
 import play.data.validation.Required;
 
+/**
+ * Richiesta di attribuzione di una competenza mensile.
+ *
+ * @author Dario Tagliaferri
+ *
+ */
+@Getter
+@Setter
 @Entity
 @Table(name = "competence_requests")
 public class CompetenceRequest extends MutableModel {
   
+  private static final long serialVersionUID = -2458580703574435339L;
+
   @Required
   @NotNull
   @Enumerated(EnumType.STRING)
-  public CompetenceRequestType type;
+  private CompetenceRequestType type;
 
   @Required
   @NotNull
   @ManyToOne(optional = false)
-  public Person person;
+  private Person person;
   
-  /**
+  /*
    * Descrizione della richiesta
    */
-  public String note;
+  private String note;
   
-  /**
+  /*
+   * Destinatario della richiesta di cambio turno/reperibilità
+   */
+  @ManyToOne(optional = true)
+  private Person teamMate;
+  
+  /*
    * L'eventuale valore da salvare
    */
-  public Integer value;
+  private Integer value;
   
-  /**
+  /*
    * L'eventuale anno in cui salvare la competenza
    */
-  public Integer year;
+  private Integer year;
   
-  /**
+  /*
    * L'eventuale mese in cui salvare la competenza
    */
-  public Integer month;
+  private Integer month;
   
-  /**
-   * L'eventuale data da cambiare
+  /*
+   * L'eventuale data inizio da chiedere
    */
-  public LocalDate dateToChange;
+  private LocalDate beginDateToAsk;
+  /*
+   * L'eventuale data fine da chiedere
+   */
+  private LocalDate endDateToAsk;
+  /*
+   * L'eventuale data inizio da dare
+   */
+  private LocalDate beginDateToGive;
+  /*
+   * L'eventuale data fine da dare
+   */
+  private LocalDate endDateToGive;
+  
+  /*
+   * Lo slot per cui richiedere il cambio
+   */
+  @Enumerated(EnumType.STRING)
+  private ShiftSlot shiftSlot;
   
   /**
    * Data e ora di inizio.
@@ -65,41 +119,34 @@ public class CompetenceRequest extends MutableModel {
   @Required
   @NotNull
   @Column(name = "start_at")
-  public LocalDateTime startAt;
+  private LocalDateTime startAt;
 
   @Column(name = "end_to")
-  public LocalDateTime endTo;
+  private LocalDateTime endTo;
   
-  public LocalDateTime employeeApproved;
+  private LocalDateTime employeeApproved;
   
-  public LocalDateTime managerApproved;
+  private LocalDateTime managerApproved;
   
-  public LocalDateTime officeHeadApproved;
+  private boolean employeeApprovalRequired = true;
   
-  public LocalDateTime administrativeApproved;
+  private boolean managerApprovalRequired = true;
   
-  public boolean employeeApprovalRequired = true;
-  
-  public boolean managerApprovalRequired = true;
-  
-  public boolean officeHeadApprovalRequired = true;
-  
-  public boolean administrativeApprovalRequired = true;
   
   @NotAudited
   @OneToMany(mappedBy = "competenceRequest")
   @OrderBy("createdAt DESC")
-  public List<CompetenceRequestEvent> events = Lists.newArrayList();
+  private List<CompetenceRequestEvent> events = Lists.newArrayList();
   
   /**
    * Se il flusso è avviato.
    */
-  public boolean flowStarted = false; 
+  private boolean flowStarted = false; 
 
   /**
    * Se il flusso è terminato.
    */
-  public boolean flowEnded = false;
+  private boolean flowEnded = false;
   
   @Transient
   public LocalDate startAtAsDate() {
@@ -114,47 +161,39 @@ public class CompetenceRequest extends MutableModel {
   @Transient
   public boolean isEmployeeApproved() {
     return employeeApproved != null;
-  }  
+  }
   
+  public boolean toBeAEmployeeApproved() {
+    return employeeApprovalRequired && !isEmployeeApproved();
+  }
+
   @Transient
   public boolean isManagerApproved() {
     return managerApproved != null;
   }
 
-  @Transient
-  public boolean isAdministrativeApproved() {
-    return administrativeApproved != null;
-  }
-
-  @Transient
-  public boolean isOfficeHeadApproved() {
-    return officeHeadApproved != null;
-  }
   
   /**
    * Se non sono state già rilasciate approvazioni necessarie allora il possessore 
    * può cancellare o modificare la richiesta.
+   *
    * @return true se la richiesta di permesso è ancora modificabile o cancellabile.
    */
   @Transient
   public boolean ownerCanEditOrDelete() {
-    return !flowStarted && (officeHeadApproved == null || !officeHeadApprovalRequired) 
+    return !flowStarted  
         && (managerApproved == null || !managerApprovalRequired)
-        && (administrativeApproved == null || !administrativeApprovalRequired)
         && (employeeApproved == null || !employeeApprovalRequired);
   }
   
   /**
    * Un flusso è completato se tutte le approvazioni richieste sono state
    * impostate.
-   * 
+   *
    * @return true se è completato, false altrimenti.
    */
   public boolean isFullyApproved() {
     return (!this.managerApprovalRequired || this.isManagerApproved()) 
-        && (!this.administrativeApprovalRequired 
-            || this.isAdministrativeApproved())
-        && (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved())
         && (!this.employeeApprovalRequired
             || this.isEmployeeApproved());
   }

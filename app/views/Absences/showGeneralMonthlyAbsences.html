@@ -37,15 +37,27 @@
 				<tr>
 					<td class="warning">${entry.getKey().surname} ${entry.getKey().name}</td>
 					#{list tableMonthlyAbsences.columnKeySet(),as:'col'}
+				      #{if !col.code.equals("Totale") }
 						<td data-order="${entry.getValue().get(col)}">
 							<a href="@{Absences.showPersonMonthlyAbsences(entry.getKey().id, year, month, col.code)}"
 								 data-async-modal="#modalStamping">
 						 	${entry.getValue().get(col)}							
 							</a>
 						</td>
-					#{/list}
-				</tr>	
-				#{/list}	
+				      #{/if} 
+				    #{/list}
+					#{list tableMonthlyAbsences.columnKeySet(),as:'col'}
+				      #{if col.code.equals("Totale") }
+						<td data-order="${entry.getValue().get(col)}">
+						 	<a href="@{Absences.showPersonMonthlyAbsences(entry.getKey().id, year, month, col.code)}"
+								 data-async-modal="#modalStamping">
+						 	${entry.getValue().get(col)}							
+							</a>							
+						</td>
+				      #{/if} 
+				    #{/list}
+				</tr>
+				#{/list}
 			</tbody>	
 	      </table>
 </div>

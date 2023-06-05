@@ -3,7 +3,7 @@
 -- Creo una nouva revisione
 INSERT INTO revinfo (revtstmp) VALUES (EXTRACT(EPOCH FROM NOW())::BIGINT*1000);
 
-ALTER TABLE absence_types ADD COLUMN reperibility_compatible BOOLEAN ;
+ALTER TABLE absence_types ADD COLUMN reperibility_compatible BOOLEAN DEFAULT FALSE;
 ALTER TABLE absence_types_history ADD COLUMN reperibility_compatible BOOLEAN ;
 
 

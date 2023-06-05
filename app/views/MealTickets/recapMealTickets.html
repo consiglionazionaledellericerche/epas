@@ -49,8 +49,13 @@
       
     </div>    
     #{/if}
-
-  
+    
+	#{if electronicMealTicket}
+  	<div class="text-center">
+    <a class="btn btn-success" href="@{MealTicketCards.generateReport(office.id, year, month)}"><i class="fa fa-user-plus"></i>
+      Genera il report Repas </a>
+  	</div>
+  	#{/if}
       <table class="table table-bordered center" datatable>
         <thead>
         <tr>
@@ -65,9 +70,14 @@
 	  	  #{list items:monthRecapList, as:'recap'}
 	  	  <tr>
 	  	    <td #{if recap.expireInMonth()} webui-popover-hover data-content="Il contratto scade nel mese" #{/if}>
-	  	    
+	  	       #{if !electronicMealTicket}
 	  	       <a href="@{MealTickets.personMealTickets(recap.contract.id, year, month)}">
-		  	      ${recap.contract.person.surname} ${recap.contract.person.name}</a>  	  
+		  	      ${recap.contract.person.surname} ${recap.contract.person.name}</a>  
+		  	   #{/if}
+		  	   #{else}
+		  	   <a href="@{MealTicketCards.personMealTickets(recap.contract.id, year, month)}">
+		  	      ${recap.contract.person.surname} ${recap.contract.person.name}</a> 
+		  	   #{/else}	  
 		  	      #{if recap.expireInMonth()} * #{/if}
 	  	    </td> 
 	  	    
@@ -78,7 +88,8 @@
 	  	    #{/else}
 	  	    
 	  	    <td>${recap.buoniPastoConsegnatiNelMese}</td>
-	  	    <td>${recap.buoniPastoUsatiNelMese}</td>
+	  	    <td><a href="@{MealTickets.whichBlock(recap.contract.id, year, month)}" data-async-modal="#defaultModal">
+	  	    	${recap.buoniPastoUsatiNelMese}</a></td>
 	  	    <!-- remaining cell -->
 	  	    #{if recap.remainingMealTickets >= 5}
 	  	      <td class="success">

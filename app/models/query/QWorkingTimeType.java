@@ -37,6 +37,8 @@ public class QWorkingTimeType extends EntityPathBase<WorkingTimeType> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final StringPath externalId = createString("externalId");
+
     public final BooleanPath horizontal = createBoolean("horizontal");
 
     //inherited
@@ -50,6 +52,8 @@ public class QWorkingTimeType extends EntityPathBase<WorkingTimeType> {
     public final BooleanPath persistent = _super.persistent;
 
     public final BooleanPath shift = createBoolean("shift");
+
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
 
     //inherited
     public final NumberPath<Integer> version = _super.version;

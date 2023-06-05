@@ -1,14 +1,33 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.response;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.google.common.base.Function;
-
 import helpers.rest.JacksonModule;
-
+import lombok.Getter;
+import lombok.Setter;
 import models.absences.Absence;
-
 import org.joda.time.LocalDate;
 
+/**
+ * DTO per contenere le informazioni relative all'esito di un inserimento di assenza. 
+ */
 @JsonFilter(JacksonModule.FILTER)
 public class AbsencesResponse {
 
@@ -35,13 +54,44 @@ public class AbsencesResponse {
       + "poichè la qualifica della persona non è presente tra quelle che possono utilizzare il "
       + "codice";
 
+  @Getter
+  @Setter
   private LocalDate date;
+
+  @Getter
+  @Setter
   private String absenceCode;
+
+  @Getter
+  @Setter
   private String warning;
+
+  @Getter
+  @Setter
   private boolean insertSucceeded = false;
+
+  @Getter
+  @Setter
   private boolean isHoliday = false;
+
+  @Getter
+  @Setter
   private boolean isDayInReperibilityOrShift = false;
+
+  @Getter
+  @Setter
+  private boolean isDayInReperibility = false;
+
+  @Getter
+  @Setter
+  private boolean isDayInShift = false;
+
+  @Getter
+  @Setter
   private Absence absenceAdded;
+  
+  @Getter
+  @Setter
   private Absence absenceInError;
 
   public AbsencesResponse(LocalDate date, String absenceCode) {
@@ -49,6 +99,13 @@ public class AbsencesResponse {
     this.absenceCode = absenceCode;
   }
 
+  /**
+   * Costruttore.
+   *
+   * @param date la data
+   * @param absenceCode il codice di assenza
+   * @param warning il warning 
+   */
   public AbsencesResponse(LocalDate date, String absenceCode, String warning) {
     super();
     this.date = date;
@@ -56,71 +113,13 @@ public class AbsencesResponse {
     this.warning = warning;
   }
 
-  public LocalDate getDate() {
-    return date;
-  }
-
-  public void setDate(LocalDate date) {
-    this.date = date;
-  }
-
-  public String getAbsenceCode() {
-    return absenceCode;
-  }
-
-  public void setAbsenceCode(String absenceCode) {
-    this.absenceCode = absenceCode;
-  }
-
-  public String getWarning() {
-    return warning;
-  }
-
-  public void setWarning(String warning) {
-    this.warning = warning;
-  }
-
-  public boolean isInsertSucceeded() {
-    return insertSucceeded;
-  }
-
-  public void setInsertSucceeded(boolean insertSucceeded) {
-    this.insertSucceeded = insertSucceeded;
-  }
-
-  public boolean isHoliday() {
-    return isHoliday;
-  }
-
-  public void setHoliday(boolean isHoliday) {
-    this.isHoliday = isHoliday;
-  }
-
-  public boolean isDayInReperibilityOrShift() {
-    return isDayInReperibilityOrShift;
-  }
-
-  public void setDayInReperibilityOrShift(boolean isDayInReperibilityOrShift) {
-    this.isDayInReperibilityOrShift = isDayInReperibilityOrShift;
-  }
-
-  public Absence getAbsenceAdded() {
-    return absenceAdded;
-  }
-
-  public void setAbsenceAdded(Absence absenceAdded) {
-    this.absenceAdded = absenceAdded;
-  }
-  
-  public Absence getAbsenceInError() {
-    return absenceInError;
-  }
-
-  public void setAbsenceInError(Absence absenceInError) {
-    this.absenceInError = absenceInError;
-  }
-
-  public enum toDate implements Function<AbsencesResponse, LocalDate> {
+  /**
+   * Enumerato che ritorna la data di un AbsenceResponse.
+   *
+   * @author Dario Tagliaferri
+   *
+   */
+  public enum ToDate implements Function<AbsencesResponse, LocalDate> {
     INSTANCE;
 
     @Override

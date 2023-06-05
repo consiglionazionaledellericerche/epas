@@ -1,25 +1,36 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
-
 import helpers.OilConfig;
 import helpers.deserializers.InlineStreamHandler;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.zip.GZIPOutputStream;
-
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
 import models.User;
 import models.exports.ReportData;
-
 import org.apache.commons.mail.EmailAttachment;
-
 import play.mvc.Mailer;
 import play.mvc.Scope;
 
@@ -34,7 +45,7 @@ import play.mvc.Scope;
  * </dl>
  * Comunque ci sono dei default.
  *
- * @author cristian
+ * @author Cristian Lucchesi
  *
  */
 @Slf4j
@@ -59,11 +70,11 @@ public class OilMailer extends Mailer {
       User user) {
 
     Verify.verifyNotNull(user);
-    Verify.verifyNotNull(user.person);
-    Verify.verifyNotNull(user.person.email);
+    Verify.verifyNotNull(user.getPerson());
+    Verify.verifyNotNull(user.getPerson().getEmail());
     
     addRecipient(OilConfig.emailTo());
-    setFrom(user.person.email);
+    setFrom(user.getPerson().getEmail());
     
     //[adp]~~X~~YYYYYYYYYYYYYYY~~oggetto~~nome~~cognome~~email
     String subject = 
@@ -72,7 +83,7 @@ public class OilMailer extends Mailer {
             data.getCategory(),
             OilConfig.categoryMap().get(data.getCategory()),
             OilConfig.emailSubject(),
-            user.person.name, user.person.surname, user.person.email);
+            user.getPerson().getName(), user.getPerson().getSurname(), user.getPerson().getEmail());
     setSubject(subject);
 
     try {
@@ -154,9 +165,9 @@ public class OilMailer extends Mailer {
     Verify.verifyNotNull(description);
     String email;
     if (user.isPresent()) {
-      Verify.verifyNotNull(user.get().person);
-      Verify.verifyNotNull(user.get().person.email);
-      email = user.get().person.email;
+      Verify.verifyNotNull(user.get().getPerson());
+      Verify.verifyNotNull(user.get().getPerson().getEmail());
+      email = user.get().getPerson().getEmail();
     } else {
       email =  OilConfig.defaultEmailFromForUserReply();
     }

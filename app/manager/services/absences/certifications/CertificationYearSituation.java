@@ -1,25 +1,42 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences.certifications;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import models.absences.Absence;
 import models.absences.definitions.DefaultGroup;
-
 import org.joda.time.LocalDate;
 
 /**
  * Contiene le informazioni per inizializzare le assenze del dipendente da Attestati.
- * @author alessandro
+ *
+ * @author Alessandro Martelli
  *
  */
 public class CertificationYearSituation implements Serializable {
-  
+
+  private static final long serialVersionUID = -8220636622879573718L;
+
   public int year;
   
   public LocalDate beginDate;
@@ -114,10 +131,13 @@ public class CertificationYearSituation implements Serializable {
   
   /**
    * La situazione circa un singolo codice o gruppo.
-   * @author alessandro
+   *
+   * @author Alessandro Martelli
    *
    */
   public static class AbsenceSituation implements Serializable {
+
+    private static final long serialVersionUID = -4945653666009422856L;
 
     public AbsenceSituationType type;
     
@@ -158,6 +178,9 @@ public class CertificationYearSituation implements Serializable {
     
   }
   
+  /**
+   * Tipologia di possibili situazioni circa un singolo codice o gruppo.
+   */
   public static enum AbsenceSituationType {
     FERIE_ANNO_CORRENTE("Ferie anno corrente", null),
     FERIE_ANNO_PRECEDENTE("Ferie anno precedente", null),
@@ -179,6 +202,8 @@ public class CertificationYearSituation implements Serializable {
     MISSIONE("Missione", DefaultGroup.MISSIONE_GIORNALIERA),
     MISSIONE_ESTERA("Missione estera", DefaultGroup.MISSIONE_ESTERA),
     MISSIONE_ORARIA("Missione oraria", DefaultGroup.MISSIONE_ORARIA),
+    
+    LAVORO_AGILE("Lavoro agile", DefaultGroup.G_LAGILE),
     
     ALTRI("Altri codici", null);
     

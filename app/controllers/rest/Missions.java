@@ -1,36 +1,45 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers.rest;
 
 import com.google.common.base.Optional;
-
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
-import controllers.Resecure.NoCheck;
-
 import dao.OfficeDao;
-
 import helpers.JsonResponse;
-
 import it.cnr.iit.epas.JsonMissionBinder;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.MissionManager;
-import manager.StampingManager;
+import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
-
 import models.Office;
 import models.exports.MissionFromClient;
-
+import play.cache.Cache;
 import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import security.SecurityRules;
 
-
+/**
+ * Controller per la ricezione via REST delle informazioni sulle nuove missioni.
+ */
 @Slf4j
 @With(Resecure.class)
 public class Missions extends Controller {
@@ -41,6 +50,8 @@ public class Missions extends Controller {
   private static ConfigurationManager configurationManager;
   @Inject
   private static OfficeDao officeDao;
+  @Inject
+  private static NotificationManager notificationManager;
   
   private static void logInfo(String description, MissionFromClient body) {
     log.info(MissionManager.LOG_PREFIX + "{}. Messaggio: {}", description, body);
@@ -50,12 +61,9 @@ public class Missions extends Controller {
     log.warn(MissionManager.LOG_PREFIX + "{}. Messaggio: {}", description, body);
   }
   
-  private static void logError(String description, MissionFromClient body) {
-    log.error(MissionManager.LOG_PREFIX +  "{}. Messaggio: {}", description, body);
-  }
-  
   /**
    * metodo che processa il messaggio ricevuto dal kraken-listener.
+   *
    * @param body il dto costruito a partire dal binder
    */
   @BasicAuth
@@ -67,13 +75,14 @@ public class Missions extends Controller {
     if (body == null || body.dataInizio == null || body.dataFine == null) {
       logWarn("Messaggio, dataInizio o dataFine vuoti, messaggio scartato", body);
       JsonResponse.badRequest();
+      return;
     }
-    
+
     if (body.dataInizio.isAfter(body.dataFine)) {
       logWarn("Data di inizio successiva alla data di fine, messaggio scartato", body);
       JsonResponse.badRequest();
     }
-    
+
     // person not present (404)
     if (!missionManager.linkToPerson(body).isPresent()) {
       logWarn("Dipendente riferito nel messaggio non trovato, messaggio scartato", body);
@@ -83,31 +92,31 @@ public class Missions extends Controller {
     //Ufficio prelevato tramite il codice sede passato nel JSON
     Optional<Office> officeByMessage = officeDao.byCodeId(body.codiceSede);
     //Ufficio associato alla persona prelevata tramite la matricola passata nel JSON
-    Office office = body.person.office;
-    
+    Office office = body.person.getOffice();
+
     if (!officeByMessage.isPresent()) {
       logWarn(
           String.format("Attenzione il codice sede %s non è presente su ePAS ed il dipendente %s "
               + "è associato all'ufficio %s.", 
-              body.codiceSede, body.person.getFullname(), office.name), 
+              body.codiceSede, body.person.getFullname(), office.getName()), 
           body);
-    } else if (!body.codiceSede.equals(office.codeId)) {     
+    } else if (!body.codiceSede.equals(office.getCodeId())) {     
       logWarn(
           String.format("Attenzione il codice sede %s è diverso dal codice sede di %s (%s), "
               + "sede associata a %s.", 
-              body.codiceSede, office.name, office.codeId, body.person.getFullname()), 
+              body.codiceSede, office.getName(), office.getCodeId(), body.person.getFullname()), 
           body);
     }
-    
+
     // Check if integration ePAS-Missions is enabled
-    if (!(Boolean)configurationManager
+    if (!(Boolean) configurationManager
         .configValue(office, EpasParam.ENABLE_MISSIONS_INTEGRATION)) {
       logInfo(String.format("Non verrà processato il messaggio in quanto la sede %s "
           + "cui appartiene il destinatario %s ha l'integrazione con Missioni disabilitata",
-          office.name, body.person.fullName()), body);
+          office.getName(), body.person.fullName()), body);
       JsonResponse.ok();
     }
-    
+
     boolean success = false;
     switch (body.tipoMissione) {
       case "ORDINE":
@@ -126,7 +135,17 @@ public class Missions extends Controller {
     if (success) {
       logInfo("Messaggio inserito con successo", body);
     } else {
-      logError("Non è stato possibile inserire il messaggio", body);
+      logWarn("Problemi durante l'inserimento del messaggio", body);
+      String problematicMissionCacheKey = 
+          String.format("mission.problematic.%s.%s.%s.%s", 
+              body.tipoMissione, body.id, body.anno, body.numero);
+      if (Cache.get(problematicMissionCacheKey) == null) {
+        log.debug("Imposto la cache di missione problematica con valore true per {}", body);
+        notificationManager.sendEmailMissionFromClientProblems(body);
+        Cache.set(problematicMissionCacheKey, true, "1d");
+      } else {
+        logInfo("Missione problematica già segnalata all'utente. Email non inviata.", body);
+      }
       JsonResponse.conflict();
     }
 

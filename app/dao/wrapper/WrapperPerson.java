@@ -1,44 +1,58 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao.wrapper;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gdata.util.common.base.Preconditions;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import dao.CompetenceDao;
 import dao.ContractDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 import java.util.SortedMap;
-
+import javax.inject.Inject;
 import manager.CompetenceManager;
 import manager.PersonManager;
-
 import models.CertificatedData;
 import models.Certification;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
+import models.ContractMonthRecap;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Person;
 import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 /**
- * @author marco.
+ * Wrapper per la person.
+ *
+ * @author Marco Andreini
  */
 public class WrapperPerson implements IWrapperPerson {
 
@@ -54,6 +68,7 @@ public class WrapperPerson implements IWrapperPerson {
 
   private List<Contract> sortedContracts;
   private Optional<Contract> currentContract;
+  private Optional<Contract> previousContract;
   private Optional<WorkingTimeType> currentWorkingTimeType;
   private Optional<VacationPeriod> currentVacationPeriod;
   private Optional<ContractStampProfile> currentContractStampProfile;
@@ -157,14 +172,18 @@ public class WrapperPerson implements IWrapperPerson {
       return sortedContracts;
     }
     SortedMap<LocalDate, Contract> contracts = Maps.newTreeMap();
-    for (Contract contract : value.contracts) {
-      contracts.put(contract.beginDate, contract);
+    for (Contract contract : value.getContracts()) {
+      contracts.put(contract.getBeginDate(), contract);
     }
     sortedContracts = Lists.newArrayList(contracts.values());
     return sortedContracts;
   }
 
   /**
+   * L'ultimo contratto attivo nel mese, se esiste.
+   *
+   * @param year l'anno
+   * @param month il mese
    * @return l'ultimo contratto attivo nel mese.
    */
   @Override
@@ -180,6 +199,10 @@ public class WrapperPerson implements IWrapperPerson {
   }
 
   /**
+   * Il primo contratto attivo nel mese se esiste.
+   *
+   * @param year l'anno
+   * @param month il mese
    * @return il primo contratto attivo nel mese.
    */
   @Override
@@ -208,7 +231,7 @@ public class WrapperPerson implements IWrapperPerson {
     Preconditions.checkState(lastContract.isPresent());
 
     YearMonth current = YearMonth.now();
-    YearMonth contractBegin = new YearMonth(lastContract.get().beginDate);
+    YearMonth contractBegin = new YearMonth(lastContract.get().getBeginDate());
 
     if (contractBegin.isAfter(current)) {
       //vado in avanti
@@ -243,11 +266,11 @@ public class WrapperPerson implements IWrapperPerson {
     boolean hasPassToIndefinite = false;
 
     for (Contract contract : orderedContractInYear) {
-      if (contract.endDate != null) {
+      if (contract.getEndDate() != null) {
         hasDefinite = true;
       }
 
-      if (hasDefinite && contract.endDate == null) {
+      if (hasDefinite && contract.getEndDate() == null) {
         hasPassToIndefinite = true;
       }
     }
@@ -292,10 +315,11 @@ public class WrapperPerson implements IWrapperPerson {
     }
 
     //ricerca
-    for (ContractWorkingTimeType cwtt : currentContract.get().contractWorkingTimeType) {
+    for (ContractWorkingTimeType cwtt : currentContract.get().getContractWorkingTimeType()) {
       if (DateUtility
-          .isDateIntoInterval(LocalDate.now(), new DateInterval(cwtt.beginDate, cwtt.endDate))) {
-        currentWorkingTimeType = Optional.fromNullable(cwtt.workingTimeType);
+          .isDateIntoInterval(
+              LocalDate.now(), new DateInterval(cwtt.getBeginDate(), cwtt.getEndDate()))) {
+        currentWorkingTimeType = Optional.fromNullable(cwtt.getWorkingTimeType());
         return currentWorkingTimeType;
       }
     }
@@ -319,9 +343,9 @@ public class WrapperPerson implements IWrapperPerson {
     }
 
     //ricerca
-    for (ContractWorkingTimeType cwtt : currentContract.get().contractWorkingTimeType) {
+    for (ContractWorkingTimeType cwtt : currentContract.get().getContractWorkingTimeType()) {
       if (DateUtility.isDateIntoInterval(
-          LocalDate.now(), new DateInterval(cwtt.beginDate, cwtt.endDate))) {
+          LocalDate.now(), new DateInterval(cwtt.getBeginDate(), cwtt.getEndDate()))) {
         currentContractWorkingTimeType = Optional.fromNullable(cwtt);
         return currentContractWorkingTimeType;
       }
@@ -344,7 +368,7 @@ public class WrapperPerson implements IWrapperPerson {
     }
 
     //ricerca
-    for (VacationPeriod vp : currentContract.get().vacationPeriods) {
+    for (VacationPeriod vp : currentContract.get().getVacationPeriods()) {
       if (DateUtility.isDateIntoInterval(
           LocalDate.now(), new DateInterval(vp.getBeginDate(), vp.calculatedEnd()))) {
         currentVacationPeriod = Optional.fromNullable(vp);
@@ -366,7 +390,7 @@ public class WrapperPerson implements IWrapperPerson {
       return optCompetence.get();
     } else {
       Competence competence = new Competence(value, code, year, month);
-      competence.valueApproved = 0;
+      competence.setValueApproved(0);
       competence.save();
       return competence;
     }
@@ -451,11 +475,11 @@ public class WrapperPerson implements IWrapperPerson {
 
     properSynchronized = Optional.of(false);
 
-    if (value.perseoId == null) {
+    if (value.getPerseoId() == null) {
       return properSynchronized.get();
     }
 
-    for (Contract contract : value.contracts) {
+    for (Contract contract : value.getContracts()) {
       if (!contract.isProperSynchronized()) {
         return properSynchronized.get();
       }
@@ -467,6 +491,7 @@ public class WrapperPerson implements IWrapperPerson {
 
   /**
    * Il contratto della persona con quel perseoId.
+   *
    * @param perseoId id di perseo della Persona
    * @return Contract.
    */
@@ -475,11 +500,11 @@ public class WrapperPerson implements IWrapperPerson {
     if (perseoId == null) {
       return null;
     }
-    for (Contract contract : value.contracts) {
-      if (contract.perseoId == null) {
+    for (Contract contract : value.getContracts()) {
+      if (contract.getPerseoId() == null) {
         continue;
       }
-      if (contract.perseoId.equals(perseoId)) {
+      if (contract.getPerseoId().equals(perseoId)) {
         return contract;
       }
     }
@@ -488,24 +513,64 @@ public class WrapperPerson implements IWrapperPerson {
 
   @Override
   public boolean isTechnician() {
-    return value.qualification.qualification > 3;
+    return value.getQualification().getQualification() > 3;
   }
   
   /**
    * L'ultimo invio attestati effettuato tramite ePAS.
+   *
    * @return mese / anno
    */
   @Override
   public Optional<YearMonth> lastUpload() {
-    if (value.certifications.isEmpty()) {
+    if (value.getCertifications().isEmpty()) {
       return Optional.absent();
     }
     YearMonth last = null;
-    for (Certification certification : value.certifications) {
-      if (last == null || last.isBefore(new YearMonth(certification.year, certification.month))) {
-        last = new YearMonth(certification.year, certification.month);
+    for (Certification certification : value.getCertifications()) {
+      if (last == null 
+          || last.isBefore(new YearMonth(certification.getYear(), certification.getMonth()))) {
+        last = new YearMonth(certification.getYear(), certification.getMonth());
       }
     }
     return Optional.of(last);
+  }
+
+  @Override
+  public Optional<Contract> getPreviousContract() {
+    
+    if (previousContract != null) {
+      return previousContract;
+    }
+    
+    if (previousContract == null) {
+      previousContract = contractDao.getPreviousContract(getCurrentContract().get());
+    }
+    return previousContract;
+  }
+
+  public List<IWrapperContractMonthRecap> getWrapperContractMonthRecaps(YearMonth yearMonth) {
+    // ******************************************************************************************
+    // DATI MENSILI
+    // ******************************************************************************************
+    // I riepiloghi mensili (uno per ogni contratto attivo nel mese)
+    List<IWrapperContractMonthRecap> contractMonths = Lists.newArrayList();
+    
+    List<Contract> monthContracts = wrapperFactory.create(value)
+        .orderedMonthContracts(yearMonth.getYear(), yearMonth.getMonthOfYear());
+
+    for (Contract contract : monthContracts) {
+      Optional<ContractMonthRecap> cmr =
+          wrapperFactory.create(contract).getContractMonthRecap(yearMonth);
+      if (cmr.isPresent()) {
+        contractMonths.add(wrapperFactory.create(cmr.get()));
+      }
+    }
+    return contractMonths;
+  }
+
+  public int getNumberOfMealTicketsPreviousMonth(YearMonth yearMonth) {
+    return getWrapperContractMonthRecaps(yearMonth).stream().mapToInt(
+        cm -> cm.getValue().getBuoniPastoDalMesePrecedente()).reduce(0, Integer::sum);
   }
 }

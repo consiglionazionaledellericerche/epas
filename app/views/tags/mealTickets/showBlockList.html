@@ -7,6 +7,8 @@ showType: delivered / returned /
 <thead>
 <tr>
   <th>Codice</th>
+  <th>Tipologia</th>
+  <th>Converti</th>
   <th>Consegnato il</th>
   <th>Scadenza</th>
   *{
@@ -30,6 +32,13 @@ showType: delivered / returned /
 <tr>
   <td>
     <strong>${block.codeBlock}</strong> (${block.first}-${block.last})
+  </td>
+  <td>${block.blockType.description}</td>
+  <td>#{secure.check 'MealTickets.returnPersonCodeBlock'}
+    <a class="btn btn-warning btn-xs"
+       href="@{MealTickets.convertPersonCodeBlock(recap.contract.id, block.codeBlock, block.first, block.last)}"
+       data-async-modal="#defaultModal">Converti</a>
+    #{/secure.check}
   </td>
   <td data-order="${block.getDate()}">${block.getDate()?.format()}</td>
   <td data-order="${block.getExpireDate()}">${block.getExpireDate()?.format()}</td>

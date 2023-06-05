@@ -11,6 +11,7 @@
   #{title title:'Creazione Nuovo Tipo Orario Verticale - ' + office.name /}
     
   <h4><strong>Nome orario verticale:</strong> ${name}</h4>
+  <h4><strong>Riproporziona quantità di codici di assenza:</strong> ${reproportionEnabled} </h4>  
     
   <div id="vertical">
    
@@ -24,19 +25,19 @@
 	      <div class="center">
 	      <p>Tutti i giorni sono stati correttamente definiti. Puoi modificarli cliccando
 	      sui singoli giorni oppure creare l'orario definitivamente.</p>
-	        <a class="btn btn-primary" href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 1, false, true)}">Crea Orario</a>
+	        <a class="btn btn-primary" href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, externalId, 1, reproportionEnabled, false, true)}">Crea Orario</a>
 	      </div> 
 	    #{/else}
     #{/alert}  
     
     <ul class="nav nav-tabs">
-      <li role="presentation" #{if step == 1 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 1, true, false)}">Lun #{if daysProcessed.contains(1)} <i class="fa fa-check"></i> #{/if}</a></li>  
-      <li role="presentation" #{if step == 2 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 2, true, false)}">Mar #{if daysProcessed.contains(2)} <i class="fa fa-check"></i> #{/if}</a></li>
-      <li role="presentation" #{if step == 3 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 3, true, false)}">Mer #{if daysProcessed.contains(3)} <i class="fa fa-check"></i> #{/if}</a></li>
-      <li role="presentation" #{if step == 4 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 4, true, false)}">Gio #{if daysProcessed.contains(4)} <i class="fa fa-check"></i> #{/if}</a></li>
-      <li role="presentation" #{if step == 5 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 5, true, false)}">Ven #{if daysProcessed.contains(5)} <i class="fa fa-check"></i> #{/if}</a></li>
-      <li role="presentation" #{if step == 6 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 6, true, false)}">Sab #{if daysProcessed.contains(6)} <i class="fa fa-check"></i> #{/if}</a></li>
-      <li role="presentation" #{if step == 7 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, 7, true, false)}">Dom #{if daysProcessed.contains(7)} <i class="fa fa-check"></i> #{/if}</a></li>
+      <li role="presentation" #{if step == 1 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, externalId, 1, reproportionEnabled, true, false)}">Lun #{if daysProcessed.contains(1)} <i class="fa fa-check"></i> #{/if}</a></li>  
+      <li role="presentation" #{if step == 2 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, externalId, 2, reproportionEnabled, true, false)}">Mar #{if daysProcessed.contains(2)} <i class="fa fa-check"></i> #{/if}</a></li>
+      <li role="presentation" #{if step == 3 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, externalId, 3, reproportionEnabled, true, false)}">Mer #{if daysProcessed.contains(3)} <i class="fa fa-check"></i> #{/if}</a></li>
+      <li role="presentation" #{if step == 4 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, externalId, 4, reproportionEnabled, true, false)}">Gio #{if daysProcessed.contains(4)} <i class="fa fa-check"></i> #{/if}</a></li>
+      <li role="presentation" #{if step == 5 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, externalId, 5, reproportionEnabled, true, false)}">Ven #{if daysProcessed.contains(5)} <i class="fa fa-check"></i> #{/if}</a></li>
+      <li role="presentation" #{if step == 6 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, externalId, 6, reproportionEnabled, true, false)}">Sab #{if daysProcessed.contains(6)} <i class="fa fa-check"></i> #{/if}</a></li>
+      <li role="presentation" #{if step == 7 } class="active" #{/if}><a href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, externalId, 7, reproportionEnabled, true, false)}">Dom #{if daysProcessed.contains(7)} <i class="fa fa-check"></i> #{/if}</a></li>
     </ul>
     
 	<div class="col-md-10 col-md-offset-1">
@@ -47,7 +48,9 @@
       #{form @WorkingTimes.insertVerticalWorkingTime(), class:'form-horizontal'}
       
         #{f.hidden 'name', value:name /}
-      	
+        #{f.hidden 'reproportionEnabled', value:reproportionEnabled /}
+      	#{f.hidden 'externalId', value:externalId /}
+
       	<input type="hidden" name="officeId" value="${office.id}"/>
   	  	<input type="hidden" name="step" value="${step}"/>
   	  	

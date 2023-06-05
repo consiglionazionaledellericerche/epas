@@ -1,13 +1,29 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services;
 
 import it.cnr.iit.epas.DateUtility;
-
 import models.Stamping;
 import models.enumerate.StampTypes;
 
 /**
  * Classe che modella due stampings logicamente accoppiate nel PersonDay. (una di ingresso ed una di
- * uscita)
+ * uscita).
  */
 public class PairStamping {
 
@@ -28,6 +44,7 @@ public class PairStamping {
   
   /**
    * Costruisce la coppia di timbrature.
+   *
    * @modify in.pairId e out.pairId se appartengono ad una coppia valida. 
    * @param first ingresso
    * @param second uscita
@@ -38,8 +55,8 @@ public class PairStamping {
     this.second = second;
 
     timeInPair = 0;
-    timeInPair = timeInPair - DateUtility.toMinute(first.date);
-    timeInPair = timeInPair + DateUtility.toMinute(second.date);
+    timeInPair = timeInPair - DateUtility.toMinute(first.getDate());
+    timeInPair = timeInPair + DateUtility.toMinute(second.getDate());
     
     //La coppia valida la imposto nel caso di coppia definitiva (non contenente l'uscita fittizia
     // e se si tratta di una coppia in-out, il caso out-in è usato nel calcolo del buono pasto.
@@ -50,15 +67,16 @@ public class PairStamping {
     }
 
     // TODO: decidere se entrambe o almeno una.
-    if ((first.stampType != null && first.stampType.equals(StampTypes.PAUSA_PRANZO))
-        || (second.stampType != null && second.stampType.equals(StampTypes.PAUSA_PRANZO))) {
+    if ((first.getStampType() != null && first.getStampType().equals(StampTypes.PAUSA_PRANZO))
+        || (second.getStampType() != null 
+        && second.getStampType().equals(StampTypes.PAUSA_PRANZO))) {
       prPair = true;
     }
   }
   
   public String toString() {
-    return String.format("[%s,%s]", first.date.toString("HH:mm:ss"),
-        second.date.toString("HH:mm:ss"));
+    return String.format("[%s,%s]", first.getDate().toString("HH:mm:ss"),
+        second.getDate().toString("HH:mm:ss"));
   }
 
 }

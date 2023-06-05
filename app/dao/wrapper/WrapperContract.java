@@ -1,22 +1,36 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao.wrapper;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
+import javax.inject.Inject;
 import models.Contract;
 import models.ContractMonthRecap;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
 /**
  * Contract con alcune funzionalità aggiuntive.
  *
- * @author marco
+ * @author Marco Andreini
  */
 public class WrapperContract implements IWrapperContract {
 
@@ -48,14 +62,14 @@ public class WrapperContract implements IWrapperContract {
     DateInterval monthInterval = new DateInterval(new LocalDate(year, month, 1),
         new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
 
-    for (Contract contract : value.person.contracts) {
+    for (Contract contract : value.getPerson().getContracts()) {
       if (contract.id.equals(value.id)) {
         continue;
       }
       DateInterval contractInterval = wrapperFactory.create(contract)
           .getContractDateInterval();
       if (DateUtility.intervalIntersection(monthInterval, contractInterval) != null) {
-        if (value.beginDate.isBefore(contract.beginDate)) {
+        if (value.getBeginDate().isBefore(contract.getBeginDate())) {
           return false;
         }
       }
@@ -75,7 +89,7 @@ public class WrapperContract implements IWrapperContract {
   @Override
   public boolean isDefined() {
 
-    return this.value.endDate != null;
+    return this.value.getEndDate() != null;
   }
 
   /**
@@ -86,10 +100,10 @@ public class WrapperContract implements IWrapperContract {
    */
   @Override
   public DateInterval getContractDateInterval() {
-    if (value.endContract != null) {
-      return new DateInterval(value.beginDate, value.endContract);
+    if (value.getEndContract() != null) {
+      return new DateInterval(value.getBeginDate(), value.getEndContract());
     } else {
-      return new DateInterval(value.beginDate, value.endDate);
+      return new DateInterval(value.getBeginDate(), value.getEndDate());
     }
   }
 
@@ -107,8 +121,8 @@ public class WrapperContract implements IWrapperContract {
     // allora automaticamente deve essere definito sourceContract.
 
     DateInterval contractInterval = getContractDateInterval();
-    if (value.sourceDateResidual != null) {
-      return new DateInterval(value.sourceDateResidual,
+    if (value.getSourceDateResidual() != null) {
+      return new DateInterval(value.getSourceDateResidual(),
           contractInterval.getEnd());
     }
 
@@ -125,8 +139,8 @@ public class WrapperContract implements IWrapperContract {
   public DateInterval getContractDatabaseIntervalForMealTicket() {
 
     DateInterval contractDatebaseInterval = getContractDatabaseInterval();
-    if (value.sourceDateMealTicket != null) {
-      return new DateInterval(value.sourceDateMealTicket,
+    if (value.getSourceDateMealTicket() != null) {
+      return new DateInterval(value.getSourceDateMealTicket(),
           contractDatebaseInterval.getEnd());
     }
 
@@ -145,10 +159,10 @@ public class WrapperContract implements IWrapperContract {
     if (initializationMissing()) {
       return Optional.<YearMonth>absent();
     }
-    if (value.sourceDateResidual != null) {
-      return Optional.fromNullable((new YearMonth(value.sourceDateResidual)));
+    if (value.getSourceDateResidual() != null) {
+      return Optional.fromNullable((new YearMonth(value.getSourceDateResidual())));
     }
-    return Optional.fromNullable(new YearMonth(value.beginDate));
+    return Optional.fromNullable(new YearMonth(value.getBeginDate()));
   }
 
   /**
@@ -168,16 +182,18 @@ public class WrapperContract implements IWrapperContract {
   }
   
   /**
-   * Se il contratto è stato inizializzato per la parte residuale nel mese passato come argomento. 
+   * Se il contratto è stato inizializzato per la parte residuale nel mese passato come argomento.
+   *
    * @param yearMonth mese
+   * 
    * @return esito
    */
   @Override
   public boolean residualInitInYearMonth(YearMonth yearMonth) {
-    if (value.sourceDateResidual == null) {
+    if (value.getSourceDateResidual() == null) {
       return false;
     }
-    return new YearMonth(value.sourceDateResidual).equals(yearMonth);
+    return new YearMonth(value.getSourceDateResidual()).equals(yearMonth);
   }
 
   /**
@@ -189,9 +205,9 @@ public class WrapperContract implements IWrapperContract {
   @Override
   public Optional<ContractMonthRecap> getContractMonthRecap(YearMonth yearMonth) {
 
-    for (ContractMonthRecap cmr : value.contractMonthRecaps) {
-      if (cmr.year == yearMonth.getYear()
-          && cmr.month == yearMonth.getMonthOfYear()) {
+    for (ContractMonthRecap cmr : value.getContractMonthRecaps()) {
+      if (cmr.getYear() == yearMonth.getYear()
+          && cmr.getMonth() == yearMonth.getMonthOfYear()) {
         return Optional.fromNullable(cmr);
       }
     }
@@ -206,8 +222,8 @@ public class WrapperContract implements IWrapperContract {
    */
   @Override
   public boolean mealTicketInitBeforeGeneralInit() {
-    if (value.sourceDateResidual != null && value.sourceDateMealTicket != null
-        && value.sourceDateResidual.isAfter(value.sourceDateMealTicket)) {
+    if (value.getSourceDateResidual() != null && value.getSourceDateMealTicket() != null
+        && value.getSourceDateResidual().isAfter(value.getSourceDateMealTicket())) {
       return true;
     } else {
       return false;
@@ -225,11 +241,11 @@ public class WrapperContract implements IWrapperContract {
 
     LocalDate dateForInit = dateForInitialization();
 
-    if (value.sourceDateResidual != null) {
+    if (value.getSourceDateResidual() != null) {
       return false;
     }
 
-    return value.beginDate.isBefore(dateForInit);
+    return value.getBeginDate().isBefore(dateForInit);
   }
 
   /**
@@ -268,13 +284,15 @@ public class WrapperContract implements IWrapperContract {
   }
 
   /**
+   * La data più recente tra creazione del contratto e creazione della persona.
+   *
    * @return La data più recente tra la creazione del contratto e la creazione della persona.
    */
   @Override
   public LocalDate dateForInitialization() {
 
-    LocalDate officeBegin = value.person.office.getBeginDate();
-    LocalDate personCreation = new LocalDate(value.person.beginDate);
+    LocalDate officeBegin = value.getPerson().getOffice().getBeginDate();
+    LocalDate personCreation = new LocalDate(value.getPerson().getBeginDate());
     LocalDate candidate = value.getBeginDate();
 
     if (candidate.isBefore(officeBegin)) {
@@ -288,6 +306,8 @@ public class WrapperContract implements IWrapperContract {
   }
   
   /**
+   * La data più recente per l'inizializzazione.
+   *
    * @return La data più recente tra la creazione del contratto e la creazione della persona.
    */
   @Override
@@ -297,11 +317,11 @@ public class WrapperContract implements IWrapperContract {
       return null;
     }
     
-    if (value.sourceDateResidual != null) {
-      return value.sourceDateResidual;
+    if (value.getSourceDateResidual() != null) {
+      return value.getSourceDateResidual();
     }
     
-    return value.beginDate.minusDays(1);
+    return value.getBeginDate().minusDays(1);
   }
 
   /**
@@ -312,7 +332,7 @@ public class WrapperContract implements IWrapperContract {
   @Override
   public boolean noRelevant() {
 
-    LocalDate officeInstallation = value.person.office.getBeginDate();
+    LocalDate officeInstallation = value.getPerson().getOffice().getBeginDate();
 
     return officeInstallation.isAfter(getContractDateInterval().getEnd());
   }
@@ -335,13 +355,13 @@ public class WrapperContract implements IWrapperContract {
     }
 
     // se il contratto inizia nell'anno non ho bisogno del recap.
-    if (value.beginDate.getYear() == yearToRecap) {
+    if (value.getBeginDate().getYear() == yearToRecap) {
       return true;
     }
 
     // se source date cade nell'anno non ho bisogno del recap.
-    if (value.sourceDateResidual != null
-        && value.sourceDateResidual.getYear() == yearToRecap) {
+    if (value.getSourceDateResidual() != null
+        && value.getSourceDateResidual().getYear() == yearToRecap) {
       return true;
     }
 
@@ -355,7 +375,6 @@ public class WrapperContract implements IWrapperContract {
 
     return false;
   }
-
 
 
 }

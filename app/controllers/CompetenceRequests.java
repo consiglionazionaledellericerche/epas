@@ -1,16 +1,38 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
+import com.google.common.collect.Lists;
+import common.security.SecurityRules;
 import dao.CompetenceRequestDao;
 import dao.GroupDao;
 import dao.PersonDao;
+import dao.PersonReperibilityDayDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.Web;
@@ -23,32 +45,28 @@ import manager.flows.CompetenceRequestManager;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Person;
+import models.PersonReperibilityDay;
+import models.PersonReperibilityType;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
-import models.flows.Group;
-import models.flows.enumerate.AbsenceRequestEventType;
-import models.flows.enumerate.AbsenceRequestType;
 import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
 import play.data.validation.Required;
-import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Controller per la gestione delle richieste di straordinario dei dipendenti.
- * 
- * @author dario
  *
+ * @author Dario Tagliaferri
  */
 @Slf4j
 @With(Resecure.class)
-public class CompetenceRequests extends Controller{
+public class CompetenceRequests extends Controller {
 
   @Inject
   static PersonDao personDao;
@@ -69,8 +87,18 @@ public class CompetenceRequests extends Controller{
   @Inject
   static UsersRolesOfficesDao uroDao;
   @Inject
+  private static PersonReperibilityDayDao repDao;
+  @Inject
   private static PersonStampingRecapFactory stampingsRecapFactory;
-  
+
+
+  public static void changeReperibility() {
+    list(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST);
+  }
+
+  public static void changeReperibilityToApprove() {
+    listToApprove(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST);
+  }
 
   public static void overtimes() {
     list(CompetenceRequestType.OVERTIME_REQUEST);
@@ -82,19 +110,20 @@ public class CompetenceRequests extends Controller{
 
   /**
    * Lista delle richieste di straordinario dell'utente corrente.
-   * @param type
+   *
+   * @param competenceType il tipo di competenza
    */
   public static void list(CompetenceRequestType competenceType) {
     Verify.verifyNotNull(competenceType);
 
     val currentUser = Security.getUser().get();
-    if (currentUser.person == null) {
+    if (currentUser.getPerson() == null) {
       flash.error("L'utente corrente non ha associata una persona, non può vedere le proprie "
-          + "richieste di assenza");
+          + "richieste di competenza");
       Application.index();
       return;
     }
-    val person = currentUser.person;
+    val person = currentUser.getPerson();
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste di tipo {} per {} a partire da {}",
         competenceType, person, fromDate);
@@ -118,36 +147,46 @@ public class CompetenceRequests extends Controller{
   public static void listToApprove(CompetenceRequestType type) {
     Verify.verifyNotNull(type);
 
-    val person = Security.getUser().get().person;
+    val person = Security.getUser().get().getPerson();
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
-    log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}",
+    log.debug("Prelevo le richieste da approvare  di tipo {} a partire da {}",
         type, fromDate);
-    List<Group> groups = groupDao.groupsByOffice(person.office, Optional.absent());
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.user);
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
     List<CompetenceRequest> results = competenceRequestDao
-        .allResults(roleList, fromDate, Optional.absent(), type, groups, person);
+        .allResults(roleList, fromDate, Optional.absent(), type, person);
     List<CompetenceRequest> myResults =
         competenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(),
-            type, groups, person);
+            type, person);
     List<CompetenceRequest> approvedResults =
         competenceRequestDao
-        .totallyApproved(roleList, fromDate, Optional.absent(), type, groups, person);
+        .totallyApproved(roleList, fromDate, Optional.absent(), type, person);
     val config = competenceRequestManager.getConfiguration(type, person);
     val onlyOwn = false;
     boolean overtimesQuantityEnabled = (Boolean)configurationManager
-        .configValue(person.office, EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY);
-    render(config, results, type, onlyOwn, approvedResults, myResults, overtimesQuantityEnabled);
+        .configValue(person.getOffice(), EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY);
+    val available = person.getUser().hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
+    render(config, results, type, onlyOwn, available, approvedResults, 
+        myResults, overtimesQuantityEnabled);
   }
 
-  public static void blank(Optional<Long> personId, int year, int month, CompetenceRequestType competenceType) {
+  /**
+   * Ritorna la form di richiesta di nuova competenza.
+   *
+   * @param personId       l'id della persona che sta richiedendo la competenza
+   * @param year           l'anno
+   * @param month          il mese
+   * @param competenceType il tipo di richiesta competenza
+   */
+  public static void blank(Optional<Long> personId, int year, int month,
+      CompetenceRequestType competenceType) {
     Verify.verifyNotNull(competenceType);
     Person person;
     if (personId.isPresent()) {
       rules.check("CompetenceRequests.blank4OtherPerson");
       person = personDao.getPersonById(personId.get());
     } else {
-      if (Security.getUser().isPresent() && Security.getUser().get().person != null) {
-        person = Security.getUser().get().person;
+      if (Security.getUser().isPresent() && Security.getUser().get().getPerson() != null) {
+        person = Security.getUser().get().getPerson();
       } else {
         flash.error("L'utente corrente non ha associato una persona.");
         list(competenceType);
@@ -164,108 +203,215 @@ public class CompetenceRequests extends Controller{
     }
 
     val competenceRequest = new CompetenceRequest();
-    competenceRequest.type = competenceType;
-    competenceRequest.person = person;
+    competenceRequest.setType(competenceType);
+    competenceRequest.setPerson(person);
+    PersonReperibilityType type = null;
+    List<Person> teamMates = Lists.newArrayList();
+    List<PersonReperibilityType> types = Lists.newArrayList();
     PersonStampingRecap psDto = null;
     boolean isOvertime = false;
-    if (competenceType.equals(CompetenceRequestType.OVERTIME_REQUEST)) {
-      isOvertime = true;
-//      if (year == null || month == null) {
-//        year = LocalDate.now().getYear();
-//        month = LocalDate.now().getMonthOfYear();
-//      }
-      psDto = stampingsRecapFactory.create(person,
-          year, month, true);  
+    switch (competenceType) {
+      case CHANGE_REPERIBILITY_REQUEST:
+        types = repDao.getReperibilityTypeByOffice(person.getOffice(), Optional.of(false))
+        .stream().filter(prt -> prt.getPersonReperibilities().stream()
+            .anyMatch(pr -> pr.getPerson().equals(person)))
+        .collect(Collectors.toList());
+        //ritorno solo il primo elemento della lista con la lista dei dipendenti afferenti al servizio
+
+        type = types.get(0);
+        teamMates = type.getPersonReperibilities().stream()
+            .filter(pr -> pr.isActive(new YearMonth(year, month)))
+            .map(pr -> pr.getPerson())
+            .filter(p -> p.id != person.id).collect(Collectors.toList());
+        break;
+      case OVERTIME_REQUEST:
+        isOvertime = true;
+        psDto = stampingsRecapFactory.create(person, year, month, true);  
+        break;
+      default:
+        break;
     }
-    competenceRequest.startAt = competenceRequest.endTo = LocalDateTime.now().plusDays(1);
-    render("@edit", psDto, competenceRequest, isOvertime, competenceType, year, month);
+
+    boolean insertable = false;
+    competenceRequest.setStartAt(LocalDateTime.now().plusDays(1));
+    competenceRequest.setEndTo(LocalDateTime.now().plusDays(1));
+    render("@edit", competenceRequest, insertable, competenceType,
+        year, month, type, teamMates, types, psDto, isOvertime);
   }
 
-  public static void edit(CompetenceRequest competenceRequest, int year, int month) {
+  /**
+   * Ritorna la form di richiesta cambio di reperibilità aggiornata coi dati richiesti.
+   *
+   * @param competenceRequest la richiesta di competenza
+   * @param year              l'anno di riferimento
+   * @param month             il mese di riferimento
+   * @param type              il servizio di reperibilità
+   * @param teamMate          la persona selezionata per il cambio di reperibilità
+   * @param beginDayToAsk     la data da chiedere
+   * @param beginDayToGive    la data da cedere
+   */
+  public static void edit(CompetenceRequest competenceRequest, int year, int month,
+      PersonReperibilityType type, Person teamMate, PersonReperibilityDay beginDayToAsk,
+      PersonReperibilityDay beginDayToGive, PersonReperibilityDay endDayToGive,
+      PersonReperibilityDay endDayToAsk) {
 
-    rules.checkIfPermitted(competenceRequest);
+    rules.checkIfPermitted(type);
+    competenceRequest.setPerson(Security.getUser().get().getPerson());
+    LocalDate begin = new LocalDate(year, month, 1);
+    LocalDate to = begin.dayOfMonth().withMaximumValue();
+    List<PersonReperibilityDay> reperibilityDates = repDao
+        .getPersonReperibilityDaysByPeriodAndType(begin, to, type, teamMate);
+    List<PersonReperibilityDay> myReperibilityDates = repDao
+        .getPersonReperibilityDaysByPeriodAndType(begin, to, type, competenceRequest.getPerson());
+
+    List<PersonReperibilityType> types = repDao
+        .getReperibilityTypeByOffice(competenceRequest.getPerson().getOffice(), Optional.of(false))
+        .stream().filter(prt -> prt.getPersonReperibilities().stream()
+            .anyMatch(pr -> pr.getPerson().equals(competenceRequest.getPerson())))
+        .collect(Collectors.toList());
+    List<Person> teamMates = type.getPersonReperibilities().stream().map(pr -> pr.getPerson())
+        .filter(p -> p.id != competenceRequest.getPerson().id).collect(Collectors.toList());
     boolean insertable = true;
-    
-    render(competenceRequest, insertable);
-    
+
+    render(competenceRequest, insertable, reperibilityDates, type, teamMate,
+        month, year, teamMates, types, beginDayToAsk, myReperibilityDates, beginDayToGive,
+        endDayToGive, endDayToAsk);
+
   }
 
-  public static void save(@Required @Valid CompetenceRequest competenceRequest, 
-      Integer value, int year, int month) {
-    log.debug("CompetenceRequest.startAt = {}", competenceRequest.startAt);
+  /**
+   * Metodo che permette il salvataggio di una richiesta di competenza.
+   *
+   * @param competenceRequest la richiesta di competenza da salvare
+   * @param year              l'anno di riferimento
+   * @param month             il mese di riferimento
+   * @param teamMate          la persona destinataria della richiesta
+   * @param beginDayToAsk     il giorno iniziale da chiedere
+   * @param beginDayToGive    il giorno iniziale da dare
+   * @param endDayToGive      il giorno finale da dare
+   * @param endDayToAsk       il giorno finale da chiedere
+   * @param type              il servizio su cui chiedere il cambio
+   */
+  public static void save(@Required CompetenceRequest competenceRequest, int year,
+      int month, Person teamMate, PersonReperibilityDay beginDayToAsk,
+      PersonReperibilityDay beginDayToGive, PersonReperibilityDay endDayToGive,
+      PersonReperibilityDay endDayToAsk, PersonReperibilityType type) {
 
-    if (!Security.getUser().get().person.equals(competenceRequest.person)) {
-      rules.check("CompetenceRequests.blank4OtherPerson");
-    } 
+    //rules.checkIfPermitted(type);
 
-    notFoundIfNull(competenceRequest.person);
-        
-    competenceRequest.year = year;
-    competenceRequest.month = month;    
-    competenceRequest.startAt = LocalDateTime.now();
-        
+    Verify.verifyNotNull(beginDayToGive.getDate());
+    Verify.verifyNotNull(endDayToGive.getDate());
+
+    competenceRequest.setYear(year);
+    competenceRequest.setMonth(month);
+    competenceRequest.setStartAt(LocalDateTime.now());
+    competenceRequest.setTeamMate(teamMate);
+    competenceRequest.setPerson(Security.getUser().get().getPerson());
+
+    notFoundIfNull(competenceRequest.getPerson());
+
     CompetenceRequest existing = competenceRequestManager.checkCompetenceRequest(competenceRequest);
     if (existing != null) {
-      Validation.addError("competenceRequest.value", "Esiste già una richiesta di questo tipo per questo anno/mese");
-      response.status = 400;      
-      render("@edit", competenceRequest, existing);
+      Validation.addError("teamMate",
+          "Esiste già una richiesta di questo tipo");
     }
-    if (!competenceRequest.person.checkLastCertificationDate(
-        new YearMonth(competenceRequest.year,
-            competenceRequest.month))) {
-      Validation.addError("competenceRequest.value",
-          "Non è possibile fare una richiesta per una data di un mese già processato in Attestati");
-      response.status = 400;      
-      render("@edit", competenceRequest);
+
+    if (beginDayToGive.getDate().isAfter(endDayToGive.getDate())) {
+      Validation.addError("beginDayToGive", "Le date devono essere congruenti");
     }
-    
-//    if (Validation.hasErrors()) {
-//      response.status = 400;      
-//      flash.error(Web.msgHasErrors());
-//      render("@edit", competenceRequest);
-//      return;
-//    }
-//    
+
+    val beginDateToAsk = beginDayToAsk != null ? beginDayToAsk.getDate() : null;
+    val endDateToAsk = endDayToAsk != null ? endDayToAsk.getDate() : null;
+
+    if (beginDateToAsk != null && endDateToAsk != null) {
+      if (beginDateToAsk.isAfter(endDateToAsk)) {
+        Validation.addError("beginDayToAsk", "Le date devono essere congruenti");
+      }
+      if (Days.daysBetween(beginDateToAsk, endDateToAsk).getDays()
+          != Days.daysBetween(beginDayToGive.getDate(), endDayToGive.getDate()).getDays()) {
+        Validation.addError("beginDayToAsk",
+            "La quantità di giorni da chiedere e da dare deve coincidere");
+        Validation.addError("beginDayToGive",
+            "La quantità di giorni da chiedere e da dare deve coincidere");
+      }
+    }
+    if (!competenceRequest.getPerson().checkLastCertificationDate(
+        new YearMonth(competenceRequest.getYear(),
+            competenceRequest.getMonth()))) {
+      Validation.addError("beginDayToAsk",
+          "Non è possibile fare una richiesta per una data di un mese già "
+              + "processato in Attestati");
+    }
+    if (Validation.hasErrors()) {
+      LocalDate begin = new LocalDate(year, month, 1);
+      LocalDate to = begin.dayOfMonth().withMaximumValue();
+      List<PersonReperibilityDay> reperibilityDates = repDao
+          .getPersonReperibilityDaysByPeriodAndType(begin, to, type, teamMate);
+      List<PersonReperibilityDay> myReperibilityDates = repDao
+          .getPersonReperibilityDaysByPeriodAndType(begin, to, type, competenceRequest.getPerson());
+
+      List<PersonReperibilityType> types = repDao
+          .getReperibilityTypeByOffice(competenceRequest.getPerson()
+              .getOffice(), Optional.of(false))
+          .stream().filter(prt -> prt.getPersonReperibilities().stream()
+              .anyMatch(pr -> pr.getPerson().equals(competenceRequest.getPerson())))
+          .collect(Collectors.toList());
+      List<Person> teamMates = type.getPersonReperibilities().stream().map(pr -> pr.getPerson())
+          .filter(p -> p.id != competenceRequest.getPerson().id).collect(Collectors.toList());
+      boolean insertable = true;
+      response.status = 400;
+      render("@edit", competenceRequest, beginDayToAsk, beginDayToGive,
+          endDayToAsk, endDayToGive, type, year, month, teamMate, insertable,
+          teamMates, types, reperibilityDates, myReperibilityDates);
+    }
+
+    competenceRequest.setBeginDateToAsk(beginDateToAsk);
+    competenceRequest.setEndDateToAsk(endDateToAsk);
+    competenceRequest.setBeginDateToGive(beginDayToGive.getDate());
+    competenceRequest.setEndDateToGive(endDayToGive.getDate());
+
     competenceRequestManager.configure(competenceRequest);
 
-    if (competenceRequest.endTo == null) {
-      competenceRequest.endTo = competenceRequest.startAt;
+    if (competenceRequest.getEndTo() == null) {
+      competenceRequest.setEndTo(competenceRequest.getStartAt());
     }
 
     boolean isNewRequest = !competenceRequest.isPersistent();
     competenceRequest.save();
 
     //Avvia il flusso se necessario.
-    if (isNewRequest || !competenceRequest.flowStarted) {
+    if (isNewRequest || !competenceRequest.isFlowStarted()) {
       competenceRequestManager.executeEvent(
-          competenceRequest, competenceRequest.person,
+          competenceRequest, competenceRequest.getPerson(),
           CompetenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
-
-      //invio la notifica al primo che deve validare la mia richiesta 
-      notificationManager
-      .notificationCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
-      // invio anche la mail
-      notificationManager
-      .sendEmailCompetenceRequestPolicy(competenceRequest.person.user, competenceRequest, true);
-
-
     }
     flash.success("Operazione effettuata correttamente");
 
-    CompetenceRequests.list(competenceRequest.type);
+    CompetenceRequests.list(competenceRequest.getType());
   }
 
+  /**
+   * Metodo per l'eliminazione della richiesta di competenza.
+   *
+   * @param id l'identificativo della richiesta d competenza da eliminare
+   */
   public static void delete(long id) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     notFoundIfNull(competenceRequest);
     rules.checkIfPermitted(competenceRequest);
     competenceRequestManager.executeEvent(
-        competenceRequest, Security.getUser().get().person,
+        competenceRequest, Security.getUser().get().getPerson(),
         CompetenceRequestEventType.DELETE, Optional.absent());
     flash.success(Web.msgDeleted(AbsenceRequest.class));
-    list(competenceRequest.type);
+    list(competenceRequest.getType());
   }
 
+  /**
+   * Renderizza la form in cui viene mostrata la richiesta.
+   *
+   * @param id   l'identificativo della richiesta
+   * @param type il tipo di richiesta
+   */
   public static void show(long id, CompetenceRequestType type) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     notFoundIfNull(competenceRequest);
@@ -274,36 +420,41 @@ public class CompetenceRequests extends Controller{
     boolean disapproval = false;
     render(competenceRequest, type, user, disapproval);
   }
-  
-  public static void approval(long id, boolean approval) {
+
+  /**
+   * Permette l'approvazione della richiesta.
+   *
+   * @param id l'identificativo della richiesta
+   */
+  public static void approval(long id) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    notFoundIfNull(competenceRequest);
     User user = Security.getUser().get();
-    if (!approval) {
-      approval = true;
-      render(competenceRequest, approval);
+    rules.checkIfPermitted(competenceRequest);
+
+    log.debug("Approving competence request {}", competenceRequest);
+    boolean approved = competenceRequestManager.approval(competenceRequest, user);
+
+    if (approved) {
+      notificationManager
+      .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
+          Optional.absent(), true);
+
+      flash.success("Operazione conclusa correttamente");
+    } else {
+      flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
-    if (competenceRequest.managerApprovalRequired && competenceRequest.managerApproved == null
-        && user.hasRoles(Role.GROUP_MANAGER)) {
-      //caso di approvazione da parte del responsabile di gruppo.
-      competenceRequestManager.managerApproval(id, user);
-      if (user.usersRolesOffices.stream()
-          .anyMatch(uro -> uro.role.name.equals(Role.SEAT_SUPERVISOR))
-          && competenceRequest.officeHeadApprovalRequired) {
-        // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
-        competenceRequestManager.officeHeadApproval(id, user);
-      }
-    }
-    if (competenceRequest.officeHeadApprovalRequired && competenceRequest.officeHeadApproved == null
-        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
-      //caso di approvazione da parte del responsabile di sede
-      competenceRequestManager.officeHeadApproval(id, user);
-    }
-    notificationManager.sendEmailToUser(Optional.<AbsenceRequest>absent(), 
-        Optional.of(competenceRequest));
-    flash.success("Operazione conclusa correttamente");
-    CompetenceRequests.listToApprove(competenceRequest.type);
+
+    CompetenceRequests.listToApprove(competenceRequest.getType());
   }
-  
+
+  /**
+   * Metodo che permette il rifiuto della richiesta.
+   *
+   * @param id          identificativo della richiesta di competenza
+   * @param disapproval true se si rifiuta, false altrimenti
+   * @param reason      la motivazione al rifiuto
+   */
   public static void disapproval(long id, boolean disapproval, String reason) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     User user = Security.getUser().get();
@@ -311,20 +462,26 @@ public class CompetenceRequests extends Controller{
       disapproval = true;
       render(competenceRequest, disapproval);
     }
-    if (competenceRequest.managerApprovalRequired && competenceRequest.managerApproved == null
-        && user.hasRoles(Role.GROUP_MANAGER)) {
-      //caso di approvazione da parte del responsabile di gruppo.
-      competenceRequestManager.managerDisapproval(id, reason);
-      flash.error("Richiesta respinta");
-      render("@show", competenceRequest, user);
+
+    if (competenceRequest.isManagerApprovalRequired()
+        && competenceRequest.getManagerApproved() == null
+        && rules.check("CompetenceRequests.reperibilityManagerDisapproval", competenceRequest)) {
+      log.debug("Disapproval da parte del REPERIBILITY_MANAGER, richiesta {}",
+          competenceRequest);
+      //TODO: caso di disapprovazione da parte del supervisore del servizio.
+      competenceRequestManager.reperibilityManagerDisapproval(id, reason);
     }
-    if (competenceRequest.officeHeadApprovalRequired && competenceRequest.officeHeadApproved == null
-        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
-      //caso di approvazione da parte del responsabile di sede
-      competenceRequestManager.officeHeadDisapproval(id, reason);
-      flash.error("Richiesta respinta");
-      render("@show", competenceRequest, user);
+    if (competenceRequest.isEmployeeApprovalRequired() 
+        && competenceRequest.getEmployeeApproved() == null
+        && user.hasRoles(Role.EMPLOYEE)) {
+      //TODO: caso di disapprovazione da parte del dipendente reperibile
+      competenceRequestManager.employeeDisapproval(id, reason);
     }
+    notificationManager
+    .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
+        Optional.absent(), false);
+    flash.error("Richiesta respinta");
     render("@show", competenceRequest, user);
   }
 }
+

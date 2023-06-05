@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package helpers;
 
 import play.Play;
@@ -26,16 +43,25 @@ public class CompanyConfig {
   private static final String COMPANY_DEFAULT_CODE = "CNR";
   private static final String COMPANY_DEFAULT_NAME = "Consiglio Nazionale delle Ricerche";
   private static final String COMPANY_DEFAULT_URL = "https://www.cnr.it";
-  
-  
+
+
+  /**
+   * Preleva il COMPANY_CODE dalla configurazione. 
+   */
   public static String code() {
     return Play.configuration.getProperty(COMPANY_CODE, COMPANY_DEFAULT_CODE);
   }
-  
+
+  /**
+   * Preleva il COMPANY_NAME dalla configurazione. 
+   */
   public static String name() {
     return Play.configuration.getProperty(COMPANY_NAME, COMPANY_DEFAULT_NAME);
   }
-  
+
+  /**
+   * Preleva il COMPANY_URL dalla configurazione. 
+   */
   public static String url() {
     return Play.configuration.getProperty(COMPANY_URL, COMPANY_DEFAULT_URL);
   }

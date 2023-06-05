@@ -1,0 +1,34 @@
+#{modalAsync noTitle:'true' }
+
+    <div class="text-center">
+      #{title title:'Persone Attive con Fascia di orario lavorativo ' + ts.label /}
+    </div>
+
+  #{alert color:'info'}
+    
+    <p>Elenco delle persone di <strong>${office.name}</strong> 
+    con attualmente associata la fascia oraria <strong>${ts.label}</strong>.</p>
+    
+  #{/alert}
+	<table class="table table-condensed table-hover" datatable>
+	  <thead>
+		<tr class="warning">
+			<th>Nome</th>
+			<th>Inizio Contratto</th>
+			<th>Fine Contratto</th>
+		</tr>
+	  </thead>
+	  <tbody>
+		#{list items:contractList, as:'contract'}
+		<tr>
+			<td>${contract.person.surname} ${contract.person.name}</td>
+			<td  data-order="${contract.beginDate}">${contract.beginDate?.format()}</td>
+			<td data-order="${contract.endDate}">
+				${contract.endDate?.format()}
+			</td>
+		</tr>
+		#{/list}
+	  </tbody>
+	</table>
+
+#{/modalAsync}

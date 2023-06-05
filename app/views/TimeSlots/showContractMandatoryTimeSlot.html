@@ -1,0 +1,32 @@
+#{modalAsync noTitle:'true' }
+  
+  <div class="text-center">
+  #{title title:'Periodi con Tipo fascia di orario di lavoro ' + ts.label /}
+  </div>
+  #{alert color:'info'}
+    
+    <p>Elenco dei periodi in cui è stata associata la fascia di orario di lavoro <strong>${ts.label}</strong>
+     per le persone attualmente attive di <strong>${office.name}</strong> 
+    .</p>
+    
+  #{/alert}
+	<table class="table table-condensed table-hover" datatable>
+	  <thead>
+		<tr class="warning">
+			<th>Nome</th>
+			<th>Dal</th>
+			<th>Al</th>
+		</tr>
+	  </thead>
+	  <tbody>	
+        #{list items:cmtsList, as:'cwtt'}
+		<tr>
+			<td>${cwtt.contract.person.surname} ${cwtt.contract.person.name}</td>
+			<td data-order="${cwtt.beginDate}">${cwtt.beginDate?.format()}</td>
+			<td data-order="${cwtt.endDate}">${cwtt.endDate?.format()}</td>
+		</tr>
+		#{/list}
+	  </tbody>
+	</table>
+
+#{/modalAsync}

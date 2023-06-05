@@ -1,23 +1,39 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager;
 
 import com.google.common.base.Optional;
-
 import dao.AbsenceDao;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import models.Person;
 import models.absences.Absence;
 import models.exports.PersonEmailFromJson;
 import models.exports.PersonPeriodAbsenceCode;
-
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Manager per contenere metodi di utilità per prelevare ed importare
+ * le informazioni sulle assenze da JSON.
+ */
 public class AbsenceFromJsonManager {
 
   private static final Logger log = LoggerFactory.getLogger(AbsenceFromJsonManager.class);
@@ -25,6 +41,11 @@ public class AbsenceFromJsonManager {
   private AbsenceDao absenceDao;
 
   /**
+   * La lista dei personPeriodAbsenceCode relativa ai parametri passati.
+   *
+   * @param body il dto arrivato via json
+   * @param dateFrom la data da cui cercare
+   * @param dateTo la data fino a cui cercare
    * @return la lista dei PersonPeriodAbsenceCode nel periodo compreso tra 'dateFrom' e 'dateTo'
    *     per le persone recuperate dal 'body' contenente la lista delle persone ricavate dalle
    *     email arrivate via chiamata post json.
@@ -56,17 +77,17 @@ public class AbsenceFromJsonManager {
 
           if (previousAbsence == null) {
             previousAbsence = abs;
-            startCurrentPeriod = abs.personDay.date;
-            endCurrentPeriod = abs.personDay.date;
+            startCurrentPeriod = abs.getPersonDay().getDate();
+            endCurrentPeriod = abs.getPersonDay().getDate();
             continue;
           }
-          if (abs.absenceType.code.equals(previousAbsence.absenceType.code)) {
-            if (!endCurrentPeriod.isEqual(abs.personDay.date.minusDays(1))) {
+          if (abs.getAbsenceType().getCode().equals(previousAbsence.getAbsenceType().getCode())) {
+            if (!endCurrentPeriod.isEqual(abs.getPersonDay().getDate().minusDays(1))) {
               personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
               personPeriodAbsenceCode.personId = person.id;
-              personPeriodAbsenceCode.name = person.name;
-              personPeriodAbsenceCode.surname = person.surname;
-              personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
+              personPeriodAbsenceCode.name = person.getName();
+              personPeriodAbsenceCode.surname = person.getSurname();
+              personPeriodAbsenceCode.code = previousAbsence.getAbsenceType().getCode();
               if (startCurrentPeriod.getMonthOfYear() < 10) {
                 meseInizio = "0" + startCurrentPeriod.getMonthOfYear();
               } else {
@@ -95,20 +116,20 @@ public class AbsenceFromJsonManager {
               personsToRender.add(personPeriodAbsenceCode);
 
               previousAbsence = abs;
-              startCurrentPeriod = abs.personDay.date;
-              endCurrentPeriod = abs.personDay.date;
+              startCurrentPeriod = abs.getPersonDay().getDate();
+              endCurrentPeriod = abs.getPersonDay().getDate();
               continue;
 
             } else {
-              endCurrentPeriod = abs.personDay.date;
+              endCurrentPeriod = abs.getPersonDay().getDate();
               continue;
             }
           } else {
             personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
             personPeriodAbsenceCode.personId = person.id;
-            personPeriodAbsenceCode.name = person.name;
-            personPeriodAbsenceCode.surname = person.surname;
-            personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
+            personPeriodAbsenceCode.name = person.getName();
+            personPeriodAbsenceCode.surname = person.getSurname();
+            personPeriodAbsenceCode.code = previousAbsence.getAbsenceType().getCode();
 
             if (startCurrentPeriod.getMonthOfYear() < 10) {
               meseInizio = "0" + startCurrentPeriod.getMonthOfYear();
@@ -138,17 +159,17 @@ public class AbsenceFromJsonManager {
             personsToRender.add(personPeriodAbsenceCode);
 
             previousAbsence = abs;
-            startCurrentPeriod = abs.personDay.date;
-            endCurrentPeriod = abs.personDay.date;
+            startCurrentPeriod = abs.getPersonDay().getDate();
+            endCurrentPeriod = abs.getPersonDay().getDate();
           }
         }
 
         if (previousAbsence != null) {
           personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
           personPeriodAbsenceCode.personId = person.id;
-          personPeriodAbsenceCode.name = person.name;
-          personPeriodAbsenceCode.surname = person.surname;
-          personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
+          personPeriodAbsenceCode.name = person.getName();
+          personPeriodAbsenceCode.surname = person.getSurname();
+          personPeriodAbsenceCode.code = previousAbsence.getAbsenceType().getCode();
           if (startCurrentPeriod.getMonthOfYear() < 10) {
             meseInizio = "0" + startCurrentPeriod.getMonthOfYear();
           } else {

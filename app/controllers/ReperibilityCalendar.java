@@ -1,14 +1,34 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
 import dao.ReperibilityTypeMonthDao;
+import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 import helpers.TemplateExtensions;
 import helpers.Web;
 import java.util.ArrayList;
@@ -45,15 +65,16 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Router;
 import play.mvc.With;
-import security.SecurityRules;
 
-
+/**
+ * Controller per la generazione e gestione dei calendari di reperibilità.
+ *
+ * @author dario
+ *
+ */
 @With(Resecure.class)
 @Slf4j
 public class ReperibilityCalendar extends Controller {
-
-  private static final String REPERIBILITY_WORKDAYS = "207";
-  private static final String REPERIBILITY_HOLIDAYS = "208";
 
   @Inject
   static SecurityRules rules;
@@ -73,6 +94,10 @@ public class ReperibilityCalendar extends Controller {
   static CompetenceCodeDao competenceCodeDao;
   @Inject
   static PersonDayManager personDayManager;
+  @Inject
+  static UsersRolesOfficesDao uroDao;
+  @Inject
+  static RoleDao roleDao;
 
   /**
    * ritorna alla view le info necessarie per creare il calendario.
@@ -87,16 +112,16 @@ public class ReperibilityCalendar extends Controller {
     final List<PersonReperibilityType> reperibilities = reperibilityManager2.getUserActivities();
 
     if (reperibilities.isEmpty()) {
-      log.info("Richiesta visualizzazione reperibilità ma nessun servizio di "
+      log.debug("Richiesta visualizzazione reperibilità ma nessun servizio di "
           + "reperibilità presente");
       flash.error("Nessun tipo di reperibilità presente");
       Application.index();
     }
-    
+
     final PersonReperibilityType reperibilitySelected = 
         reperibility.id != null ? reperibility : reperibilities.get(0);
 
-    
+
     rules.checkIfPermitted(reperibilitySelected);
 
     render(reperibilities, reperibilitySelected, currentDate);
@@ -116,13 +141,13 @@ public class ReperibilityCalendar extends Controller {
     if (reperibility != null) {
       rules.checkIfPermitted(reperibility);
       final List<PersonReperibility> people = 
-          reperibilityManager2.reperibilityWorkers(reperibility,start, end);
+          reperibilityManager2.reperibilityWorkers(reperibility, start, end);
       int index = 0;
       final List<ReperibilityEvent> reperibilityWorkers = new ArrayList<>();
 
       for (PersonReperibility personReperibility : people) {
         final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
-        final Person person = personReperibility.person;
+        final Person person = personReperibility.getPerson();
         final ReperibilityEvent event = ReperibilityEvent.builder()
             .allDay(true)
             .title(person.fullName())
@@ -132,8 +157,8 @@ public class ReperibilityCalendar extends Controller {
             .textColor(eventColor.textColor)
             .borderColor(eventColor.borderColor)
             .className("removable")
-            .mobile(person.mobile)
-            .email(person.email)
+            .mobile(person.getMobile())
+            .email(person.getEmail())
             .build();
         reperibilityWorkers.add(event);
         index++;
@@ -167,7 +192,7 @@ public class ReperibilityCalendar extends Controller {
 
       // prende i turni associati alle persone attive in quel turno
       for (PersonReperibility personReperibility : people) {
-        final Person person = personReperibility.person;
+        final Person person = personReperibility.getPerson();
         final EventColor eventColor = EventColor.values()[index % (EventColor.values().length - 1)];
         events.addAll(reperibilityEvents(reperibility, person, start, end, eventColor));
         events.addAll(absenceEvents(person, start, end));
@@ -195,9 +220,9 @@ public class ReperibilityCalendar extends Controller {
     if (prd.isPresent()) {
       final ReperibilityTypeMonth reperibilityTypeMonth = 
           reperibilityTypeMonthDao.byReperibilityTypeAndDate(
-              prd.get().reperibilityType, newDate).orNull();
-      if (rules.check(prd.get().reperibilityType) && rules.check(reperibilityTypeMonth)) {
-        prd.get().date = newDate;
+              prd.get().getReperibilityType(), newDate).orNull();
+      if (rules.check(prd.get().getReperibilityType()) && rules.check(reperibilityTypeMonth)) {
+        prd.get().setDate(newDate);
         Optional<String> error = reperibilityManager2.reperibilityPermitted(prd.get());
         if (error.isPresent()) {
           message = PNotifyObject.builder()
@@ -264,10 +289,10 @@ public class ReperibilityCalendar extends Controller {
           response.status = Http.StatusCode.NOT_FOUND;
         } else {
           PersonReperibilityDay personReperibilityDay = new PersonReperibilityDay();
-          personReperibilityDay.date = date;
-          personReperibilityDay.reperibilityType = reperibilityType;
-          personReperibilityDay.personReperibility = 
-              reperibilityDao.getPersonReperibilityByPersonAndType(person, reperibilityType);
+          personReperibilityDay.setDate(date);
+          personReperibilityDay.setReperibilityType(reperibilityType);
+          personReperibilityDay.setPersonReperibility(reperibilityDao
+              .getPersonReperibilityByPersonAndType(person, reperibilityType));
           Optional<String> error;
           if (validation.valid(personReperibilityDay).ok) {
             error = reperibilityManager2.reperibilityPermitted(personReperibilityDay);
@@ -332,10 +357,10 @@ public class ReperibilityCalendar extends Controller {
       response.status = Http.StatusCode.NOT_FOUND;
     } else {
       final ReperibilityTypeMonth reperibilityTypeMonth = 
-          reperibilityTypeMonthDao.byReperibilityTypeAndDate(prd.reperibilityType, 
-              prd.date).orNull();
+          reperibilityTypeMonthDao.byReperibilityTypeAndDate(prd.getReperibilityType(), 
+              prd.getDate()).orNull();
 
-      if (rules.check(prd.reperibilityType) && rules.check(reperibilityTypeMonth)) {
+      if (rules.check(prd.getReperibilityType()) && rules.check(reperibilityTypeMonth)) {
 
         reperibilityManager2.delete(prd);
 
@@ -359,7 +384,7 @@ public class ReperibilityCalendar extends Controller {
 
   /**
    * Verifica se il calendario è modificabile o meno nella data richiesta.
-   * 
+   *
    * @param reperibilityId id dell'attività da verificare
    * @param start data relativa al mese da controllare
    * @return true se l'attività è modificabile nella data richiesta, false altrimenti.
@@ -408,7 +433,7 @@ public class ReperibilityCalendar extends Controller {
 
   /**
    * DTO che modellano le assenze della persona nel periodo.
-   * 
+   *
    * @param person Persona della quale recuperare le assenze
    * @param start data iniziale del periodo
    * @param end data finale del periodo
@@ -423,13 +448,13 @@ public class ReperibilityCalendar extends Controller {
             JustifiedTypeName.complete_day_and_add_overtime);
 
     List<Absence> absences = absenceDao.filteredByTypes(person, start, end, types, 
-        Optional.fromNullable(false));
+        Optional.fromNullable(false), Optional.<Boolean>absent());
     List<ReperibilityEvent> events = new ArrayList<>();
     ReperibilityEvent event = null;
 
     for (Absence abs : absences) {
 
-      /**
+      /*
        * Per quanto riguarda gli eventi 'allDay':
        *
        * La convenzione del fullcalendar è quella di avere il parametro end = null
@@ -439,13 +464,13 @@ public class ReperibilityCalendar extends Controller {
        */
       if (event == null
           || event.getEnd() == null && !event.getStart().plusDays(1)
-          .equals(abs.personDay.date)
-          || event.getEnd() != null && !event.getEnd().equals(abs.personDay.date)) {
+          .equals(abs.getPersonDay().getDate())
+          || event.getEnd() != null && !event.getEnd().equals(abs.getPersonDay().getDate())) {
 
         event = ReperibilityEvent.builder()
             .allDay(true)
-            .title("Assenza di " + abs.personDay.person.fullName())
-            .start(abs.personDay.date)
+            .title("Assenza di " + abs.getPersonDay().getPerson().fullName())
+            .start(abs.getPersonDay().getDate())
             .editable(false)
             .color(EventColor.RED.backgroundColor)
             .textColor(EventColor.RED.textColor)
@@ -454,7 +479,7 @@ public class ReperibilityCalendar extends Controller {
 
         events.add(event);
       } else {
-        event.setEnd(abs.personDay.date.plusDays(1));
+        event.setEnd(abs.getPersonDay().getDate().plusDays(1));
       }
 
     }
@@ -482,8 +507,8 @@ public class ReperibilityCalendar extends Controller {
 
               .personReperibilityDayId(personReperibilityDay.id)
               .title(person.fullName())
-              .start(personReperibilityDay.date)
-              .end(personReperibilityDay.date)
+              .start(personReperibilityDay.getDate())
+              .end(personReperibilityDay.getDate())
               .durationEditable(false)
               .color(color.backgroundColor)
               .textColor(color.textColor)
@@ -496,7 +521,8 @@ public class ReperibilityCalendar extends Controller {
   }
 
   /**
-   * ritorna informazioni alla vista relative ai turnisti e alle ore già approvate/pagate di turno.
+   * ritorna informazioni alla vista relative ai dipendenti associati all'attività mensile
+   * e alle ore già approvate/pagate relative all'attività stessa.
    *
    * @param reperibilityId l'id dell'attività per cui ricercare le approvazioni
    * @param date la data da cui ricercare le approvazioni
@@ -519,8 +545,8 @@ public class ReperibilityCalendar extends Controller {
       reperibilityTypeMonth = monthStatus.get();
     } else {
       reperibilityTypeMonth = new ReperibilityTypeMonth();
-      reperibilityTypeMonth.personReperibilityType = reperibility;
-      reperibilityTypeMonth.yearMonth = monthToApprove;
+      reperibilityTypeMonth.setPersonReperibilityType(reperibility);
+      reperibilityTypeMonth.setYearMonth(monthToApprove);
       reperibilityTypeMonth.save();
     }
     final LocalDate monthbegin = monthToApprove.toLocalDate(1);
@@ -539,30 +565,31 @@ public class ReperibilityCalendar extends Controller {
     final List<Person> people = reperibilityManager2
         .involvedReperibilityWorkers(reperibility, monthbegin, monthEnd);
 
-    CompetenceCode workDayReperibility = 
-        competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_WORKDAYS);
-    CompetenceCode holidayReperibility = 
-        competenceCodeDao.getCompetenceCodeByCode(REPERIBILITY_HOLIDAYS);
+    CompetenceCode workDayActivity = 
+        reperibility.getMonthlyCompetenceType().getWorkdaysCode();        
+    CompetenceCode holidayActivity = reperibility.getMonthlyCompetenceType().getHolidaysCode();
+
     people.forEach(person -> {
       WorkDaysReperibilityDto dto = new WorkDaysReperibilityDto();
 
       dto.person = person;
       dto.workdaysReperibility = reperibilityManager2
           .calculatePersonReperibilityCompetencesInPeriod(reperibility, person,
-              monthbegin, lastDay, workDayReperibility);
+              monthbegin, lastDay, workDayActivity);
       dto.workdaysPeriods = reperibilityManager2
           .getReperibilityPeriod(person, monthbegin, monthEnd, reperibility, false);
       HolidaysReperibilityDto dtoHoliday = new HolidaysReperibilityDto();
       dtoHoliday.person = person;
       dtoHoliday.holidaysReperibility = reperibilityManager2
           .calculatePersonReperibilityCompetencesInPeriod(reperibility, person,
-              monthbegin, lastDay, holidayReperibility);
+              monthbegin, lastDay, holidayActivity);
       dtoHoliday.holidaysPeriods = reperibilityManager2
           .getReperibilityPeriod(person, monthbegin, monthEnd, reperibility, true);
 
       listWorkdaysRep.add(dto);
       listHolidaysRep.add(dtoHoliday);
     });
+
     //TODO: nella render ritornare una lista di dto alla vista
     render(reperibilityTypeMonth, listWorkdaysRep, listHolidaysRep);
 
@@ -586,16 +613,17 @@ public class ReperibilityCalendar extends Controller {
       flash.error("Le reperibilità sono cambiate rispetto al riepilogo mostrato."
           + "Il nuovo riepilogo è stato ricalcolato");
       flash.keep();
-      args.put("date", reperibilityTypeMonth.yearMonth.toLocalDate(1).toString());
-      args.put("reperibilityId", reperibilityTypeMonth.personReperibilityType.id);
-      redirect(Router.reverse("ReperibilityCalendar.monthReperibilityApprovement",args).url);
+      args.put("date", reperibilityTypeMonth.getYearMonth().toLocalDate(1).toString());
+      args.put("reperibilityId", reperibilityTypeMonth.getPersonReperibilityType().id);
+      redirect(Router.reverse("ReperibilityCalendar.monthReperibilityApprovement", args).url);
     }
-    reperibilityTypeMonth.approved = true;
+    reperibilityTypeMonth.setApproved(true);
     reperibilityTypeMonth.save();
     //TODO: completare questo metodo nel reperibility manager
     reperibilityManager2.assignReperibilityCompetences(reperibilityTypeMonth);
-    args.put("date", TemplateExtensions.format(reperibilityTypeMonth.yearMonth.toLocalDate(1)));
-    args.put("activity.id", reperibilityTypeMonth.personReperibilityType.id);
+    args.put("date", 
+        TemplateExtensions.format(reperibilityTypeMonth.getYearMonth().toLocalDate(1)));
+    args.put("activity.id", reperibilityTypeMonth.getPersonReperibilityType().id);
     redirect(Router.reverse("ReperibilityCalendar.show", args).url);
 
   }
@@ -612,12 +640,14 @@ public class ReperibilityCalendar extends Controller {
         reperibilityTypeMonthDao.byId(reperibilityTypeMonthId).orNull();
     notFoundIfNull(reperibilityTypeMonth);
     rules.checkIfPermitted(reperibilityTypeMonth);
-    reperibilityTypeMonth.approved = false;
+    reperibilityTypeMonth.setApproved(false);
     reperibilityTypeMonth.save();
 
     Map<String, Object> args = new HashMap<>();
-    args.put("date", TemplateExtensions.format(reperibilityTypeMonth.yearMonth.toLocalDate(1)));
-    args.put("activity.id", reperibilityTypeMonth.personReperibilityType.id);
+    args.put("date", 
+        TemplateExtensions.format(reperibilityTypeMonth.getYearMonth().toLocalDate(1)));
+    args.put("activity.id", reperibilityTypeMonth.getPersonReperibilityType().id);
     redirect(Router.reverse("ReperibilityCalendar.show", args).url);
   }
+
 }

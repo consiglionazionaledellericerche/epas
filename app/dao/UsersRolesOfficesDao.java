@@ -1,8 +1,24 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -10,6 +26,7 @@ import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Office;
 import models.Role;
@@ -22,6 +39,9 @@ import models.query.QUsersRolesOffices;
 import org.testng.collections.Maps;
 import org.testng.collections.Sets;
 
+/**
+ * DAO per UsersRolesOffices.
+ */
 public class UsersRolesOfficesDao extends DaoBase {
 
   @Inject
@@ -30,6 +50,9 @@ public class UsersRolesOfficesDao extends DaoBase {
     super(queryFactory, emp);
   }
 
+  /**
+   * Preleva lo UsersRolesOffices per id.
+   */
   public UsersRolesOffices getById(Long id) {
     final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
     return getQueryFactory().selectFrom(uro).where(uro.id.eq(id)).fetchOne();
@@ -50,6 +73,11 @@ public class UsersRolesOfficesDao extends DaoBase {
   }
 
   /**
+   * L'userRoleOffice associato ai parametri passati.
+   *
+   * @param user l'utente
+   * @param role il ruolo
+   * @param office la sede
    * @return l'usersRolesOffice associato ai parametri passati.
    */
   public Optional<UsersRolesOffices> getUsersRolesOffices(User user, Role role, Office office) {
@@ -63,6 +91,9 @@ public class UsersRolesOfficesDao extends DaoBase {
   }
 
   /**
+   * La lista di tutti gli userRoleOffice legati all'utente passato.
+   *
+   * @param user l'utente
    * @return la lista di tutti gli usersRolesOffices associati al parametro passato.
    */
   public List<UsersRolesOffices> getUsersRolesOfficesByUser(User user) {
@@ -70,6 +101,23 @@ public class UsersRolesOfficesDao extends DaoBase {
     return getQueryFactory().selectFrom(uro).where(uro.user.eq(user)).fetch();
   }
 
+  /**
+   * La lista di tutti gli userRoleOffice legati all'utente passato.
+   *
+   * @param user l'utente
+   * @return la lista di tutti gli usersRolesOffices associati al parametro passato.
+   */
+  public List<UsersRolesOffices> getAdministrativeUsersRolesOfficesByUser(User user) {
+    final QUsersRolesOffices uro = QUsersRolesOffices.usersRolesOffices;
+    return getQueryFactory().selectFrom(uro)
+        .where(uro.user.eq(user), uro.role.name.eq(Role.ABSENCE_MANAGER)
+        .or(uro.role.name.eq(Role.GROUP_MANAGER))
+        .or(uro.role.name.eq(Role.PERSONNEL_ADMIN))
+        .or(uro.role.name.eq(Role.PERSONNEL_ADMIN_MINI))
+        .or(uro.role.name.eq(Role.SEAT_SUPERVISOR))).fetch();
+  }
+
+  
   /**
    * Metodo per effettuare check dello stato ruoli epas <-> perseo.
    */
@@ -93,17 +141,18 @@ public class UsersRolesOfficesDao extends DaoBase {
     Map<Long, Set<String>> urosMap = Maps.newHashMap();
 
     for (UsersRolesOffices uroItem : uroList) {
-      if (uroItem.user.person == null || uroItem.user.person.perseoId == null) {
+      if (uroItem.getUser().getPerson() == null 
+          || uroItem.getUser().getPerson().getPerseoId() == null) {
         continue;
       }
-      if (office.isPresent() && !office.get().equals(uroItem.user.person.office)) {
+      if (office.isPresent() && !office.get().equals(uroItem.getUser().getPerson().getOffice())) {
         continue;
       }
-      Set<String> personUros = urosMap.get(uroItem.user.person.perseoId);
+      Set<String> personUros = urosMap.get(uroItem.getUser().getPerson().getPerseoId());
       if (personUros == null) {
         personUros = Sets.newHashSet();
         personUros.add(formatUro(uroItem));
-        urosMap.put(uroItem.user.person.perseoId, personUros);
+        urosMap.put(uroItem.getUser().getPerson().getPerseoId(), personUros);
       } else {
         personUros.add(formatUro(uroItem));
       }
@@ -114,6 +163,8 @@ public class UsersRolesOfficesDao extends DaoBase {
   }
 
   /**
+   * Il conteggio di quanti sono gli utenti con ruolo role già presenti nel db.
+   *
    * @param role il ruolo da ricercare negli Uro
    * @return quanti sono gli utenti con ruolo role già inseriti nel db.
    */
@@ -122,9 +173,11 @@ public class UsersRolesOfficesDao extends DaoBase {
     return getQueryFactory().selectFrom(uro).where(uro.role.eq(role)).fetchCount();
   }
 
+  /**
+   * Formatta come stringa le info sullo UsersRolesOffices.
+   */
   public String formatUro(UsersRolesOffices uro) {
-    return uro.role.toString() + " - " + uro.office.name;
+    return uro.getRole().toString() + " - " + uro.getOffice().getName();
   }
-
 
 }

@@ -30,6 +30,19 @@
   </p>
   #{/alert}
   #{/else}
+  
+    <!-- Stampa calendario di turno -->
+<div class="row"></div>
+<div class="row">
+    <div class="col-md-4 col-md-offset-4">
+          <a href="@{Shift.exportMonthAsPDF(shiftTypeMonth.yearMonth.getYear(), 
+          			shiftTypeMonth.yearMonth.getMonthOfYear(), shiftTypeMonth.shiftType.shiftCategories.id)}" >
+           <i class="fa fa-calendar fa-2x" aria-hidden="true">  Stampa calendario</i> 
+          </a>
+    </div>
+</div>
+<div class="row"><br></div>
+
   <ul class="list-group">
     #{list shiftsCalculatedCompetences.entrySet()}
     <li class="list-group-item">

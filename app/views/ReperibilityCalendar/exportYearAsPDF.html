@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Istituto di Informatica e Telematica Piano delle Reperibilità ${year} Gruppo ${description}</title>
+        
+        <link rel="stylesheet" href="@{'/public/stylesheets/calendars/sistorgReportPDF.css'}" type="text/css" />
+        <link rel="stylesheet" href="@{'/public/stylesheets/calendars/reperibilityPDF.css'}" type="text/css" />
+    </head>
+    <body>
+        <h1>Istituto di Informatica e Telematica </h1>
+        <h2>Piano delle Reperibilità ${year} <br/>  <em>${description}</em> </h2>
+        	
+%{
+	int mm = 0;
+	int gg = 0;
+	int day = 0;
+}%
+
+#{list reperibilityMonths,as:'reperibilityMonth'}
+	<div class= "page">
+	<div class="table">
+
+	<table class="month">
+		<caption>Reperibilità ${firstOfYear.plusMonths(mm).monthOfYear().getAsText()} ${year}</caption>
+		
+		<tr>	
+			<th>Nome dipendente</th>
+			
+			#{list items:1..firstOfYear.plusMonths(mm).plusDays(day).dayOfMonth().getMaximumValue(),as:'dd'}
+			 <th>${dd} <br/> ${firstOfYear.plusMonths(mm).plusDays(dd-1).dayOfWeek().getAsText().toString().substring(0,1)}</th>
+				%{dd++;}%
+			#{/list}
+		</tr>
+		
+		#{list reperibilityMonth.rowKeySet(),as:'person'}
+			<tr>
+				<td class="nome-dipendente" id="${person.surname.toString().replace(' ', '')}">${person.surname} ${person.name}</td>
+				%{
+					nfr = 0;
+					nfs = 0;
+					dd = 0;
+				}%
+				#{list reperibilityMonth.columnKeySet(),as:'dayOfMonth'}
+					%{
+						if (reperibilityMonth.contains(person, dayOfMonth) && reperibilityMonth.get(person, dayOfMonth).toString().equals('FS')) { 
+							nfs++;
+						}
+						if (reperibilityMonth.contains(person, dayOfMonth) && reperibilityMonth.get(person, dayOfMonth).toString().equals('FR')) { 
+							nfr++;
+						}
+					}%	
+				#{/list}
+				
+				#{list items:1..firstOfYear.plusMonths(mm).plusDays(dd).dayOfMonth().getMaximumValue(),as:'dd'}
+					<td class="${reperibilityMonth.get(person, dd)}">
+							${reperibilityMonth.contains(person, dd) ? reperibilityMonth.get(person, dd) : ''}
+					</td>
+					%{dd++;}%
+				#{/list}
+					
+
+				<td class="label no-border">
+					Feriali=
+				</td>
+				<td class="no-border">
+					 ${nfr}
+				</td>
+				<td class="label no-border">
+					Festivi=
+				</td>
+				<td class="no-border red">
+					 ${nfs}
+				</td>
+			</tr>
+		#{/list}
+		
+	</table>
+	
+ 	</div>
+
+%{
+		mm++;
+}%
+#{if (mm % 4) == 0}		
+	</div>
+	<div class="page">
+#{/if}
+#{/list}
+
+
+	</div>
+
+	<table class="no-border">
+	<tr>
+		<td class="no-border"> </td> <th colspan ="2"> I semestre ${year}</th> <th colspan ="2"> II semestre ${year}</th> <th>Totale ${year} </th><th>Totale ${year} </th>
+	</tr>
+	<tr>
+		<th class="no-border"> </th> <th> Feriali</th> <th class="red">Festivi</th><th> Feriali</th> <th class="red">Festivi</th> <th> Feriali</th> <th class="red">Festivi</th>
+	</tr>
+
+#{list reperibilitySumDays.rowKeySet(),as:'person'}
+	<tr>
+		<td class="nome-dipendente" id="${person.surname.toString().replace(' ', '')}">${person.surname} ${person.name}
+	
+		<td> ${reperibilitySumDays.contains(person, "FR1S") ? reperibilitySumDays.get(person, "FR1S") : ''}</td>
+		<td class="red"> ${reperibilitySumDays.contains(person, "FS1S") ? reperibilitySumDays.get(person, "FS1S") : ''}</td>
+		<td> ${reperibilitySumDays.contains(person, "FR2S") ? reperibilitySumDays.get(person, "FR2S") : ''}</td>
+		<td class="red"> ${reperibilitySumDays.contains(person, "FS2S") ? reperibilitySumDays.get(person, "FS2S") : ''}</td>
+		%{
+			int totFr = (reperibilitySumDays.contains(person, "FR1S") ? reperibilitySumDays.get(person, "FR1S") : 0) + (reperibilitySumDays.contains(person, "FR2S") ? reperibilitySumDays.get(person, "FR2S") : 0);
+			int totFs = (reperibilitySumDays.contains(person, "FS1S") ? reperibilitySumDays.get(person, "FS1S") : 0) + (reperibilitySumDays.contains(person, "FS2S") ? reperibilitySumDays.get(person, "FS2S") : 0);
+		}%
+		<td>${totFr}</td>
+		<td class="red"> ${totFs}</td>
+	</tr>
+#{/list}
+</table>
+      
+      <div class="firma dir">
+      <strong>Il Direttore</strong> <br />
+      Dott. ${seatSupervisor}
+      </div>
+      
+      <div class="firma resp">
+      <strong>Il Responsabile</strong><br />
+      Dott. ${supervisor}
+      </div>
+  </body>
+</html>

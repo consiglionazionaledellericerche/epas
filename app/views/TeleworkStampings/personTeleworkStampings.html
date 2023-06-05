@@ -1,0 +1,39 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Orari dipendenti in telelavoro'  /}
+
+<div class="container">
+  #{title title:'Orari in telelavoro di  ' + person.fullName() /}
+</div>
+
+<div class="container">
+
+	#{list items:list, as:'day'}
+      <ul class="list-group">
+     	 <li class="list-group-item  list-group-item-grey">
+     	 
+          <h4>
+          #{if day.personDay.isHoliday}
+          	<span class="label label-danger">${day.personDay.date.shortDayName()}</span></h4>
+          #{/if}
+          #{else}
+          	<span class="label label-info">${day.personDay.date.shortDayName()}</span></h4>
+          #{/else}
+          
+          </li>
+          #{if (day.hasTeleworkStampingsWellFormed() && day.isTeleworkInDay()) 
+          || (!day.personDay.stampings.isEmpty() && !day.isTeleworkInDay())}
+          <li class="list-group-item  list-group-item-bianco">
+          #{/if}
+          #{else}
+          <li class="list-group-item  list-group-item-warning" webui-popover-hover
+    			data-content="Giornata incompleta: verificare orari inseriti e/o codice telelavoro (103)">
+          #{/else}
+            #{include './_info.html' /}
+          </li>
+      </ul>
+	#{/list}
+
+</div>
+
+<div id="modalDeleteStamping" class="modal fade container" tabindex="-1"></div>

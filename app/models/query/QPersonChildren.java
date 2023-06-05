@@ -31,6 +31,8 @@ public class QPersonChildren extends EntityPathBase<PersonChildren> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final StringPath externalId = createString("externalId");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
@@ -42,6 +44,10 @@ public class QPersonChildren extends EntityPathBase<PersonChildren> {
     public final QPerson person;
 
     public final StringPath surname = createString("surname");
+
+    public final StringPath taxCode = createString("taxCode");
+
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
 
     //inherited
     public final NumberPath<Integer> version = _super.version;

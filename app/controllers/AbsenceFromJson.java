@@ -1,24 +1,33 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import dao.AbsenceDao;
-
 import it.cnr.iit.epas.JsonPersonEmailBinder;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.AbsenceFromJsonManager;
-
 import models.exports.FrequentAbsenceCode;
 import models.exports.PersonEmailFromJson;
 import models.exports.PersonPeriodAbsenceCode;
-
 import org.joda.time.LocalDate;
-
 import play.data.binding.As;
 import play.mvc.Controller;
 
@@ -28,8 +37,8 @@ import play.mvc.Controller;
  *     "cristian.lucchesi@iit.cnr.it"},{"email" : "stefano.ruberti@iit.cnr.it"}]}'
  *     http://localhost:8888/absenceFromJson/absenceInPeriod .
  *
- * @author dario
- * @author arianna
+ * @author Dario Tagliaferri
+ * @author Arianna Del Soldato
  */
 @Slf4j
 public class AbsenceFromJson extends Controller {

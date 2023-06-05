@@ -26,24 +26,32 @@ public class QGroup extends EntityPathBase<Group> {
 
     public final models.base.query.QMutableModel _super = new models.base.query.QMutableModel(this);
 
+    public final BooleanPath active = createBoolean("active");
+
+    public final ListPath<models.flows.Affiliation, QAffiliation> affiliations = this.<models.flows.Affiliation, QAffiliation>createList("affiliations", models.flows.Affiliation.class, QAffiliation.class, PathInits.DIRECT2);
+
     //inherited
     public final DateTimePath<org.joda.time.LocalDateTime> createdAt = _super.createdAt;
 
     public final StringPath description = createString("description");
 
+    public final DatePath<java.time.LocalDate> endDate = createDate("endDate", java.time.LocalDate.class);
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final StringPath externalId = createString("externalId");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
+
+    public final StringPath label = createString("label");
 
     public final models.query.QPerson manager;
 
     public final StringPath name = createString("name");
 
     public final models.query.QOffice office;
-
-    public final ListPath<models.Person, models.query.QPerson> people = this.<models.Person, models.query.QPerson>createList("people", models.Person.class, models.query.QPerson.class, PathInits.DIRECT2);
 
     //inherited
     public final BooleanPath persistent = _super.persistent;

@@ -1,0 +1,23 @@
+#{modalAsync id:'defaultModal', title:'Rimozione associazione a gruppo' }
+
+#{alert color:'danger'}
+	<div class="text-center">
+	<p>Attenzione! <br>
+	 Stai per rimuovere da ePAS l'associazione di <strong>${affiliation.person.fullname}</strong> al gruppo
+	 <strong>${affiliation.group.name}</strong>.
+	</p>
+	<p>
+	 Questa operazione non potrà essere annullata.
+	</p>
+	#{form @Affiliations.delete(), class:'form-horizontal' }
+		<input type="hidden" name="id" value="${affiliation.id}"/>
+		<input type="hidden" name="confirmed" value="true"/>
+		
+	    #{b.buttons center:true}
+		<input class="btn btn-danger" type="submit" value="Conferma Eliminazione" />
+		#{/b.buttons}
+	#{/form}
+	</div>
+#{/alert}
+
+#{/modalAsync}	

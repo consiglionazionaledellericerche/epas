@@ -23,11 +23,11 @@
 		 </div>
      #{/secure.check}
 
-        #{tabList}
-  				#{tabItem id:'attivi', title:'Attivi', active:true /}
-  				#{tabItem id:'inattivi', title:'Disattivati' /}
-				#{/tabList}
-		<br>
+     #{tabList}
+       #{tabItem id:'attivi', title:'Attivi', active:true /}
+       #{tabItem id:'inattivi', title:'Disattivati' /}
+     #{/tabList}
+     <br>
 		#{tabContent}
   		  #{tabContentItem id:'attivi', active:true}
 
@@ -41,9 +41,13 @@
 			    <table class="table table-condensed table-hover">
 			        <tr class="warning">
 			          <th>Descrizione</th>
-			          <th class="center">Contratti attivi<br>attualmente associati</th>
+			          <th>Riproporziona quantità<br>codici assenza</th>
+			          <th class="center">Contratti attivi <br>con periodi attivi<br>attualmente associati</th>
 			          <th class="center">Periodi associati<br>a contratti attivi</th> 
 			          <th class="center">Contratti<br>associati<br>(storico)</th>
+			          #{secure.check 'WorkingTimeType.externalId'}
+			            <th class="center">&{'externalId'}</th>
+			          #{/secure.check}
 			          #{secure.check 'WorkingTimes.changeWorkingTimeTypeToAll'}
 			          <th class="center">Cambia orario<br>a tutti</th>
 			          #{/secure.check}
@@ -58,9 +62,18 @@
 	                         <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}" data-async-modal="#defaultModal">${wtt.value.description}</a>
 	                      #{/else}
 				        </td>
-				        
+				        <td class="center">
+				        <a href="@{WorkingTimes.changeEnableAdjustment(wtt.value.id, office.id)}"data-async-modal="#defaultModal">
+				        #{if wtt.value.enableAdjustmentForQuantity == true}
+				        SI
+				        #{/if}
+				        #{else}
+				        NO
+				        #{/else}
+				        </a>
+				        </td>
 				        <!-- contratti attualmente attivi con wtt -->
-				        <td  class="center">
+				        <td class="center">
 				          <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
 				            ${wtt.getAssociatedActiveContract(office).size()}
 				    	  </a>    
@@ -91,9 +104,13 @@
 				    	    #{/secure.check}
 				    	  #{/if}
 				    	</td>
+				    	#{secure.check 'WorkingTimeType.externalId'}
+				    	  <td class="center">${wtt.value.externalId}</td>
+				    	#{/secure.check}
 				    	#{secure.check 'WorkingTimes.changeWorkingTimeTypeToAll'}
                         <td class="center">
-                          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-async-modal="#defaultModal">
+                          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-async-modal="#defaultModal"
+                             class="btn btn-primary">
                             Cambia
                           </a>
                         </td>

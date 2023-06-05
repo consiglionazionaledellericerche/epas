@@ -1,0 +1,21 @@
+<div id="login-idp">
+  #{if ldapAuthEnabled}
+	  #{form @Clocks.ldapLogin(), id:'login-form-idp', role:'form'}
+	    <!-- User e Password -->
+	    <label>Username</label>
+	    <input class="form-control margin-bottom" placeholder="Username"
+	  	  type="text" name="username" value="${flash.username}" />
+
+	    <label>Password</label>
+	    <input class="form-control" placeholder="Password"
+		  type="password" name="password" value="${flash.password}" />
+
+	    <div class="submit-btn">
+	    	<!-- Submit -->
+
+	    	<input class="btn btn-primary btn-block" type="submit"
+				value="&{'secure.signin'}" />    
+	    </div>
+	  #{/form}
+  #{/if}
+</div>

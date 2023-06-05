@@ -1,17 +1,30 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package db.h2support.base;
 
+import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.inject.Inject;
-
-import com.beust.jcommander.internal.Lists;
-
 import dao.PersonDayDao;
 import dao.absences.AbsenceComponentDao;
-
 import java.util.List;
 import java.util.Set;
-
 import models.Person;
 import models.PersonDay;
 import models.absences.Absence;
@@ -19,7 +32,6 @@ import models.absences.AbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultAbsenceType;
-
 import org.joda.time.LocalDate;
 
 public class H2AbsenceSupport {
@@ -54,13 +66,13 @@ public class H2AbsenceSupport {
       justifiedType = absenceComponentDao.getOrBuildJustifiedType(justifiedTypeName.get());
     } else {
       Verify.verify(absenceType.getJustifiedTypesPermitted().size() == 1);
-      justifiedType = absenceType.justifiedTypesPermitted.iterator().next();
+      justifiedType = absenceType.getJustifiedTypesPermitted().iterator().next();
     }
     Absence absence = new Absence();
     absence.date = date;
-    absence.absenceType = absenceType;
-    absence.justifiedType = justifiedType;
-    absence.justifiedMinutes = justifiedMinutes;
+    absence.setAbsenceType(absenceType);
+    absence.setJustifiedType(justifiedType);
+    absence.setJustifiedMinutes(justifiedMinutes);
     
     return absence;
   }
@@ -81,8 +93,8 @@ public class H2AbsenceSupport {
     Absence absence = 
         absenceInstance(defaultAbsenceType, date, justifiedTypeName, justifiedMinutes);
     
-    absence.personDay = getPersonDay(person, date);
-    absence.personDay.refresh();
+    absence.setPersonDay(getPersonDay(person, date));
+    absence.getPersonDay().refresh();
     absence.save();
     
     return absence;
@@ -90,6 +102,7 @@ public class H2AbsenceSupport {
 
   /**
    * Il personDay della persona a quella data.
+   *
    * @param person persona
    * @param date data
    * @return personDay
@@ -107,6 +120,7 @@ public class H2AbsenceSupport {
   
   /**
    * Costruzione multipla di assenze all day.
+   *
    * @param person persona
    * @param defaultAbsenceType tipo essere all day permitted
    * @param dates date

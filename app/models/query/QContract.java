@@ -29,6 +29,8 @@ public class QContract extends EntityPathBase<Contract> {
     //inherited
     public final DatePath<org.joda.time.LocalDate> beginDate = _super.beginDate;
 
+    public final SetPath<models.ContractMandatoryTimeSlot, QContractMandatoryTimeSlot> contractMandatoryTimeSlots = this.<models.ContractMandatoryTimeSlot, QContractMandatoryTimeSlot>createSet("contractMandatoryTimeSlots", models.ContractMandatoryTimeSlot.class, QContractMandatoryTimeSlot.class, PathInits.DIRECT2);
+
     public final ListPath<models.ContractMonthRecap, QContractMonthRecap> contractMonthRecaps = this.<models.ContractMonthRecap, QContractMonthRecap>createList("contractMonthRecaps", models.ContractMonthRecap.class, QContractMonthRecap.class, PathInits.DIRECT2);
 
     public final SetPath<models.ContractStampProfile, QContractStampProfile> contractStampProfile = this.<models.ContractStampProfile, QContractStampProfile>createSet("contractStampProfile", models.ContractStampProfile.class, QContractStampProfile.class, PathInits.DIRECT2);
@@ -43,10 +45,14 @@ public class QContract extends EntityPathBase<Contract> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final StringPath externalId = createString("externalId");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
     public final BooleanPath isTemporaryMissing = createBoolean("isTemporaryMissing");
+
+    public final StringPath label = createString("label");
 
     public final ListPath<models.MealTicket, QMealTicket> mealTickets = this.<models.MealTicket, QMealTicket>createList("mealTickets", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
 
@@ -58,6 +64,12 @@ public class QContract extends EntityPathBase<Contract> {
     public final BooleanPath persistent = _super.persistent;
 
     public final QPerson person;
+
+    public final SetPath<models.PersonalWorkingTime, QPersonalWorkingTime> personalWorkingTimes = this.<models.PersonalWorkingTime, QPersonalWorkingTime>createSet("personalWorkingTimes", models.PersonalWorkingTime.class, QPersonalWorkingTime.class, PathInits.DIRECT2);
+
+    public final QContract previousContract;
+
+    public final SimplePath<com.google.common.collect.Range<org.joda.time.LocalDate>> range = createSimple("range", com.google.common.collect.Range.class);
 
     public final BooleanPath sourceByAdmin = createBoolean("sourceByAdmin");
 
@@ -83,6 +95,8 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final NumberPath<Integer> sourceVacationLastYearUsed = createNumber("sourceVacationLastYearUsed", Integer.class);
 
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
+
     public final ListPath<models.VacationPeriod, QVacationPeriod> vacationPeriods = this.<models.VacationPeriod, QVacationPeriod>createList("vacationPeriods", models.VacationPeriod.class, QVacationPeriod.class, PathInits.DIRECT2);
 
     //inherited
@@ -107,6 +121,7 @@ public class QContract extends EntityPathBase<Contract> {
     public QContract(Class<? extends Contract> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
+        this.previousContract = inits.isInitialized("previousContract") ? new QContract(forProperty("previousContract"), inits.get("previousContract")) : null;
     }
 
 }

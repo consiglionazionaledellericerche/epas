@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -5,55 +22,58 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import common.security.SecurityRules;
+import dao.AbsenceDao;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.history.ContractHistoryDao;
+import dao.history.HistoryValue;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
-
 import helpers.Web;
-
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
-
+import java.util.Set;
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
+import lombok.val;
 import manager.ContractManager;
 import manager.PeriodManager;
 import manager.attestati.service.ICertificationService;
 import manager.recaps.recomputation.RecomputeRecap;
+import manager.service.contracts.ContractService;
 import manager.services.absences.AbsenceService;
-
 import models.Contract;
+import models.ContractMandatoryTimeSlot;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.PersonalWorkingTime;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.absences.Absence;
 import models.base.IPropertyInPeriod;
-
-import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
-
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import security.SecurityRules;
-
+/**
+ * Controller per la gestione dei contratti.
+ */
 @Slf4j
 @With({Resecure.class})
 public class Contracts extends Controller { 
@@ -80,6 +100,12 @@ public class Contracts extends Controller {
   static AbsenceService absenceService;
   @Inject
   static PersonDayDao personDayDao;
+  @Inject
+  static ContractService contractService;
+  @Inject
+  static ContractHistoryDao historyDao;
+  @Inject
+  static AbsenceDao absenceDao;
 
   /**
    * I contratti del dipendente.
@@ -91,7 +117,7 @@ public class Contracts extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     IWrapperPerson wrPerson = wrapperFactory.create(person);
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     IWrapperContract wrCurrentContract = null;
     if (wrPerson.getCurrentContract().isPresent()) {
@@ -99,7 +125,7 @@ public class Contracts extends Controller {
     }
     List<IWrapperContract> contractList =
         FluentIterable.from(contractDao.getPersonContractList(person))
-            .transform(wrapperFunctionFactory.contract()).toList();
+        .transform(wrapperFunctionFactory.contract()).toList();
 
     render(person, wrPerson, wrCurrentContract, contractList);
   }
@@ -113,84 +139,264 @@ public class Contracts extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
-    Person person = contract.person;
+    rules.checkIfPermitted(contract.getPerson().getOffice());
+    Person person = contract.getPerson();
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
 
-    LocalDate beginDate = contract.beginDate;
-    LocalDate endDate = contract.endDate;
-    LocalDate endContract = contract.endContract;
-    boolean onCertificate = contract.onCertificate;
-    boolean isTemporaryMissing = contract.isTemporaryMissing;
-    String perseoId = contract.perseoId;
-    LocalDate sourceDateRecoveryDay = contract.sourceDateRecoveryDay;
+    LocalDate beginDate = contract.getBeginDate();
+    LocalDate endDate = contract.getEndDate();
+    LocalDate endContract = contract.getEndContract();
+    boolean onCertificate = contract.isOnCertificate();
+    boolean isTemporaryMissing = contract.isTemporaryMissing();
+    boolean linkedToPreviousContract = contract.getPreviousContract() != null ? true : false;
+    String perseoId = contract.getPerseoId();
+    LocalDate sourceDateRecoveryDay = contract.getSourceDateRecoveryDay();
     render(person, contract, wrappedContract, beginDate, endDate, endContract,
-        onCertificate, isTemporaryMissing, perseoId, sourceDateRecoveryDay);
+        onCertificate, isTemporaryMissing, perseoId, sourceDateRecoveryDay, 
+        linkedToPreviousContract);
+  }
+
+  /**
+   * Renderizza la pagina in cui si può provvedere allo split di un contratto.
+   *
+   * @param contractId l'identificativo del contratto da splittare
+   */
+  public static void split(Long contractId) {
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
+
+    LocalDate dateToSplit = new LocalDate();
+
+    render(contract, dateToSplit);
+  }
+
+  /**
+   * Provvede alla divisione del contratto contract in due contratti distinti, uno che termina il 
+   * giorno precedente dateToSplit e l'altro che inizia a dateToSplit.
+   *
+   * @param contract il contratto da splittare
+   * @param dateToSplit la data a cui splittarlo
+   */
+  public static void splitContract(@Valid Contract contract, @Required LocalDate dateToSplit, 
+      boolean attestatiSync) {
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
+
+    if (!DateUtility.isDateIntoInterval(dateToSplit, 
+        new DateInterval(contract.getBeginDate(), contract.calculatedEnd()))) {
+      Validation.addError("dateToSplit", "La data deve appartenere al contratto!!!");
+    }
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      render("@split", contract, dateToSplit);
+    }
+
+    Optional<LocalDate> to = contract.getEndDate() != null 
+        ? Optional.fromNullable(contract.getEndDate()) : Optional.absent();
+
+    //1) si eliminano le assenze a partire da dateToSplit
+    List<Absence> copy = Lists.newArrayList();
+    List<Absence> list = contractService
+        .getAbsencesInContract(contract.getPerson(), dateToSplit, to);
+    log.debug("Lista assenze contiene {} elementi", list.size());
+    if (!attestatiSync) {
+      copy.addAll(list);
+    }
+    int count = 0;
+    for (Absence abs : list) {      
+      abs.delete();  
+      count++;
+    }
+
+    IWrapperContract wrappedContract = wrapperFactory.create(contract);
+    log.debug("Rimosse {} assenze per {}", count, contract.getPerson().getFullname());
+
+    //2) si splitta il contratto in due contratti nuovi
+    log.info("Inizio procedura di split del contratto {}", contract.toString());
+    final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
+    contract.setEndDate(dateToSplit.minusDays(1));
+    if (!contractManager.isContractNotOverlapping(contract)) {
+      Validation.addError("contract.crossValidationFailed",
+          "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
+      render("@split", contract, wrappedContract, dateToSplit);
+    }
+    DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
+    RecomputeRecap recomputeRecap = periodManager.buildTargetRecap(previousInterval, newInterval,
+        wrappedContract.initializationMissing());
+    if (recomputeRecap.recomputeFrom != null) {
+      contractManager.properContractUpdate(contract, recomputeRecap.recomputeFrom, false);
+    } else {
+      contractManager.properContractUpdate(contract, LocalDate.now(), false);
+    }
+    log.info("Termine procedura di split del contratto {}", contract.toString());
+
+    //3) creo il nuovo contratto a partire da dateToSplit
+    log.info("Creazione nuovo contratto");
+    IWrapperPerson wrappedPerson = wrapperFactory.create(contract.getPerson());
+    Optional<WorkingTimeType> wtt = wrappedPerson.getCurrentWorkingTimeType();
+
+    Contract newContract = contractService.createNewContract(wrappedPerson.getValue(),
+        dateToSplit, wtt, previousInterval);
+    contractManager.properContractCreate(newContract, wtt, true);
+    log.info("Fine creazione nuovo contratto: {}", newContract.toString());
+
+    //4) riassegno le assenze sul nuovo contratto...
+
+
+    if (count != 0) {
+      if (!attestatiSync) {
+        log.info("Si resettano le assenze salvate in precedenza.");
+        contractService.resetAbsences(list);
+        log.info("Procedura completata.");
+      } else {
+        log.info("Scaricamento e persistenza assenze da Attestati a partire da {}", dateToSplit);
+        contractService.saveAbsenceOnNewContract(wrappedPerson.getValue(), dateToSplit);
+        log.info("Terminata persistenza assenze.");
+      }
+
+    }
+
+    flash.success(Web.msgSaved(Contract.class));
+    personContracts(wrappedPerson.getValue().id);
+  }
+
+  /**
+   * Renderizza la pagina in cui si può fondere l'attuale contratto col precedente, se esiste.
+   *
+   * @param contractId l'identificativo del contratto da fondere
+   */
+  public static void merge(Long contractId) {
+    Contract contract = contractDao.getContractById(contractId);
+    notFoundIfNull(contract);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
+    Person person = contract.getPerson();
+
+    Contract previousContract = personDao.getPreviousPersonContract(contract);    
+
+    render(person, contract, previousContract);
+  }
+
+  /**
+   * Fonde insieme due contratti contigui.
+   *
+   * @param contract il contratto attuale
+   * @param previousContract il contratto precedente
+   */
+  public static void mergeContract(@Valid Contract contract, @Valid Contract previousContract, 
+      boolean attestatiSync) {
+    notFoundIfNull(contract);
+    notFoundIfNull(previousContract);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
+    Optional<LocalDate> to = contract.getEndDate() != null 
+        ? Optional.fromNullable(contract.getEndDate()) : Optional.absent();
+
+    //1) si eliminano le assenze a partire da contract.beginDate
+    List<Absence> copy = Lists.newArrayList();
+    List<Absence> list = contractService
+        .getAbsencesInContract(contract.getPerson(), contract.getBeginDate(), to);
+    if (!attestatiSync) {
+      copy.addAll(list);
+    }
+    log.debug("Lista assenze contiene {} elementi", list.size());
+
+    //1-bis) si salvano i tipi orario di lavoro
+    Set<ContractWorkingTimeType> cwtts = Sets.newHashSet(contract. getContractWorkingTimeType());
+
+    //2-bis) assegno i precedenti orari di lavoro al contratto che rimarrà
+    cwtts.stream().forEach(cwtt -> {
+      cwtt.setContract(previousContract);
+      cwtt.save();
+      previousContract.getContractWorkingTimeType().add(cwtt);
+      previousContract.save();
+      previousContract.refresh();
+    });
+
+    //2) cancello il contratto più recente
+    contract.delete();
+    contract.getPerson().getContracts().remove(contract);
+    log.debug("Cancellato contratto {}", contract.toString());
+
+
+    JPA.em().flush();
+    //3) prorogo la data fine di previousContract a contract.endDate
+    IWrapperContract wrappedContract = wrapperFactory.create(previousContract);
+    IWrapperPerson wrappedPerson = wrapperFactory.create(previousContract.getPerson());
+    final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
+
+    previousContract.setEndDate(to.isPresent() ? to.get() : null);
+    log.debug("Prorogo il precedente contratto {} alla data {}", 
+        previousContract, previousContract.getEndDate());
+    DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
+    RecomputeRecap recomputeRecap = periodManager.buildTargetRecap(previousInterval, newInterval,
+        wrappedContract.initializationMissing());
+    if (recomputeRecap.recomputeFrom != null) {
+      contractManager.properContractUpdate(previousContract, recomputeRecap.recomputeFrom, false);
+    } else {
+      contractManager.properContractUpdate(previousContract, LocalDate.now(), false);
+    }
+
+    int count = list.size();
+
+    //4) riassegno le assenze sul nuovo contratto...
+    if (count != 0) {
+      if (!attestatiSync) {
+        log.info("Si resettano le assenze salvate in precedenza.");
+        //contractService.resetAbsences(copy);
+        log.info("Procedura completata.");
+      } else {
+        log.info("Scaricamento e persistenza assenze da Attestati a partire da {}", 
+            contract.getBeginDate());
+        contractService.saveAbsenceOnNewContract(wrappedPerson.getValue(), contract.getBeginDate());
+        log.info("Terminata persistenza assenze.");
+
+      }
+    }
+
+    flash.success(Web.msgSaved(Contract.class));
+    personContracts(wrappedPerson.getValue().id);
+
   }
 
   /**
    * Aggiornamento date e on certificate contratto.
    *
    * @param contract      contract
-   * @param beginDate     inizio
-   * @param endDate       scadenza
-   * @param endContract   terminazione
-   * @param onCertificate in attestati
    * @param confirmed     step di conferma
    */
-  public static void update(@Valid Contract contract, @Required LocalDate beginDate,
-      @Valid LocalDate endDate, @Valid LocalDate endContract,
-      boolean onCertificate, boolean confirmed, Boolean isTemporaryMissing,
-      String perseoId, LocalDate sourceDateRecoveryDay) {
+  public static void update(@Valid Contract contract, 
+      boolean confirmed, Boolean isTemporaryMissing,
+      LocalDate sourceDateRecoveryDay, boolean linkedToPreviousContract) { 
 
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
-
-    if (!Validation.hasErrors()) {
-      if (contract.sourceDateResidual != null
-          && contract.sourceDateResidual.isBefore(beginDate)) {
-        Validation.addError("beginDate",
-            "non può essere successiva alla data di inizializzazione");
-      }
-      if (endDate != null && endDate.isBefore(beginDate)) {
-        Validation.addError("endDate", "non può precedere l'inizio del contratto.");
-      }
-      if (endContract != null && endContract.isBefore(beginDate)) {
-        Validation.addError("endContract", "non può precedere l'inizio del contratto.");
-      }
-      if (endDate != null && endContract != null && endContract.isAfter(endDate)) {
-        Validation.addError("endContract", "non può essere successivo alla scadenza del contratto");
-      }
-    }
-
+    
     if (Validation.hasErrors()) {
+      log.info("ValidationErrors = {}", validation.errorsMap());
       response.status = 400;
-      render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
-          onCertificate, perseoId, sourceDateRecoveryDay);
+      render("@edit", contract, wrappedContract, sourceDateRecoveryDay);
     }
 
     // Salvo la situazione precedente
     final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
 
     // Attribuisco il nuovo stato al contratto per effettuare il controllo incrociato
-    contract.beginDate = beginDate;
-    contract.endDate = endDate;
-    contract.endContract = endContract;
-    contract.onCertificate = onCertificate;
-    contract.perseoId = perseoId;
-    contract.sourceDateRecoveryDay = sourceDateRecoveryDay;
+    contract.setSourceDateRecoveryDay(sourceDateRecoveryDay);
     if (isTemporaryMissing != null) {
-      contract.isTemporaryMissing = isTemporaryMissing;  
+      contract.setTemporaryMissing(isTemporaryMissing);  
     }
-
-    if (!contractManager.isContractNotOverlapping(contract)) {
-      Validation.addError("contract.crossValidationFailed",
-          "Il contratto non può intersecarsi" + " con altri contratti del dipendente.");
-      render("@edit", contract, wrappedContract, beginDate, endDate, endContract,
-          onCertificate, perseoId, sourceDateRecoveryDay);
+    //Controllo se il contratto deve e può essere linkato al precedente...
+    if (linkedToPreviousContract && !contractManager.canAppyPreviousContractLink(contract)) {
+      Validation.addError("linkedToPreviousContract", 
+          "Non esiste alcun contratto precedente cui linkare il contratto attuale");
+      render("@edit", contract, wrappedContract,
+          sourceDateRecoveryDay, linkedToPreviousContract);
+    }
+    if (confirmed) {
+      contractManager.applyPreviousContractLink(contract, linkedToPreviousContract);
     }
 
     DateInterval newInterval = wrappedContract.getContractDatabaseInterval();
@@ -201,9 +407,38 @@ public class Contracts extends Controller {
     if (!confirmed) {
       confirmed = true;
       response.status = 400;
-      render("@edit", contract, wrappedContract, beginDate, endDate, endContract, confirmed,
-          onCertificate, isTemporaryMissing, recomputeRecap, perseoId, sourceDateRecoveryDay);
+      render("@edit", contract, wrappedContract, 
+          confirmed, isTemporaryMissing, recomputeRecap, sourceDateRecoveryDay, 
+          linkedToPreviousContract);
     } else {
+      // Controllo eventuali assenze future prima di chiudere il contratto.
+      List<HistoryValue<Contract>> list = historyDao.lastRevision(contract.id);
+      
+      HistoryValue<Contract> item = list.get(0);
+      if ((item.value.getEndDate() == null && contract.getEndDate() != null) 
+          || (item.value.getEndContract() == null && contract.getEndContract() != null)) {
+        PersonDay pd = personDayDao.getMoreFuturePersonDay(contract.getPerson());
+        if ((contract.getEndDate() != null && pd.getDate().isAfter(contract.getEndDate())) 
+            || (contract.getEndContract() != null 
+            && pd.getDate().isAfter(contract.getEndContract()))) {
+          //Cancellazione dei personday successivi alla fine del contratto
+          LocalDate from = null;
+          if (contract.getEndDate() != null && contract.getEndContract() == null) {
+            from = contract.getEndDate();
+          } 
+          if (contract.getEndContract() != null && contract.getEndDate() == null) {
+            from = contract.getEndContract();
+          }
+          if (contract.getEndContract() != null && contract.getEndDate() != null) {
+            from = contract.getEndContract();
+          }
+          List<Absence> absenceFutureList = absenceDao
+              .absenceInPeriod(contract.getPerson(), from, Optional.fromNullable(pd.getDate()));
+          for (Absence absence : absenceFutureList) {
+            absence.delete();
+          }
+        }
+      }
       if (recomputeRecap.recomputeFrom != null) {
         contractManager.properContractUpdate(contract, recomputeRecap.recomputeFrom, false);
       } else {
@@ -226,10 +461,10 @@ public class Contracts extends Controller {
 
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.office);
+    rules.checkIfPermitted(person.getOffice());
 
     Contract contract = new Contract();
-    contract.person = person;
+    contract.setPerson(person);
 
     render(contract);
   }
@@ -245,18 +480,12 @@ public class Contracts extends Controller {
     notFoundIfNull(contract);
     notFoundIfNull(wtt);
 
-    rules.checkIfPermitted(contract.person.office);
-
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     if (!Validation.hasErrors()) {
-
-      if (contract.endDate != null
-          && contract.endDate.isBefore(contract.beginDate)) {
-        Validation.addError("contract.endDate", "non può precedere l'inizio del contratto.");
-
-      } else if (!contractManager.properContractCreate(contract, Optional.of(wtt), true)) {
+      if (!contractManager.properContractCreate(contract, Optional.of(wtt), true)) {
         Validation.addError("contract.beginDate", "i contratti non possono sovrapporsi.");
-        if (contract.endDate != null) {
+        if (contract.getEndDate() != null) {
           Validation.addError("contract.endDate", "i contratti non possono sovrapporsi.");
         }
       }
@@ -269,7 +498,7 @@ public class Contracts extends Controller {
 
     flash.success(Web.msgCreated(Contract.class));
 
-    Contracts.personContracts(contract.person.id);
+    Contracts.personContracts(contract.getPerson().id);
   }
 
   /**
@@ -283,25 +512,25 @@ public class Contracts extends Controller {
 
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     if (!confirmed) {
       render("@delete", contract);
     }
-    List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(contract.person, 
-        contract.beginDate, Optional.fromNullable(contract.endDate));
+    List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(contract.getPerson(), 
+        contract.getBeginDate(), Optional.fromNullable(contract.getEndDate()));
 
-    long count = pdList.stream().filter(pd -> pd.absences.isEmpty()).count();
+    long count = pdList.stream().filter(pd -> pd.getAbsences().isEmpty()).count();
     if (pdList.size() == 0 || count == pdList.size()) {
       contract.delete();
       flash.success(Web.msgDeleted(Contract.class));
     } else {
       flash.error("Non è possibile cancellare il contratto di %s perchè sono già presenti giornate"
           + " ad esso collegate contenenti assenze! Rimuoverle prima di eliminare il contratto", 
-          contract.person.fullName());
+          contract.getPerson().fullName());
     }    
 
-    Persons.edit(contract.person.id);
+    Persons.edit(contract.getPerson().id);
   }
 
   /**
@@ -314,12 +543,12 @@ public class Contracts extends Controller {
     Contract contract = contractDao.getContractById(id);
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
 
     ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
-    cwtt.contract = contract;
+    cwtt.setContract(contract);
 
     render(wrappedContract, contract, cwtt);
   }
@@ -336,22 +565,22 @@ public class Contracts extends Controller {
     // Perchè si comprometteva il funzionamento dell drools. Issue #166
 
     notFoundIfNull(cwtt);
-    notFoundIfNull(cwtt.contract);
-    notFoundIfNull(cwtt.workingTimeType);
-    Verify.verify(cwtt.contract.isPersistent());
-    Verify.verify(cwtt.workingTimeType.isPersistent());
+    notFoundIfNull(cwtt.getContract());
+    notFoundIfNull(cwtt.getWorkingTimeType());
+    Verify.verify(cwtt.getContract().isPersistent());
+    Verify.verify(cwtt.getWorkingTimeType().isPersistent());
 
-    rules.checkIfPermitted(cwtt.contract.person.office);
+    rules.checkIfPermitted(cwtt.getContract().getPerson().getOffice());
 
-    IWrapperContract wrappedContract = wrapperFactory.create(cwtt.contract);
-    Contract contract = cwtt.contract;
+    IWrapperContract wrappedContract = wrapperFactory.create(cwtt.getContract());
+    Contract contract = cwtt.getContract();
 
     if (!Validation.hasErrors()) {
-      if (!DateUtility.isDateIntoInterval(cwtt.beginDate,
+      if (!DateUtility.isDateIntoInterval(cwtt.getBeginDate(),
           wrappedContract.getContractDateInterval())) {
         Validation.addError("cwtt.beginDate", "deve appartenere al contratto");
       }
-      if (cwtt.endDate != null && !DateUtility.isDateIntoInterval(cwtt.endDate,
+      if (cwtt.getEndDate() != null && !DateUtility.isDateIntoInterval(cwtt.getEndDate(),
           wrappedContract.getContractDateInterval())) {
         Validation.addError("cwtt.endDate", "deve appartenere al contratto");
       }
@@ -363,14 +592,14 @@ public class Contracts extends Controller {
       render("@updateContractWorkingTimeType", cwtt, contract);
     }
 
-    rules.checkIfPermitted(cwtt.workingTimeType.office);
+    rules.checkIfPermitted(cwtt.getWorkingTimeType().getOffice());
 
     //riepilogo delle modifiche
     List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(cwtt, false);
     RecomputeRecap recomputeRecap =
         periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
             Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
-            periodRecaps, Optional.fromNullable(contract.sourceDateResidual));
+            periodRecaps, Optional.fromNullable(contract.getSourceDateResidual()));
 
     recomputeRecap.initMissing = wrappedContract.initializationMissing();
 
@@ -381,7 +610,7 @@ public class Contracts extends Controller {
 
       periodManager.updatePeriods(cwtt, true);
       contract = contractDao.getContractById(contract.id);
-      contract.person.refresh();
+      contract.getPerson().refresh();
       if (recomputeRecap.needRecomputation) {
         contractManager.recomputeContract(contract,
             Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
@@ -391,6 +620,285 @@ public class Contracts extends Controller {
 
       updateContractWorkingTimeType(contract.id);
     }
+
+  }
+  
+  /**
+   * Crud gestione periodi di orario di lavoro personalizzato.
+   *
+   * @param id contratto
+   */
+  public static void updatePersonalWorkingTime(Long id, PersonalWorkingTime pwt) {
+
+    Contract contract = contractDao.getContractById(id);
+    notFoundIfNull(contract);
+
+    rules.checkIfPermitted(contract.getPerson().getOffice());
+
+    IWrapperContract wrappedContract = wrapperFactory.create(contract);
+
+    if (pwt == null) {
+      pwt = new PersonalWorkingTime();
+    }
+    pwt.setContract(contract);
+
+    render("@updatePersonalWorkingTime", wrappedContract, contract, pwt);
+  }
+  
+  /**
+   * Salva il nuovo periodo di orario di lavoro personalizzato.
+   *
+   * @param pwt l'orario di lavoro personalizzato
+   * @param confirmed conferma se true
+   */
+  public static void savePersonalWorkingTime(PersonalWorkingTime pwt, boolean confirmed) {
+    
+    notFoundIfNull(pwt);
+    notFoundIfNull(pwt.getContract());
+    notFoundIfNull(pwt.getTimeSlot());
+    Verify.verify(pwt.getContract().isPersistent());
+    Verify.verify(pwt.getTimeSlot().isPersistent());
+    
+    rules.checkIfPermitted(pwt.getContract().getPerson().getOffice());
+
+    IWrapperContract wrappedContract = wrapperFactory.create(pwt.getContract());
+    Contract contract = pwt.getContract();
+        
+    if (!Validation.hasErrors()) {
+      if (!DateUtility.isDateIntoInterval(pwt.getBeginDate(),
+          wrappedContract.getContractDateInterval())) {
+        Validation.addError("pwt.beginDate", "deve appartenere al contratto");
+      }
+      if (pwt.getEndDate() != null && !DateUtility.isDateIntoInterval(pwt.getEndDate(),
+          wrappedContract.getContractDateInterval())) {
+        Validation.addError("pwt.endDate", "deve appartenere al contratto");
+      }
+    }
+
+    if (Validation.hasErrors()) {
+      render("@updatePersonalWorkingTime", pwt, wrappedContract, contract);
+    }
+    
+    val currentPeriods = pwt.getOwner().periods(pwt.getType());
+    if (pwt.isPersistent()) {
+      currentPeriods.remove(pwt);
+    }
+    
+    if (periodManager.isOverlapped(pwt, currentPeriods)) {
+      flash.error("Il periodo %s si sovrappone con altre periodi esistenti, "
+          + "impossibile aggiungerlo", pwt.getLabel());
+      response.status = 400;
+      log.warn("Il periodo {} si sovrappone con altre periodi esistenti, impossibile aggiungerlo", 
+          pwt.getLabel());
+      render("@updatePersonalWorkingTime", pwt, wrappedContract, contract);      
+    }
+
+    val periodRecaps = Lists.newArrayList(currentPeriods);
+    pwt.setRecomputeFrom(pwt.getBeginDate());   
+    periodRecaps.add(pwt);
+
+    RecomputeRecap recomputeRecap =
+        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
+            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+            periodRecaps, Optional.fromNullable(contract.getSourceDateResidual()));
+
+    recomputeRecap.initMissing = wrappedContract.initializationMissing();
+
+    if (!confirmed) {
+      confirmed = true;
+      render("@updatePersonalWorkingTime", contract, pwt, confirmed, recomputeRecap);
+    } else {
+      
+      pwt.save();
+      contract = contractDao.getContractById(contract.id);
+      contract.getPerson().refresh();
+      if (recomputeRecap.needRecomputation) {
+        contractManager.recomputeContract(contract,
+            Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
+      }
+
+      flash.success(Web.msgSaved(PersonalWorkingTime.class));
+      updatePersonalWorkingTime(contract.id, null);
+    }
+  }
+
+  /**
+   * Cancella un orario di lavoro personalizzato.
+   *
+   * @param id identificativo dell'orario da cancellare
+   * @param confirmed conferma se true
+   */
+  public static void deletePersonalWorkingTime(Long id, boolean confirmed) {
+    
+    PersonalWorkingTime pwt = PersonalWorkingTime.findById(id);
+
+    notFoundIfNull(pwt);
+
+    rules.checkIfPermitted(pwt.getContract().getPerson().getOffice());
+
+    boolean deletion = true;
+    val contract = pwt.getContract();
+    if (!confirmed) {
+      IWrapperContract wrappedContract = wrapperFactory.create(pwt.getContract());
+      val currentPeriods = pwt.getOwner().periods(pwt.getType());
+      val periodRecaps = Lists.newArrayList(currentPeriods);
+
+      periodRecaps.remove(pwt);
+      RecomputeRecap recomputeRecap =
+          periodManager.buildRecap(pwt.getBeginDate(),
+              Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+              periodRecaps, Optional.fromNullable(contract.getSourceDateResidual()));
+      recomputeRecap.recomputeFrom = pwt.getBeginDate();
+      periodManager.setDays(recomputeRecap);
+      confirmed = true;
+      render("@updatePersonalWorkingTime", pwt, contract, deletion, recomputeRecap);
+    } else {
+      pwt.delete();
+      flash.success(Web.msgDeleted(PersonalWorkingTime.class));
+    }
+    updatePersonalWorkingTime(pwt.getContract().id, null);
+  }
+  
+  
+  /**
+   * Crud gestione periodi fascia oraria obbligatoria.
+   *
+   * @param id contratto
+   */
+  public static void updateContractMandatoryTimeSlot(Long id, ContractMandatoryTimeSlot cmts) {
+
+    Contract contract = contractDao.getContractById(id);
+    notFoundIfNull(contract);
+
+    rules.checkIfPermitted(contract.getPerson().getOffice());
+
+    IWrapperContract wrappedContract = wrapperFactory.create(contract);
+
+    if (cmts == null) {
+      cmts = new ContractMandatoryTimeSlot();
+    }
+    cmts.setContract(contract);
+    render("@updateContractMandatoryTimeSlot", wrappedContract, contract, cmts);
+  }
+
+  /**
+   * Salva il nuovo periodo di fascia di orario obbligatorio.
+   *
+   * @param cmts nuovo periodo di fascia oraria obbligatoria.
+   * @param confirmed se conferma ricevuta.
+   */
+  public static void saveContractMandatoryTimeSlot(
+      ContractMandatoryTimeSlot cmts, boolean confirmed) {
+
+    // IMPORTANTE!!! Rimosso @Valid da cmts ed effettuata la validazione mancante a mano.
+    // Perchè si comprometteva il funzionamento dell drools. Issue #166
+
+    notFoundIfNull(cmts);
+    notFoundIfNull(cmts.getContract());
+    notFoundIfNull(cmts.getTimeSlot());
+    Verify.verify(cmts.getContract().isPersistent());
+    Verify.verify(cmts.getTimeSlot().isPersistent());
+
+    rules.checkIfPermitted(cmts.getContract().getPerson().getOffice());
+
+    IWrapperContract wrappedContract = wrapperFactory.create(cmts.getContract());
+    Contract contract = cmts.getContract();
+
+    if (!Validation.hasErrors()) {
+      if (!DateUtility.isDateIntoInterval(cmts.getBeginDate(),
+          wrappedContract.getContractDateInterval())) {
+        Validation.addError("cmts.beginDate", "deve appartenere al contratto");
+      }
+      if (cmts.getEndDate() != null && !DateUtility.isDateIntoInterval(cmts.getEndDate(),
+          wrappedContract.getContractDateInterval())) {
+        Validation.addError("cmts.endDate", "deve appartenere al contratto");
+      }
+    }
+
+    if (Validation.hasErrors()) {
+      render("@updateContractMandatoryTimeSlot", cmts, contract);
+    }
+
+    rules.checkIfPermitted(cmts.getTimeSlot().getOffice());
+
+    val currentPeriods = cmts.getOwner().periods(cmts.getType());
+    if (cmts.isPersistent()) {
+      currentPeriods.remove(cmts);
+    }
+
+    if (periodManager.isOverlapped(cmts, currentPeriods)) {
+      flash.error("Il periodo %s si sovrappone con altre periodi esistenti, "
+          + "impossibile aggiungerlo", cmts.getLabel());
+      response.status = 400;
+      log.warn("Il periodo {} si sovrappone con altre periodi esistenti, impossibile aggiungerlo", 
+          cmts.getLabel());
+      render("@updateContractMandatoryTimeSlot", cmts, contract);      
+    }
+
+    val periodRecaps = Lists.newArrayList(currentPeriods);
+    cmts.setRecomputeFrom(cmts.getBeginDate());   
+    periodRecaps.add(cmts);
+
+    RecomputeRecap recomputeRecap =
+        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
+            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+            periodRecaps, Optional.fromNullable(contract.getSourceDateResidual()));
+
+    recomputeRecap.initMissing = wrappedContract.initializationMissing();
+
+    if (!confirmed) {
+      confirmed = true;
+      render("@updateContractMandatoryTimeSlot", contract, cmts, confirmed, recomputeRecap);
+    } else {
+      cmts.save();
+      contract = contractDao.getContractById(contract.id);
+      contract.getPerson().refresh();
+      if (recomputeRecap.needRecomputation) {
+        contractManager.recomputeContract(contract,
+            Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
+      }
+
+      flash.success(Web.msgSaved(ContractMandatoryTimeSlot.class));
+      updateContractMandatoryTimeSlot(contract.id, null);
+    }
+
+  }
+
+  /**
+   * Cancella una fascia oraria di presenza obbligatoria.
+   *
+   * @param id id della fascia oraria da cancellare
+   * @param confirmed se è confirmed lo cancella altrimenti mostra una pagina di
+   *     riepilogo e conferma.
+   */
+  public void deleteContractMandatoryTimeSlot(Long id, boolean confirmed) {
+    ContractMandatoryTimeSlot cmts = ContractMandatoryTimeSlot.findById(id);
+
+    notFoundIfNull(cmts);
+
+    rules.checkIfPermitted(cmts.getContract().getPerson().getOffice());
+
+    boolean deletion = true;
+    val contract = cmts.getContract();
+    if (!confirmed) {
+      IWrapperContract wrappedContract = wrapperFactory.create(cmts.getContract());
+      val currentPeriods = cmts.getOwner().periods(cmts.getType());
+      val periodRecaps = Lists.newArrayList(currentPeriods);
+
+      periodRecaps.remove(cmts);
+      RecomputeRecap recomputeRecap =
+          periodManager.buildRecap(cmts.getBeginDate(),
+              Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+              periodRecaps, Optional.fromNullable(contract.getSourceDateResidual()));
+      recomputeRecap.recomputeFrom = cmts.getBeginDate();
+      periodManager.setDays(recomputeRecap);
+      confirmed = true;
+      render("@updateContractMandatoryTimeSlot", cmts, contract, deletion, recomputeRecap);
+    } else {
+      cmts.delete();
+      flash.success(Web.msgDeleted(ContractMandatoryTimeSlot.class));
+    }
+    updateContractMandatoryTimeSlot(cmts.getContract().id, null);
 
   }
 
@@ -404,12 +912,12 @@ public class Contracts extends Controller {
     Contract contract = contractDao.getContractById(id);
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
 
     VacationPeriod vp = new VacationPeriod();
-    vp.contract = contract;
+    vp.setContract(contract);
 
     render(wrappedContract, contract, vp);
   }
@@ -423,19 +931,19 @@ public class Contracts extends Controller {
   public static void saveContractVacationPeriod(@Valid VacationPeriod vp, boolean confirmed) {
 
     notFoundIfNull(vp);
-    notFoundIfNull(vp.contract);
+    notFoundIfNull(vp.getContract());
 
-    rules.checkIfPermitted(vp.contract.person.office);
+    rules.checkIfPermitted(vp.getContract().getPerson().getOffice());
 
-    IWrapperContract wrappedContract = wrapperFactory.create(vp.contract);
-    Contract contract = vp.contract;
+    IWrapperContract wrappedContract = wrapperFactory.create(vp.getContract());
+    Contract contract = vp.getContract();
 
     if (!Validation.hasErrors()) {
-      if (!DateUtility.isDateIntoInterval(vp.beginDate,
+      if (!DateUtility.isDateIntoInterval(vp.getBeginDate(),
           wrappedContract.getContractDateInterval())) {
         Validation.addError("vp.beginDate", "deve appartenere al contratto");
       }
-      if (vp.endDate != null && !DateUtility.isDateIntoInterval(vp.endDate,
+      if (vp.getEndDate() != null && !DateUtility.isDateIntoInterval(vp.getEndDate(),
           wrappedContract.getContractDateInterval())) {
         Validation.addError("vp.endDate", "deve appartenere al contratto");
       }
@@ -452,7 +960,7 @@ public class Contracts extends Controller {
     RecomputeRecap recomputeRecap =
         periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
             Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
-            periodRecaps, Optional.fromNullable(contract.sourceDateResidual));
+            periodRecaps, Optional.fromNullable(contract.getSourceDateResidual()));
 
     recomputeRecap.initMissing = wrappedContract.initializationMissing();
 
@@ -463,7 +971,7 @@ public class Contracts extends Controller {
 
       periodManager.updatePeriods(vp, true);
       contract = contractDao.getContractById(contract.id);
-      contract.person.refresh();
+      contract.getPerson().refresh();
       if (recomputeRecap.needRecomputation) {
         contractManager.recomputeContract(contract,
             Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
@@ -486,12 +994,12 @@ public class Contracts extends Controller {
     Contract contract = contractDao.getContractById(id);
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
 
     ContractStampProfile csp = new ContractStampProfile();
-    csp.contract = contract;
+    csp.setContract(contract);
 
     render(wrappedContract, contract, csp);
   }
@@ -505,19 +1013,19 @@ public class Contracts extends Controller {
   public static void saveContractStampProfile(@Valid ContractStampProfile csp, boolean confirmed) {
 
     notFoundIfNull(csp);
-    notFoundIfNull(csp.contract);
+    notFoundIfNull(csp.getContract());
 
-    rules.checkIfPermitted(csp.contract.person.office);
+    rules.checkIfPermitted(csp.getContract().getPerson().getOffice());
 
-    IWrapperContract wrappedContract = wrapperFactory.create(csp.contract);
-    Contract contract = csp.contract;
+    IWrapperContract wrappedContract = wrapperFactory.create(csp.getContract());
+    Contract contract = csp.getContract();
 
     if (!Validation.hasErrors()) {
-      if (!DateUtility.isDateIntoInterval(csp.beginDate,
+      if (!DateUtility.isDateIntoInterval(csp.getBeginDate(),
           wrappedContract.getContractDateInterval())) {
         Validation.addError("csp.beginDate", "deve appartenere al contratto");
       }
-      if (csp.endDate != null && !DateUtility.isDateIntoInterval(csp.endDate,
+      if (csp.getEndDate() != null && !DateUtility.isDateIntoInterval(csp.getEndDate(),
           wrappedContract.getContractDateInterval())) {
         Validation.addError("csp.endDate", "deve appartenere al contratto");
       }
@@ -534,7 +1042,7 @@ public class Contracts extends Controller {
     RecomputeRecap recomputeRecap =
         periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
             Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
-            periodRecaps, Optional.fromNullable(contract.sourceDateResidual));
+            periodRecaps, Optional.fromNullable(contract.getSourceDateResidual()));
 
     recomputeRecap.initMissing = wrappedContract.initializationMissing();
 
@@ -545,7 +1053,7 @@ public class Contracts extends Controller {
 
       periodManager.updatePeriods(csp, true);
       contract = contractDao.getContractById(contract.id);
-      contract.person.refresh();
+      contract.getPerson().refresh();
       if (recomputeRecap.needRecomputation) {
         contractManager.recomputeContract(contract,
             Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
@@ -565,34 +1073,34 @@ public class Contracts extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
-    if (contract.sourceDateResidual == null) {
+    if (contract.getSourceDateResidual() == null) {
       contractManager.cleanResidualInitialization(contract);
     }
 
-    IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
-    IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
-    
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getOffice());
+    IWrapperPerson wrPerson = wrapperFactory.create(contract.getPerson());
+
     Integer hoursCurrentYear = 0;
     Integer minutesCurrentYear = 0;
-    if (contract.sourceRemainingMinutesCurrentYear != null) {
-      hoursCurrentYear = contract.sourceRemainingMinutesCurrentYear / 60;
-      minutesCurrentYear = contract.sourceRemainingMinutesCurrentYear % 60;
+    if (contract.getSourceRemainingMinutesCurrentYear() != null) {
+      hoursCurrentYear = contract.getSourceRemainingMinutesCurrentYear() / 60;
+      minutesCurrentYear = contract.getSourceRemainingMinutesCurrentYear() % 60;
     }
     Integer hoursLastYear = 0;
     Integer minutesLastYear = 0;
-    if (contract.sourceRemainingMinutesLastYear != null) {
-      hoursLastYear = contract.sourceRemainingMinutesLastYear / 60;
-      minutesLastYear = contract.sourceRemainingMinutesLastYear % 60;
+    if (contract.getSourceRemainingMinutesLastYear() != null) {
+      hoursLastYear = contract.getSourceRemainingMinutesLastYear() / 60;
+      minutesLastYear = contract.getSourceRemainingMinutesLastYear() % 60;
     }
 
     IWrapperContract wrContract = wrapperFactory.create(contract);    
-    
+
     render(contract, wrContract, wrOffice, wrPerson, hoursCurrentYear, minutesCurrentYear,
         hoursLastYear, minutesLastYear);
   }
-  
+
   /**
    * Pagina aggiornamento dati iniziali ferie e permessi del contratto.
    */
@@ -600,25 +1108,24 @@ public class Contracts extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     IWrapperContract wrContract = wrapperFactory.create(contract);
-    if (contract.sourceDateResidual == null) {
+    if (contract.getSourceDateVacation() == null) {
       contractManager.cleanVacationInitialization(contract);
     }
-    
-    Integer sourceVacationLastYearUsed = contract.sourceVacationLastYearUsed;
-    Integer sourceVacationCurrentYearUsed = contract.sourceVacationCurrentYearUsed;
-    Integer sourcePermissionUsed = contract.sourcePermissionUsed;
 
-    IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
-    IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
+    Integer sourceVacationLastYearUsed = contract.getSourceVacationCurrentYearUsed();
+    Integer sourceVacationCurrentYearUsed = contract.getSourceVacationCurrentYearUsed();
+    Integer sourcePermissionUsed = contract.getSourcePermissionUsed();
 
-    
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getOffice());
+    IWrapperPerson wrPerson = wrapperFactory.create(contract.getPerson());
+
     render(contract, wrContract, wrOffice, wrPerson, 
         sourceVacationLastYearUsed, sourceVacationCurrentYearUsed, sourcePermissionUsed);
   }
-  
+
   /**
    * Pagina aggiornamento buoni pasto iniziali del contratto.
    */
@@ -626,15 +1133,15 @@ public class Contracts extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     IWrapperContract wrContract = wrapperFactory.create(contract);
-    if (contract.sourceDateMealTicket == null) {
+    if (contract.getSourceDateMealTicket() == null) {
       contractManager.cleanMealTicketInitialization(contract);
     }
 
-    IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
-    IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getOffice());
+    IWrapperPerson wrPerson = wrapperFactory.create(contract.getPerson());
 
     render(contract, wrContract, wrOffice, wrPerson);
   }
@@ -656,25 +1163,24 @@ public class Contracts extends Controller {
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     IWrapperContract wrContract = wrapperFactory.create(contract);
-    IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
-    IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getOffice());
+    IWrapperPerson wrPerson = wrapperFactory.create(contract.getPerson());
 
     if (sourceDateResidual != null) {
       validation.future(sourceDateResidual.toDate(),
           wrContract.dateForInitialization().minusDays(1).toDate())
-          .key("sourceDateResidual").message("validation.after");
+      .key("sourceDateResidual").message("validation.after");
 
       validation.past(sourceDateResidual.toDate(),
           wrContract.getContractDateInterval().getEnd().toDate())
-          .key("sourceDateResidual").message("validation.before");
+      .key("sourceDateResidual").message("validation.before");
     }
 
     if (Validation.hasErrors()) {
       response.status = 400;
-      log.warn("validation errors: {}", validation.errorsMap());
       render("@updateSourceContract", contract, wrContract, wrPerson, wrOffice, 
           hoursLastYear, minutesLastYear, hoursCurrentYear, minutesCurrentYear,
           sourceDateResidual);
@@ -685,14 +1191,15 @@ public class Contracts extends Controller {
     if (recomputeTo.isAfter(LocalDate.now())) {
       recomputeTo = LocalDate.now();
     }
-    
+
     //simulazione eliminazione inizializzazione.
     if (sourceDateResidual == null && !confirmedResidual) {
       contractManager.cleanResidualInitialization(contract);
-      boolean removeMandatory = contract.beginDate.isBefore(wrContract.dateForInitialization());
+      boolean removeMandatory = 
+          contract.getBeginDate().isBefore(wrContract.dateForInitialization());
       boolean removeUnnecessary = !removeMandatory;
       if (removeUnnecessary) {
-        recomputeFrom = contract.beginDate;
+        recomputeFrom = contract.getBeginDate();
       }
       confirmedResidual = true;
       int days = 0;
@@ -712,7 +1219,7 @@ public class Contracts extends Controller {
       int days = DateUtility.daysInInterval(new DateInterval(recomputeFrom, recomputeTo));
       boolean sourceNew = false;
       boolean sourceUpdate = false;
-      if (contract.sourceDateResidual == null) {
+      if (contract.getSourceDateResidual() == null) {
         sourceNew = true;
       } else {
         sourceUpdate = true;
@@ -725,18 +1232,19 @@ public class Contracts extends Controller {
 
     //esecuzione
     if (confirmedResidual) {
-      contract.sourceDateResidual = sourceDateResidual;
-      contract.sourceRemainingMinutesCurrentYear = hoursCurrentYear * 60 + minutesCurrentYear;
-      contract.sourceRemainingMinutesLastYear = hoursLastYear * 60 + minutesLastYear;;
+      contract.setSourceDateResidual(sourceDateResidual);
+      contract.setSourceRemainingMinutesCurrentYear(hoursCurrentYear * 60 + minutesCurrentYear);
+      contract.setSourceRemainingMinutesLastYear(hoursLastYear * 60 + minutesLastYear);
       contractManager.setSourceContractProperly(contract);
       contractManager.properContractUpdate(contract, recomputeFrom, false);
 
-      flash.success("Contratto di %s inizializzato correttamente.", contract.person.fullName());
+      flash.success(
+          "Contratto di %s inizializzato correttamente.", contract.getPerson().fullName());
     }
-    initializationsStatus(contract.person.office.id);
+    initializationsStatus(contract.getPerson().getOffice().id);
 
   }
-  
+
   /**
    * Salva l'inizializzazione ore.
    */
@@ -748,25 +1256,24 @@ public class Contracts extends Controller {
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     IWrapperContract wrContract = wrapperFactory.create(contract);
-    IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
-    IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getOffice());
+    IWrapperPerson wrPerson = wrapperFactory.create(contract.getPerson());
 
     if (sourceDateVacation != null) {
       validation.future(sourceDateVacation.toDate(),
           wrContract.dateForInitialization().minusDays(1).toDate())
-          .key("sourceDateVacation").message("validation.after");
+      .key("sourceDateVacation").message("validation.after");
 
       validation.past(sourceDateVacation.toDate(),
           wrContract.getContractDateInterval().getEnd().toDate())
-          .key("sourceDateVacation").message("validation.before");
+      .key("sourceDateVacation").message("validation.before");
     }
 
     if (Validation.hasErrors()) {
       response.status = 400;
-      log.warn("validation errors: {}", validation.errorsMap());
       render("@updateSourceContractVacation", contract, wrContract, wrPerson, wrOffice, 
           sourceVacationLastYearUsed, sourceVacationCurrentYearUsed, sourcePermissionUsed, 
           sourceDateVacation);
@@ -787,7 +1294,7 @@ public class Contracts extends Controller {
 
       confirmedVacation = true;
       boolean sourceUpdate = false;
-      if (contract.sourceDateVacation != null) {
+      if (contract.getSourceDateVacation() != null) {
         sourceUpdate = true;
       }
       render("@updateSourceContractVacation", contract, wrContract, wrPerson, wrOffice, 
@@ -798,18 +1305,19 @@ public class Contracts extends Controller {
 
     //esecuzione
     if (confirmedVacation) {
-      contract.sourceDateVacation = sourceDateVacation;
-      contract.sourceVacationLastYearUsed = sourceVacationLastYearUsed;
-      contract.sourceVacationCurrentYearUsed = sourceVacationCurrentYearUsed;
-      contract.sourcePermissionUsed = sourcePermissionUsed;
-      
+      contract.setSourceDateVacation(sourceDateVacation);
+      contract.setSourceVacationLastYearUsed(sourceVacationLastYearUsed);
+      contract.setSourceVacationCurrentYearUsed(sourceVacationCurrentYearUsed);
+      contract.setSourcePermissionUsed(sourcePermissionUsed);
+
       contractManager.setSourceContractProperly(contract);
-      
+
       absenceService.emptyVacationCache(contract);
 
-      flash.success("Contratto di %s inizializzato correttamente.", contract.person.fullName());
+      flash.success(
+          "Contratto di %s inizializzato correttamente.", contract.getPerson().fullName());
     }
-    initializationsVacation(contract.person.office.id);
+    initializationsVacation(contract.getPerson().getOffice().id);
 
   }
 
@@ -826,20 +1334,22 @@ public class Contracts extends Controller {
 
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.person.office);
+    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     IWrapperContract wrContract = wrapperFactory.create(contract);
-    IWrapperOffice wrOffice = wrapperFactory.create(contract.person.office);
-    IWrapperPerson wrPerson = wrapperFactory.create(contract.person);
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getOffice());
+    IWrapperPerson wrPerson = wrapperFactory.create(contract.getPerson());
 
     // TODO: per adesso per definire il residuo dei buoni devo avere l'inizializazione generale
     // quando richiesta.
     Preconditions.checkState(!wrContract.initializationMissing());
 
+    log.debug("saveMealTicketSourceContract, contratto inizializzato {}", 
+        wrContract.initializationMissing());
     if (sourceDateMealTicket != null) {
       validation.future(sourceDateMealTicket.toDate(), 
           wrContract.dateForMealInitialization().minusDays(1).toDate())
-          .key("sourceDateMealTicket").message("validation.after");
+      .key("sourceDateMealTicket").message("validation.after");
     }
 
     if (Validation.hasErrors()) {
@@ -851,10 +1361,10 @@ public class Contracts extends Controller {
     LocalDate recomputeFrom = sourceDateMealTicket;
     if (recomputeFrom == null) {
       //generale
-      if (contract.sourceDateResidual != null) {
-        recomputeFrom = contract.sourceDateResidual;
+      if (contract.getSourceDateResidual() != null) {
+        recomputeFrom = contract.getSourceDateResidual();
       } else {
-        recomputeFrom = contract.beginDate;
+        recomputeFrom = contract.getBeginDate();
       }
     }
     LocalDate recomputeTo = wrContract.getContractDateInterval().getEnd();
@@ -866,7 +1376,7 @@ public class Contracts extends Controller {
       int months = DateUtility.monthsInInterval(new DateInterval(recomputeFrom, recomputeTo));
       boolean sourceNew = false;
       boolean sourceUpdate = false;
-      if (contract.sourceDateResidual == null) {
+      if (contract.getSourceDateResidual() == null) {
         sourceNew = true;
       } else {
         sourceUpdate = true;
@@ -879,82 +1389,83 @@ public class Contracts extends Controller {
     }
 
     // Conferma ricevuta
-    contract.sourceDateMealTicket = sourceDateMealTicket;
+    contract.setSourceDateMealTicket(sourceDateMealTicket);
     contractManager.setSourceContractProperly(contract);
     contractManager.properContractUpdate(contract, recomputeFrom, true);
 
-    flash.success("Buoni pasto di %s inizializzati correttamente.", contract.person.fullName());
+    flash.success(
+        "Buoni pasto di %s inizializzati correttamente.", contract.getPerson().fullName());
 
-    initializationsMeal(contract.person.office.id);
+    initializationsMeal(contract.getPerson().getOffice().id);
   }
-  
+
   /**
    * Gestore delle inizializzazioni ore della sede.
    */
   public static void initializationsStatus(Long officeId) {
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    
+
     rules.checkIfPermitted(office);
 
     List<IWrapperContract> initializationsMissing = Lists.newArrayList();
     List<IWrapperContract> correctInitialized = Lists.newArrayList();
     List<IWrapperContract> correctNotInitialized = Lists.newArrayList();
-    
+
     //Tutti i dipendenti sotto forma di wrapperPerson
     for (IWrapperPerson wrPerson : FluentIterable.from(personDao.listFetched(Optional.absent(),
         ImmutableSet.of(office), false, null, null, false).list())
         .transform(wrapperFunctionFactory.person()).toList()) {
-      
+
       if (!wrPerson.getCurrentContract().isPresent()) {
         continue;
       }
-      
+
       if (wrPerson.currentContractInitializationMissing()) {
         initializationsMissing.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
       } else {
-        if (wrPerson.getCurrentContract().get().sourceDateResidual != null) {
+        if (wrPerson.getCurrentContract().get().getSourceDateResidual() != null) {
           correctInitialized.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
         } else {
           correctNotInitialized.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
         }
       }
-      
+
     }
-    
+
     render(initializationsMissing, correctInitialized, correctNotInitialized, office);
   }
-  
+
   /**
    * Gestore delle inizializzazioni ferie della sede.
    */
   public static void initializationsVacation(Long officeId) {
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    
+
     rules.checkIfPermitted(office);
 
     List<IWrapperContract> correctInitialized = Lists.newArrayList();
     List<IWrapperContract> correctNotInitialized = Lists.newArrayList();
-    
+
     //Tutti i dipendenti sotto forma di wrapperPerson
     for (IWrapperPerson wrPerson : FluentIterable.from(personDao.listFetched(Optional.absent(),
         ImmutableSet.of(office), false, null, null, false).list())
         .transform(wrapperFunctionFactory.person()).toList()) {
-      
+
       if (!wrPerson.getCurrentContract().isPresent()) {
         continue;
       }
-      
-      if (wrPerson.getCurrentContract().get().sourceDateVacation != null) {
+
+      if (wrPerson.getCurrentContract().get().getSourceDateVacation() != null) {
         correctInitialized.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
       } else {
         correctNotInitialized.add(wrapperFactory.create(wrPerson.getCurrentContract().get()));
       }
     }
-    
+
     render(correctInitialized, correctNotInitialized, office);
   }
 
@@ -965,7 +1476,7 @@ public class Contracts extends Controller {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    
+
     rules.checkIfPermitted(office);
 
     List<IWrapperContract> initializationsBeforeGeneral = Lists.newArrayList();
@@ -987,7 +1498,7 @@ public class Contracts extends Controller {
         IWrapperContract wrContract = wrapperFactory.create(wrPerson.getCurrentContract().get());
         if (wrContract.mealTicketInitBeforeGeneralInit()) {
           initializationsBeforeGeneral.add(wrContract);
-        } else if (wrContract.getValue().sourceDateMealTicket != null) {
+        } else if (wrContract.getValue().getSourceDateMealTicket() != null) {
           correctInitialized.add(wrContract);
         } else {
           correctNotInitialized.add(wrContract);
@@ -998,6 +1509,18 @@ public class Contracts extends Controller {
 
     render(initializationsBeforeGeneral, correctInitialized, correctNotInitialized, office);
 
+  }
+
+  /**
+   * Metodo di utilità/debug per verificare il contratto precedente
+   * di un contratto.
+   */
+  public void previousContract(Long id) {
+    val contract = contractDao.byId(id);
+    notFoundIfNull(contract);
+    renderText(
+        String.format("Current contract = %s\npreviousContract = %s",
+            contract, contractDao.getPreviousContract(contract)));
   }
 
 }

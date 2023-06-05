@@ -20,6 +20,13 @@
        #{/list}
       #{/alert}
      #{/if}
+     #{if insertReport.howManySuccess() == 0}
+     	#{alert color:'danger'}
+       <p><strong>Elenco degli errori riscontrati</strong></p>
+       <br>Si sta inserendo un'assenza in un giorno che già contiene un'assenza a giustificazione giornaliera
+       oppure non ci sono sufficienti ore a disposizione per fruire di un riposo compensativo
+      #{/alert}
+     #{/if}
    
      <table class="table table-condensed table-bordered" #{if insertReport.insertTemplateRows.size() > 10} #{/if}>
       <thead>
@@ -136,4 +143,4 @@
        </p>
       
    
-   #{/if} 
+#{/if} 

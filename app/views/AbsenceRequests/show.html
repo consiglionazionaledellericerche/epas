@@ -25,11 +25,19 @@
  
  	#{f.view 'absenceRequest.startAt', value:absenceRequest.startAt?.format("dd/MM/yyyy") /}<br>
 	#{f.view 'absenceRequest.endTo', value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
+	#{if absenceRequest.note != null}
+	<div class="col-sm-11"><strong>#{f.view 'absenceRequest.note', value:absenceRequest.note /}</strong></div>
+	#{/if}
+
 </div>	
 <table class="table table-striped">
 <tr>
 	<th>Autore</th>
 	<th>Data e ora sottomissione</th>
+	#{if absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.PERSONAL_PERMISSION)}
+	<th>Tempo richiesto</th>
+	#{/if}
+
 	<th>Tipo evento</th>
 	<th>Descrizione</th>
 	
@@ -45,6 +53,14 @@
 	>
 	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
 	<td>#{f.value 'item.createdAt', value:item.createdAt /}</td>
+	#{if absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.PERSONAL_PERMISSION)}
+	#{if absenceRequest.hours != null && absenceRequest.minutes != null}
+		<td>${absenceRequest.hours} ore e ${absenceRequest.minutes} minuti</td>
+	#{/if}
+	#{else}
+		<td>Tutto il giorno</td>
+	#{/else}
+	#{/if}
 	<td>#{f.value 'item.eventType', value:item.eventType /}</td>
 	<td>#{f.value 'item.description', value:item.description /}</td>
 </tr>

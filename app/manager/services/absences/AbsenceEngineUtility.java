@@ -1,9 +1,25 @@
+/*
+ * Copyright (C) 2022  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
@@ -32,17 +48,13 @@ import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 import org.testng.collections.Lists;
 
+/**
+ * Funzioni di utilità per i calcoli sulle assenze.
+ */
 public class AbsenceEngineUtility {
   
   private final Integer unitReplacingAmount = 1 * 100;
 
-  /**
-   * Constructor for injection.
-   */
-  @Inject
-  public AbsenceEngineUtility() {
-  }
- 
   /**
    * Le operazioni univocamente identificabili dal justifiedType. Devo riuscire a derivare
    * l'assenza da inserire attraverso il justifiedType.
@@ -56,14 +68,14 @@ public class AbsenceEngineUtility {
    *               un solo codice specifiedMinutes  <br>
    *               -> metto specifiedMinutes tra le opzioni <br>
    *  TODO: decidere come gestire il quanto manca               
-   *                
+   *
    * @param groupAbsenceType gruppo
    * @return entity list
    */
   public List<JustifiedTypeName> automaticJustifiedType(GroupAbsenceType groupAbsenceType) {
     
     // TODO: gruppo ferie, riposi compensativi
-    if (groupAbsenceType.pattern.equals(GroupAbsenceTypePattern.vacationsCnr)) {
+    if (groupAbsenceType.getPattern().equals(GroupAbsenceTypePattern.vacationsCnr)) {
       return Lists.newArrayList(JustifiedTypeName.all_day);
     }
     
@@ -82,12 +94,13 @@ public class AbsenceEngineUtility {
     Integer specifiedMinutesFound = 0;
     Integer completeDayAddOvertimeFound = 0;
 
-    if (groupAbsenceType.takableAbsenceBehaviour == null) {
+    if (groupAbsenceType.getTakableAbsenceBehaviour() == null) {
       return justifiedTypes;
     }
     
-    for (AbsenceType absenceType : groupAbsenceType.takableAbsenceBehaviour.takableCodes) {
-      for (JustifiedType justifiedType : absenceType.justifiedTypesPermitted) { 
+    for (AbsenceType absenceType : groupAbsenceType.getTakableAbsenceBehaviour()
+        .getTakableCodes()) {
+      for (JustifiedType justifiedType : absenceType.getJustifiedTypesPermitted()) { 
         if (justifiedType.getName().equals(JustifiedTypeName.all_day)) {
           allDayFound++;
           allDayVar = justifiedType.getName();
@@ -128,6 +141,7 @@ public class AbsenceEngineUtility {
   /**
    * Quanto giustifica l'assenza passata.
    * Se non si riesce a stabilire il tempo giustificato si ritorna un numero negativo.
+   *
    * @param person persona
    * @param absence assenza
    * @param amountType tipo di ammontare
@@ -141,6 +155,7 @@ public class AbsenceEngineUtility {
       amount = 0;
     } else if (absence.getJustifiedType().getName().equals(JustifiedTypeName.all_day) 
         || absence.getJustifiedType().getName().equals(JustifiedTypeName.all_day_limit)
+        || absence.getJustifiedType().getName().equals(JustifiedTypeName.assign_all_day)
         || absence.getJustifiedType().getName()
           .equals(JustifiedTypeName.complete_day_and_add_overtime)) {
       amount = absenceWorkingTime(person, absence);
@@ -159,7 +174,7 @@ public class AbsenceEngineUtility {
     } else if (absence.getJustifiedType().getName()
         .equals(JustifiedTypeName.absence_type_minutes)) {
       amount = absence.getAbsenceType().getJustifiedTime();
-    } else if (absence.getJustifiedType().getName().equals(JustifiedTypeName.assign_all_day)) {
+    } else {
       amount = -1;
     }
     
@@ -181,40 +196,77 @@ public class AbsenceEngineUtility {
     }
   }
   
-  public Integer takenBehaviouralFixes(Absence absence, Integer amount) {
+  /**
+   * la quantità corretta prendibile in percentuale.
+   *
+   * @param absence l'assenza
+   * @param amount la quantità prendibile
+   * @return la quantità corretta prendibile in percentuale.
+   */
+  public Integer takenBehaviouralFixes(Absence absence, Integer amount,
+      List<Contract> fetchedContracts, DateInterval periodInterval, 
+      TakeAmountAdjustment adjustment) {
+    //Qui occorre verificare la quantità corretta per i codici 661G che, in caso di part time 
+    //orizzontale, non devono togliere l'intera giornata ma l'intera giornata meno un'ora
     Optional<AbsenceTypeJustifiedBehaviour> percentageTaken = 
-        absence.absenceType.getBehaviour(JustifiedBehaviourName.takenPercentageTime);
+        absence.getAbsenceType().getBehaviour(JustifiedBehaviourName.takenPercentageTime);
     if (percentageTaken.isPresent() && percentageTaken.get().getData() != null) {
-      return amount * percentageTaken.get().getData() / 1000;
+      final int Max_Minutes_To_Cut_Back = 360;
+      boolean workTimeAdjustment = adjustment.workTime;
+
+      for (Contract contract : fetchedContracts) {
+        if (DateUtility.intervalIntersection(contract.periodInterval(), periodInterval) == null) {
+          continue;
+        }
+        for (ContractWorkingTimeType cwtt : contract.getContractWorkingTimeTypeOrderedList()) {
+          if (DateUtility.intervalIntersection(cwtt.periodInterval(), periodInterval) == null) {
+            continue;
+          }          
+          
+          if (workTimeAdjustment && cwtt.getWorkingTimeType().isEnableAdjustmentForQuantity()) {
+            //Adeguamento sull'incidenza del tipo orario
+            if (cwtt.getWorkingTimeType().averageMinutesInWeek() > Max_Minutes_To_Cut_Back) {
+              return Max_Minutes_To_Cut_Back;
+            }
+            return cwtt.getWorkingTimeType().averageMinutesInWeek() - 60;
+          }          
+          
+        }
+      }
+
     }
+    
     return amount;
   }
   
   /**
-   * Il tempo di lavoro nel giorno dell'assenza.<br>
+   * Il tempo di lavoro nel giorno dell'assenza.
+   *
    * @param person persona
    * @param absence assenza
    * @return tempo a lavoro assenza, 0 in caso di giorno contrattuale festivo
    */
   private int absenceWorkingTime(Person person, Absence absence) {
     LocalDate date = absence.getAbsenceDate();
-    for (Contract contract : person.contracts) {
-      for (ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {
+    for (Contract contract : person.getContracts()) {
+      for (ContractWorkingTimeType cwtt : contract.getContractWorkingTimeType()) {
         if (DateUtility.isDateIntoInterval(date, cwtt.periodInterval())) {
-          if (cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1).holiday) {
-            if (absence.absenceType.isConsideredWeekEnd()) {
+          if (cwtt.getWorkingTimeType().getWorkingTimeTypeDays()
+              .get(date.getDayOfWeek() - 1).isHoliday()) {
+            if (absence.getAbsenceType().isConsideredWeekEnd()) {
               LocalDate dateToChange = date;
               while (!DateUtility.isGeneralHoliday(Optional.<MonthDay>absent(), dateToChange)) {
                 dateToChange = dateToChange.plusDays(1);
               }
-              return cwtt.workingTimeType.workingTimeTypeDays.get(dateToChange.getDayOfWeek() - 1)
-                  .workingTime;
+              return cwtt.getWorkingTimeType().getWorkingTimeTypeDays()
+                  .get(dateToChange.getDayOfWeek() - 1)
+                  .getWorkingTime();
             } else {
               return 0;
             }            
           }
-          return cwtt.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1)
-              .workingTime;
+          return cwtt.getWorkingTimeType().getWorkingTimeTypeDays().get(date.getDayOfWeek() - 1)
+              .getWorkingTime();
         }
       }
     }
@@ -224,6 +276,7 @@ public class AbsenceEngineUtility {
   /**
    * Quanto completa il rimpiazzamento.
    * Se non si riesce a stabilire il tempo di completamento si ritorna un numero negativo.
+   *
    * @param absenceType tipo assenza
    * @param amountType tipo ammontare
    * @return ammontare
@@ -256,6 +309,7 @@ public class AbsenceEngineUtility {
   
   /**
    * Prova a inferire l'absenceType dell'assenza all'interno del periodo.
+   *
    * @param absencePeriod periodo
    * @param absence assenza
    * @return assenza con tipo inferito
@@ -275,8 +329,8 @@ public class AbsenceEngineUtility {
     //Cerco il codice
     if (absence.getJustifiedType().getName().equals(JustifiedTypeName.all_day)) {
       for (AbsenceType absenceType : absencePeriod.takableCodes) { 
-        if (absenceType.justifiedTypesPermitted.contains(absence.getJustifiedType())) {
-          absence.absenceType = absenceType;
+        if (absenceType.getJustifiedTypesPermitted().contains(absence.getJustifiedType())) {
+          absence.setAbsenceType(absenceType);
           return absence;
         }
       }
@@ -284,8 +338,8 @@ public class AbsenceEngineUtility {
     if (absence.getJustifiedType().getName()
         .equals(JustifiedTypeName.complete_day_and_add_overtime)) {
       for (AbsenceType absenceType : absencePeriod.takableCodes) { 
-        if (absenceType.justifiedTypesPermitted.contains(absence.getJustifiedType())) {
-          absence.absenceType = absenceType;
+        if (absenceType.getJustifiedTypesPermitted().contains(absence.getJustifiedType())) {
+          absence.setAbsenceType(absenceType);
           return absence;
         }
       }
@@ -298,21 +352,21 @@ public class AbsenceEngineUtility {
         for (JustifiedType absenceTypeJustifiedType : absenceType.getJustifiedTypesPermitted()) {
           if (absenceTypeJustifiedType.getName().equals(JustifiedTypeName.specified_minutes)) {
             if (absence.getJustifiedMinutes() != null) {
-              absence.absenceType = absenceType;
+              absence.setAbsenceType(absenceType);
               return absence; 
             }
             specifiedMinutes = absenceType;
           }
           if (absenceTypeJustifiedType.getName().equals(JustifiedTypeName.absence_type_minutes)) {
             if (absenceType.getJustifiedTime().equals(absence.getJustifiedMinutes())) { 
-              absence.absenceType = absenceType;
-              absence.justifiedType = absenceTypeJustifiedType;
+              absence.setAbsenceType(absenceType);
+              absence.setJustifiedType(absenceTypeJustifiedType);
               return absence;
             }
           }
         }
       }
-      absence.absenceType = specifiedMinutes;
+      absence.setAbsenceType(specifiedMinutes);
       return absence; 
     }
     // TODO: quanto manca?
@@ -320,7 +374,8 @@ public class AbsenceEngineUtility {
   }
  
   /**
-   * I minuti... .
+   * I minuti.
+   *
    * @param hours ore
    * @param minutes minuti
    * @return minuti
@@ -341,6 +396,7 @@ public class AbsenceEngineUtility {
   /**
    * Popola la lista ordinata in senso decrescente replacingCodesDesc a partire dal set di codici
    * replacingCodes. Popola gli eventuali errori.
+   *
    * @param complationAmountType tipo ammontare
    * @param replacingCodes i codici da analizzare
    * @param date data per errori
@@ -384,6 +440,7 @@ public class AbsenceEngineUtility {
    * Quale rimpiazzamento inserire se aggiungo il complationAmount al period nella data. 
    * I codici sono ordinati in modo decrescente in modo da testare per primi quelli col valore
    * più alto.
+   *
    * @return tipo del rimpiazzamento
    */
   public Optional<AbsenceType> whichReplacingCode(
@@ -407,22 +464,23 @@ public class AbsenceEngineUtility {
   
   /**
    * I gruppi coinvolti nel tipo di assenza.
+   *
    * @param absenceType tipo assenza
    * @return set gruppi
    */
   public Set<GroupAbsenceType> involvedGroup(AbsenceType absenceType) {
     Set<GroupAbsenceType> involvedGroup = Sets.newHashSet();
-    for (TakableAbsenceBehaviour takableAbsenceBehaviour : absenceType.takableGroup) {
-      involvedGroup.addAll(takableAbsenceBehaviour.groupAbsenceTypes);
+    for (TakableAbsenceBehaviour takableAbsenceBehaviour : absenceType.getTakableGroup()) {
+      involvedGroup.addAll(takableAbsenceBehaviour.getGroupAbsenceTypes());
     }
-    for (TakableAbsenceBehaviour takableAbsenceBehaviour : absenceType.takenGroup) {
-      involvedGroup.addAll(takableAbsenceBehaviour.groupAbsenceTypes);
+    for (TakableAbsenceBehaviour takableAbsenceBehaviour : absenceType.getTakenGroup()) {
+      involvedGroup.addAll(takableAbsenceBehaviour.getGroupAbsenceTypes());
     }
-    for (ComplationAbsenceBehaviour complationAbsenceBehaviour : absenceType.complationGroup) {
-      involvedGroup.addAll(complationAbsenceBehaviour.groupAbsenceTypes);
+    for (ComplationAbsenceBehaviour complationAbsenceBehaviour : absenceType.getComplationGroup()) {
+      involvedGroup.addAll(complationAbsenceBehaviour.getGroupAbsenceTypes());
     }
-    for (ComplationAbsenceBehaviour complationAbsenceBehaviour : absenceType.replacingGroup) {
-      involvedGroup.addAll(complationAbsenceBehaviour.groupAbsenceTypes);
+    for (ComplationAbsenceBehaviour complationAbsenceBehaviour : absenceType.getReplacingGroup()) {
+      involvedGroup.addAll(complationAbsenceBehaviour.getGroupAbsenceTypes());
     }
     return involvedGroup;
   }
@@ -430,6 +488,7 @@ public class AbsenceEngineUtility {
     
   /**
    * Ordina per data tutte le liste di assenze in una unica lista.
+   *
    * @param absences liste di assenze
    * @return entity list
    */
@@ -454,6 +513,7 @@ public class AbsenceEngineUtility {
   
   /**
    * Aggiunge alla mappa le assenze presenti in absences.
+   *
    * @param absences le assenze da aggiungere alla mappa
    * @param map mappa
    * @return mappa
@@ -477,6 +537,7 @@ public class AbsenceEngineUtility {
   /**
    * Calcola la riduzione in base al tempo contrattuale effettivamente lavorato ed alla % di
    * part time. (A seconda del tipo di aggiustamento richiesto).
+   *
    * @param fixed tempo fisso di partenza
    * @param adjustment tipo aggiustamento richiesto
    * @param periodInterval periodo totale
@@ -518,7 +579,7 @@ public class AbsenceEngineUtility {
       }  
     }
         
-    Double totalAssigned = new Double(0);
+    Double totalAssigned = Double.valueOf(0);
     
     //Ricerca dei periodi di attività
     for (Contract contract : contracts) {
@@ -538,12 +599,12 @@ public class AbsenceEngineUtility {
         int cwttDays = DateUtility.daysInInterval(cwttInverval);
 
         //Incidenza cwtt sul periodo totale (in giorni)
-        Double cwttPercent = ((double)cwttDays * 100) / periodDays; // (*)
+        Double cwttPercent = ((double) cwttDays * 100) / periodDays; // (*)
         
         //Adeguamento sull'incidenza del periodo
         Double cwttAssigned = (cwttPercent * fixed) / 100;
         
-        if (workTimeAdjustment && cwtt.workingTimeType.enableAdjustmentForQuantity) {
+        if (workTimeAdjustment && cwtt.getWorkingTimeType().isEnableAdjustmentForQuantity()) {
           //Adeguamento sull'incidenza del tipo orario
           cwttAssigned = (cwttAssigned * cwtt.getWorkingTimeType().percentEuristic()) / 100;
         }
@@ -554,5 +615,5 @@ public class AbsenceEngineUtility {
     
     return totalAssigned.intValue();
   }
-    
+
 }

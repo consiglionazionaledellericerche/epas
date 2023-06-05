@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -17,6 +34,11 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
+/**
+ * Controller per la gestione delle clausole contrattuli.
+ *
+ * @author Cristian Lucchesi
+ */
 @With({Resecure.class})
 public class ContractualClauses extends Controller {
 
@@ -59,8 +81,8 @@ public class ContractualClauses extends Controller {
   public static void edit(Long contractualClauseId) {
     ContractualClause contractualClause = ContractualClause.findById(contractualClauseId);
     notFoundIfNull(contractualClause);
-    val categoryGroupAbsenceTypes = contractualClause.categoryGroupAbsenceTypes;
-    val contractualReferences = contractualClause.contractualReferences;
+    val categoryGroupAbsenceTypes = contractualClause.getCategoryGroupAbsenceTypes();
+    val contractualReferences = contractualClause.getContractualReferences();
     render(contractualClause, categoryGroupAbsenceTypes, contractualReferences);
   }
   
@@ -80,15 +102,15 @@ public class ContractualClauses extends Controller {
       render("@edit", contractualClause, categoryGroupAbsenceTypes, 
           contractualReferences);
     }
-    contractualClause.contractualReferences = contractualReferences;
+    contractualClause.setContractualReferences(contractualReferences);
     contractualClause.save();
-    contractualClause.categoryGroupAbsenceTypes.stream().forEach(cgat -> {
-      cgat.contractualClause = null;
+    contractualClause.getCategoryGroupAbsenceTypes().stream().forEach(cgat -> {
+      cgat.setContractualClause(null);
       cgat.save();
-    });;
+    });
     if (categoryGroupAbsenceTypes != null) {
       categoryGroupAbsenceTypes.stream().forEach(cgat -> { 
-        cgat.contractualClause = contractualClause;
+        cgat.setContractualClause(contractualClause);
         cgat.save();
       }); 
     }
@@ -104,7 +126,7 @@ public class ContractualClauses extends Controller {
   public static void delete(Long contractualClauseId) {
     ContractualClause contractualClause = ContractualClause.findById(contractualClauseId);
     notFoundIfNull(contractualClause);
-    if (!contractualClause.categoryGroupAbsenceTypes.isEmpty()) {
+    if (!contractualClause.getCategoryGroupAbsenceTypes().isEmpty()) {
       flash.error("Non è possibile eliminare un istituto contrattuale associato "
           + "a categorie di tipi di assenza.");
       edit(contractualClauseId);

@@ -15,11 +15,27 @@
 #{/if}
 
 <div class="container">
+  #{accordionItem 'Tabella', parent:'codici', title:'Riepilogo situazione giornaliera', open:false, color:'warning'}
+  <table class="table table-bordered table-striped">
+  	<tr>
+  		<th>Situazione nel giorno</th>
+  		<th>Quantità</th>
+  	</tr>
+  	#{list items:map.entrySet(), as:'entry'}
+  		<tr>
+  			<td>${entry.getKey()}</td>
+  			<td>${entry.getValue()}</td>
+  		</tr>
+  	#{/list}
+  </table>
+  #{/accordionItem}
+  
   <table id="tabellonetimbrature" class="table table-bordered table-condensed table-hover">
     <tr>
       <th class="group-single">Nome</th>
       <th class="group-single">Assenza</th>
       <th class="group-single">Tempo<br>Lavoro</th>
+      <th class="group-single">Differenza</th>
       #{list items:1..numberOfInOut, as:'i'}
       <th class="group-left">${i}° entrata</th>
       <th class="group-right">${i}° uscita</th>
@@ -43,6 +59,8 @@
       </td>
       <!--Colonna tempo a lavoro-->
       <td class="default-single">${dayRecap.personDay.timeAtWork.printHourMinute()}</td>
+      <!--Colonna differenza-->
+      <td class="default-single">${dayRecap.personDay.difference.printHourMinute()}</td>
       <!--Colonne Assenze-->
       #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
 

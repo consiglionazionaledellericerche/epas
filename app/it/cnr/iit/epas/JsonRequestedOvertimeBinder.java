@@ -1,12 +1,29 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.cnr.iit.epas;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import common.injection.StaticInject;
 import dao.CompetenceCodeDao;
 import dao.PersonDao;
-import injection.StaticInject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -24,7 +41,7 @@ import play.data.binding.TypeBinder;
 /**
  * Binder per il json con le richieste di straordinario.
  *
- * @author arianna
+ * @author Arianna Del Soldato
  */
 @Slf4j
 @Global
@@ -37,6 +54,8 @@ public class JsonRequestedOvertimeBinder implements TypeBinder<PersonsCompetence
   private static CompetenceCodeDao competenceCodeDao;
 
   /**
+   * Binder per il json con le richieste di straordinario.
+   *
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */
@@ -70,12 +89,12 @@ public class JsonRequestedOvertimeBinder implements TypeBinder<PersonsCompetence
           throw new IllegalArgumentException(
               String.format("Person with email = %s doesn't exist", personEmail));
         }
-        log.debug("Find persons {} with email {}", person.name, personEmail);
+        log.debug("Find persons {} with email {}", person.getName(), personEmail);
 
         CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeByCode("S1");
         Competence competence = new Competence(person, competenceCode, 0, 0);
-        competence.valueApproved = jsonObject.get("ore").getAsInt();
-        competence.reason = jsonObject.get("motivazione").getAsString();
+        competence.setValueApproved(jsonObject.get("ore").getAsInt());
+        competence.setReason(jsonObject.get("motivazione").getAsString());
 
         log.debug("Letto ore = {} e motivazione = {}",
             jsonObject.get("ore").getAsInt(), jsonObject.get("motivazione").getAsString());

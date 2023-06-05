@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.absences;
 
 import com.google.common.base.Optional;
@@ -15,12 +32,20 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import lombok.Getter;
+import lombok.Setter;
 import models.absences.definitions.DefaultCategoryType;
 import models.base.BaseModel;
 import models.contractual.ContractualClause;
 import org.assertj.core.util.Lists;
 import org.hibernate.envers.Audited;
 
+/**
+ * Associazione tra tipologie di gruppi di assenze e le tab in cui mostrarle
+ * nell'interfaccia di gestione delle assenze.
+ */
+@Getter
+@Setter
 @Audited
 @Entity
 @Table(name = "category_group_absence_types")
@@ -30,24 +55,24 @@ public class CategoryGroupAbsenceType extends BaseModel
   private static final long serialVersionUID = 4580659910825885894L;
 
   @Column
-  public String name;
+  private String name;
 
   @Column
-  public String description;
+  private String description;
   
   @Column
-  public int priority;
+  private int priority;
   
   @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
-  public Set<GroupAbsenceType> groupAbsenceTypes;
+  private Set<GroupAbsenceType> groupAbsenceTypes;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_tab_id")
-  public CategoryTab tab;
+  private CategoryTab tab;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "contractual_clause_id")
-  public ContractualClause contractualClause;
+  private ContractualClause contractualClause;
 
   @Override
   public int compareTo(CategoryGroupAbsenceType obj) {
@@ -57,6 +82,7 @@ public class CategoryGroupAbsenceType extends BaseModel
   /**
    * Un modo (semplificabile) per ordinare i gruppi della categoria per priorità, prendendoli 
    * (se ci sono) dallo heap.
+   *
    * @param onlyFirstOfChain se voglio solo i primi della catena.
    */
   @Transient
@@ -67,13 +93,13 @@ public class CategoryGroupAbsenceType extends BaseModel
     
     //ogni gruppo lo inserisco con quelli della stessa priorità
     for (GroupAbsenceType group : this.groupAbsenceTypes) {
-      if (onlyFirstOfChain && !group.previousGroupChecked.isEmpty()) {
+      if (onlyFirstOfChain && !group.getPreviousGroupChecked().isEmpty()) {
         continue;
       }
-      Set<GroupAbsenceType> prioritySet = setByPriority.get(group.priority);
+      Set<GroupAbsenceType> prioritySet = setByPriority.get(group.getPriority());
       if (prioritySet == null) {
         prioritySet = Sets.newHashSet();
-        setByPriority.put(group.priority, prioritySet);
+        setByPriority.put(group.getPriority(), prioritySet);
       }
       prioritySet.add(group);
     }
@@ -87,6 +113,7 @@ public class CategoryGroupAbsenceType extends BaseModel
   
   /**
    * Se esiste fra gli enumerati un corrispondente e se è correttamente modellato.
+   *
    * @return absent se la categoria non è presente in enum
    */
   public Optional<Boolean> matchEnum() {
@@ -95,7 +122,7 @@ public class CategoryGroupAbsenceType extends BaseModel
       if (defaultCategory.name().equals(this.name)) {
         if (defaultCategory.description.equals(this.description)
             && defaultCategory.priority == this.priority
-            && defaultCategory.categoryTab.name().equals(this.tab.name)) {
+            && defaultCategory.categoryTab.name().equals(this.tab.getName())) {
           return Optional.of(true);
         } else {
           return Optional.of(false);
@@ -109,12 +136,13 @@ public class CategoryGroupAbsenceType extends BaseModel
   /**
    * Calcola la lista di tutti i codici prendibili in ogni groupAbsenceType di questa
    * categoria.
+   *
    * @return la lista di tutti i codici prendibili in questa categoria.
    */
   @Transient
   public Set<AbsenceType> getAbsenceTypes() {
     return groupAbsenceTypes.stream()
-        .flatMap(gat -> gat.takableAbsenceBehaviour.takableCodes.stream())
+        .flatMap(gat -> gat.getTakableAbsenceBehaviour().getTakableCodes().stream())
         .collect(Collectors.toSet());
   }
   

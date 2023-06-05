@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import com.google.common.collect.Lists;
@@ -11,6 +28,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -18,8 +37,11 @@ import play.data.validation.Required;
 import play.data.validation.Unique;
 
 
-
-
+/**
+ * Categoria di turno.
+ */
+@Getter
+@Setter
 @Entity
 @Audited
 @Table(name = "shift_categories")
@@ -29,7 +51,7 @@ public class ShiftCategories extends BaseModel {
 
   @Required
   @Unique
-  public String description;
+  private String description;
 
   /**
    * responsabile della categoria turno.
@@ -37,21 +59,21 @@ public class ShiftCategories extends BaseModel {
   @ManyToOne(optional = false)
   @JoinColumn(name = "supervisor")
   @Required
-  public Person supervisor;
+  private Person supervisor;
   
-  public boolean disabled;
+  private boolean disabled;
   
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
   @JoinColumn(name = "office_id")
   @NotNull
-  public Office office; 
+  private Office office; 
   
   @NotAudited
   @OneToMany(mappedBy = "shiftCategories")
-  public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
+  private List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
   
   @ManyToMany
-  public List<Person> managers = Lists.newArrayList();
+  private List<Person> managers = Lists.newArrayList();
   
   @Override
   public String toString() {

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
@@ -10,9 +27,12 @@ import it.cnr.iit.epas.NullStringBinder;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.OfficeManager;
 import manager.PersonDayManager;
+import manager.ldap.LdapService;
+import manager.ldap.LdapUser;
 import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.recaps.personstamping.PersonStampingDayRecapFactory;
 import models.Contract;
@@ -31,8 +51,17 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.Http;
+import play.mvc.Util;
 import play.mvc.With;
 
+/**
+ * Controller per la gestione delle timbrature via WEB.
+ *
+ * @author Cristian Lucchesi
+ * @author Dario Tagliaferri
+ *
+ */
+@Slf4j
 @With(Resecure.class)
 public class Clocks extends Controller {
 
@@ -48,7 +77,12 @@ public class Clocks extends Controller {
   static PersonStampingDayRecapFactory stampingDayRecapFactory;
   @Inject
   static ConsistencyManager consistencyManager;
+  @Inject
+  static LdapService ldapService;
 
+  /**
+   * Mostra la pagina di inizio della timbratura web.
+   */
   @NoCheck
   public static void show() {
     LocalDate data = new LocalDate();
@@ -64,8 +98,7 @@ public class Clocks extends Controller {
       try {
         Secure.login();
       } catch (Throwable ex) {
-        // TODO Auto-generated catch block
-        ex.printStackTrace();
+        log.warn("Eccezione per la login durante la @Clocks.show", ex);
       }
     }
 
@@ -75,6 +108,12 @@ public class Clocks extends Controller {
     render(data, personList);
   }
 
+  /**
+   * Mostra la pagina di login per la timbratura web.
+   *
+   * @param person la persona che intende loggarsi
+   * @param password la password con cui intende loggarsi
+   */
   @NoCheck
   public static void clockLogin(Person person, String password) {
 
@@ -83,7 +122,7 @@ public class Clocks extends Controller {
       show();
     }
 
-    final User user = person.user;
+    final User user = person.getUser();
 
     if (user == null) {
       flash.error("La persona selezionata non dispone di un account valido."
@@ -91,21 +130,11 @@ public class Clocks extends Controller {
       show();
     }
 
-    final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
-        .split(Http.Request.current().remoteAddress));
+    checkIpEnabled(person);
 
-    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(person.office)) {
-
-      flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
-          + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
-          + " abilitarlo");
-      show();
-
-    }
-
-    if (Security.authenticate(user.username, password)) {
+    if (Security.authenticate(user.getUsername(), password)) {
       // Mark user as connected
-      session.put("username", user.username);
+      session.put("username", user.getUsername());
       daySituation();
     } else {
       flash.error("Autenticazione fallita!");
@@ -113,6 +142,48 @@ public class Clocks extends Controller {
     }
   }
 
+  /**
+   * Effettua il login tramite ldap.
+   */
+  @NoCheck
+  public static void ldapLogin(String username, String password) {
+    log.debug("Richiesta autenticazione su Timbrature via WEB con credenziali "
+        + "LDAP username={}", username);
+
+    Optional<LdapUser> ldapUser = ldapService.authenticate(username, password);
+
+    if (!ldapUser.isPresent()) {
+      log.info("Failed clock login using LDAP for {}", username);
+      flash.error("Oops! Username o password sconosciuti");
+      show();
+    }
+
+    log.debug("clockLdapLogin -> LDAP user = {}", ldapUser.get());
+
+    Person person = Ldap.getPersonByLdapUser(ldapUser.get(), Optional.of("/clocks/show"));
+    if (person != null) {
+      checkIpEnabled(person);
+      daySituation();
+    }
+  }
+  
+  @Util
+  private static void checkIpEnabled(Person person) {
+    final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
+        .split(Http.Request.current().remoteAddress));
+
+    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(person.getOffice())) {
+
+      flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
+          + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
+          + " abilitarlo");
+      show();
+    }
+  }
+
+  /**
+   * Ritorna la situazione giornaliera della persona loggata.
+   */
   public static void daySituation() {
     // Se non e' presente lo user in sessione non posso accedere al metodo per via della resecure,
     // Quindi non dovrebbe mai accadere di avere a questo punto uno user null.
@@ -121,7 +192,7 @@ public class Clocks extends Controller {
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
-    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(user.person.office)) {
+    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(user.getPerson().getOffice())) {
 
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -132,7 +203,8 @@ public class Clocks extends Controller {
 
     final LocalDate today = LocalDate.now();
 
-    final PersonDay personDay = personDayManager.getOrCreateAndPersistPersonDay(user.person, today);
+    final PersonDay personDay = 
+        personDayManager.getOrCreateAndPersistPersonDay(user.getPerson(), today);
 
     int numberOfInOut = personDayManager.numberOfInOutInPersonDay(personDay) + 1;
 
@@ -144,6 +216,8 @@ public class Clocks extends Controller {
   }
 
   /**
+   * Ritorna la form di inserimento della timbratura.
+   *
    * @param wayType verso timbratura.
    */
   public static void webStamping(@Required WayType wayType) {
@@ -153,12 +227,14 @@ public class Clocks extends Controller {
       daySituation();
     }
 
-    final Person currentPerson = Security.getUser().get().person;
+    final Person currentPerson = Security.getUser().get().getPerson();
     final LocalDate today = LocalDate.now();
     render(wayType, currentPerson, today);
   }
 
   /**
+   * Inserisce la timbratura.
+   *
    * @param way       verso timbratura
    * @param stampType Causale timbratura
    * @param note      eventuali note.
@@ -171,7 +247,7 @@ public class Clocks extends Controller {
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
-    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(user.person.office)) {
+    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(user.getPerson().getOffice())) {
 
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -180,12 +256,12 @@ public class Clocks extends Controller {
     }
 
     final PersonDay personDay = personDayManager
-        .getOrCreateAndPersistPersonDay(user.person, LocalDate.now());
+        .getOrCreateAndPersistPersonDay(user.getPerson(), LocalDate.now());
     final Stamping stamping = new Stamping(personDay, LocalDateTime.now());
 
-    stamping.way = way;
-    stamping.stampType = stampType;
-    stamping.note = note;
+    stamping.setWay(way);
+    stamping.setStampType(stampType);
+    stamping.setNote(note);
 
     validation.valid(stamping);
 
@@ -194,11 +270,11 @@ public class Clocks extends Controller {
       daySituation();
     }
 
-    stamping.personDay.stampings.stream().filter(s -> !stamping.equals(s)).forEach(s -> {
+    stamping.getPersonDay().getStampings().stream().filter(s -> !stamping.equals(s)).forEach(s -> {
 
-      if (Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 1
-          || s.way == stamping.way
-          && Minutes.minutesBetween(s.date, stamping.date).getMinutes() < 2) {
+      if (Minutes.minutesBetween(s.getDate(), stamping.getDate()).getMinutes() < 1
+          || s.getWay() == stamping.getWay()
+          && Minutes.minutesBetween(s.getDate(), stamping.getDate()).getMinutes() < 2) {
 
         flash.error("Impossibile inserire 2 timbrature così ravvicinate."
             + "Attendere 1 minuto per timbrature nel verso opposto o "
@@ -209,7 +285,7 @@ public class Clocks extends Controller {
 
     stamping.save();
 
-    consistencyManager.updatePersonSituation(personDay.person.id, personDay.date);
+    consistencyManager.updatePersonSituation(personDay.getPerson().id, personDay.getDate());
 
     daySituation();
   }

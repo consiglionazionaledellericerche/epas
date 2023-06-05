@@ -1,10 +1,27 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import common.security.SecurityRules;
 import controllers.RequestInit.CurrentData;
 import dao.GeneralSettingDao;
 import dao.OfficeDao;
@@ -13,8 +30,6 @@ import dao.ShiftTypeMonthDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.CacheValues;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,19 +47,16 @@ import manager.configurations.EpasParam;
 import models.Office;
 import models.Person;
 import models.ShiftTypeMonth;
-import org.apache.commons.io.IOUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-import play.Play;
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
-import security.SecurityRules;
 
 /**
  * Il controller per l'invio dei dati certificati al nuovo attestati.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 @Slf4j
 @With(Resecure.class)
@@ -105,7 +117,7 @@ public class Certifications extends Controller {
     final List<Person> people = personDao.list(Optional.absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
 
-    if (generalSettingDao.generalSetting().onlyMealTicket == true) {
+    if (generalSettingDao.generalSetting().isOnlyMealTicket() == true) {
       //Caso di invio solo buoni pasto per INAF
       render("@partialCertifications", people, office, validYear, validMonth);
       
@@ -130,10 +142,10 @@ public class Certifications extends Controller {
       renderArgs.put("currentData", new CurrentData(validYear, validMonth,
           Integer.parseInt(session.get("daySelected")),
           Long.parseLong(session.get("personSelected")),
-          office.id, null));
+          office.id));
       // ##########################################################################
 
-
+      
       Set<String> matricoleAttestati = new HashSet<>();
       
       final Map.Entry<Office, YearMonth> cacheKey = new AbstractMap
@@ -154,7 +166,7 @@ public class Certifications extends Controller {
         render(office, validYear, validMonth);
       }
       
-      final Set<String> matricoleEpas = people.stream().map(person -> person.number)
+      final Set<String> matricoleEpas = people.stream().map(person -> person.getNumber())
           .collect(Collectors.toSet());
 
       final Set<String> notInEpas = Sets.difference(matricoleAttestati, matricoleEpas);
@@ -165,16 +177,16 @@ public class Certifications extends Controller {
       matchNumbers.retainAll(matricoleAttestati);
 
       // Controlli sull'abilitazione del calendario turni
-      final boolean enabledCalendar = office.configurations.stream()
-          .anyMatch(configuration -> configuration.epasParam == EpasParam.ENABLE_CALENDARSHIFT
-              && "true".equals(configuration.fieldValue));
+      final boolean enabledCalendar = office.getConfigurations().stream()
+          .anyMatch(configuration -> configuration.getEpasParam() == EpasParam.ENABLE_CALENDARSHIFT
+              && "true".equals(configuration.getFieldValue()));
 
       final List<ShiftTypeMonth> unApprovedActivities;
 
       if (enabledCalendar) {
         unApprovedActivities = shiftTypeMonthDao
             .byOfficeInMonth(office, monthToUpload.get()).stream()
-            .filter(shiftTypeMonth -> !shiftTypeMonth.approved).collect(Collectors.toList());
+            .filter(shiftTypeMonth -> !shiftTypeMonth.isApproved()).collect(Collectors.toList());
       } else {
         unApprovedActivities = new ArrayList<>();
       }
@@ -252,7 +264,6 @@ public class Certifications extends Controller {
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person);
-
     PersonCertData personCertData = null;
     try {
       // Costruisco lo status generale
@@ -262,14 +273,14 @@ public class Certifications extends Controller {
     } catch (Exception ex) {
       log.error("Errore nel recupero delle informazioni dal server di attestati per la persona {}: "
           + "{}", person, cleanMessage(ex).getMessage());
-      render();
+      render(person);
     }
 
     // La percentuale di completamento della progress bar rispetto al totale da elaborare
     double stepSize;
     try {
       final Map.Entry<Office, YearMonth> key = new AbstractMap
-          .SimpleEntry<>(person.office, new YearMonth(year, month));
+          .SimpleEntry<>(person.getOffice(), new YearMonth(year, month));
       stepSize = cacheValues.elaborationStep.get(key);
     } catch (Exception ex) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
@@ -344,7 +355,7 @@ public class Certifications extends Controller {
     double stepSize;
     try {
       final Map.Entry<Office, YearMonth> key = new AbstractMap
-          .SimpleEntry<>(person.office, new YearMonth(year, month));
+          .SimpleEntry<>(person.getOffice(), new YearMonth(year, month));
       stepSize = cacheValues.elaborationStep.get(key);
     } catch (Exception ex) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
@@ -355,7 +366,7 @@ public class Certifications extends Controller {
     // permette di chiamare questo controller anche in maniera sincrona per il reinvio delle
     // informazioni per una sola persona tramite link (button sulla singola persona)
     if (redirect) {
-      certifications(person.office.id, year, month);
+      certifications(person.getOffice().id, year, month);
     }
 
     render("@personStatus", personCertData, stepSize, person);
@@ -364,7 +375,7 @@ public class Certifications extends Controller {
   
   /**
    * Metodo da chiamare per permettere l'invio dei soli buoni pasto (per INAF).
-   * 
+   *
    * @param officeId l'identificativo della sede
    * @param year l'anno di riferimento
    * @param month il mese di riferimento

@@ -1,22 +1,35 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package manager.services.absences;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-
 import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.dto.internal.CruscottoDipendente.SituazioneDipendenteAssenze;
 import manager.attestati.dto.internal.CruscottoDipendente.SituazioneParametriControllo;
@@ -28,7 +41,6 @@ import manager.services.absences.certifications.CertificationYearSituation.Absen
 import manager.services.absences.certifications.CodeComparation;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.VacationSituation;
-
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -38,15 +50,14 @@ import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.cache.Cache;
 
 /**
  * Servizi di comparazione fra assenze epas e assenze attestati.
- * @author alessandro
+ *
+ * @author Alessandro Martelli
  *
  */
 @Slf4j
@@ -59,6 +70,7 @@ public class AbsenceCertificationService {
 
   /**
    * Injection.
+   *
    * @param absenceComponentDao injected
    * @param certificationService injected
    * @param absenceService injected
@@ -89,19 +101,21 @@ public class AbsenceCertificationService {
 
   /**
    * La situatione della persona dalla cache se caricata.
+   *
    * @param person person 
    * @param year anno
    */
   public Optional<CertificationYearSituation> certificationYearSituationCached(Person person, 
       int year) {
     return Optional.fromNullable(
-        (CertificationYearSituation)Cache.get(cysKey(person, year)));
-    
+        (CertificationYearSituation) Cache.get(cysKey(person, year)));
+
   }
-  
+
 
   /**
    * Situazione assenze epas/attestati.
+   *
    * @param person persona
    * @param year anno
    * @param cache prova a prelevare il certification year situation dalla cache
@@ -118,10 +132,10 @@ public class AbsenceCertificationService {
       }
     }
     
-    CruscottoDipendente cruscottoCurrent = (CruscottoDipendente)Cache.get(crKey(person, year));
+    CruscottoDipendente cruscottoCurrent = (CruscottoDipendente) Cache.get(crKey(person, year));
     if (cruscottoCurrent == null) {
       try {
-        log.debug("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year);
+        log.debug("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year);        
         cruscottoCurrent = certificationService.getCruscottoDipendente(person, year);
         Cache.add(crKey(person, year), cruscottoCurrent);
       } catch (Exception ex) {
@@ -134,7 +148,7 @@ public class AbsenceCertificationService {
       return null;
     }
     
-    CruscottoDipendente cruscottoPrev = (CruscottoDipendente)Cache.get(crKey(person, year - 1));
+    CruscottoDipendente cruscottoPrev = (CruscottoDipendente) Cache.get(crKey(person, year - 1));
     if (cruscottoPrev == null) {
       try {
         log.debug("Il cruscotto di {} anno {} non era cachato.", person.fullName(), year - 1);
@@ -217,6 +231,11 @@ public class AbsenceCertificationService {
         inEpas, notInEpas);
     buildGenericSituation(situation, person, AbsenceSituationType.ASTENSIONE_FIGLIO_3, 
         DefaultGroup.G_233, LocalDate.now(), Optional.absent(), Optional.absent(), 
+        inEpas, notInEpas);
+    
+    //3b) lavoro agile
+    buildGenericSituation(situation, person, AbsenceSituationType.LAVORO_AGILE, 
+        DefaultGroup.G_LAGILE, LocalDate.now(), Optional.absent(), Optional.absent(), 
         inEpas, notInEpas);
     
     //4) riduce ferie
@@ -398,8 +417,8 @@ public class AbsenceCertificationService {
     
     Optional<AbsenceType> absenceType = absenceComponentDao.absenceTypeByCode(code);
     if (!absenceType.isPresent() 
-        || (absenceType.get().certificateCode != null 
-        && !absenceType.get().certificateCode.equalsIgnoreCase(code))) {
+        || (absenceType.get().getCertificateCode() != null 
+        && !absenceType.get().getCertificateCode().equalsIgnoreCase(code))) {
       
       //Se non lo trovo oppure il codice in attestati è diverso da quello trovato
       //Lo cerco per codice attestati. Si potrebbe migliorare popolando per ogni codice 
@@ -461,7 +480,7 @@ public class AbsenceCertificationService {
     putDatesVacation(vacationPreviousYear.datesPerCodeOk, mapInEpas, code37, year);
     putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code32,  year - 1);
     putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code31,  year);
-    putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas,code37,  year);
+    putDatesVacation(vacationPreviousYear.toAddAutomatically, mapNotInEpas, code37,  year);
     if (vacationSituation.lastYear != null) {
       vacationPreviousYear.notPresent = absenceNotInAttestati(
           vacationSituation.lastYear.absencesUsed(),
@@ -553,8 +572,8 @@ public class AbsenceCertificationService {
     if (dates == null || dates.isEmpty()) {
       return;
     }
-    LocalDate sourceDate = wrPerson.getCurrentContract().get().sourceDateResidual;
-    LocalDate beginContract = wrPerson.getCurrentContract().get().beginDate;
+    LocalDate sourceDate = wrPerson.getCurrentContract().get().getSourceDateResidual();
+    LocalDate beginContract = wrPerson.getCurrentContract().get().getBeginDate();
     Set<LocalDate> manually = Sets.newHashSet();
     for (LocalDate date : dates) {
       if (date.isBefore(beginContract)) {
@@ -616,8 +635,8 @@ public class AbsenceCertificationService {
       DefaultGroup group, Set<String> codes) {
     GroupAbsenceType groupAbsenceType = absenceComponentDao
         .groupAbsenceTypeByName(group.name()).get();
-    for (InitializationGroup initialization : person.initializationGroups) {
-      if (initialization.groupAbsenceType.equals(groupAbsenceType)) {
+    for (InitializationGroup initialization : person.getInitializationGroups()) {
+      if (initialization.getGroupAbsenceType().equals(groupAbsenceType)) {
         return; //inizializzazione già presente o importata... si cambia solo manualmente.
       }
     }
@@ -633,8 +652,8 @@ public class AbsenceCertificationService {
     Collections.sort(list);
     InitializationGroup initializationGroup = new InitializationGroup(person, groupAbsenceType, 
         list.iterator().next().minusDays(1));
-    initializationGroup.unitsInput = group.takable.fixedLimit;
-    initializationGroup.averageWeekTime = 432;
+    initializationGroup.setUnitsInput(group.takable.fixedLimit);
+    initializationGroup.setAverageWeekTime(432);
     initializationGroup.save();
   }
   
@@ -643,6 +662,7 @@ public class AbsenceCertificationService {
    *  - tolgo il 23H7 da inserire automaticamente
    *  - tolgo il 23 da codici da rimuovere
    *  - inserisco il 23H7 ok
+   *
    * @param situation absenceSituation
    */
   private void patchPostPartumH7(Person person, CertificationYearSituation situation) {
@@ -707,6 +727,7 @@ public class AbsenceCertificationService {
   
   /**
    * Le assenze mancanti rispetto ad attestati da persistere.
+   *
    * @param person person
    * @param year year
    * @return list
@@ -724,15 +745,18 @@ public class AbsenceCertificationService {
         .getOrBuildJustifiedType(JustifiedTypeName.all_day);
     JustifiedType specified = absenceComponentDao
         .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-    JustifiedType completeDayAndAddOvertime = absenceComponentDao
-        .getOrBuildJustifiedType(JustifiedTypeName.complete_day_and_add_overtime);
-
+    
     for (AbsenceSituation absenceSituation : situation.absenceSituations) {
       for (String code : absenceSituation.toAddAutomatically.keySet()) {
         Optional<AbsenceType> type = absenceComponentDao.absenceTypeByCode(code);
         if (!type.isPresent()) {
-          log.info("Un codice utilizzato su attestati non è presente su ePAS {}", code);
-          continue;
+          log.debug("Un codice utilizzato su attestati non è presente su ePAS {}", code);
+          if (code.equalsIgnoreCase("L-AGILE")) {
+            log.debug("Recupero il lavoro agile che ha un codice diverso sul db di epas");
+            type = absenceComponentDao.absenceTypeByCode("LAGILE");
+          } else {
+            continue;
+          }          
         }
 
         for (LocalDate date : absenceSituation.toAddAutomatically.get(code)) {
@@ -794,7 +818,7 @@ public class AbsenceCertificationService {
           }
           if (!aux.equals(type.get())) {
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
-                aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
+                aux, specified, type.get().getReplacingTime() / 60, 0).absencesToPersist);
             continue;
           } 
 
@@ -809,7 +833,7 @@ public class AbsenceCertificationService {
           }
           if (!aux.equals(type.get())) {
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
-                aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
+                aux, specified, type.get().getReplacingTime() / 60, 0).absencesToPersist);
             continue;
           } 
 
@@ -849,32 +873,32 @@ public class AbsenceCertificationService {
           }
           if (!aux.equals(type.get())) {
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
-                aux, specified, type.get().replacingTime / 60, 0).absencesToPersist);
+                aux, specified, type.get().getReplacingTime() / 60, 0).absencesToPersist);
             continue;
           } 
 
           
           //Gli altri li inserisco senza paura 
           // (a patto che il tipo sia allDay o absence_type_minutes)
-          if (type.get().justifiedTypesPermitted.size() != 1) {
-            log.info("Impossibile importare una assenza senza justified univoco o definito {}", 
-                type.get().code);
+          if (type.get().getJustifiedTypesPermitted().size() != 1) {
+            log.debug("Impossibile importare una assenza senza justified univoco o definito {}", 
+                type.get().getCode());
             continue;
           }
-          JustifiedType justifiedType = type.get().justifiedTypesPermitted.iterator().next();
-          if (justifiedType.name.equals(JustifiedTypeName.all_day)) {
+          JustifiedType justifiedType = type.get().getJustifiedTypesPermitted().iterator().next();
+          if (justifiedType.getName().equals(JustifiedTypeName.all_day)) {
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
                 type.get(), justifiedType, 0, 0).absencesToPersist); 
             continue;
           }
-          if (justifiedType.name.equals(JustifiedTypeName.absence_type_minutes)) {
-            int hour = type.get().justifiedTime / 60;
-            int minute = type.get().justifiedTime % 60;
+          if (justifiedType.getName().equals(JustifiedTypeName.absence_type_minutes)) {
+            int hour = type.get().getJustifiedTime() / 60;
+            int minute = type.get().getJustifiedTime() % 60;
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
                 type.get(), justifiedType, hour, minute).absencesToPersist); 
             continue;
           }
-          if (justifiedType.name.equals(JustifiedTypeName.complete_day_and_add_overtime)) {
+          if (justifiedType.getName().equals(JustifiedTypeName.complete_day_and_add_overtime)) {
             absenceToPersist.addAll(absenceService.forceInsert(person, date, null, 
                 type.get(), justifiedType, 0, 0).absencesToPersist);
             continue;
@@ -928,6 +952,5 @@ public class AbsenceCertificationService {
     
     return codeComparation;
   }
-  
-  
+
 }

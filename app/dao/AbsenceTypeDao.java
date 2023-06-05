@@ -1,17 +1,35 @@
+/*
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package dao;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Person;
 import models.absences.AbsenceType;
@@ -19,10 +37,12 @@ import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 import org.joda.time.LocalDate;
 
+
+
 /**
  * Dao per l'accesso alle informazioni degli AbsenceType.
  *
- * @author dario
+ * @author Dario Tagliaferri
  */
 public class AbsenceTypeDao extends DaoBase {
 
@@ -31,6 +51,43 @@ public class AbsenceTypeDao extends DaoBase {
     super(queryFactory, emp);
   }
 
+  /**
+   * Lista dei codici di assenza, filtrabili per date di inizio e fine validità e per
+   * il fatto che siano utilizzati o meno.
+   */
+  public List<AbsenceType> list(
+      java.util.Optional<LocalDate> validFrom,
+      java.util.Optional<LocalDate> validTo, java.util.Optional<Boolean> used) {
+    final QAbsenceType absenceType = QAbsenceType.absenceType;
+    BooleanBuilder condition = new BooleanBuilder();
+    JPQLQuery<AbsenceType> query = getQueryFactory().selectFrom(absenceType);
+    if (validFrom.isPresent()) {
+      condition.and(absenceType.validFrom.before(validFrom.get())
+          .or(absenceType.validFrom.isNull()));
+    }
+    if (validTo.isPresent()) {
+      condition.and(absenceType.validTo.after(validTo.get()).or(absenceType.validTo.isNull()));
+    }
+    if (used.isPresent()) {
+      final QAbsence absence = QAbsence.absence;
+      query = query.leftJoin(absenceType.absences, absence).groupBy(absenceType);
+      if (used.get().equals(Boolean.TRUE)) {
+        query = query.having(absence.count().gt(0L));        
+      } else {
+        query = query.having(absence.count().lt(1L));
+      }
+    }
+    return query
+        .where(condition)
+        .orderBy(absenceType.code.asc())
+        .fetch();
+  }
+
+  /**
+   * Ritorna una lista di dto di tipi assenza che non è chiaro dove venga usata...
+   *
+   * @return la lista dei dto.
+   */
   public List<AbsenceTypeDto> countersDto() {
 
     final QAbsenceType absenceType = QAbsenceType.absenceType;
@@ -44,6 +101,11 @@ public class AbsenceTypeDao extends DaoBase {
         .fetch();
   }
 
+  /**
+   * Ritorna la mappa di tipo assenza/quantità.
+   *
+   * @return la mappa dei tipi assenza relazionata alla quantità di quei tipi presa
+   */
   public Map<AbsenceType, Long> counters() {
 
     final QAbsenceType absenceType = QAbsenceType.absenceType;
@@ -87,6 +149,8 @@ public class AbsenceTypeDao extends DaoBase {
   }
 
   /**
+   * Ritorna la lista dei tipi assenza che vanno ad Attestati.
+   *
    * @return la lista degli AbsenceType che non siano di internalUse.
    */
   public List<AbsenceType> certificateTypes() {
@@ -98,6 +162,8 @@ public class AbsenceTypeDao extends DaoBase {
   }
 
   /**
+   * Ritorna l'absenceType appartenente all'id passato come parametro.
+   *
    * @return l'absenceType relativo all'id passato come parametro.
    */
   public AbsenceType getAbsenceTypeById(Long long1) {
@@ -111,6 +177,8 @@ public class AbsenceTypeDao extends DaoBase {
   }
 
   /**
+   * Ritorna la lista dei tipi assenza validi a partire dalla data date.
+   *
    * @return la lista di codici di assenza che sono validi da una certa data in poi ordinati per
    *     codice di assenza crescente.
    */
@@ -126,6 +194,8 @@ public class AbsenceTypeDao extends DaoBase {
   }
 
   /**
+   * Ritorna l'absenceType (opzionale) relativo al codice stringa passato come parametro.
+   *
    * @return l'absenceType relativo al codice passato come parametro.
    */
   public Optional<AbsenceType> getAbsenceTypeByCode(String string) {
@@ -174,6 +244,9 @@ public class AbsenceTypeDao extends DaoBase {
         .transform(groupBy(absenceType).as(absence.count()));
   }
 
+  /**
+   * DTO per le informazioni dell'absenceType.
+   */
   public class AbsenceTypeDto {
 
     public String code;

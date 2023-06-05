@@ -1,18 +1,35 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models.base;
 
 import org.joda.time.LocalDate;
-
 import play.db.Model;
 
 /**
  * Il modello è un periodo del contratto con un valore.
  *
- * @author alessandro
+ * @author Alessandro Martelli
  */
 public interface IPropertyInPeriod extends IPeriodModel, Model {
 
   /**
    * L'owner del periodo (il contenitore dei periodi con proprietà).
+   *
    * @return l'owner
    */
   IPropertiesInPeriodOwner getOwner();
@@ -25,13 +42,13 @@ public interface IPropertyInPeriod extends IPeriodModel, Model {
 
   /**
    * Il tipo della proprietà.
+   *
    * @return tipo proprietà
    */
   Object getType();
 
   /**
    * Imposta il tipo della proprietà.
-
    */
   void setType(Object value);
 
@@ -59,6 +76,7 @@ public interface IPropertyInPeriod extends IPeriodModel, Model {
 
   /**
    * Contiene l'informazione se all'interno del periodo vi è la prima data da ricalcolare.
+   *
    * @return la data da cui ricalcolare
    */
   public LocalDate getRecomputeFrom();

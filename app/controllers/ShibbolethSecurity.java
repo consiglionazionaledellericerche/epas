@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.net.UrlEscapers;
@@ -52,6 +69,11 @@ public class ShibbolethSecurity extends controllers.shib.Security {
    */
   static void onAuthenticated() {
     log.debug("Security: Security.onAuthenticated()");
+    if (!Play.configuration.getProperty("shib.login", "false").equalsIgnoreCase("true")) {
+      log.warn("Bloccato tentativo di autenticazione Shibboleth perché non attivo");
+      session.clear();
+      badRequest("Autenticazione Shibboleth non abilitata.");
+    }
 
     String eppn = session.get("eppn");
     log.debug("Trasformazione dell'utente shibboleth in utente locale, email = {}", eppn);
@@ -60,17 +82,19 @@ public class ShibbolethSecurity extends controllers.shib.Security {
 
     if (person != null) {
 
-      Cache.set(person.user.username, person, Security.CACHE_DURATION);
+      Cache.set(person.getUser().getUsername(), person, Security.CACHE_DURATION);
       Cache.set("personId", person.id, Security.CACHE_DURATION);
 
-      session.put("username", person.user.username);
+      session.put("username", person.getUser().getUsername());
       session.put("shibboleth", true);
       
-      flash.success("Benvenuto " + person.name + ' ' + person.surname);
-      log.info("Person {} successfully logged in", person.user.username);
+      flash.success("Benvenuto " + person.getName() + ' ' + person.getSurname());
+      log.info("Person {} successfully logged in", person.getUser().getUsername());
       log.trace("Permission list for {} {}: {}",
-          person.name, person.surname, person.user.usersRolesOffices);
+          person.getName(), person.getSurname(), person.getUser().getUsersRolesOffices());
     } else {
+      flash.error(
+          "Autenticazione shibboleth riuscita ma utente con eppn=%s non presente in ePAS", eppn);
       log.warn("Person with email {} successfully logged in Shibboleth but unknonw to ePAS", eppn);
     }
 

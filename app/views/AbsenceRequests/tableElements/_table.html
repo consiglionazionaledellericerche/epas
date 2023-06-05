@@ -4,12 +4,17 @@
 	<thead>
 		
 		<tr>
-			<th width="10%" rowspan="2">Data e ora sottomissione</th>
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Data e ora sottomissione</th>
 			#{if !onlyOwn}
 				<th width="15%" #{if approvalRequired}rowspan="2"#{/if}>&{'absenceRequest.person'}</th>
 			#{/if}
+			
 		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>dal</th>
 			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>al</th>
+			#{if type.equals(models.flows.enumerate.AbsenceRequestType.PERSONAL_PERMISSION)}
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Tempo richiesto</th>
+			#{/if}
+			
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
 			#{/if}
@@ -43,7 +48,14 @@
 								
 				<td>#{f.value 'item.startAt', value:config.allDay ? item.startAtAsDate().format() : item.startAt.format() /}</td>	    
 				<td>#{f.value 'item.endTo', value:config.allDay ? item.endToAsDate().format() : item.endTo.format() /}</td>
-								
+				#{if type.equals(models.flows.enumerate.AbsenceRequestType.PERSONAL_PERMISSION)}	
+				#{if item.hours != null && item.minutes != null}
+					<td>${item.hours} ore e ${item.minutes} minuti</td>
+				#{/if}	
+				#{else}
+					<td>Tutto il giorno</td>	
+				#{/else}		
+				#{/if}
 				#{if config.managerApprovalRequired}
 					<td>#{f.value 'item.managerApproved', value:item.managerApproved ?: 'non ancora approvata' /}</td>
 				#{/if}

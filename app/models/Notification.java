@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import javax.persistence.Column;
@@ -8,17 +25,19 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-
+import lombok.Getter;
+import lombok.Setter;
 import models.base.MutableModel;
 import models.enumerate.NotificationSubject;
-
 import play.data.validation.Required;
 
 /**
  * Notification info and its database mapping.
  *
- * @author marco
+ * @author Marco Andreini
  */
+@Getter
+@Setter
 @Entity
 @Table(name = "notifications")
 public class Notification extends MutableModel {
@@ -27,23 +46,23 @@ public class Notification extends MutableModel {
 
   @NotNull
   @ManyToOne(optional = false)
-  public User recipient;
+  private User recipient;
 
   @Required
   @NotNull
-  public String message;
+  private String message;
 
   @Required
   @NotNull
   @Enumerated(EnumType.STRING)
-  public NotificationSubject subject;
+  private NotificationSubject subject;
 
   // id dell'oggetto correlato indicato dal target.
   @Column(name = "subject_id")
-  public Long subjectId;
+  private Long subjectId;
 
   @NotNull
-  public boolean read = false;
+  private boolean read = false;
 
   @Transient
   public boolean isRedirect() {
@@ -55,10 +74,16 @@ public class Notification extends MutableModel {
     return subject.toUrl(subjectId);
   }
 
+  /**
+   * Interfaccia per la creazione del tipo di notifica.
+   */
   public interface NotificationBuilderTypeCreate {
     Notification create();
   }
 
+  /**
+   * Interfaccia per la creazione della notifica.
+   */
   public interface NotificationBuilderType {
 
     NotificationBuilderTypeCreate subject(NotificationSubject type);
@@ -67,15 +92,26 @@ public class Notification extends MutableModel {
 
   }
 
+  /**
+   * Interfaccia del builder dei messaggi all'interno delle notifice. 
+   */
   public interface NotificationBuilderMessage {
     NotificationBuilderType message(String text);
   }
 
+  /**
+   * Interfaccia del builder del destinatario nei messaggi di notifica. 
+   */
   public interface NotificationBuilderOperator {
     NotificationBuilderMessage destination(User operator);
   }
 
-  public static class NotificationBuilder implements
+  /**
+   * Builder per costruire i messaggi di Notifica.
+   *
+   * @author Marco Andreini
+   */
+  static class NotificationBuilder implements
       NotificationBuilderTypeCreate, NotificationBuilderType,
       NotificationBuilderMessage, NotificationBuilderOperator {
 
@@ -124,6 +160,7 @@ public class Notification extends MutableModel {
 
   /**
    * Crea un builder per costruire le notifiche.
+   *
    * @return a new notification, saved.
    */
   public static NotificationBuilderOperator builder() {

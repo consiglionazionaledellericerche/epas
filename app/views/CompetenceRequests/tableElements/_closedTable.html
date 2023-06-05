@@ -4,9 +4,20 @@
 			#{if !onlyOwn}
 				<th width="15%" #{if approvalRequired}rowspan="2"#{/if}>&{'competenceRequest.person'}</th>
 			#{/if}
-		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>anno</th>
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>mese</th>
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>quantità</th>
+			#{if competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
+			    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>anno</th>
+				<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>mese</th>
+				<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>quantità</th>
+			#{/if}
+			#{else}
+				#{if approvalRequired}
+				<th colspan="2">Date richieste</th>
+				#{/if}
+				#{if approvalRequired}
+				<th colspan="2">Date offerte</th>
+				#{/if}
+		    	<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Destinatario</th>
+			#{/else}
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
 			#{/if}
@@ -15,7 +26,7 @@
 			<th #{if approvalRequired}rowspan="2"#{/if}>Visualizza</th>
 				
 		</tr>			
-		#{if approvalRequired}
+		#{if approvalRequired && competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
 			<tr>
 				#{if config.officeHeadApprovalRequired}
 					<th width="50%">Responsabile di sede</th>
@@ -27,6 +38,22 @@
 					<th width="50%">&{'competenceRequest.administrativeApproved'}</th>
 				#{/if}			
 		#{/if}
+		#{else}
+			<tr>
+				<th width="10%">Dal </th>
+				<th width="10%">Al  </th>
+	
+				<th width="10%">Dal</th>
+				<th width="10%">Al </th>
+	
+				#{if config.reperibilityManagerApprovalRequired}
+					<th width="20%">Supervisore del servizio</th>
+				#{/if}
+				#{if config.employeeApprovalRequired}
+					<th width="20%">Reperibile</th>
+				#{/if}
+			</tr>
+		#{/else}
 	</thead>
 
 	<tbody>
@@ -35,11 +62,19 @@
 				#{if !onlyOwn}
 					<td>#{f.value 'item.person.fullname', value:item.person.fullname /}</td>
 				#{/if}
-								
-				<td>#{f.value 'item.year', value:item.year /}</td>	    
-				<td>#{f.value 'item.month', value:item.month /}</td>
-				<td>#{f.value 'item.value', value:item.value /}</td>
-				
+				#{if competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}				
+					<td>#{f.value 'item.year', value:item.year /}</td>	    
+					<td>#{f.value 'item.month', value:item.month /}</td>
+					<td>#{f.value 'item.value', value:item.value /}</td>
+				#{/if}
+				#{else}
+					<td>#{f.value 'item.beginDateToAsk', value:item.beginDateToAsk /}</td>	    
+					<td>#{f.value 'item.endDateToAsk', value:item.endDateToAsk /}</td>
+					<td>#{f.value 'item.beginDateToGive', value:item.beginDateToGive /}</td>
+					<td>#{f.value 'item.endDateToGive', value:item.endDateToGive /}</td>
+
+					<td>#{f.value 'item.teamMate.fullName()', value:item.teamMate.fullName() /}</td>
+				#{/else}
 				#{if config.officeHeadApprovalRequired}
 					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved /}</td>
 				#{/if}

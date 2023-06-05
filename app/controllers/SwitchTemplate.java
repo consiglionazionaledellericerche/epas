@@ -1,16 +1,37 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package controllers;
 
 import com.google.common.collect.Maps;
-
+import java.time.LocalDate;
 import java.util.Map;
-
 import models.Office;
 import models.Person;
-
 import play.mvc.Controller;
 import play.mvc.Router;
 import play.mvc.With;
 
+/**
+ * Classe che permette lo switch dei vari menu (persone, sedi, giorni...)
+ *
+ * @author dario
+ *
+ */
 @With(Resecure.class)
 public class SwitchTemplate extends Controller {
 
@@ -18,9 +39,16 @@ public class SwitchTemplate extends Controller {
 
   private static void executeAction(String action) {
 
-    Integer year = Integer.parseInt(session.get("yearSelected"));
-    Integer month = Integer.parseInt(session.get("monthSelected"));
-    Integer day = Integer.parseInt(session.get("daySelected"));
+    LocalDate now = LocalDate.now();
+    Integer year = 
+        session.get("yearSelected") != null 
+          ? Integer.parseInt(session.get("yearSelected")) : now.getYear();
+    Integer month = 
+        session.get("monthSelected") != null 
+          ? Integer.parseInt(session.get("monthSelected")) : now.getMonthValue();
+    Integer day = 
+        session.get("daySelected") != null 
+          ? Integer.parseInt(session.get("daySelected")) : now.getDayOfMonth();
     Long personId = Long.parseLong(session.get("personSelected"));
     Long officeId = Long.parseLong(session.get("officeSelected"));
 

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import java.util.ArrayList;
@@ -14,16 +31,21 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-
 import play.data.validation.Max;
 import play.data.validation.Min;
-import play.data.validation.Required;
 
+/**
+ * Tipologia di turno.
+ */
+@Getter
+@Setter
 @Entity
 @Audited
 @Table(name = "shift_type")
@@ -32,79 +54,82 @@ public class ShiftType extends BaseModel {
   private static final long serialVersionUID = 3156856871540530483L;
 
   
-  public String type;
+  private String type;
   
-  public String description;
+  private String description;
   
   @Column(name = "allow_unpair_slots")
-  public boolean allowUnpairSlots = false;
+  private boolean allowUnpairSlots = false;
   
   @Min(0)
   @Column(name = "entrance_tolerance")
-  public int entranceTolerance;
+  private int entranceTolerance;
   
   @Min(0)
   @Column(name = "entrance_max_tolerance")
-  public int entranceMaxTolerance;
+  private int entranceMaxTolerance;
 
   @Min(0)
   @Column(name = "exit_tolerance")
-  public int exitTolerance;
+  private int exitTolerance;
   
   @Min(0)
   @Column(name = "exit_max_tolerance")
-  public int exitMaxTolerance;
+  private int exitMaxTolerance;
   
   //quantità massima di tolleranze concesse all'interno dell'attività
   @Max(3)
   @Min(0)
   @Column(name = "max_tolerance_allowed")
-  public int maxToleranceAllowed;
+  private int maxToleranceAllowed;
 
   @Min(0)
   @Column(name = "break_in_shift")
-  public int breakInShift;
+  private int breakInShift;
   
   @Min(0)
   @Column(name = "break_max_in_shift")
-  public int breakMaxInShift;
+  private int breakMaxInShift;
 
   @NotAudited
   @OneToMany(mappedBy = "shiftType")
-  public List<PersonShiftShiftType> personShiftShiftTypes = new ArrayList<>();
+  private List<PersonShiftShiftType> personShiftShiftTypes = new ArrayList<>();
 
   @NotAudited
   @OneToMany(mappedBy = "shiftType")
-  public List<PersonShiftDay> personShiftDays = new ArrayList<>();
+  private List<PersonShiftDay> personShiftDays = new ArrayList<>();
 
   @NotAudited
   @OneToMany(mappedBy = "type")
-  public List<ShiftCancelled> shiftCancelled = new ArrayList<>();
+  private List<ShiftCancelled> shiftCancelled = new ArrayList<>();
 
   @NotAudited
   @ManyToOne
   @JoinColumn(name = "shift_time_table_id")
-  public ShiftTimeTable shiftTimeTable;
+  private ShiftTimeTable shiftTimeTable;
 
   @NotAudited
   @ManyToOne
   @JoinColumn(name = "organization_shift_time_table_id")
-  public OrganizationShiftTimeTable organizaionShiftTimeTable;
+  private OrganizationShiftTimeTable organizaionShiftTimeTable;
   
   //@Required
   @ManyToOne(optional = false)
   @JoinColumn(name = "shift_categories_id")
-  public ShiftCategories shiftCategories;
+  private ShiftCategories shiftCategories;
 
   @OneToMany(mappedBy = "shiftType", cascade = CascadeType.REMOVE)
   @OrderBy("yearMonth DESC")
-  public Set<ShiftTypeMonth> monthsStatus = new HashSet<>();
+  private Set<ShiftTypeMonth> monthsStatus = new HashSet<>();
 
   @Override
   public String toString() {
-    return shiftCategories.description + " - " + type;
+    return shiftCategories.getDescription() + " - " + type;
   }
 
+  /**
+   * Tipologia di tolleranza.
+   */
   public enum ToleranceType {
     entrance("entrance"),
     exit("exit"),
@@ -121,18 +146,30 @@ public class ShiftType extends BaseModel {
     }
   }
 
+  /**
+   * RItorna l'oggetto che contiene l'approvazione del turno ad una certa data.
+   *
+   * @param date la data da considerare
+   * @return l'oggetto che contiene l'approvazione del turno ad una certa data.
+   */
   @Transient
   public Optional<ShiftTypeMonth> monthStatusByDate(LocalDate date) {
     final YearMonth requestedMonth = new YearMonth(date);
     return monthsStatus.stream()
-        .filter(shiftTypeMonth -> shiftTypeMonth.yearMonth.equals(requestedMonth)).findFirst();
+        .filter(shiftTypeMonth -> shiftTypeMonth.getYearMonth().equals(requestedMonth)).findFirst();
   }
 
+  /**
+   * Controlla se il turno è stato approvato alla data passata come parametro.
+   *
+   * @param date la data da considerare
+   * @return true se il turno è stato approvato alla data date, false altrimenti.
+   */
   @Transient
   public boolean approvedOn(LocalDate date) {
     Optional<ShiftTypeMonth> monthStatus = monthStatusByDate(date);
     if (monthStatus.isPresent()) {
-      return monthStatus.get().approved;
+      return monthStatus.get().isApproved();
     } else {
       return false;
     }

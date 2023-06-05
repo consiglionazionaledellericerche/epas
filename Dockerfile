@@ -1,4 +1,4 @@
-FROM criluc/play1:1.5.2-patched
+FROM criluc/play1:1.5.3-openjdk-11-patched
 
 ENV user epas
 ENV APP ePas

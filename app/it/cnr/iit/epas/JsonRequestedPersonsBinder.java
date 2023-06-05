@@ -1,26 +1,36 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package it.cnr.iit.epas;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
+import common.injection.StaticInject;
 import dao.PersonDao;
-
-import injection.StaticInject;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import models.Person;
 import models.exports.PersonsList;
-
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
@@ -28,7 +38,7 @@ import play.data.binding.TypeBinder;
 /**
  * Binder per il json la lista delle persone.
  *
- * @author arianna
+ * @author Arianna Del Soldato
  */
 @Slf4j
 @Global
@@ -39,6 +49,8 @@ public class JsonRequestedPersonsBinder implements TypeBinder<PersonsList> {
   private static PersonDao personDao;
 
   /**
+   * Binder per il json la lista delle persone.
+   *
    * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[],
    * java.lang.String, java.lang.Class, java.lang.reflect.Type)
    */
@@ -73,7 +85,7 @@ public class JsonRequestedPersonsBinder implements TypeBinder<PersonsList> {
           throw new IllegalArgumentException(
               String.format("Person with email = %s doesn't exist", personEmail));
         }
-        log.debug("Find person {} with email {}", person.name, personEmail);
+        log.debug("Find person {} with email {}", person.getName(), personEmail);
 
         persons.add(person);
       }

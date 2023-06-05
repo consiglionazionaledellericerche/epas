@@ -1,0 +1,7 @@
+sphinx==5.3.0
+git+https://github.com/consiglionazionaledellericerche/docs-cnr-theme.git
+recommonmark
+numpydoc
+nbsphinx
+sphinx_markdown_tables
+sphinxcontrib-images

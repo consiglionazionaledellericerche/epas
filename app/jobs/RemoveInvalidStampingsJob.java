@@ -1,22 +1,31 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package jobs;
 
 import com.google.common.base.Optional;
-
 import dao.PersonDayDao;
-
 import java.util.List;
-
 import javax.inject.Inject;
-
 import lombok.extern.slf4j.Slf4j;
-
 import manager.ConsistencyManager;
-
 import models.Person;
 import models.PersonDay;
-
 import org.joda.time.LocalDate;
-
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
@@ -56,9 +65,9 @@ public class RemoveInvalidStampingsJob extends Job<Void> {
     List<PersonDay> persondays = personDayDao.getPersonDayInPeriod(person, begin, Optional.of(end));
 
     for (PersonDay pd : persondays) {
-      pd.stampings.stream().filter(stamping -> !stamping.valid).forEach(stamping -> {
+      pd.getStampings().stream().filter(stamping -> !stamping.valid).forEach(stamping -> {
         log.info("Eliminazione timbratura non valida per {} in data {} : {}",
-            pd.person.fullName(), pd.date, stamping);
+            pd.getPerson().fullName(), pd.getDate(), stamping);
         stamping.delete();
       });
     }

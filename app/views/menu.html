@@ -23,7 +23,9 @@
     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${currentData.monthLabel}</span><span class="caret"></span></a>
     <ul class="dropdown-menu">
       #{list items:1..12, as:'month'}
-      <li><a href="?month=${month}&year=${currentData.year}&personId=${currentData.personId}&officeId=${currentData.officeId}&day=${currentData.getDayOfMonth(month)}#{if switchType}&competenceType=${currentData.competenceType}#{/if}">&{'Month.'+month}</a></li>
+
+      <li><a href="?month=${month}&year=${currentData.year}&personId=${currentData.personId}&officeId=${currentData.officeId}&day=${currentData.getDayOfMonth(month)}#{if competenceType}&competenceType=${competenceType}#{/if}">&{'Month.'+month}</a></li>
+
       #{/list}
     </ul>
   </li>

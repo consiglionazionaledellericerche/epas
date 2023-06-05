@@ -1,12 +1,29 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package absences;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import common.injection.StaticInject;
 import dao.absences.AbsenceComponentDao;
 import db.h2support.H2Examples;
 import db.h2support.base.H2AbsenceSupport;
-import injection.StaticInject;
 import java.util.List;
 import manager.services.absences.AbsenceService;
 import manager.services.absences.model.PeriodChain;
@@ -21,9 +38,12 @@ import org.joda.time.LocalDate;
 import org.junit.Test;
 import play.test.UnitTest;
 
-
-
-
+/**
+ * Test vari per le assenze di tipo 661.
+ *
+ * @author Cristian Lucchesi
+ *
+ */
 @StaticInject
 public class Absences661Test extends UnitTest {
   
@@ -65,7 +85,7 @@ public class Absences661Test extends UnitTest {
     PeriodChain periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
-        person.contracts,
+        person.getContracts(),
         Lists.newArrayList(), 
         Lists.newArrayList());
     
@@ -87,7 +107,7 @@ public class Absences661Test extends UnitTest {
         FERIAL_3_2016, Optional.of(JustifiedTypeName.specified_minutes), 40);
     
     serviceFactories.buildPeriodChainPhase2(periodChain, toInsert, 
-        allPersistedAbsences, groupPersistedAbsences);
+        allPersistedAbsences, groupPersistedAbsences, person.getContracts());
     
     assertNotNull(periodChain.successPeriodInsert);
     assertEquals(periodChain.successPeriodInsert.attemptedInsertAbsence, toInsert);
@@ -116,7 +136,7 @@ public class Absences661Test extends UnitTest {
     PeriodChain periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
-        person.contracts,
+        person.getContracts(),
         Lists.newArrayList(), 
         Lists.newArrayList());
     
@@ -131,7 +151,7 @@ public class Absences661Test extends UnitTest {
     periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
-        person.contracts,
+        person.getContracts(),
         Lists.newArrayList(), 
         Lists.newArrayList());
 
@@ -147,7 +167,7 @@ public class Absences661Test extends UnitTest {
     periodChain = serviceFactories.buildPeriodChainPhase1(person, group661, 
         new LocalDate(2016, 11, 15), 
         Lists.newArrayList(), 
-        person.contracts,
+        person.getContracts(),
         Lists.newArrayList(), 
         Lists.newArrayList());
 

@@ -1,0 +1,39 @@
+<div id="container-nav-tabs" class="container">
+  <ul class="nav nav-tabs">
+    #{secure.check 'Administration.generalSetting'}
+      <li#{if actionSelected.equals("Administration.generalSetting")} class="active"#{set editable:true /}#{/if}>
+        #{secure.link @Administration.generalSetting()}Impostazioni generali#{/secure.link}
+      </li>
+    #{/secure.check}
+    #{secure.check 'Administration.playConfiguration'}
+      <li#{if actionSelected.equals("Administration.playConfiguration")} class="active"#{set editable:true /}#{/if}>
+        #{secure.link @Administration.playConfiguration()}Play!#{/secure.link}
+      </li>
+    #{/secure.check}
+    #{secure.check 'Administration.jvmConfiguration'}
+      <li#{if actionSelected.equals("Administration.jvmConfiguration")} class="active"#{/if}>
+        #{secure.link @Administration.jvmConfiguration()}Jvm#{/secure.link}
+      </li>
+    #{/secure.check}
+    #{secure.check 'Administration.runtimeData'}
+      <li#{if actionSelected.equals("Administration.runtimeData")} class="active"#{/if}>
+        #{secure.link @Administration.runtimeData()}Runtime#{/secure.link}
+      </li>
+    #{/secure.check}
+    #{secure.check 'Administration.threadsData'}
+      <li#{if actionSelected.equals("Administration.threadsData")} class="active"#{/if}>
+        #{secure.link @Administration.threadsData()}Thread#{/secure.link}
+      </li>
+    #{/secure.check}
+    #{secure.check 'Administration.emergency'}
+      <li#{if actionSelected.equals("Administration.emergency") || actionSelected.equals("Administration.shutdown")} class="active"#{/if}>
+        #{secure.link @Administration.emergency(), fa:'ambulance'}Emergency#{/secure.link}
+      </li>
+    #{/secure.check}
+    #{secure.check 'Administration.contractsToFix'}
+      <li#{if actionSelected.equals("Administration.contractsToFix")} class="active"#{set editable:true /}#{/if}>
+        #{secure.link @Administration.contractsToFix()}Contratti da correggere#{/secure.link}
+      </li>
+    #{/secure.check}
+  </ul>
+</div>

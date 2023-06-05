@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package models;
 
 import com.google.common.base.Optional;
@@ -13,11 +30,17 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import lombok.Getter;
+import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
+/**
+ * Riepilogo mensile di un contratto.
+ */
+@Getter
+@Setter
 @Entity
 @Table(
     name = "contract_month_recap",
@@ -30,49 +53,49 @@ public class ContractMonthRecap extends BaseModel {
   @Required
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "contract_id")
-  public Contract contract;
+  private Contract contract;
 
   @Column
-  public int year;
+  private int year;
 
   @Column
-  public int month;
+  private int month;
 
   //***************************************************************************/
   // MODULO RECAP ASSENZE
   // **************************************************************************/
 
   @Column(name = "abs_rc_usati")
-  public Integer recoveryDayUsed = 0;        //numeroRiposiCompensativi
+  private Integer recoveryDayUsed = 0;        //numeroRiposiCompensativi
 
   //***************************************************************************/
   // * FONTI DELL'ALGORITMO RESIDUI
   // **************************************************************************/
 
   @Column(name = "s_r_bp_init")
-  public int buoniPastoDaInizializzazione = 0;
+  private int buoniPastoDaInizializzazione = 0;
 
   @Column(name = "s_r_bp")
-  public int buoniPastoDalMesePrecedente = 0;
+  private int buoniPastoDalMesePrecedente = 0;
 
   @Column(name = "s_bp_consegnati")
-  public int buoniPastoConsegnatiNelMese = 0;
+  private int buoniPastoConsegnatiNelMese = 0;
 
   @Getter
   @Column(name = "s_bd_usati")
-  public int buoniPastoUsatiNelMese = 0;
+  private int buoniPastoUsatiNelMese = 0;
 
   @Column(name = "s_r_ac_initmese")
-  public int initResiduoAnnoCorrenteNelMese = 0;    //per il template (se sourceContract è del mese)
+  private int initResiduoAnnoCorrenteNelMese = 0;   //per il template (se sourceContract è del mese)
 
   @Column(name = "s_r_ap")
-  public int initMonteOreAnnoPassato = 0;        //dal precedente recap ma è utile salvarlo
+  private int initMonteOreAnnoPassato = 0;        //dal precedente recap ma è utile salvarlo
 
   @Column(name = "s_r_ac")
-  public int initMonteOreAnnoCorrente = 0;    //dal precedente recap ma è utile salvarlo
+  private int initMonteOreAnnoCorrente = 0;    //dal precedente recap ma è utile salvarlo
 
   @Column(name = "s_pf")
-  public int progressivoFinaleMese = 0;            //person day
+  private int progressivoFinaleMese = 0;            //person day
 
   /**
    * Questo campo ha due scopi: <br> 1) Il progressivo finale positivo da visualizzare nel template.
@@ -80,64 +103,64 @@ public class ContractMonthRecap extends BaseModel {
    * differire (esempio turnisti), decidere se splittarli in due campi distinti.
    */
   @Column(name = "s_pfp")
-  public int progressivoFinalePositivoMese = 0;
+  private int progressivoFinalePositivoMese = 0;
 
 
   @Column(name = "s_r_ap_usabile")
-  public boolean possibileUtilizzareResiduoAnnoPrecedente = true;
+  private boolean possibileUtilizzareResiduoAnnoPrecedente = true;
 
   @Column(name = "s_s1")
-  public int straordinariMinutiS1Print = 0;    //per il template
+  private int straordinariMinutiS1Print = 0;    //per il template
 
   @Column(name = "s_s2")
-  public int straordinariMinutiS2Print = 0;    //per il template
+  private int straordinariMinutiS2Print = 0;    //per il template
 
   @Column(name = "s_s3")
-  public int straordinariMinutiS3Print = 0;    //per il template
+  private int straordinariMinutiS3Print = 0;    //per il template
 
   @Column(name = "s_rc_min")
-  public int riposiCompensativiMinutiPrint = 0;    //per il template
+  private int riposiCompensativiMinutiPrint = 0;    //per il template
   
   @Column(name = "s_91ce_min")
-  public int riposiCompensativiChiusuraEnteMinutiPrint = 0;    //per il template
+  private int riposiCompensativiChiusuraEnteMinutiPrint = 0;    //per il template
 
   @Column(name = "s_ol")
-  public int oreLavorate = 0;                // riepilogo per il template
+  private int oreLavorate = 0;                // riepilogo per il template
 
   //***************************************************************************/
   // DECISIONI DELL'ALGORITMO
   // **************************************************************************/
 
   @Column(name = "d_pfn_ap")
-  public int progressivoFinaleNegativoMeseImputatoAnnoPassato = 0;
+  private int progressivoFinaleNegativoMeseImputatoAnnoPassato = 0;
   @Column(name = "d_pfn_ac")
-  public int progressivoFinaleNegativoMeseImputatoAnnoCorrente = 0;
+  private int progressivoFinaleNegativoMeseImputatoAnnoCorrente = 0;
   @Column(name = "d_pfn_pfp")
-  public int progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese = 0;
+  private int progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese = 0;
 
   @Column(name = "d_rc_ap")
-  public int riposiCompensativiMinutiImputatoAnnoPassato = 0;
+  private int riposiCompensativiMinutiImputatoAnnoPassato = 0;
   @Column(name = "d_rc_ac")
-  public int riposiCompensativiMinutiImputatoAnnoCorrente = 0;
+  private int riposiCompensativiMinutiImputatoAnnoCorrente = 0;
   @Column(name = "d_rc_pfp")
-  public int riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = 0;
+  private int riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = 0;
   
   @Column(name = "d_91ce_ap")
-  public int riposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato = 0;
+  private int riposiCompensativiChiusuraEnteMinutiImputatoAnnoPassato = 0;
   @Column(name = "d_91ce_ac")
-  public int riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente = 0;
+  private int riposiCompensativiChiusuraEnteMinutiImputatoAnnoCorrente = 0;
   @Column(name = "d_91ce_pfp")
-  public int riposiCompensativiChiusuraEnteMinutiImputatoProgressivoFinalePositivoMese = 0;
+  private int riposiCompensativiChiusuraEnteMinutiImputatoProgressivoFinalePositivoMese = 0;
 
   
   @Column(name = "d_r_ap")
-  public Integer remainingMinutesLastYear = 0;
+  private Integer remainingMinutesLastYear = 0;
 
   @Column(name = "d_r_ac")
-  public Integer remainingMinutesCurrentYear = 0;
+  private Integer remainingMinutesCurrentYear = 0;
 
   @Column(name = "d_r_bp")
-  public Integer remainingMealTickets = 0; //buoniPastoResidui
+  private Integer remainingMealTickets = 0; //buoniPastoResidui
 
 
   //***************************************************************************/
@@ -145,18 +168,18 @@ public class ContractMonthRecap extends BaseModel {
   // **************************************************************************/
 
   @Transient
-  public int straordinariMinuti = 0;    //competences (di appoggio deducibile dalle imputazioni)
+  private int straordinariMinuti = 0;    //competences (di appoggio deducibile dalle imputazioni)
 
   @Transient
-  public int riposiCompensativiMinuti = 0;    //absences  (di appoggio deducibile dalle imputazioni)
+  private int riposiCompensativiMinuti = 0;    //absences (di appoggio deducibile dalle imputazioni)
   // in charts è usato... capire cosa contiene alla fine e fixare
   
   @Transient
-  public int riposiCompensativiChiusuraEnteMinuti = 0;
+  private int riposiCompensativiChiusuraEnteMinuti = 0;
 
   //person day  // (di appoggio deducibile dalle imputazioni)
   @Transient
-  public int progressivoFinaleNegativoMese = 0;
+  private int progressivoFinaleNegativoMese = 0;
 
   //**************************************************************************
   // DI SUPPORTO (VALORIZZATI PER POI ESSERE SCORPORATI)
@@ -193,9 +216,9 @@ public class ContractMonthRecap extends BaseModel {
     LocalDate beginMonth = new LocalDate(this.year, this.month, 1);
     LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
     DateInterval monthInterval = new DateInterval(beginMonth, endMonth);
-    LocalDate endContract = this.contract.endDate;
-    if (this.contract.endContract != null) {
-      endContract = this.contract.endContract;
+    LocalDate endContract = this.contract.getEndDate();
+    if (this.contract.getEndContract() != null) {
+      endContract = this.contract.getEndContract();
     }
     if (DateUtility.isDateIntoInterval(endContract, monthInterval)) {
       return "(contratto scaduto in data " + endContract + ")";
@@ -214,9 +237,9 @@ public class ContractMonthRecap extends BaseModel {
    */
   @Transient
   public boolean expireInMonth() {
-    if (this.contract.endDate != null 
-        && this.contract.endDate.isBefore(
-            new LocalDate(year, month,1).dayOfMonth().withMaximumValue())) {
+    if (this.contract.getEndDate() != null 
+        && this.contract.getEndDate().isBefore(
+            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())) {
       return true;
     }
     return false;

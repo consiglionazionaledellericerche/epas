@@ -5,41 +5,82 @@
 <div class="container">
 	#{title title:'Gestione gruppi', administration:true /}
 
-  <p>
-  #{secure.check 'Groups.createGroup'}
-  <div class="text-center">
-    <a class="btn btn-success" href="@{blank(office.id)}" data-async-modal="#modalInsertBadgeReader">
-    <i class="fa fa-user-plus"></i>
-      Crea nuovo gruppo</a>
-  </div>
-  #{/secure.check}
-  </p>
-  #{if groups.isEmpty()}
-     #{alert color:'info'}
-     	<p>Al momento non sono definiti gruppi di lavoro per la sede <strong>${office.name}</strong>.
-     	Per definirne uno, cliccare sul bottone verde qui sopra.</p>
-     #{/alert}
-  #{/if}
-  
-  #{else}
-   
-  <ul class="list-group">
-  #{list items:groups, as:'item'}
-   
-	<li class="list-group-item list-group-item-grey">
-			<div class="pull-right btn-group">
-            #{secure.check 'Groups.deleteGroup'}
-            <a class="btn btn-sm btn-danger" href="@{Groups.deleteGroup(item.id)}">
-              <i class="fa fa-minus"></i> Rimuovi</a>
-            #{/secure.check}
-          	</div>
-	  #{group.item item:item, edit:'true' /}	  
-    </li>
-    
-  #{/list}
-  </ul>
-  #{/else}
+  #{tabList}
+    #{tabItem id:'attivo', title:'Gruppi Attivi', active:true /}
+    #{tabItem id:'nonAttivo', title:'Gruppi Non Attivi' /}
+  #{/tabList}
 
+  #{tabContent}
+
+  #{tabContentItem id:'attivo', active:true}
+  
+	  <p>
+	  #{secure.check 'Groups.createGroup'}
+	  <div class="text-center">
+	    <a class="btn btn-success" href="@{blank(office.id)}" data-async-modal="#modalInsertBadgeReader">
+	    <i class="fa fa-user-plus"></i>
+	      Crea nuovo gruppo</a>
+	  </div>
+	  #{/secure.check}
+	  </p>
+	  #{if activeGroups.isEmpty()}
+	     #{alert color:'info'}
+	     	<p>Al momento non sono definiti gruppi di lavoro per la sede <strong>${office.name}</strong>.
+	     	Per definirne uno, cliccare sul bottone verde qui sopra.</p>
+	     #{/alert}
+	  #{/if}
+	  
+	  #{else}
+	   
+	  <ul class="list-group">
+	  #{list items:activeGroups, as:'item'}
+	   
+		<li class="list-group-item list-group-item-grey">
+				<div class="pull-right btn-group">
+	            #{secure.check 'Groups.deleteGroup'}
+	            <a class="btn btn-sm btn-danger" href="@{Groups.deleteGroup(item.id)}">
+	              <i class="fa fa-minus"></i> Rimuovi</a>
+	            #{/secure.check}
+	          	</div>
+		  #{group.item item:item, edit:'true' /}	  
+	    </li>
+	    
+	  #{/list}
+	  </ul>
+	  #{/else}
+  #{/tabContentItem}
+
+  #{tabContentItem id:'nonAttivo', active:false}
+  
+	  #{if disabledGroups.isEmpty()}
+	     #{alert color:'info'}
+	     	<p>Al momento non sono presenti gruppi di lavoro <strong>disattivati</strong>
+	     	per la sede <strong>${office.name}</strong>.</p>
+	     #{/alert}
+	  #{/if}
+	  
+	  #{else}
+	   
+	  <ul class="list-group">
+	  #{list items:disabledGroups, as:'item'}
+	   
+		<li class="list-group-item list-group-item-grey">
+				<div class="pull-right btn-group">
+	            #{secure.check 'Groups.deleteGroup'}
+	            <a class="btn btn-sm btn-danger" href="@{Groups.deleteGroup(item.id)}">
+	              <i class="fa fa-minus"></i> Rimuovi</a>
+	            #{/secure.check}
+	          	</div>
+		  #{group.item item:item, edit:'true' /}	  
+	    </li>
+	    
+	  #{/list}
+	  </ul>
+	  #{/else}
+  
+  #{/tabContentItem}
+  
+  #{/tabContent}
 </div>
 
 <div id="modalInsertBadgeReader" class="modal fade container" tabindex="-1"></div>
