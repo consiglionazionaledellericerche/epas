@@ -20,12 +20,12 @@
 
         <input type="hidden" name="absenceType.id" value="${absenceType?.id}">
  	
- 		#{f.input 'absenceType.code',required:'true',value:absenceType?.code,popover:'true' /}
- 		#{f.input 'absenceType.certificateCode',popover:'true' /}
- 		#{f.input 'absenceType.description',popover:'true' /}
- 		#{f.booleanRadio 'absenceType.internalUse',popover:'true' /}
- 		#{f.date 'absenceType.validFrom',view:'year',popover:'true' /}
- 		#{f.date 'absenceType.validTo',view:'year',popover:'true' /}
+ 		#{f.input 'absenceType.code',required:'true',value:absenceType?.code,custom_popover:'true' /}
+ 		#{f.input 'absenceType.certificateCode',custom_popover:'true' /}
+ 		#{f.input 'absenceType.description',custom_popover:'true' /}
+ 		#{f.booleanRadio 'absenceType.internalUse',custom_popover:'true' /}
+ 		#{f.date 'absenceType.validFrom',view:'year',custom_popover:'true' /}
+ 		#{f.date 'absenceType.validTo',view:'year',custom_popover:'true' /}
 
  		<div class="form-group">
  			<label class="col-sm-3 control-label">Utilizzabile per le categorie:</label>
@@ -39,7 +39,7 @@
 				</div>
 		</div>
 
- 		#{f.booleanRadio 'absenceType.consideredWeekEnd',popover:'true' /}
+ 		#{f.booleanRadio 'absenceType.consideredWeekEnd',custom_popover:'true' /}
  		
  		#{f.selectModels 'absenceType.justifiedTypesPermitted.id', label:'Tipo di giustificazione permessa', 
  		  value:absenceType.justifiedTypesPermitted,
@@ -47,17 +47,17 @@
         #{f.input 'absenceType.justifiedTime', type:'number' /}   
         #{f.input 'absenceType.replacingTime', type:'number' /}
                 
-        #{f.selectEnum 'absenceType.mealTicketBehaviour', items:models.enumerate.MealTicketBehaviour.values(), popover:'true' /}
-        #{f.booleanRadio 'absenceType.reperibilityCompatible', popover:'true' /}
+        #{f.selectEnum 'absenceType.mealTicketBehaviour', items:models.enumerate.MealTicketBehaviour.values(), custom_popover:'true' /}
+        #{f.booleanRadio 'absenceType.reperibilityCompatible', custom_popover:'true' /}
         
-        #{f.booleanRadio 'absenceType.toUpdate', popover:'true' /}
+        #{f.booleanRadio 'absenceType.toUpdate', custom_popover:'true' /}
        
         <div class="container center">
           #{secure.check 'AbsenceGroups.saveAbsenceType' }
 	        <input class="btn btn-primary" type="submit" value="Ok">
 	        %{ canSave = true; }%  
           #{/secure.check}
-          
+
           #{if !canSave}
 	        #{alert color:'success'}
 	          <p><i class="fa fa-lock" aria-hidden="true"></i>

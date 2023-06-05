@@ -26,7 +26,7 @@
 		value:exportFile, byEquals:true /}
 	#{f.date 'beginDate'/}
   	#{f.date 'endDate' /}
-  	#{f.booleanRadio 'onlyMission', label:'Missioni con tempo a lavoro', popover:'true' /}
+  	#{f.booleanRadio 'onlyMission', label:'Missioni con tempo a lavoro', 'custom_popover':'true' /}
 	#{f.booleanRadio 'forAll', label:'Per tutti' /}
         
     <div id="single-person" #{if forAll} style="display: none" #{/if}>	

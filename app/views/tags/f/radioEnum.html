@@ -10,7 +10,7 @@ disabled: input disabilitato
 }%
 #{list _items}
 <label class="radio-inline ${_class}"
-       #{if _popover}popover data-content=#{if _popText}${_popText}#{/if}
+       #{if _custom_popover}custom-popover data-content=#{if _popText}${_popText}#{/if}
 #{else}'&{field.name+'.popover'}'#{/else}#{/if}>
 <input type="radio" name="${field.name}" id="${field.id}" value="${_}"
        #{if field.value== _} checked#{/if}

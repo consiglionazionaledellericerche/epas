@@ -13,7 +13,7 @@
    
    <!-- popover che si attiva sia sull'icona che 
         sul testo grazie a questo div che li contiene entrambi -->
-   #{if _popover} <div webui-popover-hover data-content="&{_popover}"> #{/if}
+   #{if _custom_popover} <div webui-popover-hover data-content="&{_custom_popover}"> #{/if}
 
      <!-- icona -->   
 	 #{if _fa}<i class="fa fa-${_fa}"></i> #{/if}
@@ -23,7 +23,7 @@
 	   #{doBody/}
 	 </span>
 	 
-   #{if _popover} </div>#{/if}	 
+   #{if _custom_popover} </div>#{/if}	 
    
    
 </a>
