@@ -3,7 +3,7 @@
     value = _attrs.containsKey('value') ? _value : field.value
   }%
   
-  <select class="form-control ${_class}" multiple select2 name="${field.name}" id="${field.id}"#{if _disabled} disabled#{/if}#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if} >
+  <select class="form-control ${_class}" multiple select2 name="${field.name}" id="${field.id}"#{if _disabled} disabled#{/if}#{if _custom_popover} custom-popover data-content='&{field.name+'.popover'}'#{/if} >
   <option></option>
     #{list _items}
        

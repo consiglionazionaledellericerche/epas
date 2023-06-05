@@ -34,7 +34,7 @@
 	    #{f.hidden 'stamping.id', value:stamping.id /}
 	  #{/if}
 	
-	  #{f.input 'time', popover:'true', value:stamping?.isPersistent() ? stamping?.formattedHour() : time, required:true/}
+	  #{f.input 'time', custom_popover:'true', value:stamping?.isPersistent() ? stamping?.formattedHour() : time, required:true/}
 	  #{f.radioEnum 'stamping.way', items:models.Stamping.WayType, required:true /}
 	
 	  

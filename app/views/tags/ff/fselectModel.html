@@ -12,7 +12,7 @@
       name = _name
     }
   }%
-  <select class="form-control ${_class}" name="${name}" id="${field.id}"#{ifnot _select2} select2#{/ifnot}#{if _disabled} disabled#{/if}#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if} >
+  <select class="form-control ${_class}" name="${name}" id="${field.id}"#{ifnot _select2} select2#{/ifnot}#{if _disabled} disabled#{/if}#{if _custom_popover} custom-popover data-content='&{field.name+'.popover'}'#{/if} >
     #{if _personalizeItems}
       #{doBody /}
     #{/if}
