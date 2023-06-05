@@ -57,18 +57,22 @@ public class QCompetenceRequest extends EntityPathBase<CompetenceRequest> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final BooleanPath managerApprovalRequired = createBoolean("managerApprovalRequired");
+
+    public final DateTimePath<org.joda.time.LocalDateTime> managerApproved = createDateTime("managerApproved", org.joda.time.LocalDateTime.class);
+
     public final NumberPath<Integer> month = createNumber("month", Integer.class);
 
     public final StringPath note = createString("note");
+
+    public final BooleanPath officeHeadApprovalRequired = createBoolean("officeHeadApprovalRequired");
+
+    public final DateTimePath<org.joda.time.LocalDateTime> officeHeadApproved = createDateTime("officeHeadApproved", org.joda.time.LocalDateTime.class);
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
     public final models.query.QPerson person;
-
-    public final BooleanPath reperibilityManagerApprovalRequired = createBoolean("reperibilityManagerApprovalRequired");
-
-    public final DateTimePath<org.joda.time.LocalDateTime> reperibilityManagerApproved = createDateTime("reperibilityManagerApproved", org.joda.time.LocalDateTime.class);
 
     public final EnumPath<models.enumerate.ShiftSlot> shiftSlot = createEnum("shiftSlot", models.enumerate.ShiftSlot.class);
 
@@ -111,3 +115,4 @@ public class QCompetenceRequest extends EntityPathBase<CompetenceRequest> {
     }
 
 }
+
