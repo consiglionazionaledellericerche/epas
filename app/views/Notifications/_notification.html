@@ -7,7 +7,7 @@
   <span style="padding-left: 4px">
     ${notification.message}
     #{if notification.redirect}
-      #{bb.b_link notification.url, fa:'external-link', color:'default', popover:'notification.show'}
+      #{bb.b_link notification.url, fa:'external-link', color:'default', custom_popover:'notification.show'}
       #{/bb.b_link}
     #{/if}
     #{else}
@@ -18,7 +18,7 @@
   <div class="pull-right">
     <div class="btn-group">
       #{if !notification.read}
-        #{bb.b_link @Notifications.read(notification.id, message, filter), color:'primary', fa:'check-circle', popover:'Segna come letta'}
+        #{bb.b_link @Notifications.read(notification.id, message, filter), color:'primary', fa:'check-circle', custom_popover:'Segna come letta'}
           &{'notification.archive'}
         #{/bb.b_link}
       #{/if}

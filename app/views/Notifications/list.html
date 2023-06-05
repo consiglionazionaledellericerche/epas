@@ -21,7 +21,7 @@
     #{form action:@Notifications.filter(), method:'POST', autocomplete:false, class:'form-inline auto-submit'}
       #{ff.fselectEnum 'filter', items:dao.NotificationDao.NotificationFilter.values(), value:filter, byEquals:'true', sronly:true /}
       #{ff.finput 'message', sronly:true, placeholder:'Filtra testo', faicon:'filter' /}
-      #{b.submit '', fa:'search', color:'primary', popover:'notification.show'/}
+      #{b.submit '', fa:'search', color:'primary', custom_popover:'notification.show'/}
     #{/form}    
     </div>
     <div class="col-sm-3">
@@ -31,7 +31,7 @@
         #{if message}
           #{f.hidden message, value:message /}
         #{/if}  
-        #{b.submit 'Archivia tutte (' + unReadNotifications.total + ')', fa:'check-circle', class:'pull-right', color:'warning', popover:'notification.show'/}
+        #{b.submit 'Archivia tutte (' + unReadNotifications.total + ')', fa:'check-circle', class:'pull-right', color:'warning', custom_popover:'notification.show'/}
       #{/form}
     #{/if}  
     </div>

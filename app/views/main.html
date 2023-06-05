@@ -138,13 +138,6 @@
             #{include './_notificationsMenu.html' /}
           
             #{if session.contains("sudo.username")}
-
-              #{if loginResponse != null}
-                <li data-toggle="tooltip" data-placement="bottom" title="Login effettuato su Attestati CNR">
-                  <a style="color: red"><span class="glyphicon glyphicon-user"></span> ${loginResponse.getUsernameCnr()}</a>
-                </li>
-              #{/if}
-            
               <li>
                 <a href="@{Administration.restoreUser()}">
                   &{'restoreUser'}&nbsp<i class="fa fa-sign-out"></i>

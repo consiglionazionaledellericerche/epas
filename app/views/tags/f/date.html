@@ -9,7 +9,7 @@
   name="${field.name}" type="text" 
   title="${label}" aria-label="${label}"
   value="${_value == null ? field.value?.format() : _value}"
-  #{if _popover} popover data-content='&{field.name+'.popover'}'#{/if}
+  #{if _custom_popover} custom-popover data-content='&{field.name+'.popover'}'#{/if}
   #{if _disabled} disabled#{/if}
   #{if _auto_submit_parent} auto-submit-parent#{/if}>
   <span class="input-group-addon"><i class="fa fa-calendar"></i></span>

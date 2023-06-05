@@ -55,7 +55,17 @@ public class Ldap extends Controller {
       url = request.params.get("return");
     }
     if (url == null) {
-      url = Play.configuration.getProperty("ldap.login.return", "/");
+      url = 
+          Play.configuration.getProperty("ldap.login.return", 
+              Play.configuration.getProperty("http.path", "/"));
+      log.debug("url from ldap.login.return = {}", url);
+    }
+
+    if (url.equals(Play.configuration.getProperty("http.path", "/")) 
+        && !Play.configuration.getProperty("http.path", "/").endsWith("/")) {
+      url = Play.configuration.getProperty("http.path") + "/";
+      log.debug("Play.configuration.getProperty('http.path') = {}, url={}", 
+          Play.configuration.getProperty("http.path"), url);
     }
 
     log.debug("Ldap: Redirecting user back to destination location: " + url);

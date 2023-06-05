@@ -62,6 +62,7 @@ import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.recaps.troubles.PersonTroublesInMonthRecap;
 import manager.recaps.troubles.PersonTroublesInMonthRecapFactory;
+import models.BadgeReader;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -69,6 +70,8 @@ import models.Role;
 import models.Stamping;
 import models.User;
 import models.UsersRolesOffices;
+import models.Zone;
+import models.ZoneToZones;
 import models.enumerate.StampTypes;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -146,7 +149,7 @@ public class Stampings extends Controller {
     if (currentPerson == null) {
       Application.index();
     }
-    
+
     IWrapperPerson wrperson = wrapperFactory.create(currentPerson);
 
     if (!wrperson.isActiveInMonth(new YearMonth(year, month))) {
@@ -195,7 +198,7 @@ public class Stampings extends Controller {
 
     val yearMonth = new YearMonth(
         year != 0 ? year : YearMonth.now().getYear(),
-        month != 0 ? month : YearMonth.now().getMonthOfYear());
+            month != 0 ? month : YearMonth.now().getMonthOfYear());
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
 
@@ -255,11 +258,17 @@ public class Stampings extends Controller {
     boolean insertOffsite = false;
     boolean insertNormal = true;
     boolean autocertification = false;
+    
+    List<BadgeReader> badgeReaders = person.getBadges()
+        .stream().map(b -> b.getBadgeReader()).collect(Collectors.toList());
+    List<Zone> zones = badgeReaders.stream()
+        .flatMap(br ->  br.getZones().stream().filter(z -> z != null)).collect(Collectors.toList());
 
     User user = Security.getUser().get();
     if (user.isSystemUser()) {
-      render(person, date, offsite, insertOffsite, insertNormal, autocertification);
+      render(person, date, offsite, insertOffsite, insertNormal, autocertification, zones);
     }
+
     IWrapperPerson wrperson = wrapperFactory
         .create(Security.getUser().get().getPerson());
     if (user.getPerson() != null && user.getPerson().equals(person)) {
@@ -279,7 +288,7 @@ public class Stampings extends Controller {
     if (autocertification == true  && insertOffsite == true) {
       insertOffsite = false;
     }
-    render(person, date, offsite, insertOffsite, insertNormal, autocertification);
+    render(person, date, offsite, insertOffsite, insertNormal, autocertification, zones);
   }
 
 
@@ -302,6 +311,11 @@ public class Stampings extends Controller {
     boolean ownStamping = false;
     final Person person = stamping.getPersonDay().getPerson();
     final LocalDate date = stamping.getPersonDay().getDate();
+    List<BadgeReader> badgeReaders = person.getBadges()
+        .stream().map(b -> b.getBadgeReader()).collect(Collectors.toList());
+    List<Zone> zones = badgeReaders.stream()
+        .flatMap(br ->  br.getZones().stream().filter(z -> z != null)).collect(Collectors.toList());
+
 
     if (stamping.isOffSiteWork()) {
       render("@editOffSite", stamping, person, date, historyStamping);
@@ -314,7 +328,7 @@ public class Stampings extends Controller {
       render("@editServiceReasons", stamping, person, date, historyStamping);
     }
 
-    render(stamping, person, date, historyStamping, ownStamping);
+    render(stamping, person, date, historyStamping, ownStamping, zones);
   }
 
   /**
@@ -326,19 +340,19 @@ public class Stampings extends Controller {
    * @param time     orario
    */
   public static void save(Long personId, @Required LocalDate date, @Required Stamping stamping,
-      @Required @CheckWith(StringIsTime.class) String time) {
+      @Required @CheckWith(StringIsTime.class) String time, Zone zone) {
 
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    
+
     if (stamping.getWay() == null) {
       Validation.addError("stamping.way", "Obbligatorio");
     }
     if (Validation.hasErrors()) {
       response.status = 400;
-      
+
       List<HistoryValue<Stamping>> historyStamping = Lists.newArrayList();
       if (stamping.isPersistent()) {
         historyStamping = stampingsHistoryDao.stampings(stamping.id);
@@ -359,9 +373,10 @@ public class Stampings extends Controller {
       // non è usato il costruttore con la add, quindi aggiungiamo qui a mano:
       personDay.getStampings().add(stamping);
     }
-        
+    
     rules.checkIfPermitted(stamping);
     final User currentUser = Security.getUser().get();
+    stamping.setStampingZone(zone.getName());
     String result = stampingManager
         .persistStamping(stamping, person, currentUser, newInsert, false);
     if (!Strings.isNullOrEmpty(result)) {
@@ -369,8 +384,8 @@ public class Stampings extends Controller {
     } else {
       flash.success(Web.msgSaved(Stampings.class));
     }
-    
-    
+
+
     //redirection stuff
     if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
         && currentUser.getPerson().id.equals(person.id)) {
@@ -378,7 +393,7 @@ public class Stampings extends Controller {
     }
     personStamping(person.id, date.getYear(), date.getMonthOfYear());
   }
-  
+
   /**
    * Metodo che permette il salvataggio della timbratura per lavoro fuori sede.
    *
@@ -393,7 +408,7 @@ public class Stampings extends Controller {
 
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-  
+
     //Temporaneo per la validazione
     stamping.setDate(LocalDateTime.now());
     validation.valid(stamping);
@@ -428,9 +443,9 @@ public class Stampings extends Controller {
     log.debug("inizio salvataggio della timbratura fuori sede, person = {}", person);
     rules.checkIfPermitted(stamping);
     log.debug("dopo permessi -> salvataggio della timbratura fuori sede, person = {}", person);
-    
+
     final User currentUser = Security.getUser().get();
-    
+
     String result = stampingManager
         .persistStamping(stamping, person, currentUser, newInsert, false);
     if (!Strings.isNullOrEmpty(result)) {
@@ -444,7 +459,7 @@ public class Stampings extends Controller {
     }
     personStamping(person.id, date.getYear(), date.getMonthOfYear());
   }
-  
+
 
   /**
    * Effettua il salvataggio dei soli campi reason, place e note di una
@@ -496,7 +511,7 @@ public class Stampings extends Controller {
     flash.success("Timbratura rimossa correttamente.");
 
     notificationManager.notificationStampingPolicy(currentUser, stamping, false, false, true);
-    
+
     //redirection stuff
     if (!currentUser.isSystemUser() && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)
         && currentUser.getPerson().id.equals(personDay.getPerson().id)) {
@@ -595,7 +610,7 @@ public class Stampings extends Controller {
     rules.checkIfPermitted(office);
 
     List<Stamping> stampingsByAdmin = stampingDao.adminStamping(new YearMonth(year, month), office);
-     
+
     if (pdf) {
       renderPDF("/Stampings/stampingsByAdminPDF.html", 
           month, year, office, offices, stampingsByAdmin);
@@ -603,9 +618,9 @@ public class Stampings extends Controller {
       render(month, year, office, offices, stampingsByAdmin);
     }
   }
-  
-  
-  
+
+
+
   /**
    * Presenza giornaliera dei dipendenti visibili all'amministratore.
    *
@@ -640,7 +655,7 @@ public class Stampings extends Controller {
 
     daysRecap = stampingManager.populatePersonStampingDayRecapList(
         activePersonsInDay, date, numberOfInOut);
-    
+
     Map<String, Integer> map = stampingManager.createDailyMap(daysRecap);
 
     render(daysRecap, office, date, numberOfInOut, map);
@@ -664,7 +679,7 @@ public class Stampings extends Controller {
         .getUsersRolesOffices(user, role, user.getPerson().getOffice());
     List<Person> people = Lists.newArrayList();
     if (uro.isPresent()) {
-      
+
       people = groupDao.groupsByManager(Optional.fromNullable(user.getPerson()))
           .stream().flatMap(g -> g.getPeople().stream().distinct()).collect(Collectors.toList()); 
     } else {
@@ -672,7 +687,7 @@ public class Stampings extends Controller {
           + "Rivolgiti all'amministratore del personale", user.getPerson().fullName());
       stampings(year, month);
     }
-    
+
     int numberOfInOut = stampingManager.maxNumberOfStampingsInMonth(date, people);
 
     List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();

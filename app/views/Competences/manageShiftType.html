@@ -92,35 +92,35 @@
 			#{alert color: 'info'}
 			#{f.input 'type.type' /}
 			#{f.input 'type.description' /}
-			#{f.booleanRadio 'type.allowUnpairSlots', popover:true /}
+			#{f.booleanRadio 'type.allowUnpairSlots', 'custom_popover':true /}
 			#{if type.organizaionShiftTimeTable != null }
-				#{f.booleanRadio 'considerEverySlot', value:type.organizaionShiftTimeTable.considerEverySlot, popover:true /}
+				#{f.booleanRadio 'considerEverySlot', value:type.organizaionShiftTimeTable.considerEverySlot, 'custom_popover':true /}
 			#{/if}
 			#{/alert}
 			#{alert color: 'danger'}
 			
 		  		<div class="row">
 				
-		  		<div class="col-sm-6">#{f.input 'type.entranceTolerance', type:'number', popover:'true', required:'true'/}</div>
-		  		<div class="col-sm-6">#{f.input 'type.entranceMaxTolerance', type:'number', popover:'true'/}</div>
+		  		<div class="col-sm-6">#{f.input 'type.entranceTolerance', type:'number', 'custom_popover':'true', required:'true'/}</div>
+		  		<div class="col-sm-6">#{f.input 'type.entranceMaxTolerance', type:'number', 'custom_popover':'true'/}</div>
 				</div>
 			#{/alert}	
 			#{alert color: 'danger'}
 				<div class="row">
 				
-		  		<div class="col-sm-6">#{f.input 'type.exitTolerance', type:'number', popover:'true', required:'true'/}</div>
-		  		<div class="col-sm-6">#{f.input 'type.exitMaxTolerance', type:'number', popover:'true'/}</div>
+		  		<div class="col-sm-6">#{f.input 'type.exitTolerance', type:'number', 'custom_popover':'true', required:'true'/}</div>
+		  		<div class="col-sm-6">#{f.input 'type.exitMaxTolerance', type:'number', 'custom_popover':'true'/}</div>
 				</div>
 			#{/alert}
 			#{alert color: 'warning'}	
 				<div class="row">
 				
-		  		<div class="col-sm-6">#{f.input 'type.breakInShift', type:'number', popover:'true', required:'true'/}</div>
-		  		<div class="col-sm-6">#{f.input 'type.breakMaxInShift', type:'number', popover:'true'/}</div>							
+		  		<div class="col-sm-6">#{f.input 'type.breakInShift', type:'number', 'custom_popover':'true', required:'true'/}</div>
+		  		<div class="col-sm-6">#{f.input 'type.breakMaxInShift', type:'number', 'custom_popover':'true'/}</div>							
 				</div>
 			#{/alert}
 			#{alert color: 'success'}	
-				#{f.input 'type.maxToleranceAllowed', type:'number', popover:'true'/}
+				#{f.input 'type.maxToleranceAllowed', type:'number', 'custom_popover':'true'/}
 	  		#{/alert}
 		  #{b.buttons center:true}
 		  		#{b.submit 'Ok'/}

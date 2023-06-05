@@ -49,10 +49,10 @@
 		#{f.input 'person.telephone'/}
 		#{f.date 'person.birthday', view:'year'/}
 		#{secure.check 'Persons.updatePerseoId'}
-       		#{f.input 'person.perseoId', popover: true /}
+       		#{f.input 'person.perseoId', custom_popover: true /}
        	#{/secure.check}
 
-   		#{f.input 'person.eppn', popover: true, disabled:!controllers.Resecure.check('Persons.updateEppn', person) /} 
+   		#{f.input 'person.eppn', custom_popover: true, disabled:!controllers.Resecure.check('Persons.updateEppn', person) /} 
 		        
 		<div class="col-sm-6 col-sm-offset-3">
 			#{alert color:'info'}

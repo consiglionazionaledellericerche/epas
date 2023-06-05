@@ -41,6 +41,9 @@
 	  #{else}
 	    #{f.selectEnum 'stamping.stampType', items:stampTypes /}
 	  #{/else}
+	  #{if !zones.isEmpty()}
+	  	#{f.selectModel 'zone', items:zones, required:true, getLabel:true /}
+	  #{/if}
 	
 	  #{f.input 'stamping.note' /}
 
