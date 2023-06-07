@@ -129,8 +129,7 @@ public class TemplateUtility {
   private final CompetenceRequestDao competenceRequestDao;
   private final InformationRequestDao informationRequestDao;
   private final GeneralSettingDao generalSettingDao;
-
-  
+ 
   /**
    * Costruttotore di default per l'injection dei vari componenti.
    */
@@ -146,6 +145,7 @@ public class TemplateUtility {
       NotificationDao notificationDao, UserDao userDao,
       CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
       ContractualReferenceDao contractualReferenceDao, AbsenceRequestDao absenceRequestDao,
+
       UsersRolesOfficesDao uroDao, GroupDao groupDao, TimeSlotDao timeSlotDao,
       CompetenceRequestDao competenceRequestDao, InformationRequestDao informationRequestDao,
       GeneralSettingDao generalSettingDao) {
@@ -169,12 +169,11 @@ public class TemplateUtility {
     this.absenceRequestDao = absenceRequestDao;
     this.uroDao = uroDao;
     this.groupDao = groupDao;
-    this.timeSlotDao = timeSlotDao;
     this.competenceRequestDao = competenceRequestDao;
     this.informationRequestDao = informationRequestDao;
     this.generalSettingDao = generalSettingDao;
-
-    
+    this.timeSlotDao = timeSlotDao;
+   
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
           @Override

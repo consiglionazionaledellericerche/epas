@@ -151,6 +151,7 @@ public class CompetenceRequests extends Controller {
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste da approvare  di tipo {} a partire da {}",
         type, fromDate);
+
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
     List<CompetenceRequest> results = competenceRequestDao
         .allResults(roleList, fromDate, Optional.absent(), type, person);

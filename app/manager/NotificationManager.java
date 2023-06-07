@@ -108,11 +108,9 @@ public class NotificationManager {
    */
   @Inject
   public NotificationManager(SecureManager secureManager, RoleDao roleDao, AbsenceDao absenceDao,
-
       AbsenceComponentDao componentDao, GroupDao groupDao, 
       ConfigurationManager configurationManager, CompetenceDao competenceDao,
       CompetenceCodeDao competenceCodeDao, InformationRequestDao requestDao) {
-
     this.secureManager = secureManager;
     this.roleDao = roleDao;
     this.absenceDao = absenceDao;
@@ -173,7 +171,6 @@ public class NotificationManager {
     final String message = String.format(template, person.fullName(), 
         stamping.getDate().toString(DTF),
         verso, stamping.getPlace(), stamping.getReason());
-
     person.getOffice().getUsersRolesOffices().stream()
     .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN)
         || uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
@@ -215,6 +212,7 @@ public class NotificationManager {
       modifier = person.fullName();
     }
 
+
     final String message = String.format(template, modifier, absence.getPersonDay()
         .getDate().toString(DF), absence.getAbsenceType().getCode());
     // controllare se dalla configurazione è possibile notificare le assenze da flusso
@@ -223,6 +221,7 @@ public class NotificationManager {
     if (config.equals(Boolean.FALSE)) {
       return;
     }
+
     person.getOffice().getUsersRolesOffices().stream()
     .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN)
         || uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
@@ -252,7 +251,6 @@ public class NotificationManager {
             + "o non attivato da configurazione");
       }
     }
-
   }
 
   /**
@@ -742,6 +740,7 @@ public class NotificationManager {
     log.info("Inviata email per rimozione utenti dalla reperibilità {} perchè contratto scaduto:"
         + "Mail: \n\tTo: {}\n\tSubject: {}\n\tbody: {}",
         description, userDestination.getPerson().getEmail(), simpleEmail.getSubject(), mailBody);
+
   }
 
   /**
@@ -919,6 +918,7 @@ public class NotificationManager {
       log.error("Impossibile inviare l'email a {} relativa alla sua comunicazione di assenza.", 
           absenceRequest.getPerson().getFullname(), e);
     }
+
   }
 
   /**
@@ -1218,14 +1218,17 @@ public class NotificationManager {
     if (competenceRequest.isPresent()) {
       sendEmailCompetenceRequestConfirmation(competenceRequest.get(), approval);
     }
+
     if (informationRequest.isPresent()) {
       sendEmailInformationRequestConfirmation(informationRequest.get(), approval);
     }
 
   }
 
-  private void sendEmailCompetenceRequestConfirmation(CompetenceRequest competenceRequest,
+
+  private void sendEmailCompetenceRequestConfirmation(CompetenceRequest competenceRequest, 
       boolean approval) {
+
     Verify.verifyNotNull(competenceRequest);
     final Person person = competenceRequest.getPerson();
     SimpleEmail simpleEmail = new SimpleEmail();
@@ -1431,10 +1434,8 @@ public class NotificationManager {
 
     return message.toString();
   }
-
+ 
   /**
-   * Metodo che ritorna il corretto ruolo da chiamare in base alla richiesta di competenza.
-   *
    * @param competenceRequest la richiesta di competenza.
    * @return il ruolo corretto per l'approvazione della richiesta.
    */
@@ -2206,6 +2207,10 @@ public class NotificationManager {
         TemplateExtensions.format(mission.dataInizio), 
         TemplateExtensions.format(mission.dataFine));
 
+
+    //sendEmailAbsenceRequestConfirmation(absenceRequest);
+
   }
-}
+
+ }
 

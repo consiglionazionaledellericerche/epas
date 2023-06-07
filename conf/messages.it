@@ -1110,6 +1110,7 @@ AbsenceRequestType.SHORT_TERM_PERMITS_TOP_LEVEL =permessi breve
 AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
 AbsenceRequestType.SHORT_TERM_PERMIT_TOP_LEVEL.blank =nuova richiesta permesso breve
 
+<<<<<<< HEAD
 Groups.seatOrganizationChart =Ruoli in ePAS all'interno della sede
 
 
@@ -1120,12 +1121,15 @@ AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL =comunica
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS_TOP_LEVEL = Mie comunicazioni ferie anno passato dopo deadline
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL.blank =nuova comunicazione ferie anno passato dopo deadline
 
-
 CompetenceRequests.overtimes =Mie richieste di straordinari
 CompetenceRequests.overtimesToApprove =Flussi di richieste straordinari
 CompetenceRequestType.OVERTIME_REQUEST=richiesta di straordinari
 CompetenceRequestType.OVERTIME_REQUESTS= Mie richieste di straordinari
 CompetenceRequestType.OVERTIME_REQUEST.blank =nuova richiesta di straordinari
+
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST =richiesta ferie anno passato dopo deadline
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS = Mie richieste ferie anno passato dopo deadline
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST.blank =nuova richiesta ferie anno passato dopo deadline
 
 Institutes.list= Sedi e Amministratori
 MealTicketCards.mealTicketCards= Gestione card buoni pasto elettronici
@@ -1377,6 +1381,7 @@ PERSONAL_PERMISSION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazi
 PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
 PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i Responsabili di gruppo da parte del Responsabile di Sede
 
+<<<<<<< HEAD
 ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION=Invio notifica a responsabile di sede per comunicazione assenza livelli I-III (non responsabili di gruppo)
 ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION=Invio notifica a responsabile di sede per comunicazione assenza livelli I-III (responsabili di gruppo)
 ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION=Invio notifica a responsabile di gruppo per comunicazione assenza livelli I-III
@@ -1405,7 +1410,6 @@ SERVICE_INFORMATION_IV_VIII_MANAGER_APPROVAL_REQUIRED= Richiesta approvazione us
 
 FATHER_PARENTAL_LEAVE_I_III_ADMINISTRATIVE_APPROVAL_REQUIRED=Richiesta presa visione richiesta di congedo parentale per il padre per i livelli I-III da parte del responsabile amministrativo
 FATHER_PARENTAL_LEAVE_IV_VIII_ADMINISTRATIVE_APPROVAL_REQUIRED=Richiesta presa visione richiesta di congedo parentale per il padre per i livelli IV-VIII da parte del responsabile amministrativo
-
 
 configurationDto.validityYear=Anno
 configurationDto.toTheEnd=Anche Per gli anni successivi

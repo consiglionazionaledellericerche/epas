@@ -560,12 +560,8 @@ public class AbsenceRequestManager {
             absenceRequest.getPerson().fullName(), insertReport.reperibilityShiftDate());
       }
       JPA.em().flush();
-      consistencyManager.updatePersonSituation(absenceRequest.getPerson().id, absenceForm.from);
-
-
+      consistencyManager.updatePersonSituation(absenceRequest.getPerson().id, absenceForm.from);    
     }
-
-
     return insertReport;
   }
 

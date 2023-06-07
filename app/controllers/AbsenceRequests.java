@@ -627,6 +627,7 @@ public class AbsenceRequests extends Controller {
     boolean approved = absenceRequestManager.approval(absenceRequest, user);
 
     if (approved) {
+
       notificationManager.sendEmailToUser(Optional.fromNullable(absenceRequest), 
           Optional.absent(), Optional.absent(), true);
 
@@ -634,6 +635,7 @@ public class AbsenceRequests extends Controller {
     } else {
       flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
+
 
     if (absenceRequest.isManagerApprovalRequired() && absenceRequest.getManagerApproved() == null
         && user.hasRoles(Role.GROUP_MANAGER)) {

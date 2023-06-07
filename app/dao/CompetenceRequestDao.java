@@ -123,19 +123,18 @@ public class CompetenceRequestDao extends DaoBase {
     if (!signer.getReperibilityTypes().isEmpty()) {
       conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
       .and(competenceRequest.employeeApproved.isNull())
-      .and(competenceRequest.reperibilityManagerApprovalRequired.isTrue())
-      .and(competenceRequest.reperibilityManagerApproved.isNull())
+      .and(competenceRequest.managerApprovalRequired.isTrue())
+      .and(competenceRequest.managerApproved.isNull())
           .and(person.office.eq(signer.getOffice()));
       query = getQueryFactory().selectFrom(competenceRequest)
           .join(competenceRequest.person, person)
           .leftJoin(person.reperibility, pr)
           .where(pr.personReperibilityType.in(signer.getReperibilityTypes()).and(conditions));
-          
     } else {
       conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
           .and(competenceRequest.employeeApproved.isNotNull()
-              .and(competenceRequest.reperibilityManagerApprovalRequired.isTrue()
-              .and(competenceRequest.reperibilityManagerApproved.isNull())));
+              .and(competenceRequest.managerApprovalRequired.isTrue()
+              .and(competenceRequest.managerApproved.isNull())));
       query = getQueryFactory().selectFrom(competenceRequest).where(conditions);
     }
     results.addAll(query.fetch());
@@ -225,9 +224,9 @@ public class CompetenceRequestDao extends DaoBase {
     }
 
     if (!signer.getReperibilityTypes().isEmpty()) {
-      conditions.andAnyOf((competenceRequest.reperibilityManagerApprovalRequired.isTrue())
-          .and(competenceRequest.reperibilityManagerApproved.isNotNull()), 
-          competenceRequest.reperibilityManagerApprovalRequired.isFalse());
+      conditions.andAnyOf((competenceRequest.managerApprovalRequired.isTrue())
+          .and(competenceRequest.managerApproved.isNotNull()), 
+          competenceRequest.managerApprovalRequired.isFalse());
       
       query = getQueryFactory().selectFrom(competenceRequest)
           .leftJoin(competenceRequest.person, person)
@@ -278,8 +277,8 @@ public class CompetenceRequestDao extends DaoBase {
   private BooleanBuilder managerQuery(List<Office> officeList, 
       BooleanBuilder condition, Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
-    condition.and(competenceRequest.reperibilityManagerApprovalRequired.isTrue())
-        .and(competenceRequest.reperibilityManagerApproved.isNull())
+    condition.and(competenceRequest.managerApprovalRequired.isTrue())
+        .and(competenceRequest.managerApproved.isNull())
         .andAnyOf(competenceRequest.employeeApproved.isNotNull(), 
             competenceRequest.employeeApprovalRequired.isFalse())
           .and(competenceRequest.person.office.in(officeList));

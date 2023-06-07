@@ -848,7 +848,6 @@ then
   $c.grant();
 end
 
-
 rule canViewOvertimeRequest
 when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
@@ -878,7 +877,6 @@ when
 then
   $c.grant();
 end
-
 
 rule EmployCanEditOrDeleteAbsenceRequest
 when
@@ -1005,8 +1003,6 @@ when
 			"AbsenceRequests.compensatoryRestsToApprove",
 			"AbsenceRequests.permissionsToApprove",
 			"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
-			
-
 			"AbsenceRequests.vacations",
 			"AbsenceRequests.compensatoryRests",
 			"AbsenceRequests.shortTermPermits",
@@ -1578,7 +1574,10 @@ when
 		"AbsenceRequests.list",
 		"AbsenceRequests.listToApprove",
 		"AbsenceRequests.vacationsToApprove",
-		"AbsenceRequests.compensatoryRestsToApprove",		
+
+		"AbsenceRequests.compensatoryRestsToApprove",
+		"AbsenceRequests.permissionsToApprove",
+		"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
@@ -1665,18 +1664,11 @@ when
         "Stampings.dailyPresence",
         "AbsenceRequests.blank",
 
-		"AbsenceRequests.edit",
-		"AbsenceRequests.save",
-		"AbsenceRequests.list",
-		"AbsenceRequests.listToApprove",
-		"AbsenceRequests.vacationsToApprove",
-		"AbsenceRequests.compensatoryRestsToApprove",
-		
 		"AbsenceRequests.vacations",
 		"AbsenceRequests.compensatoryRests",
 		"AbsenceRequests.shortTermPermits",
+
 		"AbsenceRequests.show",
-		
 		"CompetenceRequests.show",
 		"CompetenceRequests.list",
 		"CompetenceRequests.approval",
@@ -1694,12 +1686,9 @@ when
         "AbsenceRequests.permissionsToApprove",
         "AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 
-        "AbsenceRequests.vacations",
-        "AbsenceRequests.compensatoryRests",
-        "AbsenceRequests.shortTermPermits",
         "AbsenceRequests.personalPermissions",
         "AbsenceRequests.vacationsPastYearAfterDeadline",
-        "AbsenceRequests.show",
+
         
         /*Gestione green pass*/
         "CheckGreenPasses.dailySituation",
@@ -1731,7 +1720,6 @@ when
         "Configurations.edit",
         "Configurations.update",
         "Configurations.uploadAttachment"
-
 
         ), target == $o, granted == false)
 then
@@ -3916,7 +3904,6 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_37_FLOW, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action == "AbsenceRequests.pastYearEnabled", granted == false, target == null)
-
 then
   $c.grant();
 end
