@@ -13,7 +13,7 @@
 	if (config.managerApprovalRequired) {
 	 approvalsRequired++;
 	}
-	if (config.administrativeApprovalRequired) {
+	if (config.employeeApprovalRequired) {
 	  approvalsRequired++;
 	}
 	approvalRequired = approvalsRequired > 0
@@ -35,7 +35,7 @@
   	#{b.buttons center:true}
   		<a class="btn btn-success" href="@{CompetenceRequests.blank('person':person, 
   		'year':currentData.year, 'month':currentData.month, 'competenceType':competenceType)}">
-    		<i class="fa fa-plus"></i> &{'CompetenceRequestType.' + type + '.blank'}
+    		<i class="fa fa-plus"></i> &{'CompetenceRequestType.' + competenceType + '.blank'}
   		</a>
   	#{/b.buttons}
  	#{if myResults.isEmpty()}

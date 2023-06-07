@@ -12,6 +12,9 @@ ALTER TABLE competence_requests_history RENAME COLUMN reperibility_manager_appro
 ALTER TABLE competence_requests_history ADD COLUMN office_head_approval_required BOOLEAN default TRUE;
 ALTER TABLE competence_requests_history ADD COLUMN office_head_approved timestamp without time zone;
 
+UPDATE competence_request_events
+SET event_type = 'MANAGER_APPROVAL' WHERE event_type = 'REPERIBILITY_MANAGER_APPROVAL'; 
+
 # --- !Downs
 
 -- non è necessaria una down

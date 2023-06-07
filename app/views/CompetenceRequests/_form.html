@@ -58,8 +58,7 @@ Specificando la <strong>data</strong> che intendi richiedere come cambio e la <s
 				</table>
 			#{/list}
 	</div>
-	#{/if}
-
+	
 	#{secure.check 'CompetenceRequests.overtimesQuantityEnabled'}
 	#{f.input 'competenceRequest.value', type:'number', required:true /}
 	#{/secure.check}

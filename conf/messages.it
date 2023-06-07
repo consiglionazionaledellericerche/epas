@@ -1381,7 +1381,7 @@ PERSONAL_PERMISSION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazi
 PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
 PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i Responsabili di gruppo da parte del Responsabile di Sede
 
-<<<<<<< HEAD
+
 ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION=Invio notifica a responsabile di sede per comunicazione assenza livelli I-III (non responsabili di gruppo)
 ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION=Invio notifica a responsabile di sede per comunicazione assenza livelli I-III (responsabili di gruppo)
 ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION=Invio notifica a responsabile di gruppo per comunicazione assenza livelli I-III

@@ -462,16 +462,7 @@
        al responsabile amministrativo della sede di lavoro di cui fanno parte.      
       </p>
     #{/if}
-    
-    
-    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_OVERTIME_FLOWS) }
-      <p>Abilitando questo paramentro si permette alla sede <strong>${configuration.office.name}</strong> di usufruire del sistema
-      integrato di approvazione delle richieste di straordinario. <br>
-      Esso permette di far richiedere al dipendente lo straordinario direttamente al proprio responsabile di gruppo 
-      o al proprio responsabile di sede o a entrambi in sequenza 
-      (a seconda di quale deve essere il flusso di approvazione standard presente nella sede).
-      </p>
-    #{/if}
+
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY) }
       <p>Abilitando questo paramentro si permette al dipendente di specificare, in fase di richiesta straordinario, anche
       la quantità di ore che intende richiedere per un certo anno/mese.

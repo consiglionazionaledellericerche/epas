@@ -299,43 +299,48 @@ public class CompetenceRequests extends Controller {
       PersonReperibilityDay endDayToAsk, PersonReperibilityType type) {
 
     //rules.checkIfPermitted(type);
+    if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
+      Verify.verifyNotNull(beginDayToGive.getDate());
+      Verify.verifyNotNull(endDayToGive.getDate());
+      if (beginDayToGive.getDate().isAfter(endDayToGive.getDate())) {
+        Validation.addError("beginDayToGive", "Le date devono essere congruenti");
+      }
 
-    Verify.verifyNotNull(beginDayToGive.getDate());
-    Verify.verifyNotNull(endDayToGive.getDate());
+      val beginDateToAsk = beginDayToAsk != null ? beginDayToAsk.getDate() : null;
+      val endDateToAsk = endDayToAsk != null ? endDayToAsk.getDate() : null;
+      if (beginDateToAsk != null && endDateToAsk != null) {
+        if (beginDateToAsk.isAfter(endDateToAsk)) {
+          Validation.addError("beginDayToAsk", "Le date devono essere congruenti");
+        }
+        if (Days.daysBetween(beginDateToAsk, endDateToAsk).getDays()
+            != Days.daysBetween(beginDayToGive.getDate(), endDayToGive.getDate()).getDays()) {
+          Validation.addError("beginDayToAsk",
+              "La quantità di giorni da chiedere e da dare deve coincidere");
+          Validation.addError("beginDayToGive",
+              "La quantità di giorni da chiedere e da dare deve coincidere");
+        }
+      }
+      competenceRequest.setBeginDateToAsk(beginDateToAsk);
+      competenceRequest.setEndDateToAsk(endDateToAsk);
+      competenceRequest.setBeginDateToGive(beginDayToGive.getDate());
+      competenceRequest.setEndDateToGive(endDayToGive.getDate());
+      competenceRequest.setTeamMate(teamMate);
+    }    
 
+    notFoundIfNull(competenceRequest.getPerson());
+    
     competenceRequest.setYear(year);
     competenceRequest.setMonth(month);
     competenceRequest.setStartAt(LocalDateTime.now());
-    competenceRequest.setTeamMate(teamMate);
+    
     competenceRequest.setPerson(Security.getUser().get().getPerson());
-
-    notFoundIfNull(competenceRequest.getPerson());
 
     CompetenceRequest existing = competenceRequestManager.checkCompetenceRequest(competenceRequest);
     if (existing != null) {
       Validation.addError("teamMate",
           "Esiste già una richiesta di questo tipo");
     }
-
-    if (beginDayToGive.getDate().isAfter(endDayToGive.getDate())) {
-      Validation.addError("beginDayToGive", "Le date devono essere congruenti");
-    }
-
-    val beginDateToAsk = beginDayToAsk != null ? beginDayToAsk.getDate() : null;
-    val endDateToAsk = endDayToAsk != null ? endDayToAsk.getDate() : null;
-
-    if (beginDateToAsk != null && endDateToAsk != null) {
-      if (beginDateToAsk.isAfter(endDateToAsk)) {
-        Validation.addError("beginDayToAsk", "Le date devono essere congruenti");
-      }
-      if (Days.daysBetween(beginDateToAsk, endDateToAsk).getDays()
-          != Days.daysBetween(beginDayToGive.getDate(), endDayToGive.getDate()).getDays()) {
-        Validation.addError("beginDayToAsk",
-            "La quantità di giorni da chiedere e da dare deve coincidere");
-        Validation.addError("beginDayToGive",
-            "La quantità di giorni da chiedere e da dare deve coincidere");
-      }
-    }
+    
     if (!competenceRequest.getPerson().checkLastCertificationDate(
         new YearMonth(competenceRequest.getYear(),
             competenceRequest.getMonth()))) {
@@ -365,11 +370,6 @@ public class CompetenceRequests extends Controller {
           endDayToAsk, endDayToGive, type, year, month, teamMate, insertable,
           teamMates, types, reperibilityDates, myReperibilityDates);
     }
-
-    competenceRequest.setBeginDateToAsk(beginDateToAsk);
-    competenceRequest.setEndDateToAsk(endDateToAsk);
-    competenceRequest.setBeginDateToGive(beginDayToGive.getDate());
-    competenceRequest.setEndDateToGive(endDayToGive.getDate());
 
     competenceRequestManager.configure(competenceRequest);
 

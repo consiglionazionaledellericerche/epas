@@ -81,6 +81,7 @@ public class CompetenceRequestManager {
     final CompetenceRequestType type;
     boolean employeeApprovalRequired;
     boolean managerApprovalRequired;
+    boolean officeHeadApprovalRequired;
   }
 
   /**
@@ -161,6 +162,18 @@ public class CompetenceRequestManager {
   public CompetenceRequestConfiguration getConfiguration(
       CompetenceRequestType requestType, Person person) {
     val competenceRequestConfiguration = new CompetenceRequestConfiguration(person, requestType);
+    
+    if (requestType.alwaysSkipOfficeHeadApproval) {
+      competenceRequestConfiguration.officeHeadApprovalRequired = false;
+    } else {
+      if (requestType.getOfficeHeadApprovalRequiredTechnicianLevel().isPresent()) {
+        competenceRequestConfiguration.officeHeadApprovalRequired =
+            (Boolean) configurationManager.configValue(
+                person.getOffice(), requestType.officeHeadApprovalRequiredTechnicianLevel.get(),
+                LocalDate.now());
+      }
+    }
+    
     if (requestType.alwaysSkipManagerApproval) {
       competenceRequestConfiguration.managerApprovalRequired = false;
     } else {

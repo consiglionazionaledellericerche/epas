@@ -52,7 +52,7 @@
 				<th width="10%">Dal</th>
 				<th width="10%">Al </th>
 	
-				#{if config.reperibilityManagerApprovalRequired}
+				#{if config.managerApprovalRequired}
 					<th width="20%">Supervisore del servizio</th>
 				#{/if}
 				#{if config.employeeApprovalRequired}
@@ -87,8 +87,8 @@
 				#{if config.managerApprovalRequired}
 					<td>#{f.value 'item.managerApproved', value:item.managerApproved ?: 'non ancora approvata' /}</td>
 				#{/if}
-				#{if config.administrativeApprovalRequired}
-					<td>#{f.value 'item.administrativeApproved', value:item.administrativeApproved ?: 'non ancora approvata' /}</td>
+				#{if config.employeeApprovalRequired}
+					<td>#{f.value 'item.employeeApproved', value:item.employeeApproved ?: 'non ancora approvata' /}</td>
 				#{/if}
 				#{if config.officeHeadApprovalRequired}
 					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved ?: 'non ancora approvata' /}</td>

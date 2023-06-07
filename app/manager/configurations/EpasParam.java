@@ -627,17 +627,6 @@ public enum EpasParam {
   //#####################################################################
   //FLOWS PARAMS COMPETENCES
   
-  /**
-   * Attivazione o meno delle richieste di straordinario
-   */
-  ENABLE_OVERTIME_FLOWS(
-      "enable_overtime_flows",
-      EpasParamCategory.COMPETENCE_FLOWS,
-      EpasParamTimeType.GENERAL,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
   
   /**
    * Attivazione della possibilità per il dipendente di richiedere le ore di straordinario
