@@ -176,6 +176,10 @@ public class CompetenceRequest extends MutableModel {
     return managerApproved != null;
   }
 
+  @Transient
+  public boolean isOfficeHeadApproved() {
+    return officeHeadApproved != null;
+  }
   
   /**
    * Se non sono state già rilasciate approvazioni necessarie allora il possessore 
@@ -199,7 +203,8 @@ public class CompetenceRequest extends MutableModel {
   public boolean isFullyApproved() {
     return (!this.managerApprovalRequired || this.isManagerApproved()) 
         && (!this.employeeApprovalRequired
-            || this.isEmployeeApproved());
+            || this.isEmployeeApproved())
+        && (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved());
   }
   
   @Transient

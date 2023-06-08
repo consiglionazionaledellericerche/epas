@@ -379,6 +379,27 @@ public class NotificationManager {
     }
     return role;
   }
+  
+  /**
+   * Metodo privato che ritorna il ruolo a cui inviare la notifica della richiesta 
+   * di competenza.
+   *
+   * @param competenceRequest la richiesta di flusso di richiesta competenza
+   * @return il ruolo a cui inviare la notifica della richiesta di competenza.
+   */
+  private Role getProperRole(CompetenceRequest competenceRequest) {
+    Role role = null;
+    if (competenceRequest.isOfficeHeadApprovalRequired()
+        && competenceRequest.getOfficeHeadApproved() == null) {
+      role = roleDao.getRoleByName(Role.SEAT_SUPERVISOR);
+    }
+    if (competenceRequest.isManagerApprovalRequired()
+        && competenceRequest.getManagerApproved() == null) {
+      role = roleDao.getRoleByName(Role.GROUP_MANAGER);
+    }
+
+    return role;
+  }
 
   /**
    * Metodo privato che ritorna il ruolo a cui inviare la notifica della richiesta d'assenza.
@@ -1240,6 +1261,8 @@ public class NotificationManager {
     String requestType = "";
     if (competenceRequest.getType() == CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST) {
       requestType = Messages.get("CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST");
+    } else {
+      requestType = Messages.get("CompetenceRequestType.OVERTIME_REQUEST");
     }
     simpleEmail.setSubject("ePas Approvazione flusso");
     final StringBuilder message = new StringBuilder()
@@ -1334,7 +1357,13 @@ public class NotificationManager {
   private void sendEmailCompetenceRequest(CompetenceRequest competenceRequest) {
     Verify.verifyNotNull(competenceRequest);
     SimpleEmail simpleEmail = new SimpleEmail();
-    final User userDestination = getProperUser(competenceRequest);
+    User userDestination = null;
+    if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
+      userDestination = getProperUser(competenceRequest);
+    } else {
+      //TODO: inserire qui la ricerca del ruolo a cui destinare la mail di richiesta straordinari
+    }
+    
     log.info("Destination = {}", userDestination);
     if (userDestination == null) {
       log.warn("Non si è trovato il ruolo a cui inviare la mail per la richiesta d'assenza di "
@@ -1493,27 +1522,56 @@ public class NotificationManager {
     //se il flusso è terminato notifico a chi ha fatto la richiesta...
     if (competenceRequest.isFullyApproved()) {
       Notification.builder().destination(person.getUser()).message(message)
-      .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
-
-      if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
-        //TODO: verificare se abbia senso informare qualche altro ruolo del cambio di reperibilità
-      }
+      .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();      
     }
-    final User userDestination = getProperUser(competenceRequest);
-    if (userDestination == null) {
-      log.info("Non si è trovato l'utente a cui inviare la notifica per la richiesta di "
-          + "{} di tipo {} con date {}, {}",
-          competenceRequest.getPerson(), competenceRequest.getType(), 
-          competenceRequest.getBeginDateToAsk(),
-          competenceRequest.getEndDateToAsk());
+    if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
+      final User userDestination = getProperUser(competenceRequest);
+      if (userDestination == null) {
+        log.info("Non si è trovato l'utente a cui inviare la notifica per la richiesta di "
+            + "{} di tipo {} con date {}, {}",
+            competenceRequest.getPerson(), competenceRequest.getType(), 
+            competenceRequest.getBeginDateToAsk(),
+            competenceRequest.getEndDateToAsk());
+        return;
+      }
+      Notification.builder().destination(userDestination).message(message)
+      .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
       return;
     }
-
-    Notification.builder().destination(userDestination).message(message)
-    .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
-    return;
-
-
+    
+    final Role roleDestination = getProperRole(competenceRequest);
+    if (roleDestination == null) {
+      log.info(
+          "Non si è trovato il ruolo a cui inviare la notifica per la richiesta d'assenza di "
+              + "{} di tipo {} con date {}, {}",
+              competenceRequest.getPerson(), competenceRequest.getType(), competenceRequest.getStartAt(),
+              competenceRequest.getEndTo());
+      return;
+    }
+    List<User> users =
+        person.getOffice().getUsersRolesOffices().stream()
+        .filter(uro -> uro.getRole().equals(roleDestination))
+        .map(uro -> uro.getUser()).collect(Collectors.toList());
+    if (roleDestination.getName().equals(Role.GROUP_MANAGER)) {
+      log.info("Notifica al responsabile di gruppo per {}", competenceRequest);
+      List<Group> groups =
+          groupDao.groupsByOffice(person.getOffice(), Optional.absent(), Optional.of(false));
+      log.debug("Gruppi da controllare {}", groups);
+      for (User user : users) {
+        for (Group group : groups) {
+          if (group.getManager().equals(user.getPerson()) && group.getPeople().contains(person)) {
+            Notification.builder().destination(user).message(message)
+            .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
+          }
+        }
+      }
+      return;
+    } else {
+      users.forEach(user -> {
+        Notification.builder().destination(user).message(message)
+        .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
+      });
+    }
   }
 
   /**
