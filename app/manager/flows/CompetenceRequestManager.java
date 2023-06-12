@@ -20,6 +20,7 @@ package manager.flows;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import controllers.Security;
+import dao.CompetenceCodeDao;
 import dao.CompetenceRequestDao;
 import dao.GroupDao;
 import dao.PersonDao;
@@ -36,6 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
+import models.Competence;
+import models.CompetenceCode;
 import models.Person;
 import models.PersonReperibilityDay;
 import models.Role;
@@ -68,6 +71,7 @@ public class CompetenceRequestManager {
   private GroupDao groupDao;
   private PersonDao personDao;
   private PersonReperibilityDayDao repDao;
+  private CompetenceCodeDao competenceCodeDao;
 
   /**
    * DTO per la configurazione delle CompenteRequest.
@@ -101,7 +105,7 @@ public class CompetenceRequestManager {
       UsersRolesOfficesDao uroDao, RoleDao roleDao, NotificationManager notificationManager,
       CompetenceRequestDao competenceRequestDao,
       GroupDao groupDao, PersonDao personDao,
-      PersonReperibilityDayDao repDao) {
+      PersonReperibilityDayDao repDao, CompetenceCodeDao competenceCodeDao) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
@@ -110,6 +114,7 @@ public class CompetenceRequestManager {
     this.groupDao = groupDao;
     this.personDao = personDao;
     this.repDao = repDao;
+    this.competenceCodeDao = competenceCodeDao;
 
   }
 
@@ -211,10 +216,10 @@ public class CompetenceRequestManager {
 
     val config = getConfiguration(competenceRequest.getType(), competenceRequest.getPerson());
 
-    competenceRequest
-    .setManagerApprovalRequired(config.managerApprovalRequired);
+    competenceRequest.setManagerApprovalRequired(config.managerApprovalRequired);
 
     competenceRequest.setEmployeeApprovalRequired(config.employeeApprovalRequired);
+    competenceRequest.setOfficeHeadApprovalRequired(config.officeHeadApprovalRequired);
   }
 
   /**
@@ -391,8 +396,17 @@ public class CompetenceRequestManager {
     competenceRequest.setFlowEnded(true);
     competenceRequest.save();
     log.info("Flusso relativo a {} terminato. ", competenceRequest);
-
-    if (competenceRequest.getType() == CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST) {
+    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+      Competence competence = new Competence();
+      competence.setMonth(competenceRequest.getMonth());
+      competence.setYear(competenceRequest.getYear());
+      competence.setValueApproved(competenceRequest.getValue());
+      competence.setPerson(competenceRequest.getPerson());
+      competence.setCompetenceCode(code);
+      competence.save();
+      return true;
+    } else {
       LocalDate temp = competenceRequest.getBeginDateToGive();
       PersonReperibilityDay repDayAsker = null;
       PersonReperibilityDay repDayGiver = null;
@@ -539,6 +553,12 @@ public class CompetenceRequestManager {
       reperibilityManagerApproval(competenceRequest.id, user);
       approved = true;
     }
+    if (competenceRequest.isOfficeHeadApprovalRequired() 
+        && competenceRequest.getOfficeHeadApproved() == null) {
+      officeHeadApproval(competenceRequest.id, user);
+      approved = true;
+    }
+    
     if (competenceRequest.isManagerApprovalRequired()
         && !competenceRequest.isManagerApproved()) {
       log.debug("Necessaria l'approvazione da parte del manager della reperibilità per {}",
@@ -548,6 +568,17 @@ public class CompetenceRequestManager {
     return approved;
   }
 
+  
+  public void officeHeadApproval(long id, User user) {
+    CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().getPerson();
+    executeEvent(competenceRequest, currentPerson, 
+        CompetenceRequestEventType.OFFICE_HEAD_APPROVAL, Optional.absent());
+    log.info("{} approvata dal responsabile di sede {}.", 
+        competenceRequest, currentPerson.getFullname());
+    
+    notificationManager.notificationCompetenceRequestPolicy(user, competenceRequest, true);
+  }
 
   /**
    * Approvazione richiesta competenza da parte del responsabile di gruppo.

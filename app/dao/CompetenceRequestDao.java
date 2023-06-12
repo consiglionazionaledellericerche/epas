@@ -85,14 +85,14 @@ public class CompetenceRequestDao extends DaoBase {
   }
 
   /**
-   * Metodo che ritorna la lista di tutte le richieste di assenza attive.
+   * Metodo che ritorna la lista di tutte le richieste di competenza attive.
    *
    * @param uros la lista dei ruoli della persona che deve approvare
    * @param fromDate da quando cercare le richieste
    * @param toDate a quando cercare le richieste (opzionale)
    * @param competenceRequestType il tipo della richiesta
    * @param signer il dipendente deputato all'approvazione
-   * @return la lista di tutte le richieste di assenza attive.
+   * @return la lista di tutte le richieste di competenza attive.
    */
   public List<CompetenceRequest> allResults(List<UsersRolesOffices> uros,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate,
@@ -173,23 +173,42 @@ public class CompetenceRequestDao extends DaoBase {
     }
 
     List<CompetenceRequest> results = new ArrayList<>();
-
-    if (!signer.getReperibilityTypes().isEmpty()) {
-      List<Office> officeList = 
-          roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
-      conditions = managerQuery(officeList, conditions, signer);
-      List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
-          .join(competenceRequest.person, person)
-          .join(person.reperibility, pr)
-          .where(pr.personReperibilityType.supervisor.eq(signer).and(conditions))
-          .fetch();
-      results.addAll(queryResults);
-    } else {
-      conditions = employeeQuery(conditions, signer);
-      List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
-          .where(competenceRequest.teamMate.eq(signer).and(conditions)).fetch();
-      results.addAll(queryResults);
+    
+    switch (type) {
+      case CHANGE_REPERIBILITY_REQUEST:
+        if (!signer.getReperibilityTypes().isEmpty()) {
+          List<Office> officeList = 
+              roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
+          conditions = managerQuery(officeList, conditions, signer);
+          List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
+              .join(competenceRequest.person, person)
+              .join(person.reperibility, pr)
+              .where(pr.personReperibilityType.supervisor.eq(signer).and(conditions))
+              .fetch();
+          results.addAll(queryResults);
+        } else {
+          conditions = employeeQuery(conditions, signer);
+          List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
+              .where(competenceRequest.teamMate.eq(signer).and(conditions)).fetch();
+          results.addAll(queryResults);
+        }
+        break;
+      case OVERTIME_REQUEST:
+        List<Office> officeList = 
+        roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
+        if (roleList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))) {
+          conditions = officeHeadQuery(officeList,conditions, signer);
+        } else {          
+          conditions = managerQuery(officeList, conditions, signer);
+        }
+        List<CompetenceRequest> queryResult = getQueryFactory()
+            .selectFrom(competenceRequest).where(conditions).fetch();
+        results.addAll(queryResult);
+        break;
+        default:
+          break;          
     }
+    
     return results;
   }
 
@@ -290,6 +309,17 @@ public class CompetenceRequestDao extends DaoBase {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     condition.and(competenceRequest.employeeApprovalRequired.isTrue())
         .and(competenceRequest.employeeApproved.isNull());
+    return condition;
+  }
+  
+  private BooleanBuilder officeHeadQuery(List<Office> officeList,
+      BooleanBuilder condition, Person signer) {
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    condition.and(competenceRequest.officeHeadApprovalRequired.isTrue())
+        .and(competenceRequest.officeHeadApproved.isNull())
+        .andAnyOf(competenceRequest.managerApproved.isNotNull(), 
+            competenceRequest.managerApprovalRequired.isFalse())
+        .and(competenceRequest.person.office.in(officeList));
     return condition;
   }
 

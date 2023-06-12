@@ -8,7 +8,7 @@
 			#{if !onlyOwn}
 				<th width="15%" #{if approvalRequired}rowspan="2"#{/if}>&{'competenceRequest.person'}</th>
 			#{/if}
-			#{if competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
+			#{if type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
 				<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>anno</th>
 				<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>mese</th>
 				<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>quantità</th>
@@ -32,14 +32,11 @@
 			<th #{if approvalRequired}rowspan="2"#{/if}>Note</th>
 				
 		</tr>			
-		#{if approvalRequired && competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
+		#{if approvalRequired && type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
 			<tr>
 				#{if config.managerApprovalRequired}
 					<th width="20%">Responsabile di gruppo</th>
 				#{/if}						
-				#{if config.administrativeApprovalRequired}
-					<th width="20%">&{'absenceRequest.administrativeApproved'}</th>
-				#{/if}
 				#{if config.officeHeadApprovalRequired}
 					<th width="20%">Responsabile di sede</th>
 				#{/if}			
@@ -70,7 +67,7 @@
 					<td>#{f.value 'item.person.fullname', value:item.person.fullname /}</td>
 				#{/if}
 				
-				#{if competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}	
+				#{if type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}	
 					<td>#{f.value 'item.year', value:item.year /}</td>	    
 					<td>#{f.value 'item.month', value:item.month /}</td>
 					<td>#{f.value 'item.value', value:item.value /}</td>
@@ -103,12 +100,7 @@
 				</td>
 				<td>
 				#{secure.check 'CompetenceRequests.approval', target: item }
-				#{if overtimesQuantityEnabled}
-					<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id, true)}">
-				#{/if}
-				#{else}
-					<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}" data-async-modal="#defaultModal" color="primary" title="Approva">
-				#{/else}
+				<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}" data-async-modal="#defaultModal" color="primary" title="Approva">
         		Approva 
       			</a>
       			#{/secure.check}

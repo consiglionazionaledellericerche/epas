@@ -113,8 +113,8 @@ public class CompetenceRequests extends Controller {
    *
    * @param competenceType il tipo di competenza
    */
-  public static void list(CompetenceRequestType competenceType) {
-    Verify.verifyNotNull(competenceType);
+  public static void list(CompetenceRequestType type) {
+    Verify.verifyNotNull(type);
 
     val currentUser = Security.getUser().get();
     if (currentUser.getPerson() == null) {
@@ -126,17 +126,17 @@ public class CompetenceRequests extends Controller {
     val person = currentUser.getPerson();
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste di tipo {} per {} a partire da {}",
-        competenceType, person, fromDate);
+        type, person, fromDate);
 
-    val config = competenceRequestManager.getConfiguration(competenceType, person);
+    val config = competenceRequestManager.getConfiguration(type, person);
     List<CompetenceRequest> myResults = competenceRequestDao
-        .findByPersonAndDate(person, fromDate, Optional.absent(), competenceType, true);
+        .findByPersonAndDate(person, fromDate, Optional.absent(), type, true);
     List<CompetenceRequest> closed = competenceRequestDao
-        .findByPersonAndDate(person, fromDate, Optional.absent(), competenceType, false);
+        .findByPersonAndDate(person, fromDate, Optional.absent(), type, false);
     val onlyOwn = true;
     boolean persist = false;
 
-    render(config, myResults, competenceType, onlyOwn, persist, closed);
+    render(config, myResults, type, onlyOwn, persist, closed);
   }
 
   /**
