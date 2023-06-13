@@ -620,23 +620,21 @@ public class ShiftManager2 {
         } else {
           shifts.forEach(shift -> fixShiftTrouble(shift, ShiftTroubles.SHIFT_INCOMPLETED));
         }
-      }  
-    }
-
-    if (activity.isAllowUnpairSlots()) {      
-      long morningSize = shifts.stream()
-          .filter(psd -> psd.getShiftSlot().equals(ShiftSlot.MORNING)).count();
-      long afternoonSize = shifts.stream()
-          .filter(psd -> psd.getShiftSlot().equals(ShiftSlot.AFTERNOON)).count();
-      if (morningSize - afternoonSize > 1 || afternoonSize - morningSize > 1) {
-        shifts.forEach(shift 
-            -> setShiftTrouble(shift, ShiftTroubles.TOO_MANY_DIFFERENCE_BETWEEN_SLOTS));
-      } else {
-        shifts.forEach(shift 
-            -> fixShiftTrouble(shift, ShiftTroubles.TOO_MANY_DIFFERENCE_BETWEEN_SLOTS));
+        if (activity.isAllowUnpairSlots()) {
+          long morningSize = shifts.stream().filter(psd -> Objects.nonNull(psd.getShiftSlot()))
+              .filter(psd -> ShiftSlot.MORNING.equals(psd.getShiftSlot())).count();
+          long afternoonSize = shifts.stream().filter(psd -> Objects.nonNull(psd.getShiftSlot()))
+              .filter(psd -> ShiftSlot.AFTERNOON.equals(psd.getShiftSlot())).count();
+          if (morningSize - afternoonSize > 1 || afternoonSize - morningSize > 1) {
+            shifts.forEach(shift 
+                -> setShiftTrouble(shift, ShiftTroubles.TOO_MANY_DIFFERENCE_BETWEEN_SLOTS));
+          } else {
+            shifts.forEach(shift 
+                -> fixShiftTrouble(shift, ShiftTroubles.TOO_MANY_DIFFERENCE_BETWEEN_SLOTS));
+          }
+        }
       }
     }
-
 
     // 2. Verifica che gli slot siano tutti validi e setta PROBLEMS_ON_OTHER_SLOT su quelli da
     // invalidare a causa degli altri turni non rispettati

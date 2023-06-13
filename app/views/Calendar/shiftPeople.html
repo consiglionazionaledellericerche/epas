@@ -48,7 +48,7 @@
 #{list items:organizationSlotList, as:'organizationShiftslot'}
 <div class="radio">
   <label>
-    <input type="radio" name="organizationShiftslot" id="organizationShiftslot" value="${organizationShiftslot.id}">
+    <input type="radio" name="organizationShiftslot" id="organizationShiftslot-${organizationShiftslot.id}" value="${organizationShiftslot.id}">
     ${organizationShiftslot.beginSlot.format()} - ${organizationShiftslot.endSlot.format()}
   </label>
 </div>
