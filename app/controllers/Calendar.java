@@ -514,8 +514,8 @@ public class Calendar extends Controller {
           personShiftDay.setOrganizationShiftSlot(organizationShiftslot);
         } else {
           personShiftDay.setShiftSlot(shiftSlot);
-        }        
- 
+        }
+
         personShiftDay.setPersonShift(shiftDao
             .getPersonShiftByPersonAndType(personId, personShiftDay.getShiftType().getType()));
         Optional<String> error = Optional.of("");
