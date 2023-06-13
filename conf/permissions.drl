@@ -114,7 +114,7 @@ when
   		&& reperibility != null && !reperibility.isEmpty()) from currentOperator.person
   $o: Office() from $p.getOffice()
   Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.getConfigurations()
-  $c: PermissionCheck(action in ("CompetenceRequests.enabled", "CompetenceRequests.handleEnabled"), granted == false, target == null)
+  $c: PermissionCheck(action in ("CompetenceRequests.enableReperibilityChange"), granted == false, target == null)
 then
   $c.grant();
 end
@@ -746,7 +746,6 @@ when
 		"CompetenceRequests.blank",
 		"CompetenceRequests.edit",
 		"CompetenceRequests.save",
-		"CompetenceRequests.delete",
 		"CompetenceRequests.show",
 		"CompetenceRequests.overtimes",
 		
@@ -903,9 +902,8 @@ when
   UsersRolesOffices(role.name == Role.EMPLOYEE)
   CompetenceRequest(person == currentOperator.person, ownerCanEditOrDelete())
   $c: PermissionCheck( action in ("CompetenceRequests.edit" ,
-    "CompetenceRequests.save", "CompetenceRequests.delete" ), granted == false)
+    "CompetenceRequests.save", "CompetenceRequests.delete" ), target == null, granted == false)
 then
-  System.out.println("Sono nella EmployCanEditOrDeleteCompetenceRequest");
   $c.grant();
 end
 
@@ -922,7 +920,7 @@ end
 rule EmployCanDeleteSpecificCompetenceRequest
 when
   UsersRolesOffices(role.name == Role.EMPLOYEE)
-  $ar: CompetenceRequest(person == currentOperator.person, flowEnded == false,
+  $ar: CompetenceRequest(person == currentOperator.person, flowEnded == false, employeeApproved == false,
   		managerApproved == null, officeHeadApproved == null)
   $c: PermissionCheck( action in ("CompetenceRequests.delete" ), target==$ar, granted == false)
 then
@@ -980,8 +978,8 @@ rule showCompetenceRequest
 when 
   UsersRolesOffices(role.name == Role.GROUP_MANAGER || role.name == Role.SEAT_SUPERVISOR 
   || role.name == Role.PERSONNEL_ADMIN)
-  $ar: CompetenceRequest(person != currentOperator.person, flowEnded == true)
-  $c: PermissionCheck(action == "CompetenceRequests.show", target==$ar, granted == false)
+  $cr: CompetenceRequest(person != currentOperator.person, flowEnded == true)
+  $c: PermissionCheck(action == "CompetenceRequests.show", target==$cr, granted == false)
 then
   $c.grant();
 end
@@ -1119,7 +1117,7 @@ then
   $c.grant();
 end
 
-rule personInChargeCompetenceRequestsApprovalDisapproval
+rule personInChargeCompetenceRequestsApprovalDisapprovalWithTarget
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
   $p: Person() from currentOperator.person
@@ -1129,6 +1127,21 @@ when
 			"CompetenceRequests.disapproval"
   			), target == $cr, granted == false)
 then
+  System.out.println("Sono nella personInChargeCompetenceRequestsApprovalDisapprovalWIthTarget");
+  $c.grant();
+end
+
+rule personInChargeCompetenceRequestsApprovalDisapproval
+when
+  UsersRolesOffices(role.name == Role.GROUP_MANAGER)
+  $p: Person() from currentOperator.person
+  $cr: CompetenceRequest(person != $p && managerApprovalRequired == true && managerApproved == null, flowEnded == false)
+  $c: PermissionCheck( action in (
+			"CompetenceRequests.approval",
+			"CompetenceRequests.disapproval"
+  			), target == null, granted == false)
+then
+  System.out.println("Sono nella personInChargeCompetenceRequestsApprovalDisapproval");
   $c.grant();
 end
 

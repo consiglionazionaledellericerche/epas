@@ -77,6 +77,7 @@ Specificando la <strong>data</strong> che intendi richiedere come cambio e la <s
 
 	#{f.hidden 'competenceRequest.id' /}
 	#{f.hidden 'competenceRequest.type' /}
+	#{f.hidden 'competenceRequest.person.id' /}
 	#{f.hidden 'year', value: currentData.year /}
 	#{f.hidden 'month', value: currentData.month /}
 	#{f.hidden 'persist', value:persist /}
@@ -100,6 +101,7 @@ Specificando la <strong>data</strong> che intendi richiedere come cambio e la <s
 	class:'form form-horizontal', 'data-spinner':'#modalSpinner' }
                        
 	#{f.hidden 'competenceRequest.id' /}
+	#{f.hidden 'competenceRequest.person.id' /}
 	#{f.hidden 'competenceRequest.type' /}
 	#{f.hidden 'persist', value:persist /}
 	#{f.hidden 'year', value: currentData.year /}

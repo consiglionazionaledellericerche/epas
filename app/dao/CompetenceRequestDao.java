@@ -24,6 +24,7 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,9 +35,12 @@ import models.Office;
 import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
+import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
 import models.flows.enumerate.CompetenceRequestType;
+import models.flows.query.QAffiliation;
 import models.flows.query.QCompetenceRequest;
+import models.flows.query.QGroup;
 import models.query.QPerson;
 import models.query.QPersonReperibility;
 import org.joda.time.LocalDateTime;
@@ -194,12 +198,29 @@ public class CompetenceRequestDao extends DaoBase {
         }
         break;
       case OVERTIME_REQUEST:
+        final QGroup group = QGroup.group;
+        if (roleList.stream().noneMatch(r -> r.getRole().getName().equals(Role.SEAT_SUPERVISOR) 
+            || r.getRole().getName().equals(Role.GROUP_MANAGER))) {
+          return results;
+        }
         List<Office> officeList = 
-        roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
+            roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
         if (roleList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))) {
           conditions = officeHeadQuery(officeList,conditions, signer);
-        } else {          
+        } else {     
+          final QAffiliation affiliation = QAffiliation.affiliation;
           conditions = managerQuery(officeList, conditions, signer);
+          List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
+              .join(competenceRequest.person, person).fetchJoin()
+              .join(person.affiliations, affiliation)
+                .on(affiliation.beginDate.before(LocalDate.now())
+                    .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
+              .join(affiliation.group, group)
+              .where(group.manager.eq(signer).and(conditions))
+              .distinct()
+              .fetch();
+          results.addAll(queryResults);
+          return results;
         }
         List<CompetenceRequest> queryResult = getQueryFactory()
             .selectFrom(competenceRequest).where(conditions).fetch();

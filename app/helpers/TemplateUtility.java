@@ -415,8 +415,6 @@ public class TemplateUtility {
       return 0;
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = groupDao
-        .groupsByOffice(user.getPerson().getOffice(), Optional.absent(), Optional.absent());
     List<CompetenceRequest> results = competenceRequestDao
         .toApproveResults(roleList, 
             LocalDateTime.now().minusMonths(1), 

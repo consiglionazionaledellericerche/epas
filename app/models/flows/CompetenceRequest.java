@@ -191,7 +191,8 @@ public class CompetenceRequest extends MutableModel {
   public boolean ownerCanEditOrDelete() {
     return !flowStarted  
         && (managerApproved == null || !managerApprovalRequired)
-        && (employeeApproved == null || !employeeApprovalRequired);
+        && (employeeApproved == null || !employeeApprovalRequired)
+        && (officeHeadApproved == null || !officeHeadApprovalRequired);
   }
   
   /**
