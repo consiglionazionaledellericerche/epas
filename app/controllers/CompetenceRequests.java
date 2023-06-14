@@ -159,8 +159,7 @@ public class CompetenceRequests extends Controller {
         competenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(),
             type, person);
     List<CompetenceRequest> approvedResults =
-        competenceRequestDao
-        .totallyApproved(roleList, fromDate, Optional.absent(), type, person);
+        competenceRequestDao.totallyApproved(roleList, fromDate, Optional.absent(), type, person);
     val config = competenceRequestManager.getConfiguration(type, person);
     val onlyOwn = false;
     boolean overtimesQuantityEnabled = (Boolean)configurationManager

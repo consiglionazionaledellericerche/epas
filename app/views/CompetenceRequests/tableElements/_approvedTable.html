@@ -23,8 +23,11 @@
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
 			#{/if}
-			<th #{if approvalRequired}rowspan="2"#{/if}>&{'absenceRequest.note'}</th>
+			<th #{if approvalRequired}rowspan="2"#{/if}>Stato attuale</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Visualizza</th>
+			<th #{if approvalRequired}rowspan="2"#{/if}>Azioni</th>
+			<th #{if approvalRequired}rowspan="2"#{/if}>Note</th>
+			
 				
 		</tr>			
 		#{if approvalRequired && type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
@@ -82,13 +85,31 @@
 					<td>#{f.value 'item.managerApproved', value:item.managerApproved /}</td>
 				#{/if}
 				<td>${item.note}</td>
+				<td>${item.actualEvent().eventType.label()}</td>
 				<td>
 				#{secure.check 'CompetenceRequests.show', target: item }
 				#{secure.link @CompetenceRequests.show(item.id, type)}	    	  	
 	        	<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
 	        	#{/secure.link}
-	        	#{/secure.check}
+	        	#{/secure.check}	        	
 				</td>
+								<td>
+				#{secure.check 'CompetenceRequests.approval', target: item }
+				<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}" data-async-modal="#defaultModal" color="primary" title="Approva">
+        		Approva 
+      			</a>
+      			#{/secure.check}
+      			#{secure.check 'CompetenceRequests.disapproval', target: item }
+      			<a class="btn btn-warning btn-xs" href="@{CompetenceRequests.disapproval(item.id)}" data-async-modal="#defaultModal" color="warning" title="Rifiuta">
+        		Rifiuta
+      			</a>
+      			#{/secure.check}
+      			</td>
+      			<td #{if item.note != null && !item.note.equals("")} 
+      				webui-popover-hover data-content="${item.note}">      			
+      				<i class="fa fa-exclamation-triangle fa-2x text-danger" aria-hidden="true" ></i>
+      				#{/if}
+      			</td>
 			</tr>
 		#{/list}
 	</tbody>
