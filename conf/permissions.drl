@@ -345,7 +345,8 @@ when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
-  $c: PermissionCheck(action in ("ReperibilityCalendar.show",
+  $c: PermissionCheck(action in ("CompetenceRequests.enableReperibilityChange",
+  								 "ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
                                  "ReperibilityCalendar.deleteReperibility",
                                  "ReperibilityCalendar.events",
@@ -370,7 +371,8 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
-  $c: PermissionCheck(action in ("ReperibilityCalendar.show",
+  $c: PermissionCheck(action in ("CompetenceRequests.enableReperibilityChange",
+  								 "ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
                                  "ReperibilityCalendar.deleteReperibility",
                                  "ReperibilityCalendar.events",
