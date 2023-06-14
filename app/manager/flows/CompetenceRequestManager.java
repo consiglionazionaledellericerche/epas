@@ -35,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
 import models.Competence;
@@ -72,6 +73,7 @@ public class CompetenceRequestManager {
   private PersonDao personDao;
   private PersonReperibilityDayDao repDao;
   private CompetenceCodeDao competenceCodeDao;
+  private ConsistencyManager consistencyManager;
 
   /**
    * DTO per la configurazione delle CompenteRequest.
@@ -103,9 +105,9 @@ public class CompetenceRequestManager {
   @Inject
   public CompetenceRequestManager(ConfigurationManager configurationManager,
       UsersRolesOfficesDao uroDao, RoleDao roleDao, NotificationManager notificationManager,
-      CompetenceRequestDao competenceRequestDao,
-      GroupDao groupDao, PersonDao personDao,
-      PersonReperibilityDayDao repDao, CompetenceCodeDao competenceCodeDao) {
+      CompetenceRequestDao competenceRequestDao, GroupDao groupDao, PersonDao personDao,
+      PersonReperibilityDayDao repDao, CompetenceCodeDao competenceCodeDao, 
+      ConsistencyManager consistencyManager) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
@@ -115,6 +117,7 @@ public class CompetenceRequestManager {
     this.personDao = personDao;
     this.repDao = repDao;
     this.competenceCodeDao = competenceCodeDao;
+    this.consistencyManager = consistencyManager;
 
   }
 
@@ -405,6 +408,8 @@ public class CompetenceRequestManager {
       competence.setPerson(competenceRequest.getPerson());
       competence.setCompetenceCode(code);
       competence.save();
+      consistencyManager.updatePersonSituation(competenceRequest.getPerson().id, 
+          new LocalDate(competenceRequest.getYear(), competenceRequest.getMonth(), 1));
       return true;
     } else {
       LocalDate temp = competenceRequest.getBeginDateToGive();
@@ -541,16 +546,13 @@ public class CompetenceRequestManager {
           .anyMatch(pr -> pr.getPersonReperibilityType().getSupervisor().equals(user.getPerson()))
           && competenceRequest.isManagerApprovalRequired()) {
         //TODO: se il dipendente è anche supervisore del servizio faccio un'unica approvazione
-        reperibilityManagerApproval(competenceRequest.id, user);
+        managerApproval(competenceRequest.id, user);
       }
       approved = true;
     }
     if (competenceRequest.isManagerApprovalRequired()
-        && competenceRequest.getManagerApproved() == null
-        && competenceRequest.getPerson().getReperibility().stream()
-        .anyMatch(pr -> pr.getPersonReperibilityType().getSupervisor().equals(user.getPerson()))) {
-
-      reperibilityManagerApproval(competenceRequest.id, user);
+        && competenceRequest.getManagerApproved() == null) {
+      managerApproval(competenceRequest.id, user);
       approved = true;
     }
     if (competenceRequest.isOfficeHeadApprovalRequired() 
@@ -585,7 +587,7 @@ public class CompetenceRequestManager {
    *
    * @param id id della richiesta di competenza.
    */
-  public void reperibilityManagerApproval(long id, User user) {
+  public void managerApproval(long id, User user) {
 
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     val currentPerson = Security.getUser().get().getPerson();

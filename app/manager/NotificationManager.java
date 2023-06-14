@@ -379,7 +379,7 @@ public class NotificationManager {
     }
     return role;
   }
-  
+
   /**
    * Metodo privato che ritorna il ruolo a cui inviare la notifica della richiesta 
    * di competenza.
@@ -1279,28 +1279,32 @@ public class NotificationManager {
           approver, requestType));
     }
 
-    if (competenceRequest.getBeginDateToAsk() != null) {
-      if (competenceRequest.getBeginDateToAsk().isEqual(competenceRequest.getEndDateToAsk())) {
-        message.append(String.format("\r\n per il giorno %s con il giorno %s.",
-            competenceRequest.getBeginDateToGive().toString(dateFormatter),
-            competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
+    if (competenceRequest.getType() == CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST) {
+      if (competenceRequest.getBeginDateToAsk() != null) {
+        if (competenceRequest.getBeginDateToAsk().isEqual(competenceRequest.getEndDateToAsk())) {
+          message.append(String.format("\r\n per il giorno %s con il giorno %s.",
+              competenceRequest.getBeginDateToGive().toString(dateFormatter),
+              competenceRequest.getBeginDateToAsk().toString(dateFormatter)));
+        } else {
+          message.append(String.format("\r\n per i giorni %s - %s con i giorni %s - %s.",
+              competenceRequest.getBeginDateToGive().toString(dateFormatter),
+              competenceRequest.getEndDateToGive().toString(dateFormatter),
+              competenceRequest.getBeginDateToAsk().toString(dateFormatter),
+              competenceRequest.getEndDateToAsk().toString(dateFormatter)));
+        }
       } else {
-        message.append(String.format("\r\n per i giorni %s - %s con i giorni %s - %s.",
-            competenceRequest.getBeginDateToGive().toString(dateFormatter),
-            competenceRequest.getEndDateToGive().toString(dateFormatter),
-            competenceRequest.getBeginDateToAsk().toString(dateFormatter),
-            competenceRequest.getEndDateToAsk().toString(dateFormatter)));
+        //Questo è il caso di cessione di giorni di reperibilità senza prenderne in cambio.
+        if (competenceRequest.getBeginDateToGive().isEqual(competenceRequest.getEndDateToGive())) {
+          message.append(String.format("\r\n per il giorno %s senza cedere giorni in cambio.",
+              competenceRequest.getBeginDateToGive().toString(dateFormatter)));
+        } else {
+          message.append(String.format("\r\n per i giorni %s - %s senza cedere giorni in cambio.",
+              competenceRequest.getBeginDateToGive().toString(dateFormatter),
+              competenceRequest.getEndDateToGive().toString(dateFormatter)));
+        }
       }
     } else {
-      //Questo è il caso di cessione di giorni di reperibilità senza prenderne in cambio.
-      if (competenceRequest.getBeginDateToGive().isEqual(competenceRequest.getEndDateToGive())) {
-        message.append(String.format("\r\n per il giorno %s senza cedere giorni in cambio.",
-            competenceRequest.getBeginDateToGive().toString(dateFormatter)));
-      } else {
-        message.append(String.format("\r\n per i giorni %s - %s senza cedere giorni in cambio.",
-            competenceRequest.getBeginDateToGive().toString(dateFormatter),
-            competenceRequest.getEndDateToGive().toString(dateFormatter)));
-      }
+      message.append(String.format("\r\n per un totale di %s ore", competenceRequest.getValue()));
     }
 
     val mailBody = message.toString();
@@ -1363,7 +1367,7 @@ public class NotificationManager {
     } else {
       //TODO: inserire qui la ricerca del ruolo a cui destinare la mail di richiesta straordinari
     }
-    
+
     log.info("Destination = {}", userDestination);
     if (userDestination == null) {
       log.warn("Non si è trovato il ruolo a cui inviare la mail per la richiesta d'assenza di "
@@ -1409,7 +1413,7 @@ public class NotificationManager {
     message.append(String.format("\r\nLe è stata notificata la richiesta di %s",
         competenceRequest.getPerson().fullName()));
     message.append(String.format(" di tipo %s\r\n", requestType));
-    
+
     String baseUrl = BASE_URL;
     if (!baseUrl.endsWith("/")) {
       baseUrl = baseUrl + "/";
@@ -1453,17 +1457,17 @@ public class NotificationManager {
         break;
       case OVERTIME_REQUEST:
         baseUrl = baseUrl + OVERTIME_PATH + "?id=" + competenceRequest.id 
-            + "&type=" + competenceRequest.getType();
+        + "&type=" + competenceRequest.getType();
         break;
-        default: 
-          break;
+      default: 
+        break;
     }
 
     message.append(String.format("\r\nVerifica cliccando sul link seguente: %s", baseUrl));
 
     return message.toString();
   }
- 
+
   /**
    * @param competenceRequest la richiesta di competenza.
    * @return il ruolo corretto per l'approvazione della richiesta.
@@ -1538,7 +1542,7 @@ public class NotificationManager {
       .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
       return;
     }
-    
+
     final Role roleDestination = getProperRole(competenceRequest);
     if (roleDestination == null) {
       log.info(
@@ -2105,23 +2109,23 @@ public class NotificationManager {
    * @param absenceRequest la richiesta di assenza
    * @param refuser la persona che ha rifiutato la richiesta di assenza.
    */
-//  public void notificationCompetenceRequestRefused(
-//      CompetenceRequest competenceRequest, Person refuser) {
-//
-//    Verify.verifyNotNull(competenceRequest);
-//    Verify.verifyNotNull(refuser);
-//
-//    final String message = 
-//        String.format("La richiesta di tipo \"%s\" per il %s "
-//            + "è stata rifiutata da %s",
-//            TemplateExtensions.label(competenceRequest.type),
-//            TemplateExtensions.format(competenceRequest.startAt),
-//            refuser.getFullname());
-//
-//    Notification.builder().destination(competenceRequest.person.user).message(message)
-//    .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
-//
-//  }
+  //  public void notificationCompetenceRequestRefused(
+  //      CompetenceRequest competenceRequest, Person refuser) {
+  //
+  //    Verify.verifyNotNull(competenceRequest);
+  //    Verify.verifyNotNull(refuser);
+  //
+  //    final String message = 
+  //        String.format("La richiesta di tipo \"%s\" per il %s "
+  //            + "è stata rifiutata da %s",
+  //            TemplateExtensions.label(competenceRequest.type),
+  //            TemplateExtensions.format(competenceRequest.startAt),
+  //            refuser.getFullname());
+  //
+  //    Notification.builder().destination(competenceRequest.person.user).message(message)
+  //    .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
+  //
+  //  }
 
   private void sendEmailInformationRequestConfirmation(InformationRequest informationRequest,
       boolean approval) {
@@ -2158,10 +2162,10 @@ public class NotificationManager {
     } else {
       message.append(String.format("\r\nè stata RESPINTA%s la sua richiesta di %s",
           approver, requestType));
-      
+
     }
 
-    
+
   }
 
   private void sendEmailCompetenceRequestConfirmation(CompetenceRequest competenceRequest) {
@@ -2270,5 +2274,5 @@ public class NotificationManager {
 
   }
 
- }
+}
 
