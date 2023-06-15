@@ -43,8 +43,8 @@ public enum CompetenceRequestType {
 //Richiesta straordinario
   CHANGE_REPERIBILITY_REQUEST(false, true, false, true,
       Optional.of(EpasParam.CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED),
-      Optional.of(EpasParam.CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED),
       Optional.absent(),
+      Optional.of(EpasParam.CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED),
       Optional.absent());  
   
   

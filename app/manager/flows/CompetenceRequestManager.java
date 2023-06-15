@@ -538,6 +538,7 @@ public class CompetenceRequestManager {
    */
   public boolean approval(CompetenceRequest competenceRequest, User user) {
     boolean approved = false;
+
     if (competenceRequest.isEmployeeApprovalRequired() 
         && competenceRequest.getEmployeeApproved() == null
         && user.hasRoles(Role.EMPLOYEE)) {
@@ -550,23 +551,25 @@ public class CompetenceRequestManager {
       }
       approved = true;
     }
-    if (competenceRequest.isManagerApprovalRequired()
-        && competenceRequest.getManagerApproved() == null) {
-      managerApproval(competenceRequest.id, user);
-      approved = true;
+    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      if (competenceRequest.isManagerApprovalRequired()
+          && competenceRequest.getManagerApproved() == null ) {
+        managerApproval(competenceRequest.id, user);
+        approved = true;
+      }
+    } else {
+      if (competenceRequest.isManagerApprovalRequired() && competenceRequest.getManagerApproved() == null
+          && user.hasRoles(Role.REPERIBILITY_MANAGER)) {
+        managerApproval(competenceRequest.id, user);
+        approved = true;
+      }
     }
+    
     if (competenceRequest.isOfficeHeadApprovalRequired() 
         && competenceRequest.getOfficeHeadApproved() == null) {
       officeHeadApproval(competenceRequest.id, user);
       approved = true;
-    }
-    
-    if (competenceRequest.isManagerApprovalRequired()
-        && !competenceRequest.isManagerApproved()) {
-      log.debug("Necessaria l'approvazione da parte del manager della reperibilità per {}",
-          competenceRequest);
-      notificationManager.sendEmailCompetenceRequestPolicy(user, competenceRequest, true);
-    }
+    }    
     return approved;
   }
 
