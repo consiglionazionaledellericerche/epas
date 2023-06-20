@@ -18,6 +18,7 @@
 package controllers;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import common.security.SecurityRules;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import models.PersonDay;
 import models.Stamping;
@@ -47,6 +49,7 @@ import play.mvc.With;
  *
  * @author Marco Andreini
  */
+@Slf4j
 @With({Resecure.class})
 public class PersonDays extends Controller {
 
@@ -168,6 +171,31 @@ public class PersonDays extends Controller {
     
     flash.success("Ore approvate correttamente.");
     Stampings.personStamping(personDay.getPerson().id, personDay.getDate().getYear(), 
+        personDay.getDate().getMonthOfYear());
+  }
+
+  /**
+   * Inserimento di note associate ad un personDay.
+   */
+  public static void note(Long personDayId, boolean confirmed, String note) {
+    PersonDay personDay = personDayDao.getPersonDayById(personDayId);
+    Preconditions.checkNotNull(personDay);
+    Preconditions.checkNotNull(personDay.isPersistent());
+
+    rules.checkIfPermitted(personDay.getPerson().getOffice());
+
+    if (!confirmed) {
+      confirmed = true;
+      note = personDay.getNote();
+      render(personDay, confirmed, note);
+    }
+
+    personDay.setNote(Strings.emptyToNull(note));
+    personDay.save();
+    log.info("Note impostate su person day {}", personDay);
+    flash.success("Note impostate correttamente.");
+
+    Stampings.personStamping(personDay.getPerson().id, personDay.getDate().getYear(),
         personDay.getDate().getMonthOfYear());
   }
 

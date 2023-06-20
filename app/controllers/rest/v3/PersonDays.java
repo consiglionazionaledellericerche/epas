@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
+import controllers.PersonDays.MealTicketDecision;
 import controllers.Resecure;
 import controllers.rest.v2.Offices;
 import controllers.rest.v2.Persons;
@@ -44,10 +45,12 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import manager.ConsistencyManager;
 import manager.PersonManager;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.enumerate.MealTicketBehaviour;
 import org.joda.time.YearMonth;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -71,6 +74,8 @@ public class PersonDays extends Controller {
   static GsonBuilder gsonBuilder;
   @Inject
   static PersonManager personManager;
+  @Inject
+  static ConsistencyManager consistencyManager;
   
   /**
    * Metodo rest che ritorna la situazione della persona (passata per id, email, eppn, 
@@ -263,6 +268,50 @@ public class PersonDays extends Controller {
 
     renderJSON(gson.toJson(personDays.stream().map(
         pd -> PersonDayShowDto.build(pd)).collect(Collectors.toList())));
+  }
+
+  /**
+   * Metodo rest che ritorna la situazione della persona (passata per id, email, eppn, 
+   * personPerseoId o fiscalCode) in un giorno specifico (date).
+   */
+  public static void setMealTicketBehavior(
+      Long id, String email, String eppn, Long personPerseoId, String fiscalCode, 
+      String number, LocalDate date, MealTicketDecision mealTicketDecision, String note) {
+    log.debug("Chiamata getDaySituation, email = {}, date = {}", email, date);
+    val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
+    if (date == null || mealTicketDecision == null) {
+      JsonResponse.badRequest("Il parametro date e mealTicketDecision sono obbligatori");
+    }
+    rules.checkIfPermitted(person.getOffice());
+
+    PersonDay pd = 
+        personDayDao.getPersonDay(person, JodaConverters.javaToJodaLocalDate(date)).orNull();
+    if (pd == null) {
+      JsonResponse.notFound(
+          String.format("Non sono presenti informazioni per %s nel giorno %s",
+              person.getFullname(), date));
+    }
+
+    if (mealTicketDecision.equals(MealTicketDecision.COMPUTED)) {
+      pd.setTicketForcedByAdmin(false);
+    } else {
+      pd.setTicketForcedByAdmin(true);
+      if (mealTicketDecision.equals(MealTicketDecision.FORCED_FALSE)) {
+        pd.setTicketAvailable(MealTicketBehaviour.notAllowMealTicket);
+      }
+      if (mealTicketDecision.equals(MealTicketDecision.FORCED_TRUE)) {
+        pd.setTicketAvailable(MealTicketBehaviour.allowMealTicket);
+      }
+    }
+    pd.setNote(Strings.emptyToNull(note));
+    pd.save();
+    consistencyManager.updatePersonSituation(pd.getPerson().id, pd.getDate());
+
+    log.info("Impostato comportamento buono pasto {}) per giorno {} di {}", 
+        mealTicketDecision, pd.getDate(), person);
+
+    val gson = gsonBuilder.create();
+    renderJSON(gson.toJson(PersonDayShowTerseDto.build(pd)));
   }
 
 }

@@ -1,0 +1,27 @@
+#{modalAsync id:'modalStamping', title:('Gestione Del Giorno ' + personDay.date.format()) }
+ 
+ 
+ <div class="container-fluid" id="showDay">
+ 
+ #{include './_showDayTabs.html' /}
+ 
+ 
+ <div class="container">
+  #{form action:@note(), method:'POST', autocomplete:false, class:'form form-horizontal' }
+    
+    #{f.hidden 'personDayId', value:personDay.id /}
+    
+    #{f.hidden 'confirmed', value:confirmed /}
+
+    #{f.input 'note', type:'text' /}
+
+    #{b.buttons center:true} 
+      #{b.submit 'Aggiorna'/}
+    #{/b.buttons}
+  #{/form}
+
+ </div>
+
+</div>
+
+#{/modalAsync}
