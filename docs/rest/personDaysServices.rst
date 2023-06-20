@@ -240,3 +240,39 @@ La sede è individuata tramite il parametro *sedeId*.
 
 La risposta ottenuta è analoga a quella descritta nel paragrafo precedente relativamente
 al metodo /rest/v3/personDays/offSiteWorkByOfficeAndMonth.
+
+
+Modifica decisioni su assegnazione buono pasto in un giorno
+-----------------------------------------------------------
+
+È disponibile un endpoint per impostare la politica di assegnazione di un buono pasto in un giorno.
+A differenza degli altri endpoint di questa parte delle API REST, ci sono dei ruoli da utilizzare 
+che permettono di modificare i dati del sistema (e non solo di visualizzarli).
+
+Per poter accedere a questo endpoint REST è necessario utilizzare un utente che abbia il ruolo 
+di *Gestore Assenze* per la sede su cui si vuole effettuare le operazioni, oppure il ruolo di sistema
+*Gestore assenze* (per poter operare sugli utenti di tutte le sedi).
+
+Per modificare la politica di assegnazione di un buono pasto è possibile effettuare 
+una *HTTP POST* all'endpoint **/rest/v3/persondays/setMealTicketBehavior**.
+
+La persona può essere individuata passando i parametri identificativi delle persone:
+*id, email, eppn, perseoPersonId, fiscalCode, number*. 
+La data deve essere specificata tramite il campo *date* e deve essere nel formato *YYYY-MM-dd*.
+Le tipologie di assegnazione di buono pasto sono da indicare attraverso il campo *mealTicketDecision*, 
+i valori che si possono assegnare sono:
+
+ - *COMPUTED* (Calcolato)
+ - *FORCED_TRUE* (Forzato si) 
+ - *FORCED_FALSE* (Forzato no)
+
+E' anche possibile passare un campo *note* con cui assegnare delle note al giorno indicato.
+
+.. code-block:: bash
+
+  $ http -a istituto_xxx_absence_manager 
+      GET https://epas-demo.devel.iit.cnr.it/rest/v3/personDays/setMealTicketBehavior 
+      email==galileo.galilei@cnr.it date==2023-06-20 mealTicketDecision==FORCED_TRUE 
+      note=='ne aveva proprio diritto oggi'
+
+Il risultato sarà un json contenente le info principali sul giorno appena modificato.

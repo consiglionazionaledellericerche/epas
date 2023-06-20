@@ -38,6 +38,7 @@ import org.modelmapper.ModelMapper;
 public class PersonDayShowDto extends PersonDayShowTerseDto {
 
   private PersonShowTerseDto person;
+  private String note;
 
   @JsonIgnore
   @Inject

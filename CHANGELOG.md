@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.6.8] - UNRELEASED
+### Added
+ - Aggiunto metodo REST per la configurazione delle decisioni sul buono pasto in un giorno
+   specifico
+
 ### Changed
  - corretta gestione di periodi ferie anno precedente non presenti nel metodo rest /rest/v3/vacations/byPersonAndYear
  - ignorata la gestione di turni con slot dispari nel caso di timetable esterna, così da non fornire errore in questo
