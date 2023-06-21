@@ -313,9 +313,6 @@ public class Stampings extends Controller {
     final LocalDate date = stamping.getPersonDay().getDate();
     List<BadgeReader> badgeReaders = person.getBadges()
         .stream().map(b -> b.getBadgeReader()).collect(Collectors.toList());
-    List<Zone> zones = badgeReaders.stream()
-        .flatMap(br ->  br.getZones().stream().filter(z -> z != null)).collect(Collectors.toList());
-
 
     if (stamping.isOffSiteWork()) {
       render("@editOffSite", stamping, person, date, historyStamping);
@@ -327,6 +324,9 @@ public class Stampings extends Controller {
     if (stamping.isServiceReasons() && ownStamping) {
       render("@editServiceReasons", stamping, person, date, historyStamping);
     }
+
+    List<Zone> zones = badgeReaders.stream()
+        .flatMap(br ->  br.getZones().stream().filter(z -> z != null)).collect(Collectors.toList());
 
     render(stamping, person, date, historyStamping, ownStamping, zones);
   }
@@ -672,8 +672,15 @@ public class Stampings extends Controller {
   public static void dailyPresenceForPersonInCharge(Integer year, Integer month, Integer day) {
 
     LocalDate date = new LocalDate(year, month, day);
-
     final User user = Security.getUser().get();
+    
+    if (user.getPerson() == null) {
+      flash.error("%s è un'utenza di servizio non associata a nessuna persona, "
+          + "non sono quindi presenti gruppi associati al tuo utente."
+          , user.getUsername());
+      render("@dailyPresence", date);
+    }
+
     Role role = roleDao.getRoleByName(Role.GROUP_MANAGER);
     Optional<UsersRolesOffices> uro = uroDao
         .getUsersRolesOffices(user, role, user.getPerson().getOffice());

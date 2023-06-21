@@ -807,6 +807,13 @@ public class Competences extends Controller {
     LocalDate beginMonth = null;
 
     beginMonth = new LocalDate(year, month, 1);
+    
+    if (user.getPerson() == null || user.getPerson().getOffice() == null) {
+      flash.error("%s è un'utenza di servizio non associata a nessuna persona, "
+          + "non sono quindi presenti informazioni associate alla sua sede."
+          , user.getUsername());
+      render(year, month);
+    }
 
     CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
     SimpleResults<Person> simpleResults = personDao.listForCompetence(code,
