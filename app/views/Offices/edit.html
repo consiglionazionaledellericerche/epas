@@ -28,8 +28,8 @@
 	        #{f.hidden 'office.institute.id' /}
 
 	        #{f.input 'office.name', required:true /}
-	        #{f.input 'office.codeId', required:true, popover:true /}
-	        #{f.input 'office.code',popover:true /}
+	        #{f.input 'office.codeId', required:true, custom_popover:true /}
+	        #{f.input 'office.code',custom_popover:true /}
 	        #{f.input 'office.address'/}
 	        #{secure.check 'Office.updateBeginDate'}
 	        	#{f.date 'office.beginDate' /}

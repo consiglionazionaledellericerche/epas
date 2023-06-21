@@ -1110,7 +1110,7 @@ rule personInChargeApprovalDisapproval
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
   $p: Person() from currentOperator.person
-  $ar: AbsenceRequest(person != $p && managerApprovalRequired == true && managerApproved == null, flowEnded == false)
+  $ar: AbsenceRequest(person != $p, managerApprovalRequired == true, !isManagerApproved(), flowEnded == false)
   $c: PermissionCheck( action in (
 			"AbsenceRequests.approval",
 			"AbsenceRequests.disapproval"
@@ -2130,6 +2130,7 @@ when
      	"PersonDays.workingOutOpening",
      	"PersonDays.approveWorkingOutOpening",
      	"PersonDays.forceMealTicket",
+     	"PersonDays.note",
 
      	/* Vecchio permesso editCompetence */
         "Competences.saveOvertime",
@@ -2308,8 +2309,9 @@ when
         "PersonDays.workingOutOpening",
         "PersonDays.approveWorkingOutOpening",
         "PersonDays.forceMealTicket",
+        "PersonDays.note",
 
-         /* Vecchio permesso editCompetence */
+        /* Vecchio permesso editCompetence */
         "Competences.saveOvertime",
         "Competences.updatePersonCompetence",
         "Competences.saveNewCompetenceConfiguration",
@@ -3665,7 +3667,9 @@ when
         "rest.v3.Vacations.byPersonAndYear",
 
         "rest.v3.AbsenceTypes.list",
-        "rest.v3.AbsenceTypes.show"
+        "rest.v3.AbsenceTypes.show",
+
+        "rest.v3.PersonDays.setMealTicketBehavior"
 
        ), target == null, granted == false)
 then
@@ -3695,7 +3699,8 @@ when
         "rest.v3.Vacations.byPersonAndYear",
 
         "rest.v3.AbsenceTypes.list",
-        "rest.v3.AbsenceTypes.show"
+        "rest.v3.AbsenceTypes.show",
+        "rest.v3.PersonDays.setMealTicketBehavior"
 
        ), target == $o, granted == false)
 then
@@ -3729,7 +3734,9 @@ when
         "rest.v3.Vacations.byPersonAndYear",
 
         "rest.v3.AbsenceTypes.list",
-        "rest.v3.AbsenceTypes.show"
+        "rest.v3.AbsenceTypes.show",
+
+        "rest.v3.PersonDays.setMealTicketBehavior"
 
        ), granted == false)
 then

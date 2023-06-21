@@ -9,7 +9,7 @@
 	value = _value == null ? field.value : _value;
 }%
 <label class="radio-inline ${_class}" 
-    #{if _popover}popover data-content=#{if _popText}${_popText}#{/if}
+    #{if _custom_popover}custom-popover data-content=#{if _popText}${_popText}#{/if}
     #{else}'&{field.name+'.popover'}'#{/else}#{/if}>
     <input type="radio" name="${field.name}" value="true"
     class="${_class}"
@@ -19,7 +19,7 @@
     ${_true == null ? 'Si' : _true}
 </label>
 <label class="radio-inline ${_class}" 
-    #{if _popover}popover data-content=#{if _popText}${_popText}#{/if}
+    #{if _custom_popover}custom-popover data-content=#{if _popText}${_popText}#{/if}
     #{else}'&{field.name+'.popover'}'#{/else}#{/if}>
 	<input type="radio" name="${field.name}" value="false"#{if value == false} checked#{/if}
 	class="${_class}"

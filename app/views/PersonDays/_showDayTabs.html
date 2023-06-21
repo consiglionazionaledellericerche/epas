@@ -50,6 +50,13 @@
 	  #{/else}
     #{/secure.check}
   #{/if}  
-  
+
+  #{if personDay}	
+    #{secure.check 'PersonDays.note'}
+	  <li #{if actionSelected == 'PersonDays.note'} class="active"#{/if}>
+	    <a href="@{PersonDays.note(personDay.id)}" data-async="#showDay">Note</a>
+	  </li>
+    #{/secure.check}
+  #{/if}  
 </ul>
 <br>

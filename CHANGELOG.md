@@ -4,7 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.7] - UNRELEASED
+## [2.6.8] - UNRELEASED
+### Added
+ - Aggiunto metodo REST per la configurazione delle decisioni sul buono pasto in un giorno
+   specifico
+
+### Changed
+ - corretta gestione di periodi ferie anno precedente non presenti nel metodo rest /rest/v3/vacations/byPersonAndYear
+ - ignorata la gestione di turni con slot dispari nel caso di timetable esterna, così da non fornire errore in questo
+   specifico caso errore nella gestione dei calendari
+ - cambiata regola drools di approvazione delle richieste ferie che non funzionava in alcuni casi per i responsabili di gruppo
+
+## [2.6.7] - 2023-06-05
 ### Added
  - Aggiunta la possibilità di inserire la zona di timbratura in fase di inserimento timbratura da interfaccia da parte
    dell'amministratore del personale.
@@ -13,7 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    
 ### Changed
   - Modificata la creazione del gruppo per correggere bug in caso di externalId nullo
-
+  - Dopo la login utilizzando LDAP effettuato il redirect alla configurazione http.path la quale
+    può essere diversa da /
+  - Sostituite nei template le stringe CNR con la variabile company.code
+  - Sostituito l'utilizzo dell'attributo html popover con custom-popover per compatibilità 
+    con nuova specifica html
 
 ## [2.6.6] - 2023-05-18
 ### Added

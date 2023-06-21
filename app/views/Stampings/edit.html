@@ -45,7 +45,7 @@ Action = (stamping != null && stamping.persistent) ? 'Modifica' : 'Nuova'
 	  	#{f.view 'stamping.way', value: stamping.way /}
 	  #{/if}
 	  #{else}
-	  	#{f.input 'time', popover:'true', value:stamping?.isPersistent() ? stamping?.formattedHour() : time, required:true/}
+	  	#{f.input 'time', custom_popover:'true', value:stamping?.isPersistent() ? stamping?.formattedHour() : time, required:true/}
 	  	#{f.radioEnum 'stamping.way', items:models.Stamping.WayType, required:true /}
 	  #{/else}
 	  

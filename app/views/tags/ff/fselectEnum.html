@@ -15,7 +15,7 @@
 	  id="${field.id}"
 	  #{ifnot _select2} select2#{/ifnot}
 	  #{if _disabled} disabled#{/if}
-	  #{if _popover} popover data-content='&{field.name+'.popover'}'#{/if} >
+	  #{if _custom_popover} custom-popover data-content='&{field.name+'.popover'}'#{/if} >
 	  
 	  <option></option>
 	  #{list _items}

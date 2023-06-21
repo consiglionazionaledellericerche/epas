@@ -3,7 +3,7 @@
   label = _label == null ? messages.get(field.name) : _label  
 }%
 <textarea class="form-control ${_class}" rows="${_rows == null ? 3 : _rows}" id="${field.id}" name="${field.name}" type="${_type == null ? 'text' : _type}"
-    #{if _placeholder} placeholder="${_placeholder}"#{/if}#{if _popover} popover data-content='&{field.name+'.popover'}'#{/if}#{if _disabled} disabled#{/if}
+    #{if _placeholder} placeholder="${_placeholder}"#{/if}#{if _custom_popover} custom-popover data-content='&{field.name+'.popover'}'#{/if}#{if _disabled} disabled#{/if}
     wysiwyg="${_wysiwyg}"
     title="${label}" aria-label="${label}">
 ${_value == null ? field.value : _value}

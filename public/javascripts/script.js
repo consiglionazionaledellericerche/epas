@@ -325,7 +325,7 @@ $(function($) {
     $(':input[select2Table]', this).select2({
       minimumResultsForSearch: 25
     });
-    $('[popover]').popover({
+    $('[custom-popover]').popover({
       trigger: "focus",
       placement: 'right auto',
       container: 'body'

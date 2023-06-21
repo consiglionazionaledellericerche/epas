@@ -179,7 +179,7 @@
     #{accordionItem 'warningInsertPerson', parent:'generalSetting', title:'Avvisa per inserimento nuova unità di personale', open:false}
     #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
       #{f.hidden 'generalSetting.id' /}
-      #{alert color:'info'}Abilita alla visualizzazione di un alert in caso di inserimento di una nuova persona (per il CNR)#{/alert}
+      #{alert color:'info'}Abilita alla visualizzazione di un alert in caso di inserimento di una nuova persona.#{/alert}
       #{f.booleanRadio 'generalSetting.warningInsertPerson' /}
       #{b.buttons}
         #{b.save /}
