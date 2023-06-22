@@ -471,6 +471,14 @@
       </p>
     #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION) }
+      <p>Abilitando questo paramentro si permette al dipendente di effettuare una richiesta <strong>PREVENTIVA</strong>
+      di straordinario al proprio responsabile.
+      Questa richiesta dovrà poi essere validata dal responsabile sia <strong>al momento 
+      in cui arriva</strong>, sia poi <strong>quando dovrà essere effettivamente assegnata la quantità di ore di straordinario</strong>.
+      </p>
+    #{/if}
+    
   #{/alert} 
   
   <!-- Riepilogo delle ricomputazioni eventuali -->

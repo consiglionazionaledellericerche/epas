@@ -124,6 +124,11 @@ public class CompetenceRequest extends MutableModel {
   @Column(name = "end_to")
   private LocalDateTime endTo;
   
+  /*Nuovi campi per la doppia approvazione delle richieste di straordinario*/
+  private LocalDateTime firstApproved;
+  private boolean firstApprovalRequired = false;
+  /*Fine*/  
+  
   private LocalDateTime employeeApproved;
   
   private LocalDateTime managerApproved;

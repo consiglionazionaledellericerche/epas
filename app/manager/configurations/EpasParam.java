@@ -666,6 +666,15 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
+  OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION(
+      "overtime_advance_request_and_confirmation", 
+      EpasParamCategory.COMPETENCE_FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
   /**
    * Il responsabile di sede deve ricevere le notifiche delle comunicazioni
    * di ferie deli livelli I-III.
