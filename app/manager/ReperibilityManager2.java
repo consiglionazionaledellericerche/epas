@@ -488,7 +488,8 @@ public class ReperibilityManager2 {
 
       Competence holidayCompetence = reperibilityHolidayCompetence
           .or(new Competence(person, reperibilityHoliday, year, month));
-      holidayCompetence.setValueApproved(dto2.holidaysReperibility);
+      holidayCompetence.setValueApproved(holidayCompetence.getValueApproved() 
+          + dto2.holidaysReperibility);
       holidayCompetence.setReason(getReperibilityDates(dto2.holidaysPeriods));
       holidayCompetence.save();
 
@@ -499,7 +500,8 @@ public class ReperibilityManager2 {
 
       Competence workdayCompetence = reperibilityWorkdaysCompetence
           .or(new Competence(person, reperibilityWorkdays, year, month));
-      workdayCompetence.setValueApproved(dto.workdaysReperibility);
+      workdayCompetence.setValueApproved(workdayCompetence.getValueApproved() 
+          + dto.workdaysReperibility);
       workdayCompetence.setReason(getReperibilityDates(dto.workdaysPeriods));
       workdayCompetence.save();
 
