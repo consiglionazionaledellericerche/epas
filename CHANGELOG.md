@@ -15,8 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - ignorata la gestione di turni con slot dispari nel caso di timetable esterna, così da non fornire errore in questo
    specifico caso errore nella gestione dei calendari
  - cambiata regola drools di approvazione delle richieste ferie che non funzionava in alcuni casi per i responsabili di gruppo
+ - corretta visualizzazione Presenza giornaliera gruppo e Straordinari mensili gruppi che restituivano errore per gli utenti di servizio (senza persona associata)
  - cambiato comportamento nell'attribuzione dei giorni di reperibilità se i reperibili stanno su più calendari (sede centrale)
  - rimossi i codici 31_2020 e 31_2021 dalla scheda dei codici di ferie inseribili dall'amministratore del personale
+
 
 ## [2.6.7] - 2023-06-05
 ### Added

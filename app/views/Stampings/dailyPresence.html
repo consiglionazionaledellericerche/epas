@@ -7,14 +7,21 @@
 #{/set}
 
 <div class="container">
-  #{title title:'Presenza giornaliera del ' + date.format() + ' - ' + office?.name /}
+  #{title title:'Presenza giornaliera del ' + date.format() + (office != null ? ' - ' + office?.name : '') /}
 </div>
 
 #{if !groupView}
 #{stampings.presenceDashboardTabs activeAction:'dailyPresence' /}
 #{/if}
 
+
 <div class="container">
+#{if !map}
+  #{alert color: 'warning'}
+    Non sono presenti persone da visualizzare che sono appartengono al gruppo dell'utente corrente.
+  #{/alert}
+#{/if}
+#{else}
   #{accordionItem 'Tabella', parent:'codici', title:'Riepilogo situazione giornaliera', open:false, color:'warning'}
   <table class="table table-bordered table-striped">
   	<tr>
@@ -110,4 +117,5 @@
     </tr>
     #{/list}
   </table>
+  #{/else}
 </div>
