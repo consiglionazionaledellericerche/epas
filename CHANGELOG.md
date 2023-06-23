@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - corretta visualizzazione Presenza giornaliera gruppo e Straordinari mensili gruppi che restituivano errore per gli utenti di servizio (senza persona associata)
  - cambiato comportamento nell'attribuzione dei giorni di reperibilità se i reperibili stanno su più calendari (sede centrale)
  - rimossi i codici 31_2020 e 31_2021 dalla scheda dei codici di ferie inseribili dall'amministratore del personale
-
+ - corretta gestione permessi brevi per personale in turno
 
 ## [2.6.7] - 2023-06-05
 ### Added
