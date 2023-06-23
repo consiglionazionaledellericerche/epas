@@ -1446,6 +1446,7 @@ absenceType.description= Descrizione
 absenceType.internalUse= Interno
 absenceType.qualifications= Livelli
 absenceType.reperibilityCompatible=Compatibile con reperibilità
+absenceType.shiftCompatible=Compatibile con turni
 absenceType.tecnici= Tecnici
 absenceType.tecnologi= Tecnologi
 absenceType.validFrom= Inizio validita'

@@ -156,6 +156,7 @@ public class AbsenceType extends BaseModel {
   @Column(name = "reperibility_compatible")
   private boolean reperibilityCompatible;
   
+  private boolean shiftCompatible;
   private boolean isRealAbsence = true;
   // Metodi
   
