@@ -171,14 +171,14 @@ public enum DefaultGroup {
   //      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_ESENZ_19, 
   //      null, null, false, false),
 
-  PROROGA_FERIE_2020("31_2020 - Proroga ferie 2020", "", 
-      DefaultCategoryType.PROROGA_FERIE_2020, 2, // must be greater than FERIE_CNR
-      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
-      DefaultTakable.T_FERIE_CNR_PROROGA_2020, null, null, false, false),
-  PROROGA_FERIE_2021("31_2021 - Proroga ferie 2021", "", 
-      DefaultCategoryType.PROROGA_FERIE_2021, 2, // must be greater than FERIE_CNR
-      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
-      DefaultTakable.T_FERIE_CNR_PROROGA_2021, null, null, false, false),
+//  PROROGA_FERIE_2020("31_2020 - Proroga ferie 2020", "", 
+//      DefaultCategoryType.PROROGA_FERIE_2020, 2, // must be greater than FERIE_CNR
+//      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+//      DefaultTakable.T_FERIE_CNR_PROROGA_2020, null, null, false, false),
+//  PROROGA_FERIE_2021("31_2021 - Proroga ferie 2021", "", 
+//      DefaultCategoryType.PROROGA_FERIE_2021, 2, // must be greater than FERIE_CNR
+//      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+//      DefaultTakable.T_FERIE_CNR_PROROGA_2021, null, null, false, false),
   FERIE_CNR_DIPENDENTI("Ferie e permessi legge", "",
       DefaultCategoryType.FERIE_DIPENDENTI, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
@@ -349,6 +349,11 @@ public enum DefaultGroup {
   G_CONGEDI_PRENATALI("20/21 - Congedi Prenatali", "", DefaultCategoryType.CONGEDI_PRENATALI, 0,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_CONGEDI_PRENATALI,
       null, null, false, false),
+  
+  G_54B("54B - Aspettativa assistenza figli minori di 6 anni 170 giorni",
+      "", DefaultCategoryType.ASPETTATIVA, 0, GroupAbsenceTypePattern.programmed,
+      PeriodType.year, DefaultTakable.T_54B, null,
+      null, false, true),
 
   G_CONGEDO_MATRIMONIO("45 - Congedo straordinario per matrimonio", "",
       DefaultCategoryType.CONGEDO_MATRIMONIO, 0, GroupAbsenceTypePattern.programmed,
