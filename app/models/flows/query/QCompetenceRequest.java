@@ -48,6 +48,10 @@ public class QCompetenceRequest extends EntityPathBase<CompetenceRequest> {
 
     public final ListPath<models.flows.CompetenceRequestEvent, QCompetenceRequestEvent> events = this.<models.flows.CompetenceRequestEvent, QCompetenceRequestEvent>createList("events", models.flows.CompetenceRequestEvent.class, QCompetenceRequestEvent.class, PathInits.DIRECT2);
 
+    public final BooleanPath firstApprovalRequired = createBoolean("firstApprovalRequired");
+
+    public final DateTimePath<org.joda.time.LocalDateTime> firstApproved = createDateTime("firstApproved", org.joda.time.LocalDateTime.class);
+
     public final BooleanPath flowEnded = createBoolean("flowEnded");
 
     public final BooleanPath flowStarted = createBoolean("flowStarted");
