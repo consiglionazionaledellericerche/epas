@@ -38,6 +38,7 @@ import lombok.val;
 import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
@@ -319,6 +320,10 @@ public class CompetenceRequestManager {
                 competenceRequest, true);
 
         break;
+        
+      case FIRST_APPROVAL:
+        competenceRequest.setFirstApproved(LocalDateTime.now());
+        break;
 
       case MANAGER_APPROVAL:
         competenceRequest.setManagerApproved(LocalDateTime.now());
@@ -577,6 +582,15 @@ public class CompetenceRequestManager {
   public void officeHeadApproval(long id, User user) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     val currentPerson = Security.getUser().get().getPerson();
+    
+    if ((Boolean) configurationManager.configValue(currentPerson.getOffice(), 
+        EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION)) {
+      // TODO: Qui occorre distinguere il caso in cui ci sia la richiesta di approvazione preventiva
+      executeEvent(competenceRequest, currentPerson, 
+          CompetenceRequestEventType.FIRST_APPROVAL, Optional.absent());
+      log.info("{} preventiva approvata dal responsabile di sede {}.", 
+          competenceRequest, currentPerson.getFullname());
+    }
     executeEvent(competenceRequest, currentPerson, 
         CompetenceRequestEventType.OFFICE_HEAD_APPROVAL, Optional.absent());
     log.info("{} approvata dal responsabile di sede {}.", 
@@ -594,6 +608,13 @@ public class CompetenceRequestManager {
 
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     val currentPerson = Security.getUser().get().getPerson();
+    if ((Boolean) configurationManager.configValue(currentPerson.getOffice(), 
+        EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION)) {
+      executeEvent(competenceRequest, currentPerson, 
+          CompetenceRequestEventType.FIRST_APPROVAL, Optional.absent());
+      log.info("{} preventiva approvata dal responsabile di gruppo {}.", 
+          competenceRequest, currentPerson.getFullname());
+    }
     executeEvent(
         competenceRequest, currentPerson,
         CompetenceRequestEventType.MANAGER_APPROVAL, Optional.absent());

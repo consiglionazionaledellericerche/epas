@@ -922,7 +922,7 @@ end
 rule EmployCanDeleteSpecificCompetenceRequest
 when
   UsersRolesOffices(role.name == Role.EMPLOYEE)
-  $ar: CompetenceRequest(person == currentOperator.person, flowEnded == false, employeeApproved == false,
+  $ar: CompetenceRequest(person == currentOperator.person, flowEnded == false, employeeApproved == null,
   		managerApproved == null, officeHeadApproved == null)
   $c: PermissionCheck( action in ("CompetenceRequests.delete" ), target==$ar, granted == false)
 then

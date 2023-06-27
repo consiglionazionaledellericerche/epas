@@ -324,7 +324,15 @@ public class CompetenceRequests extends Controller {
       competenceRequest.setBeginDateToGive(beginDayToGive.getDate());
       competenceRequest.setEndDateToGive(endDayToGive.getDate());
       competenceRequest.setTeamMate(teamMate);
-    }    
+    } else {
+      if ((Boolean) configurationManager.configValue(competenceRequest.getPerson().getOffice(), 
+          EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION)) {
+        if (month < LocalDate.now().getMonthOfYear()) {
+          Validation.addError("competenceRequest.note", 
+              "E' prevista richiesta preventiva. Non si può richiedere straordinario per un mese concluso!");
+        }
+      }
+    }
 
     notFoundIfNull(competenceRequest.getPerson());
     
