@@ -5,6 +5,12 @@
 <div class="container">
 
   #{title title:'Straordinari Mensili', administration:true /}
+    #{if !tableFeature}
+      #{alert color: 'warning'}
+        Non sono presenti persone da visualizzare che sono appartengono alla sede dell'utente corrente.
+      #{/alert}
+    #{/if} 
+    #{else}
 		    <table class="table overtime-big table-hover">
 		    	<tr>
 			    	<th>Nome e cognome</th>
@@ -34,5 +40,5 @@
 		    	</tr> 
 		    	#{/list}
 		    </table>
+    #{/else}
 </div>
-

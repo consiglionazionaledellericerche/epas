@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import manager.ConsistencyManager;
 import manager.ShiftManager2;
 import models.CompetenceCode;
 import models.OrganizationShiftSlot;
@@ -90,6 +91,8 @@ public class Calendar extends Controller {
   static CompetenceCodeDao competenceCodeDao;
   @Inject
   static GeneralSettingDao generalSettingDao;
+  @Inject
+  static ConsistencyManager consistencyManager;
 
   private static String holidayCode = "T3";
   private static String nightCode = "T2";
@@ -209,6 +212,10 @@ public class Calendar extends Controller {
       if (rules.check(psd.getShiftType()) && rules.check(shiftTypeMonth)) {
 
         shiftManager2.delete(psd);
+
+        consistencyManager.fixPersonSituation(
+            Optional.of(psd.getPersonShift().getPerson()), Security.getUser(),
+            psd.getDate(), false);
 
         message = PNotifyObject.builder()
             .title("Ok")
@@ -514,8 +521,8 @@ public class Calendar extends Controller {
           personShiftDay.setOrganizationShiftSlot(organizationShiftslot);
         } else {
           personShiftDay.setShiftSlot(shiftSlot);
-        }        
- 
+        }
+
         personShiftDay.setPersonShift(shiftDao
             .getPersonShiftByPersonAndType(personId, personShiftDay.getShiftType().getType()));
         Optional<String> error = Optional.of("");
@@ -538,6 +545,9 @@ public class Calendar extends Controller {
 
         } else {
           shiftManager2.save(personShiftDay);
+          consistencyManager.fixPersonSituation(
+              Optional.of(personShiftDay.getPersonShift().getPerson()), Security.getUser(),
+              personShiftDay.getDate(), false);
 
           message = PNotifyObject.builder()
               .title("Ok")

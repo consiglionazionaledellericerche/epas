@@ -150,6 +150,8 @@ public class PersonDay extends BaseModel {
   @Column(name = "approved_on_holiday")
   private Integer approvedOnHoliday = 0;
 
+  private String note;
+
   @OneToMany(mappedBy = "personDay", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
   @OrderBy("date ASC")
   private List<Stamping> stampings = new ArrayList<Stamping>();

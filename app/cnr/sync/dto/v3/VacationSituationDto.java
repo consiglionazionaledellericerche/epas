@@ -33,7 +33,7 @@ public class VacationSituationDto {
         .contract(ContractShowTerseDto.build(vacationSituation.contract))
         .year(vacationSituation.year)
         .date(JodaConverters.jodaToJavaLocalDate(vacationSituation.date))
-        .lastYear(VacationSummaryDto.build(vacationSituation.lastYear))
+        .lastYear(vacationSituation.lastYear != null ? VacationSummaryDto.build(vacationSituation.lastYear) : null)
         .currentYear(VacationSummaryDto.build(vacationSituation.currentYear))
         .permissions(VacationSummaryDto.build(vacationSituation.permissions))
         .build();

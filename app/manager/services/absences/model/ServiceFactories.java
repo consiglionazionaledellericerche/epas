@@ -650,7 +650,9 @@ public class ServiceFactories {
       }
       log.debug("Controllo i turni per {} nel giorno {}", person, absence.getAbsenceDate());
       if (personShiftDayDao.getPersonShiftDay(person, absence.getAbsenceDate()).isPresent()) {
-        genericErrors.addAbsenceWarning(absence, AbsenceProblem.InShift);
+        if (!absence.getAbsenceType().isShiftCompatible()) {
+          genericErrors.addAbsenceWarning(absence, AbsenceProblem.InShift);
+        }
         log.info("Aggiunto warning di turno per {} in data {}", person, absence.getAbsenceDate());
       }
     }

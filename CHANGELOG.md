@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.8] - UNRELEASED
+### Added
+ - Aggiunto metodo REST per la configurazione delle decisioni sul buono pasto in un giorno
+   specifico
+ - Aggiunto codice 54B
+
+### Changed
+ - corretta gestione di periodi ferie anno precedente non presenti nel metodo rest /rest/v3/vacations/byPersonAndYear
+ - ignorata la gestione di turni con slot dispari nel caso di timetable esterna, così da non fornire errore in questo
+   specifico caso errore nella gestione dei calendari
+ - cambiata regola drools di approvazione delle richieste ferie che non funzionava in alcuni casi per i responsabili di gruppo
+ - corretta visualizzazione Presenza giornaliera gruppo e Straordinari mensili gruppi che restituivano errore per gli utenti di servizio (senza persona associata)
+ - cambiato comportamento nell'attribuzione dei giorni di reperibilità se i reperibili stanno su più calendari (sede centrale)
+ - rimossi i codici 31_2020 e 31_2021 dalla scheda dei codici di ferie inseribili dall'amministratore del personale
+ - corretta gestione permessi brevi per personale in turno
+
 ## [2.6.7] - 2023-06-05
 ### Added
  - Aggiunta la possibilità di inserire la zona di timbratura in fase di inserimento timbratura da interfaccia da parte
