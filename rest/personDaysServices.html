@@ -1136,6 +1136,37 @@ servizio di una sede è possibile utilizzare una GET alll'endpoint
 <p>La risposta ottenuta è analoga a quella descritta nel paragrafo precedente relativamente
 al metodo /rest/v3/personDays/offSiteWorkByOfficeAndMonth.</p>
 </section>
+<section id="modifica-decisioni-su-assegnazione-buono-pasto-in-un-giorno">
+<h2><span class="section-number">8.6.6. </span>Modifica decisioni su assegnazione buono pasto in un giorno<a class="headerlink" href="#modifica-decisioni-su-assegnazione-buono-pasto-in-un-giorno" title="Permalink to this heading">¶</a></h2>
+<p>È disponibile un endpoint per impostare la politica di assegnazione di un buono pasto in un giorno.
+A differenza degli altri endpoint di questa parte delle API REST, ci sono dei ruoli da utilizzare
+che permettono di modificare i dati del sistema (e non solo di visualizzarli).</p>
+<p>Per poter accedere a questo endpoint REST è necessario utilizzare un utente che abbia il ruolo
+di <em>Gestore Assenze</em> per la sede su cui si vuole effettuare le operazioni, oppure il ruolo di sistema
+<em>Gestore assenze</em> (per poter operare sugli utenti di tutte le sedi).</p>
+<p>Per modificare la politica di assegnazione di un buono pasto è possibile effettuare
+una <em>HTTP POST</em> all'endpoint <strong>/rest/v3/persondays/setMealTicketBehavior</strong>.</p>
+<p>La persona può essere individuata passando i parametri identificativi delle persone:
+<em>id, email, eppn, perseoPersonId, fiscalCode, number</em>.
+La data deve essere specificata tramite il campo <em>date</em> e deve essere nel formato <em>YYYY-MM-dd</em>.
+Le tipologie di assegnazione di buono pasto sono da indicare attraverso il campo <em>mealTicketDecision</em>,
+i valori che si possono assegnare sono:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>COMPUTED</em> (Calcolato)</p></li>
+<li><p><em>FORCED_TRUE</em> (Forzato si)</p></li>
+<li><p><em>FORCED_FALSE</em> (Forzato no)</p></li>
+</ul>
+</div></blockquote>
+<p>E' anche possibile passare un campo <em>note</em> con cui assegnare delle note al giorno indicato.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_absence_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v3/personDays/setMealTicketBehavior
+<span class="w">    </span><span class="nv">email</span><span class="o">==</span>galileo.galilei@cnr.it<span class="w"> </span><span class="nv">date</span><span class="o">==</span><span class="m">2023</span>-06-20<span class="w"> </span><span class="nv">mealTicketDecision</span><span class="o">==</span>FORCED_TRUE
+<span class="w">    </span><span class="nv">note</span><span class="o">==</span><span class="s1">&#39;ne aveva proprio diritto oggi&#39;</span>
+</pre></div>
+</div>
+<p>Il risultato sarà un json contenente le info principali sul giorno appena modificato.</p>
+</section>
 </section>
 
 
