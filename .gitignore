@@ -26,3 +26,6 @@ lib/
 /bin/
 /.gradle/
 /_build
+/postgres
+.idea
+/epas
