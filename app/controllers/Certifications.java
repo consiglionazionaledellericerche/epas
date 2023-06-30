@@ -20,9 +20,11 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import common.security.SecurityRules;
 import controllers.RequestInit.CurrentData;
+import dao.AbsenceDao;
 import dao.GeneralSettingDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -40,6 +42,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import manager.AbsenceManager;
 import manager.CertificationManager;
 import manager.attestati.service.ICertificationService;
 import manager.attestati.service.PersonCertData;
@@ -47,6 +50,7 @@ import manager.configurations.EpasParam;
 import models.Office;
 import models.Person;
 import models.ShiftTypeMonth;
+import models.absences.Absence;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.cache.Cache;
@@ -80,7 +84,10 @@ public class Certifications extends Controller {
   static GeneralSettingDao generalSettingDao;
   @Inject
   static CertificationManager certificationManager;
-
+  @Inject
+  static AbsenceManager absenceManager;
+  
+  
   private static final String PROCESS_COMMAND_KEY = "id-%s-year-%s-month-%s";
 
 
@@ -190,9 +197,12 @@ public class Certifications extends Controller {
       } else {
         unApprovedActivities = new ArrayList<>();
       }
+      Map<Person, List<Absence>> parentalMap = absenceManager
+          .createParentalMap(office, validYear, validMonth);
+      
 
       render(office, validYear, validMonth, people, notInEpas, notInAttestati, matchNumbers,
-          process, unApprovedActivities, enabledCalendar);
+          process, unApprovedActivities, enabledCalendar, parentalMap);
     }
     
   }
