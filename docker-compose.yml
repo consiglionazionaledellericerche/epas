@@ -14,6 +14,7 @@ services:
   epas:
     image: consiglionazionalericerche/epas
     container_name: epas
+    platform: linux/amd64
     volumes:
       - ./epas/logs:/home/epas/epas/logs
       - ./epas/attachments:/home/epas/epas/data/attachments
