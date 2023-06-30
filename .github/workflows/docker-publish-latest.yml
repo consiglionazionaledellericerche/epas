@@ -39,5 +39,5 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            consiglionazionalericerche/${{ github.repository }}:latest
-            ghcr.io/consiglionazionaledellericerche/${{ github.repository }}:latest
+            consiglionazionalericerche/epas:latest
+            ghcr.io/consiglionazionaledellericerche/epas:latest
