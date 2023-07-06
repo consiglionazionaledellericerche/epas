@@ -39,5 +39,5 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            consiglionazionalericerche/epas:${{ env.TAG_NAME }}
-            ghcr.io/consiglionazionaledellericerche/epas:${{ env.TAG_NAME }}
+            consiglionazionalericerche/epas:${{ github.ref_name }}
+            ghcr.io/consiglionazionaledellericerche/epas:${{ github.ref_name }}
