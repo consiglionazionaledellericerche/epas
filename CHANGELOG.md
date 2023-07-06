@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto codice 54B
  - Aggiunto controllo in fase di invio attestati che verifica la presenza o meno di allegato per i giorni con codice
    appartenente al gruppo dei congedi parentali e malattia figlio
+ - Aggiunta gestione delle missioni nel comune di residenza
 
 ### Changed
  - corretta gestione di periodi ferie anno precedente non presenti nel metodo rest /rest/v3/vacations/byPersonAndYear
