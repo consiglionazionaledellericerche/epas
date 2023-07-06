@@ -74,10 +74,10 @@ public class MissionManager {
   private final ConfigurationManager configurationManager;
   private final IWrapperFactory wrapperFactory;
   private final AbsenceComponentDao absComponentDao;
-  
+
 
   public static final String LOG_PREFIX = "Integrazione Missioni. ";
-  
+
   /**
    * Default constructor.
    */
@@ -101,7 +101,7 @@ public class MissionManager {
     this.absComponentDao = absComponentDao;
   }
 
-  
+
   /**
    * Metodo che verifica se al numero di matricola passato come parametro nel dto corrisponde
    * effettivamente una persona in anagrafica.
@@ -144,7 +144,7 @@ public class MissionManager {
 
     String missionCacheKey = "createMission." + body.id;
     boolean managedMissionOk = true;
-    
+
     if (Cache.get(missionCacheKey) == null) {
       log.debug(LOG_PREFIX + "Imposto la cache {} con valore true", missionCacheKey);
       Cache.set(missionCacheKey, true, "1mn");
@@ -161,7 +161,7 @@ public class MissionManager {
       Cache.delete(missionCacheKey);
       return false;
     }
-    
+
     Office office = body.person.getOffice();
 
     //verifico il parametro di ora inizio lavoro in sede
@@ -191,7 +191,7 @@ public class MissionManager {
             Optional.<Boolean>absent());
     if (!existingMissionWithoutId.isEmpty()  
         && existingMissionWithoutId.stream()
-          .allMatch(abs -> abs.getAbsenceType().getCode().equals("92") 
+        .allMatch(abs -> abs.getAbsenceType().getCode().equals("92") 
             || abs.getAbsenceType().getCode().equals("92M"))) {
       log.warn(LOG_PREFIX +  "Sono stati riscontrati codici di missione già inseriti manualmente"
           + " nei giorni {}-{}. Questa missione non viene processata.",
@@ -205,8 +205,8 @@ public class MissionManager {
     if (body.dataInizio.toLocalDate().isEqual(body.dataFine.toLocalDate())) {
       //caso di giorno unico di missione
       situation = getSituation(body.dataInizio, body, workInterval);
-      if (insertMission(body.destinazioneMissione, body.person,
-          Integer.valueOf(situation.difference / DateTimeConstants.MINUTES_PER_HOUR),
+      if (insertMission(body.destinazioneMissione, body.destinazioneNelComuneDiResidenza, 
+          body.person, Integer.valueOf(situation.difference / DateTimeConstants.MINUTES_PER_HOUR),
           Integer.valueOf(situation.difference % DateTimeConstants.MINUTES_PER_HOUR),
           body.dataInizio, body.dataFine, body.id, body.idOrdine, body.anno, body.numero)) {
         recalculate(body, Optional.<List<Absence>>absent());
@@ -248,7 +248,7 @@ public class MissionManager {
     int missionMinutes = 0;
     if (actualDate.toLocalDate().isEqual(body.dataInizio.toLocalDate()) 
         && actualDate.toLocalDate().isEqual(body.dataFine.toLocalDate())) {
-      
+
       //TODO: verificare nel caso di un solo giorno di missioni se è possibile attribuire tutti i
       //minuti in caso di missione che comincia prima dell'inizio della giornata di missione o 
       //termini dopo la fine della giornata di missione
@@ -260,14 +260,14 @@ public class MissionManager {
 
     } else if (actualDate.toLocalDate().isEqual(body.dataInizio.toLocalDate())) {
       //primo giorno di missione
-    
+
       workMinutes = workInterval.to.getHourOfDay() * DateTimeConstants.MINUTES_PER_HOUR
           + workInterval.to.getMinuteOfHour();
       missionMinutes = actualDate.getHourOfDay() * DateTimeConstants.MINUTES_PER_HOUR
           + actualDate.getMinuteOfHour();  
       situation.difference = workMinutes - missionMinutes;
       situation.isFirstOrLastDay = true;
-      
+
     } else if (actualDate.toLocalDate().isEqual(body.dataFine.toLocalDate())) {
       //ultimo giorno di missione
 
@@ -367,7 +367,7 @@ public class MissionManager {
     if (!performDeleteMission(toRemove, group)) {
       return false;
     }
-   
+
     Situation situation = null;
     for (LocalDate date : toAdd) {
       LocalDateTime dateToConsider = rightDate(date, body);
@@ -378,14 +378,14 @@ public class MissionManager {
       if (!atomicInsert(situation, body, dateToConsider)) {
         managedMissionOk = false;
       }
-      
+
     }
     /*
      * Fase II: per ogni giorno di missione così corretta, verifico gli orari se sono cambiati
      */
     JPA.em().flush();
     missions = absenceDao.absencesPersistedByMissions(body.idOrdine);
-    
+
     for (Absence abs : missions) {
       LocalDateTime actual = body.dataInizio;
       while (!actual.toLocalDate().isAfter(body.dataFine.toLocalDate())) {
@@ -407,7 +407,7 @@ public class MissionManager {
         actual = actual.plusDays(1);
       }
     }    
-    
+
     //consistencyManager.updatePersonSituation(body.person.id, body.dataInizio.toLocalDate());
     recalculate(body, Optional.fromNullable(missions));
     log.debug("Lanciati i ricalcoli per {} dal {}", body.person, body.dataInizio);
@@ -473,7 +473,7 @@ public class MissionManager {
    * @param to la data di fine fino a cui inserire la missione
    * @return true se la missione è stata inserita, false altrimenti.
    */
-  private boolean insertMission(String destination, Person person, 
+  private boolean insertMission(String destination, boolean nelComuneDiResidenza, Person person, 
       Integer hours, Integer minutes, LocalDateTime from, LocalDateTime to,
       Long id, Long idOrdine, int anno, Long numero) {
 
@@ -482,9 +482,16 @@ public class MissionManager {
     GroupAbsenceType group = null;
     switch (destination) {
       case "ITALIA":
-        group = absComponentDao
-        .groupAbsenceTypeByName(DefaultGroup.MISSIONE_GIORNALIERA.name()).get();
-        mission = absenceTypeDao.getAbsenceTypeByCode("92").get(); 
+        if (nelComuneDiResidenza) {
+          group = absComponentDao
+              .groupAbsenceTypeByName(DefaultGroup.MISSIONE_COMUNE_RESIDENZA.name()).get();        
+          mission = absenceTypeDao.getAbsenceTypeByCode("92RE").get(); 
+        } else {
+          group = absComponentDao
+              .groupAbsenceTypeByName(DefaultGroup.MISSIONE_GIORNALIERA.name()).get();        
+          mission = absenceTypeDao.getAbsenceTypeByCode("92").get(); 
+        }
+
         break;
       case "ESTERA":
         group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_ESTERA.name()).get();
@@ -503,7 +510,7 @@ public class MissionManager {
       type = absComponentDao.getOrBuildJustifiedType(JustifiedTypeName.nothing);
 
     } else if (quantity == 0 
-                || quantity > getFromDayOfMission(person, to.toLocalDate()).getWorkingTime()
+        || quantity > getFromDayOfMission(person, to.toLocalDate()).getWorkingTime()
         || day == DateTimeConstants.SATURDAY || day == DateTimeConstants.SUNDAY) {
       type = absComponentDao
           .getOrBuildJustifiedType(JustifiedTypeName.complete_day_and_add_overtime);
@@ -648,7 +655,7 @@ public class MissionManager {
     }
     consistencyManager.updatePersonSituation(body.person.id, begin);
   }
-  
+
   /**
    * Metodo privato che ritorna la localDateTime associata alla data passata come parametro
    * da ricercare all'interno del periodo inizio/fine missione del body.
@@ -662,7 +669,7 @@ public class MissionManager {
     LocalDateTime actual = body.dataInizio.withHourOfDay(body.dataFine.getHourOfDay())
         .withMinuteOfHour(body.dataFine.getMinuteOfHour())
         .withSecondOfMinute(body.dataFine.getSecondOfMinute());
-    
+
     while (!actual.isAfter(body.dataFine)) {
       if (actual.toLocalDate().isEqual(date)) {
         return actual;
@@ -671,7 +678,7 @@ public class MissionManager {
     }
     return null;
   }
-  
+
   /**
    * Metodo che consente l'inserimento di un'assenza per missione sul giorno indicato.
    *
@@ -682,25 +689,27 @@ public class MissionManager {
   private boolean atomicInsert(
       Situation situation, MissionFromClient body, LocalDateTime actualDate) {
     boolean missionInserted = false;
-    
+
     if (situation.isFirstOrLastDay) {
       if (situation.difference < 0) {
         //sono partito dopo la fine della giornata lavorativa o sono tornato prima dell'inizio 
         //della stessa --> metto un 92M con 1 minuto
-        if (insertMission(body.destinazioneMissione, body.person, 
-            Integer.valueOf(0), Integer.valueOf(-1), 
+        if (insertMission(body.destinazioneMissione, body.destinazioneNelComuneDiResidenza, 
+            body.person, Integer.valueOf(0), Integer.valueOf(-1), 
             actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
           missionInserted = true;
         } 
       } else {
         if (situation.difference 
             > getFromDayOfMission(body.person, actualDate.toLocalDate()).getWorkingTime()) {
-          if (insertMission(body.destinazioneMissione, body.person,  
-              null, null, actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
+          if (insertMission(body.destinazioneMissione, body.destinazioneNelComuneDiResidenza,
+              body.person, null, null, actualDate, actualDate, body.id, body.idOrdine, 
+              body.anno, body.numero)) {
             missionInserted = true;
           } 
         } else {
-          if (insertMission(body.destinazioneMissione, body.person,  
+          if (insertMission(body.destinazioneMissione, body.destinazioneNelComuneDiResidenza,
+              body.person, 
               Integer.valueOf(situation.difference / DateTimeConstants.MINUTES_PER_HOUR), 
               Integer.valueOf(situation.difference % DateTimeConstants.MINUTES_PER_HOUR), 
               actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
@@ -709,8 +718,9 @@ public class MissionManager {
         }        
       }
     } else {
-      if (insertMission(body.destinazioneMissione, body.person,  
-          null, null, actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
+      if (insertMission(body.destinazioneMissione, body.destinazioneNelComuneDiResidenza,
+          body.person, null, null, actualDate, actualDate, body.id, body.idOrdine, 
+          body.anno, body.numero)) {
         missionInserted = true;
       } 
     }
@@ -721,7 +731,7 @@ public class MissionManager {
     }
     return missionInserted;
   }
-  
+
   /**
    * Classe privata di aiuto.
    *
