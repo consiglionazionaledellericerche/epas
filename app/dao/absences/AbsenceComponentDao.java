@@ -50,6 +50,7 @@ import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
+import models.absences.definitions.DefaultCategoryType;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceTrouble;
 import models.absences.query.QAbsenceType;
@@ -657,5 +658,5 @@ public class AbsenceComponentDao extends DaoBase {
         .where(absence.absenceType.code.in(codes))
         .fetch();
   }
-
+  
 }

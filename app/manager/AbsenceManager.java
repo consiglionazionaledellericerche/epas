@@ -23,10 +23,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import common.security.SecurityRules;
 import controllers.Security;
 import dao.AbsenceDao;
 import dao.ContractDao;
+import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
@@ -36,6 +39,9 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -46,6 +52,7 @@ import manager.response.AbsencesResponse;
 import manager.services.absences.AbsenceService.InsertReport;
 import models.Contract;
 import models.ContractMonthRecap;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonReperibilityDay;
@@ -54,9 +61,12 @@ import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
+import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultGroup;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.MealTicketBehaviour;
 import org.apache.commons.mail.EmailException;
@@ -92,6 +102,7 @@ public class AbsenceManager {
   private final AbsenceComponentDao absenceComponentDao;
   private final NotificationManager notificationManager;
   private final SecurityRules rules;
+  private final PersonDao personDao;
 
   /**
    * Costruttore.
@@ -124,7 +135,7 @@ public class AbsenceManager {
       PersonDayManager personDayManager,
       IWrapperFactory wrapperFactory,
       NotificationManager notificationManager,
-      SecurityRules rules) {
+      SecurityRules rules, PersonDao personDao) {
 
     this.absenceComponentDao = absenceComponentDao;
     this.contractMonthRecapManager = contractMonthRecapManager;
@@ -141,6 +152,7 @@ public class AbsenceManager {
     this.personDayManager = personDayManager;
     this.notificationManager = notificationManager;
     this.rules = rules;
+    this.personDao = personDao;
   }
 
   /**
@@ -185,12 +197,12 @@ public class AbsenceManager {
       log.trace("Prima del lancio dei ricalcoli");      
       JPA.em().flush();
       log.trace("Flush dell'entity manager effettuata");
-      
+
       consistencyManager.updatePersonSituation(person.id, from);
     }
     return newAbsences;
   }
-  
+
   /**
    * Verifica la possibilità che la persona possa usufruire di un riposo compensativo nella data
    * specificata. Se voglio inserire un riposo compensativo per il mese successivo a oggi considero
@@ -319,9 +331,9 @@ public class AbsenceManager {
     Preconditions.checkNotNull(mealTicket);
 
     log.debug("Ricevuta richiesta di inserimento assenza per {}. AbsenceType = {} dal {} al {}, "
-            + "mealTicket = {}. Attachment = {}, justifiedMinites = {}", 
-            person.fullName(), absenceType.getCode(), dateFrom, dateTo.or(dateFrom), 
-            mealTicket.orNull(), file.orNull(), justifiedMinutes.orNull());
+        + "mealTicket = {}. Attachment = {}, justifiedMinites = {}", 
+        person.fullName(), absenceType.getCode(), dateFrom, dateTo.or(dateFrom), 
+        mealTicket.orNull(), file.orNull(), justifiedMinutes.orNull());
 
     AbsenceInsertReport air = new AbsenceInsertReport();
 
@@ -654,7 +666,7 @@ public class AbsenceManager {
       return;
     }
   }
-  
+
   /**
    * Metodo di utilità per popolare correttamente i cmapi dell'absence.
    *
@@ -675,7 +687,7 @@ public class AbsenceManager {
       } else {
         absence.setTimeToRecover(432);
       }
-      
+
     }
     return absence;
   }
@@ -687,11 +699,11 @@ public class AbsenceManager {
    */
   public void removeAbsence(Absence absence) {
     val pd = absence.getPersonDay();
-        
+
     if (absence.getAbsenceFile().exists()) {
       absence.getAbsenceFile().getFile().delete();
     }
-    
+
     absence.delete();
     pd.getAbsences().remove(absence);
     pd.setWorkingTimeInMission(0);
@@ -732,15 +744,15 @@ public class AbsenceManager {
 
       List<Absence> absenceList =
           absenceDao
-              .getAbsencesInPeriod(
-                  Optional.fromNullable(person), actualDate, Optional.<LocalDate>absent(), false);
+          .getAbsencesInPeriod(
+              Optional.fromNullable(person), actualDate, Optional.<LocalDate>absent(), false);
 
       for (Absence absence : absenceList) {
         if (absence.getAbsenceType().getCode().equals(absenceType.getCode())) {
           if (absence.getAbsenceFile().exists()) {
             absence.getAbsenceFile().getFile().delete();
           }
-          
+
           absence.delete();
           pd.getAbsences().remove(absence);
           pd.setWorkingTimeInMission(0);
@@ -818,6 +830,26 @@ public class AbsenceManager {
       }
     }
     return startAbsence;
+  }
+
+  public Map<Person, List<Absence>> createParentalMap(Office office, int year, int month) {
+    YearMonth yearMonth = new YearMonth(year, month);
+    Set<Office> officeSet = Sets.newHashSet();
+    officeSet.add(office);
+    Map<Person, List<Absence>> map = Maps.newHashMap();
+    List<Person> activePeople = personDao.getActivePersonInMonth(officeSet, yearMonth);
+    List<Absence> parentalWithoutAttachment = Lists.newArrayList();
+    List<String> codes = DefaultGroup.parentalLeaveAndChildIllnessCodes();
+    for (Person person : activePeople) {
+      List<Absence> absencesInMonth = absenceDao.getAbsencesNotInternalUseInMonth(person, year, month);
+      parentalWithoutAttachment = absencesInMonth.stream()
+          .filter(abs -> codes.contains(abs.getCode()) && !abs.getAbsenceFile().exists())
+          .collect(Collectors.toList());
+      if (!parentalWithoutAttachment.isEmpty()) {
+        map.put(person, parentalWithoutAttachment);
+      }      
+    }
+    return map;
   }
 
   /**

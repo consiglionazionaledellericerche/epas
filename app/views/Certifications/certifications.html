@@ -77,6 +77,37 @@
     </ul>
     #{/alert}
   #{/if}
+  
+  #{if parentalMap != null && !parentalMap.isEmpty()}
+  
+  #{alert color:'danger'}
+      <h4>
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+        Attenzione, alcuni codici di assenza per congedo parentale o malattia figlio risultano senza allegato:
+      </h4>
+    	<table class="table">
+        
+        <tr class="warning">
+          <th>Persona</th>
+          <th>Codici e giorni</th>
+        </tr>
+        #{list items:parentalMap.entrySet(), as:'entry'}
+        <tr>
+          <td>${entry.getKey().getFullname()}</td>
+          <td>
+			  <ul>
+			  #{list items:entry.getValue(), as:'value'}
+			  	<li>${value.getAbsenceType().getCode()} - ${value.getPersonDay().getDate()}</li>
+			  #{/list}
+			  </ul>
+		  </td>
+          
+        </tr>       
+		#{/list}
+      	</table>
+    #{/alert}
+  
+  #{/if}
 
   #{if matchNumbers && !matchNumbers.empty} *{ se è injettato è stata ottenuta
   l'autenticazione }*
