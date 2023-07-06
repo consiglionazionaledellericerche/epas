@@ -46,5 +46,6 @@ public class MissionFromClient {
   public Long idOrdine;
   public int anno;
   public Long numero;
+  public Boolean destinazioneNelComuneDiResidenza;
 
 }

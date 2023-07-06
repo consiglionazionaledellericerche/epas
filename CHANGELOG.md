@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto metodo REST per la configurazione delle decisioni sul buono pasto in un giorno
    specifico
  - Aggiunto codice 54B
+ - Aggiunta gestione delle missioni nel comune di residenza
 
 ### Changed
  - corretta gestione di periodi ferie anno precedente non presenti nel metodo rest /rest/v3/vacations/byPersonAndYear
