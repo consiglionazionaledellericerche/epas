@@ -4,11 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.8] - UNRELEASED
+## [2.6.8] - 2023-07-06
 ### Added
  - Aggiunto metodo REST per la configurazione delle decisioni sul buono pasto in un giorno
    specifico
  - Aggiunto codice 54B
+ - Aggiunto controllo in fase di invio attestati che verifica la presenza o meno di allegato per i giorni con codice
+   appartenente al gruppo dei congedi parentali e malattia figlio
+ - Aggiunta gestione delle missioni nel comune di residenza
 
 ### Changed
  - corretta gestione di periodi ferie anno precedente non presenti nel metodo rest /rest/v3/vacations/byPersonAndYear
