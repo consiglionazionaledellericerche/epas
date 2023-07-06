@@ -473,7 +473,7 @@ public class MissionManager {
    * @param to la data di fine fino a cui inserire la missione
    * @return true se la missione è stata inserita, false altrimenti.
    */
-  private boolean insertMission(String destination, boolean nelComuneDiResidenza, Person person, 
+  private boolean insertMission(String destination, Boolean nelComuneDiResidenza, Person person, 
       Integer hours, Integer minutes, LocalDateTime from, LocalDateTime to,
       Long id, Long idOrdine, int anno, Long numero) {
 
@@ -482,7 +482,7 @@ public class MissionManager {
     GroupAbsenceType group = null;
     switch (destination) {
       case "ITALIA":
-        if (nelComuneDiResidenza) {
+        if (nelComuneDiResidenza != null && nelComuneDiResidenza.booleanValue() == true) {
           group = absComponentDao
               .groupAbsenceTypeByName(DefaultGroup.MISSIONE_COMUNE_RESIDENZA.name()).get();        
           mission = absenceTypeDao.getAbsenceTypeByCode("92RE").get(); 
