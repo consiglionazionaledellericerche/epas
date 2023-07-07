@@ -650,6 +650,13 @@ PDFReport.thIncompleteTime=Orario incompleto
 PDFReport.thMissingTime=Orario insufficiente
 PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
 
+Qualifications.list=Qualifiche del personale
+qualification.qualification=Livello
+qualification.description=Descrizione
+qualification.persons.size=Numero persone associate
+qualification.absenceTypes.size=Numero tipi di assenza associati
+qualification.absenceTypes=Tipi di assenza associati
+
 ################### CALENDARIO SHIFT #################################################
 
 shift.alreadyInShift= Il dipendente è già in turno sull'attività %s

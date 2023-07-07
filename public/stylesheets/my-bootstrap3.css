@@ -542,3 +542,11 @@ a#web-stamping-btn {
 #login-idp-btn a {
 	box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.2);
 }
+
+span.qualification-absenceType {
+	margin-right: 0.2em;
+}
+
+span.qualification-absenceType a {
+	color: white;
+}

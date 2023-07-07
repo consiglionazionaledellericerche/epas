@@ -8,7 +8,8 @@
   'Configurations.show',
   'WorkingTimes.manageWorkingTime',
   'Competences.manageCompetenceCode',
-  'Absences.manageAbsenceCode'] /}
+  'Absences.manageAbsenceCode',
+  'Qualifications.list'] /}
 
   <li class="dropdown #{if request.action in actions}active#{/if}">
 
@@ -68,6 +69,9 @@
         <i class="fa fa-archive" aria-hidden="true"></i>
       #{/secure.li}
       #{secure.li @AbsenceGroups.showCategories() }
+       <i class="fa fa-tag" aria-hidden="true"></i>
+      #{/secure.li}
+      #{secure.li @Qualifications.list() }
        <i class="fa fa-tag" aria-hidden="true"></i>
       #{/secure.li}
 
