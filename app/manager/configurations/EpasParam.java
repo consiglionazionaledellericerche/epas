@@ -457,7 +457,7 @@ public enum EpasParam {
       Office.class),
 
   //#######################################
-  // FLOWS PARAMS
+  // FLOWS PARAMS ABSENCES
 
   /**
    * Attivazione o meno della richieste di assenza generico.
@@ -624,71 +624,57 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
 
+  //#####################################################################
+  //FLOWS PARAMS COMPETENCES
+  
+  
   /**
-   * Per i livelli I-III è necessaria l'approvazione dei permessi personali da parte del 
+   * Attivazione della possibilità per il dipendente di richiedere le ore di straordinario
+   */
+  ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY(
+      "enable_employee_request_overtime_quantity",
+      EpasParamCategory.COMPETENCE_FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+   
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione degli straordinari da parte del 
    * responsabile di sede.
    */
-  PERSONAL_PERMISSION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED(
-      "personal_permission_i_iii_request_office_head_approval_required",
-      EpasParamCategory.FLOWS,
+  OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "overtime_request_office_head_approval_required",
+      EpasParamCategory.COMPETENCE_FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-
+  
   /**
-   * Per i livelli IV-VIII è necessaria l'approvazione dei permessi personali da parte del 
-   * responsabile di sede.
+   * Per i livelli IV-VIII è necessaria l'approvazione degli straordinari da parte dell'eventuale
+   * responsabile del gruppo di lavoro.
    */
-  PERSONAL_PERMISSION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
-      "personal_permission_iv_viii_request_office_head_approval_required",
-      EpasParamCategory.FLOWS,
-      EpasParamTimeType.PERIODIC,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(true),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
-
-  /**
-   * Per i livelli I-III è necessaria l'approvazione dei permessi personali da parte 
-   * dell'eventuale responsabile di gruppo.
-   */
-  PERSONAL_PERMISSION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED(
-      "personal_permission_i_iii_request_manager_approval_required",
-      EpasParamCategory.FLOWS,
+  OVERTIME_REQUEST_MANAGER_APPROVAL_REQUIRED(
+      "overtime_request_manager_approval_required",
+      EpasParamCategory.COMPETENCE_FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-
-  /**
-   * Per i livelli IV-VIII è necessaria l'approvazione dei permessi personali da parte 
-   * dell'eventuale responsabile di gruppo.
-   */
-  PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED(
-      "personal_permission_iv_viii_request_manager_approval_required",
-      EpasParamCategory.FLOWS,
+  
+  OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION(
+      "overtime_advance_request_and_confirmation", 
+      EpasParamCategory.COMPETENCE_FLOWS,
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(true),
+      EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
-
-  /**
-   * Per i responsabili di gruppo è necessaria l'approvazione dei permessi personali da parte del 
-   * responsabile di sede.
-   */
-  PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED(
-      "personal_permission_manager_request_office_head_approval_required",
-      EpasParamCategory.FLOWS,
-      EpasParamTimeType.PERIODIC,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(true),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
-
+  
   /**
    * Il responsabile di sede deve ricevere le notifiche delle comunicazioni
    * di ferie deli livelli I-III.
@@ -754,6 +740,72 @@ public enum EpasParam {
       EpasParamTimeType.PERIODIC,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+
+  /**
+   * Per i livelli I-III è necessaria l'approvazione dei permessi personali da parte del 
+   * responsabile di sede.
+   */
+  PERSONAL_PERMISSION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "personal_permission_i_iii_request_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione dei permessi personali da parte del 
+   * responsabile di sede.
+   */
+  PERSONAL_PERMISSION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "personal_permission_iv_viii_request_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i livelli I-III è necessaria l'approvazione dei permessi personali da parte 
+   * dell'eventuale responsabile di gruppo.
+   */
+  PERSONAL_PERMISSION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED(
+      "personal_permission_i_iii_request_manager_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+
+  /**
+   * Per i livelli IV-VIII è necessaria l'approvazione dei permessi personali da parte 
+   * dell'eventuale responsabile di gruppo.
+   */
+  PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED(
+      "personal_permission_iv_viii_request_manager_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
+  /**
+   * Per i responsabili di gruppo è necessaria l'approvazione dei permessi personali da parte del 
+   * responsabile di sede.
+   */
+  PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED(
+      "personal_permission_manager_request_office_head_approval_required",
+      EpasParamCategory.FLOWS,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
@@ -997,7 +1049,9 @@ public enum EpasParam {
    * Categorizzazione dei parametri di ePAS.
    */
   public enum EpasParamCategory {
+
     GENERAL, YEARLY, PERIODIC, AUTOCERTIFICATION, FLOWS, COMPETENCE_FLOWS, INFORMATION_FLOWS
+
   }
 
   /**

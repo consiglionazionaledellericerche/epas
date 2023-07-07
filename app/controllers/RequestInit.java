@@ -37,6 +37,7 @@ import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Office;
 import models.User;
+import models.flows.enumerate.CompetenceRequestType;
 import models.enumerate.BlockType;
 import org.joda.time.LocalDate;
 import play.Play;
@@ -153,6 +154,17 @@ public class RequestInit extends Controller {
         session.put("personSelected", personId);
       }
     }
+    
+    // CompetenceRequestType init /////////////////////////////////////////////////
+    CompetenceRequestType competenceType = null;
+    if (params.get("competenceType") != null) {
+      competenceType = CompetenceRequestType.valueOf(params.get("competenceType"));
+    } else if (session.get("competenceType") != null) {
+      competenceType = CompetenceRequestType.valueOf(session.get("competenceType"));      
+    } else {      
+      competenceType = CompetenceRequestType.OVERTIME_REQUEST;
+      session.put("competenceType", CompetenceRequestType.OVERTIME_REQUEST);
+    }
 
     // Popolamento del dropdown degli anni
     List<Integer> years = Lists.newArrayList();
@@ -202,6 +214,7 @@ public class RequestInit extends Controller {
     
     computeActionSelected(currentUser, offices, year, month, day, personId, officeId);
     renderArgs.put("currentData", new CurrentData(year, month, day, personId, officeId));
+
   }
 
   private static void computeActionSelected(
@@ -258,7 +271,11 @@ public class RequestInit extends Controller {
         "Charts.exportTimesheetSituation",
         "AbsenceGroups.absenceTroubles",
         "Stampings.stampingsByAdmin",
-        "PrintTags.listPersonForPrintTags");
+        "PrintTags.listPersonForPrintTags",
+        "CompetenceRequests.blank",
+        "CompetenceRequests.edit",
+        "CompetenceRequests.show",
+        "CompetenceRequests.list");
 
 
     final Collection<String> yearSwitcher = ImmutableList.of(
@@ -472,6 +489,7 @@ public class RequestInit extends Controller {
     public final Integer day;
     public final Long personId;
     public final Long officeId;
+    
 
     CurrentData(Integer year, Integer month, Integer day, Long personId, Long officeId) {
       this.year = year;
@@ -479,6 +497,7 @@ public class RequestInit extends Controller {
       this.day = day;
       this.personId = personId;
       this.officeId = officeId;
+      
     }
 
     /**

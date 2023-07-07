@@ -9,12 +9,15 @@
 
 %{
 	approvalsRequired = 0;
-	
-	if (config.reperibilityManagerApprovalRequired) {
+
+	if (config.officeHeadApprovalRequired) {
+	 approvalsRequired++;
+	}
+	if (config.managerApprovalRequired) {
 	 approvalsRequired++;
 	}
 	if (config.employeeApprovalRequired) {
-	  approvalsRequired++;
+	 approvalsRequired++;
 	}
 	approvalRequired = approvalsRequired > 0
 }%
@@ -24,7 +27,7 @@
 
   #{tabList}
     #{tabItem id:'approvandi', title:'Flussi da approvare', active:true /}
-    #{tabItem id:'attivo', title:'Flussi attivi'/}
+    #{tabItem id:'attivo', title:'Flussi attivi'/}        
     #{tabItem id:'nonAttivo', title:'Flussi terminati' /}
   #{/tabList}
   <br>

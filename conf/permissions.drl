@@ -114,7 +114,7 @@ when
   		&& reperibility != null && !reperibility.isEmpty()) from currentOperator.person
   $o: Office() from $p.getOffice()
   Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.getConfigurations()
-  $c: PermissionCheck(action in ("CompetenceRequests.enabled", "CompetenceRequests.handleEnabled"), granted == false, target == null)
+  $c: PermissionCheck(action in ("CompetenceRequests.enableReperibilityChange"), granted == false, target == null)
 then
   $c.grant();
 end
@@ -345,7 +345,8 @@ when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
-  $c: PermissionCheck(action in ("ReperibilityCalendar.show",
+  $c: PermissionCheck(action in ("CompetenceRequests.enableReperibilityChange",
+  								 "ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
                                  "ReperibilityCalendar.deleteReperibility",
                                  "ReperibilityCalendar.events",
@@ -370,7 +371,8 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
-  $c: PermissionCheck(action in ("ReperibilityCalendar.show",
+  $c: PermissionCheck(action in ("CompetenceRequests.enableReperibilityChange",
+  								 "ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
                                  "ReperibilityCalendar.deleteReperibility",
                                  "ReperibilityCalendar.events",
@@ -619,25 +621,13 @@ when
   $p: Person() from currentOperator.person
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $rep: PersonReperibility() from $prt.personReperibilities
-  $cr: CompetenceRequest(person == $rep.person && reperibilityManagerApprovalRequired == true 
-         && reperibilityManagerApproved == null, flowEnded == false)
+  $cr: CompetenceRequest(person == $rep.person && managerApprovalRequired == true 
+         && managerApproved == null, flowEnded == false)
   $c: PermissionCheck(action in (
           "CompetenceRequests.approval",
           "CompetenceRequests.disapproval",
           "CompetenceRequests.reperibilityManagerDisapproval"),
         target == $cr, granted == false)
-then
-$c.grant();
-end
-
-/* Regole per visualizzazione richiesta di cambio reperibilità*/
-rule isEmployeeForCompetenceFlows
-when
-  $uro: UsersRolesOffices()
-  Role(name == Role.EMPLOYEE) from $uro.role
-  $cr: CompetenceRequest(person == $uro.user.person)
-  $c: PermissionCheck(action in (
-       "CompetenceRequests.show"), target == $cr, granted == false)
 then
 $c.grant();
 end
@@ -660,28 +650,6 @@ then
   $c.grant();
 end
 
-/* Regole per cancellazione richiesta di cambio reperibilità */
-
-rule EmployCanEditOrDeleteCompetenceRequest
-when
-  UsersRolesOffices(role.name == Role.EMPLOYEE)
-  CompetenceRequest(person == currentOperator.person, ownerCanEditOrDelete())
-  $c: PermissionCheck( action in ("CompetenceRequests.edit" ,
-    "CompetenceRequests.save", "CompetenceRequests.delete" ), granted == false)
-then
-  $c.grant();
-end
-
-rule EmployCanDeleteSpecificCompetenceRequest
-when
-  UsersRolesOffices(role.name == Role.EMPLOYEE)
-  $cr: CompetenceRequest(person == currentOperator.person, flowEnded == false,
-  		reperibilityManagerApproved == null, employeeApproved == null)
-  $c: PermissionCheck( action in ("CompetenceRequests.delete" ), target==$cr, granted == false)
-then
-  $c.grant();
-end
-
 rule isEmployeeForFlows
 when
   $uro: UsersRolesOffices()
@@ -692,6 +660,19 @@ when
 then
 $c.grant();
 end
+
+
+rule isEmployeeForCompetenceFlows
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $cr: CompetenceRequest(person == $uro.user.person)
+  $c: PermissionCheck(action in (
+  		"CompetenceRequests.show"), target == $cr, granted == false)
+then
+$c.grant();
+end
+
 
 rule isEmployeeForInformationFlows
 when
@@ -721,6 +702,7 @@ when
   $p: Person() from currentOperator.person
   PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
   $c: PermissionCheck(action == "PrintTags.autocertOffsite", target == null, granted == false)
+
 then
 $c.grant();
 end
@@ -760,6 +742,18 @@ when
 		"AbsenceRequests.show",
 		"AbsenceRequests.flush",
 		
+
+		/* Richieste di straordinario */
+		"CompetenceRequests.list",
+		"CompetenceRequests.blank",
+		"CompetenceRequests.edit",
+		"CompetenceRequests.save",
+		"CompetenceRequests.show",
+		"CompetenceRequests.overtimes",
+		
+     	/* Ferie */
+     	"Vacations.show",
+     	"Vacations.personVacationSummary",
 
 		/* Visualizzazione organigramma*/
 		"Groups.seatOrganizationChart",
@@ -852,8 +846,17 @@ when
 
        ), target == null, granted == false)
 then
- $c.grant();
+  $c.grant();
 end
+
+rule canViewOvertimeRequest
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
+  $c: PermissionCheck (action in ("CompetenceRequests.overtimes"), granted == false)
+then
+  $c.revoke();
+end;
 
 rule EmployeeCanAccessTeleworkStampings
 when
@@ -896,12 +899,32 @@ then
   $c.grant();
 end
 
+rule EmployCanEditOrDeleteCompetenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  CompetenceRequest(person == currentOperator.person, ownerCanEditOrDelete())
+  $c: PermissionCheck( action in ("CompetenceRequests.edit" ,
+    "CompetenceRequests.save", "CompetenceRequests.delete" ), target == null, granted == false)
+then
+  $c.grant();
+end
+
 rule EmployCanDeleteSpecificAbsenceRequest
 when
   UsersRolesOffices(role.name == Role.EMPLOYEE)
   $ar: AbsenceRequest(person == currentOperator.person, flowEnded == false,
   		managerApproved == null, administrativeApproved == null, officeHeadApproved == null)
   $c: PermissionCheck( action in ("AbsenceRequests.delete" ), target==$ar, granted == false)
+then
+  $c.grant();
+end
+
+rule EmployCanDeleteSpecificCompetenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $ar: CompetenceRequest(person == currentOperator.person, flowEnded == false, employeeApproved == null,
+  		managerApproved == null, officeHeadApproved == null)
+  $c: PermissionCheck( action in ("CompetenceRequests.delete" ), target==$ar, granted == false)
 then
   $c.grant();
 end
@@ -953,6 +976,16 @@ then
   $c.grant();
 end
 
+rule showCompetenceRequest
+when 
+  UsersRolesOffices(role.name == Role.GROUP_MANAGER || role.name == Role.SEAT_SUPERVISOR 
+  || role.name == Role.PERSONNEL_ADMIN)
+  $cr: CompetenceRequest(person != currentOperator.person, flowEnded == true)
+  $c: PermissionCheck(action == "CompetenceRequests.show", target==$cr, granted == false)
+then
+  $c.grant();
+end
+
 rule personInCharge
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
@@ -970,7 +1003,6 @@ when
 			"AbsenceRequests.compensatoryRestsToApprove",
 			"AbsenceRequests.permissionsToApprove",
 			"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
-			
 			"AbsenceRequests.vacations",
 			"AbsenceRequests.compensatoryRests",
 			"AbsenceRequests.shortTermPermits",
@@ -980,12 +1012,21 @@ when
 			"AbsenceRequests.show",
 			"AbsenceRequests.approval",
 			"AbsenceRequests.disapproval",
+
+			"CompetenceRequests.show",
+			"CompetenceRequests.approval",
+			"CompetenceRequests.disapproval",
+			"CompetenceRequests.managerApproval",
+			"CompetenceRequests.list",
+			"CompetenceRequests.listToApprove",
+			"CompetenceRequests.overtimesToApprove",
 			
 			"InformationRequests.serviceExitToApprove",
 			"InformationRequests.listToApprove",
 			"InformationRequests.approval",
 			"InformationRequests.disapproval",
 			"InformationRequests.show"
+
 		), target==null, granted == false)
 then
   $c.grant();
@@ -1032,6 +1073,23 @@ then
   $c.grant();
 end
 
+
+rule personInChargeForCompetenceRequestsFlows
+when
+  UsersRolesOffices(role.name == Role.GROUP_MANAGER)
+  $cr: CompetenceRequest(managerApprovalRequired == true && managerApproved == null)
+  $c: PermissionCheck( action in (
+    		"CompetenceRequests.list",
+			"CompetenceRequests.listToApprove",
+			"CompetenceRequests.overtimesToApprove",			
+			"CompetenceRequests.managerApproval",
+			"CompetenceRequests.show"
+			
+		), target == $cr, granted == false)
+then
+  $c.grant();
+end
+
 rule personInChargeForInformationFlows
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
@@ -1043,6 +1101,7 @@ when
 			"InformationRequests.disapproval",
 			"InformationRequests.show"
 	), target == $ir, granted == false)
+
 then
   $c.grant();
 end
@@ -1057,6 +1116,34 @@ when
 			"AbsenceRequests.disapproval"
   			), target == $ar, granted == false)
 then
+  $c.grant();
+end
+
+rule personInChargeCompetenceRequestsApprovalDisapprovalWithTarget
+when
+  UsersRolesOffices(role.name == Role.GROUP_MANAGER)
+  $p: Person() from currentOperator.person
+  $cr: CompetenceRequest(person != $p && managerApprovalRequired == true && managerApproved == null, flowEnded == false)
+  $c: PermissionCheck( action in (
+			"CompetenceRequests.approval",
+			"CompetenceRequests.disapproval"
+  			), target == $cr, granted == false)
+then
+  System.out.println("Sono nella personInChargeCompetenceRequestsApprovalDisapprovalWIthTarget");
+  $c.grant();
+end
+
+rule personInChargeCompetenceRequestsApprovalDisapproval
+when
+  UsersRolesOffices(role.name == Role.GROUP_MANAGER)
+  $p: Person() from currentOperator.person
+  $cr: CompetenceRequest(person != $p && managerApprovalRequired == true && managerApproved == null, flowEnded == false)
+  $c: PermissionCheck( action in (
+			"CompetenceRequests.approval",
+			"CompetenceRequests.disapproval"
+  			), target == null, granted == false)
+then
+  System.out.println("Sono nella personInChargeCompetenceRequestsApprovalDisapproval");
   $c.grant();
 end
 
@@ -1495,6 +1582,32 @@ when
         "Stampings.personStamping",
         "Vacations.list",
         "Vacations.vacationSummary",
+
+		"AbsenceRequests.blank",
+		"AbsenceRequests.edit",
+		"AbsenceRequests.save",
+		"AbsenceRequests.list",
+		"AbsenceRequests.listToApprove",
+		"AbsenceRequests.vacationsToApprove",
+
+		"AbsenceRequests.compensatoryRestsToApprove",
+		"AbsenceRequests.permissionsToApprove",
+		"AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
+		"AbsenceRequests.vacations",
+		"AbsenceRequests.compensatoryRests",
+		"AbsenceRequests.shortTermPermits",
+		"AbsenceRequests.officeHeadApproval",
+		"AbsenceRequests.show",
+		"AbsenceRequests.approval",
+		"AbsenceRequests.disapproval",
+		"CompetenceRequests.show",
+		"CompetenceRequests.list",
+		"CompetenceRequests.approval",
+		"CompetenceRequests.disapproval",
+		"CompetenceRequests.listToApprove",
+		"CompetenceRequests.officeHeadApproval",
+		"CompetenceRequests.overtimesToApprove",
+
         "Stampings.dailyPresence",
         "AbsenceRequests.blank",
         "AbsenceRequests.edit",
@@ -1547,6 +1660,7 @@ when
         "Configurations.update",
         "Configurations.uploadAttachment",
         "Configurations.removeAttachment"
+
         ), target == null, granted == false)
 then
  $c.grant();
@@ -1564,6 +1678,20 @@ when
         "Vacations.vacationSummary",
         "Stampings.dailyPresence",
         "AbsenceRequests.blank",
+
+		"AbsenceRequests.vacations",
+		"AbsenceRequests.compensatoryRests",
+		"AbsenceRequests.shortTermPermits",
+
+		"AbsenceRequests.show",
+		"CompetenceRequests.show",
+		"CompetenceRequests.list",
+		"CompetenceRequests.approval",
+		"CompetenceRequests.disapproval",
+		"CompetenceRequests.listToApprove",
+		"CompetenceRequests.officeHeadApproval",
+		"CompetenceRequests.overtimesToApprove",
+
         "AbsenceRequests.edit",
         "AbsenceRequests.save",
         "AbsenceRequests.list",
@@ -1573,12 +1701,9 @@ when
         "AbsenceRequests.permissionsToApprove",
         "AbsenceRequests.vacationsPastYearAfterDeadlineToApprove",
 
-        "AbsenceRequests.vacations",
-        "AbsenceRequests.compensatoryRests",
-        "AbsenceRequests.shortTermPermits",
         "AbsenceRequests.personalPermissions",
         "AbsenceRequests.vacationsPastYearAfterDeadline",
-        "AbsenceRequests.show",
+
         
         /*Gestione green pass*/
         "CheckGreenPasses.dailySituation",
@@ -1627,6 +1752,21 @@ when
 		"AbsenceRequests.approval",
 		"AbsenceRequests.disapproval"		
 		), target == $ar, granted == false)
+then
+ $c.grant();
+end
+
+
+rule RoleSeatSuperVisor_forCompetenceFlows
+when
+ $uro: UsersRolesOffices()
+ Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
+ $cr: CompetenceRequest((officeHeadApprovalRequired == true && officeHeadApproved == null && flowEnded == false))
+ $c: PermissionCheck(action in (
+		"CompetenceRequests.show",
+		"CompetenceRequests.approval",
+		"CompetenceRequests.disapproval"
+		), target == $cr, granted == false)
 then
  $c.grant();
 end
@@ -1692,6 +1832,7 @@ when
 		"InformationRequests.approval",
 		"InformationRequests.disapproval"		
 		), target == $pr, granted == false)
+
 then
  $c.grant();
 end
@@ -3718,6 +3859,45 @@ when
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_FLOWS, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action == "AbsenceRequests.enabled", granted == false, target == null)
+then
+  $c.grant();
+end
+
+/*
+ * Permesso per la visualizzazione dei flussi di richiesta straordinari
+ */
+rule isOvertimeFlowsVisible
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null && qualification.qualification > 3) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "CompetenceRequests.enabled", granted == false, target == null)
+then
+  $c.grant();
+end
+
+/*
+ * Permesso per la visualizzazione dei flussi di richiesta straordinari
+ */
+rule isOvertimeHandleFlowsVisible
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "CompetenceRequests.handleEnabled", granted == false, target == null)
+then
+  $c.grant();
+end
+
+rule isOvertimeQuantityForEmployeeEnabled
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null && qualification.qualification > 3) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "CompetenceRequests.overtimesQuantityEnabled", granted == false, target == null)
 then
   $c.grant();
 end

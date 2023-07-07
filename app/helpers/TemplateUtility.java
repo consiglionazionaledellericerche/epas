@@ -129,7 +129,7 @@ public class TemplateUtility {
   private final CompetenceRequestDao competenceRequestDao;
   private final InformationRequestDao informationRequestDao;
   private final GeneralSettingDao generalSettingDao;
-  
+ 
   /**
    * Costruttotore di default per l'injection dei vari componenti.
    */
@@ -145,6 +145,7 @@ public class TemplateUtility {
       NotificationDao notificationDao, UserDao userDao,
       CategoryGroupAbsenceTypeDao categoryGroupAbsenceTypeDao,
       ContractualReferenceDao contractualReferenceDao, AbsenceRequestDao absenceRequestDao,
+
       UsersRolesOfficesDao uroDao, GroupDao groupDao, TimeSlotDao timeSlotDao,
       CompetenceRequestDao competenceRequestDao, InformationRequestDao informationRequestDao,
       GeneralSettingDao generalSettingDao) {
@@ -168,11 +169,11 @@ public class TemplateUtility {
     this.absenceRequestDao = absenceRequestDao;
     this.uroDao = uroDao;
     this.groupDao = groupDao;
-    this.timeSlotDao = timeSlotDao;
     this.competenceRequestDao = competenceRequestDao;
     this.informationRequestDao = informationRequestDao;
     this.generalSettingDao = generalSettingDao;
-    
+    this.timeSlotDao = timeSlotDao;
+   
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
           @Override
@@ -405,6 +406,19 @@ public class TemplateUtility {
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             InformationType.PARENTAL_LEAVE_INFORMATION, user.getPerson());
 
+    return results.size();
+  }
+  
+  public final int overtimeRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<CompetenceRequest> results = competenceRequestDao
+        .toApproveResults(roleList, 
+            LocalDateTime.now().minusMonths(1), 
+            Optional.absent(), CompetenceRequestType.OVERTIME_REQUEST, user.getPerson());
     return results.size();
   }
 

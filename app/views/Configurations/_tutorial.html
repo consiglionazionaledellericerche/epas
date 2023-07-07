@@ -462,7 +462,22 @@
        al responsabile amministrativo della sede di lavoro di cui fanno parte.      
       </p>
     #{/if}
+
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY) }
+      <p>Abilitando questo paramentro si permette al dipendente di specificare, in fase di richiesta straordinario, anche
+      la quantità di ore che intende richiedere per un certo anno/mese.
+      Non abilitando il parametro, la richiesta sarà composta esclusivamente da un campo testuale in cui il dipendente dovrà
+      richiedere la quantità oraria adducendo una motivazione per la richiesta.
+      </p>
+    #{/if}
     
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION) }
+      <p>Abilitando questo paramentro si permette al dipendente di effettuare una richiesta <strong>PREVENTIVA</strong>
+      di straordinario al proprio responsabile.
+      Questa richiesta dovrà poi essere validata dal responsabile sia <strong>al momento 
+      in cui arriva</strong>, sia poi <strong>quando dovrà essere effettivamente assegnata la quantità di ore di straordinario</strong>.
+      </p>
+    #{/if}
     
   #{/alert} 
   

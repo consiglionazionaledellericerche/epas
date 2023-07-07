@@ -1,70 +1,86 @@
-#{title title:'Attivi', administration:true /}
+  #{title title:'Attivi', administration:true /}
   
- <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
+  <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
 	<thead>
-		
 		<tr>
-			<th width="10%" rowspan="2">Data e ora sottomissione</th>
 			#{if !onlyOwn}
 				<th width="15%" #{if approvalRequired}rowspan="2"#{/if}>&{'competenceRequest.person'}</th>
 			#{/if}
-			#{if approvalRequired}
-				<th colspan="2">Date richieste</th>
+			#{if type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
+				<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>anno</th>
+				<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>mese</th>
+				<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>quantità</th>
 			#{/if}
-			#{if approvalRequired}
-				<th colspan="2">Date offerte</th>
-			#{/if}
-
-		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Destinatario</th>
-
+			#{else}
+				#{if approvalRequired}
+					<th colspan="2">Date richieste</th>
+				#{/if}
+				#{if approvalRequired}
+					<th colspan="2">Date offerte</th>
+				#{/if}
+		    	<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Destinatario</th>
+			#{/else}
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
 			#{/if}
+			<th #{if approvalRequired}rowspan="2"#{/if}>&{'competenceRequest.note'}</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Stato attuale</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Visualizza</th>
-			<th #{if approvalRequired}rowspan="2"#{/if}>Azioni</th>
-			<th #{if approvalRequired}rowspan="2"#{/if}>Note</th>
 				
 		</tr>			
-		#{if approvalRequired}
-		<tr>
-			<th width="10%">Dal </th>
-			<th width="10%">Al  </th>
-
-			<th width="10%">Dal</th>
-			<th width="10%">Al </th>
-			
-				#{if config.reperibilityManagerApprovalRequired}
-					<th width="20%">Supervisore del servizio</th>
+		#{if approvalRequired && type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
+			<tr>
+				#{if config.managerApprovalRequired}
+					<th width="20%">Responsabile di gruppo</th>
 				#{/if}						
+				#{if config.officeHeadApprovalRequired}
+					<th width="20%">Responsabile di sede</th>
+				#{/if}			
+		#{/if}
+		#{else}
+			<tr>
+				<th width="10%">Dal </th>
+				<th width="10%">Al  </th>
+	
+				<th width="10%">Dal</th>
+				<th width="10%">Al </th>
+	
+				#{if config.managerApprovalRequired}
+					<th width="20%">Supervisore del servizio</th>
+				#{/if}
 				#{if config.employeeApprovalRequired}
 					<th width="20%">Reperibile</th>
 				#{/if}
-		</tr>
-		#{/if}
+			</tr>
+		#{/else}
 	</thead>
 
 	<tbody>
 		#{list items:results, as:'item'}
 			<tr>
-				<td>#{f.value 'item.createdAt', value:item.createdAt /}</td>
 				#{if !onlyOwn}
 					<td>#{f.value 'item.person.fullname', value:item.person.fullname /}</td>
 				#{/if}
-								
-				<td>#{f.value 'item.beginDateToAsk', value:item.beginDateToAsk /}</td>	    
-				<td>#{f.value 'item.endDateToAsk', value:item.endDateToAsk /}</td>
-				<td>#{f.value 'item.beginDateToGive', value:item.beginDateToGive /}</td>
-				<td>#{f.value 'item.endDateToGive', value:item.endDateToGive /}</td>
-
-				<td>#{f.value 'item.teamMate.fullName()', value:item.teamMate.fullName() /}</td>	
-
-				#{if config.reperibilityManagerApprovalRequired}
-					<td>#{f.value 'item.reperibilityManagerApproved', value:item.reperibilityManagerApproved ?: 'non ancora approvata' /}</td>
+				#{if type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
+					<td>#{f.value 'item.year', value:item.year /}</td>	    
+					<td>#{f.value 'item.month', value:item.month /}</td>
+					<td>#{f.value 'item.value', value:item.value /}</td>			
 				#{/if}
-				#{if config.employeeApprovalRequired}
-					<td>#{f.value 'item.employeeApproved', value:item.employeeApproved ?: 'non ancora approvata' /}</td>
+				#{else}
+					<td>#{f.value 'item.beginDateToAsk', value:item.beginDateToAsk /}</td>	    
+					<td>#{f.value 'item.endDateToAsk', value:item.endDateToAsk /}</td>
+					<td>#{f.value 'item.beginDateToGive', value:item.beginDateToGive /}</td>
+					<td>#{f.value 'item.endDateToGive', value:item.endDateToGive /}</td>
+
+					<td>#{f.value 'item.teamMate.fullName()', value:item.teamMate.fullName() /}</td>
+				#{/else}
+				#{if config.managerApprovalRequired}
+					<td>#{f.value 'item.managerApproved', value:item.managerApproved /}</td>
 				#{/if}
+				#{if config.officeHeadApprovalRequired}
+					<td>#{f.value 'item.officeHeadApproved', value:item.officeHeadApproved /}</td>
+				#{/if}
+				<td>${item.note}</td>
 				<td>${item.actualEvent().eventType.label()}</td>
 				<td>
 				#{secure.check 'CompetenceRequests.show', target: item }
@@ -73,23 +89,6 @@
 	        	#{/secure.link}
 	        	#{/secure.check}
 				</td>
-				<td>
-				#{secure.check 'CompetenceRequests.approval', target: item }
-				<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}" data-async-modal="#defaultModal" color="primary" title="Approva">
-        		Approva 
-      			</a>
-      			#{/secure.check}
-      			#{secure.check 'CompetenceRequests.disapproval', target: item }
-      			<a class="btn btn-warning btn-xs" href="@{CompetenceRequests.disapproval(item.id)}" data-async-modal="#defaultModal" color="warning" title="Rifiuta">
-        		Rifiuta
-      			</a>
-      			#{/secure.check}
-      			</td>
-      			<td #{if item.note != null && !item.note.equals("")} 
-      				webui-popover-hover data-content="${item.note}">      			
-      				<i class="fa fa-exclamation-triangle fa-2x text-danger" aria-hidden="true" ></i>
-      				#{/if}
-      			</td>
 			</tr>
 		#{/list}
 	</tbody>

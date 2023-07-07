@@ -1,13 +1,16 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
-#{set competenceRequestTypeLabel: messages.get('CompetenceRequestType.' + competenceType.toString() + 'S') /}
+#{set competenceRequestTypeLabel: messages.get('CompetenceRequestType.' + type.toString() + 'S') /}
 #{set title:('ePAS - ' + competenceRequestTypeLabel) /}
-#{switcher year:true, month:true, competenceType:true /}
+#{switcher year:true, month:true, type:true /}
 #{set breadcrumbs:[(competenceRequestTypeLabel):null] /}
 
 %{
 	approvalsRequired = 0;
-	if (config.reperibilityManagerApprovalRequired) {
+	if (config.officeHeadApprovalRequired) {
+	 approvalsRequired++;
+	}
+	if (config.managerApprovalRequired) {
 	 approvalsRequired++;
 	}
 	if (config.employeeApprovalRequired) {
@@ -31,8 +34,8 @@
   	#{tabContentItem id:'attivo', active:true}
   	#{b.buttons center:true}
   		<a class="btn btn-success" href="@{CompetenceRequests.blank('person':person, 
-  		'year':currentData.year, 'month':currentData.month, 'competenceType':competenceType)}">
-    		<i class="fa fa-plus"></i> &{'CompetenceRequestType.' + competenceType + '.blank'}
+  		'year':currentData.year, 'month':currentData.month, 'competenceType':type)}">
+    		<i class="fa fa-plus"></i> &{'CompetenceRequestType.' + type + '.blank'}
   		</a>
   	#{/b.buttons}
  	#{if myResults.isEmpty()}
@@ -60,3 +63,4 @@
  
   #{/tabContent}
 </div>
+

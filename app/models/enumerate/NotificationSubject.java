@@ -19,6 +19,7 @@ package models.enumerate;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
+import models.Competence;
 import models.Person;
 import models.Stamping;
 import models.absences.Absence;
@@ -97,6 +98,7 @@ public enum NotificationSubject {
    */
   PARENTAL_LEAVE_INFORMATION,
 
+
   /*
    * Notifiche per i cambi di assegnazione ad un ufficio.
    */
@@ -143,6 +145,16 @@ public enum NotificationSubject {
         params.put("year", absence.getPersonDay().getDate().getYear());
         params.put("personId", absence.getPersonDay().getPerson().id);
         return toUrl("Stampings.personStamping", params);
+      case COMPETENCE:
+        final Competence competence = Competence.findById(referenceId);
+        if (competence == null) {
+          return null;
+        }
+        params.put("month", competence.getMonth());
+        params.put("year", competence.getYear());
+        params.put("officeId", competence.getPerson().getOffice().id);
+        params.put("competenceCodeId", competence.getCompetenceCode().id);
+        return toUrl("Competences.showCompetences", params);
       case ABSENCE_REQUEST:
         final AbsenceRequest absenceRequest = AbsenceRequest.findById(referenceId);
         params.put("id", absenceRequest.id);

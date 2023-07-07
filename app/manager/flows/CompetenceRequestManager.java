@@ -20,6 +20,7 @@ package manager.flows;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import controllers.Security;
+import dao.CompetenceCodeDao;
 import dao.CompetenceRequestDao;
 import dao.GroupDao;
 import dao.PersonDao;
@@ -34,8 +35,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import manager.ConsistencyManager;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
+import models.Competence;
+import models.CompetenceCode;
 import models.Person;
 import models.PersonReperibilityDay;
 import models.Role;
@@ -68,6 +73,8 @@ public class CompetenceRequestManager {
   private GroupDao groupDao;
   private PersonDao personDao;
   private PersonReperibilityDayDao repDao;
+  private CompetenceCodeDao competenceCodeDao;
+  private ConsistencyManager consistencyManager;
 
   /**
    * DTO per la configurazione delle CompenteRequest.
@@ -80,7 +87,8 @@ public class CompetenceRequestManager {
     final Person person;
     final CompetenceRequestType type;
     boolean employeeApprovalRequired;
-    boolean reperibilityManagerApprovalRequired;
+    boolean managerApprovalRequired;
+    boolean officeHeadApprovalRequired;
   }
 
   /**
@@ -98,9 +106,9 @@ public class CompetenceRequestManager {
   @Inject
   public CompetenceRequestManager(ConfigurationManager configurationManager,
       UsersRolesOfficesDao uroDao, RoleDao roleDao, NotificationManager notificationManager,
-      CompetenceRequestDao competenceRequestDao,
-      GroupDao groupDao, PersonDao personDao,
-      PersonReperibilityDayDao repDao) {
+      CompetenceRequestDao competenceRequestDao, GroupDao groupDao, PersonDao personDao,
+      PersonReperibilityDayDao repDao, CompetenceCodeDao competenceCodeDao, 
+      ConsistencyManager consistencyManager) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
@@ -109,6 +117,8 @@ public class CompetenceRequestManager {
     this.groupDao = groupDao;
     this.personDao = personDao;
     this.repDao = repDao;
+    this.competenceCodeDao = competenceCodeDao;
+    this.consistencyManager = consistencyManager;
 
   }
 
@@ -131,7 +141,7 @@ public class CompetenceRequestManager {
       return Lists.newArrayList();
     }
 
-    if (config.isReperibilityManagerApprovalRequired()
+    if (config.isManagerApprovalRequired()
         && groupDao.myGroups(person).isEmpty()) {
       problems.add(
           String.format("Approvazione del responsabile di gruppo richiesta. "
@@ -161,13 +171,25 @@ public class CompetenceRequestManager {
   public CompetenceRequestConfiguration getConfiguration(
       CompetenceRequestType requestType, Person person) {
     val competenceRequestConfiguration = new CompetenceRequestConfiguration(person, requestType);
-    if (requestType.alwaysSkipReperibilityManagerApproval) {
-      competenceRequestConfiguration.reperibilityManagerApprovalRequired = false;
+    
+    if (requestType.alwaysSkipOfficeHeadApproval) {
+      competenceRequestConfiguration.officeHeadApprovalRequired = false;
     } else {
-      if (requestType.reperibilityManagerApprovalRequired.isPresent()) {
-        competenceRequestConfiguration.reperibilityManagerApprovalRequired =
+      if (requestType.getOfficeHeadApprovalRequiredTechnicianLevel().isPresent()) {
+        competenceRequestConfiguration.officeHeadApprovalRequired =
             (Boolean) configurationManager.configValue(
-                person.getOffice(), requestType.reperibilityManagerApprovalRequired.get(),
+                person.getOffice(), requestType.officeHeadApprovalRequiredTechnicianLevel.get(),
+                LocalDate.now());
+      }
+    }
+    
+    if (requestType.alwaysSkipManagerApproval) {
+      competenceRequestConfiguration.managerApprovalRequired = false;
+    } else {
+      if (requestType.getManagerApprovalRequiredTechnicianLevel().isPresent()) {
+        competenceRequestConfiguration.managerApprovalRequired =
+            (Boolean) configurationManager.configValue(
+                person.getOffice(), requestType.getManagerApprovalRequiredTechnicianLevel().get(),
                 LocalDate.now());
       }
     }
@@ -198,10 +220,10 @@ public class CompetenceRequestManager {
 
     val config = getConfiguration(competenceRequest.getType(), competenceRequest.getPerson());
 
-    competenceRequest
-    .setReperibilityManagerApprovalRequired(config.reperibilityManagerApprovalRequired);
+    competenceRequest.setManagerApprovalRequired(config.managerApprovalRequired);
 
     competenceRequest.setEmployeeApprovalRequired(config.employeeApprovalRequired);
+    competenceRequest.setOfficeHeadApprovalRequired(config.officeHeadApprovalRequired);
   }
 
   /**
@@ -211,7 +233,7 @@ public class CompetenceRequestManager {
    */
   public void resetFlow(CompetenceRequest competenceRequest) {
     competenceRequest.setFlowStarted(false);
-    competenceRequest.setReperibilityManagerApproved(null);
+    competenceRequest.setManagerApproved(null);
     competenceRequest.setEmployeeApproved(null);
   }
 
@@ -234,9 +256,9 @@ public class CompetenceRequestManager {
       }
     }
 
-    if (eventType == CompetenceRequestEventType.REPERIBILITY_MANAGER_APPROVAL
-        || eventType == CompetenceRequestEventType.REPERIBILITY_MANAGER_REFUSAL) {
-      if (!competenceRequest.isReperibilityManagerApprovalRequired()) {
+    if (eventType == CompetenceRequestEventType.MANAGER_APPROVAL
+        || eventType == CompetenceRequestEventType.MANAGER_REFUSAL) {
+      if (!competenceRequest.isManagerApprovalRequired()) {
         return Optional.of("Questa richiesta non prevede approvazione/rifiuto "
             + "da parte del responsabile di gruppo.");
       }
@@ -298,12 +320,16 @@ public class CompetenceRequestManager {
                 competenceRequest, true);
 
         break;
-
-      case REPERIBILITY_MANAGER_APPROVAL:
-        competenceRequest.setReperibilityManagerApproved(LocalDateTime.now());
+        
+      case FIRST_APPROVAL:
+        competenceRequest.setFirstApproved(LocalDateTime.now());
         break;
 
-      case REPERIBILITY_MANAGER_REFUSAL:
+      case MANAGER_APPROVAL:
+        competenceRequest.setManagerApproved(LocalDateTime.now());
+        break;
+
+      case MANAGER_REFUSAL:
         //si riparte dall'inizio del flusso.
         //resetFlow(absenceRequest);
         log.info("Flusso {} rifiutato dal responsabile", competenceRequest);
@@ -323,7 +349,7 @@ public class CompetenceRequestManager {
         break;
 
       case COMPLETE:
-        competenceRequest.setReperibilityManagerApproved(LocalDateTime.now());
+        competenceRequest.setManagerApproved(LocalDateTime.now());
         break;
 
       case DELETE:
@@ -378,8 +404,19 @@ public class CompetenceRequestManager {
     competenceRequest.setFlowEnded(true);
     competenceRequest.save();
     log.info("Flusso relativo a {} terminato. ", competenceRequest);
-
-    if (competenceRequest.getType() == CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST) {
+    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+      Competence competence = new Competence();
+      competence.setMonth(competenceRequest.getMonth());
+      competence.setYear(competenceRequest.getYear());
+      competence.setValueApproved(competenceRequest.getValue());
+      competence.setPerson(competenceRequest.getPerson());
+      competence.setCompetenceCode(code);
+      competence.save();
+      consistencyManager.updatePersonSituation(competenceRequest.getPerson().id, 
+          new LocalDate(competenceRequest.getYear(), competenceRequest.getMonth(), 1));
+      return true;
+    } else {
       LocalDate temp = competenceRequest.getBeginDateToGive();
       PersonReperibilityDay repDayAsker = null;
       PersonReperibilityDay repDayGiver = null;
@@ -506,48 +543,81 @@ public class CompetenceRequestManager {
    */
   public boolean approval(CompetenceRequest competenceRequest, User user) {
     boolean approved = false;
+
     if (competenceRequest.isEmployeeApprovalRequired() 
         && competenceRequest.getEmployeeApproved() == null
         && user.hasRoles(Role.EMPLOYEE)) {
       employeeApproval(competenceRequest.id, user);
       if (competenceRequest.getPerson().getReperibility().stream()
           .anyMatch(pr -> pr.getPersonReperibilityType().getSupervisor().equals(user.getPerson()))
-          && competenceRequest.isReperibilityManagerApprovalRequired()) {
+          && competenceRequest.isManagerApprovalRequired()) {
         //TODO: se il dipendente è anche supervisore del servizio faccio un'unica approvazione
-        reperibilityManagerApproval(competenceRequest.id, user);
+        managerApproval(competenceRequest.id, user);
       }
       approved = true;
     }
-    if (competenceRequest.isReperibilityManagerApprovalRequired()
-        && competenceRequest.getReperibilityManagerApproved() == null
-        && competenceRequest.getPerson().getReperibility().stream()
-        .anyMatch(pr -> pr.getPersonReperibilityType().getSupervisor().equals(user.getPerson()))) {
-
-      reperibilityManagerApproval(competenceRequest.id, user);
+    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      if (competenceRequest.isManagerApprovalRequired()
+          && competenceRequest.getManagerApproved() == null ) {
+        managerApproval(competenceRequest.id, user);
+        approved = true;
+      }
+    } else {
+      if (competenceRequest.isManagerApprovalRequired() && competenceRequest.getManagerApproved() == null
+          && user.hasRoles(Role.REPERIBILITY_MANAGER)) {
+        managerApproval(competenceRequest.id, user);
+        approved = true;
+      }
+    }
+    
+    if (competenceRequest.isOfficeHeadApprovalRequired() 
+        && competenceRequest.getOfficeHeadApproved() == null) {
+      officeHeadApproval(competenceRequest.id, user);
       approved = true;
-    }
-    if (competenceRequest.isReperibilityManagerApprovalRequired()
-        && !competenceRequest.isManagerApproved()) {
-      log.debug("Necessaria l'approvazione da parte del manager della reperibilità per {}",
-          competenceRequest);
-      notificationManager.sendEmailCompetenceRequestPolicy(user, competenceRequest, true);
-    }
+    }    
     return approved;
   }
 
+  
+  public void officeHeadApproval(long id, User user) {
+    CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().getPerson();
+    
+    if ((Boolean) configurationManager.configValue(currentPerson.getOffice(), 
+        EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION)) {
+      // TODO: Qui occorre distinguere il caso in cui ci sia la richiesta di approvazione preventiva
+      executeEvent(competenceRequest, currentPerson, 
+          CompetenceRequestEventType.FIRST_APPROVAL, Optional.absent());
+      log.info("{} preventiva approvata dal responsabile di sede {}.", 
+          competenceRequest, currentPerson.getFullname());
+    }
+    executeEvent(competenceRequest, currentPerson, 
+        CompetenceRequestEventType.OFFICE_HEAD_APPROVAL, Optional.absent());
+    log.info("{} approvata dal responsabile di sede {}.", 
+        competenceRequest, currentPerson.getFullname());
+    
+    notificationManager.notificationCompetenceRequestPolicy(user, competenceRequest, true);
+  }
 
   /**
    * Approvazione richiesta competenza da parte del responsabile di gruppo.
    *
    * @param id id della richiesta di competenza.
    */
-  public void reperibilityManagerApproval(long id, User user) {
+  public void managerApproval(long id, User user) {
 
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     val currentPerson = Security.getUser().get().getPerson();
+    if ((Boolean) configurationManager.configValue(currentPerson.getOffice(), 
+        EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION)) {
+      executeEvent(competenceRequest, currentPerson, 
+          CompetenceRequestEventType.FIRST_APPROVAL, Optional.absent());
+      log.info("{} preventiva approvata dal responsabile di gruppo {}.", 
+          competenceRequest, currentPerson.getFullname());
+    }
     executeEvent(
         competenceRequest, currentPerson,
-        CompetenceRequestEventType.REPERIBILITY_MANAGER_APPROVAL, Optional.absent());
+        CompetenceRequestEventType.MANAGER_APPROVAL, Optional.absent());
     log.info("{} approvata dal responsabile di gruppo {}.",
         competenceRequest, currentPerson.getFullname());
 
@@ -588,7 +658,7 @@ public class CompetenceRequestManager {
     val currentPerson = Security.getUser().get().getPerson();
     executeEvent(
         competenceRequest, currentPerson,
-        CompetenceRequestEventType.REPERIBILITY_MANAGER_REFUSAL, Optional.fromNullable(reason));
+        CompetenceRequestEventType.MANAGER_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dal responsabile di gruppo {}.",
         competenceRequest, currentPerson.getFullname());
 
@@ -612,3 +682,4 @@ public class CompetenceRequestManager {
   }
 
 }
+

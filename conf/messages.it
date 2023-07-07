@@ -147,6 +147,42 @@ beginDayToAsk = Giorno iniziale da chiedere
 endDayToGive = Giorno finale da dare
 endDayToAsk = Giorno finale da chiedere
 
+competenceRequest =richiesta di competenza
+
+competenceRequest.endTo =Fine
+competenceRequest.note =Testo della richiesta
+competenceRequest.person =Dipendente
+competenceRequest.startAt =Inizio
+competenceRequest.type =Tipologia
+competenceRequest.employeeApproved =Approvazione dipendente
+competenceRequest.officeHeadApproved =Approvazione responsabile di sede
+competenceRequest.managerApproved =Approvazione responsabile di gruppo
+competenceRequest.administrativeApproved =Approvazione del amministrativo
+competenceRequest.employeeApprovalRequired =Richiesta approvazione del dipendente
+competenceRequest.officeApprovalRequired =Richiesta approvazione del responsabile di gruppo
+competenceRequest.managerApprovalRequired =Richiesta approvazione del responsabile di gruppo
+competenceRequest.administrativeApprovalRequired =Richiesta approvazione del amministrativo
+competenceRequest.approval=Approva
+competenceRequest.disapproval=Disapprova
+
+CompetenceRequestEventType.STARTING_APPROVAL_FLOW=Inizio approvazione richiesta
+CompetenceRequestEventType.EMPLOYEE_APPROVAL=Richiesta approvata dal dipendente
+CompetenceRequestEventType.EMPLOYEE_REFUSAL=Richiesta respinta dal dipendente
+CompetenceRequestEventType.MANAGER_APPROVAL=Richiesta approvata dal responsabile del gruppo di lavoro
+CompetenceRequestEventType.MANAGER_REFUSAL=Richiesta respinta dal responsabile del gruppo di lavoro
+CompetenceRequestEventType.ADMINISTRATIVE_APPROVAL=Richiesta approvata dall'amministratore del personale
+CompetenceRequestEventType.ADMINISTRATIVE_REFUSAL=Richiesta respinta dall'amministratore del personale
+CompetenceRequestEventType.OFFICE_HEAD_APPROVAL=Richiesta approvata dal responsabile di sede
+CompetenceRequestEventType.OFFICE_HEAD_REFUSAL=Richiesta respinta dal responsabile di sede
+CompetenceRequestEventType.COMPLETE=Richiesta completata
+CompetenceRequestEventType.DELETE=Richiesta cancellata
+CompetenceRequestEventType.EXPIRING=Richiesta scaduta
+
+CompetenceRequestType.OVERTIME =Straordinari
+CompetenceRequestType.OVERTIME_REQUEST_TO_APPROVE =Richieste di straordinari
+competenceRequest.value =Ore di straordinario da richiedere
+
+
 activity =Attività di turno
 ADD= Inserimento
 
@@ -1081,6 +1117,7 @@ AbsenceRequestType.SHORT_TERM_PERMITS_TOP_LEVEL =permessi breve
 AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
 AbsenceRequestType.SHORT_TERM_PERMIT_TOP_LEVEL.blank =nuova richiesta permesso breve
 
+<<<<<<< HEAD
 Groups.seatOrganizationChart =Ruoli in ePAS all'interno della sede
 
 
@@ -1091,6 +1128,15 @@ AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL =comunica
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS_TOP_LEVEL = Mie comunicazioni ferie anno passato dopo deadline
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL.blank =nuova comunicazione ferie anno passato dopo deadline
 
+CompetenceRequests.overtimes =Mie richieste di straordinari
+CompetenceRequests.overtimesToApprove =Flussi di richieste straordinari
+CompetenceRequestType.OVERTIME_REQUEST=richiesta di straordinari
+CompetenceRequestType.OVERTIME_REQUESTS= Mie richieste di straordinari
+CompetenceRequestType.OVERTIME_REQUEST.blank =nuova richiesta di straordinari
+
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST =richiesta ferie anno passato dopo deadline
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS = Mie richieste ferie anno passato dopo deadline
+AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST.blank =nuova richiesta ferie anno passato dopo deadline
 
 Institutes.list= Sedi e Amministratori
 MealTicketCards.mealTicketCards= Gestione card buoni pasto elettronici
@@ -1314,7 +1360,9 @@ RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
 RESIDUAL_MEALTICKETS=Ricalcoli mensili sul residuo buoni pasto.
 
 ENABLE_FLOWS =Flusso di richiesta assenza attivato
+ENABLE_OVERTIME_FLOWS =Flusso di richiesta competenza attivato
 ENABLE_37_FLOW =Abilita flusso richiesta ferie anno precedente dopo 31/08
+
 
 VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli I-III da parte del Responsabile Sede  
 VACATION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione ferie per i livelli IV-VIII da parte del Responsabile Sede 
@@ -1328,11 +1376,19 @@ COMPENSATORY_REST_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazion
 COMPENSATORY_REST_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione riposi compensativi per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
 COMPENSATORY_REST_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED= Richiesta approvazione riposi compensativi per i Responsabili di gruppo da parte del Responsabile di Sede
 
+
+OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte del responsabile di sede
+OVERTIME_REQUEST_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte del responsabile di gruppo di lavoro
+OVERTIME_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte di altro dipendente
+ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY =Permettere al dipendente di richiedere le ore di straordinario
+OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION =Abilita richiesta preventiva di straordinario
+
 PERSONAL_PERMISSION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli I-III da parte del Responsabile Sede
 PERSONAL_PERMISSION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli IV-VIII da parte del Responsabile Sede	
 PERSONAL_PERMISSION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli I-III da parte del Responsabile gruppo di lavoro		
 PERSONAL_PERMISSION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli IV-VIII da parte del Responsabile gruppo di lavoro
 PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i Responsabili di gruppo da parte del Responsabile di Sede
+
 
 ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION=Invio notifica a responsabile di sede per comunicazione assenza livelli I-III (non responsabili di gruppo)
 ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION=Invio notifica a responsabile di sede per comunicazione assenza livelli I-III (responsabili di gruppo)
