@@ -469,17 +469,21 @@ public class AbsenceGroups extends Controller {
 
     boolean tecnologi = false;
     boolean tecnici = false;
+    boolean altri = false;
+    boolean qualificationGreaterThen10Exist = qualificationDao.qualificationGreaterThan10Exist();
 
     for (Qualification q : absenceType.getQualifications()) {
       tecnologi = !tecnologi ? QualificationMapping.TECNOLOGI.contains(q) : tecnologi;
       tecnici = !tecnici ? QualificationMapping.TECNICI.contains(q) : tecnici;
+      altri = !altri ? QualificationMapping.ALTRI.contains(q) : altri;
     }
 
     List<JustifiedType> allJustifiedType = JustifiedType.findAll();
     List<GroupAbsenceType> allSimpleGroup = absenceComponentDao
         .groupAbsenceTypeOfPattern(GroupAbsenceTypePattern.simpleGrouping);
 
-    render(absenceType, allSimpleGroup, tecnologi, tecnici, allJustifiedType);
+    render(absenceType, allSimpleGroup, tecnologi, tecnici, allJustifiedType, 
+        qualificationGreaterThen10Exist);
   }
 
   /**
@@ -490,7 +494,7 @@ public class AbsenceGroups extends Controller {
    * @param tecnici se il codice di assenza è valido per i tecnici
    */
   public static void saveAbsenceType(@Valid AbsenceType absenceType,
-      boolean tecnologi, boolean tecnici) {
+      boolean tecnologi, boolean tecnici, boolean altri) {
 
     List<JustifiedType> allJustifiedType = JustifiedType.findAll();
 
@@ -508,18 +512,22 @@ public class AbsenceGroups extends Controller {
       absenceType.getQualifications().addAll(
           qualificationDao.getByQualificationMapping(QualificationMapping.TECNOLOGI));
     }
+    if (altri) {
+      absenceType.getQualifications().addAll(
+          qualificationDao.getByQualificationMapping(QualificationMapping.ALTRI));
+    }
 
     if (absenceType.getQualifications().isEmpty()) {
-      flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
-      render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
+      flash.error("Selezionare almeno una categoria tra livelli I-III, IV-X, >X");
+      render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici, altri);
     }
     if (absenceType.getJustifiedTypesPermitted().isEmpty()) {
       flash.error("Selezionare almeno una tipologia di Tempo Giustificato");
-      render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
+      render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici, altri);
     }
     if (absenceType.isAbsenceTypeMinutesPermitted() && absenceType.getJustifiedTime() == null) {
       flash.error("Specificare i minuti del tipo assenza.");
-      render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici);
+      render("@editAbsenceType", absenceType, allJustifiedType, tecnologi, tecnici, altri);
     }
 
     absenceType.save();

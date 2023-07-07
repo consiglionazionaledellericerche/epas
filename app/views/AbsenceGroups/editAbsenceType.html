@@ -34,8 +34,14 @@
 						<input name="tecnologi" type="checkbox"#{if tecnologi} checked#{/if}> Livelli I-III 
 					</label>  
 					<label class="checkbox-inline"> 
-						<input name="tecnici" type="checkbox"#{if tecnici} checked#{/if}> Livelli IV-VIII
+						<input name="tecnici" type="checkbox"#{if tecnici} checked#{/if}> Livelli IV-X
 					</label>
+					#{if qualificationGreaterThen10Exist}
+						<label class="checkbox-inline"> 
+							<input name="altri" type="checkbox"#{if altri} checked#{/if}> Livelli > X
+						</label>
+					#{/if}
+
 				</div>
 		</div>
 

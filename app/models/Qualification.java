@@ -17,6 +17,7 @@
 
 package models;
 
+import com.google.common.collect.Lists;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
@@ -46,10 +47,10 @@ public class Qualification extends BaseModel {
   private static final long serialVersionUID = 7147378609067987191L;
 
   @OneToMany(mappedBy = "qualification")
-  private List<Person> person;
+  private List<Person> persons = Lists.newArrayList();
 
   @ManyToMany(mappedBy = "qualifications")
-  private List<AbsenceType> absenceTypes;
+  private List<AbsenceType> absenceTypes = Lists.newArrayList();
 
   @Getter
   @Setter

@@ -1,0 +1,36 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Gestione codice d\'assenza' /}
+
+#{set breadcrumbs:['Qualifiche del personale':@Qualifications.list(), (qualification.qualification):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+ 		
+ <div class="container">
+    #{form @Qualifications.save(),class:'form-horizontal'}
+
+    #{alert color:'info'}
+      <p>
+ 	    #{if qualification?.isPersistent()}
+ 		  Modifica dati per qualifica <strong>${qualification.qualification}
+ 		  	#{if qualification.description} ${qualification.description}</strong>#{/if}
+ 	    #{/if}#{else}
+ 		  Inserimento nuova qualifica.
+   	    #{/else}
+ 	  </p>
+      #{/alert}
+
+        <input type="hidden" name="qualification.id" value="${qualification?.id}">
+ 	
+ 		#{f.input 'qualification.qualification', required:'true', value:qualification?.qualification /}
+ 		#{f.input 'qualification.description' /}
+       
+        <div class="container center">
+	        <input class="btn btn-primary" type="submit" value="Ok">         
+          <input class="btn" action="action" type="button" value="Indietro" onclick="history.go(-1);">
+        </div>
+   #{/form}
+
+</div>
+
+
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -30,6 +30,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Qualification;
+import models.absences.query.QAbsenceType;
 import models.enumerate.QualificationMapping;
 import models.query.QQualification;
 
@@ -100,6 +101,23 @@ public class QualificationDao extends DaoBase {
   }
 
   /**
+   * La qualifica, se esiste, dal id passato come parametro.
+   *
+   * @param id della qualifica da cercare.
+   * @return la qualificica corrispondente al livello indicato.
+   */
+  public Optional<Qualification> byId(Long id) {
+
+    Preconditions.checkNotNull(id);
+
+    QQualification qual = QQualification.qualification1;
+    final Qualification result = getQueryFactory().selectFrom(qual)
+        .where(qual.id.eq(id)).fetchOne();
+
+    return Optional.fromNullable(result);
+
+  }
+  /**
    * Ritorna tutte le qualifiche presenti sul db.
    *
    * @return tutte le qualifiche presenti nel sistema.
@@ -133,5 +151,28 @@ public class QualificationDao extends DaoBase {
         .where(qual.qualification.goe(mapping.getRange().lowerEndpoint())
             .and(qual.qualification.loe(mapping.getRange().upperEndpoint())))
         .fetch();
+  }
+  
+  /**
+   * Verifica se esiste una qualifica con valore maggiore di 10.
+   *
+   * 10 è il valore massimo previsto per gli enti di ricerca. 
+   */
+  public Boolean qualificationGreaterThan10Exist() {
+    QQualification qual = QQualification.qualification1;
+    return getQueryFactory()
+        .selectFrom(qual)
+        .where(qual.qualification.gt(10))
+        .select(qual.count()).fetchOne() > 0;
+  }
+  
+  /**
+   * Restituise la qualifica con il numero più alto.
+   */
+  public int getMaxQualification() {
+    QQualification qual = QQualification.qualification1;
+    return getQueryFactory()
+        .selectFrom(qual)
+        .select(qual.qualification.max()).fetchOne();
   }
 }

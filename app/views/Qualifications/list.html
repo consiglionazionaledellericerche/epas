@@ -1,0 +1,54 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Qualifiche del personale' /}
+
+#{set breadcrumbs:['Qualifications.list':@Qualifications.list()] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+<div class="container-fluid">
+#{secure.check 'Qualifications.insert' }
+<div class="row text-center">
+	#{secure.link @Qualifications.insert(), class:'btn btn-primary',fa:'plus' }
+		Definisci nuova qualifica
+	#{/secure.link}
+</div>
+#{/secure.check}
+
+
+	<table class="table table-bordered table-striped table-hover" width="100%" datatable>
+	 <thead>
+	  <tr>
+	  	<th>&{'qualification.qualification'}</th>
+	  	<th>&{'qualification.description'}</th>
+	  	<th>&{'qualification.persons.size'}</th>
+		<th>&{'qualification.absenceTypes.size'}</th>
+	  	<th>&{'qualification.absenceTypes'}</th>
+		<th>Azioni</th>
+	  </tr>
+	</thead>
+	<tbody>
+		#{list items:qualifications, as:'qualification'}
+		<tr>
+			<td>#{secure.link @Qualifications.edit(qualification.id)}${qualification.qualification}#{/secure.link}</td>
+			<td>${qualification.description}</td>
+			<td>${qualification.persons.size()}</td>
+			<td>${qualification.absenceTypes.size()}</td>
+			<td>
+				#{list items:qualification.getAbsenceTypes(), as:'absenceType'}
+					<span class="label label-primary qualification-absenceType">
+						#{secure.link @Absencegroups.editabsencetype(absenceTypeId=absenceType.id)}${absenceType.code}#{/secure.link}
+					</span> 
+				#{/list}
+			</td>
+			<td>
+				#{if qualification.persons.isEmpty() && qualification.absenceTypes.isEmpty()}
+				#{secure.check 'Qualifications.delete'}
+					#{b.delete @Qualifications.delete(qualification.id) /}
+				#{/secure.check}
+				#{/if}
+			</td>
+		</tr>
+		#{/list}
+		</tbody>
+	</table>
+</div>

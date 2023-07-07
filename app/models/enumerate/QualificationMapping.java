@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -27,7 +27,8 @@ import models.Qualification;
 public enum QualificationMapping {
 
   TECNOLOGI(Range.closed(1, 3)),
-  TECNICI(Range.closed(4, 10));
+  TECNICI(Range.closed(4, 10)),
+  ALTRI(Range.closed(11, Integer.MAX_VALUE));
 
   private Range<Integer> qualifiche;
 
