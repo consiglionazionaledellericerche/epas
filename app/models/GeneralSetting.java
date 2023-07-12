@@ -109,10 +109,20 @@ public class GeneralSetting extends BaseModel {
    * gruppo o del responsabile di sede. 
    */
   private boolean enableAbsenceTopLevelAuthorization = true;
-  
+
   /*
    * Indica se condizionare l'inserimento manuale di una persona in anagrafica
    */
   private boolean warningInsertPerson = true;
+
+  /**
+   * Indica se è attiva l'integrazione con epas-service.
+   */
+  private boolean epasServiceEnabled = false;
+
+  /**
+   * URL base servizio epas-service.
+   */
+  private String epasServiceUrl = "http://localhost:8080"; 
 
 }
