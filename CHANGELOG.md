@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.7.0] - UNRELEASED
 ### Added
  - Aggiunta la CRUD per la gestione delle qualifiche del personale
+ - Aggiunto il piano di maturazione ferie per la tipologia 20+3
 
 ## [2.6.8] - 2023-07-06
 ### Added
