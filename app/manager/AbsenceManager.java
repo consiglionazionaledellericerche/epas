@@ -878,7 +878,6 @@ public class AbsenceManager {
         timeToJustify = absence.getAbsenceType().getJustifiedTime();
       }
     }
-    log.info("timeToJustify = {}", timeToJustify);
     return timeToJustify;
   }
 
