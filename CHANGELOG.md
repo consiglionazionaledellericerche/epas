@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunta la CRUD per la gestione delle qualifiche del personale
  - Aggiunto il piano di maturazione ferie per la tipologia 20+3
 
+### Changed
+ - Nei metodi rest /rest/v3/persondays/* valorizzato il campo justifiedTime anche per
+   le assenze/presenze di tipo giornaliero (come i codici LAGILE, SMART, 32, etc)
+ 
 ## [2.6.8] - 2023-07-06
 ### Added
  - Aggiunto metodo REST per la configurazione delle decisioni sul buono pasto in un giorno
