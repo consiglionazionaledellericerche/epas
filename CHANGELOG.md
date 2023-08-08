@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto il piano di maturazione ferie per la tipologia 20+3
  - Possibilità di azzerare una competenza assegnata in mese nel caso si sia 
    superato il limite delle competenze assegnabili
+ - Aggiunta funzionalità di rimozione delle quantità di reperibilità feriale e festiva tramite calendario
 
 ### Changed
  - Nei metodi rest /rest/v3/persondays/* valorizzato il campo justifiedTime anche per
