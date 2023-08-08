@@ -17,8 +17,10 @@
 
 package jobs;
 
+import dao.JwtTokenDao;
 import dao.OfficeDao;
 import javax.inject.Inject;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.CheckGreenPassManager;
 import manager.EmailManager;
@@ -28,23 +30,16 @@ import play.jobs.Job;
 import play.jobs.On;
 
 /**
- * Job per il controllo del green pass.
+ * Job per la pulizia del token scaduti.
  *
- * @author dario
- *
+ * @author Cristian Lucchesi
  */
 @Slf4j
-@On("0 15 10 ? * MON-FRI") //tutti i giorni dal lunedi al venerdi di ogni mese alle 10.15
-public class CheckGreenPassJob extends Job<Void> {
+@On("0 15 6 ? * *") //tutti i giorni alle 06.15
+public class JwtTokenCleanerJob extends Job<Void> {
 
-  static final String GREENPASS_CONF = "greenpass.active";
-  
   @Inject
-  static CheckGreenPassManager passManager;
-  @Inject
-  static OfficeDao officeDao;
-  @Inject
-  static EmailManager emailManager;
+  static JwtTokenDao jwtTokenDao;
 
   @Override
   public void doJob() {
@@ -54,13 +49,11 @@ public class CheckGreenPassJob extends Job<Void> {
       return;
     }
 
-    if (!"true".equals(Play.configuration.getProperty(GREENPASS_CONF))) {
-      log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
-      return;
-    }
-
-    log.info("Start Check Green Pass Job");
-    passManager.checkGreenPassProcedure(LocalDate.now());
-    log.info("End Check Green Pass Job");
+    log.info("Start Jwt Token Cleaner Job");
+    val expiredTokens = jwtTokenDao.expiredTokens();
+    log.debug("Presenti {} expired tokens da cancellare", expiredTokens.size());
+    expiredTokens.forEach(jwtTokenDao::delete);
+    log.debug("Cancellati {} expired tokens", expiredTokens.size());
+    log.info("End Jwt Token Cleaner Job");
   }
 }

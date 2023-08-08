@@ -71,6 +71,8 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final QJustifiedType replacingType;
 
+    public final BooleanPath shiftCompatible = createBoolean("shiftCompatible");
+
     public final SetPath<models.absences.TakableAbsenceBehaviour, QTakableAbsenceBehaviour> takableGroup = this.<models.absences.TakableAbsenceBehaviour, QTakableAbsenceBehaviour>createSet("takableGroup", models.absences.TakableAbsenceBehaviour.class, QTakableAbsenceBehaviour.class, PathInits.DIRECT2);
 
     public final SetPath<models.absences.TakableAbsenceBehaviour, QTakableAbsenceBehaviour> takenGroup = this.<models.absences.TakableAbsenceBehaviour, QTakableAbsenceBehaviour>createSet("takenGroup", models.absences.TakableAbsenceBehaviour.class, QTakableAbsenceBehaviour.class, PathInits.DIRECT2);

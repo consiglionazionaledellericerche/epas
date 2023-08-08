@@ -538,10 +538,10 @@ public class AbsenceRequests extends Controller {
       absenceRequest.setEndTo(absenceRequest.getStartAt());
     }
     
-    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION ) 
+    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION) 
         && absenceType.isAllDayPermitted()) {
-        absenceRequest.setHours(null);
-        absenceRequest.setMinutes(null);
+      absenceRequest.setHours(null);
+      absenceRequest.setMinutes(null);
     } else {
       absenceRequest.setHours(hours);
       if (minutes != null) {

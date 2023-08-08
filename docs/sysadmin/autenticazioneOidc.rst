@@ -72,19 +72,6 @@ nel token OIDC.
 Limitazioni autenticazione Keycloak e multi istanza di ePAS
 -----------------------------------------------------------
 
-Al fine di utilizzare l'autenticazione OIDC ePAS necessita di mantenere alcune informazioni in
-sessione relative ad informazioni dei token scambiati.
-Normalmente ePAS mantiene queste informazioni in sessione e la sessione è mantenuta lato client
-tramite un cookie. La dimensione massima dei caratteri impostabili in cookie è di 4096 bit.
-La sessione mantenuta lato client permette di non mantenere stato tra eventuali istanze diverse
-di ePAS (per la scalabilità orizzontale su più istanze).
- 
-Purtroppo le informazioni necessarie per OIDC eccedono i 4096 caratteri massimi del cookie, quindi
-è stato necessario mettere queste info in cache e la cache attualmente è locale alla singola
-istanza di ePAS.
-
-**Al momento l'autenticazione OICD funziona solo su singola istanza di ePAS** a meno di non utilizzare
-strumenti tipo sticky session, oppure configurare ePAS per utilizzare una cache condivisa (MemCache).
-Al momento la configurazione dalla cache MemCache è già disponibile nel framework ma manca la sua
-configurabilità tramite le variabili d'ambiente del docker-compose.
-
+Le limitazioni alla clusterizzazione su più istanza di ePAS quando viene utilizzata l'autenticazione
+OIDC non sono più presenti a partire dalla versione 2.7.0. 
+I token jwt sono salvati sul database e quindi condivisi tra più eventuali istanze.  

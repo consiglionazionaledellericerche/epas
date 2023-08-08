@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.7.0] - UNRELEASED
 ### Added
  - Aggiunta la CRUD per la gestione delle qualifiche del personale
+ - Inserita possibilità di configurare l'abilitazione di servizi REST esterni
+   per epas-service e epas-helpdesk-service.
 
 ## [2.6.8] - 2023-07-06
 ### Added

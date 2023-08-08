@@ -46,6 +46,14 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final BooleanPath epasHelpdeskServiceEnabled = createBoolean("epasHelpdeskServiceEnabled");
+
+    public final StringPath epasHelpdeskServiceUrl = createString("epasHelpdeskServiceUrl");
+
+    public final BooleanPath epasServiceEnabled = createBoolean("epasServiceEnabled");
+
+    public final StringPath epasServiceUrl = createString("epasServiceUrl");
+
     public final BooleanPath handleGroupsByInstitute = createBoolean("handleGroupsByInstitute");
 
     public final BooleanPath holidayShiftInNightToo = createBoolean("holidayShiftInNightToo");

@@ -8,7 +8,7 @@
   'data-async-error':'#accountRolesData'}
 
   #{f.hidden 'userId', value: user.id /}
-  #{f.selectEnums 'roles' , label:'user.roles', items:models.enumerate.AccountRole, value: user.roles  /}
+  #{f.selectEnums 'roles' , label:messages.get('user.roles'), items:models.enumerate.AccountRole, value: user.roles  /}
 
   #{b.buttons center:true}
     #{b.submit 'Salva'/}

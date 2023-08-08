@@ -117,6 +117,7 @@ public class QualificationDao extends DaoBase {
     return Optional.fromNullable(result);
 
   }
+
   /**
    * Ritorna tutte le qualifiche presenti sul db.
    *

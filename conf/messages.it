@@ -464,6 +464,11 @@ generalSetting.holidayShiftInNightToo=Considera come festivi i turni notturni ef
 generalSetting.enableAbsenceTopLevelAuthorization=Possibilità di configurare le autorizzazioni per le assenze dei livelli I-III
 generalSetting.warningInsertPerson=Avviso per inserimento nuova persona
 
+generalSetting.epasServiceEnabled=Abilitazione integrazione con microservizio epas-service
+generalSetting.epasServiceUrl=Url base del microservizio epas-service
+generalSetting.epasHelpdeskServiceEnabled=Abilitazione integrazione con microservizio epas-helpdesk-service
+generalSetting.epasHelpdeskServiceUrl=Url base del microservizio epas-helpdesk-service
+
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
 group.limitValue =Quantità massima

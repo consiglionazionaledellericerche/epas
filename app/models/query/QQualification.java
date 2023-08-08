@@ -39,7 +39,7 @@ public class QQualification extends EntityPathBase<Qualification> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final ListPath<models.Person, QPerson> person = this.<models.Person, QPerson>createList("person", models.Person.class, QPerson.class, PathInits.DIRECT2);
+    public final ListPath<models.Person, QPerson> persons = this.<models.Person, QPerson>createList("persons", models.Person.class, QPerson.class, PathInits.DIRECT2);
 
     public final NumberPath<Integer> qualification = createNumber("qualification", Integer.class);
 
