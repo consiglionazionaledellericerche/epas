@@ -91,11 +91,12 @@ require:
     - org.apache.tika -> tika-langdetect 1.26
     - io.jsonwebtoken -> jjwt-impl 0.11.2
     - io.jsonwebtoken -> jjwt-jackson 0.11.2
-    - io.github.openfeign -> feign-core 11.6
-    - io.github.openfeign -> feign-jackson 11.6
-    - io.github.openfeign -> feign-okhttp 11.6
-    - io.github.openfeign -> feign-slf4j 11.6
-    - io.github.openfeign -> feign-micrometer 11.6
+    - io.github.openfeign -> feign-core 12.4
+    - io.github.openfeign -> feign-jackson 12.4
+    - io.github.openfeign -> feign-gson 12.4
+    - io.github.openfeign -> feign-okhttp 12.4
+    - io.github.openfeign -> feign-slf4j 12.4
+    - io.github.openfeign -> feign-micrometer 12.4
     - io.github.openfeign.form -> feign-form 3.8.0
     # Attenzione: deve essere allineato alla versione del okhttp3
     - com.squareup.okhttp3 -> logging-interceptor 4.6.0

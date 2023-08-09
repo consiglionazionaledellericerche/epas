@@ -17,25 +17,23 @@
 
 package manager.services.helpdesk;
 
-import java.util.List;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.testng.collections.Lists;
+import controllers.SecurityTokens;
+import dao.GeneralSettingDao;
+import feign.RequestInterceptor;
+import feign.RequestTemplate;
+import javax.inject.Inject;
 
 /**
- * Risposta dei servizi REST esterni.
+ * Inserirsce l'autenticazione Bearer Token tramite l'apposito header http, prelevando
+ * il jwt presente per l'utente corrente.
  *
  * @author Cristian Lucchesi
  *
  */
-@Builder
-@Data
-public class ServiceResponse {
+public class AuthRequestInterceptor implements RequestInterceptor {
 
-  @Builder.Default
-  private List<String> problems = Lists.newArrayList();
-  //Json con la risposta
-  private String result;
-
+  @Override
+  public void apply(RequestTemplate template) {
+      template.header("Authorization", String.format("Bearer %s", SecurityTokens.getCurrentJwt().orNull()));
+  }
 }

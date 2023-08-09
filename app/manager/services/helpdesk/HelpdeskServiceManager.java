@@ -21,11 +21,13 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import controllers.SecurityTokens;
 import dao.GeneralSettingDao;
+import feign.FeignException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import models.exports.ReportData;
 import lombok.val;
 import play.libs.WS;
 
@@ -41,10 +43,13 @@ public class HelpdeskServiceManager {
   public static final  String API_CONFIG = "/rest/v1/reportcenter/config";
 
   private final GeneralSettingDao generalSettingDao;
+  private final HelpdeskServiceClient helpdeskServiceClient;
 
   @Inject
-  public HelpdeskServiceManager(GeneralSettingDao generalSettingDao) {
+  public HelpdeskServiceManager(GeneralSettingDao generalSettingDao,
+      HelpdeskServiceClient helpdeskServiceClient) {
     this.generalSettingDao = generalSettingDao;
+    this.helpdeskServiceClient = helpdeskServiceClient;
   }
 
   public String getServiceUrl() {
@@ -55,37 +60,31 @@ public class HelpdeskServiceManager {
     return new URL(new URL(getServiceUrl()), API_CONFIG).toString();
   }
 
+  public void sendReport(ReportData reportData) {
+    log.debug("Sending report to {} -> {}", getServiceUrl(), reportData);
+    helpdeskServiceClient.send(reportData);
+  }
+
   /**
    * Risposta alla richiesta di prelevare la configurazione
    * del epas-helpdesk-service.
    */
   public ServiceResponse getConfig() {
     Optional<String> currentJwt = SecurityTokens.getCurrentJwt();
-    String config = null;
-    List<String> problems = Lists.newArrayList();
+    val response = ServiceResponse.builder().build();
     if (!currentJwt.isPresent()) {
-      problems.add("JWT non presente, impossibile autenticarsi sul servizio esterno");
+      response.getProblems().add("JWT non presente, impossibile autenticarsi sul servizio esterno");
     } else {
       try { 
-        val response = WS.url(getServiceConfigUrl())
-            .setHeader("Authorization", String.format("Bearer %s", currentJwt.get())).get();
-        log.debug("epas-helpdesk-service configuration response status = {}", response.getStatus());
-        if (response.getStatus() != 200) {
-          problems.add(
-              String.format("Errore nella comunicazione con il servizio, http status code = %s", 
-                  response.getStatus()));
-          problems.add(
-              String.format("Risposta del server epas-helpdesk-service: %s",
-                  response.getString()));
-        } else {
-          config = response.getJson().toString();
-        }
-      } catch (Exception e) {
-        problems.add(e.toString());
+        val serviceResponse = helpdeskServiceClient.config();
+        response.getProblems().addAll(serviceResponse.getProblems());
+        response.setResult(serviceResponse.getResult());
+      } catch (FeignException e) {
+        response.getProblems().add(e.toString());
       }
     }
 
-    return ServiceResponse.builder().problems(problems).result(config).build();
+    return response;
   }
 
 }
