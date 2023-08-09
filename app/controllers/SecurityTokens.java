@@ -141,6 +141,9 @@ public class SecurityTokens extends Controller {
     Header authorization = Http.Request.current.get().headers.get(AUTHORIZATION);
     String token = null;
     val idToken = getCurrentIdToken();
+    if (idToken == null) {
+      return java.util.Optional.empty();
+    }
     val jwtToken = jwtTokenDao.byIdToken(idToken);
     if (jwtToken.isPresent()) {
       log.debug("Prelevato token oauth dal db utilizzando l'id token {}", idToken);
