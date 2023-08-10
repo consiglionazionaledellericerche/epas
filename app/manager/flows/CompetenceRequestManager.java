@@ -236,6 +236,7 @@ public class CompetenceRequestManager {
 
     competenceRequest.setEmployeeApprovalRequired(config.employeeApprovalRequired);
     competenceRequest.setOfficeHeadApprovalRequired(config.officeHeadApprovalRequired);
+    competenceRequest.setFirstApprovalRequired(config.advanceApprovalRequired);
   }
 
   /**
