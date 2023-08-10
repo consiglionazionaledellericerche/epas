@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -109,10 +109,30 @@ public class GeneralSetting extends BaseModel {
    * gruppo o del responsabile di sede. 
    */
   private boolean enableAbsenceTopLevelAuthorization = true;
-  
+
   /*
    * Indica se condizionare l'inserimento manuale di una persona in anagrafica
    */
   private boolean warningInsertPerson = true;
+
+  /**
+   * Indica se è attiva l'integrazione con epas-service.
+   */
+  private boolean epasServiceEnabled = false;
+
+  /**
+   * URL base servizio epas-service.
+   */
+  private String epasServiceUrl = "http://epas-service:8080/"; 
+
+  /**
+   * Indica se è attiva l'integrazione con epas-delpdesk-service.
+   */
+  private boolean epasHelpdeskServiceEnabled = false;
+
+  /**
+   * URL base servizio epas-helpdesk-service.
+   */
+  private String epasHelpdeskServiceUrl = "http://epas-helpdesk-service:8080/"; 
 
 }

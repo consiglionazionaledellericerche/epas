@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.7.0] - UNRELEASED
+## [2.7.0] - 2023-08-10
 ### Added
  - Aggiunta la CRUD per la gestione delle qualifiche del personale
+ - Inserita possibilità di configurare l'abilitazione di servizi REST esterni
+   per epas-service e epas-helpdesk-service.
  - Aggiunto il piano di maturazione ferie per la tipologia 20+3
  - Possibilità di azzerare una competenza assegnata in mese nel caso si sia 
    superato il limite delle competenze assegnabili

@@ -676,8 +676,7 @@ public class Stampings extends Controller {
     
     if (user.getPerson() == null) {
       flash.error("%s è un'utenza di servizio non associata a nessuna persona, "
-          + "non sono quindi presenti gruppi associati al tuo utente."
-          , user.getUsername());
+          + "non sono quindi presenti gruppi associati al tuo utente.", user.getUsername());
       render("@dailyPresence", date);
     }
 

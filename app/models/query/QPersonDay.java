@@ -60,6 +60,8 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
 
     public final NumberPath<Integer> justifiedTimeNoMeal = createNumber("justifiedTimeNoMeal", Integer.class);
 
+    public final StringPath note = createString("note");
+
     public final NumberPath<Integer> onHoliday = createNumber("onHoliday", Integer.class);
 
     public final NumberPath<Integer> outOpening = createNumber("outOpening", Integer.class);

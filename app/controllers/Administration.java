@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -33,6 +33,7 @@ import dao.AbsenceTypeDao;
 import dao.CompetenceCodeDao;
 import dao.ContractDao;
 import dao.GeneralSettingDao;
+import dao.JwtTokenDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -51,6 +52,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Collections;
@@ -77,6 +79,7 @@ import manager.UserManager;
 import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.service.CertificationService;
 import manager.configurations.ConfigurationManager;
+import manager.services.helpdesk.HelpdeskServiceManager;
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractMonthRecap;
@@ -166,7 +169,11 @@ public class Administration extends Controller {
   static CompetenceCodeDao competenceCodeDao;
   @Inject
   static OfficeDao officeDao;
- 
+  @Inject
+  static JwtTokenDao jwtTokenDao;
+  @Inject
+  static HelpdeskServiceManager helpdeskServiceManager;
+
   /**
    * metodo che renderizza la pagina di utilities senza parametri passati.
    */
@@ -1101,5 +1108,34 @@ public class Administration extends Controller {
   public static void contractsToFix() {
     val contracts = contractDao.getContractsWithWrongPreviousContract();
     render(contracts);
+  }
+
+  /**
+   * Visualizza le informazioni di comunicazione del servizio epas-helpdesk-service.
+   */
+  public static void epasHelpdeskServiceConfig() throws MalformedURLException {
+    String serviceName = "epas-helpdesk-service";
+    String serviceUrl = helpdeskServiceManager.getServiceUrl();
+    String serviceConfigUrl = helpdeskServiceManager.getServiceConfigUrl();
+
+    val configResponse = helpdeskServiceManager.getConfig();
+    String config = configResponse.getResult();
+    List<String> problems = configResponse.getProblems();
+    val currentJwt = SecurityTokens.getCurrentJwt();
+
+    render("/Administration/microserviceConfig.html", 
+        serviceName, config, problems,
+        serviceUrl, serviceConfigUrl, currentJwt);
+  }
+
+  /**
+   * Elimina i JWT Tokens che non sono più validi.
+   */
+  public void deleteExpiredJwtTokens() {
+    val expiredTokens = jwtTokenDao.expiredTokens();
+    log.debug("Presenti {} expired tokens da cancellare", expiredTokens.size());
+    expiredTokens.forEach(jwtTokenDao::delete);
+    log.debug("Cancellati {} expired tokens", expiredTokens.size());
+    renderText(String.format("Cancellati %s expired tokens", expiredTokens.size()));
   }
 }

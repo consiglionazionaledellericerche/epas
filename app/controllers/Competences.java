@@ -810,8 +810,8 @@ public class Competences extends Controller {
     
     if (user.getPerson() == null || user.getPerson().getOffice() == null) {
       flash.error("%s è un'utenza di servizio non associata a nessuna persona, "
-          + "non sono quindi presenti informazioni associate alla sua sede."
-          , user.getUsername());
+          + "non sono quindi presenti informazioni associate alla sua sede.", 
+          user.getUsername());
       render(year, month);
     }
 

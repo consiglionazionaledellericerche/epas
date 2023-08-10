@@ -17,9 +17,12 @@
 
 package controllers;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
 import common.oauth2.OpenIdConnectClient;
 import controllers.Resecure.NoCheck;
+import dao.JwtTokenDao;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -34,6 +37,9 @@ import java.util.Date;
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import manager.attestati.service.OauthToken;
+import models.JwtToken;
+import org.joda.time.LocalDateTime;
 import lombok.val;
 import play.Play;
 import play.cache.Cache;
@@ -60,13 +66,13 @@ public class SecurityTokens extends Controller {
 
   public static final String BEARER = "Bearer ";
   public static final String AUTHORIZATION = "authorization";
-  private static final String REFRESH_TOKEN = "refresh_token";
-  private static final String ID_TOKEN = "id_token";
-  private static final String CACHE_ACCESS_TOKEN_POSTFIX = "__ACCESS_TOKEN";
+  private static final int DEFAULT_REFRESHED_TOKEN_EXPIRES_IN_SECONDS = 300;
 
   @Inject
   static OpenIdConnectClient openIdConnectClient;
-
+  @Inject
+  static JwtTokenDao jwtTokenDao;
+  
   private static Key key() {
     String encodedKey = Play.configuration.getProperty("jwt.key");
     if (Strings.isNullOrEmpty(encodedKey)) {
@@ -134,13 +140,16 @@ public class SecurityTokens extends Controller {
   public static java.util.Optional<String> retrieveAndValidateJwtUsername() throws InvalidUsername {
     Header authorization = Http.Request.current.get().headers.get(AUTHORIZATION);
     String token = null;
-    //Attenzione dipende dalla Cache
-    if (Cache.get(cacheAccessTokenKey()) != null) {
-      log.debug("Prelevato token aouth dalla cache utilizzando la chiave {}",
-          cacheAccessTokenKey());
-      token = (String) Cache.get(cacheAccessTokenKey());
+    val idToken = getCurrentIdToken();
+    if (idToken == null) {
+      return java.util.Optional.empty();
+    }
+    val jwtToken = jwtTokenDao.byIdToken(idToken);
+    if (jwtToken.isPresent()) {
+      log.debug("Prelevato token oauth dal db utilizzando l'id token {}", idToken);
+      token = jwtToken.get().getAccessToken();
     } else if (authorization != null && authorization.value().startsWith(BEARER)) {
-      log.debug("Prelevato token aouth dall'intestazione http");
+      log.debug("Prelevato token oauth dall'intestazione http");
       token = authorization.value().substring(BEARER.length());
     }
     if (token == null) {
@@ -150,8 +159,7 @@ public class SecurityTokens extends Controller {
       val username = extractSubjectFromJwt(token);
       return java.util.Optional.ofNullable(username);
     } catch (ExpiredJwtException ex) {
-      val refreshToken = Session.current().get(Resecure.REFRESH_TOKEN);
-      val refreshed = openIdConnectClient.retrieveRefreshToken(refreshToken);
+      val refreshed = openIdConnectClient.retrieveRefreshToken(getCurrentRefreshToken());
       if (refreshed != null) {
         setJwtSession(refreshed);
         val username = extractSubjectFromJwt(refreshed.accessToken);
@@ -167,41 +175,67 @@ public class SecurityTokens extends Controller {
   }
 
   /**
-   * La chiave da utilizzare in sessione per l'access token dipende dalla
-   * sessione dell'utente.
-   */
-  @Util
-  public static String cacheAccessTokenKey() {
-    return Session.current().getId() + CACHE_ACCESS_TOKEN_POSTFIX;
-  }
-
-  /**
    * Setta la sessione jwt.
    *
    * @param oauthResponse la risposta oauth
    */
   @Util
   public static void setJwtSession(OAuth2.Response oauthResponse) {
-    //XXX l'accesso token viene impostato in Cache e non in sessione perché la sessione
+    //XXX l'accesso token viene salvato sul db non in sessione perché la sessione
     //viene inserita in un cookie che ha dimensione massima di 4096 caratteri e questa
     //dimensione non è sufficiente per contenere anche l'access token.
-    Cache.safeAdd(cacheAccessTokenKey(), oauthResponse.accessToken, Scope.COOKIE_EXPIRE);
-    log.debug("put Jwt in cache con chiave {}. lenght={}, value={}", 
-        cacheAccessTokenKey(), oauthResponse.accessToken.length(), oauthResponse.accessToken);
-    val body = oauthResponse.httpResponse.getJson().getAsJsonObject();
-    String refreshToken = body.get(REFRESH_TOKEN).getAsString();
-    String idToken = body.get(ID_TOKEN).getAsString();
-    Session.current().put(Resecure.REFRESH_TOKEN, refreshToken);
+    OauthToken oauthToken = new Gson().fromJson(oauthResponse.httpResponse.getJson(), OauthToken.class);
+    log.trace("oauthToken = {}", oauthToken);
+    val jwtToken = jwtTokenDao.persist(byOauthToken(oauthToken));
+    log.debug("Effettuato salvataggio sul db del jwt token {}", jwtToken);
+
+    Session.current().put(Resecure.REFRESH_TOKEN, jwtToken.getRefreshToken());
     log.trace("put REFRESH_TOKEN in sessione. Length = {}, value = {}", 
-        refreshToken.length(), refreshToken); 
-    Session.current().put(Resecure.ID_TOKEN, idToken);
-    log.trace("put ID_TOKEN in sessione. Length = {}, value = {}", idToken.length(), idToken);
+        jwtToken.getRefreshToken().length(), jwtToken.getRefreshToken()); 
+    Session.current().put(Resecure.ID_TOKEN, jwtToken.getIdToken());
+    log.debug("put ID_TOKEN in sessione. Length = {}, value = {}", 
+        jwtToken.getIdToken().length(), jwtToken.getIdToken());
   }
 
   @Util
   public static void clearJwtSession() {
+    jwtTokenDao.deleteByIdToken(Session.current().get(Resecure.ID_TOKEN));
     Session.current().remove(Resecure.REFRESH_TOKEN, Resecure.ID_TOKEN);
-    Cache.delete(cacheAccessTokenKey());
+  }
+
+  @Util
+  private static String getCurrentIdToken() {
+    return Session.current().get(Resecure.ID_TOKEN);
+  }
+  
+  @Util
+  private static String getCurrentRefreshToken() {
+    return Session.current().get(Resecure.REFRESH_TOKEN);
+  }
+  
+  @Util
+  public static Optional<String> getCurrentJwt() {
+    val jwtToken = jwtTokenDao.byIdToken(getCurrentIdToken());
+    //Se c'è un token
+    if (!jwtToken.isEmpty()) {
+      //ed il token è scaduto o scade a breve
+      if (jwtToken.get().isExpiringSoon() 
+            && getCurrentRefreshToken() != null) {
+        val refreshed = openIdConnectClient.retrieveRefreshToken(getCurrentRefreshToken());
+        if (refreshed != null) {
+          jwtToken.get().setAccessToken(refreshed.accessToken);
+          jwtTokenDao.save(jwtToken.get());
+        }
+      }
+    } else if (getCurrentRefreshToken() != null && getCurrentIdToken() != null) {
+      val refreshed = openIdConnectClient.retrieveRefreshToken(getCurrentRefreshToken());
+      if (refreshed != null) {
+        val newJwtToken = byRefreshTokenResponse(refreshed);
+        return Optional.of(newJwtToken.getAccessToken());
+      }
+    }
+
+    return jwtToken.isEmpty() ? Optional.absent() : Optional.of(jwtToken.get().getAccessToken());
   }
 
   @Util
@@ -220,5 +254,28 @@ public class SecurityTokens extends Controller {
           .parse(jwt).getBody();
     }
     return ((Claims) jwtBody).get(openIdConnectClient.getJwtField(), String.class);
+  }
+  
+  private static JwtToken byRefreshTokenResponse(OAuth2.Response response) {
+    val newJwtToken = new JwtToken();
+    newJwtToken.setIdToken(getCurrentIdToken());
+    newJwtToken.setRefreshToken(getCurrentRefreshToken());
+    newJwtToken.setAccessToken(response.accessToken);
+    newJwtToken.setTakenAt(LocalDateTime.now());
+    newJwtToken.setExpiresIn(DEFAULT_REFRESHED_TOKEN_EXPIRES_IN_SECONDS);
+    return jwtTokenDao.save(newJwtToken);
+  }
+
+  @Util
+  private static JwtToken byOauthToken(OauthToken oauthToken) {
+    val jwtToken = new JwtToken();
+    jwtToken.setIdToken(oauthToken.getId_token());
+    jwtToken.setAccessToken(oauthToken.getAccess_token());
+    jwtToken.setRefreshToken(oauthToken.getRefresh_token());
+    jwtToken.setScope(oauthToken.getScope());
+    jwtToken.setTakenAt(oauthToken.getTaken_at());
+    jwtToken.setExpiresIn(oauthToken.getExpires_in());
+    jwtToken.setTokenType(oauthToken.getToken_type());
+    return jwtToken;
   }
 }

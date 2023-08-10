@@ -2,6 +2,66 @@
 
 #{accordionGroup 'generalSetting'}
 
+  #{accordionItem 'epasServiceIntegration', parent:'generalSetting', title:'Integrazione con epas-service', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}
+        Abilita l'integrazione con il microservizio epas-service.
+      #{/alert}
+      #{alert color:'warning'}
+        Attivando questa integrazione alcune operazioni saranno eseguita dal microservizio epas-service
+        invece che direttamente da ePAS. 
+        <p>
+          epas-service è ancora in fase di sviluppo e le sue integrazioni/funzionalità sono <em>in progress</em>.
+        </p>
+        <p>
+          epas-service è un servizio a se stante con una propria installazione e configurazione, vedi 
+          <a href="https://github.com/consiglionazionaledellericerche/epas-service" target="_new">https://github.com/consiglionazionaledellericerche/epas-service</a> 
+        </p>
+        <p>
+          <strong>Questa integrazione è utilizzabile solo se l'utente ha fatto login tramite OAuth.</strong>
+        </p>
+      #{/alert}
+      #{f.booleanRadio 'generalSetting.epasServiceEnabled' /} 
+      #{f.input 'generalSetting.epasServiceUrl', type:text /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
+
+  #{accordionItem 'epasHelpdeskServiceIntegration', parent:'generalSetting', title:'Integrazione con epas-helpdesk-service', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}
+        Abilita l'integrazione con il microservizio epas-helpdesk-service.
+      #{/alert}
+      #{alert color:'warning'}
+        <p>
+        epas-helpdesk-service è ancora in fase di sviluppo e le sue integrazioni/funzionalità sono <em>in progress</em>.
+        </p>
+        <p>
+        Attivando questa integrazione le operazioni di invio dei feedback degli utenti saranno eseguite
+        dal microservizio epas-helpdesk-service invece che direttamente da ePAS.
+        </p>
+        <p>
+          <strong>Questa integrazione è utilizzabile solo se l'utente ha fatto login tramite OAuth.</strong>
+        </p>
+      #{/alert}
+      #{f.booleanRadio 'generalSetting.epasHelpdeskServiceEnabled' /} 
+      #{f.input 'generalSetting.epasHelpdeskServiceUrl', type:text /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+    <div class="center">
+       <a class="btn btn-warning btn-xs" href="@{Administration.epasHelpdeskServiceConfig()}" 
+         data-async-modal="#defaultModal" color="warning" title="Vedi configurazione">
+         Verifica configurazione servizio
+       </a>
+    </div>
+  #{/accordionItem}
+
   #{accordionItem 'privacyPolicySettings', parent:'generalSetting', title:'Impostazioni Privacy Policy', open:false}
     #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
       #{f.hidden 'generalSetting.id' /}
