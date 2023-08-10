@@ -194,10 +194,11 @@ public class CompetenceRequest extends MutableModel {
    */
   @Transient
   public boolean ownerCanEditOrDelete() {
-    return !flowStarted  
+    return flowStarted  
         && (managerApproved == null || !managerApprovalRequired)
         && (employeeApproved == null || !employeeApprovalRequired)
-        && (officeHeadApproved == null || !officeHeadApprovalRequired);
+        && (officeHeadApproved == null || !officeHeadApprovalRequired)
+        && (firstApproved == null || !firstApprovalRequired);
   }
   
   /**
