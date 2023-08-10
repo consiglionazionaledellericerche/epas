@@ -89,6 +89,7 @@ public class CompetenceRequestManager {
     boolean employeeApprovalRequired;
     boolean managerApprovalRequired;
     boolean officeHeadApprovalRequired;
+    boolean advanceApprovalRequired;
   }
 
   /**
@@ -203,6 +204,17 @@ public class CompetenceRequestManager {
                 person.getOffice(), requestType.employeeApprovalRequired.get(),
                 LocalDate.now());
       }
+    }
+    
+    //TODO: aggiungere il pezzo della richiesta preventiva di straordinario
+    if (requestType.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
+      competenceRequestConfiguration.advanceApprovalRequired = false;
+    } else {
+      if (requestType.advanceApprovalRequired.isPresent()) {
+        competenceRequestConfiguration.advanceApprovalRequired = 
+            (Boolean) configurationManager.configValue(person.getOffice(), 
+                requestType.advanceApprovalRequired.get(), LocalDate.now());
+      }      
     }
 
     return competenceRequestConfiguration;

@@ -21,6 +21,9 @@ ALTER TABLE competence_requests_history ADD COLUMN first_approved timestamp with
 UPDATE competence_request_events
 SET event_type = 'MANAGER_APPROVAL' WHERE event_type = 'REPERIBILITY_MANAGER_APPROVAL'; 
 
+UPDATE competence_requests
+SET first_approval_required = false WHERE type = 'CHANGE_REPERIBILITY_REQUEST';
+
 # --- !Downs
 
 -- non è necessaria una down

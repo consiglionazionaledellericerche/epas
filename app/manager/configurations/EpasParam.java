@@ -647,7 +647,7 @@ public enum EpasParam {
   OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED(
       "overtime_request_office_head_approval_required",
       EpasParamCategory.COMPETENCE_FLOWS,
-      EpasParamTimeType.PERIODIC,
+      EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
@@ -660,7 +660,7 @@ public enum EpasParam {
   OVERTIME_REQUEST_MANAGER_APPROVAL_REQUIRED(
       "overtime_request_manager_approval_required",
       EpasParamCategory.COMPETENCE_FLOWS,
-      EpasParamTimeType.PERIODIC,
+      EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),
@@ -669,7 +669,7 @@ public enum EpasParam {
   OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION(
       "overtime_advance_request_and_confirmation", 
       EpasParamCategory.COMPETENCE_FLOWS,
-      EpasParamTimeType.PERIODIC,
+      EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
       EpasParamValueType.formatValue(false),
       Lists.<RecomputationType>newArrayList(),

@@ -35,16 +35,18 @@ import manager.configurations.EpasParam;
 public enum CompetenceRequestType {
 
 //Richiesta straordinario
-  OVERTIME_REQUEST(true, false, false, true,
+  OVERTIME_REQUEST(true, false, false, true, true,
       Optional.absent(),
       Optional.of(EpasParam.OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED),
       Optional.of(EpasParam.OVERTIME_REQUEST_MANAGER_APPROVAL_REQUIRED),
-      Optional.absent()),
+      Optional.absent(),
+      Optional.of(EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION)),
 //Richiesta straordinario
-  CHANGE_REPERIBILITY_REQUEST(false, true, false, true,
+  CHANGE_REPERIBILITY_REQUEST(false, true, false, true, true,
       Optional.of(EpasParam.CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED),
       Optional.absent(),
       Optional.of(EpasParam.CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED),
+      Optional.absent(),
       Optional.absent());  
   
   
@@ -52,11 +54,13 @@ public enum CompetenceRequestType {
   public final boolean alwaysSkipOfficeHeadApproval;
   public final boolean alwaysSkipManagerApproval;
   public final boolean alwaysSkipAdministrativeApproval;  
+  public final boolean alwaysSkipAdvanceApproval;
      
   public final Optional<EpasParam> employeeApprovalRequired;
   public final Optional<EpasParam> officeHeadApprovalRequiredTechnicianLevel;
   public final Optional<EpasParam> managerApprovalRequiredTechnicianLevel;
   public final Optional<EpasParam> administrativeApprovalRequiredTechnicianLevel;
+  public final Optional<EpasParam> advanceApprovalRequired;
     
  
 }
