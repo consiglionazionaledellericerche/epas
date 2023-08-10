@@ -75,3 +75,7 @@ Limitazioni autenticazione Keycloak e multi istanza di ePAS
 Le limitazioni alla clusterizzazione su più istanza di ePAS quando viene utilizzata l'autenticazione
 OIDC non sono più presenti a partire dalla versione 2.7.0. 
 I token jwt sono salvati sul database e quindi condivisi tra più eventuali istanze.  
+
+Nelle versioni precedenti alla 2.7.0 i token OIDC venivano mantenuti in cache (non condivisa tra 
+più istanze) per cui l'autenticazione OICD funzionava solo su singola istanza di ePAS a meno di non 
+utilizzare strumenti tipo sticky session.
