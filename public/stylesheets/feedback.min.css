@@ -5,6 +5,7 @@
 #feedback-canvas{position:absolute;top:0;left:0;}
 #feedback-welcome{top:30%;left:50%;margin-left:-270px;display:block;position:fixed;}
 .feedback-logo{background:url(icons.png) -0px -0px no-repeat;width:34px;margin-bottom:16px;font-size:16px;font-weight:normal;line-height:32px;padding-left:40px;height:32px;}
+.feedback-logo-error{background:url(icons-error.png) -0px -0px no-repeat;width:34px;margin-bottom:16px;font-size:16px;font-weight:normal;line-height:32px;padding-left:40px;height:32px;}
 .feedback-next-btn{width:72px;height:29px;line-height:27px;float:right;font-size:13px;padding:0 8px;}
 .feedback-back-btn{width:72px;height:29px;line-height:27px;float:right;font-size:13px;padding:0 8px;margin-right:20px;}
 .feedback-submit-btn{width:72px;height:29px;line-height:27px;float:right;font-size:13px;padding:0 8px;}

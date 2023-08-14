@@ -27,8 +27,8 @@ import java.net.URL;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import models.exports.ReportData;
 import lombok.val;
+import models.exports.ReportData;
 import play.libs.WS;
 
 /**
@@ -60,9 +60,9 @@ public class HelpdeskServiceManager {
     return new URL(new URL(getServiceUrl()), API_CONFIG).toString();
   }
 
-  public void sendReport(ReportData reportData) {
+  public boolean sendReport(ReportData reportData) {
     log.debug("Sending report to {} -> {}", getServiceUrl(), reportData);
-    helpdeskServiceClient.send(reportData);
+    return helpdeskServiceClient.send(reportData);
   }
 
   /**

@@ -107,10 +107,10 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_43), 
       15, null),
   
-//  T_45(AmountType.units, 
-//      ImmutableSet.of(DefaultAbsenceType.A_45), 
-//      ImmutableSet.of(DefaultAbsenceType.A_45), 
-//      15, null),
+  //  T_45(AmountType.units, 
+  //      ImmutableSet.of(DefaultAbsenceType.A_45), 
+  //      ImmutableSet.of(DefaultAbsenceType.A_45), 
+  //      15, null),
 
   T_C161718(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_C16, DefaultAbsenceType.A_C17, 
@@ -212,16 +212,11 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_32, 
           DefaultAbsenceType.A_94), 
       -1, null),
-  
-//  T_FERIE_CNR_PROROGA_2020(AmountType.units, 
-//      ImmutableSet.of(DefaultAbsenceType.A_31_2020), 
-//      ImmutableSet.of(DefaultAbsenceType.A_31_2020), 
-//      -1, null),
-  
-//  T_FERIE_CNR_PROROGA_2021(AmountType.units, 
-//      ImmutableSet.of(DefaultAbsenceType.A_31_2021), 
-//      ImmutableSet.of(DefaultAbsenceType.A_31_2021), 
-//      -1, null),
+
+  //  T_FERIE_CNR_PROROGA_2021(AmountType.units, 
+  //      ImmutableSet.of(DefaultAbsenceType.A_31_2021), 
+  //      ImmutableSet.of(DefaultAbsenceType.A_31_2021), 
+  //      -1, null),
   
   T_FERIE_CNR_PROROGA(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_31, 

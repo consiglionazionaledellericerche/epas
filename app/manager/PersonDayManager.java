@@ -392,7 +392,7 @@ public class PersonDayManager {
    * @param startWork inizio apertura sede
    * @param endWork fine apertura sede
    * @param exitingNow timbratura fittizia uscendo in questo momento 
-   * @param  
+  
    * @return personDay modificato
    */
   public PersonDay updateTimeAtWork(PersonDay personDay, WorkingTimeTypeDay wttd,
@@ -568,7 +568,7 @@ public class PersonDayManager {
    *
    * @param abs l'assenza su cui fare il controllo
    * @return true se il tempo giustificato non deve concorrere all'attribuzione del buono pasto,
-   * false altrimenti.
+   *     false altrimenti.
    */
   private boolean denyMealTicketOnMission(Absence abs) {
     final Integer MAX_QUANTITY_TO_ALLOW_MEAL_TICKET = 240;

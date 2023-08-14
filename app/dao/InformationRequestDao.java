@@ -107,7 +107,8 @@ public class InformationRequestDao extends DaoBase {
     } 
     if (informationType.equals(InformationType.SERVICE_INFORMATION) 
         && uroList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.GROUP_MANAGER))) {
-      List<Office> officeList = uroList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
+      List<Office> officeList = 
+          uroList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
       conditions = groupManagerQuery(officeList, conditions, signer);
       final QAffiliation affiliation = QAffiliation.affiliation;
       List<InformationRequest> queryResults = getQueryFactory().selectFrom(informationRequest)

@@ -68,7 +68,8 @@ public class JwtToken extends MutableModel {
 
   public LocalDateTime expiresAt;
 
-  @PrePersist @PreUpdate
+  @PrePersist 
+  @PreUpdate
   void calculateExpiresAt() {
     if (expiresAt == null && takenAt != null) {
       expiresAt = takenAt.plusSeconds(expiresIn);

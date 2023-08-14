@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package manager.services.helpdesk;
+package manager.services;
 
 import controllers.SecurityTokens;
 import dao.GeneralSettingDao;
@@ -34,6 +34,7 @@ public class AuthRequestInterceptor implements RequestInterceptor {
 
   @Override
   public void apply(RequestTemplate template) {
-      template.header("Authorization", String.format("Bearer %s", SecurityTokens.getCurrentJwt().orNull()));
+    template.header("Authorization", String.format("Bearer %s", 
+        SecurityTokens.getCurrentJwt().orNull()));
   }
 }

@@ -17,8 +17,10 @@
 
 package models.exports;
 
+import com.google.common.collect.Maps;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import lombok.Data;
 import lombok.ToString;
 
@@ -55,6 +57,7 @@ public class ReportData implements Serializable {
   private String note;
   private String url;
   private String category;
+  private Map<String, String> session = Maps.newHashMap();
 
   @Override
   public String toString() {
