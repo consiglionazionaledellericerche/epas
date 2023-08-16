@@ -70,6 +70,7 @@ competenceRequest.approval=Approva
 competenceRequest.disapproval=Disapprova
 
 CompetenceRequestEventType.STARTING_APPROVAL_FLOW=Inizio approvazione richiesta
+CompetenceRequestEventType.FIRST_APPROVAL=Approvazione preventiva effettuata
 CompetenceRequestEventType.EMPLOYEE_APPROVAL=Richiesta approvata dal dipendente
 CompetenceRequestEventType.EMPLOYEE_REFUSAL=Richiesta respinta dal dipendente
 CompetenceRequestEventType.REPERIBILITY_MANAGER_APPROVAL=Richiesta approvata dal supervisore del servizio

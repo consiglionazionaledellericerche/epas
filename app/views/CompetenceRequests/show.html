@@ -44,7 +44,9 @@
 	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.DELETE)} class="danger" #{/if}
 	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.MANAGER_APPROVAL) 
 	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.ADMINISTRATIVE_APPROVAL)
-	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.OFFICE_HEAD_APPROVAL))} class="success" #{/if}	
+	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.OFFICE_HEAD_APPROVAL))} class="success" #{/if}
+	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.FIRST_APPROVAL)	
+	class="warning" #{/if}
 	>
 	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
 	<td>#{f.value 'item.createdAt', value:item.createdAt /}</td>
