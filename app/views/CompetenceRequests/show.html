@@ -45,8 +45,10 @@
 	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.MANAGER_APPROVAL) 
 	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.ADMINISTRATIVE_APPROVAL)
 	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.OFFICE_HEAD_APPROVAL))} class="success" #{/if}
-	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.FIRST_APPROVAL)	
+	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.FIRST_APPROVAL))}
 	class="warning" #{/if}
+	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.EMPLOYEE_APPROVAL))}
+	class="info" #{/if}
 	>
 	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
 	<td>#{f.value 'item.createdAt', value:item.createdAt /}</td>
@@ -60,6 +62,7 @@
 </table>
 
 	#{b.buttons center:true}
+	#{if competenceRequest.type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
 		#{secure.check 'CompetenceRequests.delete', target:competenceRequest}
 			#{b.link @delete(competenceRequest.id), color:'danger', title:'Revoca' /}
 		#{/secure.check}
@@ -73,6 +76,18 @@
         		Rifiuta
       		</a>
       	#{/secure.check}
+    #{/if}
+    #{else}
+    	#{secure.check 'CompetenceRequests.delete', target:competenceRequest}
+			#{b.link @delete(competenceRequest.id), color:'danger', title:'Revoca' /}
+		#{/secure.check}
+		#{secure.check 'CompetenceRequests.approval', target:competenceRequest}
+			#{b.link @approval(competenceRequest.id), color:'success', title:'Approva'/}
+		#{/secure.check}
+		#{secure.check 'CompetenceRequests.disapproval', target:competenceRequest}
+			#{b.link @disapproval(competenceRequest.id, disapproval), 'data-async-modal': '#defaultModal', color:'warning', title:'Rifiuta'/}			
+		#{/secure.check}
+    #{/else}
 	#{/b.buttons}
 </div>
 

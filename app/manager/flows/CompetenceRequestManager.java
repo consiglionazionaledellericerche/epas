@@ -349,6 +349,18 @@ public class CompetenceRequestManager {
         competenceRequest.setFlowEnded(true);
         notificationManager.notificationCompetenceRequestRefused(competenceRequest, person);
         break;
+        
+      case OFFICE_HEAD_APPROVAL:
+        competenceRequest.setOfficeHeadApproved(LocalDateTime.now());
+        break;
+
+      case OFFICE_HEAD_REFUSAL:
+        //si riparte dall'inizio del flusso.
+        //resetFlow(absenceRequest);
+        log.info("Flusso {} rifiutato dal responsabile di sede", competenceRequest);
+        competenceRequest.setFlowEnded(true);
+        notificationManager.notificationCompetenceRequestRefused(competenceRequest, person);
+        break;
 
       case EMPLOYEE_APPROVAL:
         competenceRequest.setEmployeeApproved(LocalDateTime.now());
@@ -564,7 +576,7 @@ public class CompetenceRequestManager {
       if (competenceRequest.getPerson().getReperibility().stream()
           .anyMatch(pr -> pr.getPersonReperibilityType().getSupervisor().equals(user.getPerson()))
           && competenceRequest.isManagerApprovalRequired()) {
-        //TODO: se il dipendente è anche supervisore del servizio faccio un'unica approvazione
+        
         managerApproval(competenceRequest.id, user);
       }
       approved = true;
@@ -576,8 +588,10 @@ public class CompetenceRequestManager {
         approved = true;
       }
     } else {
-      if (competenceRequest.isManagerApprovalRequired() && competenceRequest.getManagerApproved() == null
-          && user.hasRoles(Role.REPERIBILITY_MANAGER)) {
+      if (competenceRequest.isManagerApprovalRequired() 
+          && competenceRequest.getManagerApproved() == null
+          && competenceRequest.getPerson().getReperibility().stream()
+          .anyMatch(pr -> pr.getPersonReperibilityType().getSupervisor().equals(user.getPerson()))) {
         managerApproval(competenceRequest.id, user);
         approved = true;
       }
@@ -597,7 +611,8 @@ public class CompetenceRequestManager {
     val currentPerson = Security.getUser().get().getPerson();
     
     if ((Boolean) configurationManager.configValue(currentPerson.getOffice(), 
-        EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION)) {      
+        EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION) 
+        && competenceRequest.getFirstApproved() == null) {      
       executeEvent(competenceRequest, currentPerson, 
           CompetenceRequestEventType.FIRST_APPROVAL, Optional.absent());
       log.info("{} preventiva approvata dal responsabile di sede {}.", 
@@ -622,7 +637,8 @@ public class CompetenceRequestManager {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     val currentPerson = Security.getUser().get().getPerson();
     if ((Boolean) configurationManager.configValue(currentPerson.getOffice(), 
-        EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION)) {
+        EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION) 
+        && competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
       executeEvent(competenceRequest, currentPerson, 
           CompetenceRequestEventType.FIRST_APPROVAL, Optional.absent());
       log.info("{} preventiva approvata dal responsabile di gruppo {}.", 

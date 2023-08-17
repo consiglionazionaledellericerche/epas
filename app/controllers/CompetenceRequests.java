@@ -434,19 +434,22 @@ public class CompetenceRequests extends Controller {
    *
    * @param id l'identificativo della richiesta
    */
-  public static void approval(long id, boolean approval) {
+  public static void approval(long id, boolean approval, Integer value) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     notFoundIfNull(competenceRequest);
     User user = Security.getUser().get();
     rules.checkIfPermitted(competenceRequest);
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      competenceRequest.setValue(value);
+      competenceRequest.save();
       if (!approval) {
         approval = true;
         render(competenceRequest, approval);
       }
     }    
-
+    
     log.debug("Approving competence request {}", competenceRequest);
+    
     boolean approved = competenceRequestManager.approval(competenceRequest, user);
 
     if (approved) {

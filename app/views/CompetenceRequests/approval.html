@@ -8,7 +8,7 @@
 #{form action:@approval(competenceRequest.id, approval), method:'POST', class:'form form-horizontal'}
 
 #{f.hidden 'competenceRequest.id', value:competenceRequest.id /}
-#{f.input 'competenceRequest.value', type:'number' /}
+#{f.input 'value', type:'number' /}
 
 	    #{b.buttons center:true}   
 	      #{b.submit 'Approva', color:'success', fa:'cross' /}
