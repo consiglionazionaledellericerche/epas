@@ -100,12 +100,22 @@
 				</td>
 				<td>
 				#{secure.check 'CompetenceRequests.approval', target: item }
+				#{if type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}}
 				<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}" data-async-modal="#defaultModal" color="primary" title="Approva">
+        		#{/if}
+        		#{else}
+        		<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}" color="success" title="Approva">
+        		#{/else}
         		Approva 
       			</a>
       			#{/secure.check}
       			#{secure.check 'CompetenceRequests.disapproval', target: item }
+      			#{if type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}}
       			<a class="btn btn-warning btn-xs" href="@{CompetenceRequests.disapproval(item.id)}" data-async-modal="#defaultModal" color="warning" title="Rifiuta">
+        		#{/if}
+        		#{else}
+        		<a class="btn btn-warning btn-xs" href="@{CompetenceRequests.disapproval(item.id)}" color="warning" title="Rifiuta">
+        		#{/else}
         		Rifiuta
       			</a>
       			#{/secure.check}

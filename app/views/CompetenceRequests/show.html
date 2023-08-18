@@ -67,12 +67,12 @@
 			#{b.link @delete(competenceRequest.id), color:'danger', title:'Revoca' /}
 		#{/secure.check}
 		#{secure.check 'CompetenceRequests.approval', target:competenceRequest}
-			<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(competenceRequest.id)}" data-async-modal="#defaultModal" color="primary" title="Approva">
+			<a class="btn btn-success btn-md" href="@{CompetenceRequests.approval(competenceRequest.id)}" data-async-modal="#defaultModal" color="primary" title="Approva">
 				Approva 
     		</a>
 		#{/secure.check}
 		#{secure.check 'CompetenceRequests.disapproval', target:competenceRequest}
-			<a class="btn btn-warning btn-xs" href="@{CompetenceRequests.disapproval(competenceRequest.id)}" data-async-modal="#defaultModal" color="warning" title="Rifiuta">
+			<a class="btn btn-warning btn-md" href="@{CompetenceRequests.disapproval(competenceRequest.id)}" data-async-modal="#defaultModal" color="warning" title="Rifiuta">
         		Rifiuta
       		</a>
       	#{/secure.check}
