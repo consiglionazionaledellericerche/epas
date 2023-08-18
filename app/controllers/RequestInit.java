@@ -156,15 +156,15 @@ public class RequestInit extends Controller {
     }
     
     // CompetenceRequestType init /////////////////////////////////////////////////
-    CompetenceRequestType competenceType = null;
-    if (params.get("competenceType") != null) {
-      competenceType = CompetenceRequestType.valueOf(params.get("competenceType"));
-    } else if (session.get("competenceType") != null) {
-      competenceType = CompetenceRequestType.valueOf(session.get("competenceType"));      
-    } else {      
-      competenceType = CompetenceRequestType.OVERTIME_REQUEST;
-      session.put("competenceType", CompetenceRequestType.OVERTIME_REQUEST);
-    }
+//    CompetenceRequestType competenceType = null;
+//    if (params.get("competenceType") != null) {
+//      competenceType = CompetenceRequestType.valueOf(params.get("competenceType"));
+//    } else if (session.get("competenceType") != null) {
+//      competenceType = CompetenceRequestType.valueOf(session.get("competenceType"));      
+//    } else {      
+//      competenceType = CompetenceRequestType.OVERTIME_REQUEST;
+//      session.put("competenceType", CompetenceRequestType.OVERTIME_REQUEST);
+//    }
 
     // Popolamento del dropdown degli anni
     List<Integer> years = Lists.newArrayList();
@@ -271,11 +271,7 @@ public class RequestInit extends Controller {
         "Charts.exportTimesheetSituation",
         "AbsenceGroups.absenceTroubles",
         "Stampings.stampingsByAdmin",
-        "PrintTags.listPersonForPrintTags",
-        "CompetenceRequests.blank",
-        "CompetenceRequests.edit",
-        "CompetenceRequests.show",
-        "CompetenceRequests.list");
+        "PrintTags.listPersonForPrintTags");
 
 
     final Collection<String> yearSwitcher = ImmutableList.of(

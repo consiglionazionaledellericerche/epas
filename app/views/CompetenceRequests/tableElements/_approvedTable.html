@@ -6,7 +6,7 @@
 			#{if !onlyOwn}
 				<th width="15%" #{if approvalRequired}rowspan="2"#{/if}>&{'competenceRequest.person'}</th>
 			#{/if}
-			#{if type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
+			#{if competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
 			    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>anno</th>
 				<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>mese</th>
 				<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>quantità</th>
@@ -30,7 +30,7 @@
 			
 				
 		</tr>			
-		#{if approvalRequired && type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
+		#{if approvalRequired && competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
 			<tr>
 				#{if config.officeHeadApprovalRequired}
 					<th width="20%">Responsabile di sede</th>
@@ -64,7 +64,7 @@
 					<td>#{f.value 'item.person.fullname', value:item.person.fullname /}</td>
 				#{/if}								
 				
-				#{if type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}						
+				#{if competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}						
 					<td>#{f.value 'item.year', value:item.year /}</td>	    
 					<td>#{f.value 'item.month', value:item.month /}</td>
 					<td>#{f.value 'item.value', value:item.value /}</td>

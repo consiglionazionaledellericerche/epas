@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
 #{set competenceRequestTypeLabel: messages.get('CompetenceRequestType.' + competenceRequest.type.toString() + 'S') /}
-#{set title:('ePAS - ' + competenceRequest.isPersistent() ? 'Modifica ' : 'Inserimento ' + competenceRequest.type.label()) /}
+#{set title:('ePAS - ' + competenceRequest.isPersistent() ? 'Modifica ' : 'Inserimento ' + competenceRequest.competenceType.label()) /}
 
 #{switcher year:true, month:true, competenceType:true /}
 

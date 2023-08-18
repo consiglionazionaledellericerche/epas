@@ -1,6 +1,6 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
-#{set competenceRequestTypeLabel: messages.get('CompetenceRequestType.' + type.toString() + '_TO_APPROVE') /}
+#{set competenceRequestTypeLabel: messages.get('CompetenceRequestType.' + competenceType.toString() + '_TO_APPROVE') /}
 #{set title:('ePAS - ' + competenceRequestTypeLabel) /}
 
 #{switcher year:true, month:true /}

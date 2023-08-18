@@ -435,6 +435,11 @@ public class ConfigurationManager {
         .sorted(Comparator.comparing(c -> c.getEpasParam()))
         .collect(Collectors.toList());
   }
+  
+  public java.util.Optional<Configuration> getConfigurationByOfficeAndType(Office office, EpasParam param) {
+    return office.getConfigurations().stream()
+        .filter(conf -> conf.getEpasParam().equals(param)).findFirst();
+  }
 
   /**
    * La lista delle configurazioni esistenti della persona per la data.

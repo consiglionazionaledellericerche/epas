@@ -113,8 +113,8 @@ public class CompetenceRequests extends Controller {
    *
    * @param competenceType il tipo di competenza
    */
-  public static void list(CompetenceRequestType type) {
-    Verify.verifyNotNull(type);
+  public static void list(CompetenceRequestType competenceType) {
+    Verify.verifyNotNull(competenceType);
 
     val currentUser = Security.getUser().get();
     if (currentUser.getPerson() == null) {
@@ -126,17 +126,17 @@ public class CompetenceRequests extends Controller {
     val person = currentUser.getPerson();
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste di tipo {} per {} a partire da {}",
-        type, person, fromDate);
+        competenceType, person, fromDate);
 
-    val config = competenceRequestManager.getConfiguration(type, person);
+    val config = competenceRequestManager.getConfiguration(competenceType, person);
     List<CompetenceRequest> myResults = competenceRequestDao
-        .findByPersonAndDate(person, fromDate, Optional.absent(), type, true);
+        .findByPersonAndDate(person, fromDate, Optional.absent(), competenceType, true);
     List<CompetenceRequest> closed = competenceRequestDao
-        .findByPersonAndDate(person, fromDate, Optional.absent(), type, false);
+        .findByPersonAndDate(person, fromDate, Optional.absent(), competenceType, false);
     val onlyOwn = true;
     boolean persist = false;
 
-    render(config, myResults, type, onlyOwn, persist, closed);
+    render(config, myResults, competenceType, onlyOwn, persist, closed);
   }
 
   /**
@@ -144,28 +144,28 @@ public class CompetenceRequests extends Controller {
    *
    * @param type tipo opzionale di tipo di richiesta di assenza.
    */
-  public static void listToApprove(CompetenceRequestType type) {
-    Verify.verifyNotNull(type);
+  public static void listToApprove(CompetenceRequestType competenceType) {
+    Verify.verifyNotNull(competenceType);
 
     val person = Security.getUser().get().getPerson();
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste da approvare  di tipo {} a partire da {}",
-        type, fromDate);
+        competenceType, fromDate);
 
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
     List<CompetenceRequest> results = competenceRequestDao
-        .allResults(roleList, fromDate, Optional.absent(), type, person);
+        .allResults(roleList, fromDate, Optional.absent(), competenceType, person);
     List<CompetenceRequest> myResults =
         competenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(),
-            type, person);
+            competenceType, person);
     List<CompetenceRequest> approvedResults =
-        competenceRequestDao.totallyApproved(roleList, fromDate, Optional.absent(), type, person);
-    val config = competenceRequestManager.getConfiguration(type, person);
+        competenceRequestDao.totallyApproved(roleList, fromDate, Optional.absent(), competenceType, person);
+    val config = competenceRequestManager.getConfiguration(competenceType, person);
     val onlyOwn = false;
     boolean overtimesQuantityEnabled = (Boolean)configurationManager
         .configValue(person.getOffice(), EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY);
     val available = person.getUser().hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
-    render(config, results, type, onlyOwn, available, approvedResults, 
+    render(config, results, competenceType, onlyOwn, available, approvedResults, 
         myResults, overtimesQuantityEnabled);
   }
 
@@ -325,6 +325,8 @@ public class CompetenceRequests extends Controller {
       competenceRequest.setEndDateToGive(endDayToGive.getDate());
       competenceRequest.setTeamMate(teamMate);
     } else {
+      
+      log.info("Si fa richiesta di straordinario per un mese concluso");
       if ((Boolean) configurationManager.configValue(competenceRequest.getPerson().getOffice(), 
           EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION)) {
         if (month < LocalDate.now().getMonthOfYear()) {
@@ -347,35 +349,46 @@ public class CompetenceRequests extends Controller {
       Validation.addError("teamMate",
           "Esiste già una richiesta di questo tipo");
     }
-    
+  
     if (!competenceRequest.getPerson().checkLastCertificationDate(
         new YearMonth(competenceRequest.getYear(),
             competenceRequest.getMonth()))) {
-      Validation.addError("beginDayToAsk",
+      Validation.addError("competenceRequest.note",
           "Non è possibile fare una richiesta per una data di un mese già "
               + "processato in Attestati");
     }
     if (Validation.hasErrors()) {
-      LocalDate begin = new LocalDate(year, month, 1);
-      LocalDate to = begin.dayOfMonth().withMaximumValue();
-      List<PersonReperibilityDay> reperibilityDates = repDao
-          .getPersonReperibilityDaysByPeriodAndType(begin, to, type, teamMate);
-      List<PersonReperibilityDay> myReperibilityDates = repDao
-          .getPersonReperibilityDaysByPeriodAndType(begin, to, type, competenceRequest.getPerson());
+      
+      if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
+        LocalDate begin = new LocalDate(year, month, 1);
+        LocalDate to = begin.dayOfMonth().withMaximumValue();
+        List<PersonReperibilityDay> reperibilityDates = repDao
+            .getPersonReperibilityDaysByPeriodAndType(begin, to, type, teamMate);
+        List<PersonReperibilityDay> myReperibilityDates = repDao
+            .getPersonReperibilityDaysByPeriodAndType(begin, to, type, competenceRequest.getPerson());
 
-      List<PersonReperibilityType> types = repDao
-          .getReperibilityTypeByOffice(competenceRequest.getPerson()
-              .getOffice(), Optional.of(false))
-          .stream().filter(prt -> prt.getPersonReperibilities().stream()
-              .anyMatch(pr -> pr.getPerson().equals(competenceRequest.getPerson())))
-          .collect(Collectors.toList());
-      List<Person> teamMates = type.getPersonReperibilities().stream().map(pr -> pr.getPerson())
-          .filter(p -> p.id != competenceRequest.getPerson().id).collect(Collectors.toList());
-      boolean insertable = true;
-      response.status = 400;
-      render("@edit", competenceRequest, beginDayToAsk, beginDayToGive,
-          endDayToAsk, endDayToGive, type, year, month, teamMate, insertable,
-          teamMates, types, reperibilityDates, myReperibilityDates);
+        List<PersonReperibilityType> types = repDao
+            .getReperibilityTypeByOffice(competenceRequest.getPerson()
+                .getOffice(), Optional.of(false))
+            .stream().filter(prt -> prt.getPersonReperibilities().stream()
+                .anyMatch(pr -> pr.getPerson().equals(competenceRequest.getPerson())))
+            .collect(Collectors.toList());
+        List<Person> teamMates = type.getPersonReperibilities().stream().map(pr -> pr.getPerson())
+            .filter(p -> p.id != competenceRequest.getPerson().id).collect(Collectors.toList());
+        boolean insertable = true;
+        response.status = 400;
+        render("@edit", competenceRequest, beginDayToAsk, beginDayToGive,
+            endDayToAsk, endDayToGive, type, year, month, teamMate, insertable,
+            teamMates, types, reperibilityDates, myReperibilityDates);
+      } else {
+        boolean isOvertime = true;
+        CompetenceRequestType competenceType = competenceRequest.getType();
+        PersonStampingRecap psDto = stampingsRecapFactory
+            .create(competenceRequest.getPerson(), year, month, true);
+        render("@edit", competenceRequest, competenceType,
+            year, month, type, psDto, isOvertime);
+      }
+      
     }
 
     competenceRequestManager.configure(competenceRequest);
@@ -394,8 +407,8 @@ public class CompetenceRequests extends Controller {
           CompetenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
     }
     flash.success("Operazione effettuata correttamente");
-
-    CompetenceRequests.list(competenceRequest.getType());
+    CompetenceRequestType competenceType = competenceRequest.getType();
+    CompetenceRequests.list(competenceType);
   }
 
   /**
@@ -463,17 +476,17 @@ public class CompetenceRequests extends Controller {
     }
     val person = Security.getUser().get().getPerson();
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
-    CompetenceRequestType type = competenceRequest.getType();
+    CompetenceRequestType competenceType = competenceRequest.getType();
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
 
     List<CompetenceRequest> results = competenceRequestDao
-        .allResults(roleList, fromDate, Optional.absent(), type, person);
+        .allResults(roleList, fromDate, Optional.absent(), competenceType, person);
     List<CompetenceRequest> myResults =
         competenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(),
-            type, person);
+            competenceType, person);
     List<CompetenceRequest> approvedResults =
         competenceRequestDao
-        .totallyApproved(roleList, fromDate, Optional.absent(), type, person);
+        .totallyApproved(roleList, fromDate, Optional.absent(), competenceType, person);
     val onlyOwn = false;
     boolean overtimesQuantityEnabled = (Boolean)configurationManager
         .configValue(competenceRequest.getPerson().getOffice(), 
@@ -481,8 +494,8 @@ public class CompetenceRequests extends Controller {
     val available = competenceRequest.getPerson().getUser()
         .hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
     
-    val config = competenceRequestManager.getConfiguration(type, competenceRequest.getPerson());
-    render("@listToApprove", type, onlyOwn, overtimesQuantityEnabled, available, 
+    val config = competenceRequestManager.getConfiguration(competenceType, competenceRequest.getPerson());
+    render("@listToApprove", competenceType, onlyOwn, overtimesQuantityEnabled, available, 
         config, results, myResults, approvedResults);
    
   }
