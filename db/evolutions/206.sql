@@ -1,5 +1,8 @@
 # --- !Ups
 
+ALTER TABLE general_setting ADD COLUMN show_overtime_request BOOLEAN DEFAULT FALSE;
+ALTER TABLE general_setting_history ADD COLUMN show_overtime_request BOOLEAN DEFAULT FALSE;
+
 ALTER TABLE competence_requests RENAME COLUMN reperibility_manager_approved TO manager_approved;
 ALTER TABLE competence_requests RENAME COLUMN reperibility_manager_approval_required TO manager_approval_required;
 
@@ -26,4 +29,5 @@ SET first_approval_required = false WHERE type = 'CHANGE_REPERIBILITY_REQUEST';
 
 # --- !Downs
 
--- non è necessaria una down
+ALTER TABLE general_setting DROP COLUMN show_overtime_request;
+ALTER TABLE general_setting_history DROP COLUMN show_overtime_request;
