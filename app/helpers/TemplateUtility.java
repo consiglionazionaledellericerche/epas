@@ -228,6 +228,17 @@ public class TemplateUtility {
   public boolean enableDailyPresenceForManager() {
     return generalSettingDao.generalSetting().isEnableDailyPresenceForManager();
   }
+  
+  /**
+   * Verifica se è abilitata la visualizzazione della configurazione per i flussi di richiesta
+   * straordinari.
+   * 
+   * @return se è abilitata la visualizzazione della configurazione per i flussi di richiesta
+   * straordinari.
+   */
+  public boolean enableOvertimeFlowsConfiguration() {
+    return generalSettingDao.generalSetting().isShowOvertimeRequest();
+  }
 
   /**
    * Metodo di utilità per far comparire il badge con la quantità di richieste di riposi 

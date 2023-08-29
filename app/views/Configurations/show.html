@@ -301,12 +301,15 @@
         <th>Valore</th>
       </tr>
       #{list competenceFlows.findAll({it.epasParam.general}), as:'conf'}
+      #{if templateUtility.enableOvertimeFlowsConfiguration()
+      || conf.epasParam == manager.configurations.EpasParam.ENABLE_COMPETENCE_FLOWS}
       <tr>
         <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
         </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
       </tr>
+      #{/if}
       #{/list}
     </table>
 
