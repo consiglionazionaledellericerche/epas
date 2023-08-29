@@ -90,7 +90,8 @@ public class ReportCentre extends Controller {
       //Viene passata la sessione play corrente
       data.setSession(session.all());
       if (!helpdeskServiceManager.sendReport(data)) {
-        throw new RuntimeException("Errore nell'invio della segnalazione");
+        log.warn("Errore nell'invio della segnalazione {}", data);
+        error(String.format("Errore nell'invio della segnalazione %s", data));
       }
       return;
     }

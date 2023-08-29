@@ -5,11 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.8.0] - UNRELEASED
+### Added
+ - Gestito invio segnalazioni anonime ad epas-helpdesk-service.
+
 ### Changed
  - Mostrato un messaggio di avvertimento in caso di segnalazione non inviata correttamente
  - Corretta gestione caso JWT necessario ma non presente.
  - Inviata la sessione play al epas-helpdesk-service (se configurato)
- 
+
+
 ## [2.7.0] - 2023-08-10
 ### Added
  - Aggiunta la CRUD per la gestione delle qualifiche del personale
