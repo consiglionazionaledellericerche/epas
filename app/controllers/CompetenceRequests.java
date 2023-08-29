@@ -38,6 +38,7 @@ import dao.wrapper.IWrapperFactory;
 import helpers.Web;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import manager.CertificationManager;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -54,6 +55,7 @@ import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
 import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
+import play.Play;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -90,6 +92,8 @@ public class CompetenceRequests extends Controller {
   private static PersonReperibilityDayDao repDao;
   @Inject
   private static PersonStampingRecapFactory stampingsRecapFactory;
+  @Inject
+  private static CertificationManager certificationManager;
 
 
   public static void changeReperibility() {
@@ -225,6 +229,23 @@ public class CompetenceRequests extends Controller {
             .filter(p -> p.id != person.id).collect(Collectors.toList());
         break;
       case OVERTIME_REQUEST:
+        // controllo con la chiamata rest ad attestati per verificare se l'attestato di quell'anno/mese
+        // è già stato validato (valido solo per istanza CNR)
+        String companyCode = Play.configuration.getProperty("company.code");
+        if (companyCode.equalsIgnoreCase(companyCode)) {
+          /*
+           * Nel caso di prove in locale, occorre cambiare l'indirizzo di Attestati nei parametri 
+           * di configurazione del Play altrimenti viene lanciata un'eccezione a questa chiamata
+           */
+          val certData = certificationManager.getPersonCertData(person, year, month);
+          if (certData.validate) {
+            flash.error("Attestato già validato per l'anno/mese richiesto. "
+                + "Non si può procedere con una richiesta di straordinario.");
+            list(competenceType);
+            return;
+          }
+        }       
+        
         isOvertime = true;
         psDto = stampingsRecapFactory.create(person, year, month, true);  
         break;
