@@ -37,10 +37,10 @@ import java.util.Date;
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.attestati.service.OauthToken;
 import models.JwtToken;
 import org.joda.time.LocalDateTime;
-import lombok.val;
 import play.Play;
 import play.cache.Cache;
 import play.libs.OAuth2;
@@ -141,10 +141,10 @@ public class SecurityTokens extends Controller {
     Header authorization = Http.Request.current.get().headers.get(AUTHORIZATION);
     String token = null;
     val idToken = getCurrentIdToken();
-    if (idToken == null) {
+    if (!idToken.isPresent()) {
       return java.util.Optional.empty();
     }
-    val jwtToken = jwtTokenDao.byIdToken(idToken);
+    val jwtToken = jwtTokenDao.byIdToken(idToken.get());
     if (jwtToken.isPresent()) {
       log.debug("Prelevato token oauth dal db utilizzando l'id token {}", idToken);
       token = jwtToken.get().getAccessToken();
@@ -159,7 +159,7 @@ public class SecurityTokens extends Controller {
       val username = extractSubjectFromJwt(token);
       return java.util.Optional.ofNullable(username);
     } catch (ExpiredJwtException ex) {
-      val refreshed = openIdConnectClient.retrieveRefreshToken(getCurrentRefreshToken());
+      val refreshed = openIdConnectClient.retrieveRefreshToken(getCurrentRefreshToken().get());
       if (refreshed != null) {
         setJwtSession(refreshed);
         val username = extractSubjectFromJwt(refreshed.accessToken);
@@ -184,7 +184,8 @@ public class SecurityTokens extends Controller {
     //XXX l'accesso token viene salvato sul db non in sessione perché la sessione
     //viene inserita in un cookie che ha dimensione massima di 4096 caratteri e questa
     //dimensione non è sufficiente per contenere anche l'access token.
-    OauthToken oauthToken = new Gson().fromJson(oauthResponse.httpResponse.getJson(), OauthToken.class);
+    OauthToken oauthToken = 
+        new Gson().fromJson(oauthResponse.httpResponse.getJson(), OauthToken.class);
     log.trace("oauthToken = {}", oauthToken);
     val jwtToken = jwtTokenDao.persist(byOauthToken(oauthToken));
     log.debug("Effettuato salvataggio sul db del jwt token {}", jwtToken);
@@ -204,31 +205,37 @@ public class SecurityTokens extends Controller {
   }
 
   @Util
-  private static String getCurrentIdToken() {
-    return Session.current().get(Resecure.ID_TOKEN);
+  private static Optional<String> getCurrentIdToken() {
+    return Optional.fromNullable(Session.current().get(Resecure.ID_TOKEN));
   }
-  
+
   @Util
-  private static String getCurrentRefreshToken() {
-    return Session.current().get(Resecure.REFRESH_TOKEN);
+  private static Optional<String> getCurrentRefreshToken() {
+    return Optional.fromNullable(Session.current().get(Resecure.REFRESH_TOKEN));
   }
-  
+
+  /**
+   * Preleva il jwt dell'utente corrente se presente, altrimenti Optional.absent().
+   */
   @Util
   public static Optional<String> getCurrentJwt() {
-    val jwtToken = jwtTokenDao.byIdToken(getCurrentIdToken());
+    if (!getCurrentIdToken().isPresent()) {
+      return Optional.absent();
+    }
+    val jwtToken = jwtTokenDao.byIdToken(getCurrentIdToken().get());
     //Se c'è un token
-    if (!jwtToken.isEmpty()) {
+    if (jwtToken.isPresent()) {
       //ed il token è scaduto o scade a breve
       if (jwtToken.get().isExpiringSoon() 
-            && getCurrentRefreshToken() != null) {
-        val refreshed = openIdConnectClient.retrieveRefreshToken(getCurrentRefreshToken());
+            && getCurrentRefreshToken().isPresent()) {
+        val refreshed = openIdConnectClient.retrieveRefreshToken(getCurrentRefreshToken().get());
         if (refreshed != null) {
           jwtToken.get().setAccessToken(refreshed.accessToken);
           jwtTokenDao.save(jwtToken.get());
         }
       }
-    } else if (getCurrentRefreshToken() != null && getCurrentIdToken() != null) {
-      val refreshed = openIdConnectClient.retrieveRefreshToken(getCurrentRefreshToken());
+    } else if (getCurrentRefreshToken().isPresent() && getCurrentIdToken().isPresent()) {
+      val refreshed = openIdConnectClient.retrieveRefreshToken(getCurrentRefreshToken().get());
       if (refreshed != null) {
         val newJwtToken = byRefreshTokenResponse(refreshed);
         return Optional.of(newJwtToken.getAccessToken());
@@ -258,8 +265,8 @@ public class SecurityTokens extends Controller {
   
   private static JwtToken byRefreshTokenResponse(OAuth2.Response response) {
     val newJwtToken = new JwtToken();
-    newJwtToken.setIdToken(getCurrentIdToken());
-    newJwtToken.setRefreshToken(getCurrentRefreshToken());
+    newJwtToken.setIdToken(getCurrentIdToken().orNull());
+    newJwtToken.setRefreshToken(getCurrentRefreshToken().orNull());
     newJwtToken.setAccessToken(response.accessToken);
     newJwtToken.setTakenAt(LocalDateTime.now());
     newJwtToken.setExpiresIn(DEFAULT_REFRESHED_TOKEN_EXPIRES_IN_SECONDS);

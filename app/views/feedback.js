@@ -36,7 +36,7 @@ $(function() {
           				'</div>' +
           			'</div>',
           submitSuccess:	'<div id="feedback-submit-success"><div class="feedback-logo">Segnalazione</div><p>La tua segnalazione è stata registrata con successo.</p><button class="feedback-close-btn feedback-btn-blue">OK</button><div class="feedback-wizard-close"></div></div>',
-          submitError:	'<div id="feedback-submit-error"><div class="feedback-logo">Segnalazione</div><p>Grazie per la collaborazione, la tua segnalazione è stata registrata con successo.</p><button class="feedback-close-btn feedback-btn-blue">OK</button><div class="feedback-wizard-close"></div></div>'
+          submitError:	'<div id="feedback-submit-error"><div class="feedback-logo-error">Segnalazione non inviata</div><p>Attenzione la tua segnalazione non è stata registrata si prega di riprovare o contattare l\'amministratore di ePAS.</p><button class="feedback-close-btn feedback-btn-blue">OK</button><div class="feedback-wizard-close"></div></div>'
           },
           html2canvasURL: "@{'/public/javascripts/html2canvas.min.js'}"});
     $('button.feedback-btn').addClass('hidden-xs');

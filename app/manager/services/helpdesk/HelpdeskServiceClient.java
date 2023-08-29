@@ -28,8 +28,9 @@ import feign.RequestTemplate;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import manager.services.AuthRequestInterceptor;
 import models.exports.ReportData;
 
 /**
@@ -69,8 +70,10 @@ public class HelpdeskServiceClient {
     return Feign.builder()
         .requestInterceptor(new AuthRequestInterceptor())
         .encoder(new GsonEncoder())
-        .target(HelpdeskService.class, generalSettingDao.generalSetting().getEpasHelpdeskServiceUrl());
+        .target(HelpdeskService.class, generalSettingDao.generalSetting()
+            .getEpasHelpdeskServiceUrl());
   }
+
   /**
    * Invia la segnalazione via REST all'epas-helpdesk-service.
    */

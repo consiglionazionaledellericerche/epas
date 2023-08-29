@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -30,8 +30,8 @@ import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.Map;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.services.helpdesk.HelpdeskServiceManager;
 import models.User;
 import models.exports.ReportData;
@@ -39,7 +39,6 @@ import play.Play;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
-import play.mvc.Util;
 
 /**
  * Classi di supporto per l'invio delle segnalazioni utente.
@@ -86,8 +85,13 @@ public class ReportCentre extends Controller {
 
     val generalSettings = generalSettingDao.generalSetting();
     //Questo è il caso di invio delle segnalazioni tramite il servizio esterno.
-    if (generalSettings.isEpasHelpdeskServiceEnabled() && generalSettings.getEpasHelpdeskServiceUrl() != null) {
-      helpdeskServiceManager.sendReport(data);
+    if (generalSettings.isEpasHelpdeskServiceEnabled() 
+        && generalSettings.getEpasHelpdeskServiceUrl() != null) {
+      //Viene passata la sessione play corrente
+      data.setSession(session.all());
+      if (!helpdeskServiceManager.sendReport(data)) {
+        throw new RuntimeException("Errore nell'invio della segnalazione");
+      }
       return;
     }
 

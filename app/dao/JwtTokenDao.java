@@ -79,7 +79,7 @@ public class JwtTokenDao extends DaoBase {
   }
 
   /**
-   * @return lista dei jwtToken che sono già scaduti.
+   * Lista dei jwtToken che sono già scaduti.
    */
   public List<JwtToken> expiredTokens() {
     final QJwtToken jwtToken = QJwtToken.jwtToken;

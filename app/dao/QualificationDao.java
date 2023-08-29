@@ -157,7 +157,7 @@ public class QualificationDao extends DaoBase {
   /**
    * Verifica se esiste una qualifica con valore maggiore di 10.
    *
-   * 10 è il valore massimo previsto per gli enti di ricerca. 
+   * <p>10 è il valore massimo previsto per gli enti di ricerca.</p> 
    */
   public Boolean qualificationGreaterThan10Exist() {
     QQualification qual = QQualification.qualification1;
