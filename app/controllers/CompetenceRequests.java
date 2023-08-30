@@ -94,6 +94,8 @@ public class CompetenceRequests extends Controller {
   private static PersonStampingRecapFactory stampingsRecapFactory;
   @Inject
   private static CertificationManager certificationManager;
+  
+  static final String ATTESTATI_ACTIVE = "attestati.active";
 
 
   public static void changeReperibility() {
@@ -231,8 +233,7 @@ public class CompetenceRequests extends Controller {
       case OVERTIME_REQUEST:
         // controllo con la chiamata rest ad attestati per verificare se l'attestato di quell'anno/mese
         // è già stato validato (valido solo per istanza CNR)
-        String companyCode = Play.configuration.getProperty("company.code");
-        if (companyCode.equalsIgnoreCase(companyCode)) {
+        if ("true".equals(Play.configuration.getProperty(ATTESTATI_ACTIVE, "false"))) {
           /*
            * Nel caso di prove in locale, occorre cambiare l'indirizzo di Attestati nei parametri 
            * di configurazione del Play altrimenti viene lanciata un'eccezione a questa chiamata
