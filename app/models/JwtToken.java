@@ -77,10 +77,10 @@ public class JwtToken extends MutableModel {
   }
 
   public boolean isExpired() {
-    return expiresAt != null && expiresAt.isAfter(LocalDateTime.now());
+    return expiresAt != null && expiresAt.isBefore(LocalDateTime.now());
   }
 
   public boolean isExpiringSoon() {
-    return expiresAt != null && expiresAt.minusMinutes(1).isAfter(LocalDateTime.now());
+    return expiresAt != null && expiresAt.minusMinutes(1).isBefore(LocalDateTime.now());
   }
 }
