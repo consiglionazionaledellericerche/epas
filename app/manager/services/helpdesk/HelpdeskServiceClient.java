@@ -99,7 +99,7 @@ public class HelpdeskServiceClient {
       log.info("Inviata richiesta configurazione a {}", 
           generalSettingDao.generalSetting().getEpasHelpdeskServiceUrl());
     } catch (FeignException e) {
-      log.warn("Problema nell'invio della segnalazione", e);
+      log.warn("Problema nella ricezione delle configurazione da epas-helpdesk-service", e);
       response.getProblems().add(e.toString());
     }
     return response;

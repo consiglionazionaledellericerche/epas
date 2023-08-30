@@ -228,6 +228,8 @@ public class SecurityTokens extends Controller {
       //ed il token è scaduto o scade a breve
       if (jwtToken.get().isExpiringSoon() 
             && getCurrentRefreshToken().isPresent()) {
+        log.debug("current jwt token {} is expiring or expired, retriving a new one by "
+            + "refresh token", jwtToken.get());
         val refreshed = openIdConnectClient.retrieveRefreshToken(getCurrentRefreshToken().get());
         if (refreshed != null) {
           jwtToken.get().setAccessToken(refreshed.accessToken);
