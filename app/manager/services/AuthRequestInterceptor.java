@@ -34,7 +34,9 @@ public class AuthRequestInterceptor implements RequestInterceptor {
 
   @Override
   public void apply(RequestTemplate template) {
-    template.header("Authorization", String.format("Bearer %s", 
-        SecurityTokens.getCurrentJwt().orNull()));
+    if (SecurityTokens.getCurrentJwt().isPresent()) {
+      template.header(
+          "Authorization", String.format("Bearer %s", SecurityTokens.getCurrentJwt().get()));
+    }
   }
 }
