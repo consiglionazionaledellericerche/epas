@@ -365,9 +365,11 @@
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_COMPETENCE_FLOWS) }
       <p>Abilitando questo paramentro si permette alla sede <strong>${configuration.office.name}</strong> di usufruire del sistema
       integrato di approvazione delle richieste di competenza. <br>
-      Esso permette di far richiedere al dipendente il cambio di reperibilità direttamente al proprio responsabile di gruppo 
-      o al proprio responsabile di sede o a entrambi in sequenza 
-      (a seconda di quale deve essere il flusso di approvazione standard presente nella sede).
+      Abilita per il dipendente la possibilità di usufruire dei flussi di richiesta competenza: 
+      <ul>
+      <li>Richiesta di straordinari</li>
+      <li>Cambio di reperibilità</li>
+      </ul>
       </p>
     #{/if}
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED) }

@@ -1124,7 +1124,7 @@ AbsenceRequestType.SHORT_TERM_PERMITS_TOP_LEVEL =permessi breve
 AbsenceRequestType.SHORT_TERM_PERMIT.blank =nuova richiesta permesso breve
 AbsenceRequestType.SHORT_TERM_PERMIT_TOP_LEVEL.blank =nuova richiesta permesso breve
 
-<<<<<<< HEAD
+
 Groups.seatOrganizationChart =Ruoli in ePAS all'interno della sede
 
 
@@ -1387,7 +1387,7 @@ COMPENSATORY_REST_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED= Richiesta appro
 OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte del responsabile di sede
 OVERTIME_REQUEST_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte del responsabile di gruppo di lavoro
 OVERTIME_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte di altro dipendente
-ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY =Permettere al dipendente di richiedere le ore di straordinario
+ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY =Permettere al dipendente di specificare la quantità di ore da richiedere come straordinario
 OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION =Abilita richiesta preventiva di straordinario
 
 PERSONAL_PERMISSION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli I-III da parte del Responsabile Sede
