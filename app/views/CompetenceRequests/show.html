@@ -53,7 +53,7 @@
 	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
 	<td>#{f.value 'item.createdAt', value:item.createdAt /}</td>
 	#{if competenceRequest.type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
-		<td>${competenceRequest.value} ore</td>
+		<td>#{if competenceRequest.value}${competenceRequest.value} ore#{/if}#{else}non presente#{/else}</td>
 	#{/if}
 	<td>#{f.value 'item.eventType', value:item.eventType /}</td>
 	<td>#{f.value 'item.description', value:item.description != null ? item.description : competenceRequest.note /}</td>
