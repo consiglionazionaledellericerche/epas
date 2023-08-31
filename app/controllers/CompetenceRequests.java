@@ -238,12 +238,17 @@ public class CompetenceRequests extends Controller {
            * Nel caso di prove in locale, occorre cambiare l'indirizzo di Attestati nei parametri 
            * di configurazione del Play altrimenti viene lanciata un'eccezione a questa chiamata
            */
+          try {
           val certData = certificationManager.getPersonCertData(person, year, month);
-          if (certData.validate) {
-            flash.error("Attestato già validato per l'anno/mese richiesto. "
-                + "Non si può procedere con una richiesta di straordinario.");
-            list(competenceType);
-            return;
+            if (certData.validate) {
+              flash.error("Attestato già validato per l'anno/mese richiesto. "
+                  + "Non si può procedere con una richiesta di straordinario.");
+              list(competenceType);
+              return;
+            }
+          } catch (Exception e) {
+            log.warn("Impossibile effettuare il controllo di validazione dell'attestato " + 
+                " del {}/{} per la richiesta di straordinari di {}", month, year, person.getFullname());
           }
         }       
         
@@ -319,6 +324,8 @@ public class CompetenceRequests extends Controller {
       PersonReperibilityDay beginDayToGive, PersonReperibilityDay endDayToGive,
       PersonReperibilityDay endDayToAsk, PersonReperibilityType type) {
 
+    notFoundIfNull(competenceRequest.getPerson());
+
     //rules.checkIfPermitted(type);
     if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
       Verify.verifyNotNull(beginDayToGive.getDate());
@@ -348,7 +355,8 @@ public class CompetenceRequests extends Controller {
       competenceRequest.setTeamMate(teamMate);
     } else {
       
-      log.info("Si fa richiesta di straordinario per un mese concluso");
+      log.debug("Richiesta di straordinario per un mese concluso {}/[} per {}", 
+          month, year, competenceRequest.getPerson().getFullname());
       if ((Boolean) configurationManager.configValue(competenceRequest.getPerson().getOffice(), 
           EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION)) {
         if (month < LocalDate.now().getMonthOfYear()) {
@@ -358,8 +366,6 @@ public class CompetenceRequests extends Controller {
       }
     }
 
-    notFoundIfNull(competenceRequest.getPerson());
-    
     competenceRequest.setYear(year);
     competenceRequest.setMonth(month);
     competenceRequest.setStartAt(LocalDateTime.now());
@@ -371,7 +377,7 @@ public class CompetenceRequests extends Controller {
       Validation.addError("teamMate",
           "Esiste già una richiesta di questo tipo");
     }
-  
+
     if (!competenceRequest.getPerson().checkLastCertificationDate(
         new YearMonth(competenceRequest.getYear(),
             competenceRequest.getMonth()))) {
@@ -380,7 +386,7 @@ public class CompetenceRequests extends Controller {
               + "processato in Attestati");
     }
     if (Validation.hasErrors()) {
-      
+
       if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
         LocalDate begin = new LocalDate(year, month, 1);
         LocalDate to = begin.dayOfMonth().withMaximumValue();

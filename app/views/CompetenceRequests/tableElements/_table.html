@@ -93,24 +93,24 @@
 				<td>${item.actualEvent().eventType.label()}</td>
 				<td>
 				#{secure.check 'CompetenceRequests.show', target: item }
-				#{secure.link @CompetenceRequests.show(item.id, type)}	    	  	
+				#{secure.link @CompetenceRequests.show(item.id, type)}
 	        	<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
 	        	#{/secure.link}
 	        	#{/secure.check}
 				</td>
 				<td>
 				#{secure.check 'CompetenceRequests.approval', target: item }
-				#{if competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}}
+				#{if competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
 				<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}" data-async-modal="#defaultModal" color="primary" title="Approva">
         		#{/if}
         		#{else}
         		<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}" color="success" title="Approva">
         		#{/else}
-        		Approva 
+        		Approva
       			</a>
       			#{/secure.check}
       			#{secure.check 'CompetenceRequests.disapproval', target: item }
-      			#{if competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}}
+      			#{if competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
       			<a class="btn btn-warning btn-xs" href="@{CompetenceRequests.disapproval(item.id)}" data-async-modal="#defaultModal" color="warning" title="Rifiuta">
         		#{/if}
         		#{else}
@@ -120,8 +120,8 @@
       			</a>
       			#{/secure.check}
       			</td>
-      			<td #{if item.note != null && !item.note.equals("")} 
-      				webui-popover-hover data-content="${item.note}">      			
+      			<td #{if item.note != null && !item.note.equals("")}
+      				webui-popover-hover data-content="${item.note}">
       				<i class="fa fa-exclamation-triangle fa-2x text-danger" aria-hidden="true" ></i>
       				#{/if}
       			</td>

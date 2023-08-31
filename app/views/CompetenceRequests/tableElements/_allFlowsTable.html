@@ -84,8 +84,8 @@
 				<td>${item.actualEvent().eventType.label()}</td>
 				<td>
 				#{secure.check 'CompetenceRequests.show', target: item }
-				#{secure.link @CompetenceRequests.show(item.id, type)}	    	  	
-	        	<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
+				#{secure.link @CompetenceRequests.show(item.id, type)}
+	        		<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
 	        	#{/secure.link}
 	        	#{/secure.check}
 				</td>

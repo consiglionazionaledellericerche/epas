@@ -331,9 +331,8 @@ public class CompetenceRequestManager {
         notificationManager
             .sendEmailCompetenceRequestPolicy(competenceRequest.getPerson().getUser(), 
                 competenceRequest, true);
-
         break;
-        
+
       case FIRST_APPROVAL:
         competenceRequest.setFirstApproved(LocalDateTime.now());
         break;
