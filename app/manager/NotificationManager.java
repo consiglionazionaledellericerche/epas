@@ -1176,8 +1176,13 @@ public class NotificationManager {
             TemplateExtensions.label(competenceRequest.getType()),
             TemplateExtensions.format(competenceRequest.getStartAt()),
             revoker.getFullname());
-
-    Notification.builder().destination(competenceRequest.getTeamMate().getUser()).message(message)
+    User destination = null;
+    if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
+      destination = competenceRequest.getTeamMate().getUser();
+    } else {
+      destination = competenceRequest.getPerson().getUser();
+    }
+    Notification.builder().destination(destination).message(message)
     .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
 
   }
