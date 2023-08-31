@@ -832,7 +832,8 @@ public class AbsenceManager {
     return startAbsence;
   }
 
-  public Map<Person, List<Absence>> createParentalMap(Office office, int year, int month) {
+  public Map<Person, List<Absence>> createParentalMap(
+      Office office, int year, int month) {
     YearMonth yearMonth = new YearMonth(year, month);
     Set<Office> officeSet = Sets.newHashSet();
     officeSet.add(office);
@@ -841,7 +842,8 @@ public class AbsenceManager {
     List<Absence> parentalWithoutAttachment = Lists.newArrayList();
     List<String> codes = DefaultGroup.parentalLeaveAndChildIllnessCodes();
     for (Person person : activePeople) {
-      List<Absence> absencesInMonth = absenceDao.getAbsencesNotInternalUseInMonth(person, year, month);
+      List<Absence> absencesInMonth = 
+          absenceDao.getAbsencesNotInternalUseInMonth(person, year, month);
       parentalWithoutAttachment = absencesInMonth.stream()
           .filter(abs -> codes.contains(abs.getCode()) && !abs.getAbsenceFile().exists())
           .collect(Collectors.toList());
@@ -850,6 +852,36 @@ public class AbsenceManager {
       }      
     }
     return map;
+  }
+
+  /**
+   * Calcola il tempo giustitifcato da un'assenza in minuti. Il calcolo è
+   * effettuato tenendo conto della tipologia di assenza (se a completamento, 
+   * se tutto il giorno, etc) e dell'orario della persona nel giorno.
+   *
+   * @param absence assenza di cui calcolare il tempo giustificato.
+   * @return i minuti che sono giustificati dall'assenza.
+   */
+  public Integer getJustifiedMinutes(Absence absence) {
+    Integer timeToJustify = absence.getJustifiedMinutes();
+    Optional<WorkingTimeTypeDay> workingTimeTypeDay = 
+        workingTimeTypeDao.getWorkingTimeTypeDay(
+            absence.getPersonDay().getDate(), absence.getPersonDay().getPerson());
+    if (workingTimeTypeDay.isPresent()) {
+      if (absence.getJustifiedType().getName().equals(JustifiedTypeName.all_day) 
+          || absence.getJustifiedType().getName().equals(JustifiedTypeName.assign_all_day)) {
+        timeToJustify = workingTimeTypeDay.get().getWorkingTime();
+      }
+      if (absence.getJustifiedType().getName()
+          .equals(JustifiedTypeName.complete_day_and_add_overtime)) {
+        timeToJustify = 
+          workingTimeTypeDay.get().getWorkingTime() - absence.getPersonDay().getStampingsTime();
+      }
+      if (absence.getJustifiedType().getName().equals(JustifiedTypeName.absence_type_minutes)) {
+        timeToJustify = absence.getAbsenceType().getJustifiedTime();
+      }
+    }
+    return timeToJustify;
   }
 
   /**

@@ -20,13 +20,9 @@ package controllers;
 import dao.QualificationDao;
 import java.util.List;
 import javax.inject.Inject;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import models.Qualification;
-import models.absences.AbsenceType;
-import models.absences.GroupAbsenceType;
-import models.absences.JustifiedType;
-import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -87,7 +83,7 @@ public class Qualifications extends Controller {
   /**
    * Cancellazione di una qualifica.
    *
-   * Possibile solo se la qualifica non è associata a persone e tipi di assenza.
+   * <p>Possibile solo se la qualifica non è associata a persone e tipi di assenza.</p>
    */
   public static void delete(Long id) {
     notFoundIfNull(id);

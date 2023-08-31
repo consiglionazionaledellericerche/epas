@@ -15,29 +15,27 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package manager.attestati.service;
+package manager.services.helpdesk;
 
-import java.io.Serializable;
-import lombok.Getter;
-import lombok.ToString;
-import org.joda.time.LocalDateTime;
+import java.util.List;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.testng.collections.Lists;
 
 /**
- * DTO con le informazioni di token OAuth.
+ * Risposta dei servizi REST esterni.
  *
- * @author Dario Tagliaferri
+ * @author Cristian Lucchesi
+ *
  */
-@Getter
-@ToString
-public class OauthToken implements Serializable {
-  
-  private static final long serialVersionUID = -1971342980047760996L;
+@Builder
+@Data
+public class ServiceResponse {
 
-  private String id_token;
-  public String access_token;
-  public String token_type;
-  public String refresh_token;
-  public int expires_in;
-  public String scope;
-  public LocalDateTime taken_at = LocalDateTime.now();
+  @Builder.Default
+  private List<String> problems = Lists.newArrayList();
+  //Json con la risposta
+  private String result;
+
 }

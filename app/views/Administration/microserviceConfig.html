@@ -1,0 +1,34 @@
+#{modalAsync id:'defaultModal', title:('Configurazione microservizio ' + serviceName)}
+
+<div class="container-fluid">
+
+  #{if problems}
+    #{alert color:'warning'}
+      <p class=center>Configurazione del servizio ${serviceName} non disponibile.</p> 
+    #{/alert}
+
+    Problemi rilevati:
+    <ul>
+      #{list items:problems, as:'problem'}
+        <li>${problem}</li>
+      #{/list}
+    </ul>
+  #{/if} #{else}
+    #{alert color:'info'}
+      <p class=center>Configurazione del servizio ${serviceName}.</p> 
+      <p><code>${config}</code></p>
+    #{/alert}
+  #{/else}
+
+    #{alert color:'info'}
+      <div class="container">#{f.view 'Url base del servizio', value:serviceUrl /}</div>
+      <div class="container">#{f.view 'Endpoint configurazione del servizio', value:serviceConfigUrl /}</div>
+      <div class="container">
+        <div><strong>Token OAuth corrente</strong></div>
+        <div>${currentJwt.isPresent() ? currentJwt.get() : 'non presente'}</div>
+      </div>
+    #{/alert}
+
+</div>
+
+#{/modalAsync}

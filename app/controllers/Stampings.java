@@ -311,8 +311,7 @@ public class Stampings extends Controller {
     boolean ownStamping = false;
     final Person person = stamping.getPersonDay().getPerson();
     final LocalDate date = stamping.getPersonDay().getDate();
-    List<BadgeReader> badgeReaders = person.getBadges()
-        .stream().map(b -> b.getBadgeReader()).collect(Collectors.toList());
+
 
     if (stamping.isOffSiteWork()) {
       render("@editOffSite", stamping, person, date, historyStamping);
@@ -324,6 +323,9 @@ public class Stampings extends Controller {
     if (stamping.isServiceReasons() && ownStamping) {
       render("@editServiceReasons", stamping, person, date, historyStamping);
     }
+
+    List<BadgeReader> badgeReaders = person.getBadges()
+        .stream().map(b -> b.getBadgeReader()).collect(Collectors.toList());
 
     List<Zone> zones = badgeReaders.stream()
         .flatMap(br ->  br.getZones().stream().filter(z -> z != null)).collect(Collectors.toList());
@@ -676,8 +678,7 @@ public class Stampings extends Controller {
     
     if (user.getPerson() == null) {
       flash.error("%s è un'utenza di servizio non associata a nessuna persona, "
-          + "non sono quindi presenti gruppi associati al tuo utente."
-          , user.getUsername());
+          + "non sono quindi presenti gruppi associati al tuo utente.", user.getUsername());
       render("@dailyPresence", date);
     }
 

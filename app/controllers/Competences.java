@@ -584,7 +584,7 @@ public class Competences extends Controller {
    *
    * @param competence la competenza relativa alla persona
    */
-  public static void saveCompetence(Integer valueApproved, @Required Competence competence) {
+  public static void saveCompetence(@Required Integer valueApproved, @Required Competence competence) {
 
     notFoundIfNull(competence);
 
@@ -594,7 +594,7 @@ public class Competences extends Controller {
 
     String result = "";
 
-    if (!Validation.hasErrors()) {
+    if (!Validation.hasErrors() && valueApproved != null && valueApproved > 0) {
       result = competenceManager.canAddCompetence(competence, valueApproved);
       if (!result.isEmpty()) {
         Validation.addError("valueApproved", result);
@@ -810,8 +810,8 @@ public class Competences extends Controller {
     
     if (user.getPerson() == null || user.getPerson().getOffice() == null) {
       flash.error("%s è un'utenza di servizio non associata a nessuna persona, "
-          + "non sono quindi presenti informazioni associate alla sua sede."
-          , user.getUsername());
+          + "non sono quindi presenti informazioni associate alla sua sede.", 
+          user.getUsername());
       render(year, month);
     }
 

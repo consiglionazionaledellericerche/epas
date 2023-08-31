@@ -73,7 +73,6 @@ title:person.fullname + ' - ' + code.description + ' ' + code.code}
   		<p>Valore massimo assegnabile <strong class="text-danger">12 giorni</strong></p>
   		<p>Se contestualmente non viene assegnato alcun codice <strong>208</strong> il valore massimo assegnabile diventa 
   		<strong class="text-danger">${code.competenceCodeGroup.limitValue} giorni</strong> 
-  				
   		</p>
   	#{/elseif}
   	#{elseif code.code.equals('208')}
@@ -101,6 +100,7 @@ title:person.fullname + ' - ' + code.description + ' ' + code.code}
   			da poter inserire. 
   		</p>
   	#{/else}
+  	<p>È possibile inserire il valore <strong>zero</strong> per annullare la competenza assegnata.</p>
     #{/alert}
   
 

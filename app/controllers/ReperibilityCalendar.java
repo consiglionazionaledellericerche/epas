@@ -619,8 +619,8 @@ public class ReperibilityCalendar extends Controller {
     }
     reperibilityTypeMonth.setApproved(true);
     reperibilityTypeMonth.save();
-    //TODO: completare questo metodo nel reperibility manager
-    reperibilityManager2.assignReperibilityCompetences(reperibilityTypeMonth);
+    
+    reperibilityManager2.assignReperibilityCompetences(reperibilityTypeMonth, false);
     args.put("date", 
         TemplateExtensions.format(reperibilityTypeMonth.getYearMonth().toLocalDate(1)));
     args.put("activity.id", reperibilityTypeMonth.getPersonReperibilityType().id);
@@ -642,7 +642,7 @@ public class ReperibilityCalendar extends Controller {
     rules.checkIfPermitted(reperibilityTypeMonth);
     reperibilityTypeMonth.setApproved(false);
     reperibilityTypeMonth.save();
-
+    reperibilityManager2.assignReperibilityCompetences(reperibilityTypeMonth, true);
     Map<String, Object> args = new HashMap<>();
     args.put("date", 
         TemplateExtensions.format(reperibilityTypeMonth.getYearMonth().toLocalDate(1)));

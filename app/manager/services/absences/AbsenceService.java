@@ -537,8 +537,8 @@ public class AbsenceService {
     // Fetch special groups
     final GroupAbsenceType employeeVacation =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_DIPENDENTI.name()).get();
-//    final GroupAbsenceType employeeVacationExtension =
-//        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.PROROGA_FERIE_2020.name()).get();
+    //final GroupAbsenceType employeeVacationExtension =
+    //    absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.PROROGA_FERIE_2020.name()).get();
     final GroupAbsenceType employeeCompensatory =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name()).get();
     final GroupAbsenceType employeeOffseat =
@@ -597,11 +597,11 @@ public class AbsenceService {
           groupsPermitted.remove(covid19);
         }
       }
-//      for (AbsenceType abt : employeeVacationExtension.getCategory().getAbsenceTypes()) {
-//        if (abt.isExpired()) {
-//          groupsPermitted.remove(employeeVacationExtension);
-//        }
-//      }
+      //      for (AbsenceType abt : employeeVacationExtension.getCategory().getAbsenceTypes()) {
+      //        if (abt.isExpired()) {
+      //          groupsPermitted.remove(employeeVacationExtension);
+      //        }
+      //      }
       //groupsPermitted.remove(covid19);
       groupsPermitted.remove(medicalExams);
       groupsPermitted.remove(disabledRelativeAbsence);
@@ -637,15 +637,15 @@ public class AbsenceService {
         groupsPermitted.add(employeeOffseat);
       }
 
-//      if ((Boolean) confManager.configValue(person.getOffice(), EpasParam.TR_VACATIONS)
-//          && person.getQualification().getQualification() <= 3) {
-//        groupsPermitted.add(employeeVacation);
-//      }
-//
-//      if ((Boolean) confManager.configValue(person.getOffice(), EpasParam.TR_COMPENSATORY)
-//          && person.getQualification().getQualification() <= 3) {
-//        groupsPermitted.add(employeeCompensatory);
-//      }
+      //  if ((Boolean) confManager.configValue(person.getOffice(), EpasParam.TR_VACATIONS)
+      //      && person.getQualification().getQualification() <= 3) {
+      //    groupsPermitted.add(employeeVacation);
+      //  }
+      //
+      //  if ((Boolean) confManager.configValue(person.getOffice(), EpasParam.TR_COMPENSATORY)
+      //      && person.getQualification().getQualification() <= 3) {
+      //    groupsPermitted.add(employeeCompensatory);
+      //      }
 
       if ((Boolean) confManager.configValue(person, EpasParam.TELEWORK)) {
         groupsPermitted.add(telework);

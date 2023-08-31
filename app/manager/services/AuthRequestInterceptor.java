@@ -15,29 +15,28 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package manager.attestati.service;
+package manager.services;
 
-import java.io.Serializable;
-import lombok.Getter;
-import lombok.ToString;
-import org.joda.time.LocalDateTime;
+import controllers.SecurityTokens;
+import dao.GeneralSettingDao;
+import feign.RequestInterceptor;
+import feign.RequestTemplate;
+import javax.inject.Inject;
 
 /**
- * DTO con le informazioni di token OAuth.
+ * Inserirsce l'autenticazione Bearer Token tramite l'apposito header http, prelevando
+ * il jwt presente per l'utente corrente.
  *
- * @author Dario Tagliaferri
+ * @author Cristian Lucchesi
+ *
  */
-@Getter
-@ToString
-public class OauthToken implements Serializable {
-  
-  private static final long serialVersionUID = -1971342980047760996L;
+public class AuthRequestInterceptor implements RequestInterceptor {
 
-  private String id_token;
-  public String access_token;
-  public String token_type;
-  public String refresh_token;
-  public int expires_in;
-  public String scope;
-  public LocalDateTime taken_at = LocalDateTime.now();
+  @Override
+  public void apply(RequestTemplate template) {
+    if (SecurityTokens.getCurrentJwt().isPresent()) {
+      template.header(
+          "Authorization", String.format("Bearer %s", SecurityTokens.getCurrentJwt().get()));
+    }
+  }
 }

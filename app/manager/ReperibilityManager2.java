@@ -433,7 +433,8 @@ public class ReperibilityManager2 {
    *
    * @param reperibilityTypeMonth lo stato dell'attività di reperibilità in un determinato mese
    */
-  public void assignReperibilityCompetences(ReperibilityTypeMonth reperibilityTypeMonth) {
+  public void assignReperibilityCompetences(ReperibilityTypeMonth reperibilityTypeMonth, 
+      boolean toRemove) {
     Verify.verifyNotNull(reperibilityTypeMonth);
     //stabilisco le date di inizio e fine periodo da considerare per i calcoli
     final LocalDate monthBegin = reperibilityTypeMonth.getYearMonth().toLocalDate(1);
@@ -488,8 +489,16 @@ public class ReperibilityManager2 {
 
       Competence holidayCompetence = reperibilityHolidayCompetence
           .or(new Competence(person, reperibilityHoliday, year, month));
-      holidayCompetence.setValueApproved(holidayCompetence.getValueApproved() 
-          + dto2.holidaysReperibility);
+      if (toRemove) {
+        holidayCompetence.setValueApproved(holidayCompetence.getValueApproved() 
+            - dto2.holidaysReperibility);
+        log.info("Rimossa quantità {} dalla competenza {}", 
+            dto2.holidaysReperibility, holidayCompetence);
+      } else {
+        holidayCompetence.setValueApproved(holidayCompetence.getValueApproved() 
+            + dto2.holidaysReperibility);
+      }
+      
       holidayCompetence.setReason(getReperibilityDates(dto2.holidaysPeriods));
       holidayCompetence.save();
 
@@ -500,8 +509,16 @@ public class ReperibilityManager2 {
 
       Competence workdayCompetence = reperibilityWorkdaysCompetence
           .or(new Competence(person, reperibilityWorkdays, year, month));
-      workdayCompetence.setValueApproved(workdayCompetence.getValueApproved() 
-          + dto.workdaysReperibility);
+      if (toRemove) {
+        workdayCompetence.setValueApproved(workdayCompetence.getValueApproved() 
+            - dto.workdaysReperibility);
+        log.info("Rimossa quantità {} dalla competenza {}", 
+            dto.workdaysReperibility, workdayCompetence);
+      } else {
+        workdayCompetence.setValueApproved(workdayCompetence.getValueApproved() 
+            + dto.workdaysReperibility);
+      }
+
       workdayCompetence.setReason(getReperibilityDates(dto.workdaysPeriods));
       workdayCompetence.save();
 

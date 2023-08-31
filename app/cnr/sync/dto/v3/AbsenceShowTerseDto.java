@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.val;
+import manager.AbsenceManager;
 import models.absences.Absence;
 import org.modelmapper.ModelMapper;
 
@@ -53,14 +54,17 @@ public class AbsenceShowTerseDto {
   @JsonIgnore
   @Inject
   static ModelMapper modelMapper;
-  
+
+  @Inject
+  static AbsenceManager absenceManager;
+
   /**
    * Nuova instanza di un AbsenceShowTerseDto contenente i valori 
    * dell'oggetto absence passato.
    */
   public static AbsenceShowTerseDto build(Absence absence) {
     val absenceDto = modelMapper.map(absence, AbsenceShowTerseDto.class);
-    absenceDto.setJustifiedTime(absence.justifiedTime());
+    absenceDto.setJustifiedTime(absenceManager.getJustifiedMinutes(absence));
     absenceDto.setJustifiedType(absence.getJustifiedType().getName().name());
     absenceDto.setDate(JodaConverters.jodaToJavaLocalDate(absence.getAbsenceDate()));
     if (absence.getAbsenceType() != null) {
