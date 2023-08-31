@@ -549,9 +549,9 @@ public class CompetenceRequestManager {
     List<CompetenceRequest> existingList =
         competenceRequestDao.existingCompetenceRequests(competenceRequest);
     for (CompetenceRequest request : existingList) {
-      if (request.getMonth() == competenceRequest.getMonth()
-          && request.getYear() == competenceRequest.getYear() 
-          && request.getType() == competenceRequest.getType()) {
+      if (request.getMonth().intValue() == competenceRequest.getMonth().intValue()
+          && request.getYear().intValue() == competenceRequest.getYear().intValue() 
+          && request.getType().equals(competenceRequest.getType())) {
         return request;
       }
     }

@@ -374,17 +374,10 @@ public class CompetenceRequests extends Controller {
 
     CompetenceRequest existing = competenceRequestManager.checkCompetenceRequest(competenceRequest);
     if (existing != null) {
-      Validation.addError("teamMate",
+      Validation.addError("competenceRequest.note",
           "Esiste già una richiesta di questo tipo");
     }
-
-    if (!competenceRequest.getPerson().checkLastCertificationDate(
-        new YearMonth(competenceRequest.getYear(),
-            competenceRequest.getMonth()))) {
-      Validation.addError("competenceRequest.note",
-          "Non è possibile fare una richiesta per una data di un mese già "
-              + "processato in Attestati");
-    }
+      
     if (Validation.hasErrors()) {
 
       if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
