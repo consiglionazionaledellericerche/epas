@@ -28,6 +28,7 @@ import dao.CompetenceDao;
 import dao.GroupDao;
 import dao.InformationRequestDao;
 import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
 import helpers.TemplateExtensions;
 import it.cnr.iit.epas.DateUtility;
@@ -97,9 +98,8 @@ public class NotificationManager {
   private AbsenceComponentDao componentDao;
   private GroupDao groupDao;
   private ConfigurationManager configurationManager;
-  private CompetenceDao competenceDao;
-  private CompetenceCodeDao competenceCodeDao;
   private InformationRequestDao requestDao;
+  private UsersRolesOfficesDao uroDao;
   final String dateFormatter = "dd/MM/YYYY";
 
 
@@ -109,17 +109,16 @@ public class NotificationManager {
   @Inject
   public NotificationManager(SecureManager secureManager, RoleDao roleDao, AbsenceDao absenceDao,
       AbsenceComponentDao componentDao, GroupDao groupDao, 
-      ConfigurationManager configurationManager, CompetenceDao competenceDao,
-      CompetenceCodeDao competenceCodeDao, InformationRequestDao requestDao) {
+      ConfigurationManager configurationManager, InformationRequestDao requestDao,
+      UsersRolesOfficesDao uroDao) {
     this.secureManager = secureManager;
     this.roleDao = roleDao;
     this.absenceDao = absenceDao;
     this.componentDao = componentDao;
     this.groupDao = groupDao;
     this.configurationManager = configurationManager;
-    this.competenceDao = competenceDao;
-    this.competenceCodeDao = competenceCodeDao;
     this.requestDao = requestDao;
+    this.uroDao = uroDao;
   }
 
 
@@ -1370,7 +1369,18 @@ public class NotificationManager {
     if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
       userDestination = getProperUser(competenceRequest);
     } else {
-      //TODO: inserire qui la ricerca del ruolo a cui destinare la mail di richiesta straordinari
+      Role role = getProperRole(competenceRequest);
+      List<User> usersList = uroDao.getUsersWithRoleOnOffice(role, competenceRequest.getPerson().getOffice());
+      if (role.getName().equals(Role.GROUP_MANAGER)) {
+        for (User user : usersList) {
+          Optional<Group> group = groupDao.checkManagerPerson(user.getPerson(), competenceRequest.getPerson());
+          if (group.isPresent()) {
+            userDestination = user;
+          }
+        }        
+      } else {
+        userDestination = usersList.get(0);
+      }      
     }
 
     log.info("Destination = {}", userDestination);
