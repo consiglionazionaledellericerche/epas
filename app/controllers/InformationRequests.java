@@ -850,7 +850,7 @@ public class InformationRequests extends Controller {
       flash.error("Non esiste la richiesta associata a questo file! Verificare!");
       redirect("InformationRequests.list");
     }
-    if (parentalLeaveRequest.get().getBornCertificate() != null) {
+    if (parentalLeaveRequest.get().getBornCertificate().exists()) {
       response.setContentTypeIfNotSet(parentalLeaveRequest.get().getBornCertificate().type());
       fileName = String.format("certificatoNascitaFiglioDi-%s",
           parentalLeaveRequest.get().getPerson().getFullname().replace(" ", "-"));
