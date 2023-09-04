@@ -707,6 +707,7 @@ person.office= Sede
 person=Persona
 person.qualification= Livello
 personQualification= Livello
+person.residence=Residenza
 person.surname=Cognome
 person.telephone=Telefono
 person.user.username= Username in ePAS

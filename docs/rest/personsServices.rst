@@ -49,6 +49,7 @@ Il campo *number* corrisponde alla matricola.
      "badges": [
          "15409"
      ],
+     "birthday": "1564-02-15",
      "email": "galileo.galilei@cnr.it",
      "eppn": "galileo.galilei@cnr.it",
      "fax": null,
@@ -65,6 +66,7 @@ Il campo *number* corrisponde alla matricola.
      },
      "othersSurnames": null,
      "qualification": 1,
+     "residence": "Via Giuseppe Giusti, 24, 56127 Pisa",
      "surname": "Galilei",
      "telephone": null
   }

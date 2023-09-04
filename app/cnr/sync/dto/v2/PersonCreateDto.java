@@ -48,6 +48,8 @@ public class PersonCreateDto {
   private String telephone;
   private String fax;
   private String mobile;
+  private LocalDate birthday;
+  private String residence;
   @Required
   private Integer qualification;
   @Required
