@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Gestito invio segnalazioni anonime ad epas-helpdesk-service.
  - Aggiunto campo residenza all'anagrafica delle persone
+ - Inserita possibilità di disattivare il calcolo automatico del permesso breve in un 
+   giorno
 
 ### Changed
  - Mostrato un messaggio di avvertimento in caso di segnalazione non inviata correttamente

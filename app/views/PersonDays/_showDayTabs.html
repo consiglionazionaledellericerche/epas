@@ -14,18 +14,28 @@
   #{/if}#{else}
     <li><a class="active">Storia Del Giorno</a></li>
   #{/else}
-	
- 	
+
+
   #{secure.check 'PersonDays.forceMealTicket'}
 	#{if personDay && !personDay.future}
 	  <li #{if actionSelected == 'PersonDays.forceMealTicket'} class="active" #{/if}>
 	    <a href="@{PersonDays.forceMealTicket(personDay.id)}" data-async="#showDay">Buono Pasto</a>
 	  </li>
 	#{/if} #{else}
-	  <li class="disabled"><a href="#">Buoni Pasto</a></li>
+	  <li class="disabled"><a href="#">Buono Pasto</a></li>
 	#{/else}
   #{/secure.check}
-  
+
+  #{secure.check 'PersonDays.ignoreShortLeave'}
+	#{if personDay && !personDay.isHoliday}
+	  <li #{if actionSelected == 'PersonDays.ignoreShortLeave'} class="active" #{/if}>
+	    <a href="@{PersonDays.ignoreShortLeave(personDay.id)}" data-async="#showDay">Permesso breve</a>
+	  </li>
+	#{/if} #{else}
+	  <li class="disabled"><a href="#">Permesso breve</a></li>
+	#{/else}
+  #{/secure.check}
+
   #{if personDay && !personDay.isHoliday}	
     #{secure.check 'PersonDays.workingOutOpening'}
       #{if !personDay.future}
