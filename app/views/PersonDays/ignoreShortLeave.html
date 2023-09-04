@@ -1,0 +1,29 @@
+#{modalAsync id:'modalStamping', title:('Gestione Del Giorno ' + personDay.date.format()) }
+
+
+ <div class="container-fluid" id="showDay">
+
+ #{include './_showDayTabs.html' /}
+
+ #{alert color:'info'}
+   <p>Tramite questa form è possibile selezionare se il calcolo del permesso breve di questo
+   giorno deve essere ignorato.</p>
+ #{/alert}
+
+ <div class="container">
+  #{form action:@ignoreShortLeave(), method:'POST', autocomplete:false, class:'form form-horizontal' }
+    
+    #{f.hidden 'personDayId', value:personDay.id /}
+    #{f.hidden 'confirmed', value:confirmed /}
+
+    #{f.booleanRadio 'ignoreShortLeave', value:ignoreShortLeave /}
+
+    #{b.buttons center:true} 
+      #{b.submit 'Aggiorna'/}
+    #{/b.buttons}
+  #{/form}
+ </div>
+
+</div>
+
+#{/modalAsync}

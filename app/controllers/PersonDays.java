@@ -321,4 +321,32 @@ public class PersonDays extends Controller {
     }
     render(historyStampingsList, historyAbsencesList, personDay, found, zoneDefined);
   }
+
+  
+  /**
+   * Mostra la form per impostare di ignore il calcolo del permesso breve su un giorno.
+   */
+  public static void ignoreShortLeave(Long personDayId, boolean confirmed, 
+      boolean ignoreShortLeave) {
+    PersonDay personDay = personDayDao.getPersonDayById(personDayId);
+    Preconditions.checkNotNull(personDay);
+    Preconditions.checkNotNull(personDay.isPersistent());
+
+    rules.checkIfPermitted(personDay.getPerson().getOffice());
+
+    if (!confirmed) {
+      confirmed = true;
+      ignoreShortLeave = personDay.isIgnoreShortLeave();
+      render(personDay, confirmed, ignoreShortLeave);
+    }
+
+    personDay.setIgnoreShortLeave(ignoreShortLeave);
+    personDay.save();
+    log.info("ignoreShortLeave impostata a {} su person day {}", ignoreShortLeave, personDay);
+    flash.success("Politica di impostazione permesso breve salvata correttamente.");
+
+    Stampings.personStamping(personDay.getPerson().id, personDay.getDate().getYear(),
+        personDay.getDate().getMonthOfYear());
+  }
+  
 }

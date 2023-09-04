@@ -486,6 +486,8 @@ groups =Gruppi di lavoro
 history.back= Indietro
 history.type= Operazione
 
+ignoreShortLeave=Ignora calcolo permesso breve
+
 institute.cds= Centro di spesa
 institute.code=Sigla
 institute.name=Nome
