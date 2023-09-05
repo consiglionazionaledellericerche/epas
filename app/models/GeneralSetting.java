@@ -103,6 +103,12 @@ public class GeneralSetting extends BaseModel {
    */
   private int maxDaysInPastForRestStampings = 90;
   
+  /**
+   * Numero massimo di giorni nel passato per cui è possibile
+   * inserire assenze via REST e/o via UI.
+   */
+  private int maxMonthsInPastForAbsences = 12;
+  
   /*
    * Indica se è possibile o meno configurare per i livelli I-III
    * la richiesta di approvazione ferie da parte di un responsabile di 
