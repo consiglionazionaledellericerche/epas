@@ -201,6 +201,21 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
+  #{accordionItem 'maxMonthsInPastForAbsences', parent:'generalSetting', title:'Mesi nel passato per inserimento assenze', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Specifica il numero massimo di mesi nel passato per assenze inserite via REST e/o interfaccia web#{/alert}
+      #{alert color:'warning'}
+        ATTENZIONE: l'inserimento nel passato della assenze comporta il ricalcolo della situazione di tutti i giorni
+        fino alla data corrente. Quindi inserire assenze molto nel passato potrebbero impiegare molto tempo e
+        caricare molto il sistema.
+      #{/alert}
+      #{f.input 'generalSetting.maxMonthsInPastForAbsences' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
   #{accordionItem 'enableCovid19Param', parent:'generalSetting', title:'Abilita parametri auto inserimento Covid19', open:false}
     #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
       #{f.hidden 'generalSetting.id' /}

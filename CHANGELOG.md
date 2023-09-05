@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Aggiunto campo residenza all'anagrafica delle persone
  - Inserita possibilità di disattivare il calcolo automatico del permesso breve in un 
    giorno
+ - Reso configurabile il numero di mesi nel passato per cui è possibile inserire assenze
 
 ### Changed
  - Mostrato un messaggio di avvertimento in caso di segnalazione non inviata correttamente
