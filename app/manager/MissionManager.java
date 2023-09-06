@@ -189,7 +189,7 @@ public class MissionManager {
         absenceDao.filteredByTypes(body.person, body.dataInizio.toLocalDate(), 
             body.dataFine.toLocalDate(), types, Optional.<Boolean>absent(), 
             Optional.<Boolean>absent());
-    if (!existingMissionWithoutId.isEmpty()  
+    if (!existingMissionWithoutId.isEmpty()
         && existingMissionWithoutId.stream()
         .allMatch(abs -> abs.getAbsenceType().getCode().equals("92") 
             || abs.getAbsenceType().getCode().equals("92M"))) {
@@ -220,7 +220,7 @@ public class MissionManager {
 
     LocalDateTime actualDate = body.dataInizio;
     while (!actualDate.toLocalDate().isAfter(body.dataFine.toLocalDate())) {
-      situation = getSituation(actualDate, body, workInterval);      
+      situation = getSituation(actualDate, body, workInterval);
 
       if (!atomicInsert(situation, body, actualDate)) {
         managedMissionOk = false;
