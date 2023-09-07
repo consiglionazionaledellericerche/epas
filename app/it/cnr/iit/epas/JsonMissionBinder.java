@@ -25,6 +25,7 @@ import java.lang.reflect.Type;
 import lombok.extern.slf4j.Slf4j;
 import models.exports.MissionFromClient;
 import org.joda.time.LocalDateTime;
+import org.threeten.bp.LocalDate;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
@@ -72,6 +73,9 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
       }
       if (jsonObject.get("anno") != null) {
         mission.anno = jsonObject.get("anno").getAsInt();
+      } else {
+        mission.anno = 
+            mission.dataInizio != null ? mission.dataInizio.getYear() : LocalDate.now().getYear();
       }
       if (jsonObject.get("numero") != null) {
         mission.numero = jsonObject.get("numero").getAsLong();

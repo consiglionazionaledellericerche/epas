@@ -2113,8 +2113,8 @@ public class NotificationManager {
       e.printStackTrace();
     }
 
-    String identifier = mission.numero != null ? 
-        String.format("n. %s", mission.numero) : String.format("id=%s", mission.id);
+    String identifier = mission.numero != null
+        ? String.format("n. %s", mission.numero) : String.format("id=%s", mission.id);
     int anno = mission.anno != 0 ? mission.anno : mission.dataInizio.getYear();
 
     simpleEmail.setSubject(
