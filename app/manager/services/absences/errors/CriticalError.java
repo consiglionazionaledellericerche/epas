@@ -18,6 +18,7 @@
 package manager.services.absences.errors;
 
 import lombok.Builder;
+import lombok.ToString;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
@@ -27,6 +28,7 @@ import org.joda.time.LocalDate;
 /**
  * Rappresenta gli errori critici durante la gestione di un'assenza.
  */
+@ToString
 @Builder
 public class CriticalError {
   

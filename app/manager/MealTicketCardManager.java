@@ -69,7 +69,6 @@ import org.joda.time.LocalDate;
 public class MealTicketCardManager {
 
   private MealTicketDao mealTicketDao;
-  private IWrapperFactory wrapperFactory;
   private ContractDao contractDao;
   private final PersonStampingRecapFactory stampingsRecapFactory;
 
@@ -77,10 +76,9 @@ public class MealTicketCardManager {
    * Construttore predefinito per l'injection.
    */
   @Inject
-  public MealTicketCardManager(MealTicketDao mealTicketDao, IWrapperFactory wrapperFactory,
+  public MealTicketCardManager(MealTicketDao mealTicketDao,
       ContractDao contractDao, PersonStampingRecapFactory stampingsRecapFactory) {
     this.mealTicketDao = mealTicketDao;
-    this.wrapperFactory = wrapperFactory;
     this.contractDao = contractDao;
     this.stampingsRecapFactory = stampingsRecapFactory;
   }
@@ -170,10 +168,10 @@ public class MealTicketCardManager {
    * Metodo che costruisce il file per esportare i buoni maturati nell'anno/mese.
    *
    * @param personList la lista delle persone per cui trovare i buoni maturati
-   * @param beginDate la data di inizio da cui cercare
-   * @param endDate la data di fine entro cui cercare
+   * @param year l'anno 
+   * @param month il mese dell'esportazione
+   *
    * @return il file contenente il conteggio dei buoni maturati da begindate a enddate.
-   * @throws IOException 
    */
   public InputStream buildFile(Office office, List<Person> personList, 
       Integer year, Integer month) throws IOException {
@@ -206,10 +204,9 @@ public class MealTicketCardManager {
     String monthOfYear = DateUtility.fromIntToStringMonth(month);
     try {
       file = File.createTempFile(
-          "Esportazione_" + monthOfYear +"_"+ year.intValue()+"", ".xls");
+          "Esportazione_" + monthOfYear + "_" + year.intValue() + "", ".xls");
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.error("Problema durante creazione file temporenea per exportazione in excel", e);
     }
 
     Workbook wb = new HSSFWorkbook();

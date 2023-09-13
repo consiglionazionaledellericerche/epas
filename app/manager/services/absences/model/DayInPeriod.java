@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import manager.services.absences.errors.AbsenceError;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
@@ -149,6 +150,7 @@ public class DayInPeriod {
    * @author Alessandro
    *
    */
+  @ToString
   public static class TemplateRow {
 
     public LocalDate date;
