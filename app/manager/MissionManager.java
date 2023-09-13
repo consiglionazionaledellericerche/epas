@@ -222,20 +222,9 @@ public class MissionManager {
     LocalDateTime actualDate = body.dataInizio;
     while (!actualDate.toLocalDate().isAfter(body.dataFine.toLocalDate())) {
       situation = getSituation(actualDate, body, workInterval);
-      //      val dailyMission = absenceDao.absenceInPeriod(
-      //          body.person, actualDate.toLocalDate(), 
-      //          Optional.of(actualDate.toLocalDate())).stream()
-      //            .filter(abs -> abs.getCode().equals("92") || abs.getCode().equals("92E"))
-      //            .collect(Collectors.toList());
-      //      if (!dailyMission.isEmpty()) {
-      //        log.info("Ignorato inserimento giorno di missione del {} per {} perché già "
-      //            + "presente un codice di missione giornaliero", 
-      //                actualDate, body.person.getFullname());
-      //      } else {
       if (!atomicInsert(situation, body, actualDate)) {
         managedMissionOk = false;
       }
-      //      }
       actualDate = actualDate.plusDays(1);
     }
     recalculate(body, Optional.<List<Absence>>absent());
@@ -529,7 +518,7 @@ public class MissionManager {
       group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_ORARIA.name()).get();
       mission = absenceTypeDao.getAbsenceTypeByCode("92M").get();
       type = absComponentDao
-          .getOrBuildJustifiedType(JustifiedType.JustifiedTypeName.specified_minutes);      
+          .getOrBuildJustifiedType(JustifiedType.JustifiedTypeName.specified_minutes);
     }
 
     if (mission == null) {
@@ -723,8 +712,8 @@ public class MissionManager {
               Integer.valueOf(situation.difference % DateTimeConstants.MINUTES_PER_HOUR), 
               actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
             missionInserted = true;
-          } 
-        }        
+          }
+        }
       }
     } else {
       if (insertMission(body.destinazioneMissione, body.destinazioneNelComuneDiResidenza,
