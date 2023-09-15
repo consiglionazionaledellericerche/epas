@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -17,24 +17,39 @@
 
 package helpers.validators;
 
+import common.injection.StaticInject;
+import dao.GeneralSettingDao;
+import javax.inject.Inject;
 import org.joda.time.LocalDate;
 import play.data.validation.Check;
 
 /**
- * Controlla che una data non sia troppo lontana (1 anno) da oggi.
+ * Controlla che una data non sia troppo lontana da oggi. Usato per l'inserimento
+ * delle assenze. 
+ * 
+ * <p>Quanto può essere lontana la data dell'assenza è controllato da parametro
+ * di configurazione maxMonthsInPastForAbsences</p>
  *
  * @author Cristian Lucchesi
  *
  */
+@StaticInject
 public class LocalDateNotTooFar extends Check {
 
+  @Inject
+  static GeneralSettingDao generalSettingDao;
+  
   @Override
   public boolean isSatisfied(Object validatedObject, Object date) {
     if (date == null) {
       return true;
     }
-    setMessage("La data non deve essere distante più di un 1 anno da oggi");
+    int maxMonthsInPast = 
+        generalSettingDao.generalSetting().getMaxMonthsInPastForAbsences(); 
+    setMessage(
+        String.format("La data non deve essere distante più di %d mesi nel passato e non più "
+            + "di un anno da oggi nel futuro.", maxMonthsInPast));
     return !((LocalDate) date).isAfter(LocalDate.now().plusYears(1))
-        && !((LocalDate) date).isBefore(LocalDate.now().minusYears(1));
+        && !((LocalDate) date).isBefore(LocalDate.now().minusMonths(maxMonthsInPast));
   }
 }

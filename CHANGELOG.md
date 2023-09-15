@@ -7,11 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.8.0] - UNRELEASED
 ### Added
  - Gestito invio segnalazioni anonime ad epas-helpdesk-service.
+ - Aggiunto campo residenza all'anagrafica delle persone
+ - Inserita possibilità di disattivare il calcolo automatico del permesso breve in un 
+   giorno
+ - Reso configurabile il numero di mesi nel passato per cui è possibile inserire assenze
 
 ### Changed
  - Mostrato un messaggio di avvertimento in caso di segnalazione non inviata correttamente
  - Corretta gestione caso JWT necessario ma non presente.
  - Inviata la sessione play al epas-helpdesk-service (se configurato)
+ - Risolto bug nello scaricamento dell'allegato per richieste congedo parentale per il padre
+ - Gestiti campi data di nascita e residenza nell'interfacce REST di gestione delle persone
+ - Corretta gestione di missioni ricevute via REST con date sovrapposte
 
 
 ## [2.7.0] - 2023-08-10

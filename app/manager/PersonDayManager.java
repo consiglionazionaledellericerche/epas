@@ -75,6 +75,8 @@ import play.jobs.Job;
 @Slf4j
 public class PersonDayManager {
 
+  private static final Integer MAX_QUANTITY_TO_ALLOW_MEAL_TICKET = 240;
+
   private final ConfigurationManager configurationManager;
   private final PersonDayInTroubleManager personDayInTroubleManager;
   private final PersonShiftDayDao personShiftDayDao;
@@ -571,7 +573,6 @@ public class PersonDayManager {
    *     false altrimenti.
    */
   private boolean denyMealTicketOnMission(Absence abs) {
-    final Integer MAX_QUANTITY_TO_ALLOW_MEAL_TICKET = 240;
     if (isOnHourlyMission(abs.getPersonDay()) 
         && abs.getPersonDay().getPerson().isTopQualification()
         && abs.getJustifiedMinutes() >= MAX_QUANTITY_TO_ALLOW_MEAL_TICKET) {
@@ -1769,7 +1770,7 @@ public class PersonDayManager {
    *     è coperta come orario. 
    */
   private Optional<Absence> buildShortPermissionAbsence(PersonDay personDay, 
-      TimeSlot mandatoryTimeSlot) {   
+      TimeSlot mandatoryTimeSlot) {
     val mandatoryTimeSlotRange = Range.closed(mandatoryTimeSlot.getBeginSlot(), 
         mandatoryTimeSlot.getEndSlot());
 
@@ -1823,6 +1824,12 @@ public class PersonDayManager {
     new Job<Void>() {
       @Override
       public void doJob() {
+        if (personDay.isIgnoreShortLeave()) {
+          log.info("Calcolo del permesso per breve per il giorno {} di {} ignorato come "
+              + "da configurazione del person day id={}", 
+              personDay.getDate(), personDay.getPerson().getFullname(), personDay.getId());
+          return;
+        }
         val mandatoryTimeSlot = contractDao
             .getContractMandatoryTimeSlot(personDay.getDate(), personDay.getPerson().id);
         if (!mandatoryTimeSlot.isPresent()) {

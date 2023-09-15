@@ -2256,16 +2256,20 @@ public class NotificationManager {
       e.printStackTrace();
     }
 
+    String identifier = mission.numero != null
+        ? String.format("n. %s", mission.numero) : String.format("id=%s", mission.id);
+    int anno = mission.anno != 0 ? mission.anno : mission.dataInizio.getYear();
+
     simpleEmail.setSubject(
-        String.format("ePas: verificare missione n. %s del %s di %s", 
-            mission.numero, mission.anno, mission.person.getFullname()));
+        String.format("ePas: verificare missione %s del %s di %s", identifier,
+        anno, mission.person.getFullname()));
 
     final StringBuilder message = new StringBuilder()
         .append(String.format("Gentile %s,\r\n", person.getName()));
     message.append("ePAS ha ricevuto un messaggio dall'applicativo Missioni di tipo ")
     .append(mission.tipoMissione).append(" missione.\r\n");
-    message.append(String.format("La missione è la numero %s del %s dal %s al %s.\r\n\r\n",
-        mission.numero, mission.anno, TemplateExtensions.format(mission.dataInizio), 
+    message.append(String.format("La missione è %s del %s dal %s al %s.\r\n\r\n",
+        identifier, anno, TemplateExtensions.format(mission.dataInizio), 
         TemplateExtensions.format(mission.dataFine)));
     message.append("Non è stato possibile inserire, modificare o cancellare tutti ")
     .append("i giorni di missione previsti.\r\n\r\n");
@@ -2279,8 +2283,8 @@ public class NotificationManager {
           mission, e);
     }
     Mail.send(simpleEmail);
-    log.info("Inviata email per problemi sulla missione n. {} del {} di {} dal {} al {}",
-        mission.numero, mission.anno, mission.person.getFullname(), 
+    log.info("Inviata email per problemi sulla missione {} del {} di {} dal {} al {}",
+        identifier, anno, mission.person.getFullname(), 
         TemplateExtensions.format(mission.dataInizio), 
         TemplateExtensions.format(mission.dataFine));
 
@@ -2290,4 +2294,3 @@ public class NotificationManager {
   }
 
 }
-

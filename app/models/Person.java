@@ -96,6 +96,8 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   private LocalDate birthday;
 
+  private String residence;
+
   @Email
   @Unique
   @Required
@@ -358,7 +360,8 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @PrePersist
   private void onCreation() {
     // TODO meglio rendere non necessario questo barbatrucco...
-    this.setBeginDate(LocalDate.now().minusYears(1).withMonthOfYear(12).withDayOfMonth(31));
+    this.setBeginDate(
+        org.joda.time.LocalDate.now().minusYears(1).withMonthOfYear(12).withDayOfMonth(31));
     this.updatedAt = LocalDateTime.now();
     if (user != null) {
       user.setSubjectId(eppn);

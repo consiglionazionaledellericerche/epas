@@ -19,12 +19,14 @@ package manager.services.absences.errors;
 
 import java.util.Set;
 import lombok.Builder;
+import lombok.ToString;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 
 /**
  * DTO per contenere gli errori relativi alle assenze.
  */
+@ToString
 @Builder
 public class AbsenceError {
 

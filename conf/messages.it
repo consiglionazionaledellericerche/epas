@@ -494,6 +494,7 @@ generalSetting.roundingShiftQuantity =Arrotondamento del calcolo dei turni
 generalSetting.enableIllnessFlow =Abilita flusso richiesta informativa per malattia
 generalSetting.enableUniqueDailyShift =Abilita un solo slot di turno nel giorno per un turnista
 generalSetting.maxDaysInPastForRestStampings =Numero massimo di giorni nel passato per cui è possibile inserire timbrature via REST
+generalSetting.maxMonthsInPastForAbsences =Numero massimo di mesi nel passato inserimento assenze
 generalSetting.enableAutoconfigCovid19=Abilita visione auto inserimento covid19 in configurazione
 generalSetting.enableAutoconfigSmartworking=Abilita visione auto inserimento smartworking in configurazione
 generalSetting.enableDailyPresenceForManager=Abilita visualizzazione presenza giornaliera dipendenti appartenenti a gruppo
@@ -523,6 +524,8 @@ groups =Gruppi di lavoro
 
 history.back= Indietro
 history.type= Operazione
+
+ignoreShortLeave=Ignora calcolo permesso breve
 
 institute.cds= Centro di spesa
 institute.code=Sigla
@@ -745,6 +748,7 @@ person.office= Sede
 person=Persona
 person.qualification= Livello
 personQualification= Livello
+person.residence=Residenza
 person.surname=Cognome
 person.telephone=Telefono
 person.user.username= Username in ePAS

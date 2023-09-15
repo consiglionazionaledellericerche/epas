@@ -45,7 +45,9 @@ public class PersonUpdateDto extends PersonCreateDto {
     person.setEppn(getEppn());
     person.setTelephone(getTelephone());
     person.setFax(getFax());
-    person.setMobile(getMobile()); 
+    person.setMobile(getMobile());
+    person.setBirthday(getBirthday());
+    person.setResidence(getResidence());
     if (getQualification() != null) {
       person.setQualification(
           ((Qualification) Qualification.findAll().stream()

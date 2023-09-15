@@ -167,11 +167,16 @@ public class PersonDay extends BaseModel {
   @JoinColumn(name = "stamp_modification_type_id")
   private StampModificationType stampModificationType;
 
+  //Se impostato a true il calcolo automatico del permesso breve per questo giorno
+  //non viene effettutato.
+  private boolean ignoreShortLeave = false;
+
   @Transient
   private MealTicket mealTicketAssigned;
 
   @Transient
   private boolean isConsideredExitingNow;
+
 
   /**
    * Costruttore.

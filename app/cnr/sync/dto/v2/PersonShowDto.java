@@ -25,6 +25,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.val;
 import models.Person;
+import org.joda.time.LocalDate;
 import org.modelmapper.ModelMapper;
 
 /**
@@ -43,6 +44,8 @@ public class PersonShowDto extends PersonShowTerseDto {
   private String telephone;
   private String fax;
   private String mobile;
+  private LocalDate birthday;
+  private String residence;
   private Integer qualification;
   private Set<String> badges = Sets.newHashSet();
   private OfficeDto office;

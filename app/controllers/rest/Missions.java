@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -39,6 +39,8 @@ import play.mvc.With;
 
 /**
  * Controller per la ricezione via REST delle informazioni sulle nuove missioni.
+ *
+ * @author Cristian Lucchesi
  */
 @Slf4j
 @With(Resecure.class)
@@ -62,7 +64,8 @@ public class Missions extends Controller {
   }
   
   /**
-   * metodo che processa il messaggio ricevuto dal kraken-listener.
+   * Metodo che processa il messaggio ricevuto dal kraken-listener, oppure da qualche sistema
+   * esterno che invia le missioni via REST.
    *
    * @param body il dto costruito a partire dal binder
    */
@@ -100,7 +103,7 @@ public class Missions extends Controller {
               + "è associato all'ufficio %s.", 
               body.codiceSede, body.person.getFullname(), office.getName()), 
           body);
-    } else if (!body.codiceSede.equals(office.getCodeId())) {     
+    } else if (!body.codiceSede.equals(office.getCodeId())) {
       logWarn(
           String.format("Attenzione il codice sede %s è diverso dal codice sede di %s (%s), "
               + "sede associata a %s.", 

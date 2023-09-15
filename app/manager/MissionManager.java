@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
@@ -185,14 +186,14 @@ public class MissionManager {
     //controllo se sono già stati inseriti a mano i giorni di missione
     final List<JustifiedTypeName> types = ImmutableList
         .of(JustifiedTypeName.complete_day_and_add_overtime, JustifiedTypeName.specified_minutes);
-    List<Absence> existingMissionWithoutId = 
+    val existingMissionWithoutId = 
         absenceDao.filteredByTypes(body.person, body.dataInizio.toLocalDate(), 
             body.dataFine.toLocalDate(), types, Optional.<Boolean>absent(), 
-            Optional.<Boolean>absent());
-    if (!existingMissionWithoutId.isEmpty()  
-        && existingMissionWithoutId.stream()
-        .allMatch(abs -> abs.getAbsenceType().getCode().equals("92") 
-            || abs.getAbsenceType().getCode().equals("92M"))) {
+            Optional.<Boolean>absent()).stream()
+            .filter(abs -> abs.getExternalIdentifier() == null && abs.getCode().startsWith("92"))
+        .collect(Collectors.toList());
+
+    if (!existingMissionWithoutId.isEmpty()) {
       log.warn(LOG_PREFIX +  "Sono stati riscontrati codici di missione già inseriti manualmente"
           + " nei giorni {}-{}. Questa missione non viene processata.",
           body.dataInizio.toLocalDate(), body.dataFine.toLocalDate());
@@ -220,13 +221,11 @@ public class MissionManager {
 
     LocalDateTime actualDate = body.dataInizio;
     while (!actualDate.toLocalDate().isAfter(body.dataFine.toLocalDate())) {
-      situation = getSituation(actualDate, body, workInterval);      
-
+      situation = getSituation(actualDate, body, workInterval);
       if (!atomicInsert(situation, body, actualDate)) {
         managedMissionOk = false;
       }
       actualDate = actualDate.plusDays(1);
-
     }
     recalculate(body, Optional.<List<Absence>>absent());
     Cache.delete(missionCacheKey);
@@ -484,11 +483,11 @@ public class MissionManager {
       case "ITALIA":
         if (nelComuneDiResidenza != null && nelComuneDiResidenza.booleanValue() == true) {
           group = absComponentDao
-              .groupAbsenceTypeByName(DefaultGroup.MISSIONE_COMUNE_RESIDENZA.name()).get();        
+              .groupAbsenceTypeByName(DefaultGroup.MISSIONE_COMUNE_RESIDENZA.name()).get();
           mission = absenceTypeDao.getAbsenceTypeByCode("92RE").get(); 
         } else {
           group = absComponentDao
-              .groupAbsenceTypeByName(DefaultGroup.MISSIONE_GIORNALIERA.name()).get();        
+              .groupAbsenceTypeByName(DefaultGroup.MISSIONE_GIORNALIERA.name()).get();
           mission = absenceTypeDao.getAbsenceTypeByCode("92").get(); 
         }
 
@@ -519,7 +518,7 @@ public class MissionManager {
       group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_ORARIA.name()).get();
       mission = absenceTypeDao.getAbsenceTypeByCode("92M").get();
       type = absComponentDao
-          .getOrBuildJustifiedType(JustifiedType.JustifiedTypeName.specified_minutes);      
+          .getOrBuildJustifiedType(JustifiedType.JustifiedTypeName.specified_minutes);
     }
 
     if (mission == null) {
@@ -552,7 +551,7 @@ public class MissionManager {
         } else {
           absence.setExternalIdentifier(id);
         }
-        absence.setNote("Missione: " + numero + '\n' 
+        absence.setNote("Missione: " + (numero != null ? numero : "numero n.d.") + '\n' 
             + "Anno: " + anno + '\n' 
             + "(Identificativo: " + absence.getExternalIdentifier() + ")");
 
@@ -561,7 +560,7 @@ public class MissionManager {
         final Optional<User> currentUser = Security.getUser();
         if (currentUser.isPresent()) {
           notificationManager.notificationAbsencePolicy(currentUser.get(), 
-              absence, group, true, false, false);  
+              absence, group, true, false, false);
         }
 
         log.info(LOG_PREFIX +  "Inserita assenza {} del {} per {}.", 
@@ -572,8 +571,7 @@ public class MissionManager {
       if (!insertReport.reperibilityShiftDate().isEmpty()) {
         absenceManager
         .sendReperibilityShiftEmail(person, insertReport.reperibilityShiftDate());
-        log.info(LOG_PREFIX +  "Inserite assenze con reperibilità e turni {} {}. "
-            + "Le email sono disabilitate.",
+        log.info(LOG_PREFIX +  "Inserite assenze con reperibilità e turni {} {}. ",
             person.fullName(), insertReport.reperibilityShiftDate());
       }
       JPA.em().flush();
@@ -714,8 +712,8 @@ public class MissionManager {
               Integer.valueOf(situation.difference % DateTimeConstants.MINUTES_PER_HOUR), 
               actualDate, actualDate, body.id, body.idOrdine, body.anno, body.numero)) {
             missionInserted = true;
-          } 
-        }        
+          }
+        }
       }
     } else {
       if (insertMission(body.destinazioneMissione, body.destinazioneNelComuneDiResidenza,
@@ -727,7 +725,7 @@ public class MissionManager {
     if (missionInserted) {
       log.info("Inserita missione {} per il giorno {}. id = {}, "
           + "idOrdine = {}, anno = {}, numero = {}", body.destinazioneMissione, 
-          actualDate, body.id, body.idOrdine, body.anno, body.numero);      
+          actualDate.toLocalDate(), body.id, body.idOrdine, body.anno, body.numero);
     }
     return missionInserted;
   }
