@@ -169,7 +169,8 @@ public class CompetenceRequests extends Controller {
     val config = competenceRequestManager.getConfiguration(competenceType, person);
     val onlyOwn = false;
     boolean overtimesQuantityEnabled = (Boolean)configurationManager
-        .configValue(person.getOffice(), EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY);
+        .configValue(person.getOffice(), 
+            EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY, LocalDate.now());
     val available = person.getUser().hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
     render(config, results, competenceType, onlyOwn, available, approvedResults, 
         myResults, overtimesQuantityEnabled);
@@ -355,10 +356,10 @@ public class CompetenceRequests extends Controller {
       competenceRequest.setTeamMate(teamMate);
     } else {
       
-      log.debug("Richiesta di straordinario per un mese concluso {}/[} per {}", 
-          month, year, competenceRequest.getPerson().getFullname());
+      //log.debug("Richiesta di straordinario per un mese concluso {}/[} per {}", 
+      //    month, year, competenceRequest.getPerson().getFullname());
       if ((Boolean) configurationManager.configValue(competenceRequest.getPerson().getOffice(), 
-          EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION)) {
+          EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now())) {
         if (month < LocalDate.now().getMonthOfYear()) {
           Validation.addError("competenceRequest.note", 
               "E' prevista richiesta preventiva. Non si può richiedere straordinario per un mese concluso!");
@@ -511,7 +512,7 @@ public class CompetenceRequests extends Controller {
     val onlyOwn = false;
     boolean overtimesQuantityEnabled = (Boolean)configurationManager
         .configValue(competenceRequest.getPerson().getOffice(), 
-            EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY);
+            EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY, LocalDate.now());
     val available = competenceRequest.getPerson().getUser()
         .hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
     

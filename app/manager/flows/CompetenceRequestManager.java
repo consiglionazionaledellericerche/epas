@@ -610,7 +610,7 @@ public class CompetenceRequestManager {
     val currentPerson = Security.getUser().get().getPerson();
     
     if ((Boolean) configurationManager.configValue(currentPerson.getOffice(), 
-        EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION) 
+        EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now()) 
         && competenceRequest.getFirstApproved() == null) {      
       executeEvent(competenceRequest, currentPerson, 
           CompetenceRequestEventType.FIRST_APPROVAL, Optional.absent());
@@ -636,7 +636,7 @@ public class CompetenceRequestManager {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     val currentPerson = Security.getUser().get().getPerson();
     if ((Boolean) configurationManager.configValue(currentPerson.getOffice(), 
-        EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION) 
+        EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now()) 
         && competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
       executeEvent(competenceRequest, currentPerson, 
           CompetenceRequestEventType.FIRST_APPROVAL, Optional.absent());
