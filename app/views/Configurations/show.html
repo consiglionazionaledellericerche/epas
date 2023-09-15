@@ -322,6 +322,9 @@
         <th>Al</th>
       </tr>
       #{list competenceFlows.findAll({!it.epasParam.general}), as:'conf'}
+      #{if templateUtility.enableOvertimeFlowsConfiguration()
+      || conf.epasParam == manager.configurations.EpasParam.CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED
+      || conf.epasParam == manager.configurations.EpasParam.CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED}
       <tr>
         <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
@@ -330,6 +333,7 @@
         <td>${conf.beginDate.format()}</td>
         <td>${conf.calculatedEnd()?.format()}</td>
       </tr>
+      #{/if}
       #{/list}
     </table>
   </div>

@@ -150,7 +150,7 @@ end
 
 /*
  * Permesso per la visualizzazione dei flussi di richiesta competenze
- */
+ 
 rule isCompetenceHandleFlowsVisible
 when
   $p: Person(qualification != null && qualification.qualification <= 3 
@@ -160,7 +160,7 @@ when
   $c: PermissionCheck(action == "CompetenceRequests.handleEnabled", granted == false, target == null)
 then
   $c.grant();
-end
+end*/
 
 
 /*
@@ -3869,8 +3869,8 @@ when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person(qualification != null && qualification.qualification > 3) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.configurations
-  $c: PermissionCheck(action == "CompetenceRequests.enabled", granted == false, target == null)
+  Configuration(epasParam == EpasParam.ENABLE_OVERTIME_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action in ("CompetenceRequests.enabled"), granted == false, target == null)
 then
   $c.grant();
 end
@@ -3878,12 +3878,13 @@ end
 /*
  * Permesso per la visualizzazione dei flussi di richiesta straordinari
  */
+ 
 rule isOvertimeHandleFlowsVisible
 when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
   $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.configurations
+  Configuration(epasParam == EpasParam.ENABLE_OVERTIME_FLOWS, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action == "CompetenceRequests.handleEnabled", granted == false, target == null)
 then
   $c.grant();

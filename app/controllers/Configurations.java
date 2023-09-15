@@ -27,6 +27,8 @@ import dao.PersonDao;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -292,10 +294,7 @@ public class Configurations extends Controller {
         .filter(conf -> conf.getEpasParam().category 
             == EpasParam.EpasParamCategory.INFORMATION_FLOWS)
         .collect(Collectors.toList());
-    
-    final List<Configuration> competence_flows = configurations.stream()
-        .filter(conf -> conf.getEpasParam().category == EpasParam.EpasParamCategory.COMPETENCE_FLOWS)
-        .collect(Collectors.toList());
+   
     
     // id relativo all'allegato di autorizzazione per l'attivazione dell'autocertificazione
     java.util.Optional<Configuration> target = autocertifications.stream()

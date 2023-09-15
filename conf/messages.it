@@ -1371,7 +1371,7 @@ RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
 RESIDUAL_MEALTICKETS=Ricalcoli mensili sul residuo buoni pasto.
 
 ENABLE_FLOWS =Flusso di richiesta assenza attivato
-ENABLE_OVERTIME_FLOWS =Flusso di richiesta competenza attivato
+ENABLE_OVERTIME_FLOWS =Flusso di richiesta straordinario attivato
 ENABLE_37_FLOW =Abilita flusso richiesta ferie anno precedente dopo 31/08
 
 
