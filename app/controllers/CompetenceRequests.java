@@ -29,6 +29,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import common.security.SecurityRules;
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
 import dao.CompetenceRequestDao;
 import dao.GroupDao;
 import dao.PersonDao;
@@ -36,6 +38,7 @@ import dao.PersonReperibilityDayDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.Web;
+import it.cnr.iit.epas.DateUtility;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.CertificationManager;
@@ -45,6 +48,8 @@ import manager.configurations.EpasParam;
 import manager.flows.CompetenceRequestManager;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
+import models.Competence;
+import models.CompetenceCode;
 import models.Person;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
@@ -94,6 +99,10 @@ public class CompetenceRequests extends Controller {
   private static PersonStampingRecapFactory stampingsRecapFactory;
   @Inject
   private static CertificationManager certificationManager;
+  @Inject
+  static CompetenceDao competenceDao;
+  @Inject
+  static CompetenceCodeDao competenceCodeDao;
   
   static final String ATTESTATI_ACTIVE = "attestati.active";
 
@@ -378,6 +387,17 @@ public class CompetenceRequests extends Controller {
       Validation.addError("competenceRequest.note",
           "Esiste già una richiesta di questo tipo");
     }
+    CompetenceRequestType competenceType = competenceRequest.getType();
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+    Optional<Competence> competence = competenceDao
+        .getCompetence(competenceRequest.getPerson(), year, month, code);
+    if (competence.isPresent()) {
+      String mese = DateUtility.fromIntToStringMonth(month);
+      flash.error("Esiste già un'attribuzione di %s ore di straordinario per %s %s. "
+          + "Verificare con la propria segreteria del personale prima di "
+          + "sottomettere una nuova richiesta", competence.get().getValueApproved(), mese, year);
+      CompetenceRequests.list(competenceType);
+    }
       
     if (Validation.hasErrors()) {
 
@@ -387,7 +407,8 @@ public class CompetenceRequests extends Controller {
         List<PersonReperibilityDay> reperibilityDates = repDao
             .getPersonReperibilityDaysByPeriodAndType(begin, to, type, teamMate);
         List<PersonReperibilityDay> myReperibilityDates = repDao
-            .getPersonReperibilityDaysByPeriodAndType(begin, to, type, competenceRequest.getPerson());
+            .getPersonReperibilityDaysByPeriodAndType(begin, to, type, 
+                competenceRequest.getPerson());
 
         List<PersonReperibilityType> types = repDao
             .getReperibilityTypeByOffice(competenceRequest.getPerson()
@@ -404,7 +425,7 @@ public class CompetenceRequests extends Controller {
             teamMates, types, reperibilityDates, myReperibilityDates);
       } else {
         boolean isOvertime = true;
-        CompetenceRequestType competenceType = competenceRequest.getType();
+        
         PersonStampingRecap psDto = stampingsRecapFactory
             .create(competenceRequest.getPerson(), year, month, true);
         render("@edit", competenceRequest, competenceType,
@@ -429,7 +450,7 @@ public class CompetenceRequests extends Controller {
           CompetenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
     }
     flash.success("Operazione effettuata correttamente");
-    CompetenceRequestType competenceType = competenceRequest.getType();
+    
     CompetenceRequests.list(competenceType);
   }
 
