@@ -8,7 +8,12 @@
 #{form action:@approval(competenceRequest.id, approval), method:'POST', class:'form form-horizontal'}
 
 #{f.hidden 'competenceRequest.id', value:competenceRequest.id /}
-#{f.input 'value', type:'number', label:'Quantità approvata' /}
+#{if competenceRequest.value != null}
+	#{f.input 'competenceRequest.value', label:'Quantità richiesta' /}
+#{/if}
+#{else}
+	#{f.input 'value', type:'number', label:'Quantità approvata' /}
+#{/else}
 
 	    #{b.buttons center:true}
 	      #{b.submit 'Approva', color:'success', fa:'cross' /}

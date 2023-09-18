@@ -475,7 +475,9 @@ public class CompetenceRequests extends Controller {
     User user = Security.getUser().get();
     rules.checkIfPermitted(competenceRequest);
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
-      competenceRequest.setValue(value);
+      if (value != null) {
+        competenceRequest.setValue(value);
+      }      
       competenceRequest.save();
       if (!approval) {
         approval = true;
