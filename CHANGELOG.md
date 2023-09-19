@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.0] - UNRELEASED
+### Added
+  - Gestione delle richieste di straordinario da parte del personale IV-VIII, con possibilità
+    di configurare richieste preventive e consuntive di straordinario ed approvazione da parte
+    del responsabile di gruppo e/o di sede.
+
 ## [2.8.0] - 2023-09-15
 ### Added
  - Gestito invio segnalazioni anonime ad epas-helpdesk-service.
