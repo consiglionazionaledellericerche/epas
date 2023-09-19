@@ -124,13 +124,22 @@ public class CompetenceRequest extends MutableModel {
   @Column(name = "end_to")
   private LocalDateTime endTo;
   
+  /*Nuovi campi per la doppia approvazione delle richieste di straordinario*/
+  private LocalDateTime firstApproved;
+  private boolean firstApprovalRequired = false;
+  /*Fine*/  
+  
   private LocalDateTime employeeApproved;
   
-  private LocalDateTime reperibilityManagerApproved;
+  private LocalDateTime managerApproved;
+  
+  private LocalDateTime officeHeadApproved;
   
   private boolean employeeApprovalRequired = true;
   
-  private boolean reperibilityManagerApprovalRequired = true;
+  private boolean managerApprovalRequired = true;
+  
+  private boolean officeHeadApprovalRequired = true;
   
   
   @NotAudited
@@ -169,9 +178,13 @@ public class CompetenceRequest extends MutableModel {
 
   @Transient
   public boolean isManagerApproved() {
-    return reperibilityManagerApproved != null;
+    return managerApproved != null;
   }
 
+  @Transient
+  public boolean isOfficeHeadApproved() {
+    return officeHeadApproved != null;
+  }
   
   /**
    * Se non sono state già rilasciate approvazioni necessarie allora il possessore 
@@ -181,9 +194,11 @@ public class CompetenceRequest extends MutableModel {
    */
   @Transient
   public boolean ownerCanEditOrDelete() {
-    return !flowStarted  
-        && (reperibilityManagerApproved == null || !reperibilityManagerApprovalRequired)
-        && (employeeApproved == null || !employeeApprovalRequired);
+    return flowStarted  
+        && (managerApproved == null || !managerApprovalRequired)
+        && (employeeApproved == null || !employeeApprovalRequired)
+        && (officeHeadApproved == null || !officeHeadApprovalRequired)
+        && (firstApproved == null || !firstApprovalRequired);
   }
   
   /**
@@ -193,9 +208,10 @@ public class CompetenceRequest extends MutableModel {
    * @return true se è completato, false altrimenti.
    */
   public boolean isFullyApproved() {
-    return (!this.reperibilityManagerApprovalRequired || this.isManagerApproved()) 
+    return (!this.managerApprovalRequired || this.isManagerApproved()) 
         && (!this.employeeApprovalRequired
-            || this.isEmployeeApproved());
+            || this.isEmployeeApproved())
+        && (!this.officeHeadApprovalRequired || this.isOfficeHeadApproved());
   }
   
   @Transient

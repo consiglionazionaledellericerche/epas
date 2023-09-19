@@ -18,35 +18,43 @@
 
 <br>
  #{alert color:'info'}
-    <p>Elenco degli stati di approvazione di <strong>#{f.value 'competenceRequest.type', value:competenceRequest.type /}</strong>
+    <p>Elenco degli stati di approvazione della <strong>#{f.value 'competenceRequest.type', value:competenceRequest.type /}</strong>
     per <strong>#{f.value 'competenceRequest.person.fullname', value:competenceRequest.person.fullname /}</strong>:</p>
  #{/alert}
  <div class="container-fluid center color:info">
- 	#{alert color: 'info'}
- 	#{f.view 'Chiesto Dal', value:competenceRequest.beginDateToAsk?.format("dd/MM/yyyy") /}<br>
-	#{f.view 'Chiesto Al', value:competenceRequest.endDateToAsk?.format("dd/MM/yyyy") /}
-	#{/alert}
-	#{alert color:'warning'}
- 	#{f.view 'Offerto Dal', value:competenceRequest.beginDateToGive?.format("dd/MM/yyyy") /}<br>
-	#{f.view 'Offerto Al', value:competenceRequest.endDateToGive?.format("dd/MM/yyyy") /}
-	#{/alert}
+ 
+ 	#{f.view 'competenceRequest.startAt', value:competenceRequest.startAt?.format("dd/MM/yyyy") /}<br>
+	#{f.view 'competenceRequest.endTo', value:competenceRequest.endTo?.format("dd/MM/yyyy") /}
 </div>	
 <table class="table table-striped">
 <tr>
 	<th>Autore</th>
 	<th>Data e ora sottomissione</th>
+	#{if competenceRequest.type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
+		<th>Quantità richiesta</th>
+	#{/if}
 	<th>Tipo evento</th>
 	<th>Descrizione</th>
 	
 </tr>
 #{list items:competenceRequest.events, as:'item'}
-<tr #{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.REPERIBILITY_MANAGER_REFUSAL) 
-	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.EMPLOYEE_REFUSAL))} class="danger" #{/if}
-	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.REPERIBILITY_MANAGER_APPROVAL) 
-	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.EMPLOYEE_APPROVAL))} class="success" #{/if}	
+<tr #{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.MANAGER_REFUSAL) 
+	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.ADMINISTRATIVE_REFUSAL)
+	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.OFFICE_HEAD_REFUSAL))
+	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.DELETE)} class="danger" #{/if}
+	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.MANAGER_APPROVAL) 
+	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.ADMINISTRATIVE_APPROVAL)
+	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.OFFICE_HEAD_APPROVAL))} class="success" #{/if}
+	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.FIRST_APPROVAL))}
+	class="warning" #{/if}
+	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.EMPLOYEE_APPROVAL))}
+	class="info" #{/if}
 	>
 	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
 	<td>#{f.value 'item.createdAt', value:item.createdAt /}</td>
+	#{if competenceRequest.type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
+		<td>#{if competenceRequest.value}${competenceRequest.value} ore#{/if}#{else}non presente#{/else}</td>
+	#{/if}
 	<td>#{f.value 'item.eventType', value:item.eventType /}</td>
 	<td>#{f.value 'item.description', value:item.description != null ? item.description : competenceRequest.note /}</td>
 </tr>
@@ -54,7 +62,23 @@
 </table>
 
 	#{b.buttons center:true}
+	#{if competenceRequest.type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
 		#{secure.check 'CompetenceRequests.delete', target:competenceRequest}
+			#{b.link @delete(competenceRequest.id), color:'danger', title:'Revoca' /}
+		#{/secure.check}
+		#{secure.check 'CompetenceRequests.approval', target:competenceRequest}
+			<a class="btn btn-success btn-md" href="@{CompetenceRequests.approval(competenceRequest.id)}" data-async-modal="#defaultModal" color="primary" title="Approva">
+				Approva 
+    		</a>
+		#{/secure.check}
+		#{secure.check 'CompetenceRequests.disapproval', target:competenceRequest}
+			<a class="btn btn-warning btn-md" href="@{CompetenceRequests.disapproval(competenceRequest.id)}" data-async-modal="#defaultModal" color="warning" title="Rifiuta">
+        		Rifiuta
+      		</a>
+      	#{/secure.check}
+    #{/if}
+    #{else}
+    	#{secure.check 'CompetenceRequests.delete', target:competenceRequest}
 			#{b.link @delete(competenceRequest.id), color:'danger', title:'Revoca' /}
 		#{/secure.check}
 		#{secure.check 'CompetenceRequests.approval', target:competenceRequest}
@@ -63,5 +87,8 @@
 		#{secure.check 'CompetenceRequests.disapproval', target:competenceRequest}
 			#{b.link @disapproval(competenceRequest.id, disapproval), 'data-async-modal': '#defaultModal', color:'warning', title:'Rifiuta'/}			
 		#{/secure.check}
+    #{/else}
 	#{/b.buttons}
 </div>
+
+

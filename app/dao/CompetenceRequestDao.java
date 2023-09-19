@@ -24,6 +24,7 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,9 +35,12 @@ import models.Office;
 import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
+import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
 import models.flows.enumerate.CompetenceRequestType;
+import models.flows.query.QAffiliation;
 import models.flows.query.QCompetenceRequest;
+import models.flows.query.QGroup;
 import models.query.QPerson;
 import models.query.QPersonReperibility;
 import org.joda.time.LocalDateTime;
@@ -85,14 +89,14 @@ public class CompetenceRequestDao extends DaoBase {
   }
 
   /**
-   * Metodo che ritorna la lista di tutte le richieste di assenza attive.
+   * Metodo che ritorna la lista di tutte le richieste di competenza attive.
    *
    * @param uros la lista dei ruoli della persona che deve approvare
    * @param fromDate da quando cercare le richieste
    * @param toDate a quando cercare le richieste (opzionale)
    * @param competenceRequestType il tipo della richiesta
    * @param signer il dipendente deputato all'approvazione
-   * @return la lista di tutte le richieste di assenza attive.
+   * @return la lista di tutte le richieste di competenza attive.
    */
   public List<CompetenceRequest> allResults(List<UsersRolesOffices> uros,
       LocalDateTime fromDate, Optional<LocalDateTime> toDate,
@@ -113,7 +117,7 @@ public class CompetenceRequestDao extends DaoBase {
     val results = Lists.<CompetenceRequest>newArrayList();
     List<Office> officeList = uros.stream().map(u -> u.getOffice()).collect(Collectors.toList());
     conditions.and(competenceRequest.startAt.after(fromDate))
-        .and(competenceRequest.type.eq(competenceRequestType)
+    .and(competenceRequest.type.eq(competenceRequestType)
         .and(competenceRequest.flowStarted.isTrue())
         .and(competenceRequest.flowEnded.isFalse())
         .and(competenceRequest.person.office.in(officeList)));
@@ -123,19 +127,18 @@ public class CompetenceRequestDao extends DaoBase {
     if (!signer.getReperibilityTypes().isEmpty()) {
       conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
       .and(competenceRequest.employeeApproved.isNull())
-      .and(competenceRequest.reperibilityManagerApprovalRequired.isTrue())
-      .and(competenceRequest.reperibilityManagerApproved.isNull())
-          .and(person.office.eq(signer.getOffice()));
+      .and(competenceRequest.managerApprovalRequired.isTrue())
+      .and(competenceRequest.managerApproved.isNull())
+      .and(person.office.eq(signer.getOffice()));
       query = getQueryFactory().selectFrom(competenceRequest)
           .join(competenceRequest.person, person)
           .leftJoin(person.reperibility, pr)
           .where(pr.personReperibilityType.in(signer.getReperibilityTypes()).and(conditions));
-          
     } else {
       conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
-          .and(competenceRequest.employeeApproved.isNotNull()
-              .and(competenceRequest.reperibilityManagerApprovalRequired.isTrue()
-              .and(competenceRequest.reperibilityManagerApproved.isNull())));
+      .and(competenceRequest.employeeApproved.isNotNull()
+          .and(competenceRequest.managerApprovalRequired.isTrue()
+              .and(competenceRequest.managerApproved.isNull())));
       query = getQueryFactory().selectFrom(competenceRequest).where(conditions);
     }
     results.addAll(query.fetch());
@@ -175,22 +178,58 @@ public class CompetenceRequestDao extends DaoBase {
 
     List<CompetenceRequest> results = new ArrayList<>();
 
-    if (!signer.getReperibilityTypes().isEmpty()) {
-      List<Office> officeList = 
-          roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
-      conditions = managerQuery(officeList, conditions, signer);
-      List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
-          .join(competenceRequest.person, person)
-          .join(person.reperibility, pr)
-          .where(pr.personReperibilityType.supervisor.eq(signer).and(conditions))
-          .fetch();
-      results.addAll(queryResults);
-    } else {
-      conditions = employeeQuery(conditions, signer);
-      List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
-          .where(competenceRequest.teamMate.eq(signer).and(conditions)).fetch();
-      results.addAll(queryResults);
+    switch (type) {
+      case CHANGE_REPERIBILITY_REQUEST:
+        if (!signer.getReperibilityTypes().isEmpty()) {
+          List<Office> officeList = 
+              roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
+          conditions = managerQuery(officeList, conditions, signer);
+          List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
+              .join(competenceRequest.person, person)
+              .join(person.reperibility, pr)
+              .where(pr.personReperibilityType.supervisor.eq(signer).and(conditions))
+              .fetch();
+          results.addAll(queryResults);
+        } else {
+          conditions = employeeQuery(conditions, signer);
+          List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
+              .where(competenceRequest.teamMate.eq(signer).and(conditions)).fetch();
+          results.addAll(queryResults);
+        }
+        break;
+      case OVERTIME_REQUEST:
+        final QGroup group = QGroup.group;
+        if (roleList.stream().noneMatch(r -> r.getRole().getName().equals(Role.SEAT_SUPERVISOR) 
+            || r.getRole().getName().equals(Role.GROUP_MANAGER))) {
+          return results;
+        }
+        List<Office> officeList = 
+            roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
+        if (roleList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))) {
+          conditions = officeHeadQuery(officeList,conditions, signer);
+        } else {     
+          final QAffiliation affiliation = QAffiliation.affiliation;
+          conditions = managerQuery(officeList, conditions, signer);
+          List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
+              .join(competenceRequest.person, person).fetchJoin()
+              .join(person.affiliations, affiliation)
+              .on(affiliation.beginDate.before(LocalDate.now())
+                  .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
+              .join(affiliation.group, group)
+              .where(group.manager.eq(signer).and(conditions))
+              .distinct()
+              .fetch();
+          results.addAll(queryResults);
+          return results;
+        }
+        List<CompetenceRequest> queryResult = getQueryFactory()
+            .selectFrom(competenceRequest).where(conditions).fetch();
+        results.addAll(queryResult);
+        break;
+      default:
+        break;          
     }
+
     return results;
   }
 
@@ -213,38 +252,85 @@ public class CompetenceRequestDao extends DaoBase {
 
     BooleanBuilder conditions = new BooleanBuilder();
     List<CompetenceRequest> results = new ArrayList<>();
-    JPQLQuery<CompetenceRequest> query;
     List<Office> officeList = 
         roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
+
     conditions.and(competenceRequest.startAt.after(fromDate))
-        .and(competenceRequest.type.eq(type).and(competenceRequest.flowEnded.isTrue())
-            .and(competenceRequest.person.office.in(officeList)));
+    .and(competenceRequest.type.eq(type).and(competenceRequest.flowEnded.isTrue())
+        .and(competenceRequest.person.office.in(officeList)));
 
     if (toDate.isPresent()) {
       conditions.and(competenceRequest.endTo.before(toDate.get()));
     }
 
-    if (!signer.getReperibilityTypes().isEmpty()) {
-      conditions.andAnyOf((competenceRequest.reperibilityManagerApprovalRequired.isTrue())
-          .and(competenceRequest.reperibilityManagerApproved.isNotNull()), 
-          competenceRequest.reperibilityManagerApprovalRequired.isFalse());
-      
-      query = getQueryFactory().selectFrom(competenceRequest)
-          .leftJoin(competenceRequest.person, person)
-          .leftJoin(person.reperibility, pr)
-          .where(pr.personReperibilityType.in(signer.getReperibilityTypes())
-              .and(conditions));
-      results.addAll(query.fetch());
-    } else {
-      conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
-        .and(competenceRequest.employeeApproved.isNotNull())
-          .and(person.office.in(officeList));
-      query = getQueryFactory().selectFrom(competenceRequest)
-          .join(competenceRequest.person, person)
-          .where(person.eq(signer).and(conditions));
-      results.addAll(query.fetch());
+    switch (type) {
+      case CHANGE_REPERIBILITY_REQUEST:
+        if (!signer.getReperibilityTypes().isEmpty()) {
+          conditions = managerApprovedQuery(officeList, conditions, signer);
+          List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
+              .join(competenceRequest.person, person)
+              .join(person.reperibility, pr)
+              .where(pr.personReperibilityType.supervisor.eq(signer).and(conditions))
+              .fetch();
+          results.addAll(queryResults);
+        } else {
+          conditions = employeeApprovedQuery(conditions, signer);
+          List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
+              .where(competenceRequest.teamMate.eq(signer).and(conditions)).fetch();
+          results.addAll(queryResults);
+        }
+        break;
+      case OVERTIME_REQUEST:
+        final QGroup group = QGroup.group;
+        if (roleList.stream().noneMatch(r -> r.getRole().getName().equals(Role.SEAT_SUPERVISOR) 
+            || r.getRole().getName().equals(Role.GROUP_MANAGER))) {
+          return results;
+        }       
+        if (roleList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))) {
+          conditions = officeHeadApprovedQuery(officeList,conditions, signer);
+        } else {     
+          final QAffiliation affiliation = QAffiliation.affiliation;
+          conditions = managerApprovedQuery(officeList, conditions, signer);
+          List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
+              .join(competenceRequest.person, person).fetchJoin()
+              .join(person.affiliations, affiliation)
+              .on(affiliation.beginDate.before(LocalDate.now())
+                  .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
+              .join(affiliation.group, group)
+              .where(group.manager.eq(signer).and(conditions))
+              .distinct()
+              .fetch();
+          results.addAll(queryResults);
+          return results;
+        }
+        List<CompetenceRequest> queryResult = getQueryFactory()
+            .selectFrom(competenceRequest).where(conditions).fetch();
+        results.addAll(queryResult);
+        break;
+      default:
+        break;          
     }
-    
+    //    if (!signer.getReperibilityTypes().isEmpty()) {
+    //      conditions.andAnyOf((competenceRequest.managerApprovalRequired.isTrue())
+    //          .and(competenceRequest.managerApproved.isNotNull()), 
+    //          competenceRequest.managerApprovalRequired.isFalse());
+    //      
+    //      query = getQueryFactory().selectFrom(competenceRequest)
+    //          .leftJoin(competenceRequest.person, person)
+    //          .leftJoin(person.reperibility, pr)
+    //          .where(pr.personReperibilityType.in(signer.getReperibilityTypes())
+    //              .and(conditions));
+    //      results.addAll(query.fetch());
+    //    } else {
+    //      conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
+    //        .and(competenceRequest.employeeApproved.isNotNull())
+    //          .and(person.office.in(officeList));
+    //      query = getQueryFactory().selectFrom(competenceRequest)
+    //          .join(competenceRequest.person, person)
+    //          .where(person.eq(signer).and(conditions));
+    //      results.addAll(query.fetch());
+    //    }
+
     return results;
   }
 
@@ -265,7 +351,7 @@ public class CompetenceRequestDao extends DaoBase {
         .fetch();
   }
 
-  
+
 
   /**
    * Metodo che aggiorna le condizioni di ricerca per il responsabile del servizio.
@@ -278,11 +364,23 @@ public class CompetenceRequestDao extends DaoBase {
   private BooleanBuilder managerQuery(List<Office> officeList, 
       BooleanBuilder condition, Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
-    condition.and(competenceRequest.reperibilityManagerApprovalRequired.isTrue())
-        .and(competenceRequest.reperibilityManagerApproved.isNull())
-        .andAnyOf(competenceRequest.employeeApproved.isNotNull(), 
-            competenceRequest.employeeApprovalRequired.isFalse())
-          .and(competenceRequest.person.office.in(officeList));
+    condition.and(competenceRequest.managerApprovalRequired.isTrue())
+    .and(competenceRequest.managerApproved.isNull())
+    .andAnyOf(competenceRequest.employeeApproved.isNotNull(), 
+        competenceRequest.employeeApprovalRequired.isFalse())
+    .and(competenceRequest.person.office.in(officeList));
+    return condition;
+
+  }
+  
+  private BooleanBuilder managerApprovedQuery(List<Office> officeList, 
+      BooleanBuilder condition, Person signer) {
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    condition.and(competenceRequest.managerApprovalRequired.isTrue())
+    .and(competenceRequest.managerApproved.isNotNull())
+    .andAnyOf(competenceRequest.employeeApproved.isNotNull(), 
+        competenceRequest.employeeApprovalRequired.isFalse())
+    .and(competenceRequest.person.office.in(officeList));
     return condition;
 
   }
@@ -290,8 +388,38 @@ public class CompetenceRequestDao extends DaoBase {
   private BooleanBuilder employeeQuery(BooleanBuilder condition, Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     condition.and(competenceRequest.employeeApprovalRequired.isTrue())
-        .and(competenceRequest.employeeApproved.isNull());
+    .and(competenceRequest.employeeApproved.isNull());
+    return condition;
+  }
+  
+  private BooleanBuilder employeeApprovedQuery(BooleanBuilder condition, Person signer) {
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    condition.and(competenceRequest.employeeApprovalRequired.isTrue())
+    .and(competenceRequest.employeeApproved.isNotNull());
+    return condition;
+  }
+
+  private BooleanBuilder officeHeadQuery(List<Office> officeList,
+      BooleanBuilder condition, Person signer) {
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    condition.and(competenceRequest.officeHeadApprovalRequired.isTrue())
+    .and(competenceRequest.officeHeadApproved.isNull())
+    .andAnyOf(competenceRequest.managerApproved.isNotNull(), 
+        competenceRequest.managerApprovalRequired.isFalse())
+    .and(competenceRequest.person.office.in(officeList));
+    return condition;
+  }
+  
+  private BooleanBuilder officeHeadApprovedQuery(List<Office> officeList,
+      BooleanBuilder condition, Person signer) {
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    condition.and(competenceRequest.officeHeadApprovalRequired.isTrue())
+    .and(competenceRequest.officeHeadApproved.isNotNull())
+    .andAnyOf(competenceRequest.managerApproved.isNotNull(), 
+        competenceRequest.managerApprovalRequired.isFalse())
+    .and(competenceRequest.person.office.in(officeList));
     return condition;
   }
 
 }
+

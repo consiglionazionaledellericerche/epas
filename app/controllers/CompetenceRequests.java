@@ -17,11 +17,20 @@
 
 package controllers;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import common.security.SecurityRules;
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
 import dao.CompetenceRequestDao;
 import dao.GroupDao;
 import dao.PersonDao;
@@ -29,14 +38,18 @@ import dao.PersonReperibilityDayDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.Web;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+import it.cnr.iit.epas.DateUtility;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+import manager.CertificationManager;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.flows.CompetenceRequestManager;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
+import models.Competence;
+import models.CompetenceCode;
 import models.Person;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
@@ -47,10 +60,7 @@ import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
 import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.YearMonth;
+import play.Play;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -85,6 +95,16 @@ public class CompetenceRequests extends Controller {
   static UsersRolesOfficesDao uroDao;
   @Inject
   private static PersonReperibilityDayDao repDao;
+  @Inject
+  private static PersonStampingRecapFactory stampingsRecapFactory;
+  @Inject
+  private static CertificationManager certificationManager;
+  @Inject
+  static CompetenceDao competenceDao;
+  @Inject
+  static CompetenceCodeDao competenceCodeDao;
+  
+  static final String ATTESTATI_ACTIVE = "attestati.active";
 
 
   public static void changeReperibility() {
@@ -93,6 +113,14 @@ public class CompetenceRequests extends Controller {
 
   public static void changeReperibilityToApprove() {
     listToApprove(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST);
+  }
+
+  public static void overtimes() {
+    list(CompetenceRequestType.OVERTIME_REQUEST);
+  }
+
+  public static void overtimesToApprove() {
+    listToApprove(CompetenceRequestType.OVERTIME_REQUEST);
   }
 
   /**
@@ -106,7 +134,7 @@ public class CompetenceRequests extends Controller {
     val currentUser = Security.getUser().get();
     if (currentUser.getPerson() == null) {
       flash.error("L'utente corrente non ha associata una persona, non può vedere le proprie "
-          + "richieste di assenza");
+          + "richieste di competenza");
       Application.index();
       return;
     }
@@ -131,26 +159,30 @@ public class CompetenceRequests extends Controller {
    *
    * @param type tipo opzionale di tipo di richiesta di assenza.
    */
-  public static void listToApprove(CompetenceRequestType type) {
-    Verify.verifyNotNull(type);
+  public static void listToApprove(CompetenceRequestType competenceType) {
+    Verify.verifyNotNull(competenceType);
 
     val person = Security.getUser().get().getPerson();
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste da approvare  di tipo {} a partire da {}",
-        type, fromDate);
+        competenceType, fromDate);
+
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
     List<CompetenceRequest> results = competenceRequestDao
-        .allResults(roleList, fromDate, Optional.absent(), type, person);
+        .allResults(roleList, fromDate, Optional.absent(), competenceType, person);
     List<CompetenceRequest> myResults =
         competenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(),
-            type, person);
+            competenceType, person);
     List<CompetenceRequest> approvedResults =
-        competenceRequestDao
-            .totallyApproved(roleList, fromDate, Optional.absent(), type, person);
-    val config = competenceRequestManager.getConfiguration(type, person);
+        competenceRequestDao.totallyApproved(roleList, fromDate, Optional.absent(), competenceType, person);
+    val config = competenceRequestManager.getConfiguration(competenceType, person);
     val onlyOwn = false;
+    boolean overtimesQuantityEnabled = (Boolean)configurationManager
+        .configValue(person.getOffice(), 
+            EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY, LocalDate.now());
     val available = person.getUser().hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
-    render(config, results, type, onlyOwn, available, approvedResults, myResults);
+    render(config, results, competenceType, onlyOwn, available, approvedResults, 
+        myResults, overtimesQuantityEnabled);
   }
 
   /**
@@ -192,26 +224,56 @@ public class CompetenceRequests extends Controller {
     PersonReperibilityType type = null;
     List<Person> teamMates = Lists.newArrayList();
     List<PersonReperibilityType> types = Lists.newArrayList();
-    
-    if (competenceType.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
-      types = repDao.getReperibilityTypeByOffice(person.getOffice(), Optional.of(false))
-          .stream().filter(prt -> prt.getPersonReperibilities().stream()
-              .anyMatch(pr -> pr.getPerson().equals(person)))
-          .collect(Collectors.toList());
-      //ritorno solo il primo elemento della lista con la lista dei dipendenti afferenti al servizio
+    PersonStampingRecap psDto = null;
+    boolean isOvertime = false;
+    switch (competenceType) {
+      case CHANGE_REPERIBILITY_REQUEST:
+        types = repDao.getReperibilityTypeByOffice(person.getOffice(), Optional.of(false))
+        .stream().filter(prt -> prt.getPersonReperibilities().stream()
+            .anyMatch(pr -> pr.getPerson().equals(person)))
+        .collect(Collectors.toList());
+        //ritorno solo il primo elemento della lista con la lista dei dipendenti afferenti al servizio
 
-      type = types.get(0);
-      teamMates = type.getPersonReperibilities().stream()
-          .filter(pr -> pr.isActive(new YearMonth(year, month)))
-          .map(pr -> pr.getPerson())
-          .filter(p -> p.id != person.id).collect(Collectors.toList());
-
+        type = types.get(0);
+        teamMates = type.getPersonReperibilities().stream()
+            .filter(pr -> pr.isActive(new YearMonth(year, month)))
+            .map(pr -> pr.getPerson())
+            .filter(p -> p.id != person.id).collect(Collectors.toList());
+        break;
+      case OVERTIME_REQUEST:
+        // controllo con la chiamata rest ad attestati per verificare se l'attestato di quell'anno/mese
+        // è già stato validato (valido solo per istanza CNR)
+        if ("true".equals(Play.configuration.getProperty(ATTESTATI_ACTIVE, "false"))) {
+          /*
+           * Nel caso di prove in locale, occorre cambiare l'indirizzo di Attestati nei parametri 
+           * di configurazione del Play altrimenti viene lanciata un'eccezione a questa chiamata
+           */
+          try {
+          val certData = certificationManager.getPersonCertData(person, year, month);
+            if (certData.validate) {
+              flash.error("Attestato già validato per l'anno/mese richiesto. "
+                  + "Non si può procedere con una richiesta di straordinario.");
+              list(competenceType);
+              return;
+            }
+          } catch (Exception e) {
+            log.warn("Impossibile effettuare il controllo di validazione dell'attestato " + 
+                " del {}/{} per la richiesta di straordinari di {}", month, year, person.getFullname());
+          }
+        }       
+        
+        isOvertime = true;
+        psDto = stampingsRecapFactory.create(person, year, month, true);  
+        break;
+      default:
+        break;
     }
+
     boolean insertable = false;
     competenceRequest.setStartAt(LocalDateTime.now().plusDays(1));
     competenceRequest.setEndTo(LocalDateTime.now().plusDays(1));
     render("@edit", competenceRequest, insertable, competenceType,
-        year, month, type, teamMates, types);
+        year, month, type, teamMates, types, psDto, isOvertime);
   }
 
   /**
@@ -272,78 +334,105 @@ public class CompetenceRequests extends Controller {
       PersonReperibilityDay beginDayToGive, PersonReperibilityDay endDayToGive,
       PersonReperibilityDay endDayToAsk, PersonReperibilityType type) {
 
-    //rules.checkIfPermitted(type);
+    notFoundIfNull(competenceRequest.getPerson());
 
-    Verify.verifyNotNull(beginDayToGive.getDate());
-    Verify.verifyNotNull(endDayToGive.getDate());
+    //rules.checkIfPermitted(type);
+    if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
+      Verify.verifyNotNull(beginDayToGive.getDate());
+      Verify.verifyNotNull(endDayToGive.getDate());
+      if (beginDayToGive.getDate().isAfter(endDayToGive.getDate())) {
+        Validation.addError("beginDayToGive", "Le date devono essere congruenti");
+      }
+
+      val beginDateToAsk = beginDayToAsk != null ? beginDayToAsk.getDate() : null;
+      val endDateToAsk = endDayToAsk != null ? endDayToAsk.getDate() : null;
+      if (beginDateToAsk != null && endDateToAsk != null) {
+        if (beginDateToAsk.isAfter(endDateToAsk)) {
+          Validation.addError("beginDayToAsk", "Le date devono essere congruenti");
+        }
+        if (Days.daysBetween(beginDateToAsk, endDateToAsk).getDays()
+            != Days.daysBetween(beginDayToGive.getDate(), endDayToGive.getDate()).getDays()) {
+          Validation.addError("beginDayToAsk",
+              "La quantità di giorni da chiedere e da dare deve coincidere");
+          Validation.addError("beginDayToGive",
+              "La quantità di giorni da chiedere e da dare deve coincidere");
+        }
+      }
+      competenceRequest.setBeginDateToAsk(beginDateToAsk);
+      competenceRequest.setEndDateToAsk(endDateToAsk);
+      competenceRequest.setBeginDateToGive(beginDayToGive.getDate());
+      competenceRequest.setEndDateToGive(endDayToGive.getDate());
+      competenceRequest.setTeamMate(teamMate);
+    } else {
+      
+      //log.debug("Richiesta di straordinario per un mese concluso {}/[} per {}", 
+      //    month, year, competenceRequest.getPerson().getFullname());
+      if ((Boolean) configurationManager.configValue(competenceRequest.getPerson().getOffice(), 
+          EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now())) {
+        if (month < LocalDate.now().getMonthOfYear()) {
+          Validation.addError("competenceRequest.note", 
+              "E' prevista richiesta preventiva. Non si può richiedere straordinario per un mese concluso!");
+        }
+      }
+    }
 
     competenceRequest.setYear(year);
     competenceRequest.setMonth(month);
     competenceRequest.setStartAt(LocalDateTime.now());
-    competenceRequest.setTeamMate(teamMate);
+    
     competenceRequest.setPerson(Security.getUser().get().getPerson());
-
-    notFoundIfNull(competenceRequest.getPerson());
 
     CompetenceRequest existing = competenceRequestManager.checkCompetenceRequest(competenceRequest);
     if (existing != null) {
-      Validation.addError("teamMate",
+      Validation.addError("competenceRequest.note",
           "Esiste già una richiesta di questo tipo");
     }
-
-    if (beginDayToGive.getDate().isAfter(endDayToGive.getDate())) {
-      Validation.addError("beginDayToGive", "Le date devono essere congruenti");
+    CompetenceRequestType competenceType = competenceRequest.getType();
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+    Optional<Competence> competence = competenceDao
+        .getCompetence(competenceRequest.getPerson(), year, month, code);
+    if (competence.isPresent()) {
+      String mese = DateUtility.fromIntToStringMonth(month);
+      flash.error("Esiste già un'attribuzione di %s ore di straordinario per %s %s. "
+          + "Verificare con la propria segreteria del personale prima di "
+          + "sottomettere una nuova richiesta", competence.get().getValueApproved(), mese, year);
+      CompetenceRequests.list(competenceType);
     }
-
-    val beginDateToAsk = beginDayToAsk != null ? beginDayToAsk.getDate() : null;
-    val endDateToAsk = endDayToAsk != null ? endDayToAsk.getDate() : null;
-
-    if (beginDateToAsk != null && endDateToAsk != null) {
-      if (beginDateToAsk.isAfter(endDateToAsk)) {
-        Validation.addError("beginDayToAsk", "Le date devono essere congruenti");
-      }
-      if (Days.daysBetween(beginDateToAsk, endDateToAsk).getDays()
-          != Days.daysBetween(beginDayToGive.getDate(), endDayToGive.getDate()).getDays()) {
-        Validation.addError("beginDayToAsk",
-            "La quantità di giorni da chiedere e da dare deve coincidere");
-        Validation.addError("beginDayToGive",
-            "La quantità di giorni da chiedere e da dare deve coincidere");
-      }
-    }
-    if (!competenceRequest.getPerson().checkLastCertificationDate(
-        new YearMonth(competenceRequest.getYear(),
-            competenceRequest.getMonth()))) {
-      Validation.addError("beginDayToAsk",
-          "Non è possibile fare una richiesta per una data di un mese già "
-              + "processato in Attestati");
-    }
+      
     if (Validation.hasErrors()) {
-      LocalDate begin = new LocalDate(year, month, 1);
-      LocalDate to = begin.dayOfMonth().withMaximumValue();
-      List<PersonReperibilityDay> reperibilityDates = repDao
-          .getPersonReperibilityDaysByPeriodAndType(begin, to, type, teamMate);
-      List<PersonReperibilityDay> myReperibilityDates = repDao
-          .getPersonReperibilityDaysByPeriodAndType(begin, to, type, competenceRequest.getPerson());
 
-      List<PersonReperibilityType> types = repDao
-          .getReperibilityTypeByOffice(competenceRequest.getPerson()
-          .getOffice(), Optional.of(false))
-          .stream().filter(prt -> prt.getPersonReperibilities().stream()
-              .anyMatch(pr -> pr.getPerson().equals(competenceRequest.getPerson())))
-          .collect(Collectors.toList());
-      List<Person> teamMates = type.getPersonReperibilities().stream().map(pr -> pr.getPerson())
-          .filter(p -> p.id != competenceRequest.getPerson().id).collect(Collectors.toList());
-      boolean insertable = true;
-      response.status = 400;
-      render("@edit", competenceRequest, beginDayToAsk, beginDayToGive,
-          endDayToAsk, endDayToGive, type, year, month, teamMate, insertable,
-          teamMates, types, reperibilityDates, myReperibilityDates);
+      if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
+        LocalDate begin = new LocalDate(year, month, 1);
+        LocalDate to = begin.dayOfMonth().withMaximumValue();
+        List<PersonReperibilityDay> reperibilityDates = repDao
+            .getPersonReperibilityDaysByPeriodAndType(begin, to, type, teamMate);
+        List<PersonReperibilityDay> myReperibilityDates = repDao
+            .getPersonReperibilityDaysByPeriodAndType(begin, to, type, 
+                competenceRequest.getPerson());
+
+        List<PersonReperibilityType> types = repDao
+            .getReperibilityTypeByOffice(competenceRequest.getPerson()
+                .getOffice(), Optional.of(false))
+            .stream().filter(prt -> prt.getPersonReperibilities().stream()
+                .anyMatch(pr -> pr.getPerson().equals(competenceRequest.getPerson())))
+            .collect(Collectors.toList());
+        List<Person> teamMates = type.getPersonReperibilities().stream().map(pr -> pr.getPerson())
+            .filter(p -> p.id != competenceRequest.getPerson().id).collect(Collectors.toList());
+        boolean insertable = true;
+        response.status = 400;
+        render("@edit", competenceRequest, beginDayToAsk, beginDayToGive,
+            endDayToAsk, endDayToGive, type, year, month, teamMate, insertable,
+            teamMates, types, reperibilityDates, myReperibilityDates);
+      } else {
+        boolean isOvertime = true;
+        
+        PersonStampingRecap psDto = stampingsRecapFactory
+            .create(competenceRequest.getPerson(), year, month, true);
+        render("@edit", competenceRequest, competenceType,
+            year, month, type, psDto, isOvertime);
+      }
+      
     }
-
-    competenceRequest.setBeginDateToAsk(beginDateToAsk);
-    competenceRequest.setEndDateToAsk(endDateToAsk);
-    competenceRequest.setBeginDateToGive(beginDayToGive.getDate());
-    competenceRequest.setEndDateToGive(endDayToGive.getDate());
 
     competenceRequestManager.configure(competenceRequest);
 
@@ -361,8 +450,8 @@ public class CompetenceRequests extends Controller {
           CompetenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
     }
     flash.success("Operazione effettuata correttamente");
-
-    CompetenceRequests.list(competenceRequest.getType());
+    
+    CompetenceRequests.list(competenceType);
   }
 
   /**
@@ -401,26 +490,59 @@ public class CompetenceRequests extends Controller {
    *
    * @param id l'identificativo della richiesta
    */
-  public static void approval(long id) {
+  public static void approval(long id, boolean approval, Integer value) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     notFoundIfNull(competenceRequest);
     User user = Security.getUser().get();
     rules.checkIfPermitted(competenceRequest);
-
+    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      if (value != null) {
+        competenceRequest.setValue(value);
+      }      
+      competenceRequest.save();
+      if (!approval) {
+        approval = true;
+        render(competenceRequest, approval);
+      }
+    }    
+    
     log.debug("Approving competence request {}", competenceRequest);
+    
     boolean approved = competenceRequestManager.approval(competenceRequest, user);
 
     if (approved) {
       notificationManager
-          .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
-              Optional.absent(), true);
+      .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
+          Optional.absent(), true);
 
       flash.success("Operazione conclusa correttamente");
     } else {
       flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
+    val person = Security.getUser().get().getPerson();
+    val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
+    CompetenceRequestType competenceType = competenceRequest.getType();
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
 
-    CompetenceRequests.listToApprove(competenceRequest.getType());
+    List<CompetenceRequest> results = competenceRequestDao
+        .allResults(roleList, fromDate, Optional.absent(), competenceType, person);
+    List<CompetenceRequest> myResults =
+        competenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(),
+            competenceType, person);
+    List<CompetenceRequest> approvedResults =
+        competenceRequestDao
+        .totallyApproved(roleList, fromDate, Optional.absent(), competenceType, person);
+    val onlyOwn = false;
+    boolean overtimesQuantityEnabled = (Boolean)configurationManager
+        .configValue(competenceRequest.getPerson().getOffice(), 
+            EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY, LocalDate.now());
+    val available = competenceRequest.getPerson().getUser()
+        .hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
+    
+    val config = competenceRequestManager.getConfiguration(competenceType, competenceRequest.getPerson());
+    render("@listToApprove", competenceType, onlyOwn, overtimesQuantityEnabled, available, 
+        config, results, myResults, approvedResults);
+   
   }
 
   /**
@@ -438,8 +560,8 @@ public class CompetenceRequests extends Controller {
       render(competenceRequest, disapproval);
     }
 
-    if (competenceRequest.isReperibilityManagerApprovalRequired()
-        && competenceRequest.getReperibilityManagerApproved() == null
+    if (competenceRequest.isManagerApprovalRequired()
+        && competenceRequest.getManagerApproved() == null
         && rules.check("CompetenceRequests.reperibilityManagerDisapproval", competenceRequest)) {
       log.debug("Disapproval da parte del REPERIBILITY_MANAGER, richiesta {}",
           competenceRequest);
@@ -453,9 +575,10 @@ public class CompetenceRequests extends Controller {
       competenceRequestManager.employeeDisapproval(id, reason);
     }
     notificationManager
-        .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
-            Optional.absent(), false);
+    .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
+        Optional.absent(), false);
     flash.error("Richiesta respinta");
     render("@show", competenceRequest, user);
   }
 }
+

@@ -1,6 +1,6 @@
 #{extends 'main.html' /}
 #{set header:'navbar' /}
-#{set competenceRequestTypeLabel: messages.get('CompetenceRequestType.' + type.toString() + '_TO_APPROVE') /}
+#{set competenceRequestTypeLabel: messages.get('CompetenceRequestType.' + competenceType.toString() + '_TO_APPROVE') /}
 #{set title:('ePAS - ' + competenceRequestTypeLabel) /}
 
 #{switcher year:true, month:true /}
@@ -9,12 +9,15 @@
 
 %{
 	approvalsRequired = 0;
-	
-	if (config.reperibilityManagerApprovalRequired) {
+
+	if (config.officeHeadApprovalRequired) {
+	 approvalsRequired++;
+	}
+	if (config.managerApprovalRequired) {
 	 approvalsRequired++;
 	}
 	if (config.employeeApprovalRequired) {
-	  approvalsRequired++;
+	 approvalsRequired++;
 	}
 	approvalRequired = approvalsRequired > 0
 }%
@@ -24,7 +27,7 @@
 
   #{tabList}
     #{tabItem id:'approvandi', title:'Flussi da approvare', active:true /}
-    #{tabItem id:'attivo', title:'Flussi attivi'/}
+    #{tabItem id:'attivo', title:'Flussi attivi'/}        
     #{tabItem id:'nonAttivo', title:'Flussi terminati' /}
   #{/tabList}
   <br>

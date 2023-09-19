@@ -74,6 +74,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
 
     public final BooleanPath saturdayHolidayShift = createBoolean("saturdayHolidayShift");
 
+    public final BooleanPath showOvertimeRequest = createBoolean("showOvertimeRequest");
+
     public final StringPath startDailyShift = createString("startDailyShift");
 
     public final StringPath startNightlyShift = createString("startNightlyShift");

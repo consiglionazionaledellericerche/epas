@@ -266,4 +266,15 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
+  #{accordionItem 'showOvertimeRequest', parent:'generalSetting', title:'Abilita visualizzazione flusso straordinari', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita la visualizzazione delle opzioni di configurazione per il flusso degli straordinari #{/alert}
+      #{f.booleanRadio 'generalSetting.showOvertimeRequest' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
+  
 #{/accordionGroup}

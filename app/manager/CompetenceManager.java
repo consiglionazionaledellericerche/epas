@@ -447,6 +447,7 @@ public class CompetenceManager {
     competence.setValueApproved(value);
     competence.save();
     log.debug("Salvata la competenza {} con il nuovo valore {}", competence, value);
+    log.debug("Id competenza {}", competence.id);
   }
 
 

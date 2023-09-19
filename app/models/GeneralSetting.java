@@ -120,6 +120,12 @@ public class GeneralSetting extends BaseModel {
    * Indica se condizionare l'inserimento manuale di una persona in anagrafica
    */
   private boolean warningInsertPerson = true;
+  
+  /*
+   * Indica se mostrare o meno i parametri di configurazione per il flusso di richiesta
+   * degli straordinari
+   */
+  private boolean showOvertimeRequest = false;
 
   /**
    * Indica se è attiva l'integrazione con epas-service.

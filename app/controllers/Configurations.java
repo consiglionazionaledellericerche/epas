@@ -27,6 +27,8 @@ import dao.PersonDao;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -292,6 +294,7 @@ public class Configurations extends Controller {
         .filter(conf -> conf.getEpasParam().category 
             == EpasParam.EpasParamCategory.INFORMATION_FLOWS)
         .collect(Collectors.toList());
+   
     
     // id relativo all'allegato di autorizzazione per l'attivazione dell'autocertificazione
     java.util.Optional<Configuration> target = autocertifications.stream()
@@ -307,8 +310,10 @@ public class Configurations extends Controller {
             attachment -> attachment.getType() == AttachmentType.TR_AUTOCERTIFICATION).findFirst()
         .orElse(null);
 
+
     render(office, paramCategory, generals, yearlies, periodics, stampingsAutocertification,
         autocertifications, autocert, flows, competenceFlows, informationFlows);
+
   }
 
   /**
