@@ -41,3 +41,4 @@ jobs:
           tags: |
             consiglionazionalericerche/epas:${{ github.ref_name }}
             ghcr.io/consiglionazionaledellericerche/epas:${{ github.ref_name }}
+            ghcr.io/consiglionazionaledellericerche/epas:stable

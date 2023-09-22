@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Gestione delle richieste di straordinario da parte del personale IV-VIII, con possibilità
     di configurare richieste preventive e consuntive di straordinario ed approvazione da parte
     del responsabile di gruppo e/o di sede.
+  - Aggiornata immagine docker con tag stable su ghcr.io per ogni nuova release
 
 ## [2.8.0] - 2023-09-15
 ### Added
