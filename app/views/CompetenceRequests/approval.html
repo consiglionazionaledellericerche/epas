@@ -1,7 +1,9 @@
 #{modalAsync id:'defaultModal', title:('Approvazione richiesta di straordinari per ' + competenceRequest.person.fullname)}
 
 <div class="container-fluid">
-
+	<div class="container-fluid">
+		#{include './_overtimeSituation.html' /}
+	</div>
 #{alert color:'success'}
 <p class=center>Specifica la quantità di ore di straordinario da salvare.</p> 
 #{/alert}

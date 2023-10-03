@@ -15,7 +15,11 @@
 <div class="container">
 
 #{title title: 'Richiesta di '+ competenceRequest.person.fullName()  /}
-
+	#{if competenceRequest.type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
+	<div class="container-fluid">
+		#{include './_overtimeSituation.html' /}
+	</div>
+	#{/if}
 <br>
  #{alert color:'info'}
     <p>Elenco degli stati di approvazione della <strong>#{f.value 'competenceRequest.type', value:competenceRequest.type /}</strong>
