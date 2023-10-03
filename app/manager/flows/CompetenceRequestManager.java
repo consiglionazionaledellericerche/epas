@@ -637,17 +637,18 @@ public class CompetenceRequestManager {
     val currentPerson = Security.getUser().get().getPerson();
     if ((Boolean) configurationManager.configValue(currentPerson.getOffice(), 
         EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now()) 
-        && competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+        && competenceRequest.getFirstApproved() == null) {
       executeEvent(competenceRequest, currentPerson, 
           CompetenceRequestEventType.FIRST_APPROVAL, Optional.absent());
       log.info("{} preventiva approvata dal responsabile di gruppo {}.", 
           competenceRequest, currentPerson.getFullname());
-    }
-    executeEvent(
-        competenceRequest, currentPerson,
-        CompetenceRequestEventType.MANAGER_APPROVAL, Optional.absent());
-    log.info("{} approvata dal responsabile di gruppo {}.",
-        competenceRequest, currentPerson.getFullname());
+    } else {
+      executeEvent(
+          competenceRequest, currentPerson,
+          CompetenceRequestEventType.MANAGER_APPROVAL, Optional.absent());
+      log.info("{} approvata dal responsabile di gruppo {}.",
+          competenceRequest, currentPerson.getFullname());
+    }    
 
     notificationManager.notificationCompetenceRequestPolicy(user, competenceRequest, true);
   }

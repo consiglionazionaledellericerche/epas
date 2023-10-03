@@ -7,15 +7,13 @@
 #{alert color:'success'}
 <p class=center>Specifica la quantità di ore di straordinario da salvare.</p> 
 #{/alert}
-#{form action:@approval(competenceRequest.id, approval), method:'POST', class:'form form-horizontal'}
+#{form action:@approval(competenceRequest.id, approval, value), method:'POST', class:'form form-horizontal'}
 
 #{f.hidden 'competenceRequest.id', value:competenceRequest.id /}
-#{if competenceRequest.value != null}
-	#{f.input 'competenceRequest.value', label:'Quantità richiesta' /}
-#{/if}
-#{else}
-	#{f.input 'value', type:'number', label:'Quantità approvata' /}
-#{/else}
+
+#{f.view 'competenceRequest.value', label:'Quantità richiesta' /}
+
+#{f.input 'value', label:'Quantità concessa' /}
 
 	    #{b.buttons center:true}
 	      #{b.submit 'Approva', color:'success', fa:'cross' /}

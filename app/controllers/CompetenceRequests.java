@@ -484,7 +484,7 @@ public class CompetenceRequests extends Controller {
     boolean disapproval = false;
     int month = competenceRequest.getMonth();
     PersonStampingRecap psDto = null;
-    if (type.equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
       psDto = stampingsRecapFactory
           .create(competenceRequest.getPerson(), competenceRequest.getYear(), month, true);
     }    
@@ -502,9 +502,6 @@ public class CompetenceRequests extends Controller {
     User user = Security.getUser().get();
     rules.checkIfPermitted(competenceRequest);
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
-      if (value != null) {
-        competenceRequest.setValue(value);
-      }      
       competenceRequest.save();
       if (!approval) {
         approval = true;
@@ -517,6 +514,12 @@ public class CompetenceRequests extends Controller {
     }    
     
     log.debug("Approving competence request {}", competenceRequest);
+    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST) 
+        && (value != null && competenceRequest.getValue() != value)) {
+      competenceRequest.setValue(value);
+      log.debug("Cambiato valore alla competenza da {} a {}",competenceRequest.getValue(), value);
+      competenceRequest.save();
+    }  
     
     boolean approved = competenceRequestManager.approval(competenceRequest, user);
 
