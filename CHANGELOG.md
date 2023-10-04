@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     di configurare richieste preventive e consuntive di straordinario ed approvazione da parte
     del responsabile di gruppo e/o di sede.
   - Aggiornata immagine docker con tag stable su ghcr.io per ogni nuova release
+  
+### Changed
+  - Evitati di caricare tutti i contratti presenti nel sistema nella visualizzazione delle
+    sedi senza personale
 
 ## [2.8.0] - 2023-09-15
 ### Added
