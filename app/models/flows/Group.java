@@ -31,10 +31,13 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
+import models.GroupOvertime;
 import models.Office;
 import models.Person;
+import models.TotalOvertime;
 import models.base.MutableModel;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
@@ -69,6 +72,9 @@ public class Group extends MutableModel {
 
   @OneToMany(mappedBy = "group")
   private List<Affiliation> affiliations = Lists.newArrayList();
+  
+  @OneToMany(mappedBy = "group")
+  private List<GroupOvertime> groupOvertimes = Lists.newArrayList();
 
   @Unique(value = "office, externalId")
   private String externalId;
