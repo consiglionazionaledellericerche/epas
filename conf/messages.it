@@ -522,6 +522,8 @@ group.sendFlowsEmail =Mail al responsabile per flussi di approvazione
 group.externalId =External id
 groups =Gruppi di lavoro
 
+groupOvertime.numberOfHours =Numero di ore
+
 history.back= Indietro
 history.type= Operazione
 

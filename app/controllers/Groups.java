@@ -24,6 +24,7 @@ import common.security.SecurityRules;
 import dao.CompetenceDao;
 import dao.GeneralSettingDao;
 import dao.GroupDao;
+import dao.GroupOvertimeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
@@ -83,6 +84,8 @@ public class Groups extends Controller {
   private static CompetenceDao competenceDao;
   @Inject
   private static CompetenceManager competenceManager;
+  @Inject
+  private static GroupOvertimeDao groupOvertimeDao;
 
   /**
    * Metodo che crea il gruppo.
@@ -261,19 +264,34 @@ public class Groups extends Controller {
     render(role);
   }
   
-  public static void handleOvertimeGroup(Long id) {
-    Group group = Group.findById(id);
+  /**
+   * Ritorna la pagina di gestione delle ore di straordinario da associare al gruppo.
+   * @param groupId l'identificativo del gruppo
+   */
+  public static void handleOvertimeGroup(Long groupId) {
+    Group group = Group.findById(groupId);
     notFoundIfNull(group);
-    
+    //La quantità di ore di straordinario accordate al gruppo nell'anno
+    int totalGroupOvertimes = group.getGroupOvertimes().stream()
+        .filter(go -> go.getYear().equals(LocalDate.now().getYear()))
+        .mapToInt(go -> go.getNumberOfHours()).sum();
     //Recupero il monte ore della sede decurtandolo di eventuali assegnamenti ad atri gruppi
-    List<TotalOvertime> totalList = competenceDao.getTotalOvertime(LocalDate.now().getYear(), group.getOffice());
+    List<TotalOvertime> totalList = competenceDao
+        .getTotalOvertime(LocalDate.now().getYear(), group.getOffice());
     int totale = competenceManager.getTotalOvertime(totalList);
     List<Group> groupList = group.getOffice().getGroups().stream()
         .filter(g -> !g.getName().equals(group.getName())).collect(Collectors.toList());
+    int groupOvertimeSum = 0;
     for (Group otherGroup : groupList)  {
-      List<GroupOvertime> groupOvertimeList = Lists.newArrayList();
+      List<GroupOvertime> groupOvertimeList = groupOvertimeDao
+          .getByYearAndGroup(LocalDate.now().getYear(), otherGroup);
+      groupOvertimeSum = groupOvertimeSum + groupOvertimeList.stream()
+      .mapToInt(go -> go.getNumberOfHours()).sum();
     }
-    render(group);
+    int hoursAvailable = totale - totalGroupOvertimes - groupOvertimeSum;
+    Office office = group.getOffice();
+    GroupOvertime groupOvertime = new GroupOvertime();
+    render(group, totalGroupOvertimes, office, groupOvertime, hoursAvailable);
   }
 
 }

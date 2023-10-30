@@ -265,6 +265,25 @@ public class CompetenceDao extends DaoBase {
             competence.valueApproved.gt(0))
         .transform(GroupBy.groupBy(competence.person).as(GroupBy.list(competence)));
   }
+  
+  /**
+   * Ritorna una mappa contenente come chiave le persone e come valore la lista di competenze
+   * che hanno avuto nell'anno.
+   * 
+   * @param persons la lista delle persone di cui si vogliono le competenze di tipo CompetenceCode
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @param code il codice di competenza su cui filtrare
+   * @return la mappa contenente per ogni persona la lista di competenze di un certo tipo
+   */
+  public Map<Person, List<Competence>> competencesInYear(
+      List<Person> persons, int year, CompetenceCode code) {
+    final QCompetence competence = QCompetence.competence;
+    return getQueryFactory().selectFrom(competence)
+        .where(competence.person.in(persons), 
+            competence.year.eq(year), competence.competenceCode.eq(code))
+        .transform(GroupBy.groupBy(competence.person).as(GroupBy.list(competence)));
+  }
 
   private List<Competence> competenceFromGroupInMonth(Person person, Integer year, 
       Integer month, CompetenceCodeGroup group) {

@@ -7,9 +7,26 @@
 	#{breadcrumbs ['manageGroups':@Groups.showGroups(group.office.id), (title):null ], noHome:'true' /}
 	
 	
+	#{alert color:'info'}
+	La quantità di ore di straordinario disponibile per il gruppo: <strong>${group.name}</strong> è <strong>${hoursAvailable}</strong>
+	#{/alert}
 	
+	#{alert color:'info'}
+	La quantità di ore di straordinario assegnata al gruppo: <strong>${group.name}</strong> nell'anno è <strong>${totalGroupOvertimes}</strong>
+	#{/alert}
 	
-	
+	#{form @GroupOvertimes.save(currentData.year), method:'POST', autocomplete:false, class:'form form-horizontal'}
+		#{f.hidden 'groupId', value: group.id /}
+
+		#{f.hidden 'groupOvertime.id', value: groupOvertime.id /}
+
+		#{f.input 'groupOvertime.numberOfHours', type:'number' /}
+
+		#{b.buttons center:true}
+			#{b.submit 'Salva'/}
+		#{/b.buttons}
+
+	#{/form}
 	
 	
 	

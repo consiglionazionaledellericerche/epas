@@ -288,7 +288,8 @@ public class RequestInit extends Controller {
         "Certifications.processAll",
         "Certifications.emptyCertifications",
         "Charts.overtimeOnPositiveResidualInYear",
-        "AbsenceGroups.certificationsAbsences");
+        "AbsenceGroups.certificationsAbsences",
+        "Groups.handleOvertimeGroup");
 
     final Collection<String> personSwitcher = ImmutableList.of(
         "Stampings.personStamping",
