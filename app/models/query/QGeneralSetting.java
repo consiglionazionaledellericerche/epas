@@ -63,6 +63,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
 
     public final NumberPath<Integer> maxDaysInPastForRestStampings = createNumber("maxDaysInPastForRestStampings", Integer.class);
 
+    public final NumberPath<Integer> maxMonthsInPastForAbsences = createNumber("maxMonthsInPastForAbsences", Integer.class);
+
     public final BooleanPath onlyMealTicket = createBoolean("onlyMealTicket");
 
     //inherited

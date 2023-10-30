@@ -31,9 +31,13 @@ public class QJwtToken extends EntityPathBase<JwtToken> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final BooleanPath expired = createBoolean("expired");
+
     public final DateTimePath<org.joda.time.LocalDateTime> expiresAt = createDateTime("expiresAt", org.joda.time.LocalDateTime.class);
 
     public final NumberPath<Integer> expiresIn = createNumber("expiresIn", Integer.class);
+
+    public final BooleanPath expiringSoon = createBoolean("expiringSoon");
 
     //inherited
     public final NumberPath<Long> id = _super.id;

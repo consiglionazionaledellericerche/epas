@@ -19,7 +19,9 @@ package controllers;
 
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import common.security.SecurityRules;
+import dao.CompetenceDao;
 import dao.GeneralSettingDao;
 import dao.GroupDao;
 import dao.OfficeDao;
@@ -36,15 +38,17 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import manager.CompetenceManager;
 import manager.GroupManager;
 import models.GeneralSetting;
+import models.GroupOvertime;
 import models.Office;
 import models.Person;
 import models.Role;
+import models.TotalOvertime;
 import models.User;
 import models.UsersRolesOffices;
 import models.flows.Group;
-import org.testng.collections.Lists;
 import org.testng.util.Strings;
 import play.data.binding.As;
 import play.data.validation.Valid;
@@ -75,6 +79,10 @@ public class Groups extends Controller {
   private static UsersRolesOfficesDao uroDao;
   @Inject
   private static RoleDao roleDao;
+  @Inject
+  private static CompetenceDao competenceDao;
+  @Inject
+  private static CompetenceManager competenceManager;
 
   /**
    * Metodo che crea il gruppo.
@@ -251,6 +259,21 @@ public class Groups extends Controller {
   public static void viewInfoRole(Long id) {
     Role role = roleDao.getRoleById(id);
     render(role);
+  }
+  
+  public static void handleOvertimeGroup(Long id) {
+    Group group = Group.findById(id);
+    notFoundIfNull(group);
+    
+    //Recupero il monte ore della sede decurtandolo di eventuali assegnamenti ad atri gruppi
+    List<TotalOvertime> totalList = competenceDao.getTotalOvertime(LocalDate.now().getYear(), group.getOffice());
+    int totale = competenceManager.getTotalOvertime(totalList);
+    List<Group> groupList = group.getOffice().getGroups().stream()
+        .filter(g -> !g.getName().equals(group.getName())).collect(Collectors.toList());
+    for (Group otherGroup : groupList)  {
+      List<GroupOvertime> groupOvertimeList = Lists.newArrayList();
+    }
+    render(group);
   }
 
 }

@@ -3,7 +3,9 @@
 #{set title: 'ePAS - Gestioni gruppi'  /}
 
 <div class="container">
-	#{title title:'Gestione gruppi', administration:true /}
+  #{title title:'Gestione gruppi', administration:true /}
+  
+  #{breadcrumbs ['manageGroups':@Groups.showGroups()], noHome:'true' /}
 
   #{tabList}
     #{tabItem id:'attivo', title:'Gruppi Attivi', active:true /}
@@ -37,10 +39,13 @@
 	   
 		<li class="list-group-item list-group-item-grey">
 				<div class="pull-right btn-group">
+				<a class="btn btn-sm btn-default" href="@{Groups.handleOvertimeGroup(item.id)}">
+				  <i class="fa fa-money"></i> Monte ore straordinario</a>
 	            #{secure.check 'Groups.deleteGroup'}
 	            <a class="btn btn-sm btn-danger" href="@{Groups.deleteGroup(item.id)}">
 	              <i class="fa fa-minus"></i> Rimuovi</a>
 	            #{/secure.check}
+
 	          	</div>
 		  #{group.item item:item, edit:'true' /}	  
 	    </li>

@@ -3,7 +3,7 @@
 CREATE TABLE group_overtimes
 (
   id BIGSERIAL PRIMARY KEY,
-  date_of_update TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+  date_of_update DATE NOT NULL,
   year INTEGER,
   number_of_hours INTEGER,
   group_id bigint REFERENCES groups(id),
@@ -15,7 +15,7 @@ CREATE TABLE group_overtimes_history
   id bigint NOT NULL,
   _revision integer NOT NULL REFERENCES revinfo (rev), 
   _revision_type smallint,
-  date_of_update TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+  date_of_update DATE,
   year INTEGER,
   number_of_hours INTEGER,
   group_id bigint,

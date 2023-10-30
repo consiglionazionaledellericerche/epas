@@ -6,6 +6,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,7 @@ import play.data.validation.Required;
 @Getter
 @Setter
 @Entity
+@Audited
 @Table(name = "group_overtimes")
 public class GroupOvertime extends BaseModel{
 

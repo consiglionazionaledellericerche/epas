@@ -577,6 +577,7 @@ list[4].minutesPaid=Minuti pagati
 
 manageNoOwnerUsers= Gestione Utenti di Sistema/Orfani
 manageUsers= Gestione Utenti
+manageGroups= Gestione gruppi
 
 mealTicket.aquiredExitingNow= Buono Pasto maturato (uscendo in questo momento).
 mealTicket.aquired= Buono Pasto maturato
