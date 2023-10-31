@@ -41,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.CompetenceManager;
 import manager.GroupManager;
+import manager.GroupOvertimeManager;
 import models.GeneralSetting;
 import models.GroupOvertime;
 import models.Office;
@@ -49,6 +50,7 @@ import models.Role;
 import models.TotalOvertime;
 import models.User;
 import models.UsersRolesOffices;
+import models.dto.PersonOvertimeInMonth;
 import models.flows.Group;
 import org.testng.util.Strings;
 import play.data.binding.As;
@@ -86,6 +88,8 @@ public class Groups extends Controller {
   private static CompetenceManager competenceManager;
   @Inject
   private static GroupOvertimeDao groupOvertimeDao;
+  @Inject
+  private static GroupOvertimeManager groupOvertimeManager;
 
   /**
    * Metodo che crea il gruppo.
@@ -288,10 +292,16 @@ public class Groups extends Controller {
       groupOvertimeSum = groupOvertimeSum + groupOvertimeList.stream()
       .mapToInt(go -> go.getNumberOfHours()).sum();
     }
+    Map<Integer, List<PersonOvertimeInMonth>> map = 
+        groupOvertimeManager.groupOvertimeSituationInYear(group.getPeople(), 
+            LocalDate.now().getYear());
+    int overtimeAssigned = map.entrySet().stream()
+        .flatMapToInt(pom -> pom.getValue().stream().mapToInt(p -> p.quantity)).sum();
+    int groupOvertimesAvailable = totalGroupOvertimes - overtimeAssigned; 
     int hoursAvailable = totale - totalGroupOvertimes - groupOvertimeSum;
     Office office = group.getOffice();
     GroupOvertime groupOvertime = new GroupOvertime();
-    render(group, totalGroupOvertimes, office, groupOvertime, hoursAvailable);
+    render(group, totalGroupOvertimes, office, groupOvertime, hoursAvailable, map, groupOvertimesAvailable);
   }
 
 }
