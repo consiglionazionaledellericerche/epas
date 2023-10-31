@@ -1,0 +1,35 @@
+	<div class="container-fluid">
+	<h3>Situazione residuale per il mese di ${templateUtility.monthName(month)} ${year}: </h3>
+			#{list items:psDto.contractMonths, as:'mese'}
+				<table class="table table-condensed">
+				  <tr>
+				    <td>
+				      <em>Tempo per straordinari</em>
+				      <i class="fa fa-question-circle" aria-hidden="true" webui-popover-hover 
+				           data-content="<strong>Tempo per straordinari</strong> La somma di tutte le differenze positive nel mese.<br> 
+				                   <strong>Differenze positive</strong> Giorni in cui il dipendente ha svolto più ore di quelle <br>previste dal piano orario giornaliero."></i>
+				    </td>
+				    <td>
+				      <strong>${mese.value.progressivoFinalePositivoMese.toHourTime()}</strong>
+				      <a href="@{Stampings.stampings(year, month)}">
+				        <i class="fa fa-search" aria-hidden="true" webui-popover-hover data-content="Visualizza Presenze"></i></a>
+				    </td>
+				  </tr>
+				  <tr>
+				    <td>
+				      <em>Progressivo a fine mese</em>
+				      <i class="fa fa-question-circle" aria-hidden="true" webui-popover-hover 
+    				       data-content="<strong>Progressivo a fine mese</strong> Il saldo fra le differenze positive e negative nel mese. <br>
+				                   <strong>Differenze positive/negative</strong> Giorni in cui il dipendente ha svolto più ore/meno ore di quelle <br>previste dal piano orario giornaliero."></i>
+				    </td>
+				    <td>
+                      <strong>${mese.value.progressivoFinaleMese.toHourTime()}</strong>
+				    </td>
+				  </tr>
+				  <tr>
+				    <td><em>Residuo monte ore anno corrente</em></td>
+				    <td><strong>${mese.value.remainingMinutesCurrentYear.toHourTime()}</strong></td>
+				  </tr>
+				</table>
+			#{/list}
+	</div>

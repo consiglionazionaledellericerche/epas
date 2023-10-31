@@ -482,7 +482,13 @@ public class CompetenceRequests extends Controller {
     rules.checkIfPermitted(competenceRequest);
     User user = Security.getUser().get();
     boolean disapproval = false;
-    render(competenceRequest, type, user, disapproval);
+    int month = competenceRequest.getMonth();
+    PersonStampingRecap psDto = null;
+    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      psDto = stampingsRecapFactory
+          .create(competenceRequest.getPerson(), competenceRequest.getYear(), month, true);
+    }    
+    render(competenceRequest, type, user, disapproval, month, psDto);
   }
 
   /**
@@ -496,17 +502,24 @@ public class CompetenceRequests extends Controller {
     User user = Security.getUser().get();
     rules.checkIfPermitted(competenceRequest);
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
-      if (value != null) {
-        competenceRequest.setValue(value);
-      }      
       competenceRequest.save();
       if (!approval) {
         approval = true;
-        render(competenceRequest, approval);
+        int month = competenceRequest.getMonth();
+        PersonStampingRecap psDto = stampingsRecapFactory
+            .create(competenceRequest.getPerson(), competenceRequest.getYear(), 
+                competenceRequest.getMonth(), true);
+        render(competenceRequest, approval, psDto, month);
       }
     }    
     
     log.debug("Approving competence request {}", competenceRequest);
+    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST) 
+        && (value != null && competenceRequest.getValue() != value)) {
+      competenceRequest.setValue(value);
+      log.debug("Cambiato valore alla competenza da {} a {}",competenceRequest.getValue(), value);
+      competenceRequest.save();
+    }  
     
     boolean approved = competenceRequestManager.approval(competenceRequest, user);
 
@@ -557,7 +570,11 @@ public class CompetenceRequests extends Controller {
     User user = Security.getUser().get();
     if (!disapproval) {
       disapproval = true;
-      render(competenceRequest, disapproval);
+      int month = competenceRequest.getMonth();
+      PersonStampingRecap psDto = stampingsRecapFactory
+          .create(competenceRequest.getPerson(), competenceRequest.getYear(), 
+              competenceRequest.getMonth(), true);
+      render(competenceRequest, disapproval, month, psDto);
     }
 
     if (competenceRequest.isManagerApprovalRequired()
