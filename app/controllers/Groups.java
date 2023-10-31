@@ -275,6 +275,7 @@ public class Groups extends Controller {
   public static void handleOvertimeGroup(Long groupId) {
     Group group = Group.findById(groupId);
     notFoundIfNull(group);
+    rules.checkIfPermitted(group.getOffice());
     //La quantità di ore di straordinario accordate al gruppo nell'anno
     int totalGroupOvertimes = group.getGroupOvertimes().stream()
         .filter(go -> go.getYear().equals(LocalDate.now().getYear()))

@@ -2233,6 +2233,8 @@ when
         "Groups.edit",
         "Groups.deleteGroup",
         "Groups.showGroups",
+        "Groups.handleOvertimeGroup",
+        "GroupOvertimes.save",
         
         "Affiliations.personAffiliations",
         "Affiliations.blankByPerson",
@@ -2412,6 +2414,8 @@ when
         "Groups.edit",
         "Groups.deleteGroup",
         "Groups.showGroups",
+        "Groups.handleOvertimeGroup",
+        "GroupOvertimes.save",
 
         "Affiliations.personAffiliations",
         "Affiliations.blankByPerson",
