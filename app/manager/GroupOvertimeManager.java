@@ -39,24 +39,14 @@ public class GroupOvertimeManager {
 
   public boolean checkOvertimeAvailability(GroupOvertime groupOvertime, int year) {
     
-    int totalGroupOvertimes = groupOvertime.getGroup().getGroupOvertimes().stream()
-        .filter(go -> go.getYear().equals(LocalDate.now().getYear()))
-        .mapToInt(go -> go.getNumberOfHours()).sum();
+    int totalGroupOvertimes = totalGroupOvertimes(groupOvertime);
     
     List<TotalOvertime> totalList = competenceDao
         .getTotalOvertime(LocalDate.now().getYear(), groupOvertime.getGroup().getOffice());
     int totale = competenceManager.getTotalOvertime(totalList);
+        
+    int groupOvertimeSum = totalOtherGroupsOvertimes(groupOvertime);
     
-    List<Group> groupList = groupOvertime.getGroup().getOffice().getGroups().stream()
-        .filter(g -> !g.getName().equals(groupOvertime.getGroup().getName()))
-        .collect(Collectors.toList());
-    int groupOvertimeSum = 0;
-    for (Group otherGroup : groupList)  {
-      List<GroupOvertime> groupOvertimeList = groupOvertimeDao
-          .getByYearAndGroup(LocalDate.now().getYear(), otherGroup);
-      groupOvertimeSum = groupOvertimeSum + groupOvertimeList.stream()
-      .mapToInt(go -> go.getNumberOfHours()).sum();
-    }
     int hoursAvailable = totale - groupOvertimeSum - totalGroupOvertimes;
     if (hoursAvailable - groupOvertime.getNumberOfHours() >= 0) {
       return true;
@@ -92,5 +82,37 @@ public class GroupOvertimeManager {
       }
     }    
     return releaseMap;
+  }
+  
+  /**
+   * Ritorna la quantità di ore di straordinario assegnate al gruppo.
+   * 
+   * @param groupOvertime la nuova variazione di ore di straordinario per il gruppo
+   * @return la quantità di ore di straordinario assegnate al gruppo.
+   */
+  public int totalGroupOvertimes(GroupOvertime groupOvertime) {
+    return groupOvertime.getGroup().getGroupOvertimes().stream()
+        .filter(go -> go.getYear().equals(LocalDate.now().getYear()))
+        .mapToInt(go -> go.getNumberOfHours()).sum();
+  }
+  
+  /**
+   * Ritorna il totale delle ore di straordinario assegnate agli altri gruppi.
+   * 
+   * @param groupOvertime la variazione di ore di straordinario
+   * @return il totale delle ore di straordinario assegnate agli altri gruppi.
+   */
+  public int totalOtherGroupsOvertimes(GroupOvertime groupOvertime) {
+    List<Group> groupList = groupOvertime.getGroup().getOffice().getGroups().stream()
+        .filter(g -> !g.getName().equals(groupOvertime.getGroup().getName()))
+        .collect(Collectors.toList());
+    int groupOvertimeSum = 0;
+    for (Group otherGroup : groupList)  {
+      List<GroupOvertime> groupOvertimeList = groupOvertimeDao
+          .getByYearAndGroup(LocalDate.now().getYear(), otherGroup);
+      groupOvertimeSum = groupOvertimeSum + groupOvertimeList.stream()
+      .mapToInt(go -> go.getNumberOfHours()).sum();
+    }
+    return groupOvertimeSum;
   }
 }

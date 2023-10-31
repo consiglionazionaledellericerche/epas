@@ -509,6 +509,10 @@ public class CompetenceRequests extends Controller {
         PersonStampingRecap psDto = stampingsRecapFactory
             .create(competenceRequest.getPerson(), competenceRequest.getYear(), 
                 competenceRequest.getMonth(), true);
+        /* TODO: aggiungere l'informazione su quante ore di straordinario sono disponibili
+         * a seconda che stia approvando un responsabile di sede o un responsabile di gruppo
+         */
+        
         render(competenceRequest, approval, psDto, month);
       }
     }    
