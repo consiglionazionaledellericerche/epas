@@ -181,6 +181,8 @@ public class Groups extends Controller {
     }
     if (user.isSystemUser() 
         || uroDao.getUsersRolesOffices(user, roleDao.getRoleByName(Role.PERSONNEL_ADMIN), office)
+        .isPresent()
+        || uroDao.getUsersRolesOffices(user, roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office)
         .isPresent()) {
       groups = groupDao.groupsByOffice(office, Optional.<Person>absent(), Optional.of(true));
     }
