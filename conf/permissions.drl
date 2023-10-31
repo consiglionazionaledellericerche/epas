@@ -994,6 +994,7 @@ when
     		"Competences.monthlyOvertime",
     		"Groups.showGroups",
     		"Groups.edit",
+    		"Groups.handleOvertimeGroup",
     		"AbsenceRequests.blank",
 			"AbsenceRequests.edit",
 			"AbsenceRequests.save",
@@ -1040,6 +1041,7 @@ when
   			"Stampings.dailyPresenceForPersonInCharge" ,
     		"Competences.monthlyOvertime",
     		"Groups.showGroups",
+    		"Groups.handleOvertimeGroup",
     		"Groups.edit"), target==$o, granted==false)
 then
   $c.grant();
