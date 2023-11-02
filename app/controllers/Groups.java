@@ -298,8 +298,7 @@ public class Groups extends Controller {
     Map<Integer, List<PersonOvertimeInMonth>> map = 
         groupOvertimeManager.groupOvertimeSituationInYear(group.getPeople(), 
             LocalDate.now().getYear());
-    int overtimeAssigned = map.entrySet().stream()
-        .flatMapToInt(pom -> pom.getValue().stream().mapToInt(p -> p.quantity)).sum();
+    int overtimeAssigned = groupOvertimeManager.groupOvertimeAssignedInYear(map);
     int groupOvertimesAvailable = totalGroupOvertimes - overtimeAssigned; 
     int hoursAvailable = totale - totalGroupOvertimes - groupOvertimeSum;
     Office office = group.getOffice();

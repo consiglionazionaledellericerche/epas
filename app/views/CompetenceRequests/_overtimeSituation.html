@@ -33,3 +33,8 @@
 				</table>
 			#{/list}
 	</div>
+	#{if showOvertimeAvailableHours}
+	<div class="container-fluid">
+		<h4>Quantità di straordinari ancora disponibili da assegnare: ${hoursAvailable} ore</h4>
+	</div>
+	#{/if}

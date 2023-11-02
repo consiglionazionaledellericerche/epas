@@ -1,7 +1,7 @@
 <div class="container-fluid">
 #{alert color: 'info' }
 <p>
-Nel menu in alto seleziona <strong>l'anno e il mese</strong> per cui vuoi effettuare la richiesta.
+Nel menu in alto seleziona <strong>l'anno e il mese</strong> per cui vuoi effettuare la richiesta.<br>
 Qui sotto compila il form per inviare una richiesta di ${competenceRequest.type.label()}
 #{if isOvertime}
 Specificando la <strong>quantità di ore</strong> che intendi richiedere come straordinario.<br>  
@@ -22,6 +22,7 @@ Specificando la <strong>data</strong> che intendi richiedere come cambio e la <s
 	#{f.hidden 'persist', value:persist /}
 	#{f.hidden 'year', value: currentData.year /}
 	#{f.hidden 'month', value: currentData.month /}
+	
 	
 	<div class="container">
 		#{include './_overtimeSituation.html' /}

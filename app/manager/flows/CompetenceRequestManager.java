@@ -19,23 +19,29 @@ package manager.flows;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
+import com.google.common.collect.Sets;
 import controllers.Security;
 import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
 import dao.CompetenceRequestDao;
 import dao.GroupDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import manager.CompetenceManager;
 import manager.ConsistencyManager;
+import manager.GroupOvertimeManager;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -44,9 +50,14 @@ import models.CompetenceCode;
 import models.Person;
 import models.PersonReperibilityDay;
 import models.Role;
+import models.TotalOvertime;
 import models.User;
+import models.UsersRolesOffices;
+import models.dto.PersonOvertimeInMonth;
+import models.flows.Affiliation;
 import models.flows.CompetenceRequest;
 import models.flows.CompetenceRequestEvent;
+import models.flows.Group;
 import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
 import org.apache.commons.compress.utils.Lists;
@@ -75,6 +86,10 @@ public class CompetenceRequestManager {
   private PersonReperibilityDayDao repDao;
   private CompetenceCodeDao competenceCodeDao;
   private ConsistencyManager consistencyManager;
+  private GroupOvertimeManager groupOvertimeManager;
+  private CompetenceDao competenceDao;
+  private CompetenceManager competenceManager;
+  
 
   /**
    * DTO per la configurazione delle CompenteRequest.
@@ -109,7 +124,8 @@ public class CompetenceRequestManager {
       UsersRolesOfficesDao uroDao, RoleDao roleDao, NotificationManager notificationManager,
       CompetenceRequestDao competenceRequestDao, GroupDao groupDao, PersonDao personDao,
       PersonReperibilityDayDao repDao, CompetenceCodeDao competenceCodeDao, 
-      ConsistencyManager consistencyManager) {
+      ConsistencyManager consistencyManager, GroupOvertimeManager groupOvertimeManager,
+      CompetenceDao competenceDao, CompetenceManager competenceManager) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
@@ -120,8 +136,13 @@ public class CompetenceRequestManager {
     this.repDao = repDao;
     this.competenceCodeDao = competenceCodeDao;
     this.consistencyManager = consistencyManager;
-
+    this.groupOvertimeManager = groupOvertimeManager;
+    this.competenceDao = competenceDao;
+    this.competenceManager = competenceManager;
+    
   }
+  
+  private static String code = "S1";
 
   /**
    * Verifica che gruppi ed eventuali responsabile di sede siano presenti per poter richiedere il
@@ -708,6 +729,67 @@ public class CompetenceRequestManager {
     log.info("{} disapprovata dal responsabile di sede {}.",
         competenceRequest, currentPerson.getFullname());
 
+  }
+  
+  /**
+   * Metodo che ritorna la quantità di ore disponibili per lo straordinario.
+   * 
+   * @param approver l'utente che deve approvare la richiesta
+   * @param competenceRequest la richiesta di competenza (straordinario) da verificare
+   * @return la quantità di ore di straordinario disponibili per approvazione.
+   */
+  public int hoursAvailable(User approver, CompetenceRequest competenceRequest) {
+    
+    int totalOvertimes = 0;
+    int overtimeHoursAlreadyAssigned = 0;
+    val config = getConfiguration(competenceRequest.getType(), competenceRequest.getPerson());
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(approver);
+    // Controllo le richieste da approvare quante ore di straordinario richiedono
+    List<CompetenceRequest> results = competenceRequestDao
+        .toApproveResults(roleList, 
+            LocalDateTime.now().minusMonths(1), 
+            Optional.absent(), CompetenceRequestType.OVERTIME_REQUEST, approver.getPerson());
+    int overtimePendingRequests = results.stream().mapToInt(cr -> cr.getValue()).sum();
+    if (config.managerApprovalRequired) {
+      
+      /* 
+       * Controllo la quantità già assegnata nel corso dell'anno agli appartenenti al gruppo 
+       * del richiedente 
+       */
+      Group group = groupDao
+          .checkManagerPerson(approver.getPerson(), competenceRequest.getPerson()).get();
+      Map<Integer, List<PersonOvertimeInMonth>> map = groupOvertimeManager
+          .groupOvertimeSituationInYear(group.getPeople(), competenceRequest.getYear());
+      overtimeHoursAlreadyAssigned = groupOvertimeManager.groupOvertimeAssignedInYear(map);
+      
+      /*
+       * Controllo quante ore ha il mio gruppo a disposizione
+       */
+      totalOvertimes = groupOvertimeManager.totalGroupOvertimes(group);
+      
+      
+    }
+    if (config.officeHeadApprovalRequired) {
+      /*
+       * Controllo la quantità già assegnata nel corso dell'anno ai dipendenti della sede
+       */
+      CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeByCode(code);
+      Map<Integer, List<PersonOvertimeInMonth>> map = groupOvertimeManager
+          .groupOvertimeSituationInYear(personDao.listForCompetence(competenceCode, 
+              Optional.absent(), Sets.newHashSet(approver.getPerson().getOffice()), true, 
+              LocalDate.now().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), 
+              LocalDate.now(), Optional.absent()).list(), competenceRequest.getYear());
+      overtimeHoursAlreadyAssigned = groupOvertimeManager.groupOvertimeAssignedInYear(map);
+      
+      /*
+       * Controllo quante ore ha la sede a disposizione
+       */
+      List<TotalOvertime> totalList = competenceDao
+      .getTotalOvertime(LocalDate.now().getYear(), approver.getPerson().getOffice());
+      totalOvertimes = competenceManager.getTotalOvertime(totalList);
+      
+    }
+    return totalOvertimes - overtimePendingRequests - overtimeHoursAlreadyAssigned;
   }
 
 }

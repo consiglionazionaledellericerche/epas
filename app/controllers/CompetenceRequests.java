@@ -480,7 +480,13 @@ public class CompetenceRequests extends Controller {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     notFoundIfNull(competenceRequest);
     rules.checkIfPermitted(competenceRequest);
+    boolean showOvertimeAvailableHours = false;
+    int hoursAvailable = 0;
     User user = Security.getUser().get();
+    if (user.hasRoles(Role.GROUP_MANAGER) || user.hasRoles(Role.SEAT_SUPERVISOR)) {
+      hoursAvailable = competenceRequestManager.hoursAvailable(user, competenceRequest);
+      showOvertimeAvailableHours = true;
+    }
     boolean disapproval = false;
     int month = competenceRequest.getMonth();
     PersonStampingRecap psDto = null;
@@ -488,7 +494,8 @@ public class CompetenceRequests extends Controller {
       psDto = stampingsRecapFactory
           .create(competenceRequest.getPerson(), competenceRequest.getYear(), month, true);
     }    
-    render(competenceRequest, type, user, disapproval, month, psDto);
+    render(competenceRequest, type, user, disapproval, month, psDto, 
+        showOvertimeAvailableHours, hoursAvailable);
   }
 
   /**
@@ -502,6 +509,7 @@ public class CompetenceRequests extends Controller {
     User user = Security.getUser().get();
     rules.checkIfPermitted(competenceRequest);
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      boolean showOvertimeAvailableHours = true;
       competenceRequest.save();
       if (!approval) {
         approval = true;
@@ -509,11 +517,10 @@ public class CompetenceRequests extends Controller {
         PersonStampingRecap psDto = stampingsRecapFactory
             .create(competenceRequest.getPerson(), competenceRequest.getYear(), 
                 competenceRequest.getMonth(), true);
-        /* TODO: aggiungere l'informazione su quante ore di straordinario sono disponibili
-         * a seconda che stia approvando un responsabile di sede o un responsabile di gruppo
-         */
-        
-        render(competenceRequest, approval, psDto, month);
+
+        int hoursAvailable = competenceRequestManager.hoursAvailable(user, competenceRequest);
+        render(competenceRequest, approval, psDto, month, hoursAvailable, 
+            showOvertimeAvailableHours);
       }
     }    
     

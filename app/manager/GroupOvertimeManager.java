@@ -37,9 +37,17 @@ public class GroupOvertimeManager {
     this.competenceCodeDao = competenceCodeDao;
   }
 
+  /**
+   * Controlla se è possibile assegnare lo straordinario richiesto.
+   * 
+   * @param groupOvertime la variazione di ore di straordinario
+   * @param year l'anno di riferimento
+   * @return true se possibile assegnare al gruppo la variazione di straordinario, 
+   *    false altrimenti.
+   */
   public boolean checkOvertimeAvailability(GroupOvertime groupOvertime, int year) {
     
-    int totalGroupOvertimes = totalGroupOvertimes(groupOvertime);
+    int totalGroupOvertimes = totalGroupOvertimes(groupOvertime.getGroup());
     
     List<TotalOvertime> totalList = competenceDao
         .getTotalOvertime(LocalDate.now().getYear(), groupOvertime.getGroup().getOffice());
@@ -90,8 +98,8 @@ public class GroupOvertimeManager {
    * @param groupOvertime la nuova variazione di ore di straordinario per il gruppo
    * @return la quantità di ore di straordinario assegnate al gruppo.
    */
-  public int totalGroupOvertimes(GroupOvertime groupOvertime) {
-    return groupOvertime.getGroup().getGroupOvertimes().stream()
+  public int totalGroupOvertimes(Group group) {
+    return group.getGroupOvertimes().stream()
         .filter(go -> go.getYear().equals(LocalDate.now().getYear()))
         .mapToInt(go -> go.getNumberOfHours()).sum();
   }
@@ -114,5 +122,17 @@ public class GroupOvertimeManager {
       .mapToInt(go -> go.getNumberOfHours()).sum();
     }
     return groupOvertimeSum;
+  }
+  
+  /**
+   * Ritorna la quantità totale di ore di straordinario assegnate ad un gruppo di persone.
+   * 
+   * @param map mappa contenente, per ogni mese, la lista di persone che hanno preso straordinario
+   * e quante ore hanno preso
+   * @return la quantità di ore di straordinario assegnate.
+   */
+  public int groupOvertimeAssignedInYear(Map<Integer, List<PersonOvertimeInMonth>> map) {
+    return map.entrySet().stream()
+    .flatMapToInt(pom -> pom.getValue().stream().mapToInt(p -> p.quantity)).sum();
   }
 }
