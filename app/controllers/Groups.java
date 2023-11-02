@@ -18,8 +18,11 @@
 package controllers;
 
 
+import com.google.common.base.Functions;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import common.security.SecurityRules;
 import dao.CompetenceDao;
 import dao.GeneralSettingDao;
@@ -295,10 +298,12 @@ public class Groups extends Controller {
       groupOvertimeSum = groupOvertimeSum + groupOvertimeList.stream()
       .mapToInt(go -> go.getNumberOfHours()).sum();
     }
-    Map<Integer, List<PersonOvertimeInMonth>> map = 
+    Map<Integer, List<PersonOvertimeInMonth>> mapFirst = 
         groupOvertimeManager.groupOvertimeSituationInYear(group.getPeople(), 
             LocalDate.now().getYear());
-    int overtimeAssigned = groupOvertimeManager.groupOvertimeAssignedInYear(map);
+    Ordering naturalOrderingDesc = Ordering.natural().reverse();
+    Map<Integer, List<PersonOvertimeInMonth>> map = ImmutableSortedMap.copyOf(mapFirst, naturalOrderingDesc);
+    int overtimeAssigned = groupOvertimeManager.groupOvertimeAssignedInYear(mapFirst);
     int groupOvertimesAvailable = totalGroupOvertimes - overtimeAssigned; 
     int hoursAvailable = totale - totalGroupOvertimes - groupOvertimeSum;
     Office office = group.getOffice();
