@@ -512,6 +512,7 @@ public class CompetenceRequests extends Controller {
       boolean showOvertimeAvailableHours = true;
       competenceRequest.save();
       if (!approval) {
+        
         approval = true;
         int month = competenceRequest.getMonth();
         PersonStampingRecap psDto = stampingsRecapFactory

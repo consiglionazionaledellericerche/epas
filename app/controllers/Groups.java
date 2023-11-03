@@ -302,13 +302,17 @@ public class Groups extends Controller {
         groupOvertimeManager.groupOvertimeSituationInYear(group.getPeople(), 
             LocalDate.now().getYear());
     Ordering naturalOrderingDesc = Ordering.natural().reverse();
-    Map<Integer, List<PersonOvertimeInMonth>> map = ImmutableSortedMap.copyOf(mapFirst, naturalOrderingDesc);
+    Map<Integer, List<PersonOvertimeInMonth>> map = 
+        ImmutableSortedMap.copyOf(mapFirst, naturalOrderingDesc);
     int overtimeAssigned = groupOvertimeManager.groupOvertimeAssignedInYear(mapFirst);
     int groupOvertimesAvailable = totalGroupOvertimes - overtimeAssigned; 
     int hoursAvailable = totale - totalGroupOvertimes - groupOvertimeSum;
     Office office = group.getOffice();
     GroupOvertime groupOvertime = new GroupOvertime();
-    render(group, totalGroupOvertimes, office, groupOvertime, hoursAvailable, map, groupOvertimesAvailable);
+    List<GroupOvertime> groupOvertimeInYearList = group.getGroupOvertimes().stream()
+        .filter(go -> go.getYear().equals(LocalDate.now().getYear())).collect(Collectors.toList());
+    render(group, totalGroupOvertimes, office, groupOvertime, hoursAvailable, map, 
+        groupOvertimesAvailable, groupOvertimeInYearList);
   }
 
 }

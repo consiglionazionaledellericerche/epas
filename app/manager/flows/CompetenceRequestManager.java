@@ -33,6 +33,7 @@ import dao.UsersRolesOfficesDao;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -227,7 +228,6 @@ public class CompetenceRequestManager {
       }
     }
     
-    //TODO: aggiungere il pezzo della richiesta preventiva di straordinario
     if (requestType.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
       competenceRequestConfiguration.advanceApprovalRequired = false;
     } else {
@@ -749,7 +749,15 @@ public class CompetenceRequestManager {
         .toApproveResults(roleList, 
             LocalDateTime.now().minusMonths(1), 
             Optional.absent(), CompetenceRequestType.OVERTIME_REQUEST, approver.getPerson());
-    int overtimePendingRequests = results.stream().mapToInt(cr -> cr.getValue()).sum();
+    if (config.advanceApprovalRequired) {
+      results = results.stream()
+          .filter(cr -> cr.actualEvent().eventType
+              .equals(CompetenceRequestEventType.FIRST_APPROVAL)).collect(Collectors.toList());
+    } else {
+      results = Lists.newArrayList();
+    }
+    int overtimePendingRequests = !results.isEmpty() ? 
+        results.stream().mapToInt(cr -> cr.getValue()).sum() : 0;
     if (config.managerApprovalRequired) {
       
       /* 

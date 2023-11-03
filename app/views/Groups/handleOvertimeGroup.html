@@ -15,6 +15,17 @@
 	La quantità di ore di straordinario assegnata al gruppo: <strong>${group.name}</strong> nell'anno è <strong>${totalGroupOvertimes}</strong> <br>
 	La quantità di ore disponibili attualmente per il gruppo è: <strong>${groupOvertimesAvailable}</strong>
 	#{/alert}
+	
+
+ 	#{accordionItem 'storicoGruppo', parent:'storico', title:'Storico inserimenti di variazioni di ore di straordinario assegnate al gruppo '+group.name, open:false, color:'warning'}
+	<ul>
+		#{list items:groupOvertimeInYearList, as:'item'}
+		<li>${item.numberOfHours} ore - ${item.dateOfUpdate.format()}</li>
+		#{/list}	
+	</ul>
+	#{/accordionItem}
+
+	
 	#{secure.check 'GroupOvertimes.save'}
 	#{form @GroupOvertimes.save(currentData.year), method:'POST', autocomplete:false, class:'form form-horizontal'}
 		#{f.hidden 'groupId', value: group.id /}
