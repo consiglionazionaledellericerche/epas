@@ -125,6 +125,14 @@
       		<span class="label label-danger label-badge">${templateUtility.overtimeRequests()}</span>
     	#{/if} 
       #{/secure.li}
+      #{if templateUtility.enabledOvertimeRequestInAdvance()}
+            #{secure.li @CompetenceRequests.overtimesToApproveInAdvance()}
+        	<i class="fa fa-money" aria-hidden="true"></i>
+       		#{if templateUtility.overtimeRequests() > 0}
+      			<span class="label label-danger label-badge">${templateUtility.overtimeRequests()}</span>
+    		#{/if} 
+      #{/secure.li}
+      #{/if}
       #{/secure.check}
       
      <li class="divider"></li>

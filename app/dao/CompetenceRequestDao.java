@@ -310,26 +310,6 @@ public class CompetenceRequestDao extends DaoBase {
       default:
         break;          
     }
-    //    if (!signer.getReperibilityTypes().isEmpty()) {
-    //      conditions.andAnyOf((competenceRequest.managerApprovalRequired.isTrue())
-    //          .and(competenceRequest.managerApproved.isNotNull()), 
-    //          competenceRequest.managerApprovalRequired.isFalse());
-    //      
-    //      query = getQueryFactory().selectFrom(competenceRequest)
-    //          .leftJoin(competenceRequest.person, person)
-    //          .leftJoin(person.reperibility, pr)
-    //          .where(pr.personReperibilityType.in(signer.getReperibilityTypes())
-    //              .and(conditions));
-    //      results.addAll(query.fetch());
-    //    } else {
-    //      conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
-    //        .and(competenceRequest.employeeApproved.isNotNull())
-    //          .and(person.office.in(officeList));
-    //      query = getQueryFactory().selectFrom(competenceRequest)
-    //          .join(competenceRequest.person, person)
-    //          .where(person.eq(signer).and(conditions));
-    //      results.addAll(query.fetch());
-    //    }
 
     return results;
   }

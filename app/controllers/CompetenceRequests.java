@@ -122,6 +122,10 @@ public class CompetenceRequests extends Controller {
   public static void overtimesToApprove() {
     listToApprove(CompetenceRequestType.OVERTIME_REQUEST);
   }
+  
+  public static void overtimesToApproveInAdvance() {
+    listToApproveWithRequestInAdvance(CompetenceRequestType.OVERTIME_REQUEST);
+  }
 
   /**
    * Lista delle richieste di straordinario dell'utente corrente.
@@ -155,7 +159,7 @@ public class CompetenceRequests extends Controller {
   }
 
   /**
-   * Lista delle richieste di assenza da approvare da parte dell'utente corrente.
+   * Lista delle richieste di competenza da approvare da parte dell'utente corrente.
    *
    * @param type tipo opzionale di tipo di richiesta di assenza.
    */
@@ -167,15 +171,54 @@ public class CompetenceRequests extends Controller {
     log.debug("Prelevo le richieste da approvare  di tipo {} a partire da {}",
         competenceType, fromDate);
 
+    val config = competenceRequestManager.getConfiguration(competenceType, person);
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
     List<CompetenceRequest> results = competenceRequestDao
         .allResults(roleList, fromDate, Optional.absent(), competenceType, person);
     List<CompetenceRequest> myResults =
         competenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(),
             competenceType, person);
-    List<CompetenceRequest> approvedResults =
-        competenceRequestDao.totallyApproved(roleList, fromDate, Optional.absent(), competenceType, person);
+    List<CompetenceRequest> approvedResults = competenceRequestDao
+        .totallyApproved(roleList, fromDate, Optional.absent(), competenceType, person);
+    if (config.isAdvanceApprovalRequired()) {
+      myResults = myResults.stream().filter(cr -> cr.actualEvent().eventType
+          .equals(CompetenceRequestEventType.STARTING_APPROVAL_FLOW)).collect(Collectors.toList());
+      approvedResults = approvedResults.stream().filter(cr -> cr.actualEvent().eventType
+          .equals(CompetenceRequestEventType.FIRST_APPROVAL)).collect(Collectors.toList());
+    }
+    val onlyOwn = false;
+    boolean overtimesQuantityEnabled = (Boolean)configurationManager
+        .configValue(person.getOffice(), 
+            EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY, LocalDate.now());
+    val available = person.getUser().hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
+    render(config, results, competenceType, onlyOwn, available, approvedResults, 
+        myResults, overtimesQuantityEnabled);
+  }
+  
+  /**
+   * 
+   * @param competenceType
+   */
+  public static void listToApproveWithRequestInAdvance(CompetenceRequestType competenceType) {
+    Verify.verifyNotNull(competenceType);
+    val person = Security.getUser().get().getPerson();
+    val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
+    log.debug("Prelevo le richieste da approvare  di tipo {} a partire da {}",
+        competenceType, fromDate);
+
     val config = competenceRequestManager.getConfiguration(competenceType, person);
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
+    List<CompetenceRequest> results = competenceRequestDao
+        .allResults(roleList, fromDate, Optional.absent(), competenceType, person);
+    List<CompetenceRequest> myResults =
+        competenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(),
+            competenceType, person);
+    List<CompetenceRequest> approvedResults = competenceRequestDao
+        .totallyApproved(roleList, fromDate, Optional.absent(), competenceType, person);
+    if (config.isAdvanceApprovalRequired()) {
+      myResults = myResults.stream().filter(cr -> cr.actualEvent().eventType
+          .equals(CompetenceRequestEventType.FIRST_APPROVAL)).collect(Collectors.toList());      
+    }
     val onlyOwn = false;
     boolean overtimesQuantityEnabled = (Boolean)configurationManager
         .configValue(person.getOffice(), 
@@ -211,7 +254,8 @@ public class CompetenceRequests extends Controller {
     }
     notFoundIfNull(person);
 
-    val configurationProblems = competenceRequestManager.checkconfiguration(competenceType, person);
+    val configurationProblems = competenceRequestManager
+        .checkconfiguration(competenceType, person);
     if (!configurationProblems.isEmpty()) {
       flash.error(Joiner.on(" ").join(configurationProblems));
       list(competenceType);
@@ -232,7 +276,8 @@ public class CompetenceRequests extends Controller {
         .stream().filter(prt -> prt.getPersonReperibilities().stream()
             .anyMatch(pr -> pr.getPerson().equals(person)))
         .collect(Collectors.toList());
-        //ritorno solo il primo elemento della lista con la lista dei dipendenti afferenti al servizio
+        //ritorno solo il primo elemento della lista con la lista dei dipendenti afferenti 
+        //al servizio
 
         type = types.get(0);
         teamMates = type.getPersonReperibilities().stream()
@@ -241,8 +286,8 @@ public class CompetenceRequests extends Controller {
             .filter(p -> p.id != person.id).collect(Collectors.toList());
         break;
       case OVERTIME_REQUEST:
-        // controllo con la chiamata rest ad attestati per verificare se l'attestato di quell'anno/mese
-        // è già stato validato (valido solo per istanza CNR)
+        // controllo con la chiamata rest ad attestati per verificare se l'attestato di 
+        // quell'anno/mese è già stato validato (valido solo per istanza CNR)
         if ("true".equals(Play.configuration.getProperty(ATTESTATI_ACTIVE, "false"))) {
           /*
            * Nel caso di prove in locale, occorre cambiare l'indirizzo di Attestati nei parametri 
@@ -258,7 +303,8 @@ public class CompetenceRequests extends Controller {
             }
           } catch (Exception e) {
             log.warn("Impossibile effettuare il controllo di validazione dell'attestato " + 
-                " del {}/{} per la richiesta di straordinari di {}", month, year, person.getFullname());
+                " del {}/{} per la richiesta di straordinari di {}", 
+                month, year, person.getFullname());
           }
         }       
         
@@ -371,7 +417,8 @@ public class CompetenceRequests extends Controller {
           EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now())) {
         if (month < LocalDate.now().getMonthOfYear()) {
           Validation.addError("competenceRequest.note", 
-              "E' prevista richiesta preventiva. Non si può richiedere straordinario per un mese concluso!");
+              "E' prevista richiesta preventiva. "
+              + "Non si può richiedere straordinario per un mese concluso!");
         }
       }
     }
@@ -382,7 +429,8 @@ public class CompetenceRequests extends Controller {
     
     competenceRequest.setPerson(Security.getUser().get().getPerson());
 
-    CompetenceRequest existing = competenceRequestManager.checkCompetenceRequest(competenceRequest);
+    CompetenceRequest existing = competenceRequestManager
+        .checkCompetenceRequest(competenceRequest);
     if (existing != null) {
       Validation.addError("competenceRequest.note",
           "Esiste già una richiesta di questo tipo");
@@ -564,7 +612,8 @@ public class CompetenceRequests extends Controller {
     val available = competenceRequest.getPerson().getUser()
         .hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
     
-    val config = competenceRequestManager.getConfiguration(competenceType, competenceRequest.getPerson());
+    val config = competenceRequestManager
+        .getConfiguration(competenceType, competenceRequest.getPerson());
     render("@listToApprove", competenceType, onlyOwn, overtimesQuantityEnabled, available, 
         config, results, myResults, approvedResults);
    

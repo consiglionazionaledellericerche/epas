@@ -192,6 +192,31 @@ public class TemplateUtility {
           }
         });    
   }
+  
+  /**
+   * Verifica se dalla configurazione della sede è abilitata la richiesta preventiva di straordinari.
+   * 
+   * @return true se chi sta vedendo il menu può far abilitare, in base alla configurazione, 
+   * la visualizzazione della voce di menu relativa alle richieste di straordinario preventivamente 
+   * approvate da approvare definitivamente.
+   */
+  public boolean enabledOvertimeRequestInAdvance() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return true;
+    }
+    List<Role> list = uroDao.getUsersRolesOfficesByUser(user).stream()
+        .map(uro -> uro.getRole()).collect(Collectors.toList());
+    if (list.stream().anyMatch(r -> r.getName().equals(Role.GROUP_MANAGER) 
+        || r.getName().equals(Role.SEAT_SUPERVISOR))) {
+      if ((Boolean) configurationManager
+          .configValue(user.getPerson().getOffice(), 
+              EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now())) {
+        return true;
+      }
+    }    
+    return false;
+  }
 
   /**
    * Verifica se nella configurazione posso abilitare l'auto inserimento covid19.
@@ -430,6 +455,26 @@ public class TemplateUtility {
         .toApproveResults(roleList, 
             LocalDateTime.now().minusMonths(1), 
             Optional.absent(), CompetenceRequestType.OVERTIME_REQUEST, user.getPerson());
+    /*
+     * TODO: in base alla configurazione qui ritornare o quelle da approvare allo stato iniziale
+     * o quelle da approvare allo stato prima approvazione.
+     */
+    return results.size();
+  }
+  
+  public final int overtimeRequestsInAdvance() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<CompetenceRequest> results = competenceRequestDao
+        .toApproveResults(roleList, 
+            LocalDateTime.now().minusMonths(1), 
+            Optional.absent(), CompetenceRequestType.OVERTIME_REQUEST, user.getPerson());
+    /*
+     * TODO: in base alla configurazione qui solo quelle da approvare allo stato prima approvazione.
+     */
     return results.size();
   }
 
