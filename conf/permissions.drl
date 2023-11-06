@@ -2128,6 +2128,7 @@ when
      	"PersonDays.workingOutOpening",
      	"PersonDays.approveWorkingOutOpening",
      	"PersonDays.forceMealTicket",
+     	"PersonDays.ignoreShortLeave",
      	"PersonDays.note",
 
      	/* Vecchio permesso editCompetence */
@@ -2307,6 +2308,7 @@ when
         "PersonDays.workingOutOpening",
         "PersonDays.approveWorkingOutOpening",
         "PersonDays.forceMealTicket",
+        "PersonDays.ignoreShortLeave",
         "PersonDays.note",
 
         /* Vecchio permesso editCompetence */
