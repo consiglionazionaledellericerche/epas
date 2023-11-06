@@ -1236,8 +1236,7 @@ activation-group 'admin'
 when
  AccountRole(this == AccountRole.ADMIN)
  $c: PermissionCheck(
-    action.startsWith("Absences.")
-    || (action.startsWith("Administration.") && 
+    (action.startsWith("Administration.") && 
        action not in ("Administration.generalSetting", "Administration.saveGeneralSetting"))
     || action.startsWith("Charts.")
     || action.startsWith("MonthRecaps.")
@@ -1262,6 +1261,7 @@ when
     "Absences.showGeneralMonthlyAbsences",
     "Absences.showPersonMonthlyAbsences",
     "Absences.yearlyAbsences",
+    "Absences.downloadAttachment",
     "AbsenceGroups.showAbsenceTypes",
     "AbsenceGroups.showGroups",
     "AbsenceGroups.editGroup",       /* per la show... */
