@@ -1144,6 +1144,7 @@ AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL.blank =nu
 
 CompetenceRequests.overtimes =Mie richieste di straordinari
 CompetenceRequests.overtimesToApprove =Flussi di richieste straordinari
+CompetenceRequests.overtimesToApproveInAdvance =Approvazione richieste preventive di straordinario
 CompetenceRequestType.OVERTIME_REQUEST=richiesta di straordinari
 CompetenceRequestType.OVERTIME_REQUESTS= Mie richieste di straordinari
 CompetenceRequestType.OVERTIME_REQUEST.blank =nuova richiesta di straordinari

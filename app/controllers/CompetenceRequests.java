@@ -181,6 +181,7 @@ public class CompetenceRequests extends Controller {
     List<CompetenceRequest> approvedResults = competenceRequestDao
         .totallyApproved(roleList, fromDate, Optional.absent(), competenceType, person);
     if (config.isAdvanceApprovalRequired()) {
+      approvedResults = myResults;
       myResults = myResults.stream().filter(cr -> cr.actualEvent().eventType
           .equals(CompetenceRequestEventType.STARTING_APPROVAL_FLOW)).collect(Collectors.toList());
       approvedResults = approvedResults.stream().filter(cr -> cr.actualEvent().eventType

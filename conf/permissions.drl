@@ -1020,6 +1020,7 @@ when
 			"CompetenceRequests.managerApproval",
 			"CompetenceRequests.list",
 			"CompetenceRequests.listToApprove",
+			"CompetenceRequests.listToApproveWithRequestInAdvance",
 			"CompetenceRequests.overtimesToApprove",
 			"CompetenceRequests.overtimesToApproveInAdvance",
 			
@@ -1084,6 +1085,7 @@ when
   $c: PermissionCheck( action in (
     		"CompetenceRequests.list",
 			"CompetenceRequests.listToApprove",
+			"CompetenceRequests.listToApproveWithRequestInAdvance",
 			"CompetenceRequests.overtimesToApprove",	
 			"CompetenceRequests.overtimesToApproveInAdvance",		
 			"CompetenceRequests.managerApproval",
@@ -1607,6 +1609,7 @@ when
 		"CompetenceRequests.approval",
 		"CompetenceRequests.disapproval",
 		"CompetenceRequests.listToApprove",
+		"CompetenceRequests.listToApproveWithRequestInAdvance",
 		"CompetenceRequests.officeHeadApproval",
 		"CompetenceRequests.overtimesToApprove",
 		"CompetenceRequests.overtimesToApproveInAdvance",
@@ -1695,6 +1698,7 @@ when
 		"CompetenceRequests.approval",
 		"CompetenceRequests.disapproval",
 		"CompetenceRequests.listToApprove",
+		"CompetenceRequests.listToApproveWithRequestInAdvance",
 		"CompetenceRequests.officeHeadApproval",
 		"CompetenceRequests.overtimesToApprove",
 		"CompetenceRequests.overtimesToApproveInAdvance",

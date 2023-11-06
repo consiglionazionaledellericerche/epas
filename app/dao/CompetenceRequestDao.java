@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import lombok.val;
+import manager.flows.CompetenceRequestManager;
+import manager.flows.CompetenceRequestManager.CompetenceRequestConfiguration;
 import models.Office;
 import models.Person;
 import models.Role;
@@ -52,7 +54,7 @@ public class CompetenceRequestDao extends DaoBase {
 
   @Inject
   CompetenceRequestDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
-    super(queryFactory, emp);
+    super(queryFactory, emp);    
   }
 
   /**
@@ -400,6 +402,7 @@ public class CompetenceRequestDao extends DaoBase {
     .and(competenceRequest.person.office.in(officeList));
     return condition;
   }
+
 
 }
 
