@@ -1,5 +1,14 @@
-  #{title title:'Da approvare', administration:true /}
-  
+  #{if config.isAdvanceApprovalRequired()}
+  	#{if isDefinitevely}
+  		#{title title:'Approvazione consuntiva di lavoro straordinario', administration:true /}
+  	#{/if}
+  	#{else}
+  		#{title title:'Approvazione preventiva di lavoro straordinario', administration:true /}
+  	#{/else}
+  #{/if}
+  #{else}
+  	#{title title:'Da approvare', administration:true /}
+  #{/else}
   <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
 	<thead>
 		

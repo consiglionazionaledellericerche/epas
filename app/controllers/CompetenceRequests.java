@@ -191,9 +191,10 @@ public class CompetenceRequests extends Controller {
     boolean overtimesQuantityEnabled = (Boolean)configurationManager
         .configValue(person.getOffice(), 
             EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY, LocalDate.now());
+    boolean isDefinitevely = false;
     val available = person.getUser().hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
     render(config, results, competenceType, onlyOwn, available, approvedResults, 
-        myResults, overtimesQuantityEnabled);
+        myResults, overtimesQuantityEnabled, isDefinitevely);
   }
   
   /**
@@ -224,9 +225,10 @@ public class CompetenceRequests extends Controller {
     boolean overtimesQuantityEnabled = (Boolean)configurationManager
         .configValue(person.getOffice(), 
             EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY, LocalDate.now());
+    boolean isDefinitevely = true;
     val available = person.getUser().hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
     render(config, results, competenceType, onlyOwn, available, approvedResults, 
-        myResults, overtimesQuantityEnabled);
+        myResults, overtimesQuantityEnabled, isDefinitevely);
   }
 
   /**
