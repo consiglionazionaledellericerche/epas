@@ -584,6 +584,12 @@ public enum DefaultAbsenceType {
   //      0, false, MealTicketBehaviour.notAllowMealTicket, 0, null, 
   //      Sets.newHashSet(), new LocalDate(2022, 11, 1), 
   //      new LocalDate(2023, 2, 28), false, true, true),
+  
+  A_31_2022("31", "Ferie anno 2022 prorogate", false, 
+      ImmutableSet.of(JustifiedTypeName.all_day), 
+      0, false, MealTicketBehaviour.notAllowMealTicket, 0, null, 
+      Sets.newHashSet(), new LocalDate(2023, 11, 1), 
+      new LocalDate(2024, 2, 28), false, true, true),
 
   A_31("31", "Ferie anno precedente", false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false,
       MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), 

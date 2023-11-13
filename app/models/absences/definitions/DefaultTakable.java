@@ -213,10 +213,10 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_94), 
       -1, null),
 
-  //  T_FERIE_CNR_PROROGA_2021(AmountType.units, 
-  //      ImmutableSet.of(DefaultAbsenceType.A_31_2021), 
-  //      ImmutableSet.of(DefaultAbsenceType.A_31_2021), 
-  //      -1, null),
+    T_FERIE_CNR_PROROGA_2022(AmountType.units, 
+        ImmutableSet.of(DefaultAbsenceType.A_31_2022), 
+        ImmutableSet.of(DefaultAbsenceType.A_31_2022), 
+        -1, null),
   
   T_FERIE_CNR_PROROGA(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_31, 

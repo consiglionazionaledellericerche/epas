@@ -4,9 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.2] - Unreleased
+### Added
+  - Aggiunto il codice 31_2022 per la gestione delle assenze del 2022 nell'anno 2024
+
 ## [2.9.1] - 2023-11-07
 ### Added
   - Fornito permesso di ignorare il calcolo permesso breve ai responsabili del personale
+
 
 ## [2.9.0] - 2023-11-06
 ### Added
