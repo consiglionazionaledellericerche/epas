@@ -38,6 +38,7 @@ public enum DefaultCategoryType {
   RIPOSI_COMPENSATIVI_CNR("Riposi compensativi", 3, DefaultTab.FERIE_PERMESSI_RIPOSI),
   //  PROROGA_FERIE_2020("Proroga ferie 2020", 4, DefaultTab.FERIE_PERMESSI_RIPOSI),
   //  PROROGA_FERIE_2021("Proroga ferie 2021", 4, DefaultTab.FERIE_PERMESSI_RIPOSI),
+  PROROGA_FERIE_2022("Proroga ferie 2022", 4, DefaultTab.FERIE_PERMESSI_RIPOSI),
   ASTENSIONE_POSTPARTUM("Astensione post partum", 5, DefaultTab.CONGEDI_PARENTALI), 
   CONGEDI_PRENATALI("Congedi prenatali", 7, DefaultTab.CONGEDI_PARENTALI),
 
