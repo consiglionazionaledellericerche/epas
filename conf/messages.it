@@ -1142,9 +1142,9 @@ AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL =comunica
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS_TOP_LEVEL = Mie comunicazioni ferie anno passato dopo deadline
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL.blank =nuova comunicazione ferie anno passato dopo deadline
 
-CompetenceRequests.overtimes =Mie richieste di straordinari
-CompetenceRequests.overtimesToApprove =Flussi di richieste straordinari
-CompetenceRequests.overtimesToApproveInAdvance =Approvazione consuntiva lavoro straordinario
+CompetenceRequests.overtimes =Mie richieste di ore di lavoro straordinario
+CompetenceRequests.overtimesToApprove =Flussi di richieste ore di lavoro straordinario
+CompetenceRequests.overtimesToApproveInAdvance =Approvazione consuntiva ore di lavoro straordinario
 CompetenceRequestType.OVERTIME_REQUEST=richiesta di straordinari
 CompetenceRequestType.OVERTIME_REQUESTS= Mie richieste di straordinari
 CompetenceRequestType.OVERTIME_REQUEST.blank =nuova richiesta di straordinari
