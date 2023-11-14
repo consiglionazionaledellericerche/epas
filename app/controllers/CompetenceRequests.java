@@ -577,8 +577,33 @@ public class CompetenceRequests extends Controller {
     }    
     
     log.debug("Approving competence request {}", competenceRequest);
-    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST) 
-        && (value != null && competenceRequest.getValue() != value)) {
+    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      int hoursAvailable = competenceRequestManager.hoursAvailable(user, competenceRequest);
+      int month = competenceRequest.getMonth();
+      approval = true;
+      boolean showOvertimeAvailableHours = true;
+      PersonStampingRecap psDto = stampingsRecapFactory
+          .create(competenceRequest.getPerson(), competenceRequest.getYear(), 
+              competenceRequest.getMonth(), true);
+      if (value == null) {
+        Validation.addError("value", "Inserire una quantità!!");  
+        response.status = 400;
+        if (Validation.hasErrors()) {
+          render("@approval", competenceRequest, approval, hoursAvailable, month, psDto, 
+              showOvertimeAvailableHours);
+        }
+      }
+      
+      if (hoursAvailable - value < 0) {
+        Validation.addError("value", "La quantità non può essere assegnata perchè non ci sono "
+            + "sufficienti ore disponibili!");        
+        response.status = 400;
+        if (Validation.hasErrors()) {
+          render("@approval", competenceRequest, approval, hoursAvailable, month, psDto, 
+              showOvertimeAvailableHours);
+        }
+      }
+
       competenceRequest.setValue(value);
       log.debug("Cambiato valore alla competenza da {} a {}",competenceRequest.getValue(), value);
       competenceRequest.save();
