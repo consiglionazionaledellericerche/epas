@@ -620,30 +620,8 @@ public class CompetenceRequests extends Controller {
     } else {
       flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
-    val person = Security.getUser().get().getPerson();
-    val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
-    CompetenceRequestType competenceType = competenceRequest.getType();
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
-
-    List<CompetenceRequest> results = competenceRequestDao
-        .allResults(roleList, fromDate, Optional.absent(), competenceType, person);
-    List<CompetenceRequest> myResults =
-        competenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(),
-            competenceType, person);
-    List<CompetenceRequest> approvedResults =
-        competenceRequestDao
-        .totallyApproved(roleList, fromDate, Optional.absent(), competenceType, person);
-    val onlyOwn = false;
-    boolean overtimesQuantityEnabled = (Boolean)configurationManager
-        .configValue(competenceRequest.getPerson().getOffice(), 
-            EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY, LocalDate.now());
-    val available = competenceRequest.getPerson().getUser()
-        .hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
     
-    val config = competenceRequestManager
-        .getConfiguration(competenceType, competenceRequest.getPerson());
-    render("@listToApprove", competenceType, onlyOwn, overtimesQuantityEnabled, available, 
-        config, results, myResults, approvedResults);
+    listToApprove(competenceRequest.getType());
    
   }
 
