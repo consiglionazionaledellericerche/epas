@@ -405,18 +405,19 @@ JWT_KEY=${JWT_KEY}
 
 sed 's#{{OAUTH_LOGIN}}#'"${OAUTH_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
 
+if [ -z "${KEYCLOAK_CONFIG_URI}" ]; then
+  sed -n '/KEYCLOAK_CONFIG_URI/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{KEYCLOAK_CONFIG_URI}}#'"${KEYCLOAK_CONFIG_URI}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+sed 's#{{KEYCLOAK_CLIENT_ID}}#'"${KEYCLOAK_CLIENT_ID}"'#' -i ${APP_HOME}/conf/prod.conf
+if [ -z "${KEYCLOAK_CLIENT_SECRET}" ]; then
+  sed -n '/KEYCLOAK_CLIENT_SECRET/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{KEYCLOAK_CLIENT_SECRET}}#'"${KEYCLOAK_CLIENT_SECRET}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
 if [ ${OAUTH_LOGIN} = "true" ]; then
-  if [ -z "${KEYCLOAK_CONFIG_URI}" ]; then
-    sed -n '/KEYCLOAK_CONFIG_URI/!p' -i ${APP_HOME}/conf/prod.conf
-  else
-    sed 's#{{KEYCLOAK_CONFIG_URI}}#'"${KEYCLOAK_CONFIG_URI}"'#' -i ${APP_HOME}/conf/prod.conf
-  fi
-  sed 's#{{KEYCLOAK_CLIENT_ID}}#'"${KEYCLOAK_CLIENT_ID}"'#' -i ${APP_HOME}/conf/prod.conf
-  if [ -z "${KEYCLOAK_CLIENT_SECRET}" ]; then
-    sed -n '/KEYCLOAK_CLIENT_SECRET/!p' -i ${APP_HOME}/conf/prod.conf
-  else
-    sed 's#{{KEYCLOAK_CLIENT_SECRET}}#'"${KEYCLOAK_CLIENT_SECRET}"'#' -i ${APP_HOME}/conf/prod.conf
-  fi
   if [ -z "${KEYCLOAK_JWT_FIELD}" ]; then
     sed -n '/KEYCLOAK_JWT_FIELD/!p' -i ${APP_HOME}/conf/prod.conf
   else
@@ -428,9 +429,6 @@ if [ ${OAUTH_LOGIN} = "true" ]; then
     sed 's#{{JWT_KEY}}#'"${JWT_KEY}"'#' -i ${APP_HOME}/conf/prod.conf
   fi
 else
-  sed -n '/KEYCLOAK_CONFIG_URI/!p' -i ${APP_HOME}/conf/prod.conf
-  sed -n '/KEYCLOAK_CLIENT_ID/!p' -i ${APP_HOME}/conf/prod.conf
-  sed -n '/KEYCLOAK_CLIENT_SECRET/!p' -i ${APP_HOME}/conf/prod.conf
   sed -n '/JWT_KEY/!p' -i ${APP_HOME}/conf/prod.conf
 fi
 
