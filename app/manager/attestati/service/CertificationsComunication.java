@@ -21,6 +21,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import common.oauth2.OpenIdClientsModule;
+import common.oauth2.OpenIdConnectClient;
+import dao.GeneralSettingDao;
 import helpers.CacheValues;
 import helpers.rest.ApiRequestException;
 import java.util.Arrays;
@@ -100,6 +103,19 @@ public class CertificationsComunication {
 
   @Inject
   private CacheValues cacheValues;
+  @Inject
+  private OpenIdClientsModule openIdClientsModule;
+  @Inject
+  private OpenIdConnectClient openIdConnectClient;
+  @Inject
+  private GeneralSettingDao generalSettingDao;
+
+  public OauthToken getToken() throws NoSuchFieldException {
+    if (generalSettingDao.generalSetting().isEnableSsoForAttestati()) {
+      return getTokenBySso();
+    }
+    return getTokenByAttestati();
+  }
 
   /**
    * Per l'ottenenere il Bearer Token: curl -s -X POST -H "Content-Type:
@@ -110,7 +126,7 @@ public class CertificationsComunication {
    *
    * @return il token
    */
-  public OauthToken getToken() throws NoSuchFieldException {
+  private OauthToken getTokenByAttestati() throws NoSuchFieldException {
 
     final String url = AttestatiApis.getAttestatiBaseUrl();
     final String user = AttestatiApis.getAttestatiUser();
@@ -140,6 +156,42 @@ public class CertificationsComunication {
 
     log.info("Ottenuto access-token dal server degli attestati: {}", response.getString());
     return accessToken;
+
+  }
+
+  public OauthToken getTokenBySso() {
+    String clientId = openIdClientsModule.keycloakClientId();
+    String clientSecret = openIdClientsModule.keycloakClientSecret();
+    String url = openIdConnectClient.getConfig().getTokenEndpoint();
+
+    final Map<String, String> parameters = new HashMap<>();
+    parameters.put("grant_type", "client_credentials");
+    parameters.put("client_secret", clientSecret);
+    parameters.put("client_id", clientId);
+
+    WSRequest req = WS.url(url)
+        .setHeader("Content-Type", OAUTH_CONTENT_TYPE)
+        .setParameters(parameters);
+
+    HttpResponse response = req.post();
+
+    if (response.getStatus() != Http.StatusCode.OK) {
+      log.warn("Errore durante la richiesta del Token Oauth: {}; {} da {}",
+          response.getStatus(), response.getString(), url);
+      throw new ApiRequestException("Impossibile ottenere Token Oauth dal server " + url);
+    }
+
+    OauthToken accessToken = new Gson().fromJson(response.getJson(), OauthToken.class);
+
+    log.info("Ottenuto access-token dal server SSO {}: {}", url, response.getString());
+    return accessToken;
+  }
+
+  public OauthToken refreshToken(OauthToken token) throws NoSuchFieldException {
+    if (generalSettingDao.generalSetting().isEnableSsoForAttestati()) {
+      return refreshTokenBySso(token);
+    }
+    return refreshTokenByAttestati(token);
   }
 
   /**
@@ -148,7 +200,7 @@ public class CertificationsComunication {
    * @param token token precedente (già ottenuto dal server).
    * @return Un nuovo token Oauth con validità estesa
    */
-  public OauthToken refreshToken(OauthToken token) throws NoSuchFieldException {
+  public OauthToken refreshTokenByAttestati(OauthToken token) throws NoSuchFieldException {
 
     final String url = AttestatiApis.getAttestatiBaseUrl();
 
@@ -183,6 +235,48 @@ public class CertificationsComunication {
     return accessToken;
   }
 
+  /**
+   * Nuovo token con validità estesa.
+   *
+   * @param token token precedente (già ottenuto dal server).
+   * @return Un nuovo token Oauth con validità estesa
+   */
+  public OauthToken refreshTokenBySso(OauthToken token) throws NoSuchFieldException {
+
+    if (token.refresh_token == null) {
+      return getTokenBySso();
+    }
+
+    String clientId = openIdClientsModule.keycloakClientId();
+    String clientSecret = openIdClientsModule.keycloakClientSecret();
+    String url = openIdConnectClient.getConfig().getTokenEndpoint();
+
+    final Map<String, String> parameters = new HashMap<>();
+    parameters.put("grant_type", REFRESHTOKEN_GRANT_TYPE);
+    parameters.put("client_secret", clientSecret);
+    parameters.put("client_id", clientId);
+    parameters.put("refresh_token", token.refresh_token);
+
+    WSRequest req = WS.url(url)
+        .setHeader("Content-Type", OAUTH_CONTENT_TYPE)
+        .setParameters(parameters);
+
+    log.info("Invio richiesta Refresh-Token al server SSO. Token precedente: {}. Url = {}", token
+        .refresh_token, url);
+    HttpResponse response = req.post();
+
+    if (response.getStatus() != Http.StatusCode.OK) {
+      log.warn("Errore durante la richiesta del Refresh-Token Oauth: {}; {}. Url = {}",
+          response.getStatus(), response.getString(), url);
+      //nel caso la risposta sia negativa effettuo una richiesta per un nuovo access token
+      return getToken();
+    }
+
+    OauthToken accessToken = new Gson().fromJson(response.getJson(), OauthToken.class);
+
+    log.info("Ottenuto refresh-token oauth dal server SSO: {}. Url = {}", response.getString(), url);
+    return accessToken;
+  }
 
   /**
    * Costruisce una WSRequest predisposta alla comunicazione con le api attestati.

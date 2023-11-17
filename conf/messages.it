@@ -508,6 +508,8 @@ generalSetting.epasServiceUrl=Url base del microservizio epas-service
 generalSetting.epasHelpdeskServiceEnabled=Abilitazione integrazione con microservizio epas-helpdesk-service
 generalSetting.epasHelpdeskServiceUrl=Url base del microservizio epas-helpdesk-service
 
+generalSetting.enableSsoForAttestati=Abilita l'utilizzo di SSO del CNR per Attestati
+
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
 group.limitValue =Quantità massima

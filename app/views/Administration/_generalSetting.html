@@ -276,5 +276,15 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
-  
+    #{accordionItem 'enableSsoForAttestati', parent:'generalSetting', title:'SSO del CNR per attestati', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita l'utilizzo dell'SSO del CNR per il rilascio del token JWT utilizzato per le comunicazioni
+      tra ePAS ed Attestati (solo per il CNR)#{/alert}
+      #{f.booleanRadio 'generalSetting.enableSsoForAttestati' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
 #{/accordionGroup}

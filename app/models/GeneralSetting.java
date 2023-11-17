@@ -145,6 +145,12 @@ public class GeneralSetting extends BaseModel {
   /**
    * URL base servizio epas-helpdesk-service.
    */
-  private String epasHelpdeskServiceUrl = "http://epas-helpdesk-service:8080/"; 
+  private String epasHelpdeskServiceUrl = "http://epas-helpdesk-service:8080/";
+  
+  /**
+   * Indica se il servizio Attestati del CNR deve utilizzare l'SSO CNR per il rilascio del 
+   * token oppure il token JWT direttamente rilasciato da Attestati.
+   */
+  private boolean enableSsoForAttestati = false;
 
 }
