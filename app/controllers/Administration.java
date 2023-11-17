@@ -78,6 +78,7 @@ import manager.SecureManager;
 import manager.UserManager;
 import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.service.CertificationService;
+import manager.attestati.service.CertificationsComunication;
 import manager.configurations.ConfigurationManager;
 import manager.services.helpdesk.HelpdeskServiceManager;
 import models.CompetenceCode;
@@ -173,6 +174,16 @@ public class Administration extends Controller {
   static JwtTokenDao jwtTokenDao;
   @Inject
   static HelpdeskServiceManager helpdeskServiceManager;
+  @Inject
+  static CertificationsComunication certificationComunication;
+
+  /**
+   * Utilizzabile solo da developer e admin permette di prelevare un token del client
+   * utilizzato per la comunicazione con Attestati.
+   */
+  public static void ssoToken() {
+    renderText(certificationComunication.getTokenBySso().getAccess_token());
+  }
 
   /**
    * metodo che renderizza la pagina di utilities senza parametri passati.
