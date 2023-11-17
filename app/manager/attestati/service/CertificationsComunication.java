@@ -100,8 +100,6 @@ public class CertificationsComunication {
 
   private static final String OAUTH_TOKEN = "oauth.token.attestati";
 
-  private static final String POST_TIMEOUT = "5min";
-
   @Inject
   private CacheValues cacheValues;
   @Inject
@@ -295,7 +293,7 @@ public class CertificationsComunication {
         .setHeader("Content-Type", contentType)
         .setHeader("Authorization", "Bearer " + token);
 
-    wsRequest.timeout(POST_TIMEOUT);
+    wsRequest.timeout(getTimeout());
     return wsRequest;
   }
 
@@ -322,7 +320,7 @@ public class CertificationsComunication {
         + "/" + year + "/" + month;
 
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
-    HttpResponse httpResponse = wsRequest.timeout(getTimeout()).get();
+    HttpResponse httpResponse = wsRequest.get();
 
     // Caso di token non valido
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
@@ -362,7 +360,7 @@ public class CertificationsComunication {
           + "/" + person.getNumber() + "/" + year + "/" + month;
 
       WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
-      HttpResponse httpResponse = wsRequest.timeout(getTimeout()).get();
+      HttpResponse httpResponse = wsRequest.get();
 
       // Caso di token non valido
       if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
@@ -424,7 +422,7 @@ public class CertificationsComunication {
     String json = new Gson().toJson(riga);
     wsRequest.body(json);
 
-    return wsRequest.timeout(getTimeout()).post();
+    return wsRequest.post();
   }
 
   /**
@@ -446,9 +444,9 @@ public class CertificationsComunication {
     wsRequest.body(json);
 
     if (update) {
-      return wsRequest.timeout(getTimeout()).put();
+      return wsRequest.put();
     }
-    return wsRequest.timeout(getTimeout()).post();
+    return wsRequest.post();
   }
 
   /**
@@ -468,7 +466,7 @@ public class CertificationsComunication {
     String json = new Gson().toJson(riga);
     wsRequest.body(json);
 
-    return wsRequest.timeout(getTimeout()).post();
+    return wsRequest.post();
   }
 
   /**
@@ -488,7 +486,7 @@ public class CertificationsComunication {
     String json = new Gson().toJson(riga);
     wsRequest.body(json);
 
-    return wsRequest.timeout(getTimeout()).post();
+    return wsRequest.post();
   }
 
   /**
@@ -508,7 +506,7 @@ public class CertificationsComunication {
     String json = new Gson().toJson(rigaAssenza);
     wsRequest.body(json);
 
-    return wsRequest.timeout(getTimeout()).delete();
+    return wsRequest.delete();
   }
 
   /**
@@ -528,7 +526,7 @@ public class CertificationsComunication {
     String json = new Gson().toJson(riga);
     wsRequest.body(json);
 
-    return wsRequest.timeout(getTimeout()).delete();
+    return wsRequest.delete();
   }
 
   /**
@@ -548,7 +546,7 @@ public class CertificationsComunication {
     String json = new Gson().toJson(riga);
     wsRequest.body(json);
 
-    return wsRequest.timeout(getTimeout()).delete();
+    return wsRequest.delete();
   }
 
   /**
@@ -567,7 +565,7 @@ public class CertificationsComunication {
       String url = API_URL + API_URL_ASSENZE_PER_CONTRATTO + "/" + "CL0609";
 
       WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
-      HttpResponse httpResponse = wsRequest.timeout(getTimeout()).get();
+      HttpResponse httpResponse = wsRequest.get();
 
       // Caso di token non valido
       if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
@@ -605,7 +603,7 @@ public class CertificationsComunication {
         + "/" + year + "/" + month;
 
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
-    HttpResponse httpResponse = wsRequest.timeout(getTimeout()).get();
+    HttpResponse httpResponse = wsRequest.get();
 
     // Caso di token non valido
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
@@ -638,7 +636,7 @@ public class CertificationsComunication {
     final String url = API_URL_INT + API_INT_PERIODO_DIPENDENTE + "/" + periodoId;
 
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
-    HttpResponse httpResponse = wsRequest.timeout(getTimeout()).get();
+    HttpResponse httpResponse = wsRequest.get();
 
     // Caso di token non valido
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
@@ -669,7 +667,7 @@ public class CertificationsComunication {
     final String url = API_URL_INT + API_INT_CRUSCOTTO + "/" + dipendenteId + "/" + year;
 
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
-    HttpResponse httpResponse = wsRequest.timeout(getTimeout()).get();
+    HttpResponse httpResponse = wsRequest.get();
 
     // Caso di token non valido
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
@@ -703,7 +701,7 @@ public class CertificationsComunication {
         + "/" + year + "/" + month;
     
     WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
-    HttpResponse httpResponse = wsRequest.timeout(getTimeout()).get();
+    HttpResponse httpResponse = wsRequest.get();
     
     // Caso di token non valido
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
