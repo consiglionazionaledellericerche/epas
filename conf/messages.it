@@ -509,6 +509,7 @@ generalSetting.epasHelpdeskServiceEnabled=Abilitazione integrazione con microser
 generalSetting.epasHelpdeskServiceUrl=Url base del microservizio epas-helpdesk-service
 
 generalSetting.enableSsoForAttestati=Abilita l'utilizzo di SSO del CNR per Attestati
+generalSetting.timeoutAttestati=Timeout in secondi chiamate servizi REST Attestati
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
