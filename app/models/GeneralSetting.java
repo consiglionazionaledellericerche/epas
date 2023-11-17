@@ -152,5 +152,10 @@ public class GeneralSetting extends BaseModel {
    * token oppure il token JWT direttamente rilasciato da Attestati.
    */
   private boolean enableSsoForAttestati = false;
+  
+  /**
+   * Timeout in secondi per le chiamate REST effettuate ad Attestati.
+   */
+  private int timeoutAttestati = 60;
 
 }

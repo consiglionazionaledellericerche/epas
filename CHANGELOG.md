@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Aggiunta possibilità di comunicazione tra ePAS ed Attestati (CNR) tramite token JWT
     rilascio dall'SSO del CNR.
+  - Reso configurabile il timeout alle chiamate REST al servizio Attestati (CNR)
 
 ## [2.9.2] - 2023-11-14
 ### Added
