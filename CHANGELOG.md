@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.1] - 2023-11-17
+### Changed
+  - Nel init docker configurati i parametri relativi al keycloak anche se l'OAuth2 per 
+    gli utenti è disabilitato
+
 ## [2.10.0] - 2023-11-17
 ### Added
   - Aggiunta possibilità di comunicazione tra ePAS ed Attestati (CNR) tramite token JWT
