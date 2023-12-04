@@ -503,17 +503,14 @@ public class MissionManager {
     if (hours != null && minutes != null) {
       quantity = hours * DateTimeConstants.MINUTES_PER_HOUR + minutes;
     }
-    int day = getFromDayOfMission(person, to.toLocalDate()).getDayOfWeek();
     if (quantity < 0) {
       mission = absenceTypeDao.getAbsenceTypeByCode("92NG").get();
       type = absComponentDao.getOrBuildJustifiedType(JustifiedTypeName.nothing);
 
     } else if (quantity == 0 
-        || quantity > getFromDayOfMission(person, to.toLocalDate()).getWorkingTime()
-        || day == DateTimeConstants.SATURDAY || day == DateTimeConstants.SUNDAY) {
+        || quantity > getFromDayOfMission(person, to.toLocalDate()).getWorkingTime()) {
       type = absComponentDao
           .getOrBuildJustifiedType(JustifiedTypeName.complete_day_and_add_overtime);
-
     } else {
       group = absComponentDao.groupAbsenceTypeByName(DefaultGroup.MISSIONE_ORARIA.name()).get();
       mission = absenceTypeDao.getAbsenceTypeByCode("92M").get();
