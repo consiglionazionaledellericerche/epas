@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.11.0] - UNRELEASED
 ### Changed
   - Permesso l'inserimento delle missioni orarie nei festivi
+  - Corretto invio email a responsabile di gruppo per richiesta ferie quando afferenza al gruppo
+    è scaduta.
 
 ## [2.10.1] - 2023-11-17
 ### Changed
