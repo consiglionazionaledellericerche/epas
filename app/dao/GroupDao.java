@@ -108,7 +108,7 @@ public class GroupDao extends DaoBase {
     endDateCondition = endDateCondition.or(affiliation.endDate.after(atDate));
     return affiliation.person.eq(person)
         .and(affiliation.beginDate.before(atDate)
-            .or(endDateCondition));
+            .and(endDateCondition));
   } 
   
   /**
