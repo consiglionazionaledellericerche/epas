@@ -631,7 +631,7 @@ public enum DefaultAbsenceType {
       MealTicketBehaviour.notAllowMealTicket, 0, null,
       Sets.newHashSet(), null, null, false, true, true),
 
-  A_105BP("105BP", "Convenzione CNR - Università", false,
+  A_105BP("105BP", "Convenzione CNR - altro ente", false,
       ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, 
       MealTicketBehaviour.allowMealTicket, 0, null,
       Sets.newHashSet(), null, null, false, false, true),
