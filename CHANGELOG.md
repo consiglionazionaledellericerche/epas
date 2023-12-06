@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Corretto invio email a responsabile di gruppo per richiesta ferie quando afferenza al gruppo
     è scaduta.
   - Modificata descrizione del codice 442
+  - Modificata descrizione del codice 105BP
 
 ## [2.10.1] - 2023-11-17
 ### Changed
