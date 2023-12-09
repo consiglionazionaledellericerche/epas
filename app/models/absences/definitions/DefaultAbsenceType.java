@@ -1574,7 +1574,7 @@ public enum DefaultAbsenceType {
   A_441("441", "permesso esami", false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false, 
       MealTicketBehaviour.notAllowMealTicket,
       0, null, Sets.newHashSet(), null, null, false, true, true), 
-  A_442("442", "permesso congr.conv.seminari ecc.", false, 
+  A_442("442", "Permesso componenti commissione concorso altra amministrazione", false, 
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, MealTicketBehaviour.notAllowMealTicket, 
       0, null, Sets.newHashSet(), null, null, false, true, true), 
   A_6N("6N", "permesso motivi privati non retribuito", false,
