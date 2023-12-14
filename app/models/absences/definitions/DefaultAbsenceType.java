@@ -37,6 +37,11 @@ import org.joda.time.LocalDate;
  *
  */
 public enum DefaultAbsenceType {
+  
+  A_COMANDO("COMANDO",
+      "Parziale nel mese", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, MealTicketBehaviour.notAllowMealTicket, 
+      0, null, Sets.newHashSet(), new LocalDate(2023, 12, 1), null, true, false, true),
 
   A_VAC19("VAC-19",
       "Assenza per la somministrazione del vaccino contro il COVID-19", false,
