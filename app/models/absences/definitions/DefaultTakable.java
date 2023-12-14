@@ -538,6 +538,7 @@ public enum DefaultTakable {
 
   T_ALTRI(AmountType.units, 
       ImmutableSet.of(
+          DefaultAbsenceType.A_COMANDO,
           DefaultAbsenceType.A_102,
           DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP, 
           DefaultAbsenceType.A_105BP,
@@ -594,7 +595,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_98CV, 
           DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_46,
           DefaultAbsenceType.A_46RA, DefaultAbsenceType.A_VAC19),
-          ImmutableSet.of(DefaultAbsenceType.A_102,
+          ImmutableSet.of(DefaultAbsenceType.A_COMANDO, DefaultAbsenceType.A_102,
           DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP, 
           DefaultAbsenceType.A_105BP,
           DefaultAbsenceType.A_71, DefaultAbsenceType.A_72, DefaultAbsenceType.A_73,
