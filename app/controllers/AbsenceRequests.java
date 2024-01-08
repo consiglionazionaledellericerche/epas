@@ -636,37 +636,6 @@ public class AbsenceRequests extends Controller {
       flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
 
-
-    if (absenceRequest.isManagerApprovalRequired() && absenceRequest.getManagerApproved() == null
-        && user.hasRoles(Role.GROUP_MANAGER)) {
-      //caso di approvazione da parte del responsabile di gruppo.
-      absenceRequestManager.managerApproval(id, user);
-      if (user.getUsersRolesOffices().stream()
-          .anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
-          && absenceRequest.isOfficeHeadApprovalRequired()) {
-        // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
-        absenceRequestManager.officeHeadApproval(id, user);
-      }
-    }
-    if (absenceRequest.isAdministrativeApprovalRequired()
-        && absenceRequest.getAdministrativeApproved() == null
-        && user.hasRoles(Role.PERSONNEL_ADMIN)) {
-      //caso di approvazione da parte dell'amministratore del personale
-      absenceRequestManager.personnelAdministratorApproval(id, user);
-    }
-    if (absenceRequest.isOfficeHeadApprovalRequired() && absenceRequest.getOfficeHeadApproved() == null
-        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
-      //caso di approvazione da parte del responsabile di sede
-      absenceRequestManager.officeHeadApproval(id, user);
-    }
-    if (absenceRequest.isOfficeHeadApprovalForManagerRequired()
-        && absenceRequest.getOfficeHeadApproved() == null && user.hasRoles(Role.SEAT_SUPERVISOR)) {
-      absenceRequestManager.officeHeadApproval(id, user);
-    }
-    notificationManager.sendEmailToUser(Optional.of(absenceRequest), 
-        Optional.<CompetenceRequest>absent(), Optional.absent(), true);
-    flash.success("Operazione conclusa correttamente");
-    
     AbsenceRequests.listToApprove(absenceRequest.getType());
 
   }
