@@ -605,7 +605,7 @@ public class Reperibility extends Controller {
    * @param personId l'eventuale personId se si vuole mostrare il calendario di una sola persona
    */
   @BasicAuth
-  public static void iCal(@Required Long type, @Required int year, Long personId) {
+  public static void iCal(@Required Long type, @Required int year) {
 
     if (Validation.hasErrors()) {
       badRequest("Parametri mancanti. " + Validation.errors());
@@ -635,7 +635,7 @@ public class Reperibility extends Controller {
       unauthorized();
     }
 
-
+    Long personId = currentUser.get().getPerson().getId();
     try {
       Optional<Calendar> calendar =
           reperibilityManager.createCalendar(type, Optional.fromNullable(personId), year);
