@@ -37,10 +37,12 @@ import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +57,7 @@ import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.WorkingTimeType;
@@ -69,8 +72,16 @@ import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.MealTicketBehaviour;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.CalScale;
+import net.fortuna.ical4j.model.property.ProdId;
+import net.fortuna.ical4j.model.property.Uid;
+import net.fortuna.ical4j.model.property.Version;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.db.jpa.Blob;
@@ -895,4 +906,30 @@ public class AbsenceManager {
       return absence.getPersonDay().getDate();
     }
   }
+
+  /**
+   * Ritorna un calendario con le ics dei giorni di assenza.
+   */
+  public Calendar createIcsAbsencesCalendar(
+      LocalDate from, LocalDate to, List<Absence> absences) {
+
+    // Create a calendar
+    //---------------------------
+    Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
+    icsCalendar.getProperties().add(new ProdId("-//Events Calendar//iCal4j 1.0//EN"));
+    icsCalendar.getProperties().add(CalScale.GREGORIAN);
+    icsCalendar.getProperties().add(Version.VERSION_2_0);
+
+    for (Absence absence : absences) {
+      log.trace("absence={}, date = {}", absence, absence.getPersonDay().getDate());
+      Date date = new Date(absence.getPersonDay().getDate()
+          .toDateTimeAtStartOfDay(DateTimeZone.UTC).toDate().getTime());
+      VEvent absenceEvent = new VEvent(date, Duration.ofDays(1), absence.getAbsenceType().getLabel());
+      absenceEvent.getProperties().add(new Uid(UUID.randomUUID().toString()));
+      icsCalendar.getComponents().add(absenceEvent);
+    }
+
+    return icsCalendar;
+  }
+
 }

@@ -829,8 +829,9 @@ when
      	 * dentro il metodo controllare il permesso di
      	 * visualizzare il calendario specifico richiesto
      	 */
-     	"Shift.iCal",
+     	"Shift.ical",
      	"Reperibility.iCal",
+     	"Absences.ical",
 
      	/* Metodi rest */
      	"rest.PersonDays.getDaySituation",

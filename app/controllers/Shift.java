@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 import controllers.Resecure.BasicAuth;
+import controllers.Resecure.NoCheck;
 import dao.AbsenceDao;
 import dao.PersonDao;
 import dao.PersonShiftDayDao;
@@ -511,12 +512,12 @@ public class Shift extends Controller {
    * Restituisce la informazioni sul turno in formato iCal.
    */
   @BasicAuth
-  public static void ical(@Required String type, @Required int year, Long personId) {
-
+  public static void ical(@Required String type, @Required int year) {
     if (Validation.hasErrors()) {
       badRequest("Parametri mancanti. " + Validation.errors());
     }
     Optional<User> currentUser = Security.getUser();
+    log.debug("Shift::ical type={}, year={}, currentUser={}", type, year, currentUser);
 
     response.accessControl("*");
 
@@ -541,6 +542,7 @@ public class Shift extends Controller {
       unauthorized();
     }
 
+    Long personId = currentUser.get().getPerson().getId();
     try {
       Optional<Calendar> calendar =
           shiftManager.createCalendar(type, Optional.fromNullable(personId), year);

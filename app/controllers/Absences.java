@@ -32,10 +32,13 @@ import dao.PersonDao;
 import dao.PersonDayDao;
 import helpers.ImageUtils;
 import it.cnr.iit.epas.DateUtility;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -44,6 +47,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.inject.Inject;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.ConsistencyManager;
@@ -61,6 +65,8 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.AbsenceTypeMapping;
+import net.fortuna.ical4j.data.CalendarOutputter;
+import net.fortuna.ical4j.model.Calendar;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.data.validation.Required;
@@ -83,6 +89,8 @@ public class Absences extends Controller {
   private static PersonDao personDao;
   @Inject
   private static AbsenceDao absenceDao;
+  @Inject
+  private static AbsenceManager absenceManager;
   @Inject
   private static SecureManager secureManager;
   @Inject
@@ -633,6 +641,39 @@ public class Absences extends Controller {
       return absenceSameType.get(0).getAbsenceType().getCode();
     }
 
+  }
+
+  public static void ical(Optional<String> absenceCode, LocalDate begin, LocalDate end) {
+    if (Security.getUser().get().getPerson() == null) {
+      log.warn("Utente di sistema non abilitato alla funzionalità Absences::ical");
+      badRequest("Utente di sistema non abilitato alla funzionalità Absences::ical");
+    }
+    if (begin == null || end == null || begin.isAfter(end)) {
+      badRequest("Parametri begin e end obbligatori o non corretti");
+    }
+    if (begin.isBefore(end.minusYears(1))) {
+      badRequest("Periodo troppo lungo, il periodo massimo è di 1 anno");
+    }
+    val absences = absenceDao.getAbsenceByCodeInPeriod(
+        Optional.of(Security.getUser().get().getPerson()), absenceCode, begin, end, Optional.absent(),
+            false, true);
+    try {
+      Calendar calendar =
+          absenceManager.createIcsAbsencesCalendar(begin, end, absences);
+
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      CalendarOutputter outputter = new CalendarOutputter();
+      outputter.output(calendar, bos);
+
+      response.setHeader("Content-Type", "application/ics");
+      InputStream is = new ByteArrayInputStream(bos.toByteArray());
+      renderBinary(is, "assenze.ics");
+      bos.close();
+      is.close();
+    } catch (IOException ex) {
+      log.error("Io exception building ical", ex);
+      error("Io exception building ical");
+    }
   }
 
 }
