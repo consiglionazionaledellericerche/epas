@@ -18,4 +18,4 @@ vogliamo mostrare nel calendario.
 Il periodo massimo per cui si può richiedere il calendario delle assenze è di 1 anno.
 
 La URL corrisponde al seguente formato:
- * https://${epas-host}/abs/ical?begin=${begin}&end=${end}&absenceCode=${absenceCode}
+ * https://${epas-host}/absences/ical?begin=${begin}&end=${end}&absenceCode=${absenceCode}
