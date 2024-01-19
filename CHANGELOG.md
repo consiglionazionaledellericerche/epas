@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
   - Rimosso campo personId da calendari ICS per reperibilità e turni
   - Rivisto metodo approvazione ferie con rimozione doppio invio email al dipendente
+  - Rimossa redirect in caso di cancellazione di un orario di lavoro particolare che generava loop infinito
 
 ## [2.11.0] - 2023-12-14
 ### Added
