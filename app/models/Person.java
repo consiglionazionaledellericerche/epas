@@ -489,14 +489,21 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @Transient
   public MealTicketCard previousMealTicketCard() {
     if (!this.mealTicketCards.isEmpty() && actualMealTicketCard() == null) {
-      return mealTicketCards.stream().sorted((o1, o2) -> o2.getEndDate().compareTo(o1.getEndDate()))
+      return mealTicketCards.stream()
+    		  .sorted((o1, o2) -> o2.getEndDate().compareTo(o1.getEndDate()))
           .filter(mtc -> !mtc.isActive()).findFirst().get();
     }
     return null;
   }
   
+  /**
+   * La somma delle ore assegnate di straordinario al dipendente nell'anno.
+   * @param year l'anno di riferimento
+   * @return la somma delle ore assegnate di straordinario al dipendente nell'anno.
+   */
   @Transient
   public int totalOvertimeHourInYear(Integer year) {
-    this.getPersonOvertimes().stream().filter(po -> po.getYear().equals(year)).toList();
+    return this.getPersonOvertimes().stream().filter(po -> po.getYear().equals(year))
+    		.mapToInt(po -> po.getNumberOfHours()).sum();
   }
 }
