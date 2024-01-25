@@ -50,6 +50,33 @@
 
   #{/form}
   #{/secure.check}
+  
+  #{alert color:'info'}
+  <p>Gestione del monte ore per straordinari per i dipendenti della sede <strong>${office.name}</strong></p>
+  <p>
+    Qui di seguito la lista dei dipendenti della sede <strong>${office.name}</strong> abilitati alla competenza <strong>Straorginario</strong><br>
+  	E' possibile per ciascuno abilitare un monte ore per lo straordinario cliccando sul link a fianco di ciascun nominativo.
+  </p>  
+  #{/alert}
+	
+  <table class="table table-condensed table-hover">
+    <tr>
+      <th>Dipendente</th>
+      <th>Ore definite per l'anno</th>
+      <th>Assegna quantità</th>
+    </tr>
+    #{list items:personList, as:'person'}
+    <tr>
+      <td>${person.fullName()}</td>
+      <td>${tot.numberOfHours}</td>
+      <td>	
+      	<a class="btn btn-primary btn-xs" href="@{PersonOvertimes.addHours(person, year)}" data-async-modal="#defaultModal">
+        				Assegna ore</a>
+      </td>
+    </tr>
+    #{/list}
+  </table>
+
 
 </div>
 

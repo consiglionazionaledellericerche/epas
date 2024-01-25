@@ -494,4 +494,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     }
     return null;
   }
+  
+  @Transient
+  public int totalOvertimeHourInYear(Integer year) {
+    this.getPersonOvertimes().stream().filter(po -> po.getYear().equals(year)).toList();
+  }
 }
