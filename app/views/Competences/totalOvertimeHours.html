@@ -68,7 +68,7 @@
     #{list items:personList, as:'person'}
     <tr>
       <td>${person.fullName()}</td>
-      <td>${tot.numberOfHours}</td>
+      <td>${person.totalOvertimeHourInYear(year)}</td>
       <td>	
       	<a class="btn btn-primary btn-xs" href="@{PersonOvertimes.addHours(person, year)}" data-async-modal="#defaultModal">
         				Assegna ore</a>
