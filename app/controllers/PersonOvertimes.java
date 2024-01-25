@@ -16,14 +16,27 @@
  */
 package controllers;
 
+import java.util.List;
+import javax.inject.Inject;
+import dao.PersonDao;
+import dao.PersonOvertimeDao;
 import models.Person;
+import models.PersonOvertime;
 import play.mvc.Controller;
 import play.mvc.With;
 
 @With({Resecure.class})
 public class PersonOvertimes extends Controller {
+  
+  @Inject
+  static PersonDao personDao; 
+  @Inject
+  static PersonOvertimeDao personOvertimeDao;
 
-  public static void addHours(Person person, int year) {
-    render();
+  public static void addHours(Long personId, int year) {
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    List<PersonOvertime> personOvertimes = personOvertimeDao.personListInYear(person, year);
+    render(personOvertimes);
   }
 }
