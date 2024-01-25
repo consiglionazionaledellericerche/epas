@@ -220,6 +220,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   
   @OneToMany(mappedBy = "person")
   private Set<MealTicketCard> mealTicketCards = Sets.newHashSet();
+  
+  @OneToMany(mappedBy = "person")
+  private List<PersonOvertime> personOvertimes = Lists.newArrayList();
 
 
   /**
