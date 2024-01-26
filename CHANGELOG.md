@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Aggiunto calendario ICS con le assenze di un dipendente
   - Aggiunti codici di ferie e riposo compensativo per missione antartide
+  - Aggiunti codici 62S25V e  62S75V
 ### Changed
   - Rimosso campo personId da calendari ICS per reperibilità e turni
   - Rivisto metodo approvazione ferie con rimozione doppio invio email al dipendente
