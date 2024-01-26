@@ -17,26 +17,69 @@
 package controllers;
 
 import java.util.List;
+import java.util.regex.Pattern;
 import javax.inject.Inject;
+import common.security.SecurityRules;
 import dao.PersonDao;
 import dao.PersonOvertimeDao;
+import helpers.Web;
+import lombok.extern.slf4j.Slf4j;
 import models.Person;
 import models.PersonOvertime;
+import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
 @With({Resecure.class})
+@Slf4j
 public class PersonOvertimes extends Controller {
   
   @Inject
   static PersonDao personDao; 
   @Inject
   static PersonOvertimeDao personOvertimeDao;
+  @Inject
+  static SecurityRules rules;
 
   public static void addHours(Long personId, int year) {
+    
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
+    rules.checkIfPermitted(person.getOffice());
     List<PersonOvertime> personOvertimes = personOvertimeDao.personListInYear(person, year);
-    render(personOvertimes);
+    PersonOvertime personOvertime = new PersonOvertime();
+    render(personOvertimes, person, year, personOvertime);
+  }
+  
+  public static void saveHours(PersonOvertime personOvertime, 
+      int year, Long personId) {
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person.getOffice());
+    Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+    
+    if (personOvertime.getNumberOfHours() == null 
+        || !pattern.matcher(personOvertime.getNumberOfHours().toString()).matches()) {
+      Validation.addError("personOvertime.getNumberOfHours", "Inserire una quantità numerica!");
+    }
+    if (personOvertime.getDateOfUpdate() == null) {
+      Validation.addError("personOvertime.dateOfUpdate", "Inserire una data valida!!");
+    }
+    if (personOvertime.getDateOfUpdate().getYear() != year) {
+      Validation.addError("personOvertime.dateOfUpdate", 
+          "Si sta inserendo una quantità per un anno diverso da quello specificato nella data!!");
+    }
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      render("@addHours", person, year, personOvertime);
+    }
+    personOvertime.setPerson(person);
+    personOvertime.setYear(year);
+    personOvertime.save();
+    flash.success("Aggiunta nuova quantità al monte ore per straordinari di %s", 
+        person.getFullname());
+    Competences.totalOvertimeHours(year, person.getOffice().id);
+    
   }
 }

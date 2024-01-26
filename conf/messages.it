@@ -699,6 +699,9 @@ PDFReport.thIncompleteTime=Orario incompleto
 PDFReport.thMissingTime=Orario insufficiente
 PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
 
+personOvertime.numberOfHours =Quantità
+personOvertime.dateOfUpdate =Data inserimento
+
 Qualifications.list=Qualifiche del personale
 qualification.qualification=Livello
 qualification.description=Descrizione
