@@ -51,6 +51,7 @@
   #{/form}
   #{/secure.check}
   <br>
+  #{if !personList.isEmpty()}
   #{alert color:'warning'}
   <p>Gestione del monte ore per straordinari per i dipendenti della sede <strong>${office.name}</strong></p>
   <p>
@@ -75,7 +76,7 @@
     </tr>
     #{/list}
   </table>
-
+  #{/if}
 
 
 </div>

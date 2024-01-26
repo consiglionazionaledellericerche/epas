@@ -741,6 +741,18 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
+  /**
+   * Attivazione o meno del monte ore di straordinario per dipendente.
+   */
+  ENABLE_OVERTIME_PER_PERSON(
+      "enable_overtime_per_person",
+      EpasParamCategory.COMPETENCE_FLOWS,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
   
   /**
    * Per i livelli IV-VIII è necessaria l'approvazione del cambio di reperibilità da parte 

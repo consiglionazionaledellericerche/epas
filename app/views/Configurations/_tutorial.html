@@ -372,9 +372,16 @@
       </ul>
       </p>
     #{/if}
-        #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_OVERTIME_FLOWS) }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_OVERTIME_FLOWS) }
       <p>Abilitando questo paramentro si permette alla sede <strong>${configuration.office.name}</strong> di usufruire del sistema
       integrato di approvazione delle richieste di STRAORDINARIO. <br>
+      </p>
+    #{/if}
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_OVERTIME_PER_PERSON) }
+      <p>Abilitando questo paramentro si consente di utilizzare il monte ore per STRAORDINARIO per singola persona. <br>
+      Questa funzionalità consente di avere un controllo a livello di singola persona su quante ore richiedere da parte del dipendente <br>
+      e consente a chi approva tali ore di sapere se e quanto si è nei limiti previsti. 
+      L'assegnazione della quantità è effettuata dal <strong>responsabile amministrativo</strong>. 
       </p>
     #{/if}
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED) }

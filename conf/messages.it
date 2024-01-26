@@ -1410,6 +1410,7 @@ ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION=Invio notifica a res
 ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION=Invio notifica a responsabile di gruppo per comunicazione assenza livelli I-III
 
 ENABLE_COMPETENCE_FLOWS =Abilitazione flusso di richiesta competenze
+ENABLE_OVERTIME_PER_PERSON =Abilitazione monte ore straordinari per dipendente
 CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione del responsabile del servizio per cambio giorno di reperibilità
 CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione del reperibile per cambio giorno di reperibilità
 

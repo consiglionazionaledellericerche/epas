@@ -60,6 +60,8 @@ import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.ShiftOrganizationManager;
 import manager.competences.ShiftTimeTableDto;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.recaps.competence.CompetenceRecap;
 import manager.recaps.competence.CompetenceRecapFactory;
 import manager.recaps.competence.PersonMonthCompetenceRecap;
@@ -149,7 +151,8 @@ public class Competences extends Controller {
   private static OrganizationShiftTimeTableDao shiftTimeTableDao;
   @Inject
   private static MonthlyCompetenceTypeDao monthlyDao;
-
+  @Inject
+  private static ConfigurationManager configurationManager;
 
   /**
    * Crud CompetenceCode.
@@ -646,14 +649,20 @@ public class Competences extends Controller {
     /* Recupero la lista degli abilitati allo straordinario per assegnargli le ore di 
        monte ore personale (previa verifica del parametro associato)
      */
-    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
-    Set<Office> offices = Sets.newHashSet();
-    offices.add(office);
-    List<Person> personList = personDao
-        .listForCompetence(code, Optional.absent(), offices, true, 
-            LocalDate.now().withYear(year).monthOfYear().withMinimumValue()
-            .dayOfMonth().withMinimumValue(), LocalDate.now(), Optional.absent()).list();
-
+    List<Person> personList = Lists.newArrayList();
+    if (!(Boolean) configurationManager
+        .configValue(office, EpasParam.ENABLE_OVERTIME_PER_PERSON)) {
+      log.warn("Non abilitato il parametro per gli straordinari per persona!!");
+    } else {
+      CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+      Set<Office> offices = Sets.newHashSet();
+      offices.add(office);
+      personList = personDao
+          .listForCompetence(code, Optional.absent(), offices, true, 
+              LocalDate.now().withYear(year).monthOfYear().withMinimumValue()
+              .dayOfMonth().withMinimumValue(), LocalDate.now(), Optional.absent()).list();
+    }
+    
     render(totalList, totale, year, office, personList);
   }
 
