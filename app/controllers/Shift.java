@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +65,10 @@ import models.exports.ShiftPeriods;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.assertj.core.util.Sets;
 import org.joda.time.LocalDate;
+import org.testng.collections.Lists;
+
 import play.data.binding.As;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -188,7 +192,7 @@ public class Shift extends Controller {
 
     // get the cancelled shifts of type shiftType
     List<ShiftCancelled> shiftCancelled =
-        shiftDao.getShiftCancelledByPeriodAndType(from, to, shiftType);
+        shiftDao.getShiftCancelledByPeriodAndType(from, to, Optional.of(shiftType));
     log.debug("ShiftCancelled find called from {} to {}, type {} - found {} shift days",
         from, to, shiftType.getType(), shiftCancelled.size());
 
@@ -512,27 +516,38 @@ public class Shift extends Controller {
    * Restituisce la informazioni sul turno in formato iCal.
    */
   @BasicAuth
-  public static void ical(@Required String type, @Required int year) {
-    if (Validation.hasErrors()) {
-      badRequest("Parametri mancanti. " + Validation.errors());
+  public static void ical(String type, Integer year) {
+    if (year == null) {
+      year = LocalDate.now().getYear();
     }
     Optional<User> currentUser = Security.getUser();
-    log.debug("Shift::ical type={}, year={}, currentUser={}", type, year, currentUser);
-
-    response.accessControl("*");
-
-    ShiftType shiftType = shiftDao.getShiftTypeByType(type);
-
-    if (shiftType == null) {
-      notFound(String.format("ShiftType type = %s doesn't exist", type));
+    Set<ShiftType> shiftTypes = Sets.newHashSet();
+    if (type != null) {
+      ShiftType shiftType = shiftDao.getShiftTypeByType(type);
+      if (shiftType == null) {
+        log.info("ShiftType = {} not found", shiftType);
+        notFound(String.format("ShiftType type = %s doesn't exist", type));
+      } else {
+        shiftTypes.add(shiftType);
+      }
+    } else {
+      if (!currentUser.isPresent() || currentUser.get().getPerson() == null) {
+        notFound(String.format("L'utente corrente %s non ha associato turni", currentUser.get().getUsername()));
+      } else {
+        shiftTypes.addAll(shiftDao.getShiftTypesForPerson(currentUser.get().getPerson()));
+      }
     }
 
-    ImmutableList<Person> canAccess =
-        ImmutableList.<Person>builder()
-            .addAll(personDao.getPersonForShift(type, 
-                LocalDate.now().withYear(year).monthOfYear().withMinimumValue()
-                .dayOfMonth().withMinimumValue()))
-            .add(shiftType.getShiftCategories().getSupervisor()).build();
+    log.debug("Shift::ical types={}, year={}, currentUser={}", shiftTypes, year, currentUser);
+
+    response.accessControl("*");
+    final Integer shiftYear = year;
+    List<Person> canAccess = Lists.newArrayList();
+    shiftTypes.forEach(st ->{
+      canAccess.addAll(personDao.getPersonForShift(st.getType(), 
+                LocalDate.now().withYear(shiftYear).monthOfYear().withMinimumValue()
+                .dayOfMonth().withMinimumValue()));
+    });
 
     if (!currentUser.isPresent() || currentUser.get().getPerson() == null
         || !canAccess.contains(currentUser.get().getPerson())) {
@@ -545,12 +560,12 @@ public class Shift extends Controller {
     Long personId = currentUser.get().getPerson().getId();
     try {
       Optional<Calendar> calendar =
-          shiftManager.createCalendar(type, Optional.fromNullable(personId), year);
+          shiftManager.createCalendar(personId, year);
       if (!calendar.isPresent()) {
         log.warn("Impossible to create shift calendar for personId = {}, type = {}, year = {}",
             personId, type, year);
         notFound(
-            String.format("Person id = %d is not associated to a shift of type = %s",
+            String.format("Person id = %d is not associated to a shift of type = %s", 
                 personId, type));
       }
 
@@ -560,14 +575,12 @@ public class Shift extends Controller {
 
       response.setHeader("Content-Type", "application/ics");
       InputStream is = new ByteArrayInputStream(bos.toByteArray());
-      renderBinary(is, "reperibilitaRegistro.ics");
+      renderBinary(is, "turni.ics");
       bos.close();
       is.close();
     } catch (IOException ex) {
       log.error("Io exception building ical", ex);
     }
   }
-
-
 
 }
