@@ -12,6 +12,10 @@ Nel rispettive URL sono nei formati seguenti:
  * https://${epas-host}/reperibility/ical?type=${type}&year=${year}
  * https://${epas-host}/shift/ical?type=${type}&year=${year}
 
+Per il calendario dei turni i parametri *type* e *year* sono opzionali, se il *type* non è specificato
+vengono restituiti tutti i calendari di turno del turnista, mentre se l'*year* non è indicato viene 
+restituito l'anno corrente.
+
 Il calendario delle assenze è disponibile per tutti i dipendenti, è obbligatorio specificare una data 
 di inizio e di fine, mentre opzionalmente si può specificare il codice dell'assenza che eventualmente
 vogliamo mostrare nel calendario.
