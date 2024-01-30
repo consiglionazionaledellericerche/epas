@@ -5,7 +5,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.12.1] - 2024-01-30
-### Added
 ### Changed
   - Rimosso vincolo degli 8 giorni al Lavoro Agile per il mese di febbraio.
   - Rimossa redirect in caso di cancellazione di un orario di lavoro particolare che generava loop infinito
