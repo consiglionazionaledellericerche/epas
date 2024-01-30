@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.12.1] - UNRELEASED
+### Changed
+  - Rimosso vincolo degli 8 giorni al Lavoro Agile per il mese di febbraio.
+
+
 ## [2.12.0] - 2024-01-15
 ### Added
   - Aggiunto calendario ICS con le assenze di un dipendente
