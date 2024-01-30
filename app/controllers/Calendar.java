@@ -284,7 +284,7 @@ public class Calendar extends Controller {
   private static List<ShiftEvent> shiftEvents(ShiftType shiftType, Person person, LocalDate start,
       LocalDate end, EventColor color) {
 
-    return shiftDao.getPersonShiftDaysByPeriodAndType(start, end, shiftType, person).stream()
+    return shiftDao.getPersonShiftDaysByPeriodAndType(start, end, Optional.of(shiftType), person).stream()
         .map(shiftDay -> {
           LocalTime begin = null;
           LocalTime finish = null;

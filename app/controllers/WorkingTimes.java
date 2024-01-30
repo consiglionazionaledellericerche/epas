@@ -545,7 +545,8 @@ public class WorkingTimes extends Controller {
         wtt.getDescription(), wtt.id);
 
     flash.success("Tipo orario eliminato.");
-    redirectToManageWorkingTime(wtt.getOffice());
+    manageOfficeWorkingTime(wtt.getOffice().getId());
+    //redirectToManageWorkingTime(wtt.getOffice());
   }
 
   /**
