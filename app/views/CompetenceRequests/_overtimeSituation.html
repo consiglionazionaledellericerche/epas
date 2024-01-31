@@ -4,9 +4,9 @@
 				<table class="table table-condensed">
 				  <tr>
 				    <td>
-				      <em>Tempo per straordinari</em>
+				      <em>Tempo per straordinari maturato nel mese</em>
 				      <i class="fa fa-question-circle" aria-hidden="true" webui-popover-hover 
-				           data-content="<strong>Tempo per straordinari</strong> La somma di tutte le differenze positive nel mese.<br> 
+				           data-content="<strong>Tempo per straordinari maturato nel mese</strong> La somma di tutte le differenze positive nel mese.<br> 
 				                   <strong>Differenze positive</strong> Giorni in cui il dipendente ha svolto più ore di quelle <br>previste dal piano orario giornaliero."></i>
 				    </td>
 				    <td>
@@ -40,6 +40,10 @@
 	#{/if}
 	#{if enabledOvertimePerPerson}
 	<div class="container-fluid">
-		<h4>Quantità di ore di straordinario ancora disponibili da assegnare: ${overtimeResidual} ore</h4>
+		<h4>Quantità di ore di straordinario ancora disponibili: 
+			#{if (competenceRequest.getPerson().totalOvertimeHourInYear(year)-overtimeResidual) / competenceRequest.getPerson().totalOvertimeHourInYear(year) >= 0.9}<font color="red">${overtimeResidual} ore</font>#{/if}
+			#{elseif (competenceRequest.getPerson().totalOvertimeHourInYear(year)-overtimeResidual) / competenceRequest.getPerson().totalOvertimeHourInYear(year) >= 0.8 && overtimeResidual / competenceRequest.getPerson().totalOvertimeHourInYear(year) < 0.9}<font color="#FFA500">${overtimeResidual} ore</font>#{/elseif}
+			#{else} ${overtimeResidual} ore #{/else}
+		</h4>
 	</div>
 	#{/if}
