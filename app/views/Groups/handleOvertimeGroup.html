@@ -58,4 +58,29 @@
 	</div>
 	#{/if}
 	
+	#{if check}
+	#{accordionItem 'gruppo', parent:'storico', title:'Persone appartenenti al gruppo '+group.name, open:true, color:'primary'}
+	<table class="table center" datatable-mealTicket>
+		<thead>
+		    <tr>
+		      <th>Persona</th>
+		      <th>Ore assegnate</th>
+		      <th>Assegna ore</th>
+		    </tr>
+	     </thead>
+	     <tbody>
+			#{list items:group.people, as:'item'}
+			<tr>
+				<td>${item.fullName()}</td>
+				<td>${item.totalOvertimeHourInYear(year)}</td>
+				<td><a class="btn btn-primary btn-xs" href="@{PersonOvertimes.addHours(item.id, year)}" data-async-modal="#defaultModal">
+        				Assegna ore
+      				</a></td>
+			</tr>
+			#{/list}
+		 </tbody>	
+	</table>
+	#{/accordionItem}
+	#{/if}
+	
 </div>

@@ -45,6 +45,8 @@ import lombok.val;
 import manager.CompetenceManager;
 import manager.GroupManager;
 import manager.GroupOvertimeManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import models.GeneralSetting;
 import models.GroupOvertime;
 import models.Office;
@@ -93,6 +95,8 @@ public class Groups extends Controller {
   private static GroupOvertimeDao groupOvertimeDao;
   @Inject
   private static GroupOvertimeManager groupOvertimeManager;
+  @Inject
+  private static ConfigurationManager configurationManager;
 
   /**
    * Metodo che crea il gruppo.
@@ -282,8 +286,9 @@ public class Groups extends Controller {
     notFoundIfNull(group);
     rules.checkIfPermitted(group.getOffice());
     //La quantità di ore di straordinario accordate al gruppo nell'anno
+    int year = LocalDate.now().getYear();
     int totalGroupOvertimes = group.getGroupOvertimes().stream()
-        .filter(go -> go.getYear().equals(LocalDate.now().getYear()))
+        .filter(go -> go.getYear().equals(year))
         .mapToInt(go -> go.getNumberOfHours()).sum();
     //Recupero il monte ore della sede decurtandolo di eventuali assegnamenti ad atri gruppi
     List<TotalOvertime> totalList = competenceDao
@@ -294,13 +299,13 @@ public class Groups extends Controller {
     int groupOvertimeSum = 0;
     for (Group otherGroup : groupList)  {
       List<GroupOvertime> groupOvertimeList = groupOvertimeDao
-          .getByYearAndGroup(LocalDate.now().getYear(), otherGroup);
+          .getByYearAndGroup(year, otherGroup);
       groupOvertimeSum = groupOvertimeSum + groupOvertimeList.stream()
       .mapToInt(go -> go.getNumberOfHours()).sum();
     }
     Map<Integer, List<PersonOvertimeInMonth>> mapFirst = 
         groupOvertimeManager.groupOvertimeSituationInYear(group.getPeople(), 
-            LocalDate.now().getYear());
+            year);
     Ordering naturalOrderingDesc = Ordering.natural().reverse();
     Map<Integer, List<PersonOvertimeInMonth>> map = 
         ImmutableSortedMap.copyOf(mapFirst, naturalOrderingDesc);
@@ -310,9 +315,11 @@ public class Groups extends Controller {
     Office office = group.getOffice();
     GroupOvertime groupOvertime = new GroupOvertime();
     List<GroupOvertime> groupOvertimeInYearList = group.getGroupOvertimes().stream()
-        .filter(go -> go.getYear().equals(LocalDate.now().getYear())).collect(Collectors.toList());
+        .filter(go -> go.getYear().equals(year)).collect(Collectors.toList());
+    boolean check = ((Boolean) configurationManager
+        .configValue(office, EpasParam.ENABLE_OVERTIME_PER_PERSON));
     render(group, totalGroupOvertimes, office, groupOvertime, hoursAvailable, map, 
-        groupOvertimesAvailable, groupOvertimeInYearList);
+        groupOvertimesAvailable, groupOvertimeInYearList, year, check);
   }
 
 }
