@@ -38,3 +38,8 @@
 		<h4>Quantità di straordinari ancora disponibili da assegnare: ${hoursAvailable} ore</h4>
 	</div>
 	#{/if}
+	#{if enabledOvertimePerPerson}
+	<div class="container-fluid">
+		<h4>Quantità di ore di straordinario ancora disponibili da assegnare: ${overtimeResidual} ore</h4>
+	</div>
+	#{/if}

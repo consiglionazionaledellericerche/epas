@@ -42,6 +42,7 @@ import it.cnr.iit.epas.DateUtility;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.CertificationManager;
+import manager.CompetenceManager;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -50,14 +51,17 @@ import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Competence;
 import models.CompetenceCode;
+import models.GroupOvertime;
 import models.Person;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.Role;
+import models.TotalOvertime;
 import models.User;
 import models.UsersRolesOffices;
 import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
+import models.flows.Group;
 import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
 import play.Play;
@@ -103,6 +107,8 @@ public class CompetenceRequests extends Controller {
   static CompetenceDao competenceDao;
   @Inject
   static CompetenceCodeDao competenceCodeDao;
+  @Inject
+  static CompetenceManager competenceManager;
   
   static final String ATTESTATI_ACTIVE = "attestati.active";
 
@@ -143,6 +149,20 @@ public class CompetenceRequests extends Controller {
       return;
     }
     val person = currentUser.getPerson();
+    List<TotalOvertime> totalList = 
+        competenceDao.getTotalOvertime(LocalDate.now().getYear(), person.getOffice());
+    int totale = competenceManager.getTotalOvertime(totalList);
+    List<Group> groups = person.getGroups();
+    List<GroupOvertime> list = groups.stream().flatMap(g -> g.getGroupOvertimes().stream()
+        .filter(go -> go.getYear().equals(LocalDate.now().getYear())))
+        .collect(Collectors.toList());
+    if (person.totalOvertimeHourInYear(LocalDate.now().getYear()) == 0 
+        && totale == 0 && list.isEmpty()) {
+      flash.error("Non sono definiti monte ore per la sede, nè per la persona. "
+          + "Definire i monte ore per poter procedere con la richiesta di straordinri.");
+      Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+      
+    }
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste di tipo {} per {} a partire da {}",
         competenceType, person, fromDate);
@@ -272,7 +292,9 @@ public class CompetenceRequests extends Controller {
     List<Person> teamMates = Lists.newArrayList();
     List<PersonReperibilityType> types = Lists.newArrayList();
     PersonStampingRecap psDto = null;
+    boolean enabledOvertimePerPerson = false;
     boolean isOvertime = false;
+    int overtimeResidual = 0;
     switch (competenceType) {
       case CHANGE_REPERIBILITY_REQUEST:
         types = repDao.getReperibilityTypeByOffice(person.getOffice(), Optional.of(false))
@@ -309,9 +331,19 @@ public class CompetenceRequests extends Controller {
                 " del {}/{} per la richiesta di straordinari di {}", 
                 month, year, person.getFullname());
           }
-        }       
-        
+        }        
         isOvertime = true;
+        
+        if ((Boolean) configurationManager
+            .configValue(person.getOffice(), EpasParam.ENABLE_OVERTIME_PER_PERSON)) {
+          enabledOvertimePerPerson = true;
+          CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+          List<CompetenceCode> codeList = Lists.newArrayList();
+          codeList.add(code);
+          overtimeResidual = person.totalOvertimeHourInYear(year) - 
+              competenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.absent(), 
+                  Optional.fromNullable(person), codeList).or(0);
+        } 
         psDto = stampingsRecapFactory.create(person, year, month, true);  
         break;
       default:
@@ -322,7 +354,8 @@ public class CompetenceRequests extends Controller {
     competenceRequest.setStartAt(LocalDateTime.now().plusDays(1));
     competenceRequest.setEndTo(LocalDateTime.now().plusDays(1));
     render("@edit", competenceRequest, insertable, competenceType,
-        year, month, type, teamMates, types, psDto, isOvertime);
+        year, month, type, teamMates, types, psDto, isOvertime, 
+        enabledOvertimePerPerson, overtimeResidual);
   }
 
   /**
