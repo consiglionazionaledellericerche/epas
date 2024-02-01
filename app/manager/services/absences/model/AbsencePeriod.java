@@ -219,9 +219,9 @@ public class AbsencePeriod {
          * gruppo del codice LAGILE (this.fixexPeriodTakableAmount).
          */
         int quantity = 0;
-//        if (from.monthOfYear().get() == DateTimeConstants.FEBRUARY) {
-//          return this.fixedPeriodTakableAmount - 2 * 100;
-//        }
+        if (from.monthOfYear().get() == DateTimeConstants.FEBRUARY) {
+          return this.fixedPeriodTakableAmount - 2 * 100;
+        }
         List<PersonDay> workingDays = personDayManager.workingDaysInMonth(person, from, to);
         int count = (workingDays.size() * 100 / 2);
         if (count % 100 != 0) {
