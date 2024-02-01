@@ -41,9 +41,13 @@
 	#{if enabledOvertimePerPerson}
 	<div class="container-fluid">
 		<h4>Quantità di ore di straordinario ancora disponibili: 
+			#{if overtimeResidual != 0}
 			#{if (competenceRequest.getPerson().totalOvertimeHourInYear(year)-overtimeResidual) / competenceRequest.getPerson().totalOvertimeHourInYear(year) >= 0.9}<font color="red">${overtimeResidual} ore</font>#{/if}
 			#{elseif (competenceRequest.getPerson().totalOvertimeHourInYear(year)-overtimeResidual) / competenceRequest.getPerson().totalOvertimeHourInYear(year) >= 0.8 && overtimeResidual / competenceRequest.getPerson().totalOvertimeHourInYear(year) < 0.9}<font color="#FFA500">${overtimeResidual} ore</font>#{/elseif}
 			#{else} ${overtimeResidual} ore #{/else}
+			#{/if}
+			#{else} 0 ore disponibili o monte ore dipendente non specificato
+			#{/else}
 		</h4>
 	</div>
 	#{/if}

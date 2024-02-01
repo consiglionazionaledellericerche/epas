@@ -18,14 +18,23 @@ package controllers;
 
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
+import org.joda.time.LocalDate;
 import common.security.SecurityRules;
+import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.PersonOvertimeDao;
 import helpers.Web;
 import lombok.extern.slf4j.Slf4j;
+import manager.CompetenceManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
+import models.GroupOvertime;
 import models.Person;
 import models.PersonOvertime;
+import models.TotalOvertime;
+import models.flows.Group;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -41,6 +50,12 @@ public class PersonOvertimes extends Controller {
   static PersonOvertimeDao personOvertimeDao;
   @Inject
   static SecurityRules rules;
+  @Inject
+  static ConfigurationManager configurationManager;
+  @Inject
+  static CompetenceDao competenceDao;
+  @Inject
+  static CompetenceManager competenceManager;
 
   public static void addHours(Long personId, int year) {
     
@@ -69,6 +84,24 @@ public class PersonOvertimes extends Controller {
     if (personOvertime.getDateOfUpdate().getYear() != year) {
       Validation.addError("personOvertime.dateOfUpdate", 
           "Si sta inserendo una quantità per un anno diverso da quello specificato nella data!!");
+    }
+    //Recupero la configurazione del flusso per la sede
+    int totalOvertimes = 0;
+    if (person.getGroups().isEmpty()) {
+      List<TotalOvertime> totalList = competenceDao
+          .getTotalOvertime(LocalDate.now().getYear(), person.getOffice());
+      totalOvertimes = competenceManager.getTotalOvertime(totalList);
+    } else {      
+      List<GroupOvertime> list = person.getGroups().stream().flatMap(g -> g.getGroupOvertimes().stream()
+          .filter(go -> go.getYear().equals(LocalDate.now().getYear())))
+          .collect(Collectors.toList());
+      totalOvertimes = list.stream().mapToInt(go -> go.getNumberOfHours()).sum();
+    }
+    
+    if (personOvertime.getNumberOfHours() > totalOvertimes) {
+      Validation.addError("personOvertime.numberOfHours",
+          "Si sta inserendo una quantità che supera il limite massimo di ore previste "
+          + "dalla propria configurazione. Aggiungere monte ore al gruppo o alla sede!");
     }
     if (Validation.hasErrors()) {
       response.status = 400;

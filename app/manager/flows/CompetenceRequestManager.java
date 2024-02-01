@@ -48,6 +48,8 @@ import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Competence;
 import models.CompetenceCode;
+import models.GroupOvertime;
+import models.Office;
 import models.Person;
 import models.PersonReperibilityDay;
 import models.Role;
@@ -90,7 +92,7 @@ public class CompetenceRequestManager {
   private GroupOvertimeManager groupOvertimeManager;
   private CompetenceDao competenceDao;
   private CompetenceManager competenceManager;
-  
+
 
   /**
    * DTO per la configurazione delle CompenteRequest.
@@ -140,9 +142,9 @@ public class CompetenceRequestManager {
     this.groupOvertimeManager = groupOvertimeManager;
     this.competenceDao = competenceDao;
     this.competenceManager = competenceManager;
-    
+
   }
-  
+
   private static String code = "S1";
 
   /**
@@ -168,9 +170,9 @@ public class CompetenceRequestManager {
         && groupDao.myGroups(person).isEmpty()) {
       problems.add(
           String.format("Approvazione del responsabile di gruppo richiesta. "
-                  + "La persona %s non ha impostato nessun responsabile di gruppo "
-                  + "e non appartiene ad alcun gruppo. "
-                  + "Contattare l'ufficio del personale.",
+              + "La persona %s non ha impostato nessun responsabile di gruppo "
+              + "e non appartiene ad alcun gruppo. "
+              + "Contattare l'ufficio del personale.",
               person.getFullname()));
     }
 
@@ -194,7 +196,7 @@ public class CompetenceRequestManager {
   public CompetenceRequestConfiguration getConfiguration(
       CompetenceRequestType requestType, Person person) {
     val competenceRequestConfiguration = new CompetenceRequestConfiguration(person, requestType);
-    
+
     if (requestType.alwaysSkipOfficeHeadApproval) {
       competenceRequestConfiguration.officeHeadApprovalRequired = false;
     } else {
@@ -205,7 +207,7 @@ public class CompetenceRequestManager {
                 LocalDate.now());
       }
     }
-    
+
     if (requestType.alwaysSkipManagerApproval) {
       competenceRequestConfiguration.managerApprovalRequired = false;
     } else {
@@ -227,7 +229,7 @@ public class CompetenceRequestManager {
                 LocalDate.now());
       }
     }
-    
+
     if (requestType.equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
       competenceRequestConfiguration.advanceApprovalRequired = false;
     } else {
@@ -346,12 +348,12 @@ public class CompetenceRequestManager {
         competenceRequest.setFlowStarted(true);
         //invio la notifica al primo che deve validare la mia richiesta 
         notificationManager
-            .notificationCompetenceRequestPolicy(competenceRequest.getPerson().getUser(),
-                competenceRequest, true);
+        .notificationCompetenceRequestPolicy(competenceRequest.getPerson().getUser(),
+            competenceRequest, true);
         // invio anche la mail
         notificationManager
-            .sendEmailCompetenceRequestPolicy(competenceRequest.getPerson().getUser(), 
-                competenceRequest, true);
+        .sendEmailCompetenceRequestPolicy(competenceRequest.getPerson().getUser(), 
+            competenceRequest, true);
         break;
 
       case FIRST_APPROVAL:
@@ -369,7 +371,7 @@ public class CompetenceRequestManager {
         competenceRequest.setFlowEnded(true);
         notificationManager.notificationCompetenceRequestRefused(competenceRequest, person);
         break;
-        
+
       case OFFICE_HEAD_APPROVAL:
         competenceRequest.setOfficeHeadApproved(LocalDateTime.now());
         break;
@@ -596,7 +598,7 @@ public class CompetenceRequestManager {
       if (competenceRequest.getPerson().getReperibility().stream()
           .anyMatch(pr -> pr.getPersonReperibilityType().getSupervisor().equals(user.getPerson()))
           && competenceRequest.isManagerApprovalRequired()) {
-        
+
         managerApproval(competenceRequest.id, user);
       }
       approved = true;
@@ -616,7 +618,7 @@ public class CompetenceRequestManager {
         approved = true;
       }
     }
-    
+
     if (competenceRequest.isOfficeHeadApprovalRequired() 
         && competenceRequest.getOfficeHeadApproved() == null) {
       officeHeadApproval(competenceRequest.id, user);
@@ -625,11 +627,11 @@ public class CompetenceRequestManager {
     return approved;
   }
 
-  
+
   public void officeHeadApproval(long id, User user) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     val currentPerson = Security.getUser().get().getPerson();
-    
+
     if ((Boolean) configurationManager.configValue(currentPerson.getOffice(), 
         EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now()) 
         && competenceRequest.getFirstApproved() == null) {      
@@ -643,7 +645,7 @@ public class CompetenceRequestManager {
       log.info("{} approvata dal responsabile di sede {}.", 
           competenceRequest, currentPerson.getFullname());
     }
-        
+
     notificationManager.notificationCompetenceRequestPolicy(user, competenceRequest, true);
   }
 
@@ -730,7 +732,7 @@ public class CompetenceRequestManager {
         competenceRequest, currentPerson.getFullname());
 
   }
-  
+
   /**
    * Metodo che ritorna la quantità di ore disponibili per lo straordinario.
    * 
@@ -739,7 +741,7 @@ public class CompetenceRequestManager {
    * @return la quantità di ore di straordinario disponibili per approvazione.
    */
   public int hoursAvailable(User approver, CompetenceRequest competenceRequest) {
-    
+
     int totalOvertimes = 0;
     int overtimeHoursAlreadyAssigned = 0;
     val config = getConfiguration(competenceRequest.getType(), competenceRequest.getPerson());
@@ -759,7 +761,7 @@ public class CompetenceRequestManager {
     int overtimePendingRequests = !results.isEmpty() ? 
         results.stream().mapToInt(cr -> cr.getValue()).sum() : 0;
     if (config.managerApprovalRequired) {
-      
+
       /* 
        * Controllo la quantità già assegnata nel corso dell'anno agli appartenenti al gruppo 
        * del richiedente 
@@ -769,13 +771,13 @@ public class CompetenceRequestManager {
       Map<Integer, List<PersonOvertimeInMonth>> map = groupOvertimeManager
           .groupOvertimeSituationInYear(group.getPeople(), competenceRequest.getYear());
       overtimeHoursAlreadyAssigned = groupOvertimeManager.groupOvertimeAssignedInYear(map);
-      
+
       /*
        * Controllo quante ore ha il mio gruppo a disposizione
        */
       totalOvertimes = groupOvertimeManager.totalGroupOvertimes(group);
-      
-      
+
+
     }
     if (config.officeHeadApprovalRequired) {
       /*
@@ -788,17 +790,77 @@ public class CompetenceRequestManager {
               LocalDate.now().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), 
               LocalDate.now(), Optional.absent()).list(), competenceRequest.getYear());
       overtimeHoursAlreadyAssigned = groupOvertimeManager.groupOvertimeAssignedInYear(map);
-      
+
       /*
        * Controllo quante ore ha la sede a disposizione
        */
       List<TotalOvertime> totalList = competenceDao
-      .getTotalOvertime(LocalDate.now().getYear(), approver.getPerson().getOffice());
+          .getTotalOvertime(LocalDate.now().getYear(), approver.getPerson().getOffice());
       totalOvertimes = competenceManager.getTotalOvertime(totalList);
-      
+
     }
     return totalOvertimes - overtimePendingRequests - overtimeHoursAlreadyAssigned;
   }
 
+  /**
+   * Ritorna quante ore di straordinario rimangono alla persona nell'anno.
+   * 
+   * @param person la persona di cui richiedere le ore di straordinario residue
+   * @param year l'anno di riferimento
+   * @return la quantità di ore di straordinario residue per la persona nell'anno.
+   */
+  public int myOvertimeResidual(Person person, int year) {
+    //Calcolo le ore di straordinario residue con il monte ore per persona se abilitato in configurazione
+    int overtimeResidual = 0;
+    if ((Boolean) configurationManager
+        .configValue(person.getOffice(), EpasParam.ENABLE_OVERTIME_PER_PERSON)) {
+
+      CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+      List<CompetenceCode> codeList = Lists.newArrayList();
+      codeList.add(code);
+      overtimeResidual = person.totalOvertimeHourInYear(year) - 
+          competenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.absent(), 
+              Optional.fromNullable(person), codeList).or(0);
+    }
+    return overtimeResidual;
+  }
+  
+  /**
+   * Ritorna la quantità di ore di straordinario disponibili per l'intera sede.
+   * 
+   * @param office la sede per cui controllare le ore disponibili di straordinario
+   * @param year l'anno di riferimento
+   * @return la quantità di ore di straordinario disponibili per la sede.
+   */
+  public int seatOvertimeResidual(Office office, int year) {
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+    List<CompetenceCode> codeList = Lists.newArrayList();
+    codeList.add(code);
+  //Il monte ore della sede
+    int totalOvertimes = 0;
+    List<TotalOvertime> totalList = competenceDao
+      .getTotalOvertime(LocalDate.now().getYear(), office);
+    totalOvertimes = competenceManager.getTotalOvertime(totalList);
+    
+    return totalOvertimes - competenceDao
+        .valueOvertimeApprovedByMonthAndYear(year, Optional.absent(), Optional.absent(), codeList)
+        .get();
+  }
+  
+  /**
+   * 
+   * @param person la persona appartenente al gruppo di cui si cercano gli straordinari residui
+   * @param year l'anno di riferimento
+   * @return la quantità di ore di straordinario residue del gruppo cui appartiene la persona nell'anno.
+   */
+  public int groupOvertimeResidual(Person person, int year) {
+    Group group = groupDao
+        .myGroups(person, java.time.LocalDate.now()).get(0);
+    Map<Integer, List<PersonOvertimeInMonth>> map = groupOvertimeManager
+        .groupOvertimeSituationInYear(group.getPeople(), year);
+    int overtimeHoursAlreadyAssigned = groupOvertimeManager.groupOvertimeAssignedInYear(map); 
+    int totalOvertimes = groupOvertimeManager.totalGroupOvertimes(group);
+    return overtimeHoursAlreadyAssigned - totalOvertimes;
+  }
 }
 
