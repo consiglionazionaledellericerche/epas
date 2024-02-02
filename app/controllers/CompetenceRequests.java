@@ -624,6 +624,8 @@ public class CompetenceRequests extends Controller {
     User user = Security.getUser().get();
     rules.checkIfPermitted(competenceRequest);
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      
+      boolean isSeatSupervisor = user.hasRoles(Role.SEAT_SUPERVISOR);
       boolean showOvertimeAvailableHours = true;
       boolean enabledOvertimePerPerson = false;
       int overtimeResidual = 0;
@@ -648,7 +650,7 @@ public class CompetenceRequests extends Controller {
                   Optional.fromNullable(competenceRequest.getPerson()), codeList).or(0);
         } 
         render(competenceRequest, approval, psDto, month, hoursAvailable, 
-            showOvertimeAvailableHours, enabledOvertimePerPerson, overtimeResidual);
+            showOvertimeAvailableHours, enabledOvertimePerPerson, overtimeResidual, isSeatSupervisor);
       }
     }    
 
