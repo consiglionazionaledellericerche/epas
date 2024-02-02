@@ -101,6 +101,8 @@ public class StampingUpdateDto {
     stamping.setWay(getWayType());
     if (getReasonType() != null) {
       stamping.setStampType(StampTypes.byCode(getReasonType().name()));
+    } else {
+      stamping.setStampType(null);
     }
   }
 }
