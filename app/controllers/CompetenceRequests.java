@@ -462,15 +462,7 @@ public class CompetenceRequests extends Controller {
                   + "Non si può richiedere straordinario per un mese concluso!");
         }
       }
-      //      List<Group> groups = competenceRequest.getPerson().getGroups();
-      //      if (!groups.isEmpty()) {
-      //        List<GroupOvertime> list = groups.stream().flatMap(g -> g.getGroupOvertimes().stream()
-      //            .filter(go -> go.getYear().equals(LocalDate.now().getYear())))
-      //            .collect(Collectors.toList());
-      //        
-      //      } else {
-      //        
-      //      }
+
       if ((Boolean) configurationManager
           .configValue(competenceRequest.getPerson().getOffice(), EpasParam.ENABLE_OVERTIME_PER_PERSON)
           && competenceRequestManager.myOvertimeResidual(competenceRequest.getPerson(), year) 
@@ -633,6 +625,8 @@ public class CompetenceRequests extends Controller {
     rules.checkIfPermitted(competenceRequest);
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
       boolean showOvertimeAvailableHours = true;
+      boolean enabledOvertimePerPerson = false;
+      int overtimeResidual = 0;
       competenceRequest.save();
       if (!approval) {
 
@@ -643,8 +637,18 @@ public class CompetenceRequests extends Controller {
                 competenceRequest.getMonth(), true);
 
         int hoursAvailable = competenceRequestManager.hoursAvailable(user, competenceRequest);
+        if ((Boolean) configurationManager
+            .configValue(competenceRequest.getPerson().getOffice(), EpasParam.ENABLE_OVERTIME_PER_PERSON)) {
+          enabledOvertimePerPerson = true;
+          CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+          List<CompetenceCode> codeList = Lists.newArrayList();
+          codeList.add(code);
+          overtimeResidual = competenceRequest.getPerson().totalOvertimeHourInYear(competenceRequest.getYear()) - 
+              competenceDao.valueOvertimeApprovedByMonthAndYear(competenceRequest.getYear(), Optional.absent(), 
+                  Optional.fromNullable(competenceRequest.getPerson()), codeList).or(0);
+        } 
         render(competenceRequest, approval, psDto, month, hoursAvailable, 
-            showOvertimeAvailableHours);
+            showOvertimeAvailableHours, enabledOvertimePerPerson, overtimeResidual);
       }
     }    
 

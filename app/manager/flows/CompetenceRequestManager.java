@@ -860,7 +860,7 @@ public class CompetenceRequestManager {
         .groupOvertimeSituationInYear(group.getPeople(), year);
     int overtimeHoursAlreadyAssigned = groupOvertimeManager.groupOvertimeAssignedInYear(map); 
     int totalOvertimes = groupOvertimeManager.totalGroupOvertimes(group);
-    return overtimeHoursAlreadyAssigned - totalOvertimes;
+    return totalOvertimes - overtimeHoursAlreadyAssigned;
   }
 }
 
