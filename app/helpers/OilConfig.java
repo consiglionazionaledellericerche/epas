@@ -28,7 +28,7 @@ import play.Play;
  *  <dt>oil.app.name</dt><dd>Nome dell'instanza OIL, utilizzato nel subject del messaggio</dd>
  *  <dt>oil.email.to</dt><dd>Indirizzo email di OIL a cui inviare le segnalazioni</dd>
  *  <dt>oil.email.subject</dt><dd>Oggetto delle segnalazioni</dd>
- *  <dt>oil.categories.default</dt><dd>Id della categoria da selezionare come 
+ *  <dt>oil.categories.selected</dt><dd>Id della categoria da selezionare come 
  *      predefinita (facoltativo)</dd>
  * </dl>
  * Comunque ci sono dei default.
