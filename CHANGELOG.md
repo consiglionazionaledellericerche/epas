@@ -5,10 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.13.0] - UNRELEASED
+### Added
+  - Aggiunta possibilità di inserire residenza ed id anagrafica esterna nella creazione di 
+    una nuova persona.
+
 ### Changed
   - Corretta possibilità di azzerare via REST la causale di una timbratura
   - Correzione trattamento OIL categories selected, riduzione logo predefinito CNR
   - Rimossi vecchi file in /public/images/old
+
 
 ## [2.12.2] - 2024-02-01
 ### Changed
