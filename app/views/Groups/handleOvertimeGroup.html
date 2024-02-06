@@ -58,6 +58,7 @@
 	</div>
 	#{/if}
 	
+	<div id="hoursList">
 	#{if check}
 	#{accordionItem 'gruppo', parent:'storico', title:'Persone appartenenti al gruppo '+group.name, open:true, color:'primary'}
 	<table class="table center" datatable-mealTicket>
@@ -82,5 +83,6 @@
 	</table>
 	#{/accordionItem}
 	#{/if}
+	</div>
 	
 </div>

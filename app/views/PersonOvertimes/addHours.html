@@ -8,7 +8,7 @@ disponibile di: <strong>${person.totalOvertimeHourInYear(year)}</strong>
   <div id="officeData">
 
 	#{form action:@saveHours(), method:'POST', autocomplete:false,
-	    class:'form form-horizontal', 'data-async':'#instituteList',
+	    class:'form form-horizontal', 'data-async':'#hoursList',
 	    'data-async-error':'#officeData'}
 
 	#{f.hidden 'personId', value:person.id /}
