@@ -30,6 +30,7 @@ import dao.GroupDao;
 import dao.GroupOvertimeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonOvertimeDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import helpers.Web;
@@ -38,6 +39,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +53,7 @@ import models.GeneralSetting;
 import models.GroupOvertime;
 import models.Office;
 import models.Person;
+import models.PersonOvertime;
 import models.Role;
 import models.TotalOvertime;
 import models.User;
@@ -97,6 +100,8 @@ public class Groups extends Controller {
   private static GroupOvertimeManager groupOvertimeManager;
   @Inject
   private static ConfigurationManager configurationManager;
+  @Inject
+  private static PersonOvertimeDao personOvertimeDao;
 
   /**
    * Metodo che crea il gruppo.
@@ -320,6 +325,56 @@ public class Groups extends Controller {
         .configValue(office, EpasParam.ENABLE_OVERTIME_PER_PERSON));
     render(group, totalGroupOvertimes, office, groupOvertime, hoursAvailable, map, 
         groupOvertimesAvailable, groupOvertimeInYearList, year, check);
+  }
+  
+  public static void addHours(Long personId, int year) {
+    
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person.getOffice());
+    List<PersonOvertime> personOvertimes = personOvertimeDao.personListInYear(person, year);
+    PersonOvertime personOvertime = new PersonOvertime();
+    render(personOvertimes, person, year, personOvertime);
+  }
+  
+  public static void saveHours(PersonOvertime personOvertime, 
+      int year, Long personId) {
+    Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person.getOffice());
+    Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+    
+    if (personOvertime.getNumberOfHours() == null 
+        || !pattern.matcher(personOvertime.getNumberOfHours().toString()).matches()) {
+      Validation.addError("personOvertime.getNumberOfHours", "Inserire una quantità numerica!");
+    }
+    if (personOvertime.getDateOfUpdate() == null) {
+      Validation.addError("personOvertime.dateOfUpdate", "Inserire una data valida!!");
+    }
+    if (personOvertime.getDateOfUpdate().getYear() != year) {
+      Validation.addError("personOvertime.dateOfUpdate", 
+          "Si sta inserendo una quantità per un anno diverso da quello specificato nella data!!");
+    }
+    int totalOvertimes = 0;
+    List<GroupOvertime> list = person.getGroups().stream().flatMap(g -> g.getGroupOvertimes().stream()
+        .filter(go -> go.getYear().equals(LocalDate.now().getYear())))
+        .collect(Collectors.toList());
+    totalOvertimes = list.stream().mapToInt(go -> go.getNumberOfHours()).sum();
+    if (personOvertime.getNumberOfHours() > totalOvertimes) {
+      Validation.addError("personOvertime.numberOfHours",
+          "Si sta inserendo una quantità che supera il limite massimo di ore previste "
+          + "dalla propria configurazione. Aggiungere monte ore al gruppo o alla sede!");
+    }
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      render("@addHours", person, year, personOvertime);
+    }
+    personOvertime.setPerson(person);
+    personOvertime.setYear(year);
+    personOvertime.save();
+    flash.success("Aggiunta nuova quantità al monte ore per straordinari di %s", 
+        person.getFullname());
+    handleOvertimeGroup(person.getGroups().get(0).id);
   }
 
 }

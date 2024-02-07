@@ -42,7 +42,7 @@
 	#{/secure.check}
 	
 	#{if !map.isEmpty()}
-	<div class="container">
+	<div class="container-fluid">
 		<h4 style="text-align:center;">Riepilogo dettagliato ore di straordinario assegnate nei mesi precedenti</h4>
 		#{accordionGroup 'mensilita'}
 		#{list items:map.entrySet(), as:'entry'}
@@ -74,7 +74,7 @@
 			<tr>
 				<td>${item.fullName()}</td>
 				<td>${item.totalOvertimeHourInYear(year)}</td>
-				<td><a class="btn btn-primary btn-xs" href="@{PersonOvertimes.addHours(item.id, year)}" data-async-modal="#defaultModal">
+				<td><a class="btn btn-primary btn-xs" href="@{Groups.addHours(item.id, year)}" data-async-modal="#defaultModal">
         				Assegna ore
       				</a></td>
 			</tr>

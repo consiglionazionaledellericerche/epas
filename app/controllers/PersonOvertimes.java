@@ -112,8 +112,6 @@ public class PersonOvertimes extends Controller {
     personOvertime.save();
     flash.success("Aggiunta nuova quantità al monte ore per straordinari di %s", 
         person.getFullname());
-    //TODO: il controller dove inviare la risposta deve essere quello giusto tra quello del monte ore 
-    // della sede e quello del monte ore del gruppo (perchè questa form viene chiamata in entrambi i casi)
     Competences.totalOvertimeHours(year, person.getOffice().id);
     
   }
