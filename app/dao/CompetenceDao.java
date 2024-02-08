@@ -192,7 +192,7 @@ public class CompetenceDao extends DaoBase {
    *     straordinario (sommando i codici S1 S2 e S3).
    */
   public Optional<Integer> valueOvertimeApprovedByMonthAndYear(
-      Integer year, Optional<Integer> month, Optional<Person> person,
+      Integer year, Optional<Integer> month, Optional<Person> person, Optional<Office> office,
       List<CompetenceCode> codeList) {
 
     final QCompetence competence = QCompetence.competence;
@@ -203,6 +203,9 @@ public class CompetenceDao extends DaoBase {
     }
     if (person.isPresent()) {
       condition.and(competence.person.eq(person.get()));
+    }
+    if (office.isPresent()) {
+    	condition.and(competence.person.office.eq(office.get()));
     }
     final Integer result =
         getQueryFactory().select(competence.valueApproved.sum())

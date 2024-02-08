@@ -820,7 +820,7 @@ public class CompetenceRequestManager {
       codeList.add(code);
       overtimeResidual = person.totalOvertimeHourInYear(year) - 
           competenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.absent(), 
-              Optional.fromNullable(person), codeList).or(0);
+              Optional.fromNullable(person), Optional.absent(), codeList).or(0);
     }
     return overtimeResidual;
   }
@@ -843,8 +843,8 @@ public class CompetenceRequestManager {
     totalOvertimes = competenceManager.getTotalOvertime(totalList);
     
     return totalOvertimes - competenceDao
-        .valueOvertimeApprovedByMonthAndYear(year, Optional.absent(), Optional.absent(), codeList)
-        .get();
+        .valueOvertimeApprovedByMonthAndYear(year, Optional.absent(), 
+        		Optional.absent(), Optional.fromNullable(office), codeList).or(0);
   }
   
   /**

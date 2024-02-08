@@ -347,7 +347,7 @@ public class CompetenceRequests extends Controller {
           codeList.add(code);
           overtimeResidual = person.totalOvertimeHourInYear(year) - 
               competenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.absent(), 
-                  Optional.fromNullable(person), codeList).or(0);
+                  Optional.fromNullable(person), Optional.absent(), codeList).or(0);
         } 
         psDto = stampingsRecapFactory.create(person, year, month, true);  
         break;
@@ -471,10 +471,11 @@ public class CompetenceRequests extends Controller {
             "Si sta inserendo una quantità che supera il limite di ore di straordinario "
                 + "personali disponibili!!! Rivolgersi alla propria amministrazione.");
       }
-      if (competenceRequest.getPerson().getGroups().isEmpty()) {
-        if (competenceRequestManager
-            .seatOvertimeResidual(competenceRequest.getPerson().getOffice(), year) 
-            < competenceRequest.getValue()) {
+      if ((Boolean) configurationManager.configValue(competenceRequest.getPerson().getOffice(), 
+    		  EpasParam.OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED, LocalDate.now())) {
+    	  int result = competenceRequestManager
+    	            .seatOvertimeResidual(competenceRequest.getPerson().getOffice(), year);
+        if (result < competenceRequest.getValue()) {
           Validation.addError("competenceRequest.value", 
               "Si sta inserendo una quantità che supera il limite di ore di straordinario "
                   + "disponibili per la propria sede!!! Rivolgersi alla propria amministrazione.");
@@ -647,7 +648,7 @@ public class CompetenceRequests extends Controller {
           codeList.add(code);
           overtimeResidual = competenceRequest.getPerson().totalOvertimeHourInYear(competenceRequest.getYear()) - 
               competenceDao.valueOvertimeApprovedByMonthAndYear(competenceRequest.getYear(), Optional.absent(), 
-                  Optional.fromNullable(competenceRequest.getPerson()), codeList).or(0);
+                  Optional.fromNullable(competenceRequest.getPerson()), Optional.absent(), codeList).or(0);
         } 
         render(competenceRequest, approval, psDto, month, hoursAvailable, 
             showOvertimeAvailableHours, enabledOvertimePerPerson, overtimeResidual, isSeatSupervisor);

@@ -324,7 +324,7 @@ public class Groups extends Controller {
     boolean check = ((Boolean) configurationManager
         .configValue(office, EpasParam.ENABLE_OVERTIME_PER_PERSON));
     render(group, totalGroupOvertimes, office, groupOvertime, hoursAvailable, map, 
-        groupOvertimesAvailable, groupOvertimeInYearList, year, check);
+        groupOvertimesAvailable, groupOvertimeInYearList, year, check, totale);
   }
   
   public static void addHours(Long personId, int year) {
