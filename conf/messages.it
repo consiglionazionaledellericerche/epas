@@ -52,6 +52,7 @@ competenceRequest.person =Dipendente
 competenceRequest.startAt =Inizio
 competenceRequest.type =Tipologia
 competenceRequest.value =Ore di straordinario da richiedere
+competenceRequest.valueRequested =Ore di straordinario da richiedere
 competenceRequest.dateToChange =Giorno in cui effettuare il cambio
 competenceRequest.beginDateToAsk =Giorno inziale chiesto
 competenceRequest.endDateToAsk =Giorno finale chiesto

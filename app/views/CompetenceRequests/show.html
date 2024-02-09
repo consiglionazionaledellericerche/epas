@@ -36,6 +36,7 @@
 	<th>Data e ora sottomissione</th>
 	#{if competenceRequest.type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
 		<th>Quantità richiesta</th>
+		<th>Quantità approvata</th>
 	#{/if}
 	<th>Tipo evento</th>
 	<th>Descrizione</th>
@@ -57,6 +58,7 @@
 	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
 	<td>#{f.value 'item.createdAt', value:item.createdAt /}</td>
 	#{if competenceRequest.type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
+		<td>#{if competenceRequest.valueRequested}${competenceRequest.valueRequested} ore#{/if}#{else}non presente#{/else}</td>
 		<td>#{if competenceRequest.value}${competenceRequest.value} ore#{/if}#{else}non presente#{/else}</td>
 	#{/if}
 	<td>#{f.value 'item.eventType', value:item.eventType /}</td>

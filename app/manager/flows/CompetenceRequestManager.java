@@ -759,7 +759,7 @@ public class CompetenceRequestManager {
       results = Lists.newArrayList();
     }
     int overtimePendingRequests = !results.isEmpty() ? 
-        results.stream().mapToInt(cr -> cr.getValue()).sum() : 0;
+        results.stream().mapToInt(cr -> cr.getValueRequested()).sum() : 0;
     if (config.managerApprovalRequired) {
 
       /* 

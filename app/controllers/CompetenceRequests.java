@@ -466,8 +466,8 @@ public class CompetenceRequests extends Controller {
       if ((Boolean) configurationManager
           .configValue(competenceRequest.getPerson().getOffice(), EpasParam.ENABLE_OVERTIME_PER_PERSON)
           && competenceRequestManager.myOvertimeResidual(competenceRequest.getPerson(), year) 
-          < competenceRequest.getValue()) {
-        Validation.addError("competenceRequest.value", 
+          < competenceRequest.getValueRequested()) {
+        Validation.addError("competenceRequest.valueRequested", 
             "Si sta inserendo una quantità che supera il limite di ore di straordinario "
                 + "personali disponibili!!! Rivolgersi alla propria amministrazione.");
       }
@@ -475,15 +475,15 @@ public class CompetenceRequests extends Controller {
     		  EpasParam.OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED, LocalDate.now())) {
     	  int result = competenceRequestManager
     	            .seatOvertimeResidual(competenceRequest.getPerson().getOffice(), year);
-        if (result < competenceRequest.getValue()) {
-          Validation.addError("competenceRequest.value", 
+        if (result < competenceRequest.getValueRequested()) {
+          Validation.addError("competenceRequest.valueRequested", 
               "Si sta inserendo una quantità che supera il limite di ore di straordinario "
                   + "disponibili per la propria sede!!! Rivolgersi alla propria amministrazione.");
         }
       } else {        
         if(competenceRequestManager.groupOvertimeResidual(competenceRequest.getPerson(), year) 
-            < competenceRequest.getValue()) {
-          Validation.addError("competenceRequest.value", 
+            < competenceRequest.getValueRequested()) {
+          Validation.addError("competenceRequest.valueRequested", 
               "Si sta inserendo una quantità che supera il limite di ore di straordinario "
                   + "disponibili per il proprio gruppo!!! Rivolgersi alla propria amministrazione.");
         }
@@ -684,7 +684,7 @@ public class CompetenceRequests extends Controller {
       }
 
       competenceRequest.setValue(value);
-      log.debug("Cambiato valore alla competenza da {} a {}",competenceRequest.getValue(), value);
+      log.debug("Cambiato valore alla competenza da {} a {}",competenceRequest.getValueRequested(), value);
       competenceRequest.save();
     }  
 
