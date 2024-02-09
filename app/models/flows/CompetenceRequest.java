@@ -81,6 +81,11 @@ public class CompetenceRequest extends MutableModel {
   private Integer value;
   
   /*
+   * L'eventuale valore da richiedere
+   */
+  private Integer valueRequested;
+  
+  /*
    * L'eventuale anno in cui salvare la competenza
    */
   private Integer year;

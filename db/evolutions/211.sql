@@ -55,6 +55,12 @@ ALTER TABLE persons
   
 ALTER TABLE persons_history
   ADD COLUMN person_overtimes_id bigint;
+  
+ALTER TABLE competence_requests 
+  ADD COLUMN value_requested INTEGER;
+
+ALTER TABLE competence_requests_history 
+  ADD COLUMN value_requested INTEGER;
 
 # --- !Downs
 
