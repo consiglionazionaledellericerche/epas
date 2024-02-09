@@ -995,6 +995,8 @@ when
     		"Groups.showGroups",
     		"Groups.edit",
     		"Groups.handleOvertimeGroup",
+    		"Groups.addHours",
+    		"Groups.saveHours",
     		"AbsenceRequests.blank",
 			"AbsenceRequests.edit",
 			"AbsenceRequests.save",
@@ -1044,6 +1046,8 @@ when
     		"Competences.monthlyOvertime",
     		"Groups.showGroups",
     		"Groups.handleOvertimeGroup",
+    		"Groups.addHours",
+    		"Groups.saveHours",
     		"Groups.edit"), target==$o, granted==false)
 then
   $c.grant();
@@ -2251,6 +2255,8 @@ when
         "Groups.showGroups",
         "Groups.handleOvertimeGroup",
         "GroupOvertimes.save",
+        "PersonOvertimes.addHours",
+        "PersonOvertimes.saveHours",
         
         "Affiliations.personAffiliations",
         "Affiliations.blankByPerson",
@@ -2432,6 +2438,8 @@ when
         "Groups.showGroups",
         "Groups.handleOvertimeGroup",
         "GroupOvertimes.save",
+        "PersonOvertimes.addHours",
+        "PersonOvertimes.saveHours",
 
         "Affiliations.personAffiliations",
         "Affiliations.blankByPerson",
