@@ -95,6 +95,8 @@
   #{accordionItem 'registrySynchSettings', parent:'generalSetting', title:'Sincronizzazione anagrafica', open:false}
     #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
       #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita l'inserimento del persona da parte degli ufficio amministrativi#{/alert}
+      #{f.booleanRadio 'generalSetting.personCreationEnabled' /}
       #{alert color:'info'}Abilita la sincronizzazione dei badge di tutti gli uffici con l'anagrafica centrale#{/alert}
       #{f.booleanRadio 'generalSetting.syncBadgesEnabled' /}
       #{alert color:'info'}Abilita la sincronizzazione delle persone con l'anagrafica centrale verificando la

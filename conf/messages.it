@@ -480,6 +480,7 @@ generalSetting =Impostazioni generali di sistema
 generalSetting.cookiePolicyEnabled=Visualizzazione del banner per la cookie policy abilitato
 generalSetting.cookiePolicyContent=Pagina (HTML) con la cookie policy
 generalSetting.regulationsEnabled=Menu Normativa attivo per i dipendenti 
+generalSetting.personCreationEnabled =Inserimento nuovo personale da parte degli uffici
 generalSetting.syncBadgesEnabled =Sincronizzazione badge
 generalSetting.syncOfficesEnabled =Sincronizzazione uffici
 generalSetting.syncPersonsEnabled =Sincronizzazione persone

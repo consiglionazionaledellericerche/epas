@@ -45,6 +45,7 @@ public class GeneralSetting extends BaseModel {
   
   // Parametri gestione anagrafica
   
+  private boolean personCreationEnabled = true;
   private boolean syncBadgesEnabled = false;
   private boolean syncOfficesEnabled = false;
   private boolean syncPersonsEnabled = false;
