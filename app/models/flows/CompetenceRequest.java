@@ -35,6 +35,8 @@ import models.Person;
 import models.base.MutableModel;
 import models.enumerate.ShiftSlot;
 import models.flows.enumerate.CompetenceRequestType;
+
+import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -49,6 +51,7 @@ import play.data.validation.Required;
 @Getter
 @Setter
 @Entity
+@Audited
 @Table(name = "competence_requests")
 public class CompetenceRequest extends MutableModel {
   
@@ -147,7 +150,6 @@ public class CompetenceRequest extends MutableModel {
   private boolean officeHeadApprovalRequired = true;
   
   
-  @NotAudited
   @OneToMany(mappedBy = "competenceRequest")
   @OrderBy("createdAt DESC")
   private List<CompetenceRequestEvent> events = Lists.newArrayList();

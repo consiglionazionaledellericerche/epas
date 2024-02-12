@@ -44,6 +44,19 @@ CREATE TABLE person_overtimes_history
   CONSTRAINT person_overtimes_history_pkey PRIMARY KEY (id , _revision )
 );
 
+CREATE TABLE competence_request_events_history
+(
+  id bigint NOT NULL,
+  _revision integer NOT NULL REFERENCES revinfo (rev), 
+  _revision_type smallint,
+  competence_request_id BIGINT,
+  owner_id BIGINT,
+  description TEXT,	
+  event_type TEXT,
+  created_at TIMESTAMP WITHOUT TIME ZONE,
+  CONSTRAINT competence_request_events_history_pkey PRIMARY KEY (id , _revision )
+);
+
 ALTER TABLE groups
   ADD COLUMN group_overtimes_id bigint REFERENCES group_overtimes(id);
     

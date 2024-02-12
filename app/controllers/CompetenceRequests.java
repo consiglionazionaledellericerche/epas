@@ -37,6 +37,8 @@ import dao.GroupDao;
 import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
 import dao.UsersRolesOfficesDao;
+import dao.history.CompetenceRequestHistoryDao;
+import dao.history.HistoryValue;
 import dao.wrapper.IWrapperFactory;
 import helpers.Web;
 import it.cnr.iit.epas.DateUtility;
@@ -114,6 +116,8 @@ public class CompetenceRequests extends Controller {
   static CompetenceManager competenceManager;
   @Inject
   static GroupOvertimeManager groupOvertimeManager;
+  @Inject
+  static CompetenceRequestHistoryDao competenceRequestHistoryDao;
 
   static final String ATTESTATI_ACTIVE = "attestati.active";
 
@@ -610,8 +614,11 @@ public class CompetenceRequests extends Controller {
       psDto = stampingsRecapFactory
           .create(competenceRequest.getPerson(), competenceRequest.getYear(), month, true);
     }    
+    List<HistoryValue<CompetenceRequest>> historyCompetence = competenceRequestHistoryDao
+            .competenceRequests(competenceRequest.getId());
+
     render(competenceRequest, type, user, disapproval, month, psDto, 
-        showOvertimeAvailableHours, hoursAvailable);
+        showOvertimeAvailableHours, hoursAvailable, historyCompetence);
   }
 
   /**
