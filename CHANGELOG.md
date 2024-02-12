@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Aggiunta possibilità di inserire residenza ed id anagrafica esterna nella creazione di 
     una nuova persona.
+  - Inserita in configurazione generale la possibilità di disabilitare l'inserimento del personale
+    da parte dei responsabili del personale degli uffici
 
 ### Changed
   - Corretta possibilità di azzerare via REST la causale di una timbratura

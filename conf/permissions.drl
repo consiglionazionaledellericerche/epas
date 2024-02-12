@@ -22,6 +22,7 @@ import org.joda.time.YearMonth;
 
 import dao.history.HistoricalDao;
 import dao.UserDao;
+import dao.GeneralSettingStaticDao;
 import manager.configurations.EpasParam;
 import models.absences.definitions.DefaultGroup;
 import models.enumerate.StampTypes;
@@ -2594,7 +2595,7 @@ when
         "Contracts.saveContractWorkingTimeType",
         "Contracts.updateContractMandatoryTimeSlot",
         "Contracts.updatePersonalWorkingTime",
-        "Contracts.saveContractMandatoryTimeSlot",        
+        "Contracts.saveContractMandatoryTimeSlot",
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
         "Contracts.savePersonalWorkingTime",
@@ -2661,9 +2662,7 @@ when
  $c: PermissionCheck(action in (
         "Persons.list",
         "Persons.edit",
-        "Persons.insertPerson",
         "Persons.update",
-        "Persons.save",
         "Persons.insertUsername",
         "Persons.updateUsername",
         "Persons.showCurrentContractWorkingTimeType",
@@ -2704,7 +2703,7 @@ when
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
         "Contracts.updateContractMandatoryTimeSlot",
-        "Contracts.saveContractMandatoryTimeSlot",        
+        "Contracts.saveContractMandatoryTimeSlot",
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
         "Contracts.updatePersonalWorkingTime",
@@ -2765,6 +2764,21 @@ then
  $c.grant();
 end
 
+/*******************************************************************
+ * Inserimento del personale per ruolo di gestore dell'anagrafica 
+ * (registry_manager)
+ ******************************************************************/
+rule OnlyForRegistryManager_insertPerson_Generic
+when
+ $uro: UsersRolesOffices(role.name == Role.REGISTRY_MANAGER)
+ $c: PermissionCheck(
+        action in ("Persons.insertPerson", "Persons.save"), 
+        target == null, granted == false)
+ eval(GeneralSettingStaticDao.isPersonCreationEnabled())
+then
+ $c.grant();
+end
+
 rule OnlyForRegistryManager_InOffice
 when
  $uro: UsersRolesOffices(role.name == Role.REGISTRY_MANAGER)
@@ -2772,9 +2786,7 @@ when
  $c: PermissionCheck(action in (
 		"Persons.list",
     	"Persons.edit",
-    	"Persons.insertPerson",
 		"Persons.update",
-        "Persons.save",
      	"Persons.insertUsername",
      	"Persons.updateUsername",
      	"Persons.showCurrentContractWorkingTimeType",
@@ -2869,6 +2881,19 @@ when
         "rest.v2.WorkingTimeTypes.list"
 
      	), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+rule OnlyForRegistryManager_insertPerson_InOffice
+when
+ $uro: UsersRolesOffices(role.name == Role.REGISTRY_MANAGER)
+ $o: Office( usersRolesOffices contains $uro)
+ $c: PermissionCheck(action in (
+        "Persons.insertPerson",
+        "Persons.save"
+        ), target == $o, granted == false)
+ eval(GeneralSettingStaticDao.isPersonCreationEnabled())
 then
  $c.grant();
 end
