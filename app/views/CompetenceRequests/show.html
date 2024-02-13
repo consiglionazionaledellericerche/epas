@@ -42,27 +42,27 @@
 	<th>Descrizione</th>
 	
 </tr>
-#{list items:competenceRequest.events, as:'item'}
-<tr #{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.MANAGER_REFUSAL) 
-	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.ADMINISTRATIVE_REFUSAL)
-	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.OFFICE_HEAD_REFUSAL))
-	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.DELETE)} class="danger" #{/if}
-	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.MANAGER_APPROVAL) 
-	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.ADMINISTRATIVE_APPROVAL)
-	|| item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.OFFICE_HEAD_APPROVAL))} class="success" #{/if}
-	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.FIRST_APPROVAL))}
+#{list items:historyCompetence, as:'item'}
+<tr #{if item.value.events.eventType[0] != null && (item.value.events.eventType[0].equals(models.flows.enumerate.CompetenceRequestEventType.MANAGER_REFUSAL) 
+	|| item.value.events.eventType[0].equals(models.flows.enumerate.CompetenceRequestEventType.ADMINISTRATIVE_REFUSAL)
+	|| item.value.events.eventType[0].equals(models.flows.enumerate.CompetenceRequestEventType.OFFICE_HEAD_REFUSAL))
+	|| item.value.events.eventType[0].equals(models.flows.enumerate.CompetenceRequestEventType.DELETE)} class="danger" #{/if}
+	#{if item.value.events.eventType[0] != null && (item.value.events.eventType[0].equals(models.flows.enumerate.CompetenceRequestEventType.MANAGER_APPROVAL) 
+	|| item.value.events.eventType[0].equals(models.flows.enumerate.CompetenceRequestEventType.ADMINISTRATIVE_APPROVAL)
+	|| item.value.events.eventType[0].equals(models.flows.enumerate.CompetenceRequestEventType.OFFICE_HEAD_APPROVAL))} class="success" #{/if}
+	#{if item.value.events.eventType[0] != null && (item.value.events.eventType[0].equals(models.flows.enumerate.CompetenceRequestEventType.FIRST_APPROVAL))}
 	class="warning" #{/if}
-	#{if item.eventType != null && (item.eventType.equals(models.flows.enumerate.CompetenceRequestEventType.EMPLOYEE_APPROVAL))}
+	#{if item.value.events.eventType[0] != null && (item.value.events.eventType[0].equals(models.flows.enumerate.CompetenceRequestEventType.EMPLOYEE_APPROVAL))}
 	class="info" #{/if}
 	>
-	<td>#{f.value 'item.owner.person.fullname', value:item.owner.person.fullname /}</td>
-	<td>#{f.value 'item.createdAt', value:item.createdAt /}</td>
+	<td>#{f.value 'competenceRequest.person.fullname', value:competenceRequest.person.fullname /}</td>
+	<td>#{f.value 'competenceRequest.createdAt', value:competenceRequest.createdAt /}</td>
 	#{if competenceRequest.type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
-		<td>#{if competenceRequest.valueRequested}${competenceRequest.valueRequested} ore#{/if}#{else}non presente#{/else}</td>
-		<td>#{if competenceRequest.value}${competenceRequest.value} ore#{/if}#{else}non presente#{/else}</td>
+		<td>#{if item.value.valueRequested}${item.value.valueRequested} ore#{/if}#{else}non presente#{/else}</td>
+		<td>#{if item.value.value}${item.value.value} ore#{/if}#{else}non presente#{/else}</td>
 	#{/if}
-	<td>#{f.value 'item.eventType', value:item.eventType /}</td>
-	<td>#{f.value 'item.description', value:item.description != null ? item.description : competenceRequest.note /}</td>
+	<td>#{f.value 'item.value.events.eventType[0]', value:item.value.events.eventType[0] /}</td>
+	<td>#{f.value 'item.value.actualEvent().description', value:item.value.actualEvent().description != null ? item.value.actualEvent().description : competenceRequest.note /}</td>
 </tr>
 #{/list}
 </table>

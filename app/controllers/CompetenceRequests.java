@@ -614,6 +614,7 @@ public class CompetenceRequests extends Controller {
       psDto = stampingsRecapFactory
           .create(competenceRequest.getPerson(), competenceRequest.getYear(), month, true);
     }    
+    
     List<HistoryValue<CompetenceRequest>> historyCompetence = competenceRequestHistoryDao
             .competenceRequests(competenceRequest.getId());
 
