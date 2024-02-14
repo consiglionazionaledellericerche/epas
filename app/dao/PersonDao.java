@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2024  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,6 @@
 package dao;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
@@ -30,6 +29,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import dao.filter.QFilters;
+import helpers.JodaConverters;
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateInterval;
@@ -755,6 +755,14 @@ public final class PersonDao extends DaoBase {
 
     final BooleanBuilder condition = new BooleanBuilder();
 
+    if (start.isPresent()) {
+      condition.and(affiliation.beginDate.before(JodaConverters.jodaToJavaLocalDate(start.get())));
+    }
+    if (end.isPresent()) {
+      condition.andAnyOf(
+          affiliation.endDate.goe(JodaConverters.jodaToJavaLocalDate(end.get())), 
+          affiliation.endDate.isNull());
+    }
     filterOffices(condition, offices);
     filterOnlyTechnician(condition, onlyTechnician);
     condition.and(new QFilters().filterNameFromPerson(QPerson.person, name));
@@ -765,7 +773,6 @@ public final class PersonDao extends DaoBase {
     }
     filterPersonInCharge(condition, personInCharge);
     filterOnlySynchronized(condition, onlySynchronized);
-
     return query.where(condition);
   }
 
@@ -886,7 +893,7 @@ public final class PersonDao extends DaoBase {
           .andAnyOf(pcc.endDate.goe(date), pcc.endDate.isNull()));
     }
   }
-  
+
   /**
    * Filtro su codice competenza abilitato appartenente a gruppo.
    *
