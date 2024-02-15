@@ -29,7 +29,7 @@ public class CompetenceRequestHistoryDao {
 		final AuditQuery query = auditReader.get().createQuery()
 				.forRevisionsOfEntity(CompetenceRequest.class, false, true)
 				.add(AuditEntity.id().eq(competenceRequestId))
-				.addOrder(AuditEntity.revisionNumber().asc());
+				.addOrder(AuditEntity.revisionNumber().desc());
 
 		return FluentIterable.from(query.getResultList())
 				.transform(HistoryValue.fromTuple(CompetenceRequest.class))
