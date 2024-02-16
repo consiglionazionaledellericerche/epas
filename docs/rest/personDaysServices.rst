@@ -64,7 +64,208 @@ Negli esempio successivi sostituite *223400* con il *sedeId* della vostra sede.
 
   $ http -a istituto_xxx_person_day_reader
       GET https://epas-demo.devel.iit.cnr.it/rest/v3/persondays/getmonthsituationbyoffice
-      sedeId==223400 year==2020 month==10
+      sedeId==223400 year==2024 month==02
+
+Un estratto del risultato è il seguente:
+
+.. code-block:: json
+  [
+    {
+        "basedWorkingDays": 0,
+        "month": 2,
+        "person": {
+            "email": "galileo.galilei@iit.cnr.it",
+            "eppn": "galileo.galilei1@cnr.it",
+            "fiscalCode": null,
+            "fullname": "Galilei Galileo",
+            "id": 4616,
+            "number": "123"
+        },
+        "personDays": [
+            {
+                "absences": [],
+                "date": "2024-02-01",
+                "difference": 13,
+                "id": 656263,
+                "isHoliday": false,
+                "isTicketAvailable": true,
+                "progressive": 13,
+                "stampings": [
+                    {
+                        "date": "2024-02-01T09:00:00",
+                        "id": 119934,
+                        "markedByAdmin": false,
+                        "markedByEmployee": false,
+                        "note": "",
+                        "place": null,
+                        "reason": null,
+                        "stampType": null,
+                        "way": "in"
+                    },
+                    {
+                        "date": "2024-02-01T13:00:00",
+                        "id": 119935,
+                        "markedByAdmin": false,
+                        "markedByEmployee": false,
+                        "note": "",
+                        "place": null,
+                        "reason": null,
+                        "stampType": "pausaPranzo",
+                        "way": "out"
+                    },
+                    {
+                        "date": "2024-02-01T13:35:00",
+                        "id": 119936,
+                        "markedByAdmin": false,
+                        "markedByEmployee": false,
+                        "note": "",
+                        "place": null,
+                        "reason": null,
+                        "stampType": "pausaPranzo",
+                        "way": "in"
+                    },
+                    {
+                        "date": "2024-02-01T17:00:00",
+                        "id": 119937,
+                        "markedByAdmin": false,
+                        "markedByEmployee": false,
+                        "note": "",
+                        "place": null,
+                        "reason": null,
+                        "stampType": null,
+                        "way": "out"
+                    }
+                ],
+                "timeAtWork": 445
+            },
+            {
+                "absences": [
+                    {
+                        "absenceTypeId": 864,
+                        "code": "LAGILE",
+                        "date": "2024-02-02",
+                        "externalId": null,
+                        "id": 21480,
+                        "justifiedTime": 432,
+                        "justifiedType": "complete_day_and_add_overtime",
+                        "note": null,
+                        "updatedAt": "2024-02-16T11:20:52.210516"
+                    }
+                ],
+                "date": "2024-02-02",
+                "difference": 0,
+                "id": 656264,
+                "isHoliday": false,
+                "isTicketAvailable": false,
+                "progressive": 13,
+                "stampings": [],
+                "timeAtWork": 432
+            },
+            {
+                "absences": [],
+                "date": "2024-02-03",
+                "difference": 0,
+                "id": 656265,
+                "isHoliday": true,
+                "isTicketAvailable": false,
+                "progressive": 13,
+                "stampings": [],
+                "timeAtWork": 0
+            },
+            {
+                "absences": [],
+                "date": "2024-02-04",
+                "difference": 0,
+                "id": 656266,
+                "isHoliday": true,
+                "isTicketAvailable": false,
+                "progressive": 13,
+                "stampings": [],
+                "timeAtWork": 0
+            },
+            {
+                "absences": [
+                    {
+                        "absenceTypeId": 297,
+                        "code": "31",
+                        "date": "2024-02-05",
+                        "externalId": null,
+                        "id": 21481,
+                        "justifiedTime": 432,
+                        "justifiedType": "all_day",
+                        "note": null,
+                        "updatedAt": "2024-02-16T11:21:00.926999"
+                    }
+                ],
+                "date": "2024-02-05",
+                "difference": 0,
+                "id": 656267,
+                "isHoliday": false,
+                "isTicketAvailable": false,
+                "progressive": 13,
+                "stampings": [],
+                "timeAtWork": 0
+            },
+            {
+                "absences": [],
+                "date": "2024-02-06",
+                "difference": 18,
+                "id": 656268,
+                "isHoliday": false,
+                "isTicketAvailable": true,
+                "progressive": 31,
+                "stampings": [
+                    {
+                        "date": "2024-02-06T08:00:00",
+                        "id": 119938,
+                        "markedByAdmin": false,
+                        "markedByEmployee": false,
+                        "note": "",
+                        "place": null,
+                        "reason": null,
+                        "stampType": null,
+                        "way": "in"
+                    },
+                    {
+                        "date": "2024-02-06T09:00:00",
+                        "id": 119939,
+                        "markedByAdmin": false,
+                        "markedByEmployee": false,
+                        "note": "",
+                        "place": null,
+                        "reason": null,
+                        "stampType": "motiviDiServizio",
+                        "way": "out"
+                    },
+                    {
+                        "date": "2024-02-06T10:00:00",
+                        "id": 119941,
+                        "markedByAdmin": false,
+                        "markedByEmployee": false,
+                        "note": "",
+                        "place": null,
+                        "reason": null,
+                        "stampType": "motiviDiServizio",
+                        "way": "in"
+                    },
+                    {
+                        "date": "2024-02-06T16:00:00",
+                        "id": 119942,
+                        "markedByAdmin": false,
+                        "markedByEmployee": false,
+                        "note": "",
+                        "place": null,
+                        "reason": null,
+                        "stampType": null,
+                        "way": "out"
+                    }
+                ],
+                "timeAtWork": 450
+            }
+        ],
+        "year": 2024
+    }
+  ]
 
 Timbrature per lavoro fuori sede o per motivi di servizio fuori sede con luogo e/o motivazione
 ----------------------------------------------------------------------------------------------
