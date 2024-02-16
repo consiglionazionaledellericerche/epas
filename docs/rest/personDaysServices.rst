@@ -69,6 +69,7 @@ Negli esempio successivi sostituite *223400* con il *sedeId* della vostra sede.
 Un estratto del risultato è il seguente:
 
 .. code-block:: json
+
   [
     {
         "basedWorkingDays": 0,
