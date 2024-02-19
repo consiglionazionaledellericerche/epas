@@ -120,6 +120,11 @@ public class Group extends MutableModel {
     return getPeople(LocalDate.now());
   }
   
+  @Transient
+  public List<Person> getPeopleOvertimes() {
+	  return getPeople().stream().filter(p -> !p.isTopQualification()).collect(Collectors.toList());
+  }
+  
   public String getLabel() {
     return name;
   }
