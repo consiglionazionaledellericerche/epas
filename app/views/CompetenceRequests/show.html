@@ -55,8 +55,8 @@
 	#{if item.value.events.eventType[0] != null && (item.value.events.eventType[0].equals(models.flows.enumerate.CompetenceRequestEventType.EMPLOYEE_APPROVAL))}
 	class="info" #{/if}
 	>
-	<td>#{f.value 'competenceRequest.person.fullname', value:competenceRequest.person.fullname /}</td>
-	<td>#{f.value 'competenceRequest.createdAt', value:competenceRequest.createdAt /}</td>
+	<td>#{f.value 'competenceRequest.person.fullname', value:item.value.getEvents().get(0).owner.username /}</td>
+	<td>#{f.value 'competenceRequest.createdAt', value:item.value.getEvents().get(0).createdAt /}</td>
 	#{if competenceRequest.type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
 		<td>#{if item.value.valueRequested}${item.value.valueRequested} ore#{/if}#{else}non presente#{/else}</td>
 		<td>#{if item.value.value}${item.value.value} ore#{/if}#{else}non presente#{/else}</td>
