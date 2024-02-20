@@ -638,6 +638,7 @@ public class CompetenceRequests extends Controller {
       boolean showOvertimeAvailableHours = true;
       boolean enabledOvertimePerPerson = false;
       int overtimeResidual = 0;
+      boolean showOvertimeApprovalAdvance = false;
       competenceRequest.save();
       if (!approval) {
 
@@ -648,17 +649,23 @@ public class CompetenceRequests extends Controller {
                 competenceRequest.getMonth(), true);
 
         int hoursAvailable = competenceRequestManager.hoursAvailable(user, competenceRequest);
-        if ((Boolean) configurationManager
-            .configValue(competenceRequest.getPerson().getOffice(), EpasParam.ENABLE_OVERTIME_PER_PERSON)) {
+        if ((Boolean) configurationManager.configValue(competenceRequest.getPerson().getOffice(), 
+        		EpasParam.ENABLE_OVERTIME_PER_PERSON)) {
           enabledOvertimePerPerson = true;
           CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
           List<CompetenceCode> codeList = Lists.newArrayList();
           codeList.add(code);
-          overtimeResidual = competenceRequest.getPerson().totalOvertimeHourInYear(competenceRequest.getYear()) - 
-              competenceDao.valueOvertimeApprovedByMonthAndYear(competenceRequest.getYear(), Optional.absent(), 
-                  Optional.fromNullable(competenceRequest.getPerson()), Optional.absent(), codeList).or(0);
+          overtimeResidual = competenceRequest.getPerson()
+        		  .totalOvertimeHourInYear(competenceRequest.getYear()) - competenceDao
+        		  .valueOvertimeApprovedByMonthAndYear(competenceRequest.getYear(), Optional.absent(), 
+                  Optional.fromNullable(competenceRequest.getPerson()), 
+                  Optional.absent(), codeList).or(0);
         } 
-        render(competenceRequest, approval, psDto, month, hoursAvailable, 
+        if ((Boolean) configurationManager.configValue(competenceRequest.getPerson().getOffice(), 
+        		EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now())) {
+        	showOvertimeApprovalAdvance = true;
+        }
+        render(competenceRequest, approval, psDto, month, hoursAvailable, showOvertimeApprovalAdvance,
             showOvertimeAvailableHours, enabledOvertimePerPerson, overtimeResidual, isSeatSupervisor);
       }
     }    

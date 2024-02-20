@@ -13,7 +13,9 @@
 #{f.hidden 'competenceRequest.id', value:competenceRequest.id /}
 
 #{f.view 'competenceRequest.valueRequested', label:'Quantità richiesta' /}
-
+#{if showOvertimeApprovalAdvance}
+#{f.view 'competenceRequest.value', label:'Quantità approvata preventivamente' /}
+#{/if}
 #{f.input 'value', label:'Quantità concessa', type:'number' /}
 
 	    #{b.buttons center:true}
