@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.14.0] - UNRELEASED
 ### Changed
   - Corretta lista persone in Straordinario mensili gruppo, filtrando le persone non più affiliate
+  - Cambiata la gestione dei codici 71D e seguenti con la stessa logica del 7M
 
 ## [2.13.0] - 2024-02-13
 ### Added
