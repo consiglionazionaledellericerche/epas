@@ -72,7 +72,7 @@ public class Group extends MutableModel {
 
   @OneToMany(mappedBy = "group")
   private List<Affiliation> affiliations = Lists.newArrayList();
-  
+
   @OneToMany(mappedBy = "group")
   private List<GroupOvertime> groupOvertimes = Lists.newArrayList();
 
@@ -97,7 +97,7 @@ public class Group extends MutableModel {
   public boolean isActive() {
     return endDate == null || endDate.isAfter(LocalDate.now());
   }
-  
+
   /**
    * La lista delle persone che appartengono al gruppo
    * ad una certa data.
@@ -119,14 +119,15 @@ public class Group extends MutableModel {
   public List<Person> getPeople() {
     return getPeople(LocalDate.now());
   }
-  
+
   @Transient
   public List<Person> getPeopleOvertimes() {
-	  return getPeople().stream().filter(p -> !p.isTopQualification()).collect(Collectors.toList());
+    return getPeople().stream()
+        .filter(p -> !p.isTopQualification()).collect(Collectors.toList());
   }
-  
+
   public String getLabel() {
     return name;
   }
-  
+
 }
