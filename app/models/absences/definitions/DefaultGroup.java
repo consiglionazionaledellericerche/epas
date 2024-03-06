@@ -127,6 +127,10 @@ public enum DefaultGroup {
   G_7("7 - Permessi sindacali", "", DefaultCategoryType.ALTRI_CODICI, 0, 
       GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_PERMESSI_SINDACALI, 
       DefaultComplation.C_7, null, false, true),
+  
+  G_7D("7D - Permessi sindacali dirigenti", "", DefaultCategoryType.ALTRI_CODICI, 0, 
+      GroupAbsenceTypePattern.programmed, PeriodType.year, 
+      DefaultTakable.T_PERMESSI_SINDACALI_DIRIGENTI, DefaultComplation.C_7D, null, false, true),
 
   G_0("0 - Assemblea", "", DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.year, DefaultTakable.T_0, DefaultComplation.C_0, null, false, true),

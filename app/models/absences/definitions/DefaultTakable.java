@@ -179,6 +179,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_7M),
       -1, null),
   
+  T_PERMESSI_SINDACALI_DIRIGENTI(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_7DM),
+      ImmutableSet.of(DefaultAbsenceType.A_7DM),
+      -1, null),
+  
   T_MISSIONE(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_92M),
       ImmutableSet.of(DefaultAbsenceType.A_92M),
@@ -545,7 +550,7 @@ public enum DefaultTakable {
 
           DefaultAbsenceType.A_71, DefaultAbsenceType.A_72, DefaultAbsenceType.A_73,
           DefaultAbsenceType.A_74, DefaultAbsenceType.A_75, DefaultAbsenceType.A_76,
-          DefaultAbsenceType.A_77, DefaultAbsenceType.A_78,
+          DefaultAbsenceType.A_77, 
 
           DefaultAbsenceType.A_71A, DefaultAbsenceType.A_72A, 
           DefaultAbsenceType.A_73A, DefaultAbsenceType.A_74A, DefaultAbsenceType.A_75A, 
@@ -561,7 +566,7 @@ public enum DefaultTakable {
 
           DefaultAbsenceType.A_71D, DefaultAbsenceType.A_72D, 
           DefaultAbsenceType.A_73D, DefaultAbsenceType.A_74D, DefaultAbsenceType.A_75D, 
-          DefaultAbsenceType.A_76D, DefaultAbsenceType.A_77D, DefaultAbsenceType.A_78D,
+          DefaultAbsenceType.A_76D, DefaultAbsenceType.A_77D, 
 
           DefaultAbsenceType.A_FA1, DefaultAbsenceType.A_FA2, 
           DefaultAbsenceType.A_FA3, DefaultAbsenceType.A_FA4, DefaultAbsenceType.A_FA5, 
@@ -602,7 +607,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_105BP,
           DefaultAbsenceType.A_71, DefaultAbsenceType.A_72, DefaultAbsenceType.A_73,
           DefaultAbsenceType.A_74, DefaultAbsenceType.A_75, DefaultAbsenceType.A_76,
-          DefaultAbsenceType.A_77, DefaultAbsenceType.A_78,
+          DefaultAbsenceType.A_77, 
           DefaultAbsenceType.A_71A, DefaultAbsenceType.A_72A, 
           DefaultAbsenceType.A_73A, DefaultAbsenceType.A_74A, DefaultAbsenceType.A_75A, 
           DefaultAbsenceType.A_76A, DefaultAbsenceType.A_77A, DefaultAbsenceType.A_78A,
@@ -614,7 +619,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_76R, DefaultAbsenceType.A_77R,
           DefaultAbsenceType.A_71D, DefaultAbsenceType.A_72D, 
           DefaultAbsenceType.A_73D, DefaultAbsenceType.A_74D, DefaultAbsenceType.A_75D, 
-          DefaultAbsenceType.A_76D, DefaultAbsenceType.A_77D, DefaultAbsenceType.A_78D,
+          DefaultAbsenceType.A_76D, DefaultAbsenceType.A_77D, 
           DefaultAbsenceType.A_FA1, DefaultAbsenceType.A_FA2, 
           DefaultAbsenceType.A_FA3, DefaultAbsenceType.A_FA4, DefaultAbsenceType.A_FA5, 
           DefaultAbsenceType.A_FA6, DefaultAbsenceType.A_FA7,
