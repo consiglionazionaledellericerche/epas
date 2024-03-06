@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Cambiata la gestione dei codici 71D e seguenti con la stessa logica del 7M
   - Corretta possibilità di inserire più richieste di cambio reperibilità non ancora confermate nello stesso mese
   - Nell'esportazione via REST del riepilogo mensile dei dipendenti aggiunto nuovo campo externalId del tipo di assenza
+  - Modificata durata cache del javascript per l'invio delle segnalazioni
 
 ## [2.13.0] - 2024-02-13
 ### Added
