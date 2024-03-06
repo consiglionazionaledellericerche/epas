@@ -270,6 +270,14 @@ public class TemplateUtility {
   public boolean enableOvertimeFlowsConfiguration() {
     return generalSettingDao.generalSetting().isShowOvertimeRequest();
   }
+  
+  public boolean enableOvertimeRequestInAdvance() {
+    return generalSettingDao.generalSetting().isEnableOvertimeRequestInAdvance();
+  }
+  
+  public boolean enableOvertimePerPerson() {
+    return generalSettingDao.generalSetting().isEnableOvertimePerPerson();
+  }
 
   /**
    * Metodo di utilità per far comparire il badge con la quantità di richieste di riposi 

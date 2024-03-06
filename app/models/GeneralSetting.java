@@ -146,5 +146,15 @@ public class GeneralSetting extends BaseModel {
    * URL base servizio epas-helpdesk-service.
    */
   private String epasHelpdeskServiceUrl = "http://epas-helpdesk-service:8080/"; 
+  
+  /**
+   * Indica se è attivo il monte ore di straordinario per il dipendente
+   */
+  private boolean enableOvertimePerPerson = true;
+  
+  /**
+   * Indica se si può utilizzare o meno la richiesta preventiva di straordinario
+   */
+  private boolean enableOvertimeRequestInAdvance = false;
 
 }

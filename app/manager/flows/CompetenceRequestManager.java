@@ -24,6 +24,7 @@ import controllers.Security;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.CompetenceRequestDao;
+import dao.GeneralSettingDao;
 import dao.GroupDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -48,6 +49,7 @@ import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Competence;
 import models.CompetenceCode;
+import models.GeneralSetting;
 import models.GroupOvertime;
 import models.Office;
 import models.Person;
@@ -92,6 +94,7 @@ public class CompetenceRequestManager {
   private GroupOvertimeManager groupOvertimeManager;
   private CompetenceDao competenceDao;
   private CompetenceManager competenceManager;
+  private GeneralSettingDao settingDao;
 
 
   /**
@@ -128,7 +131,7 @@ public class CompetenceRequestManager {
       CompetenceRequestDao competenceRequestDao, GroupDao groupDao, PersonDao personDao,
       PersonReperibilityDayDao repDao, CompetenceCodeDao competenceCodeDao, 
       ConsistencyManager consistencyManager, GroupOvertimeManager groupOvertimeManager,
-      CompetenceDao competenceDao, CompetenceManager competenceManager) {
+      CompetenceDao competenceDao, CompetenceManager competenceManager, GeneralSettingDao settingDao) {
     this.configurationManager = configurationManager;
     this.uroDao = uroDao;
     this.roleDao = roleDao;
@@ -142,7 +145,7 @@ public class CompetenceRequestManager {
     this.groupOvertimeManager = groupOvertimeManager;
     this.competenceDao = competenceDao;
     this.competenceManager = competenceManager;
-
+    this.settingDao = settingDao;
   }
 
   private static String code = "S1";
@@ -812,8 +815,8 @@ public class CompetenceRequestManager {
   public int myOvertimeResidual(Person person, int year) {
     //Calcolo le ore di straordinario residue con il monte ore per persona se abilitato in configurazione
     int overtimeResidual = 0;
-    if ((Boolean) configurationManager
-        .configValue(person.getOffice(), EpasParam.ENABLE_OVERTIME_PER_PERSON)) {
+    GeneralSetting settings = settingDao.generalSetting();
+    if (settings.isEnableOvertimePerPerson()) {
 
       CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
       List<CompetenceCode> codeList = Lists.newArrayList();

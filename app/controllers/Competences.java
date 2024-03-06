@@ -30,6 +30,7 @@ import common.security.SecurityRules;
 import dao.CertificationDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.GeneralSettingDao;
 import dao.MonthlyCompetenceTypeDao;
 import dao.OfficeDao;
 import dao.OrganizationShiftTimeTableDao;
@@ -74,6 +75,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.CompetenceCodeGroup;
 import models.Contract;
+import models.GeneralSetting;
 import models.MonthlyCompetenceType;
 import models.Office;
 import models.OrganizationShiftTimeTable;
@@ -153,6 +155,8 @@ public class Competences extends Controller {
   private static MonthlyCompetenceTypeDao monthlyDao;
   @Inject
   private static ConfigurationManager configurationManager;
+  @Inject
+  private static GeneralSettingDao settingDao;
 
   /**
    * Crud CompetenceCode.
@@ -650,8 +654,8 @@ public class Competences extends Controller {
        monte ore personale (previa verifica del parametro associato)
      */
     List<Person> personList = Lists.newArrayList();
-    if (!(Boolean) configurationManager
-        .configValue(office, EpasParam.ENABLE_OVERTIME_PER_PERSON)) {
+    GeneralSetting settings = settingDao.generalSetting();
+    if (!settings.isEnableOvertimePerPerson()) {
       log.warn("Non abilitato il parametro per gli straordinari per persona!!");
     } else {
       CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");

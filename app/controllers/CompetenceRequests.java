@@ -33,6 +33,7 @@ import common.security.SecurityRules;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.CompetenceRequestDao;
+import dao.GeneralSettingDao;
 import dao.GroupDao;
 import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
@@ -55,6 +56,7 @@ import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Competence;
 import models.CompetenceCode;
+import models.GeneralSetting;
 import models.GroupOvertime;
 import models.Person;
 import models.PersonReperibilityDay;
@@ -118,6 +120,8 @@ public class CompetenceRequests extends Controller {
   static GroupOvertimeManager groupOvertimeManager;
   @Inject
   static CompetenceRequestHistoryDao competenceRequestHistoryDao;
+  @Inject
+  private static GeneralSettingDao settingDao;
 
   static final String ATTESTATI_ACTIVE = "attestati.active";
 
@@ -342,9 +346,8 @@ public class CompetenceRequests extends Controller {
           }
         }        
         isOvertime = true;
-
-        if ((Boolean) configurationManager
-            .configValue(person.getOffice(), EpasParam.ENABLE_OVERTIME_PER_PERSON)) {
+        GeneralSetting settings = settingDao.generalSetting();
+        if (settings.isEnableOvertimePerPerson()) {
           enabledOvertimePerPerson = true;
           CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
           List<CompetenceCode> codeList = Lists.newArrayList();
@@ -466,9 +469,8 @@ public class CompetenceRequests extends Controller {
                   + "Non si può richiedere straordinario per un mese concluso!");
         }
       }
-
-      if ((Boolean) configurationManager
-          .configValue(competenceRequest.getPerson().getOffice(), EpasParam.ENABLE_OVERTIME_PER_PERSON)
+      GeneralSetting settings = settingDao.generalSetting();
+      if (settings.isEnableOvertimePerPerson()
           && competenceRequestManager.myOvertimeResidual(competenceRequest.getPerson(), year) 
           < competenceRequest.getValueRequested()) {
         Validation.addError("competenceRequest.valueRequested", 
@@ -649,8 +651,8 @@ public class CompetenceRequests extends Controller {
                 competenceRequest.getMonth(), true);
 
         int hoursAvailable = competenceRequestManager.hoursAvailable(user, competenceRequest);
-        if ((Boolean) configurationManager.configValue(competenceRequest.getPerson().getOffice(), 
-        		EpasParam.ENABLE_OVERTIME_PER_PERSON)) {
+        GeneralSetting settings = settingDao.generalSetting();
+        if (settings.isEnableOvertimePerPerson()) {
           enabledOvertimePerPerson = true;
           CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
           List<CompetenceCode> codeList = Lists.newArrayList();

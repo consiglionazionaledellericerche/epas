@@ -321,8 +321,8 @@ public class Groups extends Controller {
     GroupOvertime groupOvertime = new GroupOvertime();
     List<GroupOvertime> groupOvertimeInYearList = group.getGroupOvertimes().stream()
         .filter(go -> go.getYear().equals(year)).collect(Collectors.toList());
-    boolean check = ((Boolean) configurationManager
-        .configValue(office, EpasParam.ENABLE_OVERTIME_PER_PERSON));
+    GeneralSetting settings = settingDao.generalSetting();
+    boolean check = settings.isEnableOvertimePerPerson();
     render(group, totalGroupOvertimes, office, groupOvertime, hoursAvailable, map, 
         groupOvertimesAvailable, groupOvertimeInYearList, year, check, totale);
   }

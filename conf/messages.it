@@ -508,6 +508,8 @@ generalSetting.epasServiceEnabled=Abilitazione integrazione con microservizio ep
 generalSetting.epasServiceUrl=Url base del microservizio epas-service
 generalSetting.epasHelpdeskServiceEnabled=Abilitazione integrazione con microservizio epas-helpdesk-service
 generalSetting.epasHelpdeskServiceUrl=Url base del microservizio epas-helpdesk-service
+generalSetting.enableOvertimeRequestInAdvance =Abilita richiesta preventiva di straordinario
+generalSetting.enableOvertimePerPerson =Abilita il monte ore straordinari per dipendente
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite

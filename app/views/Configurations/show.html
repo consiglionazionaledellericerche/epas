@@ -322,7 +322,8 @@
         <th>Al</th>
       </tr>
       #{list competenceFlows.findAll({!it.epasParam.general}), as:'conf'}
-      #{if templateUtility.enableOvertimeFlowsConfiguration()
+      #{if templateUtility.enableOvertimeFlowsConfiguration() 
+      || conf.epasParam == manager.configurations.EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION && templateUtility.enableOvertimeRequestInAdvance()
       || conf.epasParam == manager.configurations.EpasParam.CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED
       || conf.epasParam == manager.configurations.EpasParam.CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED}
       <tr>

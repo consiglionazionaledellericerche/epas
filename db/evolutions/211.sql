@@ -1,5 +1,10 @@
 # --- !Ups
 
+ALTER TABLE general_setting ADD COLUMN enable_overtime_per_person BOOLEAN DEFAULT TRUE;
+ALTER TABLE general_setting_history ADD COLUMN enable_overtime_per_person BOOLEAN;
+ALTER TABLE general_setting ADD COLUMN enable_overtime_request_in_advance BOOLEAN DEFAULT FALSE;
+ALTER TABLE general_setting_history ADD COLUMN enable_overtime_request_in_advance BOOLEAN;
+
 CREATE TABLE group_overtimes
 (
   id BIGSERIAL PRIMARY KEY,
