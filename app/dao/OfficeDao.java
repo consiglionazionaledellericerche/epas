@@ -316,4 +316,11 @@ public class OfficeDao extends DaoBase {
             .or(office.endDate.after(LocalDate.now()))).fetch();
   }
 
+  public List<Office> allOffices(LocalDate atDate) {
+    final QOffice office = QOffice.office;
+    BooleanBuilder conditions = new BooleanBuilder(office.beginDate.before(atDate));
+    conditions.and(office.endDate.isNull().or(office.endDate.after(atDate)));
+    return queryFactory.selectFrom(office).where(conditions).fetch();
+  }
+
 }

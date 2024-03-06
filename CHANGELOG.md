@@ -7,12 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.14.0] - UNRELEASED
 ### Added
   - Aggiunto piano ferie 15+2
-  
+  - Aggiunto servizio REST per esportazione lista delle sedi
+  - Aggiunto campo externalId ai tipi di assenza
+
 ### Changed
   - Corretta lista persone in Straordinario mensili gruppo, filtrando le persone non più affiliate
   - Cambiata la gestione dei codici 71D e seguenti con la stessa logica del 7M
   - Corretta possibilità di inserire più richieste di cambio reperibilità non ancora confermate nello stesso mese
-
+  - Nell'esportazione via REST del riepilogo mensile dei dipendenti aggiunto nuovo campo externalId del tipo di assenza
 
 ## [2.13.0] - 2024-02-13
 ### Added

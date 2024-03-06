@@ -1536,6 +1536,8 @@ absenceType.timeForMealTicket=Considerato per buono pasto
 absenceType.justifiedTime=Minuti specificati nel tipo assenza
 absenceType.toUpdate=Aggiornamento stato assenza
 absenceType.mealTicketBehaviour =Comportamento per buono pasto
+absenceType.externalId =External id
+absenceType.externalId.popover =External id utilizzabile anche per il raggruppamento delle assenze per i timesheet
 
 absenceType.replacingTime=Minuti per completamento
 absenceType.used=Usato
