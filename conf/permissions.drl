@@ -4128,7 +4128,10 @@ when
         "rest.Absences.attachment",
 
         "rest.v3.AbsenceTypes.list",
-        "rest.v3.AbsenceTypes.show"
+        "rest.v3.AbsenceTypes.show",
+
+        "rest.v3.Offices.all",
+        "rest.v3.Offices.show"
 
        ), granted == false)
 then
