@@ -406,7 +406,7 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_TELELAVORO_RT, null, null, false, false),
 
-  G_PUBBLICA_FUNZIONE("Codici Pubblica Funzione", "", DefaultCategoryType.PUBBLICA_FUNZIOINE, 2,
+  G_PUBBLICA_FUNZIONE("Codici Pubblica Funzione", "", DefaultCategoryType.PUBBLICA_FUNZIONE, 2,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_PUBBLICA_FUNZIONE,
       null, null, false, false),
 
@@ -438,7 +438,10 @@ public enum DefaultGroup {
       false, false), 
   G_683("683 - Permesso terzo lutto", "",
       DefaultCategoryType.PERMESSO_TERZO_LUTTO, 0, GroupAbsenceTypePattern.programmed,
-      PeriodType.year, DefaultTakable.T_683, null, null, false, false);
+      PeriodType.year, DefaultTakable.T_683, null, null, false, false),
+  G_662("662 - Permesso grave infermità coniuge o parente", "",
+      DefaultCategoryType.PERMESSI_PERSONALI, 0, GroupAbsenceTypePattern.programmed,
+      PeriodType.year, DefaultTakable.T_662, null, null, false, false);
 
   public String description;
   public String chainDescription;

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Aggiunto piano ferie 15+2
   - Aggiunto servizio REST per esportazione lista delle sedi
   - Aggiunto campo externalId ai tipi di assenza
+  - Aggiunta limitazione di 3 giorni annuali al codice 662
 
 ### Changed
   - Corretta lista persone in Straordinario mensili gruppo, filtrando le persone non più affiliate

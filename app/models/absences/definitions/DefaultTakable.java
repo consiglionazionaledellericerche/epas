@@ -667,6 +667,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_683),
       3, null),
   
+  T_662(AmountType.units,
+      ImmutableSet.of(DefaultAbsenceType.A_662),
+      ImmutableSet.of(DefaultAbsenceType.A_662),
+      3, null),
+  
   T_6N(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_6N),
       ImmutableSet.of(DefaultAbsenceType.A_6N),

@@ -72,7 +72,7 @@ public enum DefaultCategoryType {
 
   ALTRI_CODICI("Altri Codici", 16, DefaultTab.ALTRI_CODICI), 
   ASPETTATIVA("Codici Aspettativa", 17, DefaultTab.ALTRI_CODICI), 
-  PUBBLICA_FUNZIOINE("Pubblica Funzione", 18, DefaultTab.ALTRI_CODICI),
+  PUBBLICA_FUNZIONE("Pubblica Funzione", 18, DefaultTab.ALTRI_CODICI),
 
   LAVORO_FUORI_SEDE("Lavoro fuori sede", 17, DefaultTab.LAVORO_FUORI_SEDE), 
   FERIE_DIPENDENTI("Ferie e permessi legge", 18, DefaultTab.FERIE_DIPENDENTI), 
