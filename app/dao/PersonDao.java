@@ -755,14 +755,14 @@ public final class PersonDao extends DaoBase {
 
     final BooleanBuilder condition = new BooleanBuilder();
 
-    if (start.isPresent()) {
-      condition.and(affiliation.beginDate.before(JodaConverters.jodaToJavaLocalDate(start.get())));
-    }
-    if (end.isPresent()) {
-      condition.andAnyOf(
-          affiliation.endDate.goe(JodaConverters.jodaToJavaLocalDate(end.get())), 
-          affiliation.endDate.isNull());
-    }
+//    if (start.isPresent()) {
+//      condition.and(affiliation.isNull().or(affiliation.beginDate.before(JodaConverters.jodaToJavaLocalDate(start.get()))));
+//    }
+//    if (end.isPresent()) {
+//      condition.and(affiliation.isNull().or(
+//          affiliation.endDate.isNull().or(
+//          affiliation.endDate.goe(JodaConverters.jodaToJavaLocalDate(end.get())))));
+//    }
     filterOffices(condition, offices);
     filterOnlyTechnician(condition, onlyTechnician);
     condition.and(new QFilters().filterNameFromPerson(QPerson.person, name));
