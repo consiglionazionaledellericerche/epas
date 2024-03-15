@@ -914,53 +914,6 @@ public class CompetenceManager {
     st.save();
   }
 
-  /**
-   * crea la timetable da associare al turno.
-   *
-   * @param timeTable il dto da cui creare la ShiftTimeTable
-   * @param office la sede a cui associare la timeTable
-   */
-  public void createShiftTimeTable(TimeTableDto timeTable, Office office, 
-      CalculationType calculationType) {
-
-    ShiftTimeTable stt = new ShiftTimeTable();
-    stt.setOffice(office);
-    stt.setCalculationType(calculationType);
-    stt.setPaidMinutes(timeTable.paidMinutes);
-    stt.setTotalWorkMinutes(timeTable.totalWorkMinutes);
-    stt.setStartMorning(normalize(timeTable.startMorning));
-    stt.setEndMorning(normalize(timeTable.endMorning));
-    stt.setStartAfternoon(normalize(timeTable.startAfternoon));
-    stt.setEndAfternoonLunchTime(normalize(timeTable.endAfternoon));
-    if (timeTable.startEvening != null && !timeTable.startEvening.equals("")) {
-      stt.setStartEvening(normalize(timeTable.startEvening));
-    } else {
-      stt.setStartEvening(null);
-    }
-    if (timeTable.endEvening != null && !timeTable.endEvening.equals("")) {
-      stt.setEndEvening(normalize(timeTable.endEvening));
-    } else {
-      stt.setEndEvening(null);
-    }
-
-    stt.setStartMorningLunchTime(normalize(timeTable.startMorningLunchTime));
-    stt.setEndMorningLunchTime(normalize(timeTable.endMorningLunchTime));
-    stt.setStartAfternoonLunchTime(normalize(timeTable.startAfternoonLunchTime));
-    stt.setEndAfternoonLunchTime(normalize(timeTable.endAfternoonLunchTime));
-    if (timeTable.startEveningLunchTime != null && !timeTable.startEveningLunchTime.equals("")) {
-      stt.setStartEveningLunchTime(normalize(timeTable.startEveningLunchTime));
-    } else {
-      stt.setStartEveningLunchTime(null);
-    }
-    if (timeTable.endEveningLunchTime != null && !timeTable.endEveningLunchTime.equals("")) {
-      stt.setEndEveningLunchTime(normalize(timeTable.endEveningLunchTime)); 
-    } else {
-      stt.setEndEveningLunchTime(null);
-    }
-
-    stt.save();
-  }
-
 
   /**
    * Chiama il metodo su ciascuna persona della sede per cui fare i conteggi del codice di
@@ -1126,12 +1079,4 @@ public class CompetenceManager {
     pcc.save();
   }
 
-
-  private LocalTime normalize(String time) {
-    time = time.replaceAll(":", "");
-    Integer hour = Integer.parseInt(time.substring(0, 2));
-    Integer minute = Integer.parseInt(time.substring(2, 4));
-
-    return new LocalTime(hour, minute, 0);
-  }
 }

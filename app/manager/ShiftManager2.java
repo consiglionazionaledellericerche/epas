@@ -745,7 +745,9 @@ public class ShiftManager2 {
 
     int paidMinutes = 0;
     if (activity.getShiftTimeTable() != null) {
-      paidMinutes = activity.getShiftTimeTable().getPaidMinutes();
+      //TODO: completare con il calcolo corretto tra mattine e pomeriggi con la nuova
+      // modellazione di minuti pagati la mattina e minuti pagati il pomeriggio
+      //paidMinutes = activity.getShiftTimeTable().getPaidMinutes();
     }
 
     final List<PersonShiftDay> shifts = personShiftDayDao
