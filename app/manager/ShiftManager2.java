@@ -743,11 +743,13 @@ public class ShiftManager2 {
 
     int shiftCompetences = 0;
 
-    int paidMinutes = 0;
+    int paidMinutesMorning = 0;
+    int paidMinutesAfternoon = 0;
     if (activity.getShiftTimeTable() != null) {
       //TODO: completare con il calcolo corretto tra mattine e pomeriggi con la nuova
       // modellazione di minuti pagati la mattina e minuti pagati il pomeriggio
-      //paidMinutes = activity.getShiftTimeTable().getPaidMinutes();
+      paidMinutesMorning = activity.getShiftTimeTable().getPaidMinutesMorning();
+      paidMinutesAfternoon = activity.getShiftTimeTable().getPaidMinutesAfternoon();
     }
 
     final List<PersonShiftDay> shifts = personShiftDayDao
@@ -851,7 +853,12 @@ public class ShiftManager2 {
             }
           }
         } else {
-          shiftCompetences += paidMinutes - (shift.getExceededThresholds() * SIXTY_MINUTES);
+          if (shift.getShiftSlot().equals(ShiftSlot.MORNING)) {
+            shiftCompetences += paidMinutesMorning - (shift.getExceededThresholds() * SIXTY_MINUTES);
+          } else {
+            shiftCompetences += paidMinutesAfternoon - (shift.getExceededThresholds() * SIXTY_MINUTES);
+          }
+          
         }
         log.info("Competenza calcolata sul turno di {}-{}: {}", 
             person.fullName(), shift.getDate(), shiftCompetences 
