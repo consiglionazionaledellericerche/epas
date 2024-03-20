@@ -2645,7 +2645,8 @@ when
         "rest.v2.Contracts.delete",
 
         "rest.v2.WorkingTimeTypes.show",
-        "rest.v2.WorkingTimeTypes.list"
+        "rest.v2.WorkingTimeTypes.list",
+        "rest.v3.Offices.all"
 
         ), granted == false)
 then
@@ -3762,7 +3763,8 @@ when
         "rest.v3.AbsenceTypes.list",
         "rest.v3.AbsenceTypes.show",
 
-        "rest.v3.PersonDays.setMealTicketBehavior"
+        "rest.v3.PersonDays.setMealTicketBehavior",
+        "rest.v3.Offices.all"
 
        ), granted == false)
 then
