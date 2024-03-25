@@ -101,8 +101,12 @@ public class ShiftTimeTable extends BaseModel {
   private Integer totalWorkMinutes;
 
   // Paid minuts per shift
-  @Column(name = "paid_minutes")
-  private Integer paidMinutes;
+  @Column(name = "paid_minutes_morning")
+  private Integer paidMinutesMorning;
+  
+  // Paid minuts per shift
+  @Column(name = "paid_minutes_afternoon")
+  private Integer paidMinutesAfternoon;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "office_id")

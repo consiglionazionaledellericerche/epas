@@ -1185,24 +1185,6 @@ public class Competences extends Controller {
     manageCompetenceCode();
   }
 
-  /**
-   * form che salva la nuova timetable e la associa alla sede passata come parametro.
-   *
-   * @param timeTable la timetable da creare
-   * @param officeId l'id della sede a cui associare la nuova timetable
-   */
-  public static void saveTimeTable(@Valid TimeTableDto timeTable, Long officeId, 
-      CalculationType calculationType) {
-    if (Validation.hasErrors()) {
-      response.status = 400;
-      List<Office> officeList = officeDao.getAllOffices();
-      render("@configureShiftTimeTable", timeTable, officeList, calculationType);
-    }
-    Office office = officeDao.getOfficeById(officeId);
-    competenceManager.createShiftTimeTable(timeTable, office, calculationType);
-    flash.success("Creata nuova timetable");
-    manageCompetenceCode();
-  }
 
   /**
    * metodo che ritorna al template le informazioni per poter configurare correttamente il turno.

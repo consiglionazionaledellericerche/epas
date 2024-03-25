@@ -4,10 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.15.o] - UNRELEASED
+## [2.15.0] - UNRELEASED
 ### Added
   - Aggiunti ruoli di sistema Gestore assenze e Gestore anagrafica a quelli che possono chiamare
     il servizio REST con la lista delle sedi
+  - Modificato il calcolo delle ore di turno del pomeriggio per chi utilizza la fascia oraria
+    07-14/13.30-19: ora a chi fa il pomeriggio viene conteggiata una mezz'ora in meno
 
 ## [2.14.1] - 2024-03-15
 ### Changed
