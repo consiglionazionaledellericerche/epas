@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.15.o] - UNRELEASED
+### Added
+  - Aggiunti ruoli di sistema Gestore assenze e Gestore anagrafica a quelli che possono chiamare
+    il servizio REST con la lista delle sedi
+
+## [2.14.1] - 2024-03-15
+### Changed
+  - Corretto metodo che preleva la lista delle persone attive che aveva un problema
+    introdotto nella versione 2.14.0
+
 ## [2.14.0] - 2024-03-12
 ### Added
   - Aggiunto piano ferie 15+2
