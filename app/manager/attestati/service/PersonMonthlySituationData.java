@@ -332,12 +332,10 @@ public class PersonMonthlySituationData {
         competenceDao.competencesInMonth(persons, year, month);
 
     competencesMap.keySet().stream().forEach(person -> {
-      Map<String, Certification> certificationMap = new HashMap<>();
       competencesMap.get(person).forEach(competence -> {
         Certification certification = byCompetence(competence);
-        certificationMap.put(certification.aMapKey(), certification);
+        certifications.get(person).put(certification.aMapKey(), certification);
       });
-      certifications.put(person, certificationMap);
     });
     return certifications;
   }
@@ -391,7 +389,6 @@ public class PersonMonthlySituationData {
         buoniElettronici = buoniElettronici + composition.electronicMealTicket;
       }
     }
-
     certification.setContent(
         String.valueOf(buoniCartacei) + ";" + String.valueOf(buoniElettronici));
     log.trace("certification = {}, certification.key = {}", 
@@ -452,9 +449,7 @@ public class PersonMonthlySituationData {
       }
       certification.setContent(
           String.valueOf(buoniCartacei) + ";" + String.valueOf(buoniElettronici));
-      Map<String, Certification> certificationMap = new HashMap<>();
-      certificationMap.put(certification.aMapKey(), certification);
-      certifications.put(person, certificationMap);
+      certifications.get(person).put(certification.aMapKey(), certification);
     });
     return certifications;
   }
