@@ -91,8 +91,7 @@ Per ottenere lo stesso riepilogo ma per tutti i dipendenti di una sede è possib
       sedeId==223400 year==2020 month==10
 
 Il risultato sarà una lista dei riepilogi strutturati come quello dell'esempio precedente per il
-singolo dipendente (in questo caso i campi *mealTicketsPreviousMonth* e *remainingMealTickets* non
-vengono valorizzati per ragioni di performance).
+singolo dipendente.
 
 
 Verifica validazione attestati

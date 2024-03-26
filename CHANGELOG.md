@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Modificato il calcolo delle ore di turno del pomeriggio per chi utilizza la fascia oraria
     07-14/13.30-19: ora a chi fa il pomeriggio viene conteggiata una mezz'ora in meno
 
+### Changed
+  - Nel metodo REST /rest/v2/certifications/getMonthSituationByOffice valorizzate correttamente
+    le competenze
+
 ## [2.14.1] - 2024-03-15
 ### Changed
   - Corretto metodo che preleva la lista delle persone attive che aveva un problema
