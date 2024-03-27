@@ -44,6 +44,7 @@ public class AbsenceShowTerseDto {
   private LocalDate date;
   private String code;
   private Long absenceTypeId;
+  private Boolean isRealAbsence;
   private Integer justifiedTime;
   private String justifiedType;
   private String note;
@@ -70,6 +71,7 @@ public class AbsenceShowTerseDto {
     if (absence.getAbsenceType() != null) {
       absenceDto.setAbsenceTypeId(absence.getAbsenceType().getId());
       absenceDto.setExternalTypeId(absence.getAbsenceType().getExternalId());
+      absenceDto.setIsRealAbsence(absence.getAbsenceType().isRealAbsence());
     }
     return absenceDto;
   }

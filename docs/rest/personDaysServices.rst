@@ -87,6 +87,7 @@ Un estratto del risultato è il seguente:
                 "absences": [],
                 "date": "2024-02-01",
                 "difference": 13,
+                "decurtedMeal": 0,
                 "id": 656263,
                 "isHoliday": false,
                 "isTicketAvailable": true,
@@ -137,6 +138,7 @@ Un estratto del risultato è il seguente:
                         "way": "out"
                     }
                 ],
+                "stampingsTime": 445,
                 "timeAtWork": 445
             },
             {
@@ -147,6 +149,7 @@ Un estratto del risultato è il seguente:
                         "date": "2024-02-02",
                         "externalId": null,
                         "id": 21480,
+                        "isRealAbsence": false,
                         "justifiedTime": 432,
                         "justifiedType": "complete_day_and_add_overtime",
                         "note": null,

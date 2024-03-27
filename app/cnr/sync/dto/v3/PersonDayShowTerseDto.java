@@ -46,6 +46,8 @@ public class PersonDayShowTerseDto {
   private int timeAtWork;
   private int difference;
   private int progressive;
+  private Integer stampingsTime;
+  private Integer decurtedMeal;
   private boolean isTicketAvailable;
   private boolean isHoliday;
 
