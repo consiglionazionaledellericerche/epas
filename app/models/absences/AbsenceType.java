@@ -156,6 +156,9 @@ public class AbsenceType extends BaseModel {
   private boolean reperibilityCompatible;
   
   private boolean shiftCompatible;
+  
+  @Getter
+  @Setter
   private boolean isRealAbsence = true;
 
   private String externalId;
