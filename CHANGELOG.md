@@ -10,12 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     il servizio REST con la lista delle sedi
   - Modificato il calcolo delle ore di turno del pomeriggio per chi utilizza la fascia oraria
     07-14/13.30-19: ora a chi fa il pomeriggio viene conteggiata una mezz'ora in meno
+  - Aggiunto campo externalId all'enumerato che modella gli absenceTypes e reso disponibile anche 
+    nella form di modifica degli absence_types
 
 ### Changed
   - Nel metodo REST /rest/v2/certifications/getMonthSituationByOffice valorizzate correttamente
     le competenze
   - Nel metodo REST /rest/v3/persondays/getMonthSituationByPerson per il personDay esportati i campi
     stampingsTime e decurtedMeal e per le assenze esportato isRealAbsence
+  - Modificato il valore del campo isRealAbsence per le assenze che sono in realtà specifiche modalità
+    di lavoro
+  - Aggiornata la procedura di allineamento tra enumerato e absence_types
   
 ## [2.14.1] - 2024-03-15
 ### Changed
