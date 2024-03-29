@@ -14,7 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
   - Nel metodo REST /rest/v2/certifications/getMonthSituationByOffice valorizzate correttamente
     le competenze
-
+  - Nel metodo REST /rest/v3/persondays/getMonthSituationByPerson per il personDay esportati i campi
+    stampingsTime e decurtedMeal e per le assenze esportato isRealAbsence
+  
 ## [2.14.1] - 2024-03-15
 ### Changed
   - Corretto metodo che preleva la lista delle persone attive che aveva un problema
