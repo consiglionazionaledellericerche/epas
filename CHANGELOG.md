@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.15.0] - UNRELEASED
+## [2.15.0] - 2024-04-04
 ### Added
   - Aggiunti ruoli di sistema Gestore assenze e Gestore anagrafica a quelli che possono chiamare
     il servizio REST con la lista delle sedi
