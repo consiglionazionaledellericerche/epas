@@ -1538,6 +1538,10 @@ absenceType.toUpdate=Aggiornamento stato assenza
 absenceType.mealTicketBehaviour =Comportamento per buono pasto
 absenceType.externalId =External id
 absenceType.externalId.popover =External id utilizzabile anche per il raggruppamento delle assenze per i timesheet
+absenceType.realAbsence =Vera assenza
+absenceType.realAbsence.popover =Codice che giustifica una assenza o una specifica condizione lavorativa non in sede
+absenceType.reperibilityCompatible.popover =Compatibile con una giornata di reperibilità
+absenceType.shiftCompatible.popover =Compatibile con la presenza in turno 
 
 absenceType.replacingTime=Minuti per completamento
 absenceType.used=Usato

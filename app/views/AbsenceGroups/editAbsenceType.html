@@ -56,6 +56,7 @@
         #{f.selectEnum 'absenceType.mealTicketBehaviour', items:models.enumerate.MealTicketBehaviour.values(), custom_popover:'true' /}
         #{f.booleanRadio 'absenceType.reperibilityCompatible', custom_popover:'true' /}
         #{f.booleanRadio 'absenceType.shiftCompatible', custom_popover:'true' /}
+		#{f.booleanRadio 'absenceType.realAbsence', custom_popover:'true' /}
 
 		#{f.input 'absenceType.externalId',custom_popover:'true' /}
         #{f.booleanRadio 'absenceType.toUpdate', custom_popover:'true' /}

@@ -104,9 +104,12 @@ public class EnumAllineator {
           }
           absenceType.setValidFrom(defaultAbsenceType.get().validFrom);
           absenceType.setValidTo(defaultAbsenceType.get().validTo);
+          absenceType.setExternalId(defaultAbsenceType.get().externalId);
+          absenceType.setRealAbsence(defaultAbsenceType.get().isRealAbsence);
           absenceType.save();
           updateBehaviourSet(absenceType, absenceType.getJustifiedBehaviours(), 
               defaultAbsenceType.get().behaviour);
+          
           absenceType.save();
         }
 

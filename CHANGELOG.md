@@ -4,18 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.16.0] - UNRELEASED
+### Added
+  - Aggiunto campo externalId all'enumerato che modella gli absenceTypes e reso disponibile anche 
+    nella form di modifica degli absence_types
+    
+### Changed
+  - Modificato il valore del campo isRealAbsence per le assenze che sono in realtà specifiche modalità
+    di lavoro
+  - Aggiornata la procedura di allineamento tra enumerato e absence_types
+
 ## [2.15.0] - 2024-04-04
 ### Added
   - Aggiunti ruoli di sistema Gestore assenze e Gestore anagrafica a quelli che possono chiamare
     il servizio REST con la lista delle sedi
   - Modificato il calcolo delle ore di turno del pomeriggio per chi utilizza la fascia oraria
     07-14/13.30-19: ora a chi fa il pomeriggio viene conteggiata una mezz'ora in meno
+  
 
 ### Changed
   - Nel metodo REST /rest/v2/certifications/getMonthSituationByOffice valorizzate correttamente
     le competenze
   - Nel metodo REST /rest/v3/persondays/getMonthSituationByPerson per il personDay esportati i campi
     stampingsTime e decurtedMeal e per le assenze esportato isRealAbsence
+  
   
 ## [2.14.1] - 2024-03-15
 ### Changed
