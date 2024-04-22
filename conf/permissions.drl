@@ -1194,7 +1194,7 @@ end
  */
 rule PersonnelAdmin_onPerson
 when
-  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+  $uro: UsersRolesOffices(role.name in (Role.PERSONNEL_ADMIN, Role.SEAT_SUPERVISOR))
   $o: Office() from $uro.office
   $c: PermissionCheck($o.persons contains target, granted == false, action not in ("Persons.updateEppn"))
 then
@@ -1582,6 +1582,14 @@ when
         "Stampings.personStamping",
         "Vacations.list",
         "Vacations.vacationSummary",
+        
+        "AbsenceGroups.insert",
+        "AbsenceGroups.insertAssisted",
+        "AbsenceGroups.findCode",
+        "AbsenceGroups.groupStatus",
+        "AbsenceGroups.save",
+     	"AbsenceGroups.edit",
+     	"AbsenceGroups.delete",
 
 		"AbsenceRequests.blank",
 		"AbsenceRequests.edit",
@@ -1677,6 +1685,12 @@ when
         "Vacations.list",
         "Vacations.vacationSummary",
         "Stampings.dailyPresence",
+        
+        "AbsenceGroups.groupStatus",
+        "AbsenceGroups.showAbsenceTypes",
+        "AbsenceGroups.editGroup",       /* per la show... */
+        "AbsenceGroups.editAbsenceType",
+        
         "AbsenceRequests.blank",
 
 		"AbsenceRequests.vacations",

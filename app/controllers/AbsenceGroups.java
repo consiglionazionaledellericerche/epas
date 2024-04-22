@@ -749,7 +749,7 @@ public class AbsenceGroups extends Controller {
     final User currentUser = Security.getUser().get();
     if (currentUser.isSystemUser()
         || userDao.getUsersWithRoles(person.getOffice(), 
-            Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)
+            Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.SEAT_SUPERVISOR)
         .contains(currentUser)) {
       isAdmin = true;
     }
