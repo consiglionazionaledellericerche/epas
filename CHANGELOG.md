@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Aggiunto campo externalId all'enumerato che modella gli absenceTypes e reso disponibile anche 
     nella form di modifica degli absence_types
+  - Aggiunta possibilità per il responsabile di sede di verificare lo stato di avanzamento delle assenze
+    soggette a limitazione temporale/quantitativa sui cartellini dei dipendenti delle sedi che gestisce
     
 ### Changed
   - Modificato il valore del campo isRealAbsence per le assenze che sono in realtà specifiche modalità
