@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Modificato il valore del campo isRealAbsence per le assenze che sono in realtà specifiche modalità
     di lavoro
   - Aggiornata la procedura di allineamento tra enumerato e absence_types
+  - Modificato il valore del campo externalId per assenze per malattia (F) e rimosso dalle missioni orarie
+    "H"
 
 ## [2.15.0] - 2024-04-04
 ### Added
