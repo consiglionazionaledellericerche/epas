@@ -7,7 +7,7 @@ name: epas
 releaseDate: '2024-05-24'
 url: 'https://github.com/consiglionazionaledellericerche/epas'
 applicationSuite: epas
-softwareVersion: 2.15.3
+softwareVersion: 2.16.0
 developmentStatus: stable
 softwareType: standalone/web
 platforms:
