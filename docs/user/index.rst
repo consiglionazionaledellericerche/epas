@@ -13,3 +13,4 @@ Documentazione per i dipendenti
    hourRecap
    trainingHours
    managePassword
+   icalCalendars

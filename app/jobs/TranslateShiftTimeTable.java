@@ -74,7 +74,7 @@ public class TranslateShiftTimeTable extends Job<Void> {
         slotMorning.setEndSlot(tt.getEndMorning());
         slotMorning.setBeginMealSlot(tt.getStartMorningLunchTime());
         slotMorning.setEndMealSlot(tt.getEndMorningLunchTime());
-        slotMorning.setMinutesPaid(tt.getPaidMinutes());
+        slotMorning.setMinutesPaid(tt.getPaidMinutesMorning());
         slotMorning.setPaymentType(PaymentType.T1);
         slotMorning.setShiftTimeTable(ostt);
         slotMorning.save();
@@ -89,7 +89,7 @@ public class TranslateShiftTimeTable extends Job<Void> {
         slotAfternoon.setEndSlot(tt.getEndAfternoon());
         slotAfternoon.setBeginMealSlot(tt.getStartAfternoonLunchTime());
         slotAfternoon.setEndMealSlot(tt.getEndAfternoonLunchTime());
-        slotAfternoon.setMinutesPaid(tt.getPaidMinutes());
+        slotAfternoon.setMinutesPaid(tt.getPaidMinutesAfternoon());
         slotMorning.setPaymentType(PaymentType.T1);
         slotAfternoon.setShiftTimeTable(ostt);
         slotAfternoon.save();
@@ -105,7 +105,7 @@ public class TranslateShiftTimeTable extends Job<Void> {
           slotEvening.setEndSlot(tt.getEndEvening());
           slotEvening.setBeginMealSlot(tt.getStartEveningLunchTime());
           slotEvening.setEndMealSlot(tt.getEndEveningLunchTime());
-          slotEvening.setMinutesPaid(tt.getPaidMinutes());
+          //slotEvening.setMinutesPaid(tt.getPaidMinutes());
           slotMorning.setPaymentType(PaymentType.T1);
           slotEvening.setShiftTimeTable(ostt);
           slotEvening.save();

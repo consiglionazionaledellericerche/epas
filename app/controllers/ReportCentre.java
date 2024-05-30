@@ -64,8 +64,8 @@ public class ReportCentre extends Controller {
   @NoCheck
   public static void javascript() {
     response.contentType = MediaType.JAVASCRIPT_UTF_8.toString();
-    response.setHeader("Cache-Control", "max-age=" + 31536000);
-    response.setHeader("Expires", LocalDateTime.now().plusYears(1).toString());
+    response.setHeader("Cache-Control", "max-age=" + 86400);
+    response.setHeader("Expires", LocalDateTime.now().plusDays(1).toString());
 
     Map<String, String> categoryMap = OilConfig.categoryMap();
     //Se sono presenti le categorie è obbligatorio per l'utente selezionarle

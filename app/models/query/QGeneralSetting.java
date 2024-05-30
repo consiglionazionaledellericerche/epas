@@ -41,6 +41,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
 
     public final BooleanPath enableOvertimeRequestInAdvance = createBoolean("enableOvertimeRequestInAdvance");
 
+    public final BooleanPath enableSsoForAttestati = createBoolean("enableSsoForAttestati");
+
     public final BooleanPath enableUniqueDailyShift = createBoolean("enableUniqueDailyShift");
 
     public final StringPath endDailyShift = createString("endDailyShift");
@@ -74,6 +76,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    public final BooleanPath personCreationEnabled = createBoolean("personCreationEnabled");
+
     public final BooleanPath regulationsEnabled = createBoolean("regulationsEnabled");
 
     public final BooleanPath roundingShiftQuantity = createBoolean("roundingShiftQuantity");
@@ -91,6 +95,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
     public final BooleanPath syncOfficesEnabled = createBoolean("syncOfficesEnabled");
 
     public final BooleanPath syncPersonsEnabled = createBoolean("syncPersonsEnabled");
+
+    public final NumberPath<Integer> timeoutAttestati = createNumber("timeoutAttestati", Integer.class);
 
     //inherited
     public final NumberPath<Integer> version = _super.version;

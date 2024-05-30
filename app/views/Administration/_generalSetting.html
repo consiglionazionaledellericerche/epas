@@ -95,6 +95,8 @@
   #{accordionItem 'registrySynchSettings', parent:'generalSetting', title:'Sincronizzazione anagrafica', open:false}
     #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
       #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilita l'inserimento del persona da parte degli ufficio amministrativi#{/alert}
+      #{f.booleanRadio 'generalSetting.personCreationEnabled' /}
       #{alert color:'info'}Abilita la sincronizzazione dei badge di tutti gli uffici con l'anagrafica centrale#{/alert}
       #{f.booleanRadio 'generalSetting.syncBadgesEnabled' /}
       #{alert color:'info'}Abilita la sincronizzazione delle persone con l'anagrafica centrale verificando la
@@ -276,7 +278,8 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
-    #{accordionItem 'enableOvertimePerPerson', parent:'generalSetting', title:'Abilita utilizzo monte ore straordinari dipendente', open:false}
+
+  #{accordionItem 'enableOvertimePerPerson', parent:'generalSetting', title:'Abilita utilizzo monte ore straordinari dipendente', open:false}
     #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
       #{f.hidden 'generalSetting.id' /}
       #{alert color:'info'}Abilita l'utilizzo di un monte ore straordinari per dipendente #{/alert}
@@ -286,7 +289,23 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
-    #{accordionItem 'enableOvertimeRequestInAdvance', parent:'generalSetting', title:'Abilita utilizzo richiesta preventiva di straordinari', open:false}
+
+
+  #{accordionItem 'enableSsoForAttestati', parent:'generalSetting', title:'Configurazione servizio Attestati del CNR', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Abilitazione all'utilizzo dell'SSO del CNR per il rilascio del token JWT utilizzato per le comunicazioni
+      tra ePAS ed Attestati ed impostazione del timeout dei servizi REST di Attestati.#{/alert}
+      #{f.booleanRadio 'generalSetting.enableSsoForAttestati' /}
+      #{f.input 'generalSetting.timeoutAttestati', type:'number' /}
+
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
+
+  #{accordionItem 'enableOvertimeRequestInAdvance', parent:'generalSetting', title:'Abilita utilizzo richiesta preventiva di straordinari', open:false}
     #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
       #{f.hidden 'generalSetting.id' /}
       #{alert color:'info'}Abilita l'utilizzo della richiesta preventiva di straordinari da parte dei dipendenti #{/alert}
@@ -296,5 +315,5 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
-  
+
 #{/accordionGroup}

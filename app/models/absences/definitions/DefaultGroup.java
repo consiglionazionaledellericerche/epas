@@ -127,6 +127,10 @@ public enum DefaultGroup {
   G_7("7 - Permessi sindacali", "", DefaultCategoryType.ALTRI_CODICI, 0, 
       GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_PERMESSI_SINDACALI, 
       DefaultComplation.C_7, null, false, true),
+  
+  G_7D("7D - Permessi sindacali dirigenti", "", DefaultCategoryType.ALTRI_CODICI, 0, 
+      GroupAbsenceTypePattern.programmed, PeriodType.year, 
+      DefaultTakable.T_PERMESSI_SINDACALI_DIRIGENTI, DefaultComplation.C_7D, null, false, true),
 
   G_0("0 - Assemblea", "", DefaultCategoryType.ALTRI_CODICI, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.year, DefaultTakable.T_0, DefaultComplation.C_0, null, false, true),
@@ -179,6 +183,10 @@ public enum DefaultGroup {
   //      DefaultCategoryType.PROROGA_FERIE_2021, 2, // must be greater than FERIE_CNR
   //      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
   //      DefaultTakable.T_FERIE_CNR_PROROGA_2021, null, null, false, false),
+  PROROGA_FERIE_2022("31_2022 - Proroga ferie 2022", "", 
+      DefaultCategoryType.PROROGA_FERIE_2022, 2, // must be greater than FERIE_CNR
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_FERIE_CNR_PROROGA_2022, null, null, false, false),
   FERIE_CNR_DIPENDENTI("Ferie e permessi legge", "",
       DefaultCategoryType.FERIE_DIPENDENTI, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
@@ -398,7 +406,7 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_TELELAVORO_RT, null, null, false, false),
 
-  G_PUBBLICA_FUNZIONE("Codici Pubblica Funzione", "", DefaultCategoryType.PUBBLICA_FUNZIOINE, 2,
+  G_PUBBLICA_FUNZIONE("Codici Pubblica Funzione", "", DefaultCategoryType.PUBBLICA_FUNZIONE, 2,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_PUBBLICA_FUNZIONE,
       null, null, false, false),
 
@@ -430,7 +438,10 @@ public enum DefaultGroup {
       false, false), 
   G_683("683 - Permesso terzo lutto", "",
       DefaultCategoryType.PERMESSO_TERZO_LUTTO, 0, GroupAbsenceTypePattern.programmed,
-      PeriodType.year, DefaultTakable.T_683, null, null, false, false);
+      PeriodType.year, DefaultTakable.T_683, null, null, false, false),
+  G_662("662 - Permesso grave infermità coniuge o parente", "",
+      DefaultCategoryType.PERMESSI_PERSONALI, 0, GroupAbsenceTypePattern.programmed,
+      PeriodType.year, DefaultTakable.T_662, null, null, false, false);
 
   public String description;
   public String chainDescription;

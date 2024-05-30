@@ -45,6 +45,7 @@ public class GeneralSetting extends BaseModel {
   
   // Parametri gestione anagrafica
   
+  private boolean personCreationEnabled = true;
   private boolean syncBadgesEnabled = false;
   private boolean syncOfficesEnabled = false;
   private boolean syncPersonsEnabled = false;
@@ -156,5 +157,17 @@ public class GeneralSetting extends BaseModel {
    * Indica se si può utilizzare o meno la richiesta preventiva di straordinario
    */
   private boolean enableOvertimeRequestInAdvance = false;
+ 
+  /**
+   * Indica se il servizio Attestati del CNR deve utilizzare l'SSO CNR per il rilascio del 
+   * token oppure il token JWT direttamente rilasciato da Attestati.
+   */
+  private boolean enableSsoForAttestati = false;
+  
+  /**
+   * Timeout in secondi per le chiamate REST effettuate ad Attestati.
+   */
+  private int timeoutAttestati = 60;
+
 
 }
