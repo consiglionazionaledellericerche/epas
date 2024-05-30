@@ -31,6 +31,7 @@ di ePAS in produzione del vostro ente.
    absencesServices
    certificationsServices
    contractsServices
+   officesServices
    groupsAndAffiliationsServices
    leavesServices
    personDaysServices

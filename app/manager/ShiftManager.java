@@ -25,6 +25,7 @@ import com.google.common.collect.TreeBasedTable;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import dao.PersonShiftDayDao;
@@ -118,6 +119,8 @@ public class ShiftManager {
   //nome della colonna per i giorni di assenza della tabella delle inconsistenze
   public static String thAbsences = Messages.get("PDFReport.thAbsences");
 
+  @Inject
+  private PersonDao personDao;
   @Inject
   private PersonDayManager personDayManager;
   @Inject
@@ -1304,7 +1307,7 @@ public class ShiftManager {
         shiftType);
     List<ShiftCancelled> shiftsCancelled =
         shiftDao.getShiftCancelledByPeriodAndType(firstOfMonth, firstOfMonth.dayOfMonth()
-            .withMaximumValue(), shiftType);
+            .withMaximumValue(), Optional.of(shiftType));
 
     Sd shift = new Sd(null, null);
     for (ShiftCancelled sc : shiftsCancelled) {
@@ -1386,19 +1389,15 @@ public class ShiftManager {
    *
    * @param year anno di riferimento del calendario
    * @param type tipo di turni da caricare
-   * @param personShift opzionale, contiene la persona della quale caricare i turni, se è vuota
+   * @param personShifts opzionale, contiene la persona della quale caricare i turni, se è vuota
    *        carica tutto il turno
    * @return icsCalendar calendario
    * @author Arianna Del Soldato
    */
   public Calendar createicsShiftCalendar(
-      int year, String type, Optional<PersonShift> personShift) {
-    List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
-
+      int year, List<PersonShift> personShifts) {
     log.debug("nella createicsReperibilityCalendar(int {}, String {}, List<PersonShift> {})",
-        year, type, personShift);
-    ShiftCategories shiftCategory = shiftDao.getShiftCategoryByType(type);
-    String eventLabel = "Turno ".concat(shiftCategory.getDescription()).concat(": ");
+        year, personShifts);
 
     // Create a calendar
     //---------------------------
@@ -1406,88 +1405,84 @@ public class ShiftManager {
     icsCalendar.getProperties().add(new ProdId("-//Events Calendar//iCal4j 1.0//EN"));
     icsCalendar.getProperties().add(CalScale.GREGORIAN);
     icsCalendar.getProperties().add(Version.VERSION_2_0);
+    
+    for (PersonShift personShift : personShifts) {
 
-    // read the person(0) shift days for the year
-    //-------------------------------------------------
-    LocalDate from = new LocalDate(year, 1, 1);
-    LocalDate to = new LocalDate(year, 12, 31);
+      // read the person(0) shift days for the year
+      //-------------------------------------------------
+      LocalDate from = new LocalDate(year, 1, 1);
+      LocalDate to = new LocalDate(year, 12, 31);
 
-    ShiftType shiftType = shiftDao.getShiftTypeByType(type);
+      //ShiftType shiftType = shiftDao.getShiftTypeByType(type);
 
-    // get the working shift days
-    //------------------------------
+      // get the working shift days
+      //------------------------------
 
-    // if the list is empty, load the entire shift days
-    if (!personShift.isPresent()) {
-      personShiftDays = shiftDao.getShiftDaysByPeriodAndType(from, to, shiftType);
-      log.debug("Shift find called from {} to {}, type {} - found {} shift days",
-          from, to, type, personShiftDays.size());
-    } else {
-      // load the shift days of the person in the list
-      personShiftDays =
-          shiftDao.getPersonShiftDaysByPeriodAndType(from, to, shiftType, 
-              personShift.get().getPerson());
-      log.debug("Shift find called from {} to {}, type {} person {} - found {} shift days",
-          from, to, type, personShift.get().getPerson().getSurname(), personShiftDays.size());
-    }
+      // load the shift days in the calendar
+      for (PersonShiftDay psd : shiftDao.getPersonShiftDaysByPeriodAndType(
+            from, to, Optional.absent(), personShift.getPerson())) {
 
-    // load the shift days in the calendar
-    for (PersonShiftDay psd : personShiftDays) {
+        LocalTime startShift =
+            (psd.getShiftSlot().equals(ShiftSlot.MORNING))
+                ? psd.getShiftType().getShiftTimeTable().getStartMorning()
+                : psd.getShiftType().getShiftTimeTable().getStartAfternoon();
+        LocalTime endShift = (psd.getShiftSlot().equals(ShiftSlot.MORNING))
+            ? psd.getShiftType().getShiftTimeTable().getEndMorning()
+            : psd.getShiftType().getShiftTimeTable().getEndAfternoon();
 
-      LocalTime startShift =
-          (psd.getShiftSlot().equals(ShiftSlot.MORNING))
-              ? psd.getShiftType().getShiftTimeTable().getStartMorning()
-              : psd.getShiftType().getShiftTimeTable().getStartAfternoon();
-      LocalTime endShift = (psd.getShiftSlot().equals(ShiftSlot.MORNING))
-          ? psd.getShiftType().getShiftTimeTable().getEndMorning()
-          : psd.getShiftType().getShiftTimeTable().getEndAfternoon();
+        log.debug("Turno di {} del {} dalle {} alle {}",
+            psd.getPersonShift().getPerson().getSurname(), psd.getDate(), startShift, endShift);
 
-      log.debug("Turno di {} del {} dalle {} alle {}",
-          psd.getPersonShift().getPerson().getSurname(), psd.getDate(), startShift, endShift);
+        //set the start event
+        java.util.Calendar start = java.util.Calendar.getInstance();
+        start.set(
+            psd.getDate().getYear(), psd.getDate().getMonthOfYear() - 1, 
+            psd.getDate().getDayOfMonth(),
+            startShift.getHourOfDay(), startShift.getMinuteOfHour());
 
-      //set the start event
-      java.util.Calendar start = java.util.Calendar.getInstance();
-      start.set(
-          psd.getDate().getYear(), psd.getDate().getMonthOfYear() - 1, 
-          psd.getDate().getDayOfMonth(),
-          startShift.getHourOfDay(), startShift.getMinuteOfHour());
+        //set the end event
+        java.util.Calendar end = java.util.Calendar.getInstance();
+        end.set(
+            psd.getDate().getYear(), psd.getDate().getMonthOfYear() - 1, 
+            psd.getDate().getDayOfMonth(),
+            endShift.getHourOfDay(), endShift.getMinuteOfHour());
 
-      //set the end event
-      java.util.Calendar end = java.util.Calendar.getInstance();
-      end.set(
-          psd.getDate().getYear(), psd.getDate().getMonthOfYear() - 1, 
-          psd.getDate().getDayOfMonth(),
-          endShift.getHourOfDay(), endShift.getMinuteOfHour());
+//      ShiftCategories shiftCategory = shiftDao.getShiftCategoryByType(type);
+        String eventLabel = "Turno ".concat(psd.getShiftType().getShiftCategories().getDescription()).concat(": ");
+        String label = eventLabel.concat(psd.getPersonShift().getPerson().getSurname());
 
-      String label = eventLabel.concat(psd.getPersonShift().getPerson().getSurname());
+        icsCalendar.getComponents().add(createDurationIcalEvent(
+            new DateTime(start.getTime()), new DateTime(end.getTime()), label));
+        continue;
+      }
 
-      icsCalendar.getComponents().add(createDurationIcalEvent(
-          new DateTime(start.getTime()), new DateTime(end.getTime()), label));
-      continue;
-    }
+      // get the deleted shift days
+      //------------------------------
+      // get the deleted shifts of type shiftType
+      
+      List<ShiftCancelled> shiftsCancelled =
+          shiftDao.getShiftCancelledByPeriodAndType(from, to, Optional.absent());
+      log.debug("ShiftsCancelled find called from {} to {} - found {} shift days",
+          from, to, shiftsCancelled.size());
 
-    // get the deleted shift days
-    //------------------------------
-    // get the deleted shifts of type shiftType
-    List<ShiftCancelled> shiftsCancelled =
-        shiftDao.getShiftCancelledByPeriodAndType(from, to, shiftType);
-    log.debug("ShiftsCancelled find called from {} to {}, type {} - found {} shift days",
-        from, to, shiftType.getType(), shiftsCancelled.size());
+      // load the calcelled shift in the calendar
+      for (ShiftCancelled shiftCancelled : shiftsCancelled) {
+        log.debug("Trovato turno {} ANNULLATO nel giorno {}",
+            shiftCancelled.getType().getType(), shiftCancelled.getDate());
 
-    // load the calcelled shift in the calendar
-    for (ShiftCancelled shiftCancelled : shiftsCancelled) {
-      log.debug("Trovato turno {} ANNULLATO nel giorno {}",
-          shiftCancelled.getType().getType(), shiftCancelled.getDate());
+        // build the event day
+        java.util.Calendar shift = java.util.Calendar.getInstance();
+        shift.set(
+            shiftCancelled.getDate().getYear(), shiftCancelled.getDate().getMonthOfYear() - 1,
+            shiftCancelled.getDate().getDayOfMonth());
+        String eventLabel = 
+            "Turno ".concat(shiftCancelled.getType().getShiftCategories().getDescription()).concat(": ");
+        String label = eventLabel.concat("Annullato");
 
-      // build the event day
-      java.util.Calendar shift = java.util.Calendar.getInstance();
-      shift.set(
-          shiftCancelled.getDate().getYear(), shiftCancelled.getDate().getMonthOfYear() - 1,
-          shiftCancelled.getDate().getDayOfMonth());
-      String label = eventLabel.concat("Annullato");
+        icsCalendar.getComponents().add(createAllDayIcalEvent(new Date(shift.getTime()), label));
+        continue;
+      }
 
-      icsCalendar.getComponents().add(createAllDayIcalEvent(new Date(shift.getTime()), label));
-      continue;
     }
 
     return icsCalendar;
@@ -1519,29 +1514,24 @@ public class ShiftManager {
    * of type 'type' for the 'year' year.
    * If the personId=0, it exports the calendar for all persons of the shift of type 'type'
    */
-  public Optional<Calendar> createCalendar(String type, Optional<Long> personId, int year) {
-    log.debug("Sto per creare iCal per l'anno {} della person con id = {}, shift type {}",
-        year, personId, type);
+  public Optional<Calendar> createCalendar(Long personId, int year) {
+    log.debug("Sto per creare iCal per l'anno {} della person con id = {}",
+        year, personId);
 
-    Optional<PersonShift> personShift = Optional.absent();
-    if (personId.isPresent()) {
-      // read the shift person
-      personShift =
-          Optional.fromNullable(shiftDao.getPersonShiftByPersonAndType(personId.get(), type));
-      if (!personShift.isPresent()) {
-        log.info("Person id = {} is not associated to a shift of type = {}", personId.get(), type);
-        return Optional.<Calendar>absent();
-      }
+    List<PersonShift> personShifts = 
+        personDao.byId(personId).get().getPersonShifts();
+
+    if (personShifts.isEmpty()) {
+      log.info("Person id = {} has not associated shift types", personId);
+      return Optional.<Calendar>absent();
     }
 
     Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
 
-    log.debug("chiama la createicsShiftCalendar({}, {}, {})", year, type, personShift);
-    icsCalendar = createicsShiftCalendar(year, type, personShift);
-
+    log.debug("chiama la createicsShiftCalendar({}, {})", year, personShifts);
+    icsCalendar = createicsShiftCalendar(year, personShifts);
     log.debug("Find {} periodi di turno.", icsCalendar.getComponents().size());
-    log.debug("Creato iCal per l'anno {} della person con id = {}, shift type {}",
-        year, personId, type);
+    log.debug("Creato iCal per l'anno {} della person con id = {}", year, personId);
 
     return Optional.of(icsCalendar);
   }

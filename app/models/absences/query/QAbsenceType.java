@@ -43,6 +43,8 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final StringPath externalId = createString("externalId");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 

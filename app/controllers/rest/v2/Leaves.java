@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
 import controllers.Resecure;
+import controllers.rest.v3.Offices;
 import dao.AbsenceDao;
 import dao.PersonDao;
 import helpers.JodaConverters;

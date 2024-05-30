@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2024  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,6 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package models.absences;
 
 import com.google.common.base.Joiner;
@@ -157,7 +156,13 @@ public class AbsenceType extends BaseModel {
   private boolean reperibilityCompatible;
   
   private boolean shiftCompatible;
+  
+  @Getter
+  @Setter
   private boolean isRealAbsence = true;
+
+  private String externalId;
+
   // Metodi
   
   /**

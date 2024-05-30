@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
 import controllers.Resecure;
-import controllers.rest.v2.Offices;
 import controllers.rest.v2.Persons;
 import dao.BadgeDao;
 import dao.BadgeSystemDao;

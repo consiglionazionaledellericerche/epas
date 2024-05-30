@@ -33,7 +33,8 @@ import play.data.binding.TypeBinder;
 public class LocalDateJavaBinder implements TypeBinder<LocalDate> {
 
   //Questo formato è utilizzato nelle form HTML
-  static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+  static final String ITALIAN_DATE_PATTERN = "dd/MM/yyyy"; 
+  static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern(ITALIAN_DATE_PATTERN);
 
   @SuppressWarnings("rawtypes")
   @Override
@@ -45,7 +46,7 @@ public class LocalDateJavaBinder implements TypeBinder<LocalDate> {
     try {
       return LocalDate.parse(value, dtf);
     } catch (Exception ignored) {
-      log.debug("Exception during java LocalDate binding, value={}", value);
+      log.debug("Enable to bind java LocalDate using pattern {}, value={}", ITALIAN_DATE_PATTERN, value);
     }
     //Nei metodi REST le date vengono passate nel formato ISO
     return LocalDate.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(value));

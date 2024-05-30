@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2024  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,6 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package cnr.sync.dto.v3;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -45,12 +44,14 @@ public class AbsenceShowTerseDto {
   private LocalDate date;
   private String code;
   private Long absenceTypeId;
+  private Boolean isRealAbsence;
   private Integer justifiedTime;
   private String justifiedType;
   private String note;
   private String externalId;
+  private String externalTypeId;
   private LocalDateTime updatedAt;
-  
+
   @JsonIgnore
   @Inject
   static ModelMapper modelMapper;
@@ -69,6 +70,8 @@ public class AbsenceShowTerseDto {
     absenceDto.setDate(JodaConverters.jodaToJavaLocalDate(absence.getAbsenceDate()));
     if (absence.getAbsenceType() != null) {
       absenceDto.setAbsenceTypeId(absence.getAbsenceType().getId());
+      absenceDto.setExternalTypeId(absence.getAbsenceType().getExternalId());
+      absenceDto.setIsRealAbsence(absence.getAbsenceType().isRealAbsence());
     }
     return absenceDto;
   }

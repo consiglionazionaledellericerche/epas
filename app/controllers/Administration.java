@@ -49,8 +49,10 @@ import it.cnr.iit.epas.CompetenceUtility;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
 import java.util.AbstractMap.SimpleEntry;
@@ -68,6 +70,7 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import manager.AbsenceManager;
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.ContractManager;
@@ -78,6 +81,7 @@ import manager.SecureManager;
 import manager.UserManager;
 import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.service.CertificationService;
+import manager.attestati.service.CertificationsComunication;
 import manager.configurations.ConfigurationManager;
 import manager.services.helpdesk.HelpdeskServiceManager;
 import models.CompetenceCode;
@@ -95,9 +99,13 @@ import models.Stamping;
 import models.User;
 import models.UsersRolesOffices;
 import models.absences.Absence;
+import models.absences.AbsenceType;
+import models.absences.CategoryTab;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.enumerate.LimitType;
+
+import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -173,6 +181,18 @@ public class Administration extends Controller {
   static JwtTokenDao jwtTokenDao;
   @Inject
   static HelpdeskServiceManager helpdeskServiceManager;
+  @Inject
+  static CertificationsComunication certificationComunication;
+  @Inject
+  static AbsenceManager absenceManager;
+
+  /**
+   * Utilizzabile solo da developer e admin permette di prelevare un token del client
+   * utilizzato per la comunicazione con Attestati.
+   */
+  public static void ssoToken() {
+    renderText(certificationComunication.getTokenBySso().getAccess_token());
+  }
 
   /**
    * metodo che renderizza la pagina di utilities senza parametri passati.
@@ -237,7 +257,7 @@ public class Administration extends Controller {
       Validation.addError("person", "Obbligatorio specificare un utente o un ufficio");
       Validation.addError("office", "Obbligatorio specificare un utente o un ufficio");
     }
-    
+
     if (Validation.hasErrors()) {
       flash.error("Correggere gli errori evidenziati");
       log.debug("Errori di validazione in fixPersonSituation, person={}, "
@@ -262,7 +282,7 @@ public class Administration extends Controller {
       personList = personDao.getActivePersonInMonth(
           Sets.newHashSet(office), new YearMonth(date.getYear(), date.getMonthOfYear()));
     }    
-    
+
     consistencyManager.fixPersonSituation(personList, date, onlyRecap);
 
     flash.success("Esecuzione avviata in background");
@@ -446,7 +466,7 @@ public class Administration extends Controller {
       generalSetting();
     }
   }
-  
+
   /**
    * Mostra tutti i parametri di configurazione del play.
    */
@@ -489,7 +509,7 @@ public class Administration extends Controller {
         "Free Memory", String.format("%s Mb", runtime.freeMemory() / mb),
         "Max Memory", String.format("%s Mb", runtime.maxMemory() / mb),
         "Total Memory", String.format("%s Mb", runtime.totalMemory() / mb)).entrySet();
-    
+
     final Set<Entry<String, String>> entries = Sets.newHashSet(entrySet);
     entries.add(new SimpleEntry<String, String>("Load", String.format("%s", load)));
     render("@data", entries);
@@ -503,7 +523,7 @@ public class Administration extends Controller {
     val threadsData = threads.dumpAllThreads(true, true);
     render("@threadsData", threadsData);
   }
-  
+
   /**
    * Render del modale per l'aggiunta di un nuovo parametro di configurazione.
    */
@@ -627,8 +647,8 @@ public class Administration extends Controller {
     List<UsersRolesOffices> uros = UsersRolesOffices.findAll();
 
     List<String> emails = uros.stream().filter(uro ->
-        uro.getRole().getName().equals(Role.PERSONNEL_ADMIN) 
-        && uro.getUser().getPerson() != null)
+    uro.getRole().getName().equals(Role.PERSONNEL_ADMIN) 
+    && uro.getUser().getPerson() != null)
         .map(uro -> uro.getUser().getPerson().getEmail())
         .distinct().collect(Collectors.toList());
 
@@ -736,7 +756,7 @@ public class Administration extends Controller {
       competenceManager.applyBonus(Optional.absent(), item, yearMonth);
     });
   }
-  
+
   /**
    * Metodo che applica le competenze a presenza mensile/giornaliera.
    *
@@ -984,7 +1004,7 @@ public class Administration extends Controller {
     configurationManager.updateAllOfficesConfigurations();
     renderText("Aggiornati i parametri di configuratione di tutti gli uffici.");
   }
-  
+
   public static void updatePeopleConfigurations() {
     configurationManager.updatePeopleConfigurations();
     renderText("Aggiornati i parametri di configurazione di tutte le persone.");
@@ -1042,11 +1062,11 @@ public class Administration extends Controller {
     institute.save();
 
   }
-  
+
   public static void emergency(Boolean confirm) {
     render(confirm);
   }
-  
+
   /**
    * Il peggior hack di sempre per uccidere il play.
    * È da utilizzare in casi disperati come quando sta finendo la 
@@ -1137,5 +1157,30 @@ public class Administration extends Controller {
     expiredTokens.forEach(jwtTokenDao::delete);
     log.debug("Cancellati {} expired tokens", expiredTokens.size());
     renderText(String.format("Cancellati %s expired tokens", expiredTokens.size()));
+  }
+
+  /**
+   * Genero l'alberatura dei gruppi dei codici d'assenza con limiti di fruizione e completamento
+   * @throws ArchiveException
+   */
+  public void generateAbsencesFile() throws ArchiveException {
+    List<CategoryTab> categoryTabs = absenceComponentDao.tabsByPriority();
+    InputStream file = absenceManager.buildFile(categoryTabs);
+
+    renderBinary(file, "export.zip", false);
+  }
+  
+  public void generateAbsenceCodeList() {
+    List<AbsenceType> list = absenceTypeDao
+        .list(java.util.Optional.empty(), java.util.Optional.of(LocalDate.now()), java.util.Optional.empty());
+    list = list.stream().filter(abt -> !abt.isInternalUse()).collect(Collectors.toList());
+    InputStream file = null;
+    try {
+      file = absenceManager.buildAbsenceTypeListFile(list);
+    } catch (FileNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    renderBinary(file, "codici.zip", false);
   }
 }

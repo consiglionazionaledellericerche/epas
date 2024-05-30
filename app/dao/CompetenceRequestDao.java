@@ -329,10 +329,15 @@ public class CompetenceRequestDao extends DaoBase {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     return getQueryFactory().selectFrom(competenceRequest)
         .where(competenceRequest.person.eq(request.getPerson())
+            .and(
+                competenceRequest.beginDateToAsk.between(request.getBeginDateToAsk(), request.getEndDateToAsk())
+                  .or(competenceRequest.endDateToAsk.between(request.getBeginDateToAsk(), request.getEndDateToAsk()))
+                  .or(competenceRequest.beginDateToGive.between(request.getBeginDateToGive(), request.getEndDateToGive()))
+                  .or(competenceRequest.endDateToGive.between(request.getBeginDateToGive(), request.getEndDateToGive()))
+                )
             .and(competenceRequest.flowEnded.eq(false)))
         .fetch();
   }
-
 
 
   /**

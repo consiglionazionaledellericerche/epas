@@ -48,7 +48,9 @@ public class QShiftTimeTable extends EntityPathBase<ShiftTimeTable> {
 
     public final QOffice office;
 
-    public final NumberPath<Integer> paidMinutes = createNumber("paidMinutes", Integer.class);
+    public final NumberPath<Integer> paidMinutesAfternoon = createNumber("paidMinutesAfternoon", Integer.class);
+
+    public final NumberPath<Integer> paidMinutesMorning = createNumber("paidMinutesMorning", Integer.class);
 
     //inherited
     public final BooleanPath persistent = _super.persistent;

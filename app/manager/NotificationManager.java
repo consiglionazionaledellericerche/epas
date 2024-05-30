@@ -801,7 +801,7 @@ public class NotificationManager {
    *
    * @param absenceRequest la richiesta d'assenza
    */
-  private void sendEmailAbsenceRequest(AbsenceRequest absenceRequest) {
+  public void sendEmailAbsenceRequest(AbsenceRequest absenceRequest) {
 
     Verify.verifyNotNull(absenceRequest);
     final Person person = absenceRequest.getPerson();

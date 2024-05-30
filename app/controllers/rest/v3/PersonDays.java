@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2024  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,6 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package controllers.rest.v3;
 
 import cnr.sync.dto.v2.PersonShowTerseDto;
@@ -29,7 +28,6 @@ import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
 import controllers.PersonDays.MealTicketDecision;
 import controllers.Resecure;
-import controllers.rest.v2.Offices;
 import controllers.rest.v2.Persons;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -43,8 +41,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
 import manager.PersonManager;
 import models.Office;
@@ -120,7 +118,7 @@ public class PersonDays extends Controller {
     }
     val office = 
         Offices.getOfficeFromRequest(id, code, Strings.isNullOrEmpty(codeId) ? sedeId : codeId);
-    rules.checkIfPermitted(office);    
+    rules.checkIfPermitted(office);
     
     org.joda.time.LocalDate date = new org.joda.time.LocalDate(year, month, 1);
 
@@ -132,15 +130,15 @@ public class PersonDays extends Controller {
         personDays.stream().collect(Collectors.groupingBy(PersonDay::getPerson));
 
     List<PersonMonthRecapDto> monthRecaps = Lists.newArrayList();
-    personDayMap.forEach((p, pds) -> {      
-      monthRecaps.add(PersonMonthRecapDto.builder()
-          .person(PersonShowTerseDto.build(p))
-          .year(year).month(month)
-          .personDays(
-              pds.stream().map(pd -> PersonDayShowTerseDto.build(pd))
-                .collect(Collectors.toList()))
-          .build());
-    });
+      personDayMap.forEach((p, pds) -> {
+        monthRecaps.add(PersonMonthRecapDto.builder()
+            .person(PersonShowTerseDto.build(p))
+            .year(year).month(month)
+            .personDays(
+                pds.stream().map(pd -> PersonDayShowTerseDto.build(pd))
+                  .collect(Collectors.toList()))
+            .build());
+      });
 
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(monthRecaps));
@@ -205,7 +203,7 @@ public class PersonDays extends Controller {
             .collect(Collectors.toList()))
         .build();
     val gson = gsonBuilder.create();
-    renderJSON(gson.toJson(monthRecap));    
+    renderJSON(gson.toJson(monthRecap));
   }
 
   /**

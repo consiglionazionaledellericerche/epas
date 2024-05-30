@@ -18,6 +18,7 @@
 package manager;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
@@ -37,16 +38,33 @@ import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
+import it.cnr.iit.epas.DateUtility;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import manager.charts.ChartsManager.PersonStampingDayRecapHeader;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
+import manager.recaps.personstamping.PersonStampingDayRecap;
 import manager.response.AbsenceInsertReport;
 import manager.response.AbsencesResponse;
 import manager.services.absences.AbsenceService.InsertReport;
@@ -55,6 +73,7 @@ import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.WorkingTimeType;
@@ -62,6 +81,7 @@ import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
+import models.absences.CategoryTab;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
@@ -69,12 +89,27 @@ import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.MealTicketBehaviour;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.CalScale;
+import net.fortuna.ical4j.model.property.ProdId;
+import net.fortuna.ical4j.model.property.Uid;
+import net.fortuna.ical4j.model.property.Version;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import play.db.jpa.Blob;
 import play.db.jpa.JPA;
+import play.i18n.Messages;
 import play.libs.Mail;
 
 
@@ -875,7 +910,7 @@ public class AbsenceManager {
       if (absence.getJustifiedType().getName()
           .equals(JustifiedTypeName.complete_day_and_add_overtime)) {
         timeToJustify = 
-          workingTimeTypeDay.get().getWorkingTime() - absence.getPersonDay().getStampingsTime();
+            workingTimeTypeDay.get().getWorkingTime() - absence.getPersonDay().getStampingsTime();
       }
       if (absence.getJustifiedType().getName().equals(JustifiedTypeName.absence_type_minutes)) {
         timeToJustify = absence.getAbsenceType().getJustifiedTime();
@@ -895,4 +930,321 @@ public class AbsenceManager {
       return absence.getPersonDay().getDate();
     }
   }
+
+  /**
+   * Ritorna un calendario con le ics dei giorni di assenza.
+   */
+  public Calendar createIcsAbsencesCalendar(
+      LocalDate from, LocalDate to, List<Absence> absences) {
+
+    // Create a calendar
+    //---------------------------
+    Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
+    icsCalendar.getProperties().add(new ProdId("-//Events Calendar//iCal4j 1.0//EN"));
+    icsCalendar.getProperties().add(CalScale.GREGORIAN);
+    icsCalendar.getProperties().add(Version.VERSION_2_0);
+
+    for (Absence absence : absences) {
+      log.trace("absence={}, date = {}", absence, absence.getPersonDay().getDate());
+      Date date = new Date(absence.getPersonDay().getDate()
+          .toDateTimeAtStartOfDay(DateTimeZone.UTC).toDate().getTime());
+      VEvent absenceEvent = new VEvent(date, Duration.ofDays(1), absence.getAbsenceType().getLabel());
+      absenceEvent.getProperties().add(new Uid(UUID.randomUUID().toString()));
+      icsCalendar.getComponents().add(absenceEvent);
+    }
+
+    return icsCalendar;
+  }
+
+  /**
+   * Metodo di utilità da chiamare dal controller Administration per generare il file che contiene
+   * la lista dei codici raggruppati con le loro caratteristiche.
+   * @param categoryTabs la lista dell categorie dei codici
+   * @return il file generato contenente i codici raggruppati con le loro caratteristiche.
+   */
+  public InputStream buildFile(List<CategoryTab> categoryTabs) {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    ZipOutputStream zos = new ZipOutputStream(out);
+    byte[] buffer = new byte[1024];
+    File file = null;
+    try {
+      try {
+        file = File.createTempFile(
+            "statoAssenzeEpas", ".xls");
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      Workbook wb = new HSSFWorkbook();
+      FileOutputStream outStream = new FileOutputStream(file);
+      Sheet sheet = wb.createSheet("codiciAssenza"); 
+
+      Row row = null;
+      Cell cell = null;
+
+      row = sheet.createRow(0);
+      row.setHeightInPoints(30);
+      for (int i = 0; i < 5; i++) {
+        sheet.setColumnWidth((short) i, (short) ((50 * 8) / ((double) 1 / 20)));
+        cell = row.createCell(i);        
+        switch (i) {
+          case 0:
+            cell.setCellValue("Gruppo");
+            break;
+          case 1:
+            cell.setCellValue("Periodo");
+            break;
+          case 2:
+            cell.setCellValue("Limite");
+            break;
+          case 3:
+            cell.setCellValue("Codici");
+            break;
+          case 4:
+            cell.setCellValue("Completamenti e Codici");
+            break;
+          default:
+            break;
+        }
+      }
+      int rownum = 1;
+      for (CategoryTab category : categoryTabs) {
+        for (CategoryGroupAbsenceType categoryGroup : category.getCategoryGroupAbsenceTypes()) {
+          for (GroupAbsenceType group : categoryGroup.getGroupAbsenceTypes()) {
+            row = sheet.createRow(rownum);
+
+            for (int cellnum = 0; cellnum < 5; cellnum++) {
+              cell = row.createCell(cellnum);
+              switch (cellnum) {
+                case 0:
+                  cell.setCellValue(group.getDescription());
+                  break;
+                case 1:
+                  cell.setCellValue(Messages.get(group.getPeriodType().toString()));
+                  break;
+                case 2:
+                  if (group.getTakableAbsenceBehaviour().getFixedLimit() > 0) {
+                    cell.setCellValue(group.getTakableAbsenceBehaviour().getFixedLimit().toString() +" "
+                        + Messages.get(group.getTakableAbsenceBehaviour().getAmountType()));
+                  } else {
+                    cell.setCellValue("Nessun limite");
+                  }           
+                  break;
+                case 3:
+                  for (AbsenceType abt : group.getTakableAbsenceBehaviour().getTakableCodes()) {
+                    String temp = cell.getStringCellValue();
+                    cell.setCellValue(temp + " " + abt.getCode() +" ");
+                  }
+                  break;
+                case 4:
+                  if (group.getComplationAbsenceBehaviour() != null) {
+                    cell.setCellValue("Completamento in " + Messages.get(group.getComplationAbsenceBehaviour().getAmountType()));
+                    for (AbsenceType abt : group.getComplationAbsenceBehaviour().getComplationCodes()) {
+                      if (!abt.isExpired()) {
+                        String temp = cell.getStringCellValue();
+                        cell.setCellValue(temp + " " + abt.getCode() +" ");
+                      }                      
+                    }
+                  }
+                  break;
+                default:
+                  break;
+              }
+            }
+            rownum++;
+          }
+        }
+      }		      
+
+      try {
+        wb.write(outStream);
+        wb.close();
+        out.close();
+      } catch (IOException ex) {
+        log.error("problema in chiusura stream");
+        ex.printStackTrace();
+      }
+    } catch (IllegalArgumentException | FileNotFoundException ex) {
+      log.error("Problema in riconoscimento file");
+      ex.printStackTrace();
+    }
+
+    // faccio lo stream da inviare al chiamante...
+    FileInputStream in = null;
+    try {
+      in = new FileInputStream(file);
+    } catch (FileNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    try {
+      zos.putNextEntry(new ZipEntry(file.getName()));
+      int length;
+      while ((length = in.read(buffer)) > 0) {
+        zos.write(buffer, 0, length);
+      }
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
+    try {
+      in.close();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    file.delete();
+    try {
+      zos.closeEntry();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    try {
+      zos.close();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    return new ByteArrayInputStream(out.toByteArray());
+  }
+
+
+
+  public InputStream buildAbsenceTypeListFile(List<AbsenceType> absenceTypeList) throws FileNotFoundException {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    ZipOutputStream zos = new ZipOutputStream(out);
+    byte[] buffer = new byte[1024];
+    File file = null;
+    try {
+      file = File.createTempFile(
+          "codiciAssenzaEpas", ".xls");
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    Workbook wb = new HSSFWorkbook();
+
+    FileOutputStream outStream = new FileOutputStream(file);
+
+    Sheet sheet = wb.createSheet("codiciAssenza");
+    Row row = null;
+    Cell cell = null;
+
+    row = sheet.createRow(0);
+    row.setHeightInPoints(30);
+    for (int i = 0; i < 5; i++) {
+      sheet.setColumnWidth((short) i, (short) ((50 * 8) / ((double) 1 / 20)));
+      cell = row.createCell(i);        
+      switch (i) {
+        case 0:
+          cell.setCellValue("Codice assenza");
+          break;
+        case 1:
+          cell.setCellValue("Descrizione");
+          break;
+        case 2:
+          cell.setCellValue("Compatibile coi turni");
+          break;
+        case 3:
+          cell.setCellValue("Compatibile con la reperibilità");
+          break;
+        case 4:
+          cell.setCellValue("Usabile nel week end");
+          break;
+        default:
+          break;
+      }
+    }
+    int rownum = 1;
+    for (AbsenceType abt : absenceTypeList) {
+      row = sheet.createRow(rownum);
+
+      for (int cellnum = 0; cellnum < 5; cellnum++) {
+        cell = row.createCell(cellnum);
+        switch (cellnum) {
+          case 0:
+            cell.setCellValue(abt.getCode());
+            break;
+          case 1:
+            cell.setCellValue(abt.getDescription());
+            break;
+          case 2:
+            if (abt.isShiftCompatible()) {
+              cell.setCellValue("Sì");
+            } else {
+              cell.setCellValue("No");
+            }            
+            break;
+          case 3:
+            if (abt.isReperibilityCompatible()) {
+              cell.setCellValue("Sì");
+            } else {
+              cell.setCellValue("No");
+            }            
+            break;
+          case 4:
+            if (abt.isConsideredWeekEnd()) {
+              cell.setCellValue("Sì");
+            } else {
+              cell.setCellValue("No");
+            }            
+            break;
+          default:
+            break;
+        }
+      }
+      rownum++;
+    }
+    try {
+      wb.write(outStream);
+      wb.close();
+      out.close();
+    } catch (IOException ex) {
+      log.error("problema in chiusura stream");
+      ex.printStackTrace();
+    }
+
+
+    // faccio lo stream da inviare al chiamante...
+    FileInputStream in = null;
+    try {
+      in = new FileInputStream(file);
+      
+    } catch (FileNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    try {
+      zos.putNextEntry(new ZipEntry(file.getName()));
+      int length;
+      while ((length = in.read(buffer)) > 0) {
+        zos.write(buffer, 0, length);
+      }
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
+    try {
+      in.close();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    file.delete();
+    try {
+      zos.closeEntry();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    try {
+      zos.close();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return new ByteArrayInputStream(out.toByteArray());
+  }
+
+
 }

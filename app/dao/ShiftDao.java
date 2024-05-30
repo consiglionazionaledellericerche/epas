@@ -121,16 +121,18 @@ public class ShiftDao extends DaoBase {
    *     periodo tra 'begin' e 'to'.
    */
   public List<PersonShiftDay> getPersonShiftDaysByPeriodAndType(
-      LocalDate begin, LocalDate to, ShiftType type, Person person) {
+      LocalDate begin, LocalDate to, Optional<ShiftType> type, Person person) {
     final QPersonShiftDay psd = QPersonShiftDay.personShiftDay;
+    BooleanBuilder conditions = new BooleanBuilder(psd.date.between(begin, to));
+    conditions.and(psd.personShift.person.eq(person));
+    if (type.isPresent()) {
+      conditions.and(psd.shiftType.eq(type.get()));
+    }
     return getQueryFactory().selectFrom(psd)
-        .where(psd.date.between(begin, to)
-            .and(psd.shiftType.eq(type))
-            .and(psd.personShift.person.eq(person)))
+        .where(conditions)
         .orderBy(psd.organizationShiftSlot.name.asc(), psd.date.asc())
         .fetch();
   }
-
 
   /**
    * La lista dei turni cancellati tra from e to dell'attività type.
@@ -142,11 +144,13 @@ public class ShiftDao extends DaoBase {
    *     'to'.
    */
   public List<ShiftCancelled> getShiftCancelledByPeriodAndType(
-      LocalDate from, LocalDate to, ShiftType type) {
+      LocalDate from, LocalDate to, Optional<ShiftType> type) {
     final QShiftCancelled sc = QShiftCancelled.shiftCancelled;
-    return getQueryFactory().selectFrom(sc)
-        .where(sc.date.between(from, to).and(sc.type.eq(type))).orderBy(sc.date.asc())
-        .fetch();
+    BooleanBuilder conditions = new BooleanBuilder(sc.date.between(from, to));
+    if (type.isPresent()) {
+      conditions.and(sc.type.eq(type.get()));
+    }
+    return getQueryFactory().selectFrom(sc).where(conditions).orderBy(sc.date.asc()).fetch();
   }
 
   /**
@@ -197,15 +201,34 @@ public class ShiftDao extends DaoBase {
    * @param type il nome dell'attività
    * @return il PersonShift relativo alla persona person e al tipo type passati come parametro.
    */
+  public List<PersonShift> getPersonShiftByPerson(Long personId) {
+    final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
+
+    BooleanBuilder conditions = 
+        new BooleanBuilder(psst.personShift.person.id.eq(personId));
+    conditions.and(psst.beginDate.isNull().or(psst.beginDate.loe(LocalDate.now())));
+    conditions.and(psst.endDate.isNull().or(psst.endDate.goe(LocalDate.now())));
+    return getQueryFactory().select(psst.personShift).from(psst)
+        .where(conditions).fetch();
+  }
+  
+  /**
+   * L'associazione persona/attività se esiste sul db.
+   *
+   * @param personId l'id della persona
+   * @param type il nome dell'attività
+   * @return il PersonShift relativo alla persona person e al tipo type passati come parametro.
+   */
   public PersonShift getPersonShiftByPersonAndType(Long personId, String type) {
     final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
 
+    BooleanBuilder conditions = 
+        new BooleanBuilder(psst.personShift.person.id.eq(personId));
+    conditions.and(psst.beginDate.isNull().or(psst.beginDate.loe(LocalDate.now())));
+    conditions.and(psst.endDate.isNull().or(psst.endDate.goe(LocalDate.now())));
+    conditions.and(psst.shiftType.type.eq(type));
     return getQueryFactory().select(psst.personShift).from(psst)
-        .where(psst.personShift.person.id.eq(personId)
-            .and(psst.shiftType.type.eq(type))
-            .and(psst.beginDate.isNull().or(psst.beginDate.loe(LocalDate.now())))
-            .and(psst.endDate.isNull().or(psst.endDate.goe(LocalDate.now())))
-        ).fetchOne();
+        .where(conditions).fetchOne();
   }
 
   /**
@@ -394,5 +417,10 @@ public class ShiftDao extends DaoBase {
         .fetch();
   }
 
+  public List<ShiftType> getShiftTypesForPerson(Person person) {
+    final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
+    return getQueryFactory().selectFrom(psst).select(psst.shiftType)
+        .where(psst.personShift.person.eq(person)).fetch();
+  }
 
 }

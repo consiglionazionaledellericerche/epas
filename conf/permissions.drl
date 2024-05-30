@@ -22,6 +22,7 @@ import org.joda.time.YearMonth;
 
 import dao.history.HistoricalDao;
 import dao.UserDao;
+import dao.GeneralSettingStaticDao;
 import manager.configurations.EpasParam;
 import models.absences.definitions.DefaultGroup;
 import models.enumerate.StampTypes;
@@ -829,8 +830,9 @@ when
      	 * dentro il metodo controllare il permesso di
      	 * visualizzare il calendario specifico richiesto
      	 */
-     	"Shift.iCal",
+     	"Shift.ical",
      	"Reperibility.iCal",
+     	"Absences.ical",
 
      	/* Metodi rest */
      	"rest.PersonDays.getDaySituation",
@@ -1202,7 +1204,7 @@ end
  */
 rule PersonnelAdmin_onPerson
 when
-  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
+  $uro: UsersRolesOffices(role.name in (Role.PERSONNEL_ADMIN, Role.SEAT_SUPERVISOR))
   $o: Office() from $uro.office
   $c: PermissionCheck($o.persons contains target, granted == false, action not in ("Persons.updateEppn"))
 then
@@ -1246,8 +1248,7 @@ activation-group 'admin'
 when
  AccountRole(this == AccountRole.ADMIN)
  $c: PermissionCheck(
-    action.startsWith("Absences.")
-    || (action.startsWith("Administration.") && 
+    (action.startsWith("Administration.") && 
        action not in ("Administration.generalSetting", "Administration.saveGeneralSetting"))
     || action.startsWith("Charts.")
     || action.startsWith("MonthRecaps.")
@@ -1272,6 +1273,7 @@ when
     "Absences.showGeneralMonthlyAbsences",
     "Absences.showPersonMonthlyAbsences",
     "Absences.yearlyAbsences",
+    "Absences.downloadAttachment",
     "AbsenceGroups.showAbsenceTypes",
     "AbsenceGroups.showGroups",
     "AbsenceGroups.editGroup",       /* per la show... */
@@ -1590,6 +1592,14 @@ when
         "Stampings.personStamping",
         "Vacations.list",
         "Vacations.vacationSummary",
+        
+        "AbsenceGroups.insert",
+        "AbsenceGroups.insertAssisted",
+        "AbsenceGroups.findCode",
+        "AbsenceGroups.groupStatus",
+        "AbsenceGroups.save",
+     	"AbsenceGroups.edit",
+     	"AbsenceGroups.delete",
 
 		"AbsenceRequests.blank",
 		"AbsenceRequests.edit",
@@ -1690,6 +1700,12 @@ when
         "Vacations.list",
         "Vacations.vacationSummary",
         "Stampings.dailyPresence",
+        
+        "AbsenceGroups.groupStatus",
+        "AbsenceGroups.showAbsenceTypes",
+        "AbsenceGroups.editGroup",       /* per la show... */
+        "AbsenceGroups.editAbsenceType",
+        
         "AbsenceRequests.blank",
 
 		"AbsenceRequests.vacations",
@@ -2148,6 +2164,7 @@ when
      	"PersonDays.workingOutOpening",
      	"PersonDays.approveWorkingOutOpening",
      	"PersonDays.forceMealTicket",
+     	"PersonDays.ignoreShortLeave",
      	"PersonDays.note",
 
      	/* Vecchio permesso editCompetence */
@@ -2331,6 +2348,7 @@ when
         "PersonDays.workingOutOpening",
         "PersonDays.approveWorkingOutOpening",
         "PersonDays.forceMealTicket",
+        "PersonDays.ignoreShortLeave",
         "PersonDays.note",
 
         /* Vecchio permesso editCompetence */
@@ -2619,7 +2637,7 @@ when
         "Contracts.saveContractWorkingTimeType",
         "Contracts.updateContractMandatoryTimeSlot",
         "Contracts.updatePersonalWorkingTime",
-        "Contracts.saveContractMandatoryTimeSlot",        
+        "Contracts.saveContractMandatoryTimeSlot",
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
         "Contracts.savePersonalWorkingTime",
@@ -2669,7 +2687,8 @@ when
         "rest.v2.Contracts.delete",
 
         "rest.v2.WorkingTimeTypes.show",
-        "rest.v2.WorkingTimeTypes.list"
+        "rest.v2.WorkingTimeTypes.list",
+        "rest.v3.Offices.all"
 
         ), granted == false)
 then
@@ -2686,9 +2705,7 @@ when
  $c: PermissionCheck(action in (
         "Persons.list",
         "Persons.edit",
-        "Persons.insertPerson",
         "Persons.update",
-        "Persons.save",
         "Persons.insertUsername",
         "Persons.updateUsername",
         "Persons.showCurrentContractWorkingTimeType",
@@ -2729,7 +2746,7 @@ when
         "Contracts.updateContractWorkingTimeType",
         "Contracts.saveContractWorkingTimeType",
         "Contracts.updateContractMandatoryTimeSlot",
-        "Contracts.saveContractMandatoryTimeSlot",        
+        "Contracts.saveContractMandatoryTimeSlot",
         "Contracts.updateContractVacationPeriod",
         "Contracts.saveContractVacationPeriod",
         "Contracts.updatePersonalWorkingTime",
@@ -2790,6 +2807,21 @@ then
  $c.grant();
 end
 
+/*******************************************************************
+ * Inserimento del personale per ruolo di gestore dell'anagrafica 
+ * (registry_manager)
+ ******************************************************************/
+rule OnlyForRegistryManager_insertPerson_Generic
+when
+ $uro: UsersRolesOffices(role.name == Role.REGISTRY_MANAGER)
+ $c: PermissionCheck(
+        action in ("Persons.insertPerson", "Persons.save"), 
+        target == null, granted == false)
+ eval(GeneralSettingStaticDao.isPersonCreationEnabled())
+then
+ $c.grant();
+end
+
 rule OnlyForRegistryManager_InOffice
 when
  $uro: UsersRolesOffices(role.name == Role.REGISTRY_MANAGER)
@@ -2797,9 +2829,7 @@ when
  $c: PermissionCheck(action in (
 		"Persons.list",
     	"Persons.edit",
-    	"Persons.insertPerson",
 		"Persons.update",
-        "Persons.save",
      	"Persons.insertUsername",
      	"Persons.updateUsername",
      	"Persons.showCurrentContractWorkingTimeType",
@@ -2894,6 +2924,19 @@ when
         "rest.v2.WorkingTimeTypes.list"
 
      	), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+rule OnlyForRegistryManager_insertPerson_InOffice
+when
+ $uro: UsersRolesOffices(role.name == Role.REGISTRY_MANAGER)
+ $o: Office( usersRolesOffices contains $uro)
+ $c: PermissionCheck(action in (
+        "Persons.insertPerson",
+        "Persons.save"
+        ), target == $o, granted == false)
+ eval(GeneralSettingStaticDao.isPersonCreationEnabled())
 then
  $c.grant();
 end
@@ -3762,7 +3805,8 @@ when
         "rest.v3.AbsenceTypes.list",
         "rest.v3.AbsenceTypes.show",
 
-        "rest.v3.PersonDays.setMealTicketBehavior"
+        "rest.v3.PersonDays.setMealTicketBehavior",
+        "rest.v3.Offices.all"
 
        ), granted == false)
 then
@@ -4128,7 +4172,10 @@ when
         "rest.Absences.attachment",
 
         "rest.v3.AbsenceTypes.list",
-        "rest.v3.AbsenceTypes.show"
+        "rest.v3.AbsenceTypes.show",
+
+        "rest.v3.Offices.all",
+        "rest.v3.Offices.show"
 
        ), granted == false)
 then

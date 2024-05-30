@@ -94,6 +94,11 @@ public class Vacations extends Controller {
     
     List<VacationSituation> vacationSituations = Lists.newArrayList();
 
+    if (year > LocalDate.now().getYear()) {
+      flash.error("Anno selezionato nel futuro, mostrate le ferie dell'anno corrente");
+      show(LocalDate.now().getYear());
+      return;
+    }
     for (Contract contract : person.orderedYearContracts(year)) {
       
       VacationSituation vacationSituation = absenceService.buildVacationSituation(contract, year, 

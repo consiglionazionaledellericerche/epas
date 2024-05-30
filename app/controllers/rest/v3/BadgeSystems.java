@@ -22,7 +22,6 @@ import cnr.sync.dto.v3.BadgeSystemShowTerseDto;
 import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
 import controllers.Resecure;
-import controllers.rest.v2.Offices;
 import dao.BadgeSystemDao;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;

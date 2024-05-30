@@ -440,6 +440,7 @@ VacationCode.CODE_9_1= 9+1
 VacationCode.CODE_13_2= 13+2
 VacationCode.CODE_14_2= 14+2
 VacationCode.CODE_23_3= 23+3
+VacationCode.CODE_15_2= 15+2
 
 date= Data
 
@@ -481,6 +482,7 @@ generalSetting =Impostazioni generali di sistema
 generalSetting.cookiePolicyEnabled=Visualizzazione del banner per la cookie policy abilitato
 generalSetting.cookiePolicyContent=Pagina (HTML) con la cookie policy
 generalSetting.regulationsEnabled=Menu Normativa attivo per i dipendenti 
+generalSetting.personCreationEnabled =Inserimento nuovo personale da parte degli uffici
 generalSetting.syncBadgesEnabled =Sincronizzazione badge
 generalSetting.syncOfficesEnabled =Sincronizzazione uffici
 generalSetting.syncPersonsEnabled =Sincronizzazione persone
@@ -510,6 +512,9 @@ generalSetting.epasHelpdeskServiceEnabled=Abilitazione integrazione con microser
 generalSetting.epasHelpdeskServiceUrl=Url base del microservizio epas-helpdesk-service
 generalSetting.enableOvertimeRequestInAdvance =Abilita richiesta preventiva di straordinario
 generalSetting.enableOvertimePerPerson =Abilita il monte ore straordinari per dipendente
+
+generalSetting.enableSsoForAttestati=Abilita l'utilizzo di SSO del CNR per Attestati
+generalSetting.timeoutAttestati=Timeout in secondi chiamate servizi REST Attestati
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
@@ -1542,6 +1547,12 @@ absenceType.timeForMealTicket=Considerato per buono pasto
 absenceType.justifiedTime=Minuti specificati nel tipo assenza
 absenceType.toUpdate=Aggiornamento stato assenza
 absenceType.mealTicketBehaviour =Comportamento per buono pasto
+absenceType.externalId =External id
+absenceType.externalId.popover =External id utilizzabile anche per il raggruppamento delle assenze per i timesheet
+absenceType.realAbsence =Vera assenza
+absenceType.realAbsence.popover =Codice che giustifica una assenza o una specifica condizione lavorativa non in sede
+absenceType.reperibilityCompatible.popover =Compatibile con una giornata di reperibilità
+absenceType.shiftCompatible.popover =Compatibile con la presenza in turno 
 
 absenceType.replacingTime=Minuti per completamento
 absenceType.used=Usato

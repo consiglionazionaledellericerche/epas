@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2024  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,15 +14,26 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package controllers.rest.v3;
 
-package controllers.rest.v2;
-
+import cnr.sync.dto.v3.OfficeShowTerseDto;
+import com.beust.jcommander.internal.Lists;
 import com.google.common.base.Optional;
+import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
 import controllers.Resecure;
+import controllers.Resecure.BasicAuth;
 import dao.OfficeDao;
+import helpers.JodaConverters;
 import helpers.JsonResponse;
+import helpers.rest.RestUtils;
+import helpers.rest.RestUtils.HttpMethod;
+import it.cnr.iit.epas.DateUtility;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import models.Office;
 import play.mvc.Controller;
@@ -40,6 +51,38 @@ public class Offices extends Controller {
   static OfficeDao officeDao;
   @Inject 
   static SecurityRules rules;
+  @Inject
+  static GsonBuilder gsonBuilder;
+
+  /**
+   * Lista JSON delle persone che appartengono alla sede
+   * individuata con i parametri passati. 
+   */
+  @BasicAuth
+  public static void all(LocalDate atDate) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    log.debug("rest.Offices::all atDate = {}", atDate);
+    List<Office> offices = Lists.newArrayList();
+    if (atDate != null) {
+      offices = officeDao.allOffices(JodaConverters.javaToJodaLocalDate(atDate));
+    } else {
+      offices = officeDao.allEnabledOffices();
+    }
+    val list = 
+        offices.stream().map(o -> OfficeShowTerseDto.build(o)).collect(Collectors.toList());
+    renderJSON(gsonBuilder.create().toJson(list));
+  }
+
+  /**
+   * Restituisce il JSON con i dati dell'ufficio individuato con i parametri
+   * passati. 
+   */
+  public static void show(Long id, String code, String codeId) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    val office = getOfficeFromRequest(id, code, codeId);
+    rules.checkIfPermitted(office);
+    renderJSON(gsonBuilder.create().toJson(OfficeShowTerseDto.build(office)));
+  }
 
   /**
    * Cerca l'ufficio in funzione dei parametri passati.

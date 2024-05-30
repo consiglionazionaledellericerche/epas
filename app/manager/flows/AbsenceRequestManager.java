@@ -412,6 +412,9 @@ public class AbsenceRequestManager {
 
       case MANAGER_APPROVAL:
         absenceRequest.setManagerApproved(LocalDateTime.now());
+        if (absenceRequest.isOfficeHeadApprovalRequired()) {
+          notificationManager.sendEmailAbsenceRequest(absenceRequest);
+        }
         break;
 
       case MANAGER_REFUSAL:

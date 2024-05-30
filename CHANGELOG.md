@@ -4,7 +4,132 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.9.0] - UNRELEASED
+## [2.16.0] - 2024-05-24
+### Added
+
+### Changed
+  - Modificato il nome dell'orario Maternità CNR in Allattamento per renderlo più generico e usabile in 
+    tutte le installazioni di ePAS
+  
+## [2.15.2] - 2024-05-23
+### Added
+  - Aggiunto nuovo orario Maternità CNR da utilizzare come orario di lavoro maternità generico per tutti i dipendenti CNR. 
+
+### Changed
+  - Disabilitati gli orari Maternità e Maternità gemellare che erano incompleti o sbagliati
+
+## [2.15.1] - 2024-04-23
+### Added
+  - Aggiunto campo externalId all'enumerato che modella gli absenceTypes e reso disponibile anche 
+    nella form di modifica degli absence_types
+  - Aggiunta possibilità per il responsabile di sede di verificare lo stato di avanzamento delle assenze
+    soggette a limitazione temporale/quantitativa sui cartellini dei dipendenti delle sedi che gestisce
+    
+### Changed
+  - Modificato il valore del campo isRealAbsence per le assenze che sono in realtà specifiche modalità
+    di lavoro
+  - Aggiornata la procedura di allineamento tra enumerato e absence_types
+  - Modificato il valore del campo externalId per assenze per malattia (F) e rimosso dalle missioni orarie
+    "H"
+
+## [2.15.0] - 2024-04-04
+### Added
+  - Aggiunti ruoli di sistema Gestore assenze e Gestore anagrafica a quelli che possono chiamare
+    il servizio REST con la lista delle sedi
+  - Modificato il calcolo delle ore di turno del pomeriggio per chi utilizza la fascia oraria
+    07-14/13.30-19: ora a chi fa il pomeriggio viene conteggiata una mezz'ora in meno
+  
+
+### Changed
+  - Nel metodo REST /rest/v2/certifications/getMonthSituationByOffice valorizzate correttamente
+    le competenze
+  - Nel metodo REST /rest/v3/persondays/getMonthSituationByPerson per il personDay esportati i campi
+    stampingsTime e decurtedMeal e per le assenze esportato isRealAbsence
+  
+  
+## [2.14.1] - 2024-03-15
+### Changed
+  - Corretto metodo che preleva la lista delle persone attive che aveva un problema
+    introdotto nella versione 2.14.0
+
+## [2.14.0] - 2024-03-12
+### Added
+  - Aggiunto piano ferie 15+2
+  - Aggiunto servizio REST per esportazione lista delle sedi
+  - Aggiunto campo externalId ai tipi di assenza
+  - Aggiunta limitazione di 3 giorni annuali al codice 662
+
+### Changed
+  - Corretta lista persone in Straordinario mensili gruppo, filtrando le persone non più affiliate
+  - Cambiata la gestione dei codici 71D e seguenti con la stessa logica del 7M
+  - Corretta possibilità di inserire più richieste di cambio reperibilità non ancora confermate nello stesso mese
+  - Nell'esportazione via REST del riepilogo mensile dei dipendenti aggiunto nuovo campo externalId del tipo di assenza
+  - Modificata durata cache del javascript per l'invio delle segnalazioni
+  - Rimossi codici 402 e 413
+
+## [2.13.0] - 2024-02-13
+### Added
+  - Aggiunta possibilità di inserire residenza ed id anagrafica esterna nella creazione di 
+    una nuova persona.
+  - Inserita in configurazione generale la possibilità di disabilitare l'inserimento del personale
+    da parte dei responsabili del personale degli uffici
+
+### Changed
+  - Corretta possibilità di azzerare via REST la causale di una timbratura
+  - Correzione trattamento OIL categories selected, riduzione logo predefinito CNR
+  - Rimossi vecchi file in /public/images/old
+  - Limitata la visualizzazione delle ferie residue negli anni futuri
+
+## [2.12.2] - 2024-02-01
+### Changed
+  - Ripristinato vincolo degli 8 giorni al Lavoro Agile per il mese di febbraio.
+
+## [2.12.1] - 2024-01-30
+### Changed
+  - Rimosso vincolo degli 8 giorni al Lavoro Agile per il mese di febbraio.
+  - Rimossa redirect in caso di cancellazione di un orario di lavoro particolare che generava loop infinito
+  - Resi opzionali parametri type e year nel ical dei turni
+
+## [2.12.0] - 2024-01-15
+### Added
+  - Aggiunto calendario ICS con le assenze di un dipendente
+  - Aggiunti codici di ferie e riposo compensativo per missione antartide
+  - Aggiunti codici 62S25V e  62S75V
+### Changed
+  - Rimosso campo personId da calendari ICS per reperibilità e turni
+  - Rivisto metodo approvazione ferie con rimozione doppio invio email al dipendente
+
+## [2.11.0] - 2023-12-14
+### Added
+  - Aggiunto codice di assenza COMANDO
+### Changed
+  - Permesso l'inserimento delle missioni orarie nei festivi
+  - Corretto invio email a responsabile di gruppo per richiesta ferie quando afferenza al gruppo
+    è scaduta.
+  - Modificata descrizione del codice 442
+  - Modificata descrizione del codice 105BP
+
+## [2.10.1] - 2023-11-17
+### Changed
+  - Nel init docker configurati i parametri relativi al keycloak anche se l'OAuth2 per 
+    gli utenti è disabilitato
+
+## [2.10.0] - 2023-11-17
+### Added
+  - Aggiunta possibilità di comunicazione tra ePAS ed Attestati (CNR) tramite token JWT
+    rilascio dall'SSO del CNR.
+  - Reso configurabile il timeout alle chiamate REST al servizio Attestati (CNR)
+
+## [2.9.2] - 2023-11-14
+### Added
+  - Aggiunto il codice 31_2022 per la gestione delle assenze del 2022 nell'anno 2024
+
+## [2.9.1] - 2023-11-07
+### Added
+  - Fornito permesso di ignorare il calcolo permesso breve ai responsabili del personale
+
+
+## [2.9.0] - 2023-11-06
 ### Added
   - Gestione delle richieste di straordinario da parte del personale IV-VIII, con possibilità 
     di configurare richieste preventive e consuntive di straordinario ed approvazione da parte
@@ -13,7 +138,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   
 ### Changed
   - Evitati di caricare tutti i contratti presenti nel sistema nella visualizzazione delle sedi senza personale
-  - Risolti errori nell'approvazione delle richieste di straordinario da parte del responsabile di gruppo.
+  - Permesso al ruolo "ADMIN" di effettuare le operazioni sulle assenze
+  - Permesso al ruolo "RO_ADMIN" di scaricare gli allegati delle assenze
 
 
 ## [2.8.0] - 2023-09-15
