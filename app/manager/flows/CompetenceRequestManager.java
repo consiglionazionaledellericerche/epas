@@ -572,16 +572,24 @@ public class CompetenceRequestManager {
    * @return la richiesta di competenza se esiste già con i parametri passati.
    */
   public CompetenceRequest checkCompetenceRequest(CompetenceRequest competenceRequest) {
-    List<CompetenceRequest> existingList =
-        competenceRequestDao.existingCompetenceRequests(competenceRequest);
-    for (CompetenceRequest request : existingList) {
-      if (request.getMonth().intValue() == competenceRequest.getMonth().intValue()
-          && request.getYear().intValue() == competenceRequest.getYear().intValue() 
-          && request.getType().equals(competenceRequest.getType())) {
-        return request;
+    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      Optional<CompetenceRequest> comp = competenceRequestDao.existingOvertimeRequest(competenceRequest);
+      if (comp.isPresent()) {
+        return comp.get();
       }
-    }
-    return null;
+      return null;
+    } else {
+      List<CompetenceRequest> existingList =
+          competenceRequestDao.existingCompetenceRequests(competenceRequest);
+      for (CompetenceRequest request : existingList) {
+        if (request.getMonth().intValue() == competenceRequest.getMonth().intValue()
+            && request.getYear().intValue() == competenceRequest.getYear().intValue() 
+            && request.getType().equals(competenceRequest.getType())) {
+          return request;
+        }
+      }
+      return null;
+    }    
   }
 
   /**

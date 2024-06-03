@@ -318,7 +318,7 @@ public class CompetenceRequestDao extends DaoBase {
 
   /**
    * Ritorna la lista delle richieste di competenza non ancora validate che presentano date di
-   * inizio/fine che in qualche modo intersecano le date di inizio/fine della richiesta d'assenza da
+   * inizio/fine che in qualche modo intersecano le date di inizio/fine della richiesta di competenza da
    * validare.
    *
    * @param request la richiesta di competenza da far validare
@@ -337,6 +337,21 @@ public class CompetenceRequestDao extends DaoBase {
                 )
             .and(competenceRequest.flowEnded.eq(false)))
         .fetch();
+  }
+  
+  /**
+   * Verifica che esista una richiesta di straordinario con i dati uguali a quelli presenti nell'
+   * attuale richiesta di competenza.
+   * 
+   * @param request la richiesta di competenza da verificare se ne esiste un'altra con dati simili
+   * @return se esiste la richiesta di competenza con dati analoghi a quelli presenti nella richiesta attuale.
+   */
+  public Optional<CompetenceRequest> existingOvertimeRequest(CompetenceRequest request) {
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    return Optional.fromNullable(getQueryFactory().selectFrom(competenceRequest)
+        .where(competenceRequest.person.eq(request.getPerson())
+            .and(competenceRequest.month.eq(request.getMonth())
+                .and(competenceRequest.year.eq(request.getYear())))).fetchFirst());
   }
 
 

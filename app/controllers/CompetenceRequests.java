@@ -507,7 +507,7 @@ public class CompetenceRequests extends Controller {
         .checkCompetenceRequest(competenceRequest);
     if (existing != null) {
       Validation.addError("competenceRequest.note",
-          "Esiste già una richiesta di questo tipo");
+          "Esiste già una richiesta di questo tipo per questo mese e questo anno");
     }
     CompetenceRequestType competenceType = competenceRequest.getType();
     CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
