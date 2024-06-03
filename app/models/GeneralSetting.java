@@ -157,7 +157,7 @@ public class GeneralSetting extends BaseModel {
    * Indica se si può utilizzare o meno la richiesta preventiva di straordinario
    */
   private boolean enableOvertimeRequestInAdvance = false;
-  
+
   /**
    * Indica se il servizio Attestati del CNR deve utilizzare l'SSO CNR per il rilascio del 
    * token oppure il token JWT direttamente rilasciato da Attestati.
