@@ -51,6 +51,7 @@ import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.jpa.ModelQuery;
 import it.cnr.iit.epas.DateUtility;
+import lombok.val;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -59,10 +60,12 @@ import manager.SecureManager;
 import manager.attestati.service.AttestatiApis;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
+import manager.flows.CompetenceRequestManager;
 import models.BadgeReader;
 import models.BadgeSystem;
 import models.CompetenceCode;
 import models.CompetenceCodeGroup;
+import models.Configuration;
 import models.Institute;
 import models.Notification;
 import models.Office;
@@ -87,6 +90,7 @@ import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
+import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -99,7 +103,7 @@ import synch.diagnostic.SynchDiagnostic;
  * @author Alessandro Martelli
  */
 public class TemplateUtility {
-  
+
   private static final String WORKDAYS_REP = "207";
   private static final String HOLIDAYS_REP = "208";
   private static final String FLOWS_ACTIVE = "flows.active";
@@ -129,7 +133,8 @@ public class TemplateUtility {
   private final CompetenceRequestDao competenceRequestDao;
   private final InformationRequestDao informationRequestDao;
   private final GeneralSettingDao generalSettingDao;
- 
+  
+
   /**
    * Costruttotore di default per l'injection dei vari componenti.
    */
@@ -174,6 +179,7 @@ public class TemplateUtility {
     this.generalSettingDao = generalSettingDao;
     this.timeSlotDao = timeSlotDao;
    
+
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
           @Override
@@ -194,6 +200,31 @@ public class TemplateUtility {
   }
 
   /**
+   * Verifica se dalla configurazione della sede è abilitata la richiesta preventiva di straordinari.
+   * 
+   * @return true se chi sta vedendo il menu può far abilitare, in base alla configurazione, 
+   * la visualizzazione della voce di menu relativa alle richieste di straordinario preventivamente 
+   * approvate da approvare definitivamente.
+   */
+  public boolean enabledOvertimeRequestInAdvance() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return true;
+    }
+    List<Role> list = uroDao.getUsersRolesOfficesByUser(user).stream()
+        .map(uro -> uro.getRole()).collect(Collectors.toList());
+    if (list.stream().anyMatch(r -> r.getName().equals(Role.GROUP_MANAGER) 
+        || r.getName().equals(Role.SEAT_SUPERVISOR))) {
+      if ((Boolean) configurationManager
+          .configValue(user.getPerson().getOffice(), 
+              EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now())) {
+        return true;
+      }
+    }    
+    return false;
+  }
+
+  /**
    * Verifica se nella configurazione posso abilitare l'auto inserimento covid19.
    *
    * @return se nella configurazione generale ho abilitato il covid19 come parametro per 
@@ -202,7 +233,7 @@ public class TemplateUtility {
   public boolean enableCovid() {
     return generalSettingDao.generalSetting().isEnableAutoconfigCovid19();
   }
-  
+
   /**
    * Verifica se nella configurazione posso abilitare l'auto inserimento smartworking.
    *
@@ -228,7 +259,7 @@ public class TemplateUtility {
   public boolean enableDailyPresenceForManager() {
     return generalSettingDao.generalSetting().isEnableDailyPresenceForManager();
   }
-  
+
   /**
    * Verifica se è abilitata la visualizzazione della configurazione per i flussi di richiesta
    * straordinari.
@@ -238,6 +269,14 @@ public class TemplateUtility {
    */
   public boolean enableOvertimeFlowsConfiguration() {
     return generalSettingDao.generalSetting().isShowOvertimeRequest();
+  }
+  
+  public boolean enableOvertimeRequestInAdvance() {
+    return generalSettingDao.generalSetting().isEnableOvertimeRequestInAdvance();
+  }
+  
+  public boolean enableOvertimePerPerson() {
+    return generalSettingDao.generalSetting().isEnableOvertimePerPerson();
   }
 
   /**
@@ -260,7 +299,7 @@ public class TemplateUtility {
             AbsenceRequestType.COMPENSATORY_REST, groups, user.getPerson());
     return results.size();
   }
-  
+
   /**
    * Metodo di utiiltà per far comparire il badge con la quantità di richieste ferie da approvare 
    * nel template.
@@ -282,7 +321,7 @@ public class TemplateUtility {
 
     return results.size();
   }
-  
+
   /**
    * Metodo di utiiltà per far comparire il badge con la quantità di richieste di permesso personale
    * da approvare nel template.
@@ -304,7 +343,7 @@ public class TemplateUtility {
 
     return results.size();
   }
-  
+
   /**
    * Metodo di utiiltà per far comparire il badge con la quantità di richieste ferie anno passato
    * post deadline da approvare nel template.
@@ -347,7 +386,7 @@ public class TemplateUtility {
             user.getPerson());
     return results.size();
   }
-  
+
   /**
    * Metodo di utilità per conteggiare le richieste pendenti di approvazione telelavoro. 
    *
@@ -365,7 +404,7 @@ public class TemplateUtility {
 
     return results.size();
   }
-  
+
   /**
    * Metodo di utilità per conteggiare le richieste pendenti di approvazione di uscite di servizio.
    *
@@ -383,7 +422,7 @@ public class TemplateUtility {
 
     return results.size();
   }
-  
+
   /**
    * Metodo di utilità per conteggiare le richieste pendenti di informazione malattia. 
    *
@@ -401,7 +440,7 @@ public class TemplateUtility {
 
     return results.size();
   }
-  
+
   /**
    * Metodo di utilità per conteggiare le richieste pendenti di approvazione telelavoro. 
    *
@@ -419,7 +458,7 @@ public class TemplateUtility {
 
     return results.size();
   }
-  
+
   public final int overtimeRequests() {
     User user = Security.getUser().get();
     if (user.isSystemUser()) {
@@ -430,6 +469,30 @@ public class TemplateUtility {
         .toApproveResults(roleList, 
             LocalDateTime.now().minusMonths(1), 
             Optional.absent(), CompetenceRequestType.OVERTIME_REQUEST, user.getPerson());
+    Office office = user.getPerson().getOffice();
+    java.util.Optional<Configuration> conf = office.getConfigurations().stream()
+        .filter(c -> c.getEpasParam().equals(EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION))
+        .findFirst();
+    if (conf.isPresent() && conf.get().getFieldValue().equals("true")) {
+      results = results.stream().filter(cr -> cr.actualEvent().eventType
+          .equals(CompetenceRequestEventType.STARTING_APPROVAL_FLOW)).collect(Collectors.toList());
+    }
+    return results.size();
+  }
+
+  public final int overtimeRequestsInAdvance() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<CompetenceRequest> results = competenceRequestDao
+        .toApproveResults(roleList, 
+            LocalDateTime.now().minusMonths(1), 
+            Optional.absent(), CompetenceRequestType.OVERTIME_REQUEST, user.getPerson());
+    results = results.stream().filter(cr -> cr.actualEvent().eventType
+        .equals(CompetenceRequestEventType.FIRST_APPROVAL)).collect(Collectors.toList());      
+
     return results.size();
   }
 
@@ -516,8 +579,8 @@ public class TemplateUtility {
   public List<Office> officesAllowed() {
     return secureManager.officesWriteAllowed(Security.getUser().get())
         .stream()
-          .sorted((o, o1) -> o.getName().compareTo(o1.getName()))
-          .collect(Collectors.toList());
+        .sorted((o, o1) -> o.getName().compareTo(o1.getName()))
+        .collect(Collectors.toList());
   }
 
   public List<Qualification> getAllQualifications() {
@@ -540,7 +603,7 @@ public class TemplateUtility {
   public List<TimeSlot> getEnabledTimeSlotsForOffice(Office office) {
     return timeSlotDao.getEnabledTimeSlotsForOffice(office);
   }
-  
+
   public List<BadgeReader> getAllBadgeReader(Person person) {
     return badgeReaderDao.getBadgeReaderByOffice(person.getOffice());
   }
@@ -556,7 +619,7 @@ public class TemplateUtility {
   public List<CompetenceCode> allCodesContainingGroupCodes(CompetenceCodeGroup group) {
     return competenceCodeDao.allCodesContainingGroupCodes(group);
   }
-    
+
   public List<CompetenceCode> allOnMonthlyPresenceCodes() {
     return competenceCodeDao.getCompetenceCodeByLimitType(LimitType.onMonthlyPresence);
   }
@@ -564,11 +627,11 @@ public class TemplateUtility {
   public List<CategoryGroupAbsenceType> allCategoryGroupAbsenceTypes() {
     return categoryGroupAbsenceTypeDao.all();
   }
-  
+
   public List<ContractualReference> allContractualReferences() {
     return contractualReferenceDao.all(Optional.of(false));
   }
-  
+
   /**
    * Controlla se i flussi sono attivi.
    *
@@ -581,7 +644,7 @@ public class TemplateUtility {
     }
     return false;
   }
-  
+
   /**
    * Gli user associati a tutte le persone appartenenti all'istituto.
    */
@@ -774,7 +837,7 @@ public class TemplateUtility {
     return configuredBadgeSystem;
   }
 
-  
+
   public boolean hasAdminRole() {
     return userDao.hasAdminRoles(Security.getUser().get());
   }
@@ -782,7 +845,7 @@ public class TemplateUtility {
   public List<StampTypes> getStampTypes() {
     return UserDao.getAllowedStampTypes(Security.getUser().get());
   }
-  
+
   public List<TeleworkStampTypes> getTeleworkStampTypes() {
     return UserDao.getAllowedTeleworkStampTypes(Security.getUser().get());
   }
@@ -911,7 +974,7 @@ public class TemplateUtility {
       return "#";
     }
   }
-  
+
   /**
    * Verifica se la persona è reperible in data odierna.
    *
@@ -922,10 +985,10 @@ public class TemplateUtility {
     return person.getPersonCompetenceCodes().stream()
         .anyMatch(comp -> !comp.getBeginDate().isAfter(LocalDate.now()) 
             && (comp.getCompetenceCode().getCode().equalsIgnoreCase(WORKDAYS_REP) 
-            || comp.getCompetenceCode().getCode().equalsIgnoreCase(HOLIDAYS_REP)));
-    
+                || comp.getCompetenceCode().getCode().equalsIgnoreCase(HOLIDAYS_REP)));
+
   }
-  
+
   /**
    * Lista di persone appartententi all'ufficio passato (in questo anno).
    *
@@ -960,7 +1023,7 @@ public class TemplateUtility {
     return CompanyConfig.url();
   }
 
-  
+
   /**
    * Indica se è permessa la configurabilità delle richieste di assenza 
    * per i livelli I-III.

@@ -18,6 +18,7 @@
 package controllers;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.joda.time.Days;
@@ -32,16 +33,21 @@ import common.security.SecurityRules;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.CompetenceRequestDao;
+import dao.GeneralSettingDao;
 import dao.GroupDao;
 import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
 import dao.UsersRolesOfficesDao;
+import dao.history.CompetenceRequestHistoryDao;
+import dao.history.HistoryValue;
 import dao.wrapper.IWrapperFactory;
 import helpers.Web;
 import it.cnr.iit.epas.DateUtility;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.CertificationManager;
+import manager.CompetenceManager;
+import manager.GroupOvertimeManager;
 import manager.NotificationManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -50,14 +56,19 @@ import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Competence;
 import models.CompetenceCode;
+import models.GeneralSetting;
+import models.GroupOvertime;
 import models.Person;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.Role;
+import models.TotalOvertime;
 import models.User;
 import models.UsersRolesOffices;
+import models.dto.PersonOvertimeInMonth;
 import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
+import models.flows.Group;
 import models.flows.enumerate.CompetenceRequestEventType;
 import models.flows.enumerate.CompetenceRequestType;
 import play.Play;
@@ -103,7 +114,15 @@ public class CompetenceRequests extends Controller {
   static CompetenceDao competenceDao;
   @Inject
   static CompetenceCodeDao competenceCodeDao;
-  
+  @Inject
+  static CompetenceManager competenceManager;
+  @Inject
+  static GroupOvertimeManager groupOvertimeManager;
+  @Inject
+  static CompetenceRequestHistoryDao competenceRequestHistoryDao;
+  @Inject
+  private static GeneralSettingDao settingDao;
+
   static final String ATTESTATI_ACTIVE = "attestati.active";
 
 
@@ -123,6 +142,10 @@ public class CompetenceRequests extends Controller {
     listToApprove(CompetenceRequestType.OVERTIME_REQUEST);
   }
 
+  public static void overtimesToApproveInAdvance() {
+    listToApproveWithRequestInAdvance(CompetenceRequestType.OVERTIME_REQUEST);
+  }
+
   /**
    * Lista delle richieste di straordinario dell'utente corrente.
    *
@@ -139,6 +162,20 @@ public class CompetenceRequests extends Controller {
       return;
     }
     val person = currentUser.getPerson();
+    List<TotalOvertime> totalList = 
+        competenceDao.getTotalOvertime(LocalDate.now().getYear(), person.getOffice());
+    int totale = competenceManager.getTotalOvertime(totalList);
+    List<Group> groups = person.getGroups();
+    List<GroupOvertime> list = groups.stream().flatMap(g -> g.getGroupOvertimes().stream()
+        .filter(go -> go.getYear().equals(LocalDate.now().getYear())))
+        .collect(Collectors.toList());
+    if (person.totalOvertimeHourInYear(LocalDate.now().getYear()) == 0 
+        && totale == 0 && list.isEmpty()) {
+      flash.error("Non sono definiti monte ore per la sede, nè per la persona. "
+          + "Definire i monte ore per poter procedere con la richiesta di straordinri.");
+      Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+
+    }
     val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
     log.debug("Prelevo le richieste di tipo {} per {} a partire da {}",
         competenceType, person, fromDate);
@@ -155,7 +192,7 @@ public class CompetenceRequests extends Controller {
   }
 
   /**
-   * Lista delle richieste di assenza da approvare da parte dell'utente corrente.
+   * Lista delle richieste di competenza da approvare da parte dell'utente corrente.
    *
    * @param type tipo opzionale di tipo di richiesta di assenza.
    */
@@ -167,22 +204,64 @@ public class CompetenceRequests extends Controller {
     log.debug("Prelevo le richieste da approvare  di tipo {} a partire da {}",
         competenceType, fromDate);
 
+    val config = competenceRequestManager.getConfiguration(competenceType, person);
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
     List<CompetenceRequest> results = competenceRequestDao
         .allResults(roleList, fromDate, Optional.absent(), competenceType, person);
     List<CompetenceRequest> myResults =
         competenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(),
             competenceType, person);
-    List<CompetenceRequest> approvedResults =
-        competenceRequestDao.totallyApproved(roleList, fromDate, Optional.absent(), competenceType, person);
-    val config = competenceRequestManager.getConfiguration(competenceType, person);
+    List<CompetenceRequest> approvedResults = competenceRequestDao
+        .totallyApproved(roleList, fromDate, Optional.absent(), competenceType, person);
+    if (config.isAdvanceApprovalRequired()) {
+      approvedResults = myResults;
+      myResults = myResults.stream().filter(cr -> cr.actualEvent().eventType
+          .equals(CompetenceRequestEventType.STARTING_APPROVAL_FLOW)).collect(Collectors.toList());
+      approvedResults = approvedResults.stream().filter(cr -> cr.actualEvent().eventType
+          .equals(CompetenceRequestEventType.FIRST_APPROVAL)).collect(Collectors.toList());
+    }
     val onlyOwn = false;
     boolean overtimesQuantityEnabled = (Boolean)configurationManager
         .configValue(person.getOffice(), 
             EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY, LocalDate.now());
+    boolean isDefinitevely = false;
     val available = person.getUser().hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
     render(config, results, competenceType, onlyOwn, available, approvedResults, 
-        myResults, overtimesQuantityEnabled);
+        myResults, overtimesQuantityEnabled, isDefinitevely);
+  }
+
+  /**
+   * 
+   * @param competenceType
+   */
+  public static void listToApproveWithRequestInAdvance(CompetenceRequestType competenceType) {
+    Verify.verifyNotNull(competenceType);
+    val person = Security.getUser().get().getPerson();
+    val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
+    log.debug("Prelevo le richieste da approvare  di tipo {} a partire da {}",
+        competenceType, fromDate);
+
+    val config = competenceRequestManager.getConfiguration(competenceType, person);
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
+    List<CompetenceRequest> results = competenceRequestDao
+        .allResults(roleList, fromDate, Optional.absent(), competenceType, person);
+    List<CompetenceRequest> myResults =
+        competenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(),
+            competenceType, person);
+    List<CompetenceRequest> approvedResults = competenceRequestDao
+        .totallyApproved(roleList, fromDate, Optional.absent(), competenceType, person);
+    if (config.isAdvanceApprovalRequired()) {
+      myResults = myResults.stream().filter(cr -> cr.actualEvent().eventType
+          .equals(CompetenceRequestEventType.FIRST_APPROVAL)).collect(Collectors.toList());      
+    }
+    val onlyOwn = false;
+    boolean overtimesQuantityEnabled = (Boolean)configurationManager
+        .configValue(person.getOffice(), 
+            EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY, LocalDate.now());
+    boolean isDefinitevely = true;
+    val available = person.getUser().hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
+    render(config, results, competenceType, onlyOwn, available, approvedResults, 
+        myResults, overtimesQuantityEnabled, isDefinitevely);
   }
 
   /**
@@ -211,7 +290,8 @@ public class CompetenceRequests extends Controller {
     }
     notFoundIfNull(person);
 
-    val configurationProblems = competenceRequestManager.checkconfiguration(competenceType, person);
+    val configurationProblems = competenceRequestManager
+        .checkconfiguration(competenceType, person);
     if (!configurationProblems.isEmpty()) {
       flash.error(Joiner.on(" ").join(configurationProblems));
       list(competenceType);
@@ -225,14 +305,17 @@ public class CompetenceRequests extends Controller {
     List<Person> teamMates = Lists.newArrayList();
     List<PersonReperibilityType> types = Lists.newArrayList();
     PersonStampingRecap psDto = null;
+    boolean enabledOvertimePerPerson = false;
     boolean isOvertime = false;
+    int overtimeResidual = 0;
     switch (competenceType) {
       case CHANGE_REPERIBILITY_REQUEST:
         types = repDao.getReperibilityTypeByOffice(person.getOffice(), Optional.of(false))
         .stream().filter(prt -> prt.getPersonReperibilities().stream()
             .anyMatch(pr -> pr.getPerson().equals(person)))
         .collect(Collectors.toList());
-        //ritorno solo il primo elemento della lista con la lista dei dipendenti afferenti al servizio
+        //ritorno solo il primo elemento della lista con la lista dei dipendenti afferenti 
+        //al servizio
 
         type = types.get(0);
         teamMates = type.getPersonReperibilities().stream()
@@ -241,15 +324,15 @@ public class CompetenceRequests extends Controller {
             .filter(p -> p.id != person.id).collect(Collectors.toList());
         break;
       case OVERTIME_REQUEST:
-        // controllo con la chiamata rest ad attestati per verificare se l'attestato di quell'anno/mese
-        // è già stato validato (valido solo per istanza CNR)
+        // controllo con la chiamata rest ad attestati per verificare se l'attestato di 
+        // quell'anno/mese è già stato validato (valido solo per istanza CNR)
         if ("true".equals(Play.configuration.getProperty(ATTESTATI_ACTIVE, "false"))) {
           /*
            * Nel caso di prove in locale, occorre cambiare l'indirizzo di Attestati nei parametri 
            * di configurazione del Play altrimenti viene lanciata un'eccezione a questa chiamata
            */
           try {
-          val certData = certificationManager.getPersonCertData(person, year, month);
+            val certData = certificationManager.getPersonCertData(person, year, month);
             if (certData.validate) {
               flash.error("Attestato già validato per l'anno/mese richiesto. "
                   + "Non si può procedere con una richiesta di straordinario.");
@@ -258,11 +341,21 @@ public class CompetenceRequests extends Controller {
             }
           } catch (Exception e) {
             log.warn("Impossibile effettuare il controllo di validazione dell'attestato " + 
-                " del {}/{} per la richiesta di straordinari di {}", month, year, person.getFullname());
+                " del {}/{} per la richiesta di straordinari di {}", 
+                month, year, person.getFullname());
           }
-        }       
-        
+        }        
         isOvertime = true;
+        GeneralSetting settings = settingDao.generalSetting();
+        if (settings.isEnableOvertimePerPerson()) {
+          enabledOvertimePerPerson = true;
+          CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+          List<CompetenceCode> codeList = Lists.newArrayList();
+          codeList.add(code);
+          overtimeResidual = person.totalOvertimeHourInYear(year) - 
+              competenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.absent(), 
+                  Optional.fromNullable(person), Optional.absent(), codeList).or(0);
+        } 
         psDto = stampingsRecapFactory.create(person, year, month, true);  
         break;
       default:
@@ -273,7 +366,8 @@ public class CompetenceRequests extends Controller {
     competenceRequest.setStartAt(LocalDateTime.now().plusDays(1));
     competenceRequest.setEndTo(LocalDateTime.now().plusDays(1));
     render("@edit", competenceRequest, insertable, competenceType,
-        year, month, type, teamMates, types, psDto, isOvertime);
+        year, month, type, teamMates, types, psDto, isOvertime, 
+        enabledOvertimePerPerson, overtimeResidual);
   }
 
   /**
@@ -364,28 +458,56 @@ public class CompetenceRequests extends Controller {
       competenceRequest.setEndDateToGive(endDayToGive.getDate());
       competenceRequest.setTeamMate(teamMate);
     } else {
-      
+
       //log.debug("Richiesta di straordinario per un mese concluso {}/[} per {}", 
       //    month, year, competenceRequest.getPerson().getFullname());
       if ((Boolean) configurationManager.configValue(competenceRequest.getPerson().getOffice(), 
           EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now())) {
         if (month < LocalDate.now().getMonthOfYear()) {
           Validation.addError("competenceRequest.note", 
-              "E' prevista richiesta preventiva. Non si può richiedere straordinario per un mese concluso!");
+              "E' prevista richiesta preventiva. "
+                  + "Non si può richiedere straordinario per un mese concluso!");
         }
       }
+      GeneralSetting settings = settingDao.generalSetting();
+      if (settings.isEnableOvertimePerPerson()
+          && competenceRequestManager.myOvertimeResidual(competenceRequest.getPerson(), year) 
+          < competenceRequest.getValueRequested()) {
+        Validation.addError("competenceRequest.valueRequested", 
+            "Si sta inserendo una quantità che supera il limite di ore di straordinario "
+                + "personali disponibili!!! Rivolgersi alla propria amministrazione.");
+      }
+      if ((Boolean) configurationManager.configValue(competenceRequest.getPerson().getOffice(), 
+    		  EpasParam.OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED, LocalDate.now())) {
+    	  int result = competenceRequestManager
+    	            .seatOvertimeResidual(competenceRequest.getPerson().getOffice(), year);
+        if (result < competenceRequest.getValueRequested()) {
+          Validation.addError("competenceRequest.valueRequested", 
+              "Si sta inserendo una quantità che supera il limite di ore di straordinario "
+                  + "disponibili per la propria sede!!! Rivolgersi alla propria amministrazione.");
+        }
+      } else {        
+        if(competenceRequestManager.groupOvertimeResidual(competenceRequest.getPerson(), year) 
+            < competenceRequest.getValueRequested()) {
+          Validation.addError("competenceRequest.valueRequested", 
+              "Si sta inserendo una quantità che supera il limite di ore di straordinario "
+                  + "disponibili per il proprio gruppo!!! Rivolgersi alla propria amministrazione.");
+        }
+      }
+
     }
 
     competenceRequest.setYear(year);
     competenceRequest.setMonth(month);
     competenceRequest.setStartAt(LocalDateTime.now());
-    
+
     competenceRequest.setPerson(Security.getUser().get().getPerson());
 
-    CompetenceRequest existing = competenceRequestManager.checkCompetenceRequest(competenceRequest);
+    CompetenceRequest existing = competenceRequestManager
+        .checkCompetenceRequest(competenceRequest);
     if (existing != null) {
       Validation.addError("competenceRequest.note",
-          "Esiste già una richiesta di questo tipo");
+          "Esiste già una richiesta di questo tipo per questo mese e questo anno");
     }
     CompetenceRequestType competenceType = competenceRequest.getType();
     CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
@@ -398,7 +520,7 @@ public class CompetenceRequests extends Controller {
           + "sottomettere una nuova richiesta", competence.get().getValueApproved(), mese, year);
       CompetenceRequests.list(competenceType);
     }
-      
+
     if (Validation.hasErrors()) {
 
       if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
@@ -425,13 +547,13 @@ public class CompetenceRequests extends Controller {
             teamMates, types, reperibilityDates, myReperibilityDates);
       } else {
         boolean isOvertime = true;
-        
+
         PersonStampingRecap psDto = stampingsRecapFactory
             .create(competenceRequest.getPerson(), year, month, true);
         render("@edit", competenceRequest, competenceType,
             year, month, type, psDto, isOvertime);
       }
-      
+
     }
 
     competenceRequestManager.configure(competenceRequest);
@@ -450,7 +572,7 @@ public class CompetenceRequests extends Controller {
           CompetenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
     }
     flash.success("Operazione effettuata correttamente");
-    
+
     CompetenceRequests.list(competenceType);
   }
 
@@ -480,9 +602,26 @@ public class CompetenceRequests extends Controller {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     notFoundIfNull(competenceRequest);
     rules.checkIfPermitted(competenceRequest);
+    boolean showOvertimeAvailableHours = false;
+    int hoursAvailable = 0;
     User user = Security.getUser().get();
+    if (user.hasRoles(Role.GROUP_MANAGER) || user.hasRoles(Role.SEAT_SUPERVISOR)) {
+      hoursAvailable = competenceRequestManager.hoursAvailable(user, competenceRequest);
+      showOvertimeAvailableHours = true;
+    }
     boolean disapproval = false;
-    render(competenceRequest, type, user, disapproval);
+    int month = competenceRequest.getMonth();
+    PersonStampingRecap psDto = null;
+    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      psDto = stampingsRecapFactory
+          .create(competenceRequest.getPerson(), competenceRequest.getYear(), month, true);
+    }    
+    
+    List<HistoryValue<CompetenceRequest>> historyCompetence = competenceRequestHistoryDao
+            .competenceRequests(competenceRequest.getId());
+
+    render(competenceRequest, type, user, disapproval, month, psDto, 
+        showOvertimeAvailableHours, hoursAvailable, historyCompetence);
   }
 
   /**
@@ -496,18 +635,76 @@ public class CompetenceRequests extends Controller {
     User user = Security.getUser().get();
     rules.checkIfPermitted(competenceRequest);
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
-      if (value != null) {
-        competenceRequest.setValue(value);
-      }      
+      
+      boolean isSeatSupervisor = user.hasRoles(Role.SEAT_SUPERVISOR);
+      boolean showOvertimeAvailableHours = true;
+      boolean enabledOvertimePerPerson = false;
+      int overtimeResidual = 0;
+      boolean showOvertimeApprovalAdvance = false;
       competenceRequest.save();
       if (!approval) {
+
         approval = true;
-        render(competenceRequest, approval);
+        int month = competenceRequest.getMonth();
+        PersonStampingRecap psDto = stampingsRecapFactory
+            .create(competenceRequest.getPerson(), competenceRequest.getYear(), 
+                competenceRequest.getMonth(), true);
+
+        int hoursAvailable = competenceRequestManager.hoursAvailable(user, competenceRequest);
+        GeneralSetting settings = settingDao.generalSetting();
+        if (settings.isEnableOvertimePerPerson()) {
+          enabledOvertimePerPerson = true;
+          CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+          List<CompetenceCode> codeList = Lists.newArrayList();
+          codeList.add(code);
+          overtimeResidual = competenceRequest.getPerson()
+        		  .totalOvertimeHourInYear(competenceRequest.getYear()) - competenceDao
+        		  .valueOvertimeApprovedByMonthAndYear(competenceRequest.getYear(), Optional.absent(), 
+                  Optional.fromNullable(competenceRequest.getPerson()), 
+                  Optional.absent(), codeList).or(0);
+        } 
+        if ((Boolean) configurationManager.configValue(competenceRequest.getPerson().getOffice(), 
+        		EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now())) {
+        	showOvertimeApprovalAdvance = true;
+        }
+        render(competenceRequest, approval, psDto, month, hoursAvailable, showOvertimeApprovalAdvance,
+            showOvertimeAvailableHours, enabledOvertimePerPerson, overtimeResidual, isSeatSupervisor);
       }
     }    
-    
+
     log.debug("Approving competence request {}", competenceRequest);
-    
+    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      int hoursAvailable = competenceRequestManager.hoursAvailable(user, competenceRequest);
+      int month = competenceRequest.getMonth();
+      approval = true;
+      boolean showOvertimeAvailableHours = true;
+      PersonStampingRecap psDto = stampingsRecapFactory
+          .create(competenceRequest.getPerson(), competenceRequest.getYear(), 
+              competenceRequest.getMonth(), true);
+      if (value == null) {
+        Validation.addError("value", "Inserire una quantità!!");  
+        response.status = 400;
+        if (Validation.hasErrors()) {
+          render("@approval", competenceRequest, approval, hoursAvailable, month, psDto, 
+              showOvertimeAvailableHours);
+        }
+      }
+
+      if (hoursAvailable - value < 0) {
+        Validation.addError("value", "La quantità non può essere assegnata perchè non ci sono "
+            + "sufficienti ore disponibili!");        
+        response.status = 400;
+        if (Validation.hasErrors()) {
+          render("@approval", competenceRequest, approval, hoursAvailable, month, psDto, 
+              showOvertimeAvailableHours);
+        }
+      }
+
+      competenceRequest.setValue(value);
+      log.debug("Cambiato valore alla competenza da {} a {}",competenceRequest.getValueRequested(), value);
+      competenceRequest.save();
+    }  
+
     boolean approved = competenceRequestManager.approval(competenceRequest, user);
 
     if (approved) {
@@ -519,30 +716,9 @@ public class CompetenceRequests extends Controller {
     } else {
       flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
-    val person = Security.getUser().get().getPerson();
-    val fromDate = LocalDateTime.now().dayOfYear().withMinimumValue();
-    CompetenceRequestType competenceType = competenceRequest.getType();
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
 
-    List<CompetenceRequest> results = competenceRequestDao
-        .allResults(roleList, fromDate, Optional.absent(), competenceType, person);
-    List<CompetenceRequest> myResults =
-        competenceRequestDao.toApproveResults(roleList, fromDate, Optional.absent(),
-            competenceType, person);
-    List<CompetenceRequest> approvedResults =
-        competenceRequestDao
-        .totallyApproved(roleList, fromDate, Optional.absent(), competenceType, person);
-    val onlyOwn = false;
-    boolean overtimesQuantityEnabled = (Boolean)configurationManager
-        .configValue(competenceRequest.getPerson().getOffice(), 
-            EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY, LocalDate.now());
-    val available = competenceRequest.getPerson().getUser()
-        .hasRoles(Role.REPERIBILITY_MANAGER) ? false : true;
-    
-    val config = competenceRequestManager.getConfiguration(competenceType, competenceRequest.getPerson());
-    render("@listToApprove", competenceType, onlyOwn, overtimesQuantityEnabled, available, 
-        config, results, myResults, approvedResults);
-   
+    listToApprove(competenceRequest.getType());
+
   }
 
   /**
@@ -557,7 +733,11 @@ public class CompetenceRequests extends Controller {
     User user = Security.getUser().get();
     if (!disapproval) {
       disapproval = true;
-      render(competenceRequest, disapproval);
+      int month = competenceRequest.getMonth();
+      PersonStampingRecap psDto = stampingsRecapFactory
+          .create(competenceRequest.getPerson(), competenceRequest.getYear(), 
+              competenceRequest.getMonth(), true);
+      render(competenceRequest, disapproval, month, psDto);
     }
 
     if (competenceRequest.isManagerApprovalRequired()

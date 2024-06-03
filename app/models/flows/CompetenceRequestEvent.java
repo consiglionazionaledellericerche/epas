@@ -31,6 +31,8 @@ import lombok.ToString;
 import models.User;
 import models.base.BaseModel;
 import models.flows.enumerate.CompetenceRequestEventType;
+
+import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
 import play.data.validation.Required;
 
@@ -39,6 +41,7 @@ import play.data.validation.Required;
  *
  * @author Dario Tagliaferri
  */
+@Audited
 @Builder
 @ToString
 @Entity

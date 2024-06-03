@@ -1,0 +1,89 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'Monte ore straordinari per: ' + group.name  /}
+
+<div class="container">
+	#{title title: title /}
+	#{breadcrumbs ['manageGroups':@Groups.showGroups(group.office.id), (title):null ], noHome:'true' /}
+	
+	
+	#{alert color:'info'}
+	La quantità di ore di straordinario assegnata alla sede <strong>${group.office.name}</strong> è <strong>${totale}</strong><br> 
+	Il monte ore di straordinario disponibile per l'intera sede <strong>${group.office.name}</strong> è <strong>${hoursAvailable}</strong>
+	#{/alert}
+	
+	#{alert color:'info'}
+	La quantità di ore di straordinario assegnata al gruppo: <strong>${group.name}</strong> nell'anno è <strong>${totalGroupOvertimes}</strong> <br>
+	La quantità di ore disponibili attualmente per il gruppo è: <strong>${groupOvertimesAvailable}</strong>
+	#{/alert}
+	
+
+ 	#{accordionItem 'storicoGruppo', parent:'storico', title:'Storico inserimenti di variazioni di ore di straordinario assegnate al gruppo '+group.name, open:false, color:'warning'}
+	<ul>
+		#{list items:groupOvertimeInYearList, as:'item'}
+		<li>${item.numberOfHours} ore - ${item.dateOfUpdate.format()}</li>
+		#{/list}	
+	</ul>
+	#{/accordionItem}
+
+	
+	#{secure.check 'GroupOvertimes.save'}
+	#{form @GroupOvertimes.save(currentData.year), method:'POST', autocomplete:false, class:'form form-horizontal'}
+		#{f.hidden 'groupId', value: group.id /}
+
+		#{f.hidden 'groupOvertime.id', value: groupOvertime.id /}
+
+		#{f.input 'groupOvertime.numberOfHours', type:'number' /}
+
+		#{b.buttons center:true}
+			#{b.submit 'Salva'/}
+		#{/b.buttons}
+	
+	#{/form}
+	#{/secure.check}
+	
+	#{if !map.isEmpty()}
+	<div class="container-fluid">
+		<h4 style="text-align:center;">Riepilogo dettagliato ore di straordinario assegnate nei mesi precedenti</h4>
+		#{accordionGroup 'mensilita'}
+		#{list items:map.entrySet(), as:'entry'}
+			  #{accordionItem 'item'+entry.getKey(), parent:'mensilita', title:'Straordinari di '+templateUtility.monthName(entry.getKey()), open:false}
+      			<ul>
+      			#{list items:entry.getValue(), as:'pom'}
+      				<li>${pom.person.fullName()} - ${pom.quantity} ore</li>
+      			#{/list}
+    			</ul>
+  				#{/accordionItem}
+		#{/list}
+		#{/accordionGroup}
+	</div>
+	#{/if}
+	<br>
+	<div id="hoursList">
+	#{if check}
+	#{accordionItem 'gruppo', parent:'storico', title:'Persone appartenenti al gruppo '+group.name, open:true, color:'primary'}
+	<table class="table center" datatable-mealTicket>
+		<thead>
+		    <tr>
+		      <th>Persona</th>
+		      <th>Ore assegnate</th>
+		      <th>Assegna ore</th>
+		    </tr>
+	     </thead>
+	     <tbody>
+			#{list items:group.getPeopleOvertimes(), as:'item'}
+			<tr>
+				<td>${item.fullName()}</td>
+				<td>${item.totalOvertimeHourInYear(year)}</td>
+				<td><a class="btn btn-primary btn-xs" href="@{Groups.addHours(item.id, year)}" data-async-modal="#defaultModal">
+        				Assegna ore
+      				</a></td>
+			</tr>
+			#{/list}
+		 </tbody>	
+	</table>
+	#{/accordionItem}
+	#{/if}
+	</div>
+	
+</div>

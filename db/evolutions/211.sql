@@ -13,3 +13,4 @@ ALTER TABLE general_setting_history DROP COLUMN enable_sso_for_attestati;
 
 ALTER TABLE general_setting DROP COLUMN timeout_attestati;
 ALTER TABLE general_setting_history DROP COLUMN timeout_attestati;
+

@@ -1,0 +1,57 @@
+	<div class="container-fluid">
+	<h3>Situazione residuale per il mese di ${templateUtility.monthName(month)} ${year}: </h3>
+			#{list items:psDto.contractMonths, as:'mese'}
+				<table class="table table-condensed">
+				  <tr>
+				    <td>
+				      <em>Tempo per straordinari maturato nel mese</em>
+				      <i class="fa fa-question-circle" aria-hidden="true" webui-popover-hover 
+				           data-content="<strong>Tempo per straordinari maturato nel mese</strong> La somma di tutte le differenze positive nel mese.<br> 
+				                   <strong>Differenze positive</strong> Giorni in cui il dipendente ha svolto più ore di quelle <br>previste dal piano orario giornaliero."></i>
+				    </td>
+				    <td>
+				      <strong>${mese.value.progressivoFinalePositivoMese.toHourTime()}</strong>
+				      <a href="@{Stampings.stampings(year, month)}">
+				        <i class="fa fa-search" aria-hidden="true" webui-popover-hover data-content="Visualizza Presenze"></i></a>
+				    </td>
+				  </tr>
+				  <tr>
+				    <td>
+				      <em>Progressivo a fine mese</em>
+				      <i class="fa fa-question-circle" aria-hidden="true" webui-popover-hover 
+    				       data-content="<strong>Progressivo a fine mese</strong> Il saldo fra le differenze positive e negative nel mese. <br>
+				                   <strong>Differenze positive/negative</strong> Giorni in cui il dipendente ha svolto più ore/meno ore di quelle <br>previste dal piano orario giornaliero."></i>
+				    </td>
+				    <td>
+                      <strong>${mese.value.progressivoFinaleMese.toHourTime()}</strong>
+				    </td>
+				  </tr>
+				  <tr>
+				    <td><em>Residuo monte ore anno corrente</em></td>
+				    <td><strong>${mese.value.remainingMinutesCurrentYear.toHourTime()}</strong></td>
+				  </tr>
+				</table>
+			#{/list}
+	</div>
+	#{if showOvertimeAvailableHours}
+	<div class="container-fluid">
+		<h4>Quantità di straordinari ancora disponibili da assegnare dal monte ore #{if isSeatSupervisor}della sede#{/if}#{else} del gruppo#{/else}: ${hoursAvailable} ore</h4>
+	</div>
+	#{/if}
+	#{if enabledOvertimePerPerson}
+	<div class="container-fluid">
+		<h4>Quantità di ore di straordinario ancora disponibili dal monte ore personale: 
+			#{if overtimeResidual != 0}
+				#{if competenceRequest.getPerson().totalOvertimeHourInYear(year) == 0} ${overtimeResidual} ore #{/if}
+				#{else}
+				#{if (competenceRequest.getPerson().totalOvertimeHourInYear(year)-overtimeResidual) / competenceRequest.getPerson().totalOvertimeHourInYear(year) >= 0.9}<font color="red">${overtimeResidual} ore</font>#{/if}
+				#{elseif (competenceRequest.getPerson().totalOvertimeHourInYear(year)-overtimeResidual) / competenceRequest.getPerson().totalOvertimeHourInYear(year) >= 0.8 && overtimeResidual / competenceRequest.getPerson().totalOvertimeHourInYear(year) < 0.9}<font color="#FFA500">${overtimeResidual} ore</font>#{/elseif}
+				#{else} ${overtimeResidual} ore #{/else}
+				#{/else}
+			#{/if}
+			#{else} 
+				0 ore disponibili o monte ore dipendente non specificato
+			#{/else}
+		</h4>
+	</div>
+	#{/if}

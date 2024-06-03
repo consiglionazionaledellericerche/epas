@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import lombok.val;
+import manager.flows.CompetenceRequestManager;
+import manager.flows.CompetenceRequestManager.CompetenceRequestConfiguration;
 import models.Office;
 import models.Person;
 import models.Role;
@@ -52,7 +54,7 @@ public class CompetenceRequestDao extends DaoBase {
 
   @Inject
   CompetenceRequestDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
-    super(queryFactory, emp);
+    super(queryFactory, emp);    
   }
 
   /**
@@ -310,33 +312,13 @@ public class CompetenceRequestDao extends DaoBase {
       default:
         break;          
     }
-    //    if (!signer.getReperibilityTypes().isEmpty()) {
-    //      conditions.andAnyOf((competenceRequest.managerApprovalRequired.isTrue())
-    //          .and(competenceRequest.managerApproved.isNotNull()), 
-    //          competenceRequest.managerApprovalRequired.isFalse());
-    //      
-    //      query = getQueryFactory().selectFrom(competenceRequest)
-    //          .leftJoin(competenceRequest.person, person)
-    //          .leftJoin(person.reperibility, pr)
-    //          .where(pr.personReperibilityType.in(signer.getReperibilityTypes())
-    //              .and(conditions));
-    //      results.addAll(query.fetch());
-    //    } else {
-    //      conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
-    //        .and(competenceRequest.employeeApproved.isNotNull())
-    //          .and(person.office.in(officeList));
-    //      query = getQueryFactory().selectFrom(competenceRequest)
-    //          .join(competenceRequest.person, person)
-    //          .where(person.eq(signer).and(conditions));
-    //      results.addAll(query.fetch());
-    //    }
 
     return results;
   }
 
   /**
    * Ritorna la lista delle richieste di competenza non ancora validate che presentano date di
-   * inizio/fine che in qualche modo intersecano le date di inizio/fine della richiesta d'assenza da
+   * inizio/fine che in qualche modo intersecano le date di inizio/fine della richiesta di competenza da
    * validare.
    *
    * @param request la richiesta di competenza da far validare
@@ -355,6 +337,21 @@ public class CompetenceRequestDao extends DaoBase {
                 )
             .and(competenceRequest.flowEnded.eq(false)))
         .fetch();
+  }
+  
+  /**
+   * Verifica che esista una richiesta di straordinario con i dati uguali a quelli presenti nell'
+   * attuale richiesta di competenza.
+   * 
+   * @param request la richiesta di competenza da verificare se ne esiste un'altra con dati simili
+   * @return se esiste la richiesta di competenza con dati analoghi a quelli presenti nella richiesta attuale.
+   */
+  public Optional<CompetenceRequest> existingOvertimeRequest(CompetenceRequest request) {
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    return Optional.fromNullable(getQueryFactory().selectFrom(competenceRequest)
+        .where(competenceRequest.person.eq(request.getPerson())
+            .and(competenceRequest.month.eq(request.getMonth())
+                .and(competenceRequest.year.eq(request.getYear())))).fetchFirst());
   }
 
 
@@ -425,6 +422,7 @@ public class CompetenceRequestDao extends DaoBase {
     .and(competenceRequest.person.office.in(officeList));
     return condition;
   }
+
 
 }
 

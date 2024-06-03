@@ -31,10 +31,13 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
+import models.GroupOvertime;
 import models.Office;
 import models.Person;
+import models.TotalOvertime;
 import models.base.MutableModel;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
@@ -70,6 +73,9 @@ public class Group extends MutableModel {
   @OneToMany(mappedBy = "group")
   private List<Affiliation> affiliations = Lists.newArrayList();
 
+  @OneToMany(mappedBy = "group")
+  private List<GroupOvertime> groupOvertimes = Lists.newArrayList();
+
   @Unique(value = "office, externalId")
   private String externalId;
 
@@ -91,7 +97,7 @@ public class Group extends MutableModel {
   public boolean isActive() {
     return endDate == null || endDate.isAfter(LocalDate.now());
   }
-  
+
   /**
    * La lista delle persone che appartengono al gruppo
    * ad una certa data.
@@ -113,9 +119,15 @@ public class Group extends MutableModel {
   public List<Person> getPeople() {
     return getPeople(LocalDate.now());
   }
-  
+
+  @Transient
+  public List<Person> getPeopleOvertimes() {
+    return getPeople().stream()
+        .filter(p -> !p.isTopQualification()).collect(Collectors.toList());
+  }
+
   public String getLabel() {
     return name;
   }
-  
+
 }
