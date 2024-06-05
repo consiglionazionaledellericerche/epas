@@ -416,10 +416,6 @@ public class PersonDayManager {
     personDay.setJustifiedTimeNoMeal(0);
     personDay.setTimeAtWork(0);
 
-    // Patch persone fixed
-    if (fixedTimeAtWork) {
-      return updateTimeAtWorkFixed(personDay, wttd);
-    }
 
     // Gli invarianti del calcolo.
     //
@@ -439,6 +435,7 @@ public class PersonDayManager {
     } else {
       personDay.setOutOpening(personDay.getStampingsTime() - stampingTimeInOpening);  
     }
+    
 
     //Caso assenza che assegna l'intera giornata ex 103, 103BP, 105BP
     Optional<Absence> assignAllDay = getAssignAllDay(personDay);
@@ -513,6 +510,11 @@ public class PersonDayManager {
     
     mealTicketHandlerAndDecurtedMeal(personDay, wttd, stampingTimeInOpening, 
         startLunch, endLunch, exitingNow);
+    
+    // Patch persone fixed
+    if (fixedTimeAtWork) {
+      return updateTimeAtWorkFixed(personDay, wttd);
+    }
 
     //Gestione decurtazione.
     // Si applica solo se non ci sono assenze orarie che maturano il buono
