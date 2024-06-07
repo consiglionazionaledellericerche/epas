@@ -4,12 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.16.1] - Unreleased
+### Added
+
+### Changed
+  - Modificato il comportamento del popover nella colonna tempo a lavoro per i dipendenti con "Presenza automatica":
+    anche per questi viene mostrato il tempo che si avrebbe da timbrature con l'eventuale sottrazione della pausa pranzo
+    (per rendicontazione).
+
 ## [2.16.0] - 2024-05-24
 ### Added
 
 ### Changed
   - Modificato il nome dell'orario Maternità CNR in Allattamento per renderlo più generico e usabile in 
     tutte le installazioni di ePAS
+
   
 ## [2.15.2] - 2024-05-23
 ### Added
