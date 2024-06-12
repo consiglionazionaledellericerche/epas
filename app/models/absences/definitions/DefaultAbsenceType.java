@@ -731,17 +731,22 @@ public enum DefaultAbsenceType {
       true, ImmutableSet.of(JustifiedTypeName.all_day_limit), 0, true, 
       MealTicketBehaviour.notAllowMealTicket, 0, null,
       Sets.newHashSet(), null, null, false, true, true, null),
+  
+  A_24PROV("24", "Retribuzione 80% 1 figlio", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, 
+      MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), new LocalDate(2024, 1, 1), 
+      new LocalDate(2025, 1, 31), false, true, true, null), 
 
-  A_24("24", "Astensione facoltativa post partum non retrib. primo figlio intera giornata", false,
+  A_24O("24O", "Astensione facoltativa post partum non retrib. primo figlio intera giornata", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, 
       MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), null, 
       new LocalDate(2022, 8, 12), false, true, true, null), 
-  A_24M("24M", "Astensione facoltativa post partum non retrib. primo figlio in ore e minuti", true, 
+  A_24OM("24M", "Astensione facoltativa post partum non retrib. primo figlio in ore e minuti", true, 
       ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, 
       MealTicketBehaviour.notAllowMealTicket, 0, null, 
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, 
       new LocalDate(2022, 8, 12), false, true, true, null), 
-  A_24H7("24H7", "Astensione facoltativa post partum non retrib. primo figlio completamento "
+  A_24OH7("24H7", "Astensione facoltativa post partum non retrib. primo figlio completamento "
       + "giornata", false, ImmutableSet.of(JustifiedTypeName.nothing), 0, false, 
       MealTicketBehaviour.notAllowMealTicket, 0, JustifiedTypeName.all_day, Sets.newHashSet(), 
       null, new LocalDate(2022, 8, 12), false, true, true, null), 

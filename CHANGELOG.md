@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.16.1] - Unreleased
+### Added
+  - Aggiunto codice 24PROV che manda ad Attestati il codice 24 per recepire la direttiva di consentire l'utilizzo di 30 giorni di congedo 
+    all'80%.
+  
+### Changed
+
+
 ## [2.16.0] - 2024-05-24
 ### Added
 
