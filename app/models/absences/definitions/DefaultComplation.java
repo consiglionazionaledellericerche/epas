@@ -197,8 +197,11 @@ public enum DefaultComplation {
       ImmutableSet.of(DefaultAbsenceType.A_25AM), 
       ImmutableSet.of(DefaultAbsenceType.A_25AH7)),
   C_24(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_24M), 
-      ImmutableSet.of(DefaultAbsenceType.A_24H7)),
+      ImmutableSet.of(DefaultAbsenceType.A_24O), 
+      ImmutableSet.of(DefaultAbsenceType.A_24OH7)),
+  C_24PROV(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_24PROV), 
+      ImmutableSet.of(DefaultAbsenceType.A_24PROV)),
  
   
   C_25P(AmountType.units, 

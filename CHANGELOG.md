@@ -6,14 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.16.1] - Unreleased
 ### Added
+  - Aggiunto codice 24PROV che manda ad Attestati il codice 24 per recepire la direttiva di consentire l'utilizzo di 30 giorni di congedo 
+    all'80%.
 
 ### Changed
   - Modificato il comportamento dei codici 62S...per distacchi sindacali part time: adesso non decurtano più le ferie
-    come richiesto dopo l'incontro con i colleghi della sezione presenze del CNR.
 
 ## [2.16.0] - 2024-05-24
-### Added
-
 ### Changed
   - Modificato il nome dell'orario Maternità CNR in Allattamento per renderlo più generico e usabile in 
     tutte le installazioni di ePAS
@@ -45,14 +44,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     il servizio REST con la lista delle sedi
   - Modificato il calcolo delle ore di turno del pomeriggio per chi utilizza la fascia oraria
     07-14/13.30-19: ora a chi fa il pomeriggio viene conteggiata una mezz'ora in meno
-  
 
 ### Changed
   - Nel metodo REST /rest/v2/certifications/getMonthSituationByOffice valorizzate correttamente
     le competenze
   - Nel metodo REST /rest/v3/persondays/getMonthSituationByPerson per il personDay esportati i campi
     stampingsTime e decurtedMeal e per le assenze esportato isRealAbsence
-  
   
 ## [2.14.1] - 2024-03-15
 ### Changed
