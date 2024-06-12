@@ -297,15 +297,20 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_25M, 
           DefaultAbsenceType.A_25U), 
       150, null),
-
+  
   T_24(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_24, 
-          DefaultAbsenceType.A_24M, 
+      ImmutableSet.of(DefaultAbsenceType.A_24O, 
+          DefaultAbsenceType.A_24OM, 
           DefaultAbsenceType.A_24U), 
-      ImmutableSet.of(DefaultAbsenceType.A_24, 
-          DefaultAbsenceType.A_24M, 
+      ImmutableSet.of(DefaultAbsenceType.A_24O, 
+          DefaultAbsenceType.A_24OM, 
           DefaultAbsenceType.A_24U), 
       150, null),
+
+  T_24PROV(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_24PROV), 
+      ImmutableSet.of(DefaultAbsenceType.A_24PROV), 
+      30, null),
 
   T_232(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_232, 
@@ -759,7 +764,7 @@ public enum DefaultTakable {
 
   T_RIDUCE_FERIE_CNR(AmountType.units, 
       ImmutableSet.of(
-          DefaultAbsenceType.A_24, DefaultAbsenceType.A_24H7,
+          DefaultAbsenceType.A_24PROV, 
           DefaultAbsenceType.A_25O, DefaultAbsenceType.A_25OH7,
           DefaultAbsenceType.A_242, DefaultAbsenceType.A_242H7,
           DefaultAbsenceType.A_252O, DefaultAbsenceType.A_252OH7,
@@ -783,7 +788,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_54B, DefaultAbsenceType.A_62S50V, 
           DefaultAbsenceType.A_62S25V,DefaultAbsenceType.A_62S75V), 
       ImmutableSet.of(
-          DefaultAbsenceType.A_24, DefaultAbsenceType.A_24H7,
+          DefaultAbsenceType.A_24PROV, 
           DefaultAbsenceType.A_25O, DefaultAbsenceType.A_25OH7,
           DefaultAbsenceType.A_242, DefaultAbsenceType.A_242H7,
           DefaultAbsenceType.A_252O, DefaultAbsenceType.A_252OH7,
