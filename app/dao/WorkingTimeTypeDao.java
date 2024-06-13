@@ -184,5 +184,19 @@ public class WorkingTimeTypeDao extends DaoBase {
     return getQueryFactory().selectFrom(cwtt)
         .where(cwtt.id.eq(id)).fetchOne();
   }
+  
+  /**
+   * 
+   * @param date la data che deve far parte del contract_working_time_type
+   * @return la lista dei contract_working_time_type che hanno al proprio interno la data passata 
+   *   come parametro.
+   */
+  public List<ContractWorkingTimeType> cwttListByDate(LocalDate date, String description) {
+    final QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
+    final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
+    return getQueryFactory().selectFrom(cwtt).leftJoin(wtt)
+        .where(wtt.description.like(description).and(wtt.office.isNotNull()).and(cwtt.beginDate.loe(date))
+            .andAnyOf(cwtt.endDate.isNull(), cwtt.endDate.goe(date))).fetch();
+  }
 
 }
