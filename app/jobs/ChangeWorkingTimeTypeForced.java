@@ -68,7 +68,10 @@ public class ChangeWorkingTimeTypeForced extends Job<Void> {
     List<ContractWorkingTimeType> list = Lists.newArrayList();
     list.addAll(maternitaList);
     list.addAll(allattamentoList);
-
+    /*TODO: qui occorre recuperare dal db l'orario allattamento generico. Poi creare un contractWorkingTimeType con
+     *  le stesse date del cwtt che di volta in volta viene analizzato e sostituire il nuovo cwtt al vecchio 
+     *  eseguendo i ricalcoli. 
+     */
     for (ContractWorkingTimeType cwtt : list) {
       if (cwtt.getWorkingTimeType().getOffice() != null) {
         IWrapperContract wrappedContract = wrapperFactory.create(cwtt.getContract());
