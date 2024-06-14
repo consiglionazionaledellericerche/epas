@@ -33,6 +33,7 @@ import manager.PeriodManager;
 import manager.recaps.recomputation.RecomputeRecap;
 import models.Contract;
 import models.ContractWorkingTimeType;
+import models.WorkingTimeType;
 import models.base.IPropertyInPeriod;
 import play.Play;
 import play.jobs.Job;
@@ -43,8 +44,8 @@ import play.jobs.OnApplicationStart;
 @OnApplicationStart(async = true)
 public class ChangeWorkingTimeTypeForced extends Job<Void> {
 
-  private static String allattamento = "Allattam";
-  private static String maternita = "Materni";
+  private final static String allattamento = "Allattam";
+  private final static String maternita = "Matern";
 
 
   @Inject
@@ -68,15 +69,23 @@ public class ChangeWorkingTimeTypeForced extends Job<Void> {
     List<ContractWorkingTimeType> list = Lists.newArrayList();
     list.addAll(maternitaList);
     list.addAll(allattamentoList);
-    /*TODO: qui occorre recuperare dal db l'orario allattamento generico. Poi creare un contractWorkingTimeType con
-     *  le stesse date del cwtt che di volta in volta viene analizzato e sostituire il nuovo cwtt al vecchio 
-     *  eseguendo i ricalcoli. 
-     */
+    log.debug("Recuperati {} contractWorkingTimeType", list.size());
+    WorkingTimeType maternitaUfficiale = wttDao
+        .workingTypeTypeByDescription("Allattamento", Optional.absent());
+    
     for (ContractWorkingTimeType cwtt : list) {
       if (cwtt.getWorkingTimeType().getOffice() != null) {
-        IWrapperContract wrappedContract = wrapperFactory.create(cwtt.getContract());
-        Contract contract = cwtt.getContract();
-        List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(cwtt, false);
+        log.debug("Creo nuovo ContractWorkingTimeType per {}", 
+            cwtt.getContract().getPerson().getFullname());
+        ContractWorkingTimeType newCwtt = new ContractWorkingTimeType();
+        newCwtt.setWorkingTimeType(maternitaUfficiale);
+        newCwtt.setBeginDate(cwtt.getBeginDate());
+        newCwtt.setEndDate(cwtt.getEndDate());
+        newCwtt.setContract(cwtt.getContract());
+        newCwtt.save();
+        IWrapperContract wrappedContract = wrapperFactory.create(newCwtt.getContract());
+        Contract contract = newCwtt.getContract();
+        List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newCwtt, false);
         RecomputeRecap recomputeRecap =
             periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
                 Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
@@ -84,13 +93,15 @@ public class ChangeWorkingTimeTypeForced extends Job<Void> {
 
         recomputeRecap.initMissing = wrappedContract.initializationMissing();
 
-        periodManager.updatePeriods(cwtt, true);
+        periodManager.updatePeriods(newCwtt, true);
         contract = contractDao.getContractById(contract.id);
         contract.getPerson().refresh();
         if (recomputeRecap.needRecomputation) {
           contractManager.recomputeContract(contract,
               Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
         }
+        log.debug("Creato nuovo ContractWorkingTimeType per {} ed effettuati ricalcoli da {} a {}", 
+            cwtt.getContract().getPerson().getFullname(), cwtt.getBeginDate(), cwtt.getEndDate());
 
       } else {
         log.info("Non occorre modificare un orario di un contratto che già contiene l'orario generico.");

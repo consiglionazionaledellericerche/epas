@@ -194,8 +194,8 @@ public class WorkingTimeTypeDao extends DaoBase {
   public List<ContractWorkingTimeType> cwttListByDate(LocalDate date, String description) {
     final QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
     final QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
-    return getQueryFactory().selectFrom(cwtt).leftJoin(wtt)
-        .where(wtt.description.like(description).and(wtt.office.isNotNull()).and(cwtt.beginDate.loe(date))
+    return getQueryFactory().selectFrom(cwtt).join(cwtt.workingTimeType, wtt).fetchJoin()
+        .where((wtt.office.isNotNull().and(wtt.description.containsIgnoreCase(description)))
             .andAnyOf(cwtt.endDate.isNull(), cwtt.endDate.goe(date))).fetch();
   }
 
