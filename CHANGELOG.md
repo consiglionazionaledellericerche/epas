@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.17.0] - 2024-06-19
+### Added
+  - Aggiunto orario di lavoro Allattamento che sostituisce il precedente: non si matura mai il buono pasto.
+
+### Changed
+  - Modificato il precedente orario Allattamento in 'Allattamento fino al 31-06-2024' e disabilitato. Questo orario 
+    non è più da usarsi a causa dell'inserimento del nuovo orario Allattamento.
+
 ## [2.16.1] - 2024-06-18
 ### Added
   - Aggiunto codice 24PROV che manda ad Attestati il codice 24 per recepire la direttiva di consentire l'utilizzo di 30 giorni di congedo 
