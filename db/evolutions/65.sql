@@ -97,6 +97,8 @@ INSERT INTO working_time_types (id, description, shift, meal_ticket_enabled, off
 INSERT INTO working_time_types (id, description, shift, meal_ticket_enabled, office_id, disabled) VALUES (8, '80%', false, true, NULL, false);
 INSERT INTO working_time_types (id, description, shift, meal_ticket_enabled, office_id, disabled) VALUES (9, '85%', false, true, NULL, false);
 
+SELECT setval('seq_working_time_types', (SELECT MAX(id) FROM working_time_types));
+
 --
 -- Data for Name: working_time_type_days; Type: TABLE DATA; Schema: public; Owner: postgres
 --
