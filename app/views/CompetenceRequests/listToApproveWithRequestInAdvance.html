@@ -1,0 +1,47 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set competenceRequestTypeLabel: messages.get('CompetenceRequestType.' + competenceType.toString() + '_TO_APPROVE') /}
+#{set title:('ePAS - ' + competenceRequestTypeLabel) /}
+
+#{switcher year:true, month:true /}
+
+#{set breadcrumbs:[(competenceRequestTypeLabel):null] /}
+
+%{
+	approvalsRequired = 0;
+
+	if (config.officeHeadApprovalRequired) {
+	 approvalsRequired++;
+	}
+	if (config.managerApprovalRequired) {
+	 approvalsRequired++;
+	}
+	if (config.employeeApprovalRequired) {
+	 approvalsRequired++;
+	}
+	approvalRequired = approvalsRequired > 0
+}%
+
+<div class="container">
+  #{breadcrumbs breadcrumbs /}
+
+  #{tabList}
+    #{tabItem id:'approvandi', title:'Flussi da approvare', active:true /}
+    #{tabItem id:'attivo', title:'Flussi attivi'/}        
+    #{tabItem id:'nonAttivo', title:'Flussi terminati' /}
+  #{/tabList}
+  <br>
+  	#{tabContent}	
+  	  	#{tabContentItem id:'approvandi', active:true}
+ 		#{include './tableElements/_table.html' /}
+ 	#{/tabContentItem}
+  	#{tabContentItem id:'attivo'}
+  		#{include './tableElements/_allFlowsTable.html' /}
+  	#{/tabContentItem}
+  	#{tabContentItem id:'nonAttivo'}
+  		#{include './tableElements/_approvedTable.html' /}
+  	#{/tabContentItem}
+ 
+  	#{/tabContent}
+
+</div>

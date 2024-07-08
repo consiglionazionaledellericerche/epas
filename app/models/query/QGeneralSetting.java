@@ -37,6 +37,10 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
 
     public final BooleanPath enableIllnessFlow = createBoolean("enableIllnessFlow");
 
+    public final BooleanPath enableOvertimePerPerson = createBoolean("enableOvertimePerPerson");
+
+    public final BooleanPath enableOvertimeRequestInAdvance = createBoolean("enableOvertimeRequestInAdvance");
+
     public final BooleanPath enableSsoForAttestati = createBoolean("enableSsoForAttestati");
 
     public final BooleanPath enableUniqueDailyShift = createBoolean("enableUniqueDailyShift");

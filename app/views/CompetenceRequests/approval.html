@@ -1,19 +1,22 @@
 #{modalAsync id:'defaultModal', title:('Approvazione richiesta di straordinari per ' + competenceRequest.person.fullname)}
 
-<div class="container-fluid">
-
+<div id="approval" class="container-fluid">
+	<div class="container-fluid">
+		#{include './_overtimeSituation.html' /}
+	</div>
 #{alert color:'success'}
 <p class=center>Specifica la quantità di ore di straordinario da salvare.</p> 
 #{/alert}
-#{form action:@approval(competenceRequest.id, approval), method:'POST', class:'form form-horizontal'}
+#{form action:@approval(competenceRequest.id, approval, value), method:'POST', class:'form form-horizontal',
+	'data-async':'#page_content', 'data-async-error':'#approval'}
 
 #{f.hidden 'competenceRequest.id', value:competenceRequest.id /}
-#{if competenceRequest.value != null}
-	#{f.input 'competenceRequest.value', label:'Quantità richiesta' /}
+
+#{f.view 'competenceRequest.valueRequested', label:'Quantità richiesta' /}
+#{if showOvertimeApprovalAdvance}
+#{f.view 'competenceRequest.value', label:'Quantità approvata preventivamente' /}
 #{/if}
-#{else}
-	#{f.input 'value', type:'number', label:'Quantità approvata' /}
-#{/else}
+#{f.input 'value', label:'Quantità concessa', type:'number' /}
 
 	    #{b.buttons center:true}
 	      #{b.submit 'Approva', color:'success', fa:'cross' /}
