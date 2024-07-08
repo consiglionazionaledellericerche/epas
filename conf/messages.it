@@ -1386,7 +1386,7 @@ RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
 RESIDUAL_MEALTICKETS=Ricalcoli mensili sul residuo buoni pasto.
 
 ENABLE_FLOWS =Flusso di richiesta assenza attivato
-ENABLE_OVERTIME_FLOWS =Flusso di richiesta straordinario attivato
+ENABLE_OVERTIME_FLOWS =Flusso di richiesta lavoro straordinario attivato
 ENABLE_37_FLOW =Abilita flusso richiesta ferie anno precedente dopo 31/08
 
 
@@ -1403,10 +1403,10 @@ COMPENSATORY_REST_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazi
 COMPENSATORY_REST_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED= Richiesta approvazione riposi compensativi per i Responsabili di gruppo da parte del Responsabile di Sede
 
 
-OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte del responsabile di sede
-OVERTIME_REQUEST_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte del responsabile di gruppo di lavoro
+OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED =Approvazione delle richieste di ore di lavoro straordinario da parte del Direttore/Dirigente/Responsabile
+OVERTIME_REQUEST_MANAGER_APPROVAL_REQUIRED =Approvazione delle richieste di ore di lavoro straordinario da parte del responsabile di gruppo di lavoro
 OVERTIME_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte di altro dipendente
-ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY =Permettere al dipendente di specificare la quantità di ore da richiedere come straordinario
+ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY =Permettere al dipendente di specificare la quantità di ore da richiedere come lavoro straordinario
 OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION =Abilita richiesta preventiva di straordinario
 
 PERSONAL_PERMISSION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli I-III da parte del Responsabile Sede
