@@ -4,12 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.17.0] - UNRELEASED
+
+## [2.17.0] - 2024-07-09
+### Added
+  - Aggiunto orario di lavoro Allattamento che sostituisce il precedente: non si matura mai il buono pasto.
+
 ### Changed
- - Corretta una vecchia evoluzione del db (la 69.sql) che inseriva i working_time_types senza
-   usare la sequenza postgres corretta. Questo rompeva l'evoluzione 215.sql nel caso di nuova
-   installazione a partire dalla versione 2.16.0 o di aggiornamento di una installazione esistente
-   pre 2.16.0 senza inserimenti effettuati via web di nuovi working_time_types
+  - Modificato il precedente orario Allattamento in 'Allattamento fino al 31-06-2024' e disabilitato. Questo orario 
+    non è più da usarsi a causa dell'inserimento del nuovo orario Allattamento.
+
+  - Corretta una vecchia evoluzione del db (la 69.sql) che inseriva i working_time_types senza
+    usare la sequenza postgres corretta. Questo rompeva l'evoluzione 215.sql nel caso di nuova
+    installazione a partire dalla versione 2.16.0 o di aggiornamento di una installazione esistente
+    pre 2.16.0 senza inserimenti effettuati via web di nuovi working_time_types
 
 ## [2.16.1] - 2024-06-18
 ### Added
