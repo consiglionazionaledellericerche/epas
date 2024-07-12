@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2024  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,11 +14,11 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package jobs;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import dao.PersonDao;
 import java.util.HashSet;
 import java.util.List;
@@ -52,19 +52,18 @@ public class SyncOfficeClosed extends Job<Void> {
     
     int count = 0;
     List<Office> list = Office.findAll();
-    List<Office> offices = null;
+    if (list.size() == 1) {
+      //Nell'installazione iniziale c'è solo un ufficio senza utenti e non va disattivato.
+      return;
+    }
     for (Office office : list) {
       if (office.getEndDate() != null) {
         continue;
       }
       log.debug("Analizzo la sede: {}", office.getName());
-      offices = Lists.newArrayList();
-      offices.add(office);
       List<Person> people = personDao.listFetched(Optional.<String>absent(),
-          new HashSet<Office>(offices), false, LocalDate.now(), LocalDate.now(), true).list();
-      if (people.isEmpty()
-          //"Ufficio da cambiare" è l'ufficio predefinito creato al primo setup dell'applicazione
-          && !office.getName().equalsIgnoreCase("Ufficio da cambiare")) {
+          Sets.newHashSet(office), false, LocalDate.now(), LocalDate.now(), true).list();
+      if (people.isEmpty()) {
         log.info("Non ci sono persone con contratto attivo sulla sede {}. "
             + "Inserisco la data di chiusura sede.", office.getName());
         office.setEndDate(LocalDate.now());
