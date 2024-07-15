@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2024  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -17,13 +17,17 @@
 
 package controllers.rest;
 
+import javax.inject.Inject;
+
+import org.joda.time.LocalDateTime;
+
 import com.google.common.base.Optional;
+
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import dao.OfficeDao;
 import helpers.JsonResponse;
 import it.cnr.iit.epas.JsonMissionBinder;
-import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.MissionManager;
 import manager.NotificationManager;
@@ -86,6 +90,18 @@ public class Missions extends Controller {
       JsonResponse.badRequest();
     }
 
+    if (body.dataInizio.isBefore(LocalDateTime.now().minusMonths(6))) {
+      logWarn("Data di inizio precedente di oltre sei mesi dalla data attuale, messaggio scartato", 
+          body);
+      JsonResponse.badRequest();
+    }
+
+    if (body.dataFine.isAfter(LocalDateTime.now().plusMonths(6))) {
+      logWarn("Data di fine successiva di oltre 6 mesi dalla data attuale, messaggio scartato", 
+          body);
+      JsonResponse.badRequest();
+    }
+
     // person not present (404)
     if (!missionManager.linkToPerson(body).isPresent()) {
       logWarn("Dipendente riferito nel messaggio non trovato, messaggio scartato", body);
@@ -99,7 +115,7 @@ public class Missions extends Controller {
 
     if (!officeByMessage.isPresent()) {
       logWarn(
-          String.format("Attenzione il codice sede %s non è presente su ePAS ed il dipendente %s "
+          String.format("Attenzione il codice sede %s non è presente su ePAS e il dipendente %s "
               + "è associato all'ufficio %s.", 
               body.codiceSede, body.person.getFullname(), office.getName()), 
           body);
