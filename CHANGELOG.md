@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
   - Nel job all'avvio dell'applicazione evitato di chiudere l'ufficio se ne è presente uno solo anche se vuoto.
   - Scartato l'inserimento delle missioni con data di inizio o fine più lontana di 6 mesi.
+  - Corretta evoluzione 217 che aggiornava l'orario Allattamento ma aveva problemi in caso di più orari Allattamento presenti
 
 ## [2.17.0] - 2024-07-09
 ### Added

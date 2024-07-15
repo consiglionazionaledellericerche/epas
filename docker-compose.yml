@@ -1,9 +1,7 @@
-version: '3.1'
-
-   ############################################################################
-   #                             ePAS Server                                  #
-   # Configurazione per l'avvio di ePAS e di un'eventuale postgres locale     #
-   ############################################################################
+############################################################################
+#                             ePAS Server                                  #
+# Configurazione per l'avvio di ePAS e di un'eventuale postgres locale     #
+############################################################################
 
 services:
 
