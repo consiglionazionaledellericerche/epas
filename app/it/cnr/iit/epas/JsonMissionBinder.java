@@ -51,7 +51,9 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
       mission.destinazioneMissione = jsonObject.get("dest_missione").getAsString();
       mission.tipoMissione = jsonObject.get("tipo_missione").getAsString();
       mission.codiceSede = jsonObject.get("codice_sede").getAsString();
-      mission.id = jsonObject.get("id").getAsLong();
+      if (jsonObject.get("id") != null) {
+        mission.id = jsonObject.get("id").getAsLong();
+      }
       mission.matricola = jsonObject.get("matricola").getAsString();
       mission.dataInizio = 
           LocalDateTime.parse(getDateFromJson(jsonObject.get("data_inizio").getAsString()));
