@@ -1,6 +1,8 @@
 # --- !Ups
 UPDATE working_time_types SET disabled = true where id in (2, 6);
 
+SELECT setval('seq_working_time_types', (SELECT MAX(id) FROM working_time_types));
+
 INSERT INTO working_time_types (description, shift, meal_ticket_enabled, office_id, disabled, horizontal, version, enable_adjustment_for_quantity, external_id, updated_at)
 VALUES ('Maternità CNR', false, true, null, false, true, 0, false, null, now());
 
