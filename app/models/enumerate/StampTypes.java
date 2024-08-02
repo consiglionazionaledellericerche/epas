@@ -107,7 +107,9 @@ public enum StampTypes {
    * @return lista delle stampTypes attive ma senza il lavoro fuori sede.
    */
   public static List<StampTypes> onlyActiveWithoutOffSiteWork() {
-    return onlyActive().stream().filter(StampTypes::isNotOffSiteWork).collect(Collectors.toList());
+    List<StampTypes> prev = onlyActive();
+    List<StampTypes> list = prev.stream().filter(st -> !st.getIdentifier().equalsIgnoreCase("lfs")).collect(Collectors.toList());
+    return list;
   }
   
   
