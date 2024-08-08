@@ -714,8 +714,7 @@ public class AbsenceGroups extends Controller {
     // FIXME utilizzare un parametro proveniente dalla vista per rifarne il redirect
     final User currentUser = Security.getUser().get();
     if (!currentUser.isSystemUser()) {
-      if (currentUser.getPerson().id.equals(person.id)
-          && !currentUser.hasRoles(Role.PERSONNEL_ADMIN)) {
+      if (currentUser.getPerson().id.equals(person.id)) {
         Stampings.stampings(from.getYear(), from.getMonthOfYear());
       }
     }
