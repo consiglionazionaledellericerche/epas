@@ -4,8 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.17.3] - Unreleased
+## [2.18.0] - Unreleased
 ### Changed
+  - Corretto il redirect dopo l'inserimento di assenze nel proprio cartellino da parte dell'amministratore del
+    personale.
   - Modificata interfaccia di inserimento timbrature rimuovendo la causale del lavoro fuori sede da quelle
     inseribili da parte dell'amministratore del personale. Ora rimane la sola form di inserimento fuori sede.
 
