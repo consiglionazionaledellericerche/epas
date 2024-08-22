@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     personale.
   - Modificata interfaccia di inserimento timbrature rimuovendo la causale del lavoro fuori sede da quelle
     inseribili da parte dell'amministratore del personale. Ora rimane la sola form di inserimento fuori sede.
+  - Modificato il controllo della sede di appartenenza del dipendente di cui arriva l'ordine/annullamento/rimborso
+    di missione per consentire l'integrazione con il nuovo sistema di missioni Cineca
 
 ## [2.17.2] - 2024-07-29
 ### Changed
