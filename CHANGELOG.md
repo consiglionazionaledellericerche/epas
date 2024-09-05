@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
   - Aggiornata libreria Guava alla 33.3.0
+  - Corretto il comportamento del codice 7M e 7DM che non devono maturare buono pasto qualsiasi quantità oraria venga
+    inserita
 
 ## [2.18.0] - 2024-08-23
 ### Changed

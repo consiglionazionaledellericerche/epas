@@ -1317,7 +1317,7 @@ public enum DefaultAbsenceType {
 
   A_7M("7M", "Permesso sindacale in ore e minuti", true,
       ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, 
-      MealTicketBehaviour.allowMealTicket, 0, null,
+      MealTicketBehaviour.notAllowMealTicket, 0, null,
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null,
       false, true, true, null), 
 
@@ -1447,7 +1447,7 @@ public enum DefaultAbsenceType {
   
   A_7DM("7DM", "Permesso dirigenti sindacato in ore e minuti", true,
       ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, 
-      MealTicketBehaviour.allowMealTicket, 0, null,
+      MealTicketBehaviour.notAllowMealTicket, 0, null,
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null,
       false, true, true, null), 
 
