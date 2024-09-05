@@ -50,7 +50,11 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
       MissionFromClient mission = new MissionFromClient();
       mission.destinazioneMissione = jsonObject.get("dest_missione").getAsString();
       mission.tipoMissione = jsonObject.get("tipo_missione").getAsString();
-      mission.codiceSede = jsonObject.get("codice_sede").getAsString();
+      if (jsonObject.get("codice_sede") != null) {
+        mission.codiceSede = jsonObject.get("codice_sede").getAsString();
+      } else {
+        mission.codiceSede = "";
+      }
       if (jsonObject.get("id") != null) {
         mission.id = jsonObject.get("id").getAsLong();
       }

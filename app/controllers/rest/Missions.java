@@ -108,18 +108,22 @@ public class Missions extends Controller {
       JsonResponse.notFound();
     }
 
+    Optional<Office> officeByMessage = Optional.absent();
     //Ufficio prelevato tramite il codice sede passato nel JSON
-    Optional<Office> officeByMessage = officeDao.byCodeId(body.codiceSede);
+    if (body.codiceSede != null || !body.codiceSede.isEmpty()) {
+      officeByMessage = officeDao.byCodeId(body.codiceSede);
+    }    
     //Ufficio associato alla persona prelevata tramite la matricola passata nel JSON
     Office office = body.person.getOffice();
 
     if (!officeByMessage.isPresent()) {
-      logWarn(
-          String.format("Attenzione il codice sede %s non è presente su ePAS e il dipendente %s "
-              + "è associato all'ufficio %s.", 
-              body.codiceSede, body.person.getFullname(), office.getName()), 
-          body);
-    } else if (!body.codiceSede.equals(office.getCodeId())) {
+      log.warn("--- Possibile messaggio proveniente da integrazione col nuovo Missioni Cineca ---");
+//      logWarn(
+//          String.format("Attenzione il codice sede %s non è presente su ePAS e il dipendente %s "
+//              + "è associato all'ufficio %s.", 
+//              body.codiceSede, body.person.getFullname(), office.getName()), 
+//          body);
+    } else if (!body.codiceSede.isEmpty() && !body.codiceSede.equals(office.getCodeId())) {
       logWarn(
           String.format("Attenzione il codice sede %s è diverso dal codice sede di %s (%s), "
               + "sede associata a %s.", 

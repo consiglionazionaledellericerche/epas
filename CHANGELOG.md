@@ -4,9 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.18.0] - UNRELEASED
+## [2.19.0] - UNRELEASED
 ### Changed
   - Rimosso vincolo obbligatorietà id missione nell'annullamento missione via REST 
+
+## [2.18.1] - 2024-09-05
+### Added
+  - Aggiunta possibilità per l'utente che si autoinserisce le assenze per congedo parentale di aggiungere anche l'allegato
+
+### Changed
+  - Aggiornata libreria Guava alla 33.3.0
+  - Corretto il comportamento del codice 7M e 7DM che non devono maturare buono pasto qualsiasi quantità oraria venga
+    inserita
+
+## [2.18.0] - 2024-08-23
+### Changed
+  - Corretto il redirect dopo l'inserimento di assenze nel proprio cartellino da parte dell'amministratore del
+    personale.
+  - Modificata interfaccia di inserimento timbrature rimuovendo la causale del lavoro fuori sede da quelle
+    inseribili da parte dell'amministratore del personale. Ora rimane la sola form di inserimento fuori sede.
+  - Modificato il controllo della sede di appartenenza del dipendente di cui arriva l'ordine/annullamento/rimborso
+    di missione per consentire l'integrazione con il nuovo sistema di missioni Cineca
+
+## [2.17.2] - 2024-07-29
+### Changed
+  - Aggiunta all'evoluzione 215 l'impostazione della sequenza seq_working_time_types per evitare gli errori 
+    nel passaggio dalla versione 2.15.0 a quelle successive in alcuni casi
 
 ## [2.17.1] - 2024-07-15
 ### Changed
