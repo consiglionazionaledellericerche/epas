@@ -4,9 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.18.1] - Unreleased
+## [2.19.0] - Unreleased
+### Changed
+  - Modificato il comportamento in caso di richiesta di approvazione telelavoro rifiutata
+
+## [2.18.1] - 2024-09-05
 ### Added
   - Aggiunta possibilità per l'utente che si autoinserisce le assenze per congedo parentale di aggiungere anche l'allegato
+
+### Changed
+  - Aggiornata libreria Guava alla 33.3.0
+  - Corretto il comportamento del codice 7M e 7DM che non devono maturare buono pasto qualsiasi quantità oraria venga inserita
+  
 
 ## [2.18.0] - 2024-08-23
 ### Changed

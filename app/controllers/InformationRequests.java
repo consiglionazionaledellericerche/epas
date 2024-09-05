@@ -502,7 +502,8 @@ public class InformationRequests extends Controller {
     TeleworkRequest teleworkRequest;
 
     val teleworkRequestInPeriod = informationRequestDao.personTeleworkInPeriod(person, month, year);
-    if (!teleworkRequestInPeriod.isPresent()) {
+    if (!teleworkRequestInPeriod.isPresent() || (teleworkRequestInPeriod.get().isFlowEnded() 
+        && !teleworkRequestInPeriod.get().isFullyApproved())) {
       teleworkRequest = new TeleworkRequest();
       teleworkRequest.setYear(year);
       teleworkRequest.setMonth(month);
@@ -532,9 +533,13 @@ public class InformationRequests extends Controller {
         notificationManager.sendEmailInformationRequestPolicy(teleworkRequest.getPerson().getUser(),
             teleworkRequest, true);
         log.debug("Inviata la richiesta di approvazione");
+        flash.success("Operazione effettuata correttamente");
       }
+    } else {
+      flash.error("Esiste già una richiesta di approvazione telelavoro per il mese %s dell'anno %s", 
+          teleworkRequest.getMonth(), teleworkRequest.getYear());
     }
-    flash.success("Operazione effettuata correttamente");
+    
     InformationRequests.list(teleworkRequest.getInformationType());
 
   }
