@@ -26,7 +26,13 @@
 					${item.teleworkRequest.officeHeadApproved.format()}
 				#{/if}
 				#{else}
-					<span class="label label-warning label-badge">Richiesta non ancora approvata</span>
+				    #{if item.teleworkRequest.flowStarted && item.teleworkRequest.flowEnded}
+				    	<span class="label label-danger label-badge">Richiesta respinta</span>
+				    #{/if}
+				    #{else}
+				    	<span class="label label-warning label-badge">Richiesta non ancora approvata</span>
+				    #{/else}
+					
 				#{/else} 			 
 			</td>
 			<td>#{if item.teleworkValidation != null}

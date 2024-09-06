@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.19.0] - UNRELEASED
 ### Changed
   - Rimosso vincolo obbligatorietà id missione nell'annullamento missione via REST 
+  - Modificato il comportamento in caso di richiesta di approvazione telelavoro rifiutata
 
 ## [2.18.1] - 2024-09-05
 ### Added
