@@ -18,19 +18,28 @@
 package controllers.rest.v3;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import org.joda.time.YearMonth;
+import org.threeten.bp.LocalDate;
+import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
+import cnr.sync.dto.v3.ContractTerseDto;
 import cnr.sync.dto.v3.OfficeShowTerseDto;
 import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
+import dao.ContractDao;
 import dao.OfficeDao;
+import dao.PersonDao;
+import helpers.JsonResponse;
 import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import models.Office;
+import models.Person;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -44,6 +53,12 @@ public class Instances extends Controller {
   static SecurityRules rules;
   @Inject
   static GsonBuilder gsonBuilder;
+  @Inject
+  static Offices offices;
+  @Inject
+  static ContractDao contractDao;
+  @Inject
+  static PersonDao personDao;
 
   @BasicAuth
   public static void list() {
@@ -53,5 +68,17 @@ public class Instances extends Controller {
     val list = 
         offices.stream().map(o -> OfficeShowTerseDto.build(o)).collect(Collectors.toList());
     renderJSON(gsonBuilder.create().toJson(list));
+  }
+  
+  public static void contractList(Long officeId, String code, String codeId) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    val office = offices.getOfficeFromRequest(officeId, code, codeId);
+    log.debug("Richiesta la lista dei contratti attuali dei dipendenti di {}", office);
+    Set<Office> offices = Sets.newHashSet();
+    offices.add(office);
+    List<Person> personList = personDao.getActivePersonInMonth(offices, YearMonth.now());
+    val list = personList.stream().map(c -> ContractTerseDto.build(c)).collect(Collectors.toList());
+    renderJSON(gsonBuilder.create().toJson(list));
+    
   }
 }
