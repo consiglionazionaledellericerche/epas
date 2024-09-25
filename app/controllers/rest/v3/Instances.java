@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.joda.time.YearMonth;
 import org.threeten.bp.LocalDate;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
 import cnr.sync.dto.v3.ContractTerseDto;
@@ -33,11 +34,14 @@ import controllers.Resecure.BasicAuth;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import models.Contract;
 import models.Office;
 import models.Person;
 import play.mvc.Controller;
@@ -59,6 +63,8 @@ public class Instances extends Controller {
   static ContractDao contractDao;
   @Inject
   static PersonDao personDao;
+  @Inject
+  static IWrapperFactory wrapperFactory;
 
   @BasicAuth
   public static void list() {
@@ -77,8 +83,20 @@ public class Instances extends Controller {
     Set<Office> offices = Sets.newHashSet();
     offices.add(office);
     List<Person> personList = personDao.getActivePersonInMonth(offices, YearMonth.now());
-    val list = personList.stream().map(c -> ContractTerseDto.build(c)).collect(Collectors.toList());
+    List<Contract> contractList = Lists.newArrayList();
+    for (Person p : personList) {
+      IWrapperPerson wrPerson = wrapperFactory.create(p);
+      Contract c = wrPerson.getCurrentContract().get();
+      contractList.add(c);
+    }
+    val list = contractList.stream().map(c -> ContractTerseDto.build(c)).collect(Collectors.toList());
     renderJSON(gsonBuilder.create().toJson(list));
     
+  }
+  
+  public static void residualList(Long officeId, String code, String codeId) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    val office = offices.getOfficeFromRequest(officeId, code, codeId);
+    log.debug("Richiesta la lista dei residui orari attuali dei dipendenti di {}", office);
   }
 }
