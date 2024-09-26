@@ -21,11 +21,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
-import org.threeten.bp.LocalDate;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
+import cnr.sync.dto.v3.ConfigurationOfficeDto;
 import cnr.sync.dto.v3.ContractTerseDto;
 import cnr.sync.dto.v3.OfficeShowTerseDto;
 import common.security.SecurityRules;
@@ -41,9 +43,11 @@ import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import models.Configuration;
 import models.Contract;
 import models.Office;
 import models.Person;
+import models.PersonConfiguration;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -66,7 +70,8 @@ public class Instances extends Controller {
   @Inject
   static IWrapperFactory wrapperFactory;
 
-  @BasicAuth
+  //@BasicAuth
+  
   public static void list() {
     RestUtils.checkMethod(request, HttpMethod.GET);
     log.debug("Richiesta la lista delle sede di questa istanza");
@@ -80,9 +85,10 @@ public class Instances extends Controller {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val office = offices.getOfficeFromRequest(officeId, code, codeId);
     log.debug("Richiesta la lista dei contratti attuali dei dipendenti di {}", office);
-    Set<Office> offices = Sets.newHashSet();
-    offices.add(office);
-    List<Person> personList = personDao.getActivePersonInMonth(offices, YearMonth.now());
+    LocalDate monthBegin = LocalDate.now().withDayOfMonth(1);
+    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+    List<Person> personList = personDao.list(Optional.absent(),
+        Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
     List<Contract> contractList = Lists.newArrayList();
     for (Person p : personList) {
       IWrapperPerson wrPerson = wrapperFactory.create(p);
@@ -98,5 +104,28 @@ public class Instances extends Controller {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val office = offices.getOfficeFromRequest(officeId, code, codeId);
     log.debug("Richiesta la lista dei residui orari attuali dei dipendenti di {}", office);
+  }
+  
+  public static void officeConfiguration(Long officeId, String code, String codeId) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    val office = offices.getOfficeFromRequest(officeId, code, codeId);
+    log.debug("Richiesta la lista delle configurazioni della sede {}", office);
+    List<Configuration> configurationList = office.getConfigurations();
+    val list = configurationList.stream().map(c -> ConfigurationOfficeDto.build(c)).collect(Collectors.toList());
+    renderJSON(gsonBuilder.create().toJson(list));
+  }
+  
+  public static void peopleConfiguration(Long officeId, String code, String codeId) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    val office = offices.getOfficeFromRequest(officeId, code, codeId);
+    log.debug("Richiesta la lista delle configurazioni dei dipendenti di {}", office);
+    LocalDate monthBegin = LocalDate.now().withDayOfMonth(1);
+    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+    List<Person> personList = personDao.list(Optional.absent(),
+        Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
+    List<PersonConfiguration> peopleConfigurations = Lists.newArrayList();
+//    for (Person p : personList) {
+//      peopleConfigurations.add(p.getPersonConfigurations());
+//    }
   }
 }

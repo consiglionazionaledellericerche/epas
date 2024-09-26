@@ -14,26 +14,30 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package controllers;
+package cnr.sync.dto.v3;
 
-import com.google.common.base.Strings;
-import lombok.extern.slf4j.Slf4j;
-import play.mvc.Controller;
-import play.mvc.With;
+import org.joda.time.LocalDate;
+import org.modelmapper.ModelMapper;
+import lombok.Data;
+import lombok.val;
+import manager.configurations.EpasParam;
+import models.Configuration;
 
-@Slf4j
-@With({Resecure.class})
-public class Instances extends Controller {
+@Data
+public class ConfigurationOfficeDto {
 
-  public static void importInstance() {
-    render();
-  }
+  private String epasParam;
+  private String fieldValue;
+  private LocalDate beginDate;
+  private LocalDate endDate;
   
-  public static void importInfo(String instance) {
-    if (Strings.isNullOrEmpty(instance)) {
-      flash.error("Inserisci un indirizzo valido");
-      importInstance();
+  public static ConfigurationOfficeDto build(Configuration configuration) {
+    ModelMapper modelMapper = new ModelMapper();
+    modelMapper.getConfiguration().setAmbiguityIgnored(true);
+    val configurationDto = modelMapper.map(configuration, ConfigurationOfficeDto.class);
+    if (configuration.getEpasParam() != null) {
+      configurationDto.setEpasParam(configuration.getEpasParam().name);
     }
-    
+    return configurationDto;
   }
 }
