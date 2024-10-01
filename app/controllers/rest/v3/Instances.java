@@ -30,6 +30,8 @@ import com.google.gson.GsonBuilder;
 import cnr.sync.dto.v3.ConfigurationOfficeDto;
 import cnr.sync.dto.v3.ContractTerseDto;
 import cnr.sync.dto.v3.OfficeShowTerseDto;
+import cnr.sync.dto.v3.PersonConfigurationList;
+import cnr.sync.dto.v3.PersonConfigurationShowDto;
 import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
@@ -123,9 +125,15 @@ public class Instances extends Controller {
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
     List<Person> personList = personDao.list(Optional.absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
-    List<PersonConfiguration> peopleConfigurations = Lists.newArrayList();
-//    for (Person p : personList) {
-//      peopleConfigurations.add(p.getPersonConfigurations());
-//    }
+    PersonConfigurationList pcl = new PersonConfigurationList();
+    List<PersonConfigurationShowDto> list = Lists.newArrayList();
+    for (Person p : personList) {
+      pcl.setNumber(p.getNumber());
+      for (PersonConfiguration pc : p.getPersonConfigurations()) {
+        list.add(PersonConfigurationShowDto.build(pc));        
+      }
+      pcl.setList(list);
+    }
+    renderJSON(gsonBuilder.create().toJson(list));
   }
 }
