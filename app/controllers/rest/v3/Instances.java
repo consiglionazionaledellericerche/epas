@@ -125,15 +125,18 @@ public class Instances extends Controller {
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
     List<Person> personList = personDao.list(Optional.absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();
+    List<PersonConfigurationList> listOfPersonConfigurationList = Lists.newArrayList();
     PersonConfigurationList pcl = new PersonConfigurationList();
     List<PersonConfigurationShowDto> list = Lists.newArrayList();
     for (Person p : personList) {
+      log.debug("Richiesta la lista delle configurazioni di {}", p.getFullname());
       pcl.setNumber(p.getNumber());
       for (PersonConfiguration pc : p.getPersonConfigurations()) {
         list.add(PersonConfigurationShowDto.build(pc));        
       }
       pcl.setList(list);
+      listOfPersonConfigurationList.add(pcl);
     }
-    renderJSON(gsonBuilder.create().toJson(list));
+    renderJSON(gsonBuilder.create().toJson(listOfPersonConfigurationList));
   }
 }
