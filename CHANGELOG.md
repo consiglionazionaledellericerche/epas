@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.19.0] - UNRELEASED
+### Added
+  - Aggiunti i codici a completamento "H7" per i codici 24PROV e 242PROV in caso di fruizione oraria.
 ### Changed
   - Rimosso vincolo obbligatorietà id missione nell'annullamento missione via REST 
   - Modificato il comportamento in caso di richiesta di approvazione telelavoro rifiutata

@@ -254,7 +254,11 @@ public enum DefaultGroup {
   
   G_24PROV("24 - Retribuzione 80% 1 figlio", "24 - Retribuzione provvisoria 80% 1 figlio",
       DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
-      PeriodType.child1_0_12, DefaultTakable.T_24PROV, null, null, false,
+      PeriodType.child1_0_12, DefaultTakable.T_24PROV, DefaultComplation.C_24PROV, null, false,
+      false), 
+  G_242PROV("242 - Retribuzione 80% 2 figlio", "242 - Retribuzione provvisoria 80% 2 figlio",
+      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      PeriodType.child2_0_12, DefaultTakable.T_242PROV, DefaultComplation.C_242PROV, null, false,
       false), 
 
   G_24("24 - Retribuzione 80% 1 figlio", "Retribuzione provvisoria 80% 1 figlio",
