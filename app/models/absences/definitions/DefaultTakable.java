@@ -485,7 +485,7 @@ public enum DefaultTakable {
   
   T_MALATTIA(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_111, 
-          DefaultAbsenceType.A_111FR,
+          /*DefaultAbsenceType.A_111FR,*/
           DefaultAbsenceType.A_115, 
           DefaultAbsenceType.A_116, 
           DefaultAbsenceType.A_117, 
@@ -500,7 +500,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_11S,
           DefaultAbsenceType.A_111SCM), 
       ImmutableSet.of(DefaultAbsenceType.A_111, 
-          DefaultAbsenceType.A_111FR,
+          /*DefaultAbsenceType.A_111FR,*/
           DefaultAbsenceType.A_115, 
           DefaultAbsenceType.A_116, 
           DefaultAbsenceType.A_117, 
@@ -554,7 +554,7 @@ public enum DefaultTakable {
       ImmutableSet.of(
           DefaultAbsenceType.A_COMANDO,
           DefaultAbsenceType.A_102,
-          DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP, 
+          DefaultAbsenceType.A_103, /*DefaultAbsenceType.A_103BP,*/ 
           DefaultAbsenceType.A_105BP,
 
           DefaultAbsenceType.A_71, DefaultAbsenceType.A_72, DefaultAbsenceType.A_73,
@@ -609,9 +609,9 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_62,
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_98CV, 
           DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_46,
-          DefaultAbsenceType.A_46RA, DefaultAbsenceType.A_VAC19),
+          DefaultAbsenceType.A_46RA/*, DefaultAbsenceType.A_VAC19*/),
           ImmutableSet.of(DefaultAbsenceType.A_COMANDO, DefaultAbsenceType.A_102,
-          DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP, 
+          DefaultAbsenceType.A_103, /*DefaultAbsenceType.A_103BP,*/ 
           DefaultAbsenceType.A_105BP,
           DefaultAbsenceType.A_71, DefaultAbsenceType.A_72, DefaultAbsenceType.A_73,
           DefaultAbsenceType.A_74, DefaultAbsenceType.A_75, DefaultAbsenceType.A_76,
@@ -655,7 +655,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_62,
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_98CV,
           DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_46,
-          DefaultAbsenceType.A_46RA, DefaultAbsenceType.A_VAC19),
+          DefaultAbsenceType.A_46RA/*, DefaultAbsenceType.A_VAC19*/),
       -1, null),
 
   T_CONGEDO_MATRIMONIO(AmountType.units, 
