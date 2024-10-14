@@ -32,6 +32,7 @@ import cnr.sync.dto.v3.ContractTerseDto;
 import cnr.sync.dto.v3.OfficeShowTerseDto;
 import cnr.sync.dto.v3.PersonConfigurationList;
 import cnr.sync.dto.v3.PersonConfigurationShowDto;
+import cnr.sync.dto.v3.PersonResidualDto;
 import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
@@ -45,6 +46,8 @@ import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Configuration;
 import models.Contract;
 import models.Office;
@@ -71,6 +74,8 @@ public class Instances extends Controller {
   static PersonDao personDao;
   @Inject
   static IWrapperFactory wrapperFactory;
+  @Inject
+  static PersonStampingRecapFactory stampingsRecapFactory;
 
   //@BasicAuth
   
@@ -83,6 +88,12 @@ public class Instances extends Controller {
     renderJSON(gsonBuilder.create().toJson(list));
   }
   
+  /**
+   * La lista dei contratti dei dipendenti di una sede.
+   * @param officeId l'identificativo della sede
+   * @param code il codice della sede
+   * @param codeId il codeId della sede
+   */
   public static void contractList(Long officeId, String code, String codeId) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val office = offices.getOfficeFromRequest(officeId, code, codeId);
@@ -102,12 +113,41 @@ public class Instances extends Controller {
     
   }
   
+  /**
+   * La lista dei residui orari dei dipendenti di una sede.
+   * @param officeId l'identificativo della sede
+   * @param code il codice della sede
+   * @param codeId il codeId della sede
+   */
   public static void residualList(Long officeId, String code, String codeId) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val office = offices.getOfficeFromRequest(officeId, code, codeId);
     log.debug("Richiesta la lista dei residui orari attuali dei dipendenti di {}", office);
+    val yearMonth = YearMonth.now();
+    LocalDate monthBegin = LocalDate.now().withDayOfMonth(1);
+    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+    List<Person> personList = personDao.list(Optional.absent(),
+        Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();   
+    List<PersonResidualDto> list = Lists.newArrayList();
+    for (Person person : personList) {
+      PersonStampingRecap psDto = 
+          stampingsRecapFactory.create(
+              person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
+      PersonResidualDto dto = new PersonResidualDto();
+      dto.person = person;
+      dto.residual = psDto.contractMonths.stream().mapToInt(cm -> cm.getValue().getRemainingMinutesLastYear() 
+          + cm.getValue().getRemainingMinutesCurrentYear()).sum();
+      list.add(dto);
+    }
+    renderJSON(gsonBuilder.create().toJson(list));
   }
   
+  /**
+   * La configurazione di una sede.
+   * @param officeId l'identificativo della sede
+   * @param code il codice della sede
+   * @param codeId il codeId della sede
+   */
   public static void officeConfiguration(Long officeId, String code, String codeId) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val office = offices.getOfficeFromRequest(officeId, code, codeId);
@@ -117,6 +157,12 @@ public class Instances extends Controller {
     renderJSON(gsonBuilder.create().toJson(list));
   }
   
+  /**
+   * La lista delle configurazioni personali dei dipendenti di una sede.
+   * @param officeId l'identificativo della sede
+   * @param code il codice della sede
+   * @param codeId il codeId della sede
+   */
   public static void peopleConfiguration(Long officeId, String code, String codeId) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val office = offices.getOfficeFromRequest(officeId, code, codeId);
