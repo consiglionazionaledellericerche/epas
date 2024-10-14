@@ -640,6 +640,10 @@ public enum DefaultAbsenceType {
       ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, 
       MealTicketBehaviour.allowMealTicket, 0, null,
       Sets.newHashSet(), null, null, false, false, true, null),
+  A_105("105", "Convenzione CNR - altro ente no buono pasto", false,
+      ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, 
+      MealTicketBehaviour.notAllowMealTicket, 0, null,
+      Sets.newHashSet(), null, null, false, false, true, null),
 
   A_23("23", "Astensione facoltativa post partum 100% primo figlio intera giornata", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, 

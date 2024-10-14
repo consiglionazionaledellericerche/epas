@@ -555,7 +555,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_COMANDO,
           DefaultAbsenceType.A_102,
           DefaultAbsenceType.A_103, /*DefaultAbsenceType.A_103BP,*/ 
-          DefaultAbsenceType.A_105BP,
+          DefaultAbsenceType.A_105BP, DefaultAbsenceType.A_105,
 
           DefaultAbsenceType.A_71, DefaultAbsenceType.A_72, DefaultAbsenceType.A_73,
           DefaultAbsenceType.A_74, DefaultAbsenceType.A_75, DefaultAbsenceType.A_76,
@@ -612,7 +612,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_46RA/*, DefaultAbsenceType.A_VAC19*/),
           ImmutableSet.of(DefaultAbsenceType.A_COMANDO, DefaultAbsenceType.A_102,
           DefaultAbsenceType.A_103, /*DefaultAbsenceType.A_103BP,*/ 
-          DefaultAbsenceType.A_105BP,
+          DefaultAbsenceType.A_105BP, DefaultAbsenceType.A_105,
           DefaultAbsenceType.A_71, DefaultAbsenceType.A_72, DefaultAbsenceType.A_73,
           DefaultAbsenceType.A_74, DefaultAbsenceType.A_75, DefaultAbsenceType.A_76,
           DefaultAbsenceType.A_77, 
