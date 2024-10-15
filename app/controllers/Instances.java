@@ -17,13 +17,21 @@
 package controllers;
 
 import com.google.common.base.Strings;
+import helpers.rest.ApiRequestException;
 import lombok.extern.slf4j.Slf4j;
+import play.libs.WS;
+import play.libs.WS.HttpResponse;
+import play.libs.WS.WSRequest;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.With;
 
 @Slf4j
 @With({Resecure.class})
 public class Instances extends Controller {
+  
+  private static final String JSON_CONTENT_TYPE = "application/json";
+  private static final String LIST = "list";
 
   public static void importInstance() {
     render();
@@ -33,6 +41,15 @@ public class Instances extends Controller {
     if (Strings.isNullOrEmpty(instance)) {
       flash.error("Inserisci un indirizzo valido");
       importInstance();
+    }
+    WSRequest wsRequest = WS.url(instance+"/"+LIST)
+        .setHeader("Content-Type", JSON_CONTENT_TYPE)
+        .authenticate("Authorization", "Bearer ");
+    
+    HttpResponse httpResponse = wsRequest.get();
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      log.error("Errore di connessione: {}", httpResponse.getStatusText());
+      throw new ApiRequestException("Unauthorized");
     }
     
   }
