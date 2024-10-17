@@ -58,6 +58,7 @@ import java.net.MalformedURLException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -75,6 +76,7 @@ import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.ContractManager;
 import manager.EmailManager;
+import manager.PeriodManager;
 import manager.PersonDayInTroubleManager;
 import manager.PersonDayManager;
 import manager.SecureManager;
@@ -83,8 +85,14 @@ import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.service.CertificationService;
 import manager.attestati.service.CertificationsComunication;
 import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
+import manager.configurations.EpasParam.EpasParamValueType;
+import manager.recaps.recomputation.RecomputeRecap;
+import manager.services.absences.AbsenceService;
+import manager.services.absences.AbsenceService.InsertReport;
 import manager.services.helpdesk.HelpdeskServiceManager;
 import models.CompetenceCode;
+import models.Configuration;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.GeneralSetting;
@@ -101,13 +109,17 @@ import models.UsersRolesOffices;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.CategoryTab;
+import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultGroup;
+import models.base.IPropertyInPeriod;
 import models.enumerate.LimitType;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.joda.time.YearMonth;
 import play.Play;
 import play.data.validation.Required;
@@ -185,6 +197,10 @@ public class Administration extends Controller {
   static CertificationsComunication certificationComunication;
   @Inject
   static AbsenceManager absenceManager;
+  @Inject
+  static PeriodManager periodManager;
+  @Inject
+  static AbsenceService absenceService;
 
   /**
    * Utilizzabile solo da developer e admin permette di prelevare un token del client
@@ -1183,4 +1199,106 @@ public class Administration extends Controller {
     }
     renderBinary(file, "codici.zip", false);
   }
+  
+  public static void convertVacations() {
+    /*
+     * Prima cosa devo verificare che tutte le configurazioni delle sedi abbiano il 31/12 come limite
+     * alle ferie dell'anno 2023. Se così non fosse devo modificarlo
+     */
+    List<Office> officeList = officeDao.allEnabledOffices();
+    MonthDay dayMonth = (MonthDay) EpasParamValueType
+        .parseValue(EpasParamValueType.DAY_MONTH, "31/12");
+    Configuration newConfiguration = null;
+    for (Office office : officeList) {
+      log.debug("Controllo il parametro della sede {}", office.getName());
+      val oldConfiguration = (MonthDay) configurationManager.configValue(office, EpasParam.EXPIRY_VACATION_PAST_YEAR, 2023);
+      log.debug("Il valore del parametro è: {}", oldConfiguration);
+      newConfiguration = (Configuration) configurationManager.updateDayMonth(EpasParam.EXPIRY_VACATION_PAST_YEAR,
+          office, dayMonth.getDayOfMonth(), dayMonth.getMonthOfYear(),
+          Optional.fromNullable(new LocalDate(2023,1,1)),
+          Optional.fromNullable(new LocalDate(2023,12,31)), false);
+      List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
+      RecomputeRecap recomputeRecap =
+          periodManager.buildRecap(office.getBeginDate(),
+              Optional.fromNullable(LocalDate.now()),
+              periodRecaps, Optional.<LocalDate>absent());
+      recomputeRecap.epasParam = EpasParam.EXPIRY_VACATION_PAST_YEAR;
+      periodManager.updatePeriods(newConfiguration, true);
+
+      consistencyManager.performRecomputation(office,
+          EpasParam.EXPIRY_VACATION_PAST_YEAR.recomputationTypes, recomputeRecap.recomputeFrom);
+      log.debug("Il nuovo valore del parametro è: {}", newConfiguration.getFieldValue());
+    }
+
+    /*
+     * Ora occorre trovare tutte le assenze con codice 37 fatte dal 1/9/2024 al 31/12/2024
+     * e cambiarle in 31
+     */
+    log.debug("Cerco le assenze con codice 37...");
+    List<Absence> absenceList = absenceDao.getAbsenceByCodeInPeriod(Optional.absent(), 
+        Optional.fromNullable("37"), new LocalDate(2024,9,1), new LocalDate(2024,12,31), 
+        Optional.absent(), false, false);
+    absenceList.sort(Comparator.comparing(Absence::getAbsenceDate).reversed());
+    log.debug("Sono state trovate {} assenze con codice 37 dal 1 settembre al 31 dicembre", absenceList.size());
+    Map<Person, List<Absence>> map = Maps.newHashMap();
+    for (Absence abs : absenceList) {
+      List<Absence> list = map.get(abs.getPersonDay().getPerson());
+      if (list == null || list.isEmpty()) {
+        list = Lists.newArrayList();        
+      }
+      list.add(abs);
+      map.put(abs.getPersonDay().getPerson(), list);
+      log.debug("Caricata sulla mappa l'assenza {} di {} del giorno {}", 
+          abs.getAbsenceType().getCode(), abs.getPersonDay().getPerson(), abs.getPersonDay().getDate());
+    }
+    int count = 0;
+        
+    for (Map.Entry<Person, List<Absence>> entry : map.entrySet()) {
+      JPAPlugin.closeTx(false);
+      JPAPlugin.startTx(false);
+      log.debug("Rimuovo le assenze 37 di {}", entry.getKey().getFullname());
+      for (Absence abs : entry.getValue()) {
+        
+        int deleted = absenceManager
+            .removeAbsencesInPeriod(entry.getKey(), abs.getPersonDay().getDate(), 
+                abs.getPersonDay().getDate(), abs.getAbsenceType());
+        if (deleted != 0) {
+          count++;
+          log.debug("Rimossa assenza 37 del giorno {}", abs.getPersonDay().getDate());
+        }
+      }    
+      JPAPlugin.closeTx(false);
+    }
+    log.debug("Rimosse {} assenze.", count);
+    /*
+     * Ora occorre inserire al posto dei 37 i 31
+     */
+    JPAPlugin.startTx(false);
+    
+    InsertReport insertReport = null;
+    int count31 = 0;
+    for (Map.Entry<Person, List<Absence>> entry : map.entrySet()) {
+      JPAPlugin.closeTx(false);
+      JPAPlugin.startTx(false);
+      GroupAbsenceType vacationGroup = absenceComponentDao
+          .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+      JustifiedType type = absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.all_day);
+      for (Absence abs : entry.getValue()) {
+        
+        log.debug("Cerco di inserire un codice 31 per il giorno {} per {}", 
+            abs.getPersonDay().getDate(), abs.getPersonDay().getPerson().getFullname());
+        Person person = personDao.getPersonById(entry.getKey().getId());
+        insertReport = absenceService.insert(person, vacationGroup, 
+            abs.getPersonDay().getDate(), abs.getPersonDay().getDate(),
+            null, type, 1, null, false, absenceManager);
+
+        absenceManager.saveAbsences(insertReport, person, abs.getPersonDay().getDate(), null, 
+            type, vacationGroup);
+        count31++;
+      }
+      JPAPlugin.closeTx(false);
+    }
+    renderText(String.format("Procedura completata correttamente. Rimossi %s codici 37 e inseriti %s codici 31", count, count31));
+  }
+  
 }
