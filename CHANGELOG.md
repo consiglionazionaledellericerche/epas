@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Aggiunti i codici a completamento "H7" per i codici 24PROV e 242PROV in caso di fruizione oraria.
   - Aggiunto codice 105 per convenzione cnr-università che non matura buono pasto
+  - Aggiunta procedura per modificare i codici 37 in codici 31 come da disposizione di UGRU per il 2024
 ### Changed
   - Rimosso vincolo obbligatorietà id missione nell'annullamento missione via REST 
   - Modificato il comportamento in caso di richiesta di approvazione telelavoro rifiutata
