@@ -1,0 +1,27 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Importazione da altre istanze' /}
+
+
+<div class="container">
+
+	#{alert color:'info'}
+  		<p>
+    	Seleziona la sede di cui vuoi importare le informazioni
+  		</p>
+  	#{/alert}
+	#{form @Instances.importInfo(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+	<ul class="list-group">
+	      #{list items:badgeReadersResults.results, as:'item'}
+
+	      <li class="list-group-item list-group-item-grey">
+	        #{badgeReader.item item:item /}
+	      </li>
+
+	      #{/list}
+	</ul>
+	#{b.buttons center:true}
+		<button type="submit" class="btn btn-default">Vai</button>
+	#{/b.buttons}
+	#{/form}
+</div>

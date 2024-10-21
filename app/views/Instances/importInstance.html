@@ -9,7 +9,7 @@
     	Inserisci nel campo sottostante l'indirizzo da cui andare a prelevare le informazioni.
   		</p>
   	#{/alert}
-	#{form @Instances.importInstance(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+	#{form @Instances.importSeat(), method:'POST', autocomplete:false, class:'form form-horizontal'}
 	#{f.input 'instance', type:text/}
 	#{b.buttons center:true}
 		<button type="submit" class="btn btn-default">Vai</button>

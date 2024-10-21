@@ -77,8 +77,7 @@ public class Instances extends Controller {
   @Inject
   static PersonStampingRecapFactory stampingsRecapFactory;
 
-  //@BasicAuth
-  
+  @BasicAuth  
   public static void list() {
     RestUtils.checkMethod(request, HttpMethod.GET);
     log.debug("Richiesta la lista delle sede di questa istanza");
