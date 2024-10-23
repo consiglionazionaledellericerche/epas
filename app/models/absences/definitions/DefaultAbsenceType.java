@@ -428,7 +428,7 @@ public enum DefaultAbsenceType {
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null, 
       false, true, true, null), 
   A_98("98", "Assenza Ingiustificata", false,
-      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, 
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, 
       MealTicketBehaviour.notAllowMealTicket, 0, null,
       Sets.newHashSet(), null, null, false, true, true, null), 
   A_99("99", "permesso per diritto allo studio",
