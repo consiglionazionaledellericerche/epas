@@ -40,7 +40,7 @@ public class Instances extends Controller {
   
   private static final String JSON_CONTENT_TYPE = "application/json";
   private static final String LIST = "list";
-  private static final String PATH = "rest/v3/instances";
+  private static final String PATH = "/rest/v3/instances";
   
   
   @Inject
@@ -55,8 +55,7 @@ public class Instances extends Controller {
       flash.error("Inserisci un indirizzo valido");
       importInstance();
     }
-    WSRequest wsRequest = WS.url(instance+PATH+"/"+LIST)
-        .setHeader("Content-Type", JSON_CONTENT_TYPE)
+    WSRequest wsRequest = WS.url(instance+PATH+"/"+LIST).setHeader("Content-Type", JSON_CONTENT_TYPE)
         .authenticate("developer", "sdrfli.");
     
     HttpResponse httpResponse = wsRequest.get();
@@ -66,10 +65,13 @@ public class Instances extends Controller {
     }
     List<OfficeShowTerseDto> list = (List<OfficeShowTerseDto>) new Gson()
         .fromJson(httpResponse.getJson(), OfficeShowTerseDto.class);
-    render(list);
+    render(list, instance);
   }
   
-  public static void importInfo() {
-    
+  public static void importInfo(String instance, String code) {
+    if (Strings.isNullOrEmpty(instance)) {
+      flash.error("Inserisci un indirizzo valido");
+      importInstance();
+    }
   }
 }

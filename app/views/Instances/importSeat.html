@@ -12,10 +12,10 @@
   	#{/alert}
 	#{form @Instances.importInfo(), method:'POST', autocomplete:false, class:'form form-horizontal'}
 	<ul class="list-group">
-	      #{list items:badgeReadersResults.results, as:'item'}
+	      #{list items:list, as:'item'}
 
 	      <li class="list-group-item list-group-item-grey">
-	        #{badgeReader.item item:item /}
+	        #{item.name - item.code /}
 	      </li>
 
 	      #{/list}
