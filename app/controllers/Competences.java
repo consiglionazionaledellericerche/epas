@@ -30,6 +30,7 @@ import common.security.SecurityRules;
 import dao.CertificationDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.GeneralSettingDao;
 import dao.MonthlyCompetenceTypeDao;
 import dao.OfficeDao;
 import dao.OrganizationShiftTimeTableDao;
@@ -60,6 +61,8 @@ import manager.CompetenceManager;
 import manager.ConsistencyManager;
 import manager.ShiftOrganizationManager;
 import manager.competences.ShiftTimeTableDto;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.recaps.competence.CompetenceRecap;
 import manager.recaps.competence.CompetenceRecapFactory;
 import manager.recaps.competence.PersonMonthCompetenceRecap;
@@ -72,6 +75,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.CompetenceCodeGroup;
 import models.Contract;
+import models.GeneralSetting;
 import models.MonthlyCompetenceType;
 import models.Office;
 import models.OrganizationShiftTimeTable;
@@ -149,7 +153,10 @@ public class Competences extends Controller {
   private static OrganizationShiftTimeTableDao shiftTimeTableDao;
   @Inject
   private static MonthlyCompetenceTypeDao monthlyDao;
-
+  @Inject
+  private static ConfigurationManager configurationManager;
+  @Inject
+  private static GeneralSettingDao settingDao;
 
   /**
    * Crud CompetenceCode.
@@ -639,11 +646,28 @@ public class Competences extends Controller {
     notFoundIfNull(office);
 
     rules.checkIfPermitted(office);
-
+    /* Recupero le info per le ore del monte ore straordinari per la sede*/
     List<TotalOvertime> totalList = competenceDao.getTotalOvertime(year, office);
     int totale = competenceManager.getTotalOvertime(totalList);
-
-    render(totalList, totale, year, office);
+    
+    /* Recupero la lista degli abilitati allo straordinario per assegnargli le ore di 
+       monte ore personale (previa verifica del parametro associato)
+     */
+    List<Person> personList = Lists.newArrayList();
+    GeneralSetting settings = settingDao.generalSetting();
+    if (!settings.isEnableOvertimePerPerson()) {
+      log.warn("Non abilitato il parametro per gli straordinari per persona!!");
+    } else {
+      CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+      Set<Office> offices = Sets.newHashSet();
+      offices.add(office);
+      personList = personDao
+          .listForCompetence(code, Optional.absent(), offices, true, 
+              LocalDate.now().withYear(year).monthOfYear().withMinimumValue()
+              .dayOfMonth().withMinimumValue(), LocalDate.now(), Optional.absent()).list();
+    }
+    
+    render(totalList, totale, year, office, personList);
   }
 
   /**
