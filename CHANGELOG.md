@@ -4,9 +4,67 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.16.0] - 2024-05-24
+## [2.19.0] - 2024-10-15
 ### Added
+  - Aggiunti i codici a completamento "H7" per i codici 24PROV e 242PROV in caso di fruizione oraria.
+  - Aggiunto codice 105 per convenzione cnr-università che non matura buono pasto
+  - Aggiunta procedura per modificare i codici 37 in codici 31 come da disposizione di UGRU per il 2024
+### Changed
+  - Rimosso vincolo obbligatorietà id missione nell'annullamento missione via REST 
+  - Modificato il comportamento in caso di richiesta di approvazione telelavoro rifiutata
+  - Rimossi codici non più usati (vac19, 103P, 111FR)
 
+## [2.18.1] - 2024-09-05
+### Added
+  - Aggiunta possibilità per l'utente che si autoinserisce le assenze per congedo parentale di aggiungere anche l'allegato
+
+### Changed
+  - Aggiornata libreria Guava alla 33.3.0
+  - Corretto il comportamento del codice 7M e 7DM che non devono maturare buono pasto qualsiasi quantità oraria venga
+    inserita
+
+## [2.18.0] - 2024-08-23
+### Changed
+  - Corretto il redirect dopo l'inserimento di assenze nel proprio cartellino da parte dell'amministratore del
+    personale.
+  - Modificata interfaccia di inserimento timbrature rimuovendo la causale del lavoro fuori sede da quelle
+    inseribili da parte dell'amministratore del personale. Ora rimane la sola form di inserimento fuori sede.
+  - Modificato il controllo della sede di appartenenza del dipendente di cui arriva l'ordine/annullamento/rimborso
+    di missione per consentire l'integrazione con il nuovo sistema di missioni Cineca
+
+## [2.17.2] - 2024-07-29
+### Changed
+  - Aggiunta all'evoluzione 215 l'impostazione della sequenza seq_working_time_types per evitare gli errori 
+    nel passaggio dalla versione 2.15.0 a quelle successive in alcuni casi
+
+## [2.17.1] - 2024-07-15
+### Changed
+  - Nel job all'avvio dell'applicazione evitato di chiudere l'ufficio se ne è presente uno solo anche se vuoto.
+  - Scartato l'inserimento delle missioni con data di inizio o fine più lontana di 6 mesi.
+  - Corretta evoluzione 217 che aggiornava l'orario Allattamento ma aveva problemi in caso di più orari Allattamento presenti
+
+## [2.17.0] - 2024-07-09
+### Added
+  - Aggiunto orario di lavoro Allattamento che sostituisce il precedente: non si matura mai il buono pasto.
+
+### Changed
+  - Modificato il precedente orario Allattamento in 'Allattamento fino al 31-06-2024' e disabilitato. Questo orario 
+    non è più da usarsi a causa dell'inserimento del nuovo orario Allattamento.
+
+  - Corretta una vecchia evoluzione del db (la 69.sql) che inseriva i working_time_types senza
+    usare la sequenza postgres corretta. Questo rompeva l'evoluzione 215.sql nel caso di nuova
+    installazione a partire dalla versione 2.16.0 o di aggiornamento di una installazione esistente
+    pre 2.16.0 senza inserimenti effettuati via web di nuovi working_time_types
+
+## [2.16.1] - 2024-06-18
+### Added
+  - Aggiunto codice 24PROV che manda ad Attestati il codice 24 per recepire la direttiva di consentire l'utilizzo di 30 giorni di congedo 
+    all'80%.
+
+### Changed
+  - Modificato il comportamento dei codici 62S...per distacchi sindacali part time: adesso non decurtano più le ferie
+
+## [2.16.0] - 2024-05-24
 ### Changed
   - Modificato il nome dell'orario Maternità CNR in Allattamento per renderlo più generico e usabile in 
     tutte le installazioni di ePAS
@@ -38,14 +96,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     il servizio REST con la lista delle sedi
   - Modificato il calcolo delle ore di turno del pomeriggio per chi utilizza la fascia oraria
     07-14/13.30-19: ora a chi fa il pomeriggio viene conteggiata una mezz'ora in meno
-  
 
 ### Changed
   - Nel metodo REST /rest/v2/certifications/getMonthSituationByOffice valorizzate correttamente
     le competenze
   - Nel metodo REST /rest/v3/persondays/getMonthSituationByPerson per il personDay esportati i campi
     stampingsTime e decurtedMeal e per le assenze esportato isRealAbsence
-  
   
 ## [2.14.1] - 2024-03-15
 ### Changed

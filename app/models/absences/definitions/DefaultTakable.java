@@ -297,15 +297,24 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_25M, 
           DefaultAbsenceType.A_25U), 
       150, null),
-
+  
   T_24(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_24, 
-          DefaultAbsenceType.A_24M, 
+      ImmutableSet.of(DefaultAbsenceType.A_24O, 
+          DefaultAbsenceType.A_24OM, 
           DefaultAbsenceType.A_24U), 
-      ImmutableSet.of(DefaultAbsenceType.A_24, 
-          DefaultAbsenceType.A_24M, 
+      ImmutableSet.of(DefaultAbsenceType.A_24O, 
+          DefaultAbsenceType.A_24OM, 
           DefaultAbsenceType.A_24U), 
       150, null),
+
+  T_24PROV(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_24PROV, DefaultAbsenceType.A_24MPROV), 
+      ImmutableSet.of(DefaultAbsenceType.A_24PROV, DefaultAbsenceType.A_24MPROV), 
+      30, null),
+  T_242PROV(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_242PROV, DefaultAbsenceType.A_242MPROV), 
+      ImmutableSet.of(DefaultAbsenceType.A_242PROV, DefaultAbsenceType.A_242MPROV), 
+      30, null),
 
   T_232(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_232, 
@@ -476,7 +485,7 @@ public enum DefaultTakable {
   
   T_MALATTIA(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_111, 
-          DefaultAbsenceType.A_111FR,
+          /*DefaultAbsenceType.A_111FR,*/
           DefaultAbsenceType.A_115, 
           DefaultAbsenceType.A_116, 
           DefaultAbsenceType.A_117, 
@@ -491,7 +500,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_11S,
           DefaultAbsenceType.A_111SCM), 
       ImmutableSet.of(DefaultAbsenceType.A_111, 
-          DefaultAbsenceType.A_111FR,
+          /*DefaultAbsenceType.A_111FR,*/
           DefaultAbsenceType.A_115, 
           DefaultAbsenceType.A_116, 
           DefaultAbsenceType.A_117, 
@@ -545,8 +554,8 @@ public enum DefaultTakable {
       ImmutableSet.of(
           DefaultAbsenceType.A_COMANDO,
           DefaultAbsenceType.A_102,
-          DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP, 
-          DefaultAbsenceType.A_105BP,
+          DefaultAbsenceType.A_103, /*DefaultAbsenceType.A_103BP,*/ 
+          DefaultAbsenceType.A_105BP, DefaultAbsenceType.A_105,
 
           DefaultAbsenceType.A_71, DefaultAbsenceType.A_72, DefaultAbsenceType.A_73,
           DefaultAbsenceType.A_74, DefaultAbsenceType.A_75, DefaultAbsenceType.A_76,
@@ -600,10 +609,10 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_62,
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_98CV, 
           DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_46,
-          DefaultAbsenceType.A_46RA, DefaultAbsenceType.A_VAC19),
+          DefaultAbsenceType.A_46RA/*, DefaultAbsenceType.A_VAC19*/),
           ImmutableSet.of(DefaultAbsenceType.A_COMANDO, DefaultAbsenceType.A_102,
-          DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP, 
-          DefaultAbsenceType.A_105BP,
+          DefaultAbsenceType.A_103, /*DefaultAbsenceType.A_103BP,*/ 
+          DefaultAbsenceType.A_105BP, DefaultAbsenceType.A_105,
           DefaultAbsenceType.A_71, DefaultAbsenceType.A_72, DefaultAbsenceType.A_73,
           DefaultAbsenceType.A_74, DefaultAbsenceType.A_75, DefaultAbsenceType.A_76,
           DefaultAbsenceType.A_77, 
@@ -646,7 +655,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_62,
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_98CV,
           DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_46,
-          DefaultAbsenceType.A_46RA, DefaultAbsenceType.A_VAC19),
+          DefaultAbsenceType.A_46RA/*, DefaultAbsenceType.A_VAC19*/),
       -1, null),
 
   T_CONGEDO_MATRIMONIO(AmountType.units, 
@@ -759,7 +768,7 @@ public enum DefaultTakable {
 
   T_RIDUCE_FERIE_CNR(AmountType.units, 
       ImmutableSet.of(
-          DefaultAbsenceType.A_24, DefaultAbsenceType.A_24H7,
+          DefaultAbsenceType.A_24PROV, 
           DefaultAbsenceType.A_25O, DefaultAbsenceType.A_25OH7,
           DefaultAbsenceType.A_242, DefaultAbsenceType.A_242H7,
           DefaultAbsenceType.A_252O, DefaultAbsenceType.A_252OH7,
@@ -780,10 +789,9 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_98CV,
           DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18,
           DefaultAbsenceType.A_C16, DefaultAbsenceType.A_35R,
-          DefaultAbsenceType.A_54B, DefaultAbsenceType.A_62S50V, 
-          DefaultAbsenceType.A_62S25V,DefaultAbsenceType.A_62S75V), 
+          DefaultAbsenceType.A_54B), 
       ImmutableSet.of(
-          DefaultAbsenceType.A_24, DefaultAbsenceType.A_24H7,
+          DefaultAbsenceType.A_24PROV, 
           DefaultAbsenceType.A_25O, DefaultAbsenceType.A_25OH7,
           DefaultAbsenceType.A_242, DefaultAbsenceType.A_242H7,
           DefaultAbsenceType.A_252O, DefaultAbsenceType.A_252OH7,
@@ -804,8 +812,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_98CV,
           DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18,
           DefaultAbsenceType.A_C16, DefaultAbsenceType.A_35R,
-          DefaultAbsenceType.A_54B, DefaultAbsenceType.A_62S50V, 
-          DefaultAbsenceType.A_62S25V,DefaultAbsenceType.A_62S75V), 
+          DefaultAbsenceType.A_54B), 
       -1, null),
 
   T_RIPOSI_CNR_ATTESTATI(AmountType.units, 

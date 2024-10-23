@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2024  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,6 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package controllers;
 
 import com.google.common.base.Optional;
@@ -193,8 +192,10 @@ public class RequestInit extends Controller {
         && !session.get("officeSelected").equals("null")) {
       officeId = Long.valueOf(session.get("officeSelected"));
     } else if (!offices.isEmpty()) {
-      officeId = offices.stream().filter(off -> off.getEndDate() == null)
-            .sorted((o, o1) -> o.getName().compareTo(o1.getName())).findFirst().get().id;        
+      val officesNotClosed = offices.stream().filter(off -> off.getEndDate() == null).collect(Collectors.toList());
+      if (!officesNotClosed.isEmpty()) {
+        officeId = officesNotClosed.stream().sorted((o, o1) -> o.getName().compareTo(o1.getName())).findFirst().get().id;
+      }
     } else if (currentUser.getPerson() != null && currentUser.getPerson().getOffice() != null) {
       officeId = currentUser.getPerson().getOffice().id;
     }

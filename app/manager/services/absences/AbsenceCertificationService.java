@@ -613,9 +613,9 @@ public class AbsenceCertificationService {
     //Complete primo figlio
     patchPostPartumInitComplete(person, mappona, DefaultGroup.G_23,
         Sets.newHashSet(DefaultAbsenceType.A_25.getCode(), DefaultAbsenceType.A_25H7.getCode(), 
-            DefaultAbsenceType.A_24.getCode(), DefaultAbsenceType.A_24H7.getCode()));
+            DefaultAbsenceType.A_24O.getCode(), DefaultAbsenceType.A_24OH7.getCode()));
     patchPostPartumInitComplete(person, mappona, DefaultGroup.G_25,
-        Sets.newHashSet(DefaultAbsenceType.A_24.getCode(), DefaultAbsenceType.A_24H7.getCode()));
+        Sets.newHashSet(DefaultAbsenceType.A_24O.getCode(), DefaultAbsenceType.A_24OH7.getCode()));
     //Complete secondo figlio
     patchPostPartumInitComplete(person, mappona, DefaultGroup.G_232,
         Sets.newHashSet(DefaultAbsenceType.A_252.getCode(), DefaultAbsenceType.A_252H7.getCode(), 
@@ -669,7 +669,7 @@ public class AbsenceCertificationService {
     for (AbsenceSituation abSit : situation.absenceSituations) {
       addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_23H7, DefaultAbsenceType.A_23);
       addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_25H7, DefaultAbsenceType.A_25);
-      addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_24H7, DefaultAbsenceType.A_24);
+      addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_24OH7, DefaultAbsenceType.A_24O);
       addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_232H7, DefaultAbsenceType.A_232);
       addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_252H7, DefaultAbsenceType.A_252);
       addAutomaticallyRelax(person, abSit, DefaultAbsenceType.A_242H7, DefaultAbsenceType.A_242);
@@ -782,8 +782,8 @@ public class AbsenceCertificationService {
           if (code.equals(DefaultAbsenceType.A_253H7.getCode())) {
             aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_253.getCode()).get();
           }
-          if (code.equals(DefaultAbsenceType.A_24H7.getCode())) {
-            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_24.getCode()).get();
+          if (code.equals(DefaultAbsenceType.A_24OH7.getCode())) {
+            aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_24O.getCode()).get();
           }
           if (code.equals(DefaultAbsenceType.A_242H7.getCode())) {
             aux = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_242.getCode()).get();

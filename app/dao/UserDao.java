@@ -243,7 +243,7 @@ public class UserDao extends DaoBase {
         Role.TECHNICAL_ADMIN)) {
       stampTypes.addAll(StampTypes.onlyActiveWithoutOffSiteWork());
     }
-    if (user.getPerson().getQualification().getQualification() <= 3
+    if (user.getPerson().isTopQualification()
         && user.getPerson().getOffice().checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
 
       stampTypes.addAll(StampTypes.onlyActiveWithoutOffSiteWork());
@@ -251,10 +251,7 @@ public class UserDao extends DaoBase {
     if (user.getPerson().getOffice().checkConf(EpasParam.WORKING_OFF_SITE, "true")
         && user.getPerson().checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
       stampTypes.add(StampTypes.LAVORO_FUORI_SEDE);
-    } else {
-      stampTypes.add(StampTypes.MOTIVI_DI_SERVIZIO);
     }
-
     return stampTypes;
   }
   

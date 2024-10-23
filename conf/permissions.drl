@@ -3471,7 +3471,7 @@ end
  * L'impiegato può aggiungere un allegato ad una determinata assenza per visita medica se:
  ****************************************************************************************/
  
-rule EmployeeCanAddAttachment
+rule EmployeeCanAddAttachmentMedicalExam
 when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person() from currentOperator.person
@@ -3479,6 +3479,37 @@ when
   Configuration(epasParam == EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM, fieldValue == true) from $o.configurations
   //$target: Absence(DefaultGroup.medicalExamsCodes().contains(this.getCode()), this.getOwner() == $p)
   $c: PermissionCheck(action in ("Absences.addAttach", "Absences.removeAttach", "Absences.downloadAttachment"), target == null, granted == false)
+then
+  $c.grant();
+end
+
+/*****************************************************************************************
+ * L'impiegato può aprire la scheda di inserimento allegato ad una determinata assenza se:
+ *****************************************************************************************/
+ 
+rule EmployeeCanAddAttachmentGeneric
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person() from currentOperator.person
+  PersonConfiguration(epasParam == EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS, fieldValue == true) from $p.personConfigurations
+  $c: PermissionCheck(action in ("Absences.addAttach"), target == null, granted == false)
+  
+then
+  $c.grant();
+end
+
+/***********************************************************************
+ * L'impiegato può aggiungere un allegato ad una determinata assenza se:
+ ***********************************************************************/
+ 
+rule EmployeeCanAddAttachment
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person() from currentOperator.person
+  PersonConfiguration(epasParam == EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS, fieldValue == true) from $p.personConfigurations
+  $target: Absence(DefaultGroup.parentalLeaveAndChildIllnessCodes().contains(this.getCode()), this.getOwner() == $p)
+  $c: PermissionCheck(action in ("Absences.addAttach", "Absences.removeAttach", "Absences.downloadAttachment"), target == $target, granted == false)
+  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
 then
   $c.grant();
 end

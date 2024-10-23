@@ -1,8 +1,8 @@
 FROM criluc/play1:1.5.3-openjdk-11-patched
 
-ENV user epas
-ENV APP ePas
-ENV APP_HOME /home/epas/epas
+ENV user=epas
+ENV APP=ePas
+ENV APP_HOME=/home/epas/epas
 
 USER root
 

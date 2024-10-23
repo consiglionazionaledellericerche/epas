@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2024  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -17,13 +17,17 @@
 
 package controllers.rest;
 
+import javax.inject.Inject;
+
+import org.joda.time.LocalDateTime;
+
 import com.google.common.base.Optional;
+
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import dao.OfficeDao;
 import helpers.JsonResponse;
 import it.cnr.iit.epas.JsonMissionBinder;
-import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.MissionManager;
 import manager.NotificationManager;
@@ -86,24 +90,40 @@ public class Missions extends Controller {
       JsonResponse.badRequest();
     }
 
+    if (body.dataInizio.isBefore(LocalDateTime.now().minusMonths(6))) {
+      logWarn("Data di inizio precedente di oltre sei mesi dalla data attuale, messaggio scartato", 
+          body);
+      JsonResponse.badRequest();
+    }
+
+    if (body.dataFine.isAfter(LocalDateTime.now().plusMonths(6))) {
+      logWarn("Data di fine successiva di oltre 6 mesi dalla data attuale, messaggio scartato", 
+          body);
+      JsonResponse.badRequest();
+    }
+
     // person not present (404)
     if (!missionManager.linkToPerson(body).isPresent()) {
       logWarn("Dipendente riferito nel messaggio non trovato, messaggio scartato", body);
       JsonResponse.notFound();
     }
 
+    Optional<Office> officeByMessage = Optional.absent();
     //Ufficio prelevato tramite il codice sede passato nel JSON
-    Optional<Office> officeByMessage = officeDao.byCodeId(body.codiceSede);
+    if (body.codiceSede != null || !body.codiceSede.isEmpty()) {
+      officeByMessage = officeDao.byCodeId(body.codiceSede);
+    }    
     //Ufficio associato alla persona prelevata tramite la matricola passata nel JSON
     Office office = body.person.getOffice();
 
     if (!officeByMessage.isPresent()) {
-      logWarn(
-          String.format("Attenzione il codice sede %s non è presente su ePAS ed il dipendente %s "
-              + "è associato all'ufficio %s.", 
-              body.codiceSede, body.person.getFullname(), office.getName()), 
-          body);
-    } else if (!body.codiceSede.equals(office.getCodeId())) {
+      log.warn("--- Possibile messaggio proveniente da integrazione col nuovo Missioni Cineca ---");
+//      logWarn(
+//          String.format("Attenzione il codice sede %s non è presente su ePAS e il dipendente %s "
+//              + "è associato all'ufficio %s.", 
+//              body.codiceSede, body.person.getFullname(), office.getName()), 
+//          body);
+    } else if (!body.codiceSede.isEmpty() && !body.codiceSede.equals(office.getCodeId())) {
       logWarn(
           String.format("Attenzione il codice sede %s è diverso dal codice sede di %s (%s), "
               + "sede associata a %s.", 

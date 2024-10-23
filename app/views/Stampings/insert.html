@@ -33,14 +33,10 @@
 	  <!-- Fields -->
 	  #{include './personStampingComponents/_coreStampings.html' /}
 	
-	  #{set stampTypes: templateUtility.stampTypes /}
-	  #{if stampTypes.size() == 1}
-	    #{f.view messages.get('stamping.stampType'), value: stampTypes[0]/}
-	    #{f.hidden 'stamping.stampType', value:stampTypes[0] /}
-	  #{/if}
-	  #{else}
-	    #{f.selectEnum 'stamping.stampType', items:stampTypes /}
-	  #{/else}
+	  #{set stampTypes: templateUtility.getStampTypes() /}
+	  
+      #{f.selectEnum 'stamping.stampType', items:stampTypes /}
+	  
 	  #{if !zones.isEmpty()}
 	  	#{f.selectModel 'zone', items:zones, required:true, getLabel:true /}
 	  #{/if}

@@ -1,85 +1,37 @@
 # --- !Ups
+UPDATE working_time_types SET description = 'Allattamento fino a 31-06-2024', disabled = true WHERE description = 'Allattamento' and office_id is null;
 
-ALTER TABLE general_setting ADD COLUMN enable_overtime_per_person BOOLEAN DEFAULT TRUE;
-ALTER TABLE general_setting_history ADD COLUMN enable_overtime_per_person BOOLEAN;
-ALTER TABLE general_setting ADD COLUMN enable_overtime_request_in_advance BOOLEAN DEFAULT FALSE;
-ALTER TABLE general_setting_history ADD COLUMN enable_overtime_request_in_advance BOOLEAN;
+INSERT INTO working_time_types (description, shift, meal_ticket_enabled, office_id, disabled, horizontal, version, enable_adjustment_for_quantity, external_id, updated_at)
+VALUES ('Allattamento', false, false, null, false, true, 0, false, null, now());
 
-CREATE TABLE group_overtimes
-(
-  id BIGSERIAL PRIMARY KEY,
-  date_of_update DATE NOT NULL,
-  year INTEGER,
-  number_of_hours INTEGER,
-  group_id bigint REFERENCES groups(id),
-  version INT DEFAULT 0
-);
+INSERT INTO working_time_type_days (break_ticket_time, day_of_week, holiday, meal_ticket_time, time_meal_from, time_meal_to, time_slot_entrance_from,time_slot_entrance_to, 
+time_slot_exit_from, time_slot_exit_to, working_time, working_time_type_id, ticket_afternoon_threshold, ticket_afternoon_working_time, version, updated_at)
+VALUES (0, 1, false, 0, 0, 0, 0, 0, 0, 0, 312, (select id from working_time_types where description = 'Allattamento' and office_id is null), 0, 0, 0, now());
 
-CREATE TABLE group_overtimes_history
-(
-  id bigint NOT NULL,
-  _revision integer NOT NULL REFERENCES revinfo (rev), 
-  _revision_type smallint,
-  date_of_update DATE,
-  year INTEGER,
-  number_of_hours INTEGER,
-  group_id bigint,
-  CONSTRAINT group_overtimes_history_pkey PRIMARY KEY (id , _revision )
-);
+INSERT INTO working_time_type_days (break_ticket_time, day_of_week, holiday, meal_ticket_time, time_meal_from, time_meal_to, time_slot_entrance_from,time_slot_entrance_to, 
+time_slot_exit_from, time_slot_exit_to, working_time, working_time_type_id, ticket_afternoon_threshold, ticket_afternoon_working_time, version, updated_at)
+VALUES (0, 2, false, 0, 0, 0, 0, 0, 0, 0, 312, (select id from working_time_types where description = 'Allattamento' and office_id is null), 0, 0, 0, now());
 
-CREATE TABLE person_overtimes
-(
-  id BIGSERIAL PRIMARY KEY,
-  date_of_update DATE NOT NULL,
-  year INTEGER,
-  number_of_hours INTEGER,
-  person_id bigint REFERENCES persons(id),
-  version INT DEFAULT 0
-);
+INSERT INTO working_time_type_days (break_ticket_time, day_of_week, holiday, meal_ticket_time, time_meal_from, time_meal_to, time_slot_entrance_from,time_slot_entrance_to, 
+time_slot_exit_from, time_slot_exit_to, working_time, working_time_type_id, ticket_afternoon_threshold, ticket_afternoon_working_time, version, updated_at)
+VALUES (0, 3, false, 0, 0, 0, 0, 0, 0, 0, 312, (select id from working_time_types where description = 'Allattamento' and office_id is null), 0, 0, 0, now());
 
-CREATE TABLE person_overtimes_history
-(
-  id bigint NOT NULL,
-  _revision integer NOT NULL REFERENCES revinfo (rev), 
-  _revision_type smallint,
-  date_of_update DATE,
-  year INTEGER,
-  number_of_hours INTEGER,
-  person_id bigint,
-  CONSTRAINT person_overtimes_history_pkey PRIMARY KEY (id , _revision )
-);
+INSERT INTO working_time_type_days (break_ticket_time, day_of_week, holiday, meal_ticket_time, time_meal_from, time_meal_to, time_slot_entrance_from,time_slot_entrance_to, 
+time_slot_exit_from, time_slot_exit_to, working_time, working_time_type_id, ticket_afternoon_threshold, ticket_afternoon_working_time, version, updated_at)
+VALUES (0, 4, false, 0, 0, 0, 0, 0, 0, 0, 312, (select id from working_time_types where description = 'Allattamento' and office_id is null), 0, 0, 0, now());
 
-CREATE TABLE competence_request_events_history
-(
-  id bigint NOT NULL,
-  _revision integer NOT NULL REFERENCES revinfo (rev), 
-  _revision_type smallint,
-  competence_request_id BIGINT,
-  owner_id BIGINT,
-  description TEXT,	
-  event_type TEXT,
-  created_at TIMESTAMP WITHOUT TIME ZONE,
-  CONSTRAINT competence_request_events_history_pkey PRIMARY KEY (id , _revision )
-);
+INSERT INTO working_time_type_days (break_ticket_time, day_of_week, holiday, meal_ticket_time, time_meal_from, time_meal_to, time_slot_entrance_from,time_slot_entrance_to, 
+time_slot_exit_from, time_slot_exit_to, working_time, working_time_type_id, ticket_afternoon_threshold, ticket_afternoon_working_time, version, updated_at)
+VALUES (0, 5, false, 0, 0, 0, 0, 0, 0, 0, 312, (select id from working_time_types where description = 'Allattamento' and office_id is null), 0, 0, 0, now());
 
-ALTER TABLE groups
-  ADD COLUMN group_overtimes_id bigint REFERENCES group_overtimes(id);
-    
-ALTER TABLE groups_history
-  ADD COLUMN group_overtimes_id bigint;
-  
-ALTER TABLE persons
-  ADD COLUMN person_overtimes_id bigint REFERENCES person_overtimes(id);
-  
-ALTER TABLE persons_history
-  ADD COLUMN person_overtimes_id bigint;
-  
-ALTER TABLE competence_requests 
-  ADD COLUMN value_requested INTEGER;
+INSERT INTO working_time_type_days (break_ticket_time, day_of_week, holiday, meal_ticket_time, time_meal_from, time_meal_to, time_slot_entrance_from,time_slot_entrance_to, 
+time_slot_exit_from, time_slot_exit_to, working_time, working_time_type_id, ticket_afternoon_threshold, ticket_afternoon_working_time, version, updated_at)
+VALUES (0, 6, true, 0, 0, 0, 0, 0, 0, 0, 312, (select id from working_time_types where description = 'Allattamento' and office_id is null), 0, 0, 0, now());
 
-ALTER TABLE competence_requests_history 
-  ADD COLUMN value_requested INTEGER;
+INSERT INTO working_time_type_days (break_ticket_time, day_of_week, holiday, meal_ticket_time, time_meal_from, time_meal_to, time_slot_entrance_from,time_slot_entrance_to, 
+time_slot_exit_from, time_slot_exit_to, working_time, working_time_type_id, ticket_afternoon_threshold, ticket_afternoon_working_time, version, updated_at)
+VALUES (0, 7, true, 0, 0, 0, 0, 0, 0, 0, 312, (select id from working_time_types where description = 'Allattamento' and office_id is null), 0, 0, 0, now());
 
 # --- !Downs
+-- Non è necessaria una down
 
--- non è necessaria alcuna down
