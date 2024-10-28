@@ -24,10 +24,12 @@ import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.enumerate.Troubles;
+import models.query.QPersonDay;
 import models.query.QPersonDayInTrouble;
 import org.joda.time.LocalDate;
 
@@ -59,6 +61,7 @@ public class PersonDayInTroubleDao extends DaoBase {
 
     QPersonDayInTrouble pdit = QPersonDayInTrouble.personDayInTrouble;
 
+
     BooleanBuilder conditions = new BooleanBuilder(pdit.personDay.person.eq(person));
     if (begin.isPresent()) {
       conditions.and(pdit.personDay.date.goe(begin.get()));
@@ -86,5 +89,25 @@ public class PersonDayInTroubleDao extends DaoBase {
         .selectFrom(pdit)
         .where(pdit.personDay.eq(pd).and(pdit.cause.eq(trouble))).fetchOne();
     return Optional.fromNullable(result);
+  }
+  
+  /**
+   * La lista dei trouble per sede.
+   * @param office la sede di cui si vogliono i trouble
+   * @param begin la data di inizio da quando si ricerca
+   * @param end la data di fine in cui si ricerca
+   * @return la lista dei trouble per sede.
+   */
+  public List<PersonDayInTrouble> getPersonDayInTroubleByOfficeInPeriod(Office office, 
+      LocalDate begin, LocalDate end, Troubles trouble) {
+    QPersonDayInTrouble pdit = QPersonDayInTrouble.personDayInTrouble;
+    QPersonDay pd = QPersonDay.personDay;
+    BooleanBuilder conditions = new BooleanBuilder();
+    conditions.and(pdit.personDay.date.goe(begin));
+    conditions.and(pdit.personDay.date.loe(end));
+    //conditions.and(pdit.personDay.person.office.eq(office));
+    conditions.and(pdit.cause.eq(trouble));
+    return getQueryFactory().selectFrom(pdit).leftJoin(pdit.personDay, pd)
+        .where(conditions.and(pd.person.office.eq(office))).fetch();
   }
 }
