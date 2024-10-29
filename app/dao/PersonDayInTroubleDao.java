@@ -105,7 +105,6 @@ public class PersonDayInTroubleDao extends DaoBase {
     BooleanBuilder conditions = new BooleanBuilder();
     conditions.and(pdit.personDay.date.goe(begin));
     conditions.and(pdit.personDay.date.loe(end));
-    //conditions.and(pdit.personDay.person.office.eq(office));
     conditions.and(pdit.cause.eq(trouble));
     return getQueryFactory().selectFrom(pdit).leftJoin(pdit.personDay, pd)
         .where(conditions.and(pd.person.office.eq(office))).fetch();

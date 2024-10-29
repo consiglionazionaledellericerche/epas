@@ -300,15 +300,15 @@ public class PersonDayInTroubleManager {
 
       SimpleEmail simpleEmail = new SimpleEmail();
       simpleEmail.setSubject("ePas Controllo timbrature per Amministratori");
-      String reply = (String) configurationManager
-          .configValue(office, EpasParam.EMAIL_TO_CONTACT);
-
-      if (!reply.isEmpty()) {
-        simpleEmail.addReplyTo(reply);
-      }
       
       simpleEmail.setMsg(message);
-      
+      if (user == null || user.getPerson() == null) {
+        log.info("Trovato utente senza persona associata: {}", user.getUsername());
+        continue;
+      }
+      if (user.getPerson().getEmail() == null) {
+        continue;
+      }
       simpleEmail.addTo(user.getPerson().getEmail());
       try {
         Mail.send(simpleEmail);
