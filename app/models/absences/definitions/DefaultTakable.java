@@ -63,6 +63,12 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_182PM), 
       ImmutableSet.of(DefaultAbsenceType.A_182P, DefaultAbsenceType.A_182PM), 
       3, null),
+  
+  T_183(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_183, 
+          DefaultAbsenceType.A_183M), 
+      ImmutableSet.of(DefaultAbsenceType.A_183, DefaultAbsenceType.A_183M), 
+      3, TakeAmountAdjustment.workingTimePercent),
 
   T_19(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_19, 

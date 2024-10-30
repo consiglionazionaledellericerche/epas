@@ -55,6 +55,15 @@ public enum DefaultGroup {
       + "secondo parente tre giorni mese", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 2, 
       GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_182, 
       DefaultComplation.C_182, null, false, false),
+  
+  G_183("183 - Permesso assistenza terzo parenti/affini disabili L. 104/92 tre gg. mese", "",
+      DefaultCategoryType.L_104, 1, GroupAbsenceTypePattern.programmed, PeriodType.month,
+      DefaultTakable.T_183, DefaultComplation.C_183, null, false, false), 
+  G_183_PARENTI_DIPENDENTI("183 - Permesso assistenza parenti/affini disabili L. 104/92 "
+      + "terzo parente tre giorni mese", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 2, 
+      GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_183, 
+      DefaultComplation.C_183, null, false, false),
+  
   G_182P("182P - Permesso provv. assist. secondo parenti/affini dis. L. 104/92 tre gg. mese", "",
       DefaultCategoryType.PERMESSI_PROVVISORI_104, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.month, DefaultTakable.T_182P, DefaultComplation.C_182P, null, false, false),
@@ -566,6 +575,10 @@ public enum DefaultGroup {
 
   public static List<String> employeeSecondDisabledRelativeCodes() {
     return getCodes(DefaultGroup.G_182_PARENTI_DIPENDENTI);
+  }
+  
+  public static List<String> employeeThirdDisabledRelativeCodes() {
+    return getCodes(DefaultGroup.G_183_PARENTI_DIPENDENTI);
   }
   
   public static List<String> employeeAgileWorkOrDisabledPeopleAssistanceCodes() {

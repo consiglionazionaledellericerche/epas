@@ -4,11 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.1] - 2024-10-30
+### Added
+  - Aggiunto codice 183 giornaliero e ore e minuti per terzo parente disabile
+  - Aggiunto job che invia agli amministrativi i problemi sui giorni dei dipendenti della sede che
+    gestiscono
+    
+### Changed
+  - Il codice 98 è ora inseribile anche nei festivi
+  - Corretto typo nella visualizzazione della pagina Categorie gruppi assenze
+
+
 ## [2.19.0] - 2024-10-15
 ### Added
   - Aggiunti i codici a completamento "H7" per i codici 24PROV e 242PROV in caso di fruizione oraria.
   - Aggiunto codice 105 per convenzione cnr-università che non matura buono pasto
   - Aggiunta procedura per modificare i codici 37 in codici 31 come da disposizione di UGRU per il 2024
+
 ### Changed
   - Rimosso vincolo obbligatorietà id missione nell'annullamento missione via REST 
   - Modificato il comportamento in caso di richiesta di approvazione telelavoro rifiutata

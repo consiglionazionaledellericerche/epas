@@ -39,7 +39,7 @@
 		    </td>
 		    <td>${categoryTab.description}</td>
 		    <td>${categoryTab.priority}</td>
-		    <td>${categoryTab.isDefault}</td>
+		    <td>${categoryTab.isDefault()}</td>
 		    <td>
 			  #{list items:categoryTab.categoryGroupAbsenceTypes, as:'category'}
 			    <span class="label label-success">${category.name}</span> <br>
