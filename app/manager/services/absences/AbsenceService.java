@@ -564,6 +564,8 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.G_18_PARENTI_DIPENDENTI.name()).get();
     final GroupAbsenceType secondDisabledRelativeAbsence = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_182_PARENTI_DIPENDENTI.name()).get();
+    final GroupAbsenceType thirdDisabledRelativeAbsence = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_183_PARENTI_DIPENDENTI.name()).get();
     final GroupAbsenceType medicalExams = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_631_DIPENDENTI.name()).get();
     final GroupAbsenceType cod39LA = absenceComponentDao
@@ -607,6 +609,7 @@ public class AbsenceService {
       groupsPermitted.remove(disabledRelativeAbsence);
       groupsPermitted.remove(additionalHours);
       groupsPermitted.remove(secondDisabledRelativeAbsence);
+      groupsPermitted.remove(thirdDisabledRelativeAbsence);
       //groupsPermitted.remove(parentalLeaveForFathers);
       //groupsPermitted.remove(parentalLeaveTwinsForFathers);
       //groupsPermitted.remove(lagile);
@@ -682,6 +685,9 @@ public class AbsenceService {
         if ((Boolean) confManager.configValue(person, 
             EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION)) {
           groupsPermitted.add(secondDisabledRelativeAbsence);
+          if ((Boolean) confManager.configValue(person, EpasParam.THIRD_DISABLED_RELATIVE_PERMISSION)) {
+            groupsPermitted.add(thirdDisabledRelativeAbsence);
+          }
         }
       }
       

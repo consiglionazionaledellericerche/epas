@@ -1365,6 +1365,7 @@ COVID_19=Auto inserimento codice per emergenza COVID-19
 ADDITIONAL_HOURS=Auto inserimento ore aggiuntive
 PARENTAL_LEAVE_AND_CHILD_ILLNESS=Auto inserimento congedi parentali e malattie figlio
 SECOND_DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 secondo parente disabile
+THIRD_DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 terzo parente disabile
 PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM=Abilita personale all'auto inserimento di permessi per visita medica
 AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE=Auto inserimento lavoro agile per dipendenti fragili o assistenza disabile/immunodepresso
 SMARTWORKING =Auto inserimento codice di assenza per smartworking
