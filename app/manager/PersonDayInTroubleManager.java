@@ -21,6 +21,8 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import dao.PersonDayInTroubleDao;
 import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
@@ -28,16 +30,20 @@ import dao.wrapper.function.WrapperModelFunctionFactory;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Contract;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
+import models.User;
 import models.enumerate.Troubles;
+import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 import play.jobs.Job;
@@ -276,5 +282,88 @@ public class PersonDayInTroubleManager {
       }
     }.now();
 
+  }
+  
+  /**
+   * Metodo che invia le mail agli amministratori del personale delle varie sedi per informare
+   * sui giorni con problemi dei dipendenti della loro sede.
+   * @param daysInTrouble la lista dei giorni con problemi
+   * @param administrators la lista degli amministratori di una sede
+   * @param office la sede di riferimento
+   * @throws EmailException
+   */
+  public void sendOfficeTroubleEmailsToAdministrators(List<PersonDayInTrouble> daysInTrouble, 
+      List<User> administrators, Office office) throws EmailException {
+    Map<Person, List<String>> map = createTroubleMap(daysInTrouble);
+    String message = createMessageForAdministrator(map);
+    for (User user : administrators) {
+
+      SimpleEmail simpleEmail = new SimpleEmail();
+      simpleEmail.setSubject("ePas Controllo timbrature per Amministratori");
+      
+      simpleEmail.setMsg(message);
+      if (user == null || user.getPerson() == null) {
+        log.info("Trovato utente senza persona associata: {}", user.getUsername());
+        continue;
+      }
+      if (user.getPerson().getEmail() == null) {
+        continue;
+      }
+      simpleEmail.addTo(user.getPerson().getEmail());
+      try {
+        Mail.send(simpleEmail);
+      } catch (Exception ex) {
+        log.error("Fallito invio email all'amministratore {} della sede {} per {}",
+            user.getPerson().getFullname(), office.getName(), ex);
+      }
+      
+      log.info("Inviata mail a {} per segnalare i problemi dei dipendenti della sede {}",
+          user.getPerson(), user.getPerson().getOffice());
+    }
+
+  }
+  
+  /**
+   * Metodo privato che genera la mappa Persona-lista di stringhe contenente le giornate in cui
+   * il dipendente ha un trouble.
+   * @param daysInTrouble la lista di trouble 
+   * @return la mappa persona-lista di stringhe contenente le giornate in cui i dipendenti
+   * hanno un trouble.
+   */
+  private Map<Person, List<String>> createTroubleMap(List<PersonDayInTrouble> daysInTrouble) {
+    final String dateFormatter = "dd/MM/YYYY";
+    Map<Person, List<String>> map = Maps.newHashMap();
+    for (PersonDayInTrouble pdit : daysInTrouble) {
+      List<String> list = map.get(pdit.getPersonDay().getPerson());
+      if (list == null || list.isEmpty()) {
+        list = Lists.newArrayList();
+      }
+      list.add(pdit.getPersonDay().getDate().toString(dateFormatter));
+      map.put(pdit.getPersonDay().getPerson(), list);
+    }
+    return map;
+  }
+  
+  /**
+   * Metodo che crea il messaggio da mandare agli amministratori.
+   * @param map la mappa contenente per ogni persona la lista di date in cui ci sono problemi
+   * @return il messaggio da mandare agli amministratori del personale.
+   */
+  private String createMessageForAdministrator(Map<Person, List<String>> map) {
+    final StringBuilder message = new StringBuilder()
+        .append(String.format("Qui di seguito i dipendenti che presentano giorni con problemi "
+            + "e le date in cui sono stati riscontrati: \r\n"));
+    for (Map.Entry<Person, List<String>> entry : map.entrySet()) {
+      message.append(String.format("\r\n %s nei giorni: ", entry.getKey().getFullname()));
+      for (String s : entry.getValue()) {
+        message.append(String.format("%s - ", s));
+      }
+    }
+      
+    message.append("\r\nLa preghiamo di verificare con i dipendenti i giorni in oggetto.\r\n")
+        .append("\r\nSaluti,\r\n")
+        .append("Il team di ePAS");
+      
+    return message.toString();      
   }
 }
