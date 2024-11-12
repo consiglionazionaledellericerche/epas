@@ -4,11 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.19.2] - UNRELEASED
+## [2.20.0] - 2024-11-12
 ### Added
   - Aggiunto un parametro JAVA_OPTIONS per controllare i parametri passati in fase di avvio
     della JVM Java. Impostato di default il parametro -XX:MaxRAMPercentage=50 che assegna il
     50% della memoria disponibile al container docker.
+  - Corretta visualizzazione dei flussi di richiesta uscita di servizio da parte del responsabile
+    di sede se è anche responsabile di gruppo
 
 ## [2.19.1] - 2024-10-30
 ### Added

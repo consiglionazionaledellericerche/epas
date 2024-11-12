@@ -1050,7 +1050,7 @@ end
 rule personInChargeForFlows
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
-  $ar: AbsenceRequest(managerApprovalRequired == true && managerApproved == null)
+  $ar: AbsenceRequest(managerApprovalRequired == true && !isManagerApproved())
   $c: PermissionCheck( action in (
     		"AbsenceRequests.blank",
 			"AbsenceRequests.edit",
@@ -1079,7 +1079,7 @@ end
 rule personInChargeForCompetenceRequestsFlows
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
-  $cr: CompetenceRequest(managerApprovalRequired == true && managerApproved == null)
+  $cr: CompetenceRequest(managerApprovalRequired == true && !isManagerApproved())
   $c: PermissionCheck( action in (
     		"CompetenceRequests.list",
 			"CompetenceRequests.listToApprove",
@@ -1095,7 +1095,7 @@ end
 rule personInChargeForInformationFlows
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
-  $ir: InformationRequest(managerApprovalRequired == true && managerApproved == null)
+  $ir: InformationRequest(managerApprovalRequired == true && !isManagerApproved())
   $c: PermissionCheck( action in (			
 			"InformationRequests.serviceExitToApprove",
 			"InformationRequests.listToApprove",
