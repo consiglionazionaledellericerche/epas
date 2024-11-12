@@ -203,13 +203,13 @@ public class InformationRequests extends Controller {
     Verify.verifyNotNull(type);
 
     val person = Security.getUser().get().getPerson();
-    val fromDate = LocalDateTime.now().withDayOfYear(1).withMonth(1).minusMonths(1);
+    val fromDate = LocalDateTime.now().withDayOfMonth(1).minusMonths(3);
     log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}", type,
         fromDate);
 
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
     List<InformationRequest> myResults =
-        informationRequestDao.toApproveResults(roleList, Optional.absent(),
+        informationRequestDao.toApproveResults(roleList, Optional.of(fromDate),
             Optional.absent(), type, person);
     List<InformationRequest> approvedResults =
         informationRequestDao.totallyApproved(roleList, fromDate,

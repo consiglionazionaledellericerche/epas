@@ -9,7 +9,6 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.Generated;
 import com.querydsl.core.types.Path;
-import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -25,6 +24,8 @@ public class QServiceRequest extends EntityPathBase<ServiceRequest> {
     public static final QServiceRequest serviceRequest = new QServiceRequest("serviceRequest");
 
     public final models.base.query.QInformationRequest _super;
+
+    public final DatePath<java.time.LocalDate> day = createDate("day", java.time.LocalDate.class);
 
     //inherited
     public final BooleanPath administrativeApprovalRequired;
