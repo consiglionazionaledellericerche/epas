@@ -26,23 +26,25 @@ import javax.inject.Inject;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import manager.NotificationManager;
 import manager.flows.InformationRequestManager;
 import models.Office;
 import models.Person;
 import org.joda.time.LocalDate;
 import play.Play;
 import play.jobs.Job;
+import play.jobs.On;
 import play.jobs.OnApplicationStart;
 
 /**
- * Chiusura degli uffici senza persone con contratto attivo.
+ * Impostata scadenza di lettura per le notifiche più vecchi di 3 mesi.
  */
 @Slf4j
-@OnApplicationStart(async = true)
-public class ExpireServiceRequestsAtStartup extends Job<Void> {
+@On("0 10 7 ? * MON-FRI") //tutti i giorni dal lunedi al venerdi di ogni mese alle 7.15
+public class ExpireNotifications extends Job<Void> {
 
   @Inject
-  static InformationRequestManager irManager;
+  static NotificationManager notificationManager;
   
   @Override
   public void doJob() {
@@ -52,7 +54,7 @@ public class ExpireServiceRequestsAtStartup extends Job<Void> {
       log.info("{} interrotto. Disattivato dalla configurazione.", getClass().getName());
       return;
     }
-    val expired = irManager.expireServiceRequests();
-    log.info("Sono state chiuse come expired {} richieste di uscita di servizio.", expired.size());
+    val expired = notificationManager.expiredNotificationsNotRead();
+    log.info("Sono state impostate come lette {} notifiche.", expired);
   }
 }
