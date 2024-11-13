@@ -615,4 +615,20 @@ public class InformationRequestDao extends DaoBase {
         .orderBy(informationRequest.startAt.desc())
         .fetch();
   }
+  
+  /**
+   * Lista delle richiesta di uscita di servizio con data precedente alla data passata.
+   *
+   */
+  public List<ServiceRequest> serviceRequestActiveBeforeDate(LocalDateTime toDate) {
+
+    Preconditions.checkNotNull(toDate);
+
+    final QServiceRequest serviceRequest = QServiceRequest.serviceRequest;
+
+    BooleanBuilder conditions = 
+        new BooleanBuilder(serviceRequest.startAt.before(toDate)).and(serviceRequest.flowEnded.eq(false));
+    return getQueryFactory().selectFrom(serviceRequest)
+        .where(conditions).orderBy(serviceRequest.startAt.desc()).fetch();
+  }
 }

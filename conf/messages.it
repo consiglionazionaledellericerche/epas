@@ -117,7 +117,7 @@ InformationRequestEventType.MANAGER_REFUSAL=Richiesta respinta dal responsabile 
 
 InformationRequestEventType.COMPLETE=Richiesta completata
 InformationRequestEventType.DELETE=Richiesta cancellata
-InformationRequestEventType.EXPIRING=Richiesta scaduta
+InformationRequestEventType.EXPIRED=Richiesta scaduta
 
 informationRequest.endTo =Fine
 informationRequest.note =Note
