@@ -23,6 +23,8 @@ import controllers.Security;
 import dao.InformationRequestDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
+
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import javax.inject.Inject;
@@ -316,7 +318,10 @@ public class InformationRequestManager {
         break;
         
       case MANAGER_REFUSAL:
-        //TODO: completare
+        resetFlow(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest);
+        request.setFlowEnded(true);
+        notificationManager.notificationInformationRequestRefused(serviceRequest, 
+            illnessRequest, teleworkRequest, parentalLeaveRequest, person);
         break;
         
       case COMPLETE:
@@ -334,7 +339,11 @@ public class InformationRequestManager {
         //TODO: aggiungere notifica
         //notificationManager.notificationAbsenceRequestRefused(request, person);
         break;
-
+      case EXPIRED:
+        request.setEndTo(java.time.LocalDateTime.now());
+        request.setFlowEnded(true);
+        //TODO: aggiungere notifica
+        break;
       default:
         throw new IllegalStateException(
             String.format("Evento di richiesta assenza %s non previsto", eventType));
@@ -347,7 +356,7 @@ public class InformationRequestManager {
     log.info("Costruito evento per richiesta di assenza {}", event);
     request.save();
     checkAndCompleteFlow(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest);
-    return Optional.absent();    
+    return Optional.absent();
   }
   
 
@@ -427,6 +436,7 @@ public class InformationRequestManager {
       Optional<ParentalLeaveRequest> parentalLeaveRequest) {
     if (serviceRequest.isPresent()) {
       serviceRequest.get().setFlowStarted(false);
+      serviceRequest.get().setManagerApproved(null);
       serviceRequest.get().setOfficeHeadApproved(null);
     }
     if (illnessRequest.isPresent()) {
@@ -467,7 +477,7 @@ public class InformationRequestManager {
     if (teleworkRequest.isPresent()) {
       if (teleworkRequest.get().isFullyApproved() && !teleworkRequest.get().isFlowEnded()) {
         completeFlow(Optional.absent(), Optional.absent(), 
-            teleworkRequest, Optional.absent());      
+            teleworkRequest, Optional.absent());
       } 
     }  
     if (parentalLeaveRequest.isPresent()) {
@@ -490,7 +500,7 @@ public class InformationRequestManager {
       Optional<ParentalLeaveRequest> parentalLeaveRequest) {
     if (serviceRequest.isPresent()) {
       serviceRequest.get().setFlowEnded(true);
-      serviceRequest.get().save();    
+      serviceRequest.get().save();
     }
     if (illnessRequest.isPresent()) {
       illnessRequest.get().setFlowEnded(true);
@@ -498,7 +508,7 @@ public class InformationRequestManager {
     }
     if (teleworkRequest.isPresent()) {
       teleworkRequest.get().setFlowEnded(true);
-      teleworkRequest.get().save(); 
+      teleworkRequest.get().save();
     }  
     if (parentalLeaveRequest.isPresent()) {
       parentalLeaveRequest.get().setFlowEnded(true);
@@ -789,4 +799,51 @@ public class InformationRequestManager {
         currentPerson.getFullname());
   }
 
+  /**
+   * Effettua l'expire della richiesta.
+   */
+  public void expire(long id) {
+    ServiceRequest serviceRequest = null;
+    IllnessRequest illnessRequest = null;
+    TeleworkRequest teleworkRequest = null;
+    ParentalLeaveRequest parentalLeaveRequest = null;
+    InformationRequest request = dao.getById(id);
+    Person person = request.getPerson();
+    switch (request.getInformationType()) {
+      case SERVICE_INFORMATION:
+        serviceRequest = dao.getServiceById(id).get();
+        break;
+      case ILLNESS_INFORMATION:
+        illnessRequest = dao.getIllnessById(id).get();
+        break;
+      case TELEWORK_INFORMATION:
+        teleworkRequest = dao.getTeleworkById(id).get();
+        break;
+      case PARENTAL_LEAVE_INFORMATION:
+        parentalLeaveRequest = dao.getParentalLeaveById(id).get();
+        break;
+      default:
+        break;
+    }
+    Person currentPerson = null;
+    if (Security.getUser().isPresent()) {
+      currentPerson = Security.getUser().get().getPerson();
+    } else {
+      currentPerson = person;
+    }
+    executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), 
+        Optional.of(teleworkRequest), Optional.of(parentalLeaveRequest), currentPerson, 
+        InformationRequestEventType.EXPIRED, Optional.of("Richiesta scaduta"));
+    log.info("{} scaduta per termini di tempo trascorsi senza approvazione.", request);
+  }
+
+  public List<ServiceRequest> expireServiceRequests() {
+    val expired = dao.serviceRequestActiveBeforeDate(LocalDateTime.now().withDayOfMonth(1).minusMonths(3));
+    expired.forEach(serviceRequest -> {
+      log.debug("Expiring service request {}", serviceRequest);
+      executeEvent(Optional.of(serviceRequest), Optional.absent(), Optional.absent(), Optional.absent(), 
+          serviceRequest.getPerson(), InformationRequestEventType.EXPIRED, Optional.absent());
+    });
+    return expired;
+  }
 }

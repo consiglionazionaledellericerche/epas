@@ -50,8 +50,10 @@ import play.data.validation.Required;
  */
 @Getter
 @Setter
-@ToString(of = {"informationType", "person", "startAt", "endTo", 
-    "officeHeadApproved", "officeHeadApprovalRequired"})
+@ToString(
+    callSuper = true,
+    of = {"informationType", "person", "startAt", "endTo", 
+        "officeHeadApproved", "officeHeadApprovalRequired"})
 @Audited
 @Inheritance(strategy = InheritanceType.JOINED)
 @Entity
