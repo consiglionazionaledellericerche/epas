@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.20.1] - 2024-11-13
 ### Added
    - Inserito job per far scadere le richieste di uscite di servizio non approvate oltre i 3 mesi
+   - Introdotto meccanismo per impostare come lette le notifiche non lette più vecchie di 3 mesi
 
 ## [2.20.0] - 2024-11-12
 ### Added

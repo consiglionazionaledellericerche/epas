@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2024  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,6 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package controllers;
 
 import com.google.common.base.Optional;
@@ -22,6 +21,9 @@ import com.querydsl.core.QueryResults;
 import common.security.SecurityRules;
 import dao.NotificationDao;
 import dao.NotificationDao.NotificationFilter;
+import lombok.val;
+import manager.NotificationManager;
+
 import java.util.List;
 import javax.inject.Inject;
 import models.Notification;
@@ -39,6 +41,8 @@ public class Notifications extends Controller {
 
   @Inject
   static NotificationDao notificationDao;
+  @Inject
+  static NotificationManager notificationManager;
   @Inject
   static SecurityRules rules;
 
@@ -116,5 +120,10 @@ public class Notifications extends Controller {
     }
 
     list(message, filter);
+  }
+
+  public void expiredNotificationsNotRead() {
+    val expired = notificationManager.expiredNotificationsNotRead();
+    renderText("Notification expired -> " + expired);
   }
 }

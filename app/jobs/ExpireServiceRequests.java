@@ -36,7 +36,7 @@ import play.jobs.On;
 import play.jobs.OnApplicationStart;
 
 /**
- * Chiusura degli uffici senza persone con contratto attivo.
+ * Imposta come scadute le richieste di uscita di servizio ancora da approvare dopo 3 mesi.
  */
 @Slf4j
 @On("0 15 7 ? * MON-FRI") //tutti i giorni dal lunedi al venerdi di ogni mese alle 7.15
