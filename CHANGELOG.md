@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.21.0] - UNRELEASED
+### Changed
+   - Rimossa validazione dati della persona nell'inserimento di un nuovo badge
+
 ## [2.20.1] - 2024-11-13
 ### Added
    - Inserito job per far scadere le richieste di uscite di servizio non approvate oltre i 3 mesi
