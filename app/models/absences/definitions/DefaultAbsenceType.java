@@ -86,7 +86,7 @@ public enum DefaultAbsenceType {
       null, true, false, true, null),
 
   A_39LA("39LA",
-      "Lavoro agile per dipendenti fragili o per assistenza a disabile/immunodepresso", false,
+      "Lavoro Agile per dipendenti fragili", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
       MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), 
       null, null, true, false, true, null),
@@ -1822,6 +1822,10 @@ public enum DefaultAbsenceType {
       false, ImmutableSet.of(JustifiedTypeName.all_day), 0,
       true /* festivo capire */, MealTicketBehaviour.notAllowMealTicket, 0, null,
       Sets.newHashSet(), null, null, false, true, true, null),
+  A_54TD("54TD", "Aspettativa Legge Gelmini", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, 
+      MealTicketBehaviour.notAllowMealTicket, 0, null,
+      Sets.newHashSet(), null, null, false, true, true, null), 
 
   A_55("55", "aspett. per funzioni pubbliche", false,
       ImmutableSet.of(JustifiedTypeName.all_day),
