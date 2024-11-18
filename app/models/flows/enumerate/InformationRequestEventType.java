@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2024  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,6 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package models.flows.enumerate;
 
 /**
@@ -35,5 +34,6 @@ public enum InformationRequestEventType {
   MANAGER_REFUSAL,
   DELETE,
   EPAS_REFUSAL,
-  COMPLETE;
+  COMPLETE,
+  EXPIRED;
 }

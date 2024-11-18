@@ -4,13 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.20.0] - UNRELEASED
+## [2.20.2] - 2024-11-18
+### Changed
+   - Rimossa validazione dati della persona nell'inserimento di un nuovo badge
+   - Aggiunta la possibilità di inserire un codice di assenza al momento scaduto ma non attivo
+     alla data dell'assenza.
+
+## [2.20.1] - 2024-11-13
+### Added
+   - Inserito job per far scadere le richieste di uscite di servizio non approvate oltre i 3 mesi
+   - Introdotto meccanismo per impostare come lette le notifiche non lette più vecchie di 3 mesi
+
+## [2.20.0] - 2024-11-12
 ### Added
   - Aggiunto un parametro JAVA_OPTIONS per controllare i parametri passati in fase di avvio
     della JVM Java. Impostato di default il parametro -XX:MaxRAMPercentage=50 che assegna il
     50% della memoria disponibile al container docker.
-  - Aggiunta la possibilità di inserire un codice di assenza al momento scaduto ma non attivo
-    alla data dell'assenza.
+  
+
+### Changed
+  - Corretta visualizzazione dei flussi di richiesta uscita di servizio da parte del responsabile
+    di sede se è anche responsabile di gruppo
 
 ## [2.19.1] - 2024-10-30
 ### Added
