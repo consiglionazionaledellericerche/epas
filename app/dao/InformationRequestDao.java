@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2024  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,8 +14,18 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package dao;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -24,13 +34,8 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
+
+import lombok.val;
 import models.Office;
 import models.Person;
 import models.Role;
@@ -38,7 +43,6 @@ import models.UsersRolesOffices;
 import models.base.InformationRequest;
 import models.base.query.QInformationRequest;
 import models.enumerate.InformationType;
-import models.flows.AbsenceRequest;
 import models.flows.query.QAffiliation;
 import models.flows.query.QGroup;
 import models.informationrequests.IllnessRequest;
@@ -98,7 +102,7 @@ public class InformationRequestDao extends DaoBase {
         .and(informationRequest.flowStarted.isTrue())
         .and(informationRequest.flowEnded.isFalse()));
 
-    List<InformationRequest> results = new ArrayList<>();
+    Set<InformationRequest> results = new HashSet();
     if ((informationType.equals(InformationType.ILLNESS_INFORMATION) 
         || informationType.equals(InformationType.PARENTAL_LEAVE_INFORMATION))
         && uroList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))) {
@@ -109,7 +113,6 @@ public class InformationRequestDao extends DaoBase {
         && uroList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.GROUP_MANAGER))) {
       List<Office> officeList = 
           uroList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
-      conditions = groupManagerQuery(officeList, conditions, signer);
       final QAffiliation affiliation = QAffiliation.affiliation;
       List<InformationRequest> queryResults = getQueryFactory().selectFrom(informationRequest)
           .join(informationRequest.person, person).fetchJoin()
@@ -117,16 +120,18 @@ public class InformationRequestDao extends DaoBase {
             .on(affiliation.beginDate.before(LocalDate.now())
                 .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
           .join(affiliation.group, group)
-          .where(group.manager.eq(signer).and(conditions))
+          .where(group.manager.eq(signer).and(groupManagerQuery(officeList, conditions, signer)))
           .distinct()
           .fetch();
       results.addAll(queryResults);
-    } else {
-      results.addAll(toApproveResultsAsSeatSuperVisor(uroList,
-          informationType, signer, conditions));
+    } 
+    if (uroList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))) {
+      val resultsAsSeatSupervisor = toApproveResultsAsSeatSuperVisor(uroList,
+          informationType, signer, conditions);
+      results.addAll(resultsAsSeatSupervisor);
     }
 
-    return results;
+    return Lists.newArrayList(results);
   }
 
   /**
@@ -361,7 +366,7 @@ public class InformationRequestDao extends DaoBase {
   public List<ServiceRequest> servicesByIds(List<Long> ids) {
     final QServiceRequest serviceRequest = QServiceRequest.serviceRequest;
     return getQueryFactory().selectFrom(serviceRequest)
-        .where(serviceRequest.id.in(ids)).fetch();
+        .where(serviceRequest.id.in(ids)).orderBy(QServiceRequest.serviceRequest.day.desc()).fetch();
   }
 
   /**
@@ -477,11 +482,13 @@ public class InformationRequestDao extends DaoBase {
    */
   private BooleanBuilder seatSupervisorQuery(List<Office> officeList,
       BooleanBuilder condition, Person signer) {
-
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
+    BooleanBuilder isGroupManagerStaff = 
+        new BooleanBuilder(informationRequest.managerApprovalRequired.isTrue())
+          .and(informationRequest.managerApproved.isNull());
     condition.and(informationRequest.person.office.in(officeList))
         .and(informationRequest.officeHeadApprovalRequired.isTrue()
-            .and(informationRequest.officeHeadApproved.isNull()));
+            .and(informationRequest.officeHeadApproved.isNull())).andNot(isGroupManagerStaff);
 
     return condition;
   }
@@ -513,14 +520,15 @@ public class InformationRequestDao extends DaoBase {
    * @param signer     colui che deve firmare la richiesta
    * @return le condizioni per determinare se il responsabile di gruppo è coinvolto 
    *     nell'approvazione.
+   * @throws CloneNotSupportedException 
    */
   private BooleanBuilder groupManagerQuery(List<Office> officeList, 
       BooleanBuilder condition, Person signer) {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
-    condition.and(informationRequest.person.office.in(officeList))
+    val groupCondition = new BooleanBuilder(condition);
+    return groupCondition.and(informationRequest.person.office.in(officeList))
         .and(informationRequest.managerApprovalRequired.isTrue()
         .and(informationRequest.managerApproved.isNull()));
-    return condition;
   }
 
   /**
@@ -606,5 +614,21 @@ public class InformationRequestDao extends DaoBase {
             .collect(Collectors.toSet())).and(conditions))
         .orderBy(informationRequest.startAt.desc())
         .fetch();
+  }
+  
+  /**
+   * Lista delle richiesta di uscita di servizio con data precedente alla data passata.
+   *
+   */
+  public List<ServiceRequest> serviceRequestActiveBeforeDate(LocalDateTime toDate) {
+
+    Preconditions.checkNotNull(toDate);
+
+    final QServiceRequest serviceRequest = QServiceRequest.serviceRequest;
+
+    BooleanBuilder conditions = 
+        new BooleanBuilder(serviceRequest.startAt.before(toDate)).and(serviceRequest.flowEnded.eq(false));
+    return getQueryFactory().selectFrom(serviceRequest)
+        .where(conditions).orderBy(serviceRequest.startAt.desc()).fetch();
   }
 }

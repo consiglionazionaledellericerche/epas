@@ -876,4 +876,9 @@ public class InformationRequests extends Controller {
     }
     renderBinary(is, fileName, length);
   }
+  
+  public void expireServiceRequests() {
+    val expired = informationRequestManager.expireServiceRequests();
+    renderText(String.format("Expired %s richieste", expired.size()));
+  }
 }
