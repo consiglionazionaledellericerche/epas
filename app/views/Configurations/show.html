@@ -301,15 +301,24 @@
         <th>Valore</th>
       </tr>
       #{list competenceFlows.findAll({it.epasParam.general}), as:'conf'}
-      #{if templateUtility.enableOvertimeFlowsConfiguration()
-      || conf.epasParam == manager.configurations.EpasParam.ENABLE_COMPETENCE_FLOWS}
+      #{if !conf.epasParam.equals(manager.configurations.EpasParam.ENABLE_COMPETENCE_FLOWS)}
+      #{secure.check 'Administration.generalSetting'}
       <tr>
         <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
         </td>
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
       </tr>
+      #{/secure.check}
       #{/if}
+      #{else}
+      <tr>
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
+          &{conf.epasParam}#{/secure.link}
+        </td>
+        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+      </tr>
+      #{/else}
       #{/list}
     </table>
 
@@ -322,7 +331,8 @@
         <th>Al</th>
       </tr>
       #{list competenceFlows.findAll({!it.epasParam.general}), as:'conf'}
-      #{if conf.epasParam != manager.configurations.EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION || templateUtility.enableOvertimeRequestInAdvance()}
+      #{if conf.epasParam.name.contains('overtime')}
+      #{secure.check 'Administration.generalSetting'}
       <tr>
         <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
           &{conf.epasParam}#{/secure.link}
@@ -330,8 +340,19 @@
         <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
         <td>${conf.beginDate.format()}</td>
         <td>${conf.calculatedEnd()?.format()}</td>
-      </tr>      
-      #{/if}
+      </tr>  
+      #{/secure.check}    
+	  #{/if}
+	  #{else}
+	  <tr>
+        <td>#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
+          &{conf.epasParam}#{/secure.link}
+        </td>
+        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+        <td>${conf.beginDate.format()}</td>
+        <td>${conf.calculatedEnd()?.format()}</td>
+      </tr>     
+	  #{/else}
       #{/list}
     </table>
   </div>
@@ -393,52 +414,6 @@
   </div>
   #{/tabContentItem}
 
-  #{if templateUtility.isFlowsActive()}	
-  #{tabContentItem id:'COMPETENCE_FLOWS', active:flowsActive}
-  <div id="editFlows">
-    #{alert color:'info'}
-    <p>Elenco dei parametri di configurazione a cadenza periodica relativi ai flussi di richiesta straordinari per la sede
-      <strong>${office.name}</strong>, il loro valore attuale ed il periodo di riferimento.</p>
-    #{/alert}
-
-    <table class="table">
-      <tr>
-        <th>Attivazione</th>
-        <th>Valore</th>
-      </tr>
-      #{list competence_flows.findAll({it.epasParam.general}), as:'conf'}
-      <tr>
-        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
-          &{conf.epasParam}#{/secure.link}
-        </td>
-        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
-      </tr>
-      #{/list}
-    </table>
-
-
-    <table class="table">
-      <tr>
-        <th>Parametri specifici</th>
-        <th>Valore</th>
-        <th>Dal</th>
-        <th>Al</th>
-      </tr>
-      #{list competence_flows.findAll({!it.epasParam.general}), as:'conf'}
-      <tr>
-        <td>#{secure.link @Configurations.edit(conf.id), 'data-async-modal':'#defaultModal'}
-          &{conf.epasParam}#{/secure.link}
-        </td>
-        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
-        <td>${conf.beginDate.format()}</td>
-        <td>${conf.calculatedEnd()?.format()}</td>
-      </tr>
-      #{/list}
-    </table>
-  </div>
-  #{/tabContentItem}
-  #{/if}
-  	
   #{/tabContent}
 
 </div>
