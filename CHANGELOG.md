@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.20.2] - 2024-11-18
 ### Added
    - Aggiunto codice 54TD - Aspettativa Legge Gelmini
+   
 ### Changed
    - Rimossa validazione dati della persona nell'inserimento di un nuovo badge
    - Aggiunta la possibilità di inserire un codice di assenza al momento scaduto ma non attivo
      alla data dell'assenza.
    - Modificata descrizione del codice 39LA
+   - Modificate le form di inserimento e modifica assenza, togliendo la parola assenza dal titolo
 
 ## [2.20.1] - 2024-11-13
 ### Added
