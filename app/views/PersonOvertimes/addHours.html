@@ -1,0 +1,29 @@
+#{modalAsync title:'Gestione Monte ore Straordinari dipendente'}
+
+#{alert}
+Per l'anno <strong>${year}</strong> il dipendente <strong>${person.fullName()}</strong> ha un monte ore per straordinari 
+disponibile di: <strong>${person.totalOvertimeHourInYear(year)}</strong>
+#{/alert}
+
+  <div id="officeData">
+
+	#{form action:@saveHours(), method:'POST', autocomplete:false,
+	    class:'form form-horizontal', 'data-async':'#hoursList',
+	    'data-async-error':'#officeData'}
+
+	#{f.hidden 'personId', value:person.id /}
+	#{f.hidden 'year', value:year /}
+    #{f.input 'personOvertime.numberOfHours', required:true /}
+    #{f.date 'personOvertime.dateOfUpdate', required:true /}
+
+    #{b.buttons center:true}
+      #{b.save /}
+    #{/b.buttons}
+	#{/form}
+	
+  </div>
+
+
+
+
+#{/modalAsync}

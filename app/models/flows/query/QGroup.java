@@ -42,6 +42,8 @@ public class QGroup extends EntityPathBase<Group> {
 
     public final StringPath externalId = createString("externalId");
 
+    public final ListPath<models.GroupOvertime, models.query.QGroupOvertime> groupOvertimes = this.<models.GroupOvertime, models.query.QGroupOvertime>createList("groupOvertimes", models.GroupOvertime.class, models.query.QGroupOvertime.class, PathInits.DIRECT2);
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 

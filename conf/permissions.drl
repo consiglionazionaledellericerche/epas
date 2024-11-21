@@ -996,6 +996,9 @@ when
     		"Competences.monthlyOvertime",
     		"Groups.showGroups",
     		"Groups.edit",
+    		"Groups.handleOvertimeGroup",
+    		"Groups.addHours",
+    		"Groups.saveHours",
     		"AbsenceRequests.blank",
 			"AbsenceRequests.edit",
 			"AbsenceRequests.save",
@@ -1021,7 +1024,9 @@ when
 			"CompetenceRequests.managerApproval",
 			"CompetenceRequests.list",
 			"CompetenceRequests.listToApprove",
+			"CompetenceRequests.listToApproveWithRequestInAdvance",
 			"CompetenceRequests.overtimesToApprove",
+			"CompetenceRequests.overtimesToApproveInAdvance",
 			
 			"InformationRequests.serviceExitToApprove",
 			"InformationRequests.listToApprove",
@@ -1042,6 +1047,9 @@ when
   			"Stampings.dailyPresenceForPersonInCharge" ,
     		"Competences.monthlyOvertime",
     		"Groups.showGroups",
+    		"Groups.handleOvertimeGroup",
+    		"Groups.addHours",
+    		"Groups.saveHours",
     		"Groups.edit"), target==$o, granted==false)
 then
   $c.grant();
@@ -1083,7 +1091,9 @@ when
   $c: PermissionCheck( action in (
     		"CompetenceRequests.list",
 			"CompetenceRequests.listToApprove",
-			"CompetenceRequests.overtimesToApprove",			
+			"CompetenceRequests.listToApproveWithRequestInAdvance",
+			"CompetenceRequests.overtimesToApprove",	
+			"CompetenceRequests.overtimesToApproveInAdvance",		
 			"CompetenceRequests.managerApproval",
 			"CompetenceRequests.show"
 			
@@ -1613,8 +1623,10 @@ when
 		"CompetenceRequests.approval",
 		"CompetenceRequests.disapproval",
 		"CompetenceRequests.listToApprove",
+		"CompetenceRequests.listToApproveWithRequestInAdvance",
 		"CompetenceRequests.officeHeadApproval",
 		"CompetenceRequests.overtimesToApprove",
+		"CompetenceRequests.overtimesToApproveInAdvance",
 
         "Stampings.dailyPresence",
         "AbsenceRequests.blank",
@@ -1661,6 +1673,9 @@ when
         "InformationRequests.generateTeleworkReport",
         "InformationRequests.approval",
         "InformationRequests.disapproval",       
+        
+        "Groups.showGroups",
+    	"Groups.handleOvertimeGroup",
 
         "Configurations.administrativeEditParams",
         "Configurations.show",
@@ -1703,8 +1718,10 @@ when
 		"CompetenceRequests.approval",
 		"CompetenceRequests.disapproval",
 		"CompetenceRequests.listToApprove",
+		"CompetenceRequests.listToApproveWithRequestInAdvance",
 		"CompetenceRequests.officeHeadApproval",
 		"CompetenceRequests.overtimesToApprove",
+		"CompetenceRequests.overtimesToApproveInAdvance",
 
         "AbsenceRequests.edit",
         "AbsenceRequests.save",
@@ -1743,6 +1760,9 @@ when
         "InformationRequests.revokeValidation",
         "InformationRequests.approval",
         "InformationRequests.disapproval",  
+        
+        "Groups.showGroups",
+    	"Groups.handleOvertimeGroup",
 
         "Configurations.administrativeEditParams",
         "Configurations.show",
@@ -2250,6 +2270,10 @@ when
         "Groups.edit",
         "Groups.deleteGroup",
         "Groups.showGroups",
+        "Groups.handleOvertimeGroup",
+        "GroupOvertimes.save",
+        "PersonOvertimes.addHours",
+        "PersonOvertimes.saveHours",
         
         "Affiliations.personAffiliations",
         "Affiliations.blankByPerson",
@@ -2430,6 +2454,10 @@ when
         "Groups.edit",
         "Groups.deleteGroup",
         "Groups.showGroups",
+        "Groups.handleOvertimeGroup",
+        "GroupOvertimes.save",
+        "PersonOvertimes.addHours",
+        "PersonOvertimes.saveHours",
 
         "Affiliations.personAffiliations",
         "Affiliations.blankByPerson",

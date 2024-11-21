@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.20.2] - 2024-11-18
 ### Added
    - Aggiunto codice 54TD - Aspettativa Legge Gelmini
+   - Aggiunto flusso di richiesta straordinari
    
 ### Changed
    - Rimossa validazione dati della persona nell'inserimento di un nuovo badge
@@ -226,16 +227,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.9.0] - 2023-11-06
 ### Added
-  - Gestione delle richieste di straordinario da parte del personale IV-VIII, con possibilità
+  - Gestione delle richieste di straordinario da parte del personale IV-VIII, con possibilità 
     di configurare richieste preventive e consuntive di straordinario ed approvazione da parte
     del responsabile di gruppo e/o di sede.
   - Aggiornata immagine docker con tag stable su ghcr.io per ogni nuova release
   
 ### Changed
-  - Evitati di caricare tutti i contratti presenti nel sistema nella visualizzazione delle
-    sedi senza personale
+  - Evitati di caricare tutti i contratti presenti nel sistema nella visualizzazione delle sedi senza personale
   - Permesso al ruolo "ADMIN" di effettuare le operazioni sulle assenze
   - Permesso al ruolo "RO_ADMIN" di scaricare gli allegati delle assenze
+
 
 ## [2.8.0] - 2023-09-15
 ### Added

@@ -91,6 +91,8 @@ public class QCompetenceRequest extends EntityPathBase<CompetenceRequest> {
 
     public final NumberPath<Integer> value = createNumber("value", Integer.class);
 
+    public final NumberPath<Integer> valueRequested = createNumber("valueRequested", Integer.class);
+
     //inherited
     public final NumberPath<Integer> version = _super.version;
 
