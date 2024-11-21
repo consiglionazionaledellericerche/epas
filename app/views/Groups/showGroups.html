@@ -39,9 +39,11 @@
 	   
 		<li class="list-group-item list-group-item-grey">
 				<div class="pull-right btn-group">
+				#{secure.check 'Administration.allowGroupOvertime'}
 				#{secure.check 'Groups.handleOvertimeGroup'}
 				<a class="btn btn-sm btn-default" href="@{Groups.handleOvertimeGroup(item.id)}">
 				  <i class="fa fa-money"></i> Monte ore straordinario</a>
+	            #{/secure.check}
 	            #{/secure.check}
 	            #{secure.check 'Groups.deleteGroup'}
 	            <a class="btn btn-sm btn-danger" href="@{Groups.deleteGroup(item.id)}">
