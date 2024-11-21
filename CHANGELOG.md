@@ -469,10 +469,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed 
  - Corretto controllo dei buoni pasto inviati ad Attestati (funzionalità solo per CNR)
- - La cancellazione dei servizi di reperibilità ade<<<<<<< HEAD
-=======
-
->>>>>>> branch '73-permettere-la-modifica-del-monte-ore-straordinari-per-sede-e-a-cascata-per-gruppo' of git@github.com:consiglionazionaledellericerche/epas.gitsso è possibile anche se il servizio
+ - La cancellazione dei servizi di reperibilità adesso è possibile anche se il servizio
    ha associato delle persone ma non ha nessun giorno di reperibilità assegnato
  - Modificato il comportamento del codice 39LA per l'assegnazione del buono pasto (non lo assegna)
  - Rimosso codice 40LA dalla lista dei codici prendibili
@@ -513,10 +510,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
  - Migliorato messaggio di errore in caso di inserimento via REST di buoni pasto già esistenti
- - Fix bug del permesso breve che non veniva elimin<<<<<<< HEAD
-=======
-
->>>>>>> branch '73-permettere-la-modifica-del-monte-ore-straordinari-per-sede-e-a-cascata-per-gruppo' of git@github.com:consiglionazionaledellericerche/epas.gitato quando si completava la giornata
+ - Fix bug del permesso breve che non veniva eliminato quando si completava la giornata
  - Modificata procedura di allineamento dei codici di assenza con gli enumerati per risolvere 
    il problema CNR/INAF su alcuni codici.
  - Reinserito il codice 31_2020 per le esigenze INAF
