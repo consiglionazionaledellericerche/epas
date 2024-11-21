@@ -21,7 +21,8 @@
 		    	|| templateUtility.changeReperibilityRequests() > 0 || templateUtility.teleworkRequests() > 0
 		    	|| templateUtility.serviceRequests() > 0 || templateUtility.illnessRequests() > 0
 		    	|| templateUtility.personalPermissionRequests() > 0 
-		    	|| templateUtility.changeReperibilityRequests() > 0}
+		    	|| templateUtility.changeReperibilityRequests() > 0
+		    	|| templateUtility.overtimeRequestsInAdvance() > 0}
       			<span class="label label-danger label-badge">${templateUtility.compensatoryRestRequests() 
       				+ templateUtility.vacationRequests() 
       				+ templateUtility.overtimeRequests()
@@ -29,7 +30,8 @@
       				+ templateUtility.vacationPastYearAfterDeadlineRequests()
       				+ templateUtility.teleworkRequests() + templateUtility.serviceRequests()
       				+ templateUtility.illnessRequests()
-      				+ templateUtility.changeReperibilityRequests()}
+      				+ templateUtility.changeReperibilityRequests()
+      				+ templateUtility.overtimeRequestsInAdvance()}
       			</span>
     		#{/if}
 	     <!-- visualizza l'username -->
@@ -125,6 +127,14 @@
       		<span class="label label-danger label-badge">${templateUtility.overtimeRequests()}</span>
     	#{/if} 
       #{/secure.li}
+      #{if templateUtility.enableOvertimeRequestInAdvance()}
+            #{secure.li @CompetenceRequests.overtimesToApproveInAdvance()}
+        	<i class="fa fa-money" aria-hidden="true"></i>
+       		#{if templateUtility.overtimeRequestsInAdvance() > 0}
+      			<span class="label label-danger label-badge">${templateUtility.overtimeRequestsInAdvance()}</span>
+    		#{/if} 
+      #{/secure.li}
+      #{/if}
       #{/secure.check}
       
      <li class="divider"></li>

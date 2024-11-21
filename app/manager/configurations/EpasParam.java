@@ -750,6 +750,18 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
+  /**
+   * Attivazione o meno del monte ore di straordinario per dipendente.
+   */
+//  ENABLE_OVERTIME_PER_PERSON(
+//      "enable_overtime_per_person",
+//      EpasParamCategory.COMPETENCE_FLOWS,
+//      EpasParamTimeType.GENERAL,
+//      EpasParamValueType.BOOLEAN,
+//      EpasParamValueType.formatValue(false),
+//      Lists.<RecomputationType>newArrayList(),
+//      Office.class),
+  
   
   /**
    * Per i livelli IV-VIII è necessaria l'approvazione del cambio di reperibilità da parte 
@@ -819,7 +831,7 @@ public enum EpasParam {
   
   /**
    * Per i responsabili di gruppo è necessaria l'approvazione dei permessi personali da parte del 
-   * responsabile di sede.
+   * responsabile di sede.s
    */
   PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED(
       "personal_permission_manager_request_office_head_approval_required",
@@ -1076,7 +1088,7 @@ public enum EpasParam {
   }
 
   /**
-   * Tipologie di periodicità temporale del parametro.
+   * Tipologie di periodicità temporale del parametro.s
    */
   public enum EpasParamTimeType {
     GENERAL, YEARLY, PERIODIC;
