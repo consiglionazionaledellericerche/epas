@@ -34,4 +34,3 @@ VALUES (0, 7, true, 0, 0, 0, 0, 0, 0, 0, 312, (select id from working_time_types
 
 # --- !Downs
 -- Non è necessaria una down
-
