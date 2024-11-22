@@ -16,7 +16,12 @@
  */
 package cnr.sync.dto.v3;
 
+import org.modelmapper.ModelMapper;
+import lombok.Builder;
 import lombok.Data;
+import lombok.val;
+import manager.recaps.personstamping.PersonStampingRecap;
+import models.Configuration;
 import models.Person;
 
 @Data
@@ -24,4 +29,15 @@ public class PersonResidualDto {
 
   public Person person;
   public Integer residual;
+  
+  public static PersonResidualDto build(PersonStampingRecap psDto) {
+    ModelMapper modelMapper = new ModelMapper();
+    modelMapper.getConfiguration().setAmbiguityIgnored(true);
+    val personResidualDto = modelMapper.map(psDto, PersonResidualDto.class);
+    if (psDto != null) {
+      personResidualDto.setResidual(psDto.contractMonths.stream().mapToInt(cm -> cm.getValue().getRemainingMinutesLastYear() 
+          + cm.getValue().getRemainingMinutesCurrentYear()).sum());
+    }
+    return personResidualDto;
+  }
 }

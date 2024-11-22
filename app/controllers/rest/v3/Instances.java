@@ -59,7 +59,7 @@ import play.mvc.With;
 @Slf4j
 @With(Resecure.class)
 public class Instances extends Controller {
-  
+
   @Inject
   static OfficeDao officeDao;
   @Inject 
@@ -86,7 +86,7 @@ public class Instances extends Controller {
         offices.stream().map(o -> OfficeShowTerseDto.build(o)).collect(Collectors.toList());
     renderJSON(gsonBuilder.create().toJson(list));
   }
-  
+
   /**
    * La lista dei contratti dei dipendenti di una sede.
    * @param officeId l'identificativo della sede
@@ -109,9 +109,9 @@ public class Instances extends Controller {
     }
     val list = contractList.stream().map(c -> ContractTerseDto.build(c)).collect(Collectors.toList());
     renderJSON(gsonBuilder.create().toJson(list));
-    
+
   }
-  
+
   /**
    * La lista dei residui orari dei dipendenti di una sede.
    * @param officeId l'identificativo della sede
@@ -127,20 +127,18 @@ public class Instances extends Controller {
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
     List<Person> personList = personDao.list(Optional.absent(),
         Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();   
-    List<PersonResidualDto> list = Lists.newArrayList();
-    for (Person person : personList) {
-      PersonStampingRecap psDto = 
-          stampingsRecapFactory.create(
-              person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
-      PersonResidualDto dto = new PersonResidualDto();
-      dto.person = person;
-      dto.residual = psDto.contractMonths.stream().mapToInt(cm -> cm.getValue().getRemainingMinutesLastYear() 
-          + cm.getValue().getRemainingMinutesCurrentYear()).sum();
-      list.add(dto);
+    List<PersonStampingRecap> list = Lists.newArrayList();
+    PersonStampingRecap psDto = null;
+    for (Person person : personList) {       
+      psDto = stampingsRecapFactory.create(
+          person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
+      log.debug("Carico {} nella lista", psDto.person.getFullname());
+      list.add(psDto);      
     }
-    renderJSON(gsonBuilder.create().toJson(list));
+    val aList = list.stream().map(p -> PersonResidualDto.build(p)).collect(Collectors.toList());
+    renderJSON(gsonBuilder.create().toJson(aList));
   }
-  
+
   /**
    * La configurazione di una sede.
    * @param officeId l'identificativo della sede
@@ -155,7 +153,7 @@ public class Instances extends Controller {
     val list = configurationList.stream().map(c -> ConfigurationOfficeDto.build(c)).collect(Collectors.toList());
     renderJSON(gsonBuilder.create().toJson(list));
   }
-  
+
   /**
    * La lista delle configurazioni personali dei dipendenti di una sede.
    * @param officeId l'identificativo della sede

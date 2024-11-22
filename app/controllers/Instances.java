@@ -74,4 +74,20 @@ public class Instances extends Controller {
       importInstance();
     }
   }
+  
+  public static void importPeopleConfigurations() {
+    
+  }
+  
+  public static void importOfficeConfiguration() {
+    
+  }
+  
+  public static void importContracts() {
+    
+  }
+  
+  public static void importResidual() {
+    
+  }
 }
