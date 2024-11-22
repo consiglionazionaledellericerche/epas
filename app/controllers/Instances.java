@@ -17,7 +17,9 @@
 package controllers;
 
 import java.util.List;
+import java.util.Optional;
 import javax.inject.Inject;
+import org.joda.time.LocalDate;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -26,10 +28,22 @@ import cnr.sync.dto.v3.ConfigurationOfficeDto;
 import cnr.sync.dto.v3.ContractTerseDto;
 import cnr.sync.dto.v3.OfficeShowTerseDto;
 import cnr.sync.dto.v3.PersonConfigurationList;
+import cnr.sync.dto.v3.PersonConfigurationShowDto;
+import dao.PersonDao;
 import helpers.rest.ApiRequestException;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import manager.ConsistencyManager;
+import manager.PeriodManager;
 import manager.attestati.dto.show.ListaDipendenti;
+import manager.configurations.ConfigurationDto;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
+import manager.recaps.recomputation.RecomputeRecap;
+import models.Configuration;
+import models.Person;
+import models.PersonConfiguration;
+import models.base.IPropertyInPeriod;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
@@ -52,6 +66,14 @@ public class Instances extends Controller {
   
   @Inject
   static GsonBuilder gsonBuilder;
+  @Inject
+  static PersonDao personDao;
+  @Inject
+  static ConfigurationManager configurationManager;
+  @Inject
+  static PeriodManager periodManager;
+  @Inject
+  static ConsistencyManager consistencyManager;
 
   public static void importInstance() {
     render();
@@ -93,6 +115,34 @@ public class Instances extends Controller {
     }
     List<PersonConfigurationList> list = (List<PersonConfigurationList>) new Gson()
         .fromJson(httpResponse.getJson(), PersonConfigurationList.class);
+    EpasParam epasParam = null;
+    PersonConfiguration newConfiguration = null;
+    for (PersonConfigurationList pcl : list) {
+      Person person = personDao.getPersonByNumber(pcl.getNumber());
+      for (PersonConfigurationShowDto pcs : pcl.getList()) {
+        epasParam = EpasParam.valueOf(pcs.getEpasParam());        
+        Optional<PersonConfiguration> configuration = configurationManager.getConfigurtionByPersonAndType(person, epasParam);
+        if (configuration.isPresent()) {
+          newConfiguration = (PersonConfiguration) configurationManager.updateBoolean(epasParam,
+              person, Boolean.getBoolean(pcs.getFieldValue()),
+              com.google.common.base.Optional.fromNullable(pcs.getBeginDate()),
+              com.google.common.base.Optional.fromNullable(pcs.getEndDate()), false);
+          
+          List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
+          
+          RecomputeRecap recomputeRecap =
+              periodManager.buildRecap(configuration.get().getPerson().getBeginDate(),
+                  com.google.common.base.Optional.fromNullable(LocalDate.now()),
+                  periodRecaps, com.google.common.base.Optional.<LocalDate>absent());
+          recomputeRecap.epasParam = configuration.get().getEpasParam();
+          periodManager.updatePeriods(newConfiguration, true);
+
+          consistencyManager.performRecomputation(configuration.get().getPerson(),
+              configuration.get().getEpasParam().recomputationTypes, recomputeRecap.recomputeFrom);
+        }
+        log.debug("Aggiornato valore del parametro {} per {}", epasParam.name, person.getFullname());
+      }
+    }
   }
   
   public static void importOfficeConfiguration(String instance, String code) {
@@ -106,6 +156,45 @@ public class Instances extends Controller {
     }
     List<ConfigurationOfficeDto> list = (List<ConfigurationOfficeDto>) new Gson()
         .fromJson(httpResponse.getJson(), ConfigurationOfficeDto.class);
+    Configuration newConfiguration = null;
+    EpasParam epasParam = null;
+    for (ConfigurationOfficeDto dto : list) {
+      epasParam = EpasParam.valueOf(dto.getEpasParam());
+     switch(epasParam.epasParamValueType) {
+       case BOOLEAN:
+         break;
+       case DAY_MONTH:
+         break;
+       case EMAIL:
+         break;
+       case ENUM:
+         break;
+       case INTEGER:
+         break;
+       case IP_LIST:
+         break;
+       case LOCALDATE:
+         break;
+       case LOCALTIME:
+         break;
+       case LOCALTIME_INTERVAL:
+         break;
+       case MONTH:
+         break;
+         default:
+           break;
+     }
+      List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
+      RecomputeRecap recomputeRecap =
+          periodManager.buildRecap(configuration.getOffice().getBeginDate(),
+              Optional.fromNullable(LocalDate.now()),
+              periodRecaps, Optional.<LocalDate>absent());
+      recomputeRecap.epasParam = configuration.getEpasParam();
+      periodManager.updatePeriods(newConfiguration, true);
+
+      consistencyManager.performRecomputation(configuration.getOffice(),
+          configuration.getEpasParam().recomputationTypes, recomputeRecap.recomputeFrom);
+    }
   }
   
   public static void importContracts(String instance, String code) {
