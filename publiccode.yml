@@ -4,10 +4,10 @@
 
 publiccodeYmlVersion: '0.2'
 name: epas
-releaseDate: '2024-09-05'
+releaseDate: '2024-11-18'
 url: 'https://github.com/consiglionazionaledellericerche/epas'
 applicationSuite: epas
-softwareVersion: 2.18.1
+softwareVersion: 2.20.2
 developmentStatus: stable
 softwareType: standalone/web
 platforms:

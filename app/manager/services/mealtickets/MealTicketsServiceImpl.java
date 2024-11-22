@@ -255,6 +255,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     int buoniUsati = monthRecap.getBuoniPastoUsatiNelMese();
     int buoniDaConteggiare = 0;
     MealTicketComposition composition = new MealTicketComposition();
+    //TODO: controllare che esista una inizializzazione e inserirla nel computo dei buoni
     List<BlockMealTicket> list = recap.getBlockMealTicketReceivedDeliveryDesc();
     if (monthRecap.getRemainingMealTickets() < 0) {
       //devo guardare quale sia il default e contare quanti sono i buoni senza copertura

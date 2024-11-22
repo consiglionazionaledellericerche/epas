@@ -247,7 +247,7 @@ public class BadgeSystems extends Controller {
    * @param personFixed se è fixata la persona
    */
   public static void saveBadges(
-      @Valid BadgeSystem badgeSystem, @Required String code, @Valid Person person,
+      @Valid BadgeSystem badgeSystem, @Required String code, @Required Person person,
       boolean personFixed) {
 
     rules.checkIfPermitted(badgeSystem.getOffice());
@@ -261,7 +261,9 @@ public class BadgeSystems extends Controller {
               LocalDate.now(), LocalDate.now(), true).list();
     }
 
+    
     if (Validation.hasErrors()) {
+      log.debug("Validation errors = {}", Validation.current().errors());
       response.status = 400;
       render("@joinBadges", badgeSystem, code, person, activePersons, personFixed);
     }
@@ -289,12 +291,14 @@ public class BadgeSystems extends Controller {
 
     if (!violatedBadges.isEmpty()) {
       Validation.addError("code", "già assegnato in almeno una sorgente timbrature.");
+      log.info("Badge già assegnato in almeno una sorgente timbratura {}", violatedBadges);
       response.status = 400;
       render("@joinBadges", badgeSystem, code, person, activePersons, violatedBadges, personFixed);
     }
 
     for (Badge badge : validBadges) {
       badge.save();
+      log.info("Saving badge {} for {}", code, person);
     }
 
     flash.success(Web.msgSaved(Badge.class));

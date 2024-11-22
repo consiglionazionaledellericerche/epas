@@ -261,6 +261,12 @@
       autonomamente il codice di assenza per legge 104 per un secondo parente disabile del dipendente (182).
 	  </p> 
     #{/if}
+	
+	#{if configuration.epasParam.equals(manager.configurations.EpasParam.THIRD_DISABLED_RELATIVE_PERMISSION) }
+	  <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
+	  autonomamente il codice di assenza per legge 104 per un terzo parente disabile del dipendente (183).
+	  </p> 
+	#{/if}
    
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE) }
       <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> inserire 
@@ -372,7 +378,7 @@
       </ul>
       </p>
     #{/if}
-        #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_OVERTIME_FLOWS) }
+    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_OVERTIME_FLOWS) }
       <p>Abilitando questo paramentro si permette alla sede <strong>${configuration.office.name}</strong> di usufruire del sistema
       integrato di approvazione delle richieste di STRAORDINARIO. <br>
       </p>

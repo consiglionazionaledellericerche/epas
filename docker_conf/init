@@ -481,6 +481,12 @@ sed 's#{{GREENPASS_ACTIVE}}#'"${GREENPASS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.c
 
 ### Fine configurazione parametri relativi al Green PAss
 
+### Configurazione dei parametri per la JVM Java 
+
+export _JAVA_OPTIONS=${JAVA_OPTIONS:--XX:MaxRAMPercentage=50}
+
+### Fine della configurazione dei parametri per la JVM Java
+
 appRun () {
   if [ "$EVOLUTIONS_ENABLED" = "true" ]; then
     echo "Applico eventuali evoluzioni al database..."

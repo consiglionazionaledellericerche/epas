@@ -996,6 +996,9 @@ when
     		"Competences.monthlyOvertime",
     		"Groups.showGroups",
     		"Groups.edit",
+    		"Groups.handleOvertimeGroup",
+    		"Groups.addHours",
+    		"Groups.saveHours",
     		"AbsenceRequests.blank",
 			"AbsenceRequests.edit",
 			"AbsenceRequests.save",
@@ -1021,7 +1024,9 @@ when
 			"CompetenceRequests.managerApproval",
 			"CompetenceRequests.list",
 			"CompetenceRequests.listToApprove",
+			"CompetenceRequests.listToApproveWithRequestInAdvance",
 			"CompetenceRequests.overtimesToApprove",
+			"CompetenceRequests.overtimesToApproveInAdvance",
 			
 			"InformationRequests.serviceExitToApprove",
 			"InformationRequests.listToApprove",
@@ -1042,6 +1047,9 @@ when
   			"Stampings.dailyPresenceForPersonInCharge" ,
     		"Competences.monthlyOvertime",
     		"Groups.showGroups",
+    		"Groups.handleOvertimeGroup",
+    		"Groups.addHours",
+    		"Groups.saveHours",
     		"Groups.edit"), target==$o, granted==false)
 then
   $c.grant();
@@ -1050,7 +1058,7 @@ end
 rule personInChargeForFlows
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
-  $ar: AbsenceRequest(managerApprovalRequired == true && managerApproved == null)
+  $ar: AbsenceRequest(managerApprovalRequired == true && !isManagerApproved())
   $c: PermissionCheck( action in (
     		"AbsenceRequests.blank",
 			"AbsenceRequests.edit",
@@ -1079,11 +1087,13 @@ end
 rule personInChargeForCompetenceRequestsFlows
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
-  $cr: CompetenceRequest(managerApprovalRequired == true && managerApproved == null)
+  $cr: CompetenceRequest(managerApprovalRequired == true && !isManagerApproved())
   $c: PermissionCheck( action in (
     		"CompetenceRequests.list",
 			"CompetenceRequests.listToApprove",
-			"CompetenceRequests.overtimesToApprove",			
+			"CompetenceRequests.listToApproveWithRequestInAdvance",
+			"CompetenceRequests.overtimesToApprove",	
+			"CompetenceRequests.overtimesToApproveInAdvance",		
 			"CompetenceRequests.managerApproval",
 			"CompetenceRequests.show"
 			
@@ -1095,7 +1105,7 @@ end
 rule personInChargeForInformationFlows
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
-  $ir: InformationRequest(managerApprovalRequired == true && managerApproved == null)
+  $ir: InformationRequest(managerApprovalRequired == true && !isManagerApproved())
   $c: PermissionCheck( action in (			
 			"InformationRequests.serviceExitToApprove",
 			"InformationRequests.listToApprove",
@@ -1613,8 +1623,10 @@ when
 		"CompetenceRequests.approval",
 		"CompetenceRequests.disapproval",
 		"CompetenceRequests.listToApprove",
+		"CompetenceRequests.listToApproveWithRequestInAdvance",
 		"CompetenceRequests.officeHeadApproval",
 		"CompetenceRequests.overtimesToApprove",
+		"CompetenceRequests.overtimesToApproveInAdvance",
 
         "Stampings.dailyPresence",
         "AbsenceRequests.blank",
@@ -1661,6 +1673,9 @@ when
         "InformationRequests.generateTeleworkReport",
         "InformationRequests.approval",
         "InformationRequests.disapproval",       
+        
+        "Groups.showGroups",
+    	"Groups.handleOvertimeGroup",
 
         "Configurations.administrativeEditParams",
         "Configurations.show",
@@ -1703,8 +1718,10 @@ when
 		"CompetenceRequests.approval",
 		"CompetenceRequests.disapproval",
 		"CompetenceRequests.listToApprove",
+		"CompetenceRequests.listToApproveWithRequestInAdvance",
 		"CompetenceRequests.officeHeadApproval",
 		"CompetenceRequests.overtimesToApprove",
+		"CompetenceRequests.overtimesToApproveInAdvance",
 
         "AbsenceRequests.edit",
         "AbsenceRequests.save",
@@ -1743,6 +1760,9 @@ when
         "InformationRequests.revokeValidation",
         "InformationRequests.approval",
         "InformationRequests.disapproval",  
+        
+        "Groups.showGroups",
+    	"Groups.handleOvertimeGroup",
 
         "Configurations.administrativeEditParams",
         "Configurations.show",
@@ -2250,6 +2270,10 @@ when
         "Groups.edit",
         "Groups.deleteGroup",
         "Groups.showGroups",
+        "Groups.handleOvertimeGroup",
+        "GroupOvertimes.save",
+        "PersonOvertimes.addHours",
+        "PersonOvertimes.saveHours",
         
         "Affiliations.personAffiliations",
         "Affiliations.blankByPerson",
@@ -2430,6 +2454,10 @@ when
         "Groups.edit",
         "Groups.deleteGroup",
         "Groups.showGroups",
+        "Groups.handleOvertimeGroup",
+        "GroupOvertimes.save",
+        "PersonOvertimes.addHours",
+        "PersonOvertimes.saveHours",
 
         "Affiliations.personAffiliations",
         "Affiliations.blankByPerson",
@@ -3180,6 +3208,7 @@ when
  				|| (epasParam == EpasParam.ADDITIONAL_HOURS && fieldValue == true)
  				|| (epasParam == EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS && fieldValue == true)
  				|| (epasParam == EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION && fieldValue == true)
+ 				|| (epasParam == EpasParam.THIRD_DISABLED_RELATIVE_PERMISSION && fieldValue == true)
  				|| (epasParam == EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE && fieldValue == true)
  				|| (epasParam == EpasParam.SMARTWORKING && fieldValue == true)
  				|| (epasParam == EpasParam.AGILE_WORK && fieldValue == true)
@@ -3361,6 +3390,22 @@ when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
  PersonConfiguration(epasParam == EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION, fieldValue == true) from $p.personConfigurations
+ $target: Absence(DefaultGroup.employeeSecondDisabledRelativeCodes().contains(this.getCode()), this.getOwner() == $p)
+ $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
+ eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)
+ eval($target.getYearMonth().isAfter(YearMonth.now().minusMonths(2)) && $p.checkLastCertificationDate($target.getYearMonth()))
+then
+ $c.grant();
+end
+
+/*********************************************************************************************
+ * L'impiegato può modificare/salvare una determinata assenza per terzo parente disabile se:
+ *********************************************************************************************/
+rule EmployeeCanEditThirdDisabledRelativeAbsence
+when
+ $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+ $p: Person() from currentOperator.person
+ PersonConfiguration(epasParam == EpasParam.THIRD_DISABLED_RELATIVE_PERMISSION, fieldValue == true) from $p.personConfigurations
  $target: Absence(DefaultGroup.employeeSecondDisabledRelativeCodes().contains(this.getCode()), this.getOwner() == $p)
  $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete"), target == $target, granted == false )
  eval (!$target.isPersistent() || HistoricalDao.lastRevisionOperator($target) == currentOperator)

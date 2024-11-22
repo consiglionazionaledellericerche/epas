@@ -4,10 +4,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.19.0] - UNRELEASED
+## [2.20.2] - 2024-11-18
+### Added
+   - Aggiunto codice 54TD - Aspettativa Legge Gelmini
+   - Aggiunto flusso di richiesta straordinari
+   
+### Changed
+   - Rimossa validazione dati della persona nell'inserimento di un nuovo badge
+   - Aggiunta la possibilità di inserire un codice di assenza al momento scaduto ma non attivo
+     alla data dell'assenza.
+   - Modificata descrizione del codice 39LA
+   - Modificate le form di inserimento e modifica assenza, togliendo la parola assenza dal titolo
+
+## [2.20.1] - 2024-11-13
+### Added
+   - Inserito job per far scadere le richieste di uscite di servizio non approvate oltre i 3 mesi
+   - Introdotto meccanismo per impostare come lette le notifiche non lette più vecchie di 3 mesi
+
+## [2.20.0] - 2024-11-12
+### Added
+  - Aggiunto un parametro JAVA_OPTIONS per controllare i parametri passati in fase di avvio
+    della JVM Java. Impostato di default il parametro -XX:MaxRAMPercentage=50 che assegna il
+    50% della memoria disponibile al container docker.
+  
+
+### Changed
+  - Corretta visualizzazione dei flussi di richiesta uscita di servizio da parte del responsabile
+    di sede se è anche responsabile di gruppo
+
+## [2.19.1] - 2024-10-30
+### Added
+  - Aggiunto codice 183 giornaliero e ore e minuti per terzo parente disabile
+  - Aggiunto job che invia agli amministrativi i problemi sui giorni dei dipendenti della sede che
+    gestiscono
+    
+### Changed
+  - Il codice 98 è ora inseribile anche nei festivi
+  - Corretto typo nella visualizzazione della pagina Categorie gruppi assenze
+
+
+## [2.19.0] - 2024-10-15
+### Added
+  - Aggiunti i codici a completamento "H7" per i codici 24PROV e 242PROV in caso di fruizione oraria.
+  - Aggiunto codice 105 per convenzione cnr-università che non matura buono pasto
+  - Aggiunta procedura per modificare i codici 37 in codici 31 come da disposizione di UGRU per il 2024
+
 ### Changed
   - Rimosso vincolo obbligatorietà id missione nell'annullamento missione via REST 
   - Modificato il comportamento in caso di richiesta di approvazione telelavoro rifiutata
+  - Rimossi codici non più usati (vac19, 103P, 111FR)
 
 ## [2.18.1] - 2024-09-05
 ### Added
@@ -182,16 +227,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.9.0] - 2023-11-06
 ### Added
-  - Gestione delle richieste di straordinario da parte del personale IV-VIII, con possibilità
+  - Gestione delle richieste di straordinario da parte del personale IV-VIII, con possibilità 
     di configurare richieste preventive e consuntive di straordinario ed approvazione da parte
     del responsabile di gruppo e/o di sede.
   - Aggiornata immagine docker con tag stable su ghcr.io per ogni nuova release
   
 ### Changed
-  - Evitati di caricare tutti i contratti presenti nel sistema nella visualizzazione delle
-    sedi senza personale
+  - Evitati di caricare tutti i contratti presenti nel sistema nella visualizzazione delle sedi senza personale
   - Permesso al ruolo "ADMIN" di effettuare le operazioni sulle assenze
   - Permesso al ruolo "RO_ADMIN" di scaricare gli allegati delle assenze
+
 
 ## [2.8.0] - 2023-09-15
 ### Added

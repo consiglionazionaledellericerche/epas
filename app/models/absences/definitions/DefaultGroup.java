@@ -55,6 +55,15 @@ public enum DefaultGroup {
       + "secondo parente tre giorni mese", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 2, 
       GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_182, 
       DefaultComplation.C_182, null, false, false),
+  
+  G_183("183 - Permesso assistenza terzo parenti/affini disabili L. 104/92 tre gg. mese", "",
+      DefaultCategoryType.L_104, 1, GroupAbsenceTypePattern.programmed, PeriodType.month,
+      DefaultTakable.T_183, DefaultComplation.C_183, null, false, false), 
+  G_183_PARENTI_DIPENDENTI("183 - Permesso assistenza parenti/affini disabili L. 104/92 "
+      + "terzo parente tre giorni mese", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 2, 
+      GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_183, 
+      DefaultComplation.C_183, null, false, false),
+  
   G_182P("182P - Permesso provv. assist. secondo parenti/affini dis. L. 104/92 tre gg. mese", "",
       DefaultCategoryType.PERMESSI_PROVVISORI_104, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.month, DefaultTakable.T_182P, DefaultComplation.C_182P, null, false, false),
@@ -254,7 +263,11 @@ public enum DefaultGroup {
   
   G_24PROV("24 - Retribuzione 80% 1 figlio", "24 - Retribuzione provvisoria 80% 1 figlio",
       DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
-      PeriodType.child1_0_12, DefaultTakable.T_24PROV, null, null, false,
+      PeriodType.child1_0_12, DefaultTakable.T_24PROV, DefaultComplation.C_24PROV, null, false,
+      false), 
+  G_242PROV("242 - Retribuzione 80% 2 figlio", "242 - Retribuzione provvisoria 80% 2 figlio",
+      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      PeriodType.child2_0_12, DefaultTakable.T_242PROV, DefaultComplation.C_242PROV, null, false,
       false), 
 
   G_24("24 - Retribuzione 80% 1 figlio", "Retribuzione provvisoria 80% 1 figlio",
@@ -562,6 +575,10 @@ public enum DefaultGroup {
 
   public static List<String> employeeSecondDisabledRelativeCodes() {
     return getCodes(DefaultGroup.G_182_PARENTI_DIPENDENTI);
+  }
+  
+  public static List<String> employeeThirdDisabledRelativeCodes() {
+    return getCodes(DefaultGroup.G_183_PARENTI_DIPENDENTI);
   }
   
   public static List<String> employeeAgileWorkOrDisabledPeopleAssistanceCodes() {

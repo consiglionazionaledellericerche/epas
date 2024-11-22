@@ -7,7 +7,8 @@
 			#{if competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
 			    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>anno</th>
 				<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>mese</th>
-				<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>quantità</th>
+				<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>quantità richiesta</th>
+				<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>quantità approvata</th>
 			#{/if}
 			#{else}
 				#{if approvalRequired}
@@ -64,8 +65,9 @@
 				#{/if}
 				#{if competenceType.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}				
 					<td>#{f.value 'item.year', value:item.year /}</td>	    
-					<td>#{f.value 'item.month', value:item.month /}</td>
-					<td>#{f.value 'item.value', value:item.value /}</td>
+					<td>#{f.value 'item.month', value:templateUtility.monthName(item.month) /}</td>
+					<td>#{f.value 'item.value', value:item.valueRequested /} ore</td>
+					<td>#{f.value 'item.value', value:item.value /} ore</td>
 				#{/if}
 				#{else}
 					<td>#{f.value 'item.beginDateToAsk', value:item.beginDateToAsk /}</td>	    

@@ -192,7 +192,7 @@ public class CompetenceDao extends DaoBase {
    *     straordinario (sommando i codici S1 S2 e S3).
    */
   public Optional<Integer> valueOvertimeApprovedByMonthAndYear(
-      Integer year, Optional<Integer> month, Optional<Person> person,
+      Integer year, Optional<Integer> month, Optional<Person> person, Optional<Office> office,
       List<CompetenceCode> codeList) {
 
     final QCompetence competence = QCompetence.competence;
@@ -203,6 +203,9 @@ public class CompetenceDao extends DaoBase {
     }
     if (person.isPresent()) {
       condition.and(competence.person.eq(person.get()));
+    }
+    if (office.isPresent()) {
+    	condition.and(competence.person.office.eq(office.get()));
     }
     final Integer result =
         getQueryFactory().select(competence.valueApproved.sum())
@@ -263,6 +266,25 @@ public class CompetenceDao extends DaoBase {
         .where(competence.person.in(persons), 
             competence.year.eq(year), competence.month.eq(month),
             competence.valueApproved.gt(0))
+        .transform(GroupBy.groupBy(competence.person).as(GroupBy.list(competence)));
+  }
+  
+  /**
+   * Ritorna una mappa contenente come chiave le persone e come valore la lista di competenze
+   * che hanno avuto nell'anno.
+   * 
+   * @param persons la lista delle persone di cui si vogliono le competenze di tipo CompetenceCode
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * @param code il codice di competenza su cui filtrare
+   * @return la mappa contenente per ogni persona la lista di competenze di un certo tipo
+   */
+  public Map<Person, List<Competence>> competencesInYear(
+      List<Person> persons, int year, CompetenceCode code) {
+    final QCompetence competence = QCompetence.competence;
+    return getQueryFactory().selectFrom(competence)
+        .where(competence.person.in(persons), 
+            competence.year.eq(year), competence.competenceCode.eq(code))
         .transform(GroupBy.groupBy(competence.person).as(GroupBy.list(competence)));
   }
 

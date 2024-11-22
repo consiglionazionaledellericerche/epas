@@ -1,7 +1,9 @@
 #{modalAsync id:'defaultModal', title:('Rifiuto richiesta di straordinari per ' + competenceRequest.person.fullname)}
 
 <div class="container-fluid">
-
+	<div class="container-fluid">
+		#{include './_overtimeSituation.html' /}
+	</div>
 #{alert color:'warning'}
 <p class=center>Specifica una motivazione per cui la richiesta di straordinari inoltrata deve essere respinta.</p> 
 #{/alert}

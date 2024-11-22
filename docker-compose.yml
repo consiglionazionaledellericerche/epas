@@ -43,6 +43,8 @@ services:
       #- URL_ATTESTATI=                         # default: https://attestativ2.rm.cnr.it
       #- URL_USER=
       #- URL_PASS=
+      ####### JVM ############
+      #- JAVA_OPTIONS=-XX:MaxRAMPercentage=50
       ######## LOGS ###########
       #- LOG_LEVEL=                            # Opzionale. default: INFO   -- (OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL)
       - APPENDERS=file                         # Opzionale. default: stdout, stderr -- (stdout, stderr, file, graylog2). Abilita i log sulla console, file e server graylog

@@ -52,6 +52,7 @@ competenceRequest.person =Dipendente
 competenceRequest.startAt =Inizio
 competenceRequest.type =Tipologia
 competenceRequest.value =Ore di straordinario da richiedere
+competenceRequest.valueRequested =Ore di straordinario da richiedere
 competenceRequest.dateToChange =Giorno in cui effettuare il cambio
 competenceRequest.beginDateToAsk =Giorno inziale chiesto
 competenceRequest.endDateToAsk =Giorno finale chiesto
@@ -117,7 +118,7 @@ InformationRequestEventType.MANAGER_REFUSAL=Richiesta respinta dal responsabile 
 
 InformationRequestEventType.COMPLETE=Richiesta completata
 InformationRequestEventType.DELETE=Richiesta cancellata
-InformationRequestEventType.EXPIRING=Richiesta scaduta
+InformationRequestEventType.EXPIRED=Richiesta scaduta
 
 informationRequest.endTo =Fine
 informationRequest.note =Note
@@ -509,6 +510,8 @@ generalSetting.epasServiceEnabled=Abilitazione integrazione con microservizio ep
 generalSetting.epasServiceUrl=Url base del microservizio epas-service
 generalSetting.epasHelpdeskServiceEnabled=Abilitazione integrazione con microservizio epas-helpdesk-service
 generalSetting.epasHelpdeskServiceUrl=Url base del microservizio epas-helpdesk-service
+generalSetting.enableOvertimeRequestInAdvance =Abilita richiesta preventiva di straordinario
+generalSetting.enableOvertimePerPerson =Abilita il monte ore straordinari per dipendente
 
 generalSetting.enableSsoForAttestati=Abilita l'utilizzo di SSO del CNR per Attestati
 generalSetting.timeoutAttestati=Timeout in secondi chiamate servizi REST Attestati
@@ -526,6 +529,8 @@ group.people =Afferenti al gruppo
 group.sendFlowsEmail =Mail al responsabile per flussi di approvazione
 group.externalId =External id
 groups =Gruppi di lavoro
+
+groupOvertime.numberOfHours =Numero di ore
 
 history.back= Indietro
 history.type= Operazione
@@ -582,6 +587,7 @@ list[4].minutesPaid=Minuti pagati
 
 manageNoOwnerUsers= Gestione Utenti di Sistema/Orfani
 manageUsers= Gestione Utenti
+manageGroups= Gestione gruppi
 
 mealTicket.aquiredExitingNow= Buono Pasto maturato (uscendo in questo momento).
 mealTicket.aquired= Buono Pasto maturato
@@ -700,6 +706,9 @@ PDFReport.thMissions=Missione
 PDFReport.thIncompleteTime=Orario incompleto
 PDFReport.thMissingTime=Orario insufficiente
 PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
+
+personOvertime.numberOfHours =Quantità
+personOvertime.dateOfUpdate =Data inserimento
 
 Qualifications.list=Qualifiche del personale
 qualification.qualification=Livello
@@ -1144,8 +1153,9 @@ AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL =comunica
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUESTS_TOP_LEVEL = Mie comunicazioni ferie anno passato dopo deadline
 AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL.blank =nuova comunicazione ferie anno passato dopo deadline
 
-CompetenceRequests.overtimes =Mie richieste di straordinari
-CompetenceRequests.overtimesToApprove =Flussi di richieste straordinari
+CompetenceRequests.overtimes =Mie richieste di ore di lavoro straordinario
+CompetenceRequests.overtimesToApprove =Flussi di richieste ore di lavoro straordinario
+CompetenceRequests.overtimesToApproveInAdvance =Approvazione consuntiva ore di lavoro straordinario
 CompetenceRequestType.OVERTIME_REQUEST=richiesta di straordinari
 CompetenceRequestType.OVERTIME_REQUESTS= Mie richieste di straordinari
 CompetenceRequestType.OVERTIME_REQUEST.blank =nuova richiesta di straordinari
@@ -1365,6 +1375,7 @@ COVID_19=Auto inserimento codice per emergenza COVID-19
 ADDITIONAL_HOURS=Auto inserimento ore aggiuntive
 PARENTAL_LEAVE_AND_CHILD_ILLNESS=Auto inserimento congedi parentali e malattie figlio
 SECOND_DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 secondo parente disabile
+THIRD_DISABLED_RELATIVE_PERMISSION=Auto inserimento assenze 104 terzo parente disabile
 PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM=Abilita personale all'auto inserimento di permessi per visita medica
 AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE=Auto inserimento lavoro agile per dipendenti fragili o assistenza disabile/immunodepresso
 SMARTWORKING =Auto inserimento codice di assenza per smartworking
@@ -1376,7 +1387,7 @@ RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
 RESIDUAL_MEALTICKETS=Ricalcoli mensili sul residuo buoni pasto.
 
 ENABLE_FLOWS =Flusso di richiesta assenza attivato
-ENABLE_OVERTIME_FLOWS =Flusso di richiesta straordinario attivato
+ENABLE_OVERTIME_FLOWS =Flusso di richiesta lavoro straordinario attivato
 ENABLE_37_FLOW =Abilita flusso richiesta ferie anno precedente dopo 31/08
 
 
@@ -1393,10 +1404,10 @@ COMPENSATORY_REST_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED =Richiesta approvazi
 COMPENSATORY_REST_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED= Richiesta approvazione riposi compensativi per i Responsabili di gruppo da parte del Responsabile di Sede
 
 
-OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte del responsabile di sede
-OVERTIME_REQUEST_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte del responsabile di gruppo di lavoro
+OVERTIME_REQUEST_OFFICE_HEAD_APPROVAL_REQUIRED =Approvazione delle richieste di ore di lavoro straordinario da parte del Direttore/Dirigente/Responsabile
+OVERTIME_REQUEST_MANAGER_APPROVAL_REQUIRED =Approvazione delle richieste di ore di lavoro straordinario da parte del responsabile di gruppo di lavoro
 OVERTIME_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione straordinari da parte di altro dipendente
-ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY =Permettere al dipendente di specificare la quantità di ore da richiedere come straordinario
+ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY =Permettere al dipendente di specificare la quantità di ore da richiedere come lavoro straordinario
 OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION =Abilita richiesta preventiva di straordinario
 
 PERSONAL_PERMISSION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED =Richiesta approvazione permessi personali per i livelli I-III da parte del Responsabile Sede
@@ -1411,6 +1422,7 @@ ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION=Invio notifica a res
 ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION=Invio notifica a responsabile di gruppo per comunicazione assenza livelli I-III
 
 ENABLE_COMPETENCE_FLOWS =Abilitazione flusso di richiesta competenze
+ENABLE_OVERTIME_PER_PERSON =Abilitazione monte ore straordinari per dipendente
 CHANGE_REPERIBILITY_REQUEST_REPERIBILITY_MANAGER_APPROVAL_REQUIRED =Richiesta approvazione del responsabile del servizio per cambio giorno di reperibilità
 CHANGE_REPERIBILITY_REQUEST_EMPLOYEE_APPROVAL_REQUIRED =Richiesta approvazione del reperibile per cambio giorno di reperibilità
 

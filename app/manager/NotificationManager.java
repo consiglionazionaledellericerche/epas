@@ -17,14 +17,28 @@
 
 package manager;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
+import org.testng.collections.Lists;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.Sets;
+import com.google.inject.Provider;
+
 import controllers.Security;
 import dao.AbsenceDao;
-import dao.CompetenceCodeDao;
-import dao.CompetenceDao;
 import dao.GroupDao;
 import dao.InformationRequestDao;
 import dao.RoleDao;
@@ -32,16 +46,11 @@ import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
 import helpers.TemplateExtensions;
 import it.cnr.iit.epas.DateUtility;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Competence;
-import models.CompetenceCode;
 import models.Contract;
 import models.Notification;
 import models.Person;
@@ -71,14 +80,8 @@ import models.informationrequests.IllnessRequest;
 import models.informationrequests.ParentalLeaveRequest;
 import models.informationrequests.ServiceRequest;
 import models.informationrequests.TeleworkRequest;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-import org.testng.collections.Lists;
 import play.Play;
 import play.i18n.Messages;
-import play.jobs.Job;
 import play.libs.Mail;
 
 /**
@@ -90,8 +93,6 @@ import play.libs.Mail;
 @Slf4j
 public class NotificationManager {
 
-
-
   private SecureManager secureManager;
   private RoleDao roleDao;
   private AbsenceDao absenceDao;
@@ -100,8 +101,11 @@ public class NotificationManager {
   private ConfigurationManager configurationManager;
   private InformationRequestDao requestDao;
   private UsersRolesOfficesDao uroDao;
+  private Provider<EntityManager> emp;
+
   final String dateFormatter = "dd/MM/YYYY";
 
+  private final static int EXPIRES_IN_MONTH = 3;
 
   /**
    * Default constructor.
@@ -110,7 +114,7 @@ public class NotificationManager {
   public NotificationManager(SecureManager secureManager, RoleDao roleDao, AbsenceDao absenceDao,
       AbsenceComponentDao componentDao, GroupDao groupDao, 
       ConfigurationManager configurationManager, InformationRequestDao requestDao,
-      UsersRolesOfficesDao uroDao) {
+      UsersRolesOfficesDao uroDao, Provider<EntityManager> emp) {
     this.secureManager = secureManager;
     this.roleDao = roleDao;
     this.absenceDao = absenceDao;
@@ -119,6 +123,7 @@ public class NotificationManager {
     this.configurationManager = configurationManager;
     this.requestDao = requestDao;
     this.uroDao = uroDao;
+    this.emp = emp;
   }
 
 
@@ -2293,4 +2298,14 @@ public class NotificationManager {
 
   }
 
+  /**
+   * Imposta come lette le notifiche più vecchie di 3 mesi.
+   */
+  public int expiredNotificationsNotRead() {
+    return emp.get().createQuery(
+        "UPDATE Notification n SET n.read = true, updatedAt = :now WHERE n.read = false AND n.createdAt < :toDate")
+      .setParameter("toDate", LocalDateTime.now().withDayOfMonth(1).minusMonths(EXPIRES_IN_MONTH))
+      .setParameter("now", LocalDateTime.now())
+      .executeUpdate();
+  }
 }
