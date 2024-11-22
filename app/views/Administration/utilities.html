@@ -159,5 +159,19 @@
   	#{/b.buttons}
   #{/form}
   #{/panel}
+  
+  <!--Importazioni varie da altre istanze-->
+  #{panel title:'Importazione informazioni da altra istanza', dim:12 }
+  #{alert color:'info'}
+  <p>
+    Visualizza la pagina di importazione informazioni da altre istanze.
+  </p>
+  #{/alert}
+  #{form @Instances.importInstance(), class:'form-horizontal'}
+  	#{b.buttons center:true}
+  		<button type="submit" class="btn btn-default">Apri</button>
+  	#{/b.buttons}
+  #{/form}
+  #{/panel}
 
 </div>
