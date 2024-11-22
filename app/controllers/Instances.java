@@ -22,7 +22,10 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import cnr.sync.dto.v3.BadgeCreateDto;
+import cnr.sync.dto.v3.ConfigurationOfficeDto;
+import cnr.sync.dto.v3.ContractTerseDto;
 import cnr.sync.dto.v3.OfficeShowTerseDto;
+import cnr.sync.dto.v3.PersonConfigurationList;
 import helpers.rest.ApiRequestException;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +43,10 @@ public class Instances extends Controller {
   
   private static final String JSON_CONTENT_TYPE = "application/json";
   private static final String LIST = "list";
+  private static final String RESIDUAL_LIST = "residualList";
+  private static final String CONTRACT_LIST = "contractList";
+  private static final String OFFICE_CONFIGURATION = "officeConfiguration";
+  private static final String PEOPLE_CONFIGURATIONS = "peopleConfiguration";
   private static final String PATH = "/rest/v3/instances";
   
   
@@ -75,19 +82,53 @@ public class Instances extends Controller {
     }
   }
   
-  public static void importPeopleConfigurations() {
+  public static void importPeopleConfigurations(String instance, String code) {
+    WSRequest wsRequest = WS.url(instance+PATH+"/"+PEOPLE_CONFIGURATIONS).setHeader("Content-Type", JSON_CONTENT_TYPE)
+        .authenticate("developer", "sdrfli.");
     
+    HttpResponse httpResponse = wsRequest.get();
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      log.error("Errore di connessione: {}", httpResponse.getStatusText());
+      throw new ApiRequestException("Unauthorized");
+    }
+    List<PersonConfigurationList> list = (List<PersonConfigurationList>) new Gson()
+        .fromJson(httpResponse.getJson(), PersonConfigurationList.class);
   }
   
-  public static void importOfficeConfiguration() {
+  public static void importOfficeConfiguration(String instance, String code) {
+    WSRequest wsRequest = WS.url(instance+PATH+"/"+OFFICE_CONFIGURATION).setHeader("Content-Type", JSON_CONTENT_TYPE)
+        .authenticate("developer", "sdrfli.");
     
+    HttpResponse httpResponse = wsRequest.get();
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      log.error("Errore di connessione: {}", httpResponse.getStatusText());
+      throw new ApiRequestException("Unauthorized");
+    }
+    List<ConfigurationOfficeDto> list = (List<ConfigurationOfficeDto>) new Gson()
+        .fromJson(httpResponse.getJson(), ConfigurationOfficeDto.class);
   }
   
-  public static void importContracts() {
+  public static void importContracts(String instance, String code) {
+    WSRequest wsRequest = WS.url(instance+PATH+"/"+CONTRACT_LIST).setHeader("Content-Type", JSON_CONTENT_TYPE)
+        .authenticate("developer", "sdrfli.");
     
+    HttpResponse httpResponse = wsRequest.get();
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      log.error("Errore di connessione: {}", httpResponse.getStatusText());
+      throw new ApiRequestException("Unauthorized");
+    }
+    List<ContractTerseDto> list = (List<ContractTerseDto>) new Gson()
+        .fromJson(httpResponse.getJson(), ContractTerseDto.class);
   }
   
-  public static void importResidual() {
+  public static void importResidual(String instance, String code) {
+    WSRequest wsRequest = WS.url(instance+PATH+"/"+RESIDUAL_LIST).setHeader("Content-Type", JSON_CONTENT_TYPE)
+        .authenticate("developer", "sdrfli.");
     
+    HttpResponse httpResponse = wsRequest.get();
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      log.error("Errore di connessione: {}", httpResponse.getStatusText());
+      throw new ApiRequestException("Unauthorized");
+    }
   }
 }
