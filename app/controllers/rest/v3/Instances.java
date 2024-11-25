@@ -27,6 +27,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
+import cnr.sync.dto.v2.GroupShowTerseDto;
 import cnr.sync.dto.v3.ConfigurationOfficeDto;
 import cnr.sync.dto.v3.ContractTerseDto;
 import cnr.sync.dto.v3.OfficeShowTerseDto;
@@ -181,5 +182,27 @@ public class Instances extends Controller {
       listOfPersonConfigurationList.add(pcl);
     }
     renderJSON(gsonBuilder.create().toJson(listOfPersonConfigurationList));
+  }
+  
+  /**
+   * La lista dei gruppi di una sede.
+   * @param officeId l'identificativo della sede
+   * @param code il codice della sede
+   * @param codeId il codeId della sede
+   */
+  public static void groups(Long officeId, String code, String codeId) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    val office = offices.getOfficeFromRequest(officeId, code, codeId);
+    log.debug("Richiesta la lista dei gruppi dei dipendenti di {}", office);
+    val list = 
+        office.getGroups().stream().map(group -> GroupShowTerseDto.build(group))
+        .collect(Collectors.toSet());
+    renderJSON(gsonBuilder.create().toJson(list));
+  }
+  
+  public static void mealTicketResidual(Long officeId, String code, String codeId) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    val office = offices.getOfficeFromRequest(officeId, code, codeId);
+    log.debug("Richiesta la lista dei residui dei buoni pasto dei dipendenti di {}", office);
   }
 }

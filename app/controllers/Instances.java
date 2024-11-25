@@ -33,10 +33,13 @@ import cnr.sync.dto.v3.PersonConfigurationList;
 import cnr.sync.dto.v3.PersonConfigurationShowDto;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 import helpers.rest.ApiRequestException;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
+import manager.ContractManager;
 import manager.PeriodManager;
 import manager.attestati.dto.show.ListaDipendenti;
 import manager.configurations.ConfigurationDto;
@@ -47,6 +50,7 @@ import manager.configurations.EpasParam.EpasParamValueType.IpList;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.recaps.recomputation.RecomputeRecap;
 import models.Configuration;
+import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonConfiguration;
@@ -84,6 +88,10 @@ public class Instances extends Controller {
   static ConsistencyManager consistencyManager;
   @Inject
   static OfficeDao officeDao;
+  @Inject
+  static IWrapperFactory wrapperFactory;
+  @Inject
+  static ContractManager contractManager;
 
   public static void importInstance() {
     render();
@@ -271,6 +279,24 @@ public class Instances extends Controller {
     }
     List<ContractTerseDto> list = (List<ContractTerseDto>) new Gson()
         .fromJson(httpResponse.getJson(), ContractTerseDto.class);
+    Person person = null;
+    Contract newContract = null;
+    for (ContractTerseDto dto : list) {
+      person = personDao.getPersonByNumber(dto.getNumber());
+      if (person != null) {
+        IWrapperPerson wrPerson = wrapperFactory.create(person);
+        com.google.common.base.Optional<Contract> actualContract = wrPerson.getCurrentContract();
+        if (actualContract.isPresent()) {
+          newContract = new Contract();
+          newContract.setBeginDate(dto.getBeginDate());
+          newContract.setEndDate(dto.getEndDate());
+          newContract.isOnCertificate();
+          newContract.setPerson(person);
+          
+          contractManager.properContractCreate(newContract, com.google.common.base.Optional.absent(), true);
+        }
+      }
+    }
   }
 
   public static void importResidual(String instance, String code) {
