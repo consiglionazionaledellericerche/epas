@@ -16,15 +16,15 @@ import org.modelmapper.ModelMapper;
 @EqualsAndHashCode
 public class MealTicketResidualDto {
 
-  private Person person;
+  private String number;
   private LocalDate dateOfResidual;
   private Long mealTicketResidual;
   
   public static MealTicketResidualDto build(PersonStampingRecap psDto) {
-    ModelMapper modelMapper = new ModelMapper();
-    modelMapper.getConfiguration().setAmbiguityIgnored(true);
-    val mealTicketResidualDto = modelMapper.map(psDto, MealTicketResidualDto.class);
+    
+    val mealTicketResidualDto = new MealTicketResidualDto();
     if (psDto != null) {
+      mealTicketResidualDto.setNumber(psDto.person.getNumber());
       mealTicketResidualDto.setMealTicketResidual(psDto.contractMonths.stream()
           .mapToInt(cm -> cm.getValue().getRemainingMealTickets()).count());
       mealTicketResidualDto.setDateOfResidual(LocalDate.now());

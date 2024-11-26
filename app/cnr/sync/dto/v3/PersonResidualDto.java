@@ -16,6 +16,7 @@
  */
 package cnr.sync.dto.v3;
 
+import org.joda.time.LocalDate;
 import org.modelmapper.ModelMapper;
 import lombok.Builder;
 import lombok.Data;
@@ -27,14 +28,17 @@ import models.Person;
 @Data
 public class PersonResidualDto {
 
-  public Person person;
-  public Integer residual;
+  private String number;
+  private Integer residual;
+  private LocalDate date;
+  
   
   public static PersonResidualDto build(PersonStampingRecap psDto) {
-    ModelMapper modelMapper = new ModelMapper();
-    modelMapper.getConfiguration().setAmbiguityIgnored(true);
-    val personResidualDto = modelMapper.map(psDto, PersonResidualDto.class);
+    
+    val personResidualDto = new PersonResidualDto();
     if (psDto != null) {
+      personResidualDto.setNumber(psDto.person.getNumber());
+      personResidualDto.setDate(LocalDate.now());
       personResidualDto.setResidual(psDto.contractMonths.stream().mapToInt(cm -> cm.getValue().getRemainingMinutesLastYear() 
           + cm.getValue().getRemainingMinutesCurrentYear()).sum());
     }
