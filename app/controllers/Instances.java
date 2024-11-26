@@ -25,6 +25,7 @@ import org.joda.time.MonthDay;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import cnr.sync.dto.v3.BadgeCreateDto;
 import cnr.sync.dto.v3.ConfigurationOfficeDto;
 import cnr.sync.dto.v3.ContractTerseDto;
@@ -57,6 +58,7 @@ import models.Office;
 import models.Person;
 import models.PersonConfiguration;
 import models.base.IPropertyInPeriod;
+import models.dto.TeleworkDto;
 import models.enumerate.BlockType;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
@@ -114,18 +116,24 @@ public class Instances extends Controller {
       throw new ApiRequestException("Unauthorized");
     }
     List<OfficeShowTerseDto> list = (List<OfficeShowTerseDto>) new Gson()
-        .fromJson(httpResponse.getJson(), OfficeShowTerseDto.class);
+        .fromJson(httpResponse.getJson(), new TypeToken<List<OfficeShowTerseDto>>() {}.getRawType());
     render(list, instance);
   }
 
-  public static void importInfo(String instance, String code) {
+  public static void importInfo(String instance, String codeId) {
     if (Strings.isNullOrEmpty(instance)) {
       flash.error("Inserisci un indirizzo valido");
       importInstance();
     }
+    Office office = null;
+    com.google.common.base.Optional<Office> officeInstance = officeDao.byCodeId(codeId);
+    if (officeInstance.isPresent()) {
+      office = officeInstance.get();
+    }
+    render(instance, codeId, office);
   }
 
-  public static void importPeopleConfigurations(String instance, String code) {
+  public static void importPeopleConfigurations(String instance, String codeId) {
     WSRequest wsRequest = WS.url(instance+PATH+"/"+PEOPLE_CONFIGURATIONS)
         .setHeader("Content-Type", JSON_CONTENT_TYPE)
         .authenticate("developer", "sdrfli.");
@@ -170,7 +178,7 @@ public class Instances extends Controller {
     }
   }
 
-  public static void importOfficeConfiguration(String instance, String code) {
+  public static void importOfficeConfiguration(String instance, String codeId) {
     WSRequest wsRequest = WS.url(instance+PATH+"/"+OFFICE_CONFIGURATION)
         .setHeader("Content-Type", JSON_CONTENT_TYPE)
         .authenticate("developer", "sdrfli.");
@@ -182,7 +190,7 @@ public class Instances extends Controller {
     }
     List<ConfigurationOfficeDto> list = (List<ConfigurationOfficeDto>) new Gson()
         .fromJson(httpResponse.getJson(), ConfigurationOfficeDto.class);
-    com.google.common.base.Optional<Office> office = officeDao.byCode(code);
+    com.google.common.base.Optional<Office> office = officeDao.byCodeId(codeId);
     Configuration newConfiguration = null;
     EpasParam epasParam = null;
     if (office.isPresent()) {
@@ -279,7 +287,7 @@ public class Instances extends Controller {
     }
   }
 
-  public static void importContracts(String instance, String code) {
+  public static void importContracts(String instance, String codeId) {
     WSRequest wsRequest = WS.url(instance+PATH+"/"+CONTRACT_LIST)
         .setHeader("Content-Type", JSON_CONTENT_TYPE)
         .authenticate("developer", "sdrfli.");
@@ -320,7 +328,7 @@ public class Instances extends Controller {
     }
   }
 
-  public static void importResidual(String instance, String code) {
+  public static void importResidual(String instance, String codeId) {
     WSRequest wsRequest = WS.url(instance+PATH+"/"+RESIDUAL_LIST)
         .setHeader("Content-Type", JSON_CONTENT_TYPE)
         .authenticate("developer", "sdrfli.");
@@ -346,7 +354,7 @@ public class Instances extends Controller {
     }
   }
   
-  public static void importMealTicketResidual(String instance, String code) {
+  public static void importMealTicketResidual(String instance, String codeId) {
     WSRequest wsRequest = WS.url(instance+PATH+"/"+RESIDUAL_LIST)
         .setHeader("Content-Type", JSON_CONTENT_TYPE)
         .authenticate("developer", "sdrfli.");
@@ -371,5 +379,9 @@ public class Instances extends Controller {
             dto.getMealTicketResidual(), person.getFullname());
       }
     }
+  }
+  
+  public static void importGroups(String instance, String codeId) {
+    
   }
 }
