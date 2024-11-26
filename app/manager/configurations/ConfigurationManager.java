@@ -440,6 +440,11 @@ public class ConfigurationManager {
     return office.getConfigurations().stream()
         .filter(conf -> conf.getEpasParam().equals(param)).findFirst();
   }
+  
+  public java.util.Optional<PersonConfiguration> getConfigurtionByPersonAndType(Person person, EpasParam param) {
+    return person.getPersonConfigurations().stream()
+        .filter(conf -> conf.getEpasParam().equals(param)).findFirst();
+  }
 
   /**
    * La lista delle configurazioni esistenti della persona per la data.

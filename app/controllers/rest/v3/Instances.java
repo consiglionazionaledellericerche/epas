@@ -27,8 +27,10 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
+import cnr.sync.dto.v2.GroupShowTerseDto;
 import cnr.sync.dto.v3.ConfigurationOfficeDto;
 import cnr.sync.dto.v3.ContractTerseDto;
+import cnr.sync.dto.v3.MealTicketResidualDto;
 import cnr.sync.dto.v3.OfficeShowTerseDto;
 import cnr.sync.dto.v3.PersonConfigurationList;
 import cnr.sync.dto.v3.PersonConfigurationShowDto;
@@ -134,6 +136,7 @@ public class Instances extends Controller {
           person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
       log.debug("Carico {} nella lista", psDto.person.getFullname());
       list.add(psDto);      
+      
     }
     val aList = list.stream().map(p -> PersonResidualDto.build(p)).collect(Collectors.toList());
     renderJSON(gsonBuilder.create().toJson(aList));
@@ -181,5 +184,48 @@ public class Instances extends Controller {
       listOfPersonConfigurationList.add(pcl);
     }
     renderJSON(gsonBuilder.create().toJson(listOfPersonConfigurationList));
+  }
+  
+  /**
+   * La lista dei gruppi di una sede.
+   * @param officeId l'identificativo della sede
+   * @param code il codice della sede
+   * @param codeId il codeId della sede
+   */
+  public static void groups(Long officeId, String code, String codeId) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    val office = offices.getOfficeFromRequest(officeId, code, codeId);
+    log.debug("Richiesta la lista dei gruppi dei dipendenti di {}", office);
+    val list = 
+        office.getGroups().stream().map(group -> GroupShowTerseDto.build(group))
+        .collect(Collectors.toSet());
+    renderJSON(gsonBuilder.create().toJson(list));
+  }
+  
+  /**
+   * La lista dei residui dei buoni pasto dei dipendenti di una sede.
+   * @param officeId l'identificativo della sede
+   * @param code il codice della sede
+   * @param codeId il codeId della sede
+   */
+  public static void mealTicketResidual(Long officeId, String code, String codeId) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    val office = offices.getOfficeFromRequest(officeId, code, codeId);
+    log.debug("Richiesta la lista dei residui dei buoni pasto dei dipendenti di {}", office);
+    val yearMonth = YearMonth.now();
+    LocalDate monthBegin = LocalDate.now().withDayOfMonth(1);
+    LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+    List<Person> personList = personDao.list(Optional.absent(),
+        Sets.newHashSet(Lists.newArrayList(office)), false, monthBegin, monthEnd, true).list();   
+    List<PersonStampingRecap> list = Lists.newArrayList();
+    PersonStampingRecap psDto = null;
+    for (Person person : personList) {       
+      psDto = stampingsRecapFactory.create(
+          person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
+      log.debug("Carico {} nella lista", psDto.person.getFullname());
+      list.add(psDto);      
+    }
+    val aList = list.stream().map(p -> MealTicketResidualDto.build(p)).collect(Collectors.toList());
+    renderJSON(gsonBuilder.create().toJson(aList));
   }
 }
