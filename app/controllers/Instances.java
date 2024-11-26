@@ -28,9 +28,11 @@ import com.google.gson.GsonBuilder;
 import cnr.sync.dto.v3.BadgeCreateDto;
 import cnr.sync.dto.v3.ConfigurationOfficeDto;
 import cnr.sync.dto.v3.ContractTerseDto;
+import cnr.sync.dto.v3.MealTicketResidualDto;
 import cnr.sync.dto.v3.OfficeShowTerseDto;
 import cnr.sync.dto.v3.PersonConfigurationList;
 import cnr.sync.dto.v3.PersonConfigurationShowDto;
+import cnr.sync.dto.v3.PersonResidualDto;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperFactory;
@@ -102,7 +104,8 @@ public class Instances extends Controller {
       flash.error("Inserisci un indirizzo valido");
       importInstance();
     }
-    WSRequest wsRequest = WS.url(instance+PATH+"/"+LIST).setHeader("Content-Type", JSON_CONTENT_TYPE)
+    WSRequest wsRequest = WS.url(instance+PATH+"/"+LIST)
+        .setHeader("Content-Type", JSON_CONTENT_TYPE)
         .authenticate("developer", "sdrfli.");
 
     HttpResponse httpResponse = wsRequest.get();
@@ -123,7 +126,8 @@ public class Instances extends Controller {
   }
 
   public static void importPeopleConfigurations(String instance, String code) {
-    WSRequest wsRequest = WS.url(instance+PATH+"/"+PEOPLE_CONFIGURATIONS).setHeader("Content-Type", JSON_CONTENT_TYPE)
+    WSRequest wsRequest = WS.url(instance+PATH+"/"+PEOPLE_CONFIGURATIONS)
+        .setHeader("Content-Type", JSON_CONTENT_TYPE)
         .authenticate("developer", "sdrfli.");
 
     HttpResponse httpResponse = wsRequest.get();
@@ -139,14 +143,16 @@ public class Instances extends Controller {
       Person person = personDao.getPersonByNumber(pcl.getNumber());
       for (PersonConfigurationShowDto pcs : pcl.getList()) {
         epasParam = EpasParam.valueOf(pcs.getEpasParam());        
-        Optional<PersonConfiguration> configuration = configurationManager.getConfigurtionByPersonAndType(person, epasParam);
+        Optional<PersonConfiguration> configuration = configurationManager
+            .getConfigurtionByPersonAndType(person, epasParam);
         if (configuration.isPresent()) {
           newConfiguration = (PersonConfiguration) configurationManager.updateBoolean(epasParam,
               person, Boolean.getBoolean(pcs.getFieldValue()),
               com.google.common.base.Optional.fromNullable(pcs.getBeginDate()),
               com.google.common.base.Optional.fromNullable(pcs.getEndDate()), false);
 
-          List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
+          List<IPropertyInPeriod> periodRecaps = periodManager
+              .updatePeriods(newConfiguration, false);
 
           RecomputeRecap recomputeRecap =
               periodManager.buildRecap(configuration.get().getPerson().getBeginDate(),
@@ -158,13 +164,15 @@ public class Instances extends Controller {
           consistencyManager.performRecomputation(configuration.get().getPerson(),
               configuration.get().getEpasParam().recomputationTypes, recomputeRecap.recomputeFrom);
         }
-        log.debug("Aggiornato valore del parametro {} per {}", epasParam.name, person.getFullname());
+        log.debug("Aggiornato valore del parametro {} per {}", 
+            epasParam.name, person.getFullname());
       }
     }
   }
 
   public static void importOfficeConfiguration(String instance, String code) {
-    WSRequest wsRequest = WS.url(instance+PATH+"/"+OFFICE_CONFIGURATION).setHeader("Content-Type", JSON_CONTENT_TYPE)
+    WSRequest wsRequest = WS.url(instance+PATH+"/"+OFFICE_CONFIGURATION)
+        .setHeader("Content-Type", JSON_CONTENT_TYPE)
         .authenticate("developer", "sdrfli.");
 
     HttpResponse httpResponse = wsRequest.get();
@@ -181,7 +189,8 @@ public class Instances extends Controller {
 
       for (ConfigurationOfficeDto dto : list) {
         epasParam = EpasParam.valueOf(dto.getEpasParam());
-        Optional<Configuration> configuration = configurationManager.getConfigurationByOfficeAndType(office.get(), epasParam);
+        Optional<Configuration> configuration = configurationManager
+            .getConfigurationByOfficeAndType(office.get(), epasParam);
         switch(epasParam.epasParamValueType) {
           case BOOLEAN:
             newConfiguration = (Configuration) configurationManager.updateBoolean(epasParam,
@@ -240,7 +249,8 @@ public class Instances extends Controller {
           case LOCALTIME_INTERVAL:
             LocalTimeInterval localtimeInterval = (LocalTimeInterval) EpasParamValueType
             .parseValue(EpasParamValueType.LOCALTIME_INTERVAL, dto.getFieldValue());
-            newConfiguration = (Configuration) configurationManager.updateLocalTimeInterval(epasParam,
+            newConfiguration = (Configuration) configurationManager
+                .updateLocalTimeInterval(epasParam,
                 office.get(), localtimeInterval.from, localtimeInterval.to,
                 com.google.common.base.Optional.fromNullable(dto.getBeginDate()),
                 com.google.common.base.Optional.fromNullable(dto.getEndDate()), false);
@@ -254,7 +264,8 @@ public class Instances extends Controller {
           default:
             break;
         }
-        List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
+        List<IPropertyInPeriod> periodRecaps = periodManager
+            .updatePeriods(newConfiguration, false);
         RecomputeRecap recomputeRecap =
             periodManager.buildRecap(office.get().getBeginDate(),
                 com.google.common.base.Optional.fromNullable(LocalDate.now()),
@@ -269,7 +280,8 @@ public class Instances extends Controller {
   }
 
   public static void importContracts(String instance, String code) {
-    WSRequest wsRequest = WS.url(instance+PATH+"/"+CONTRACT_LIST).setHeader("Content-Type", JSON_CONTENT_TYPE)
+    WSRequest wsRequest = WS.url(instance+PATH+"/"+CONTRACT_LIST)
+        .setHeader("Content-Type", JSON_CONTENT_TYPE)
         .authenticate("developer", "sdrfli.");
 
     HttpResponse httpResponse = wsRequest.get();
@@ -293,20 +305,71 @@ public class Instances extends Controller {
           newContract.isOnCertificate();
           newContract.setPerson(person);
           
-          contractManager.properContractCreate(newContract, com.google.common.base.Optional.absent(), true);
+          boolean esito = contractManager.properContractCreate(newContract, 
+              com.google.common.base.Optional.absent(), true);
+         if (esito) {
+           log.debug("Salvato nuovo contratto per {} con date {} - {}", 
+               person.getFullname(), newContract.getBeginDate(), newContract.getEndDate()); 
+         } else {
+           log.debug("Non c'è stato bisogno di salvare un nuovo contratto per {}", 
+               person.getFullname());
+         }
+          
         }
       }
     }
   }
 
   public static void importResidual(String instance, String code) {
-    WSRequest wsRequest = WS.url(instance+PATH+"/"+RESIDUAL_LIST).setHeader("Content-Type", JSON_CONTENT_TYPE)
+    WSRequest wsRequest = WS.url(instance+PATH+"/"+RESIDUAL_LIST)
+        .setHeader("Content-Type", JSON_CONTENT_TYPE)
         .authenticate("developer", "sdrfli.");
 
     HttpResponse httpResponse = wsRequest.get();
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
       log.error("Errore di connessione: {}", httpResponse.getStatusText());
       throw new ApiRequestException("Unauthorized");
+    }
+    List<PersonResidualDto> list = (List<PersonResidualDto>) new Gson()
+        .fromJson(httpResponse.getJson(), PersonResidualDto.class);
+    Person person = null;
+    for (PersonResidualDto dto : list) {
+      person = personDao.getPersonByNumber(dto.getNumber());
+      IWrapperPerson wrPerson = wrapperFactory.create(person);
+      com.google.common.base.Optional<Contract> actualContract = wrPerson.getCurrentContract();
+      if (actualContract.isPresent()) {
+        actualContract.get().setSourceDateResidual(dto.getDate());
+        actualContract.get().setSourceRemainingMinutesCurrentYear(dto.getResidual());
+        actualContract.get().save();
+        log.debug("Salvato residuo di {} minuti per {}",dto.getResidual(), person.getFullname());
+      }
+    }
+  }
+  
+  public static void importMealTicketResidual(String instance, String code) {
+    WSRequest wsRequest = WS.url(instance+PATH+"/"+RESIDUAL_LIST)
+        .setHeader("Content-Type", JSON_CONTENT_TYPE)
+        .authenticate("developer", "sdrfli.");
+
+    HttpResponse httpResponse = wsRequest.get();
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      log.error("Errore di connessione: {}", httpResponse.getStatusText());
+      throw new ApiRequestException("Unauthorized");
+    }
+    List<MealTicketResidualDto> list = (List<MealTicketResidualDto>) new Gson()
+        .fromJson(httpResponse.getJson(), MealTicketResidualDto.class);
+    Person person = null;
+    for (MealTicketResidualDto dto : list) {
+      person = personDao.getPersonByNumber(dto.getNumber());
+      IWrapperPerson wrPerson = wrapperFactory.create(person);
+      com.google.common.base.Optional<Contract> actualContract = wrPerson.getCurrentContract();
+      if (actualContract.isPresent()) {
+        actualContract.get().setSourceDateMealTicket(dto.getDateOfResidual());
+        actualContract.get().setSourceRemainingMealTicket(dto.getMealTicketResidual().intValue());
+        actualContract.get().save();
+        log.debug("Salvato residuo di {} buoni pasto per {}",
+            dto.getMealTicketResidual(), person.getFullname());
+      }
     }
   }
 }

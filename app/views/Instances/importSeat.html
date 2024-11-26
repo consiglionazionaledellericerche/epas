@@ -12,13 +12,7 @@
   	#{/alert}
 	#{form @Instances.importInfo(), method:'POST', autocomplete:false, class:'form form-horizontal'}
 	<ul class="list-group">
-	      #{list items:list, as:'item'}
 
-	      <li class="list-group-item list-group-item-grey">
-	        #{item.name - item.code /}
-	      </li>
-
-	      #{/list}
 	</ul>
 	#{b.buttons center:true}
 		<button type="submit" class="btn btn-default">Vai</button>
