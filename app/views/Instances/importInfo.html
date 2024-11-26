@@ -1,0 +1,60 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Importazione da altre istanze' /}
+
+#{set breadcrumbs:['Importa sede':@Instances.importSeat(instance), 
+  (office.name):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+<div class="container">
+#{title title: title /}
+	#{alert color:'info'}
+  		<p>
+    	Clicca su "Importa" rispetto alle informazioni che intendi importare dalla sede .
+  		</p>
+  	#{/alert}
+
+<table class="table table-hover">
+	<tr class="warning">
+      <th>Metodo</th>
+      <th>Descrizione</th>
+      <th>Importa</th>
+    </tr>
+    <tr>
+      <td>Import Configuration</td>
+      <td>Importa la configurazione della sede</td>
+      <td><a class="btn btn-info btn-xs" href="@{Instances.importOfficeConfiguration(instance, codeId)}"
+           data-async-modal="#defaultModal">Importa</a></td>
+    </tr>
+    <tr>
+      <td>Import People Configuration</td>
+      <td>Importa le configurazioni personali dei dipendenti</td>
+      <td><a class="btn btn-info btn-xs" href="@{Instances.importPeopleConfigurations(instance, codeId)}"
+           data-async-modal="#defaultModal">Importa</a></td>
+    </tr>
+    <tr>
+      <td>Import Contracts</td>
+      <td>Importa i contratti dei dipendenti</td>
+      <td><a class="btn btn-info btn-xs" href="@{Instances.importContracts(instance, codeId)}"
+           data-async-modal="#defaultModal">Importa</a></td>
+    </tr>
+    <tr>
+      <td>Import Residual</td>
+      <td>Importa i residui orari dei dipendenti</td>
+      <td><a class="btn btn-info btn-xs" href="@{Instances.importResidual(instance, codeId)}"
+           data-async-modal="#defaultModal">Importa</a></td>
+    </tr>
+    <tr>
+      <td>Import MealTicket Residual</td>
+      <td>Importa i residui dei buoni pasto dei dipendenti</td>
+      <td><a class="btn btn-info btn-xs" href="@{Instances.importMealTicketResidual(instance, codeId)}"
+           data-async-modal="#defaultModal">Importa</a></td>
+    </tr>
+    <tr>
+      <td>Import Groups</td>
+      <td>Importa i gruppi</td>
+      <td><a class="btn btn-info btn-xs" href="@{Instances.importGroups(instance, codeId)}"
+           data-async-modal="#defaultModal">Importa</a></td>
+    </tr>
+</table>
+
+</div>
