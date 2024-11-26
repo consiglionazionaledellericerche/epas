@@ -74,6 +74,8 @@ public class Instances extends Controller {
   private static final String JSON_CONTENT_TYPE = "application/json";
   private static final String LIST = "list";
   private static final String RESIDUAL_LIST = "residualList";
+  private static final String MEAL_TICKET_RESIDUAL_LIST = "mealTicketResidual";
+  private static final String GROUPS = "groups";
   private static final String CONTRACT_LIST = "contractList";
   private static final String OFFICE_CONFIGURATION = "officeConfiguration";
   private static final String PEOPLE_CONFIGURATIONS = "peopleConfiguration";
@@ -136,7 +138,8 @@ public class Instances extends Controller {
   public static void importPeopleConfigurations(String instance, String codeId) {
     WSRequest wsRequest = WS.url(instance+PATH+"/"+PEOPLE_CONFIGURATIONS)
         .setHeader("Content-Type", JSON_CONTENT_TYPE)
-        .authenticate("developer", "sdrfli.");
+        .authenticate("developer", "sdrfli.")
+        .setParameter("codeId", codeId);
 
     HttpResponse httpResponse = wsRequest.get();
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
@@ -181,7 +184,8 @@ public class Instances extends Controller {
   public static void importOfficeConfiguration(String instance, String codeId) {
     WSRequest wsRequest = WS.url(instance+PATH+"/"+OFFICE_CONFIGURATION)
         .setHeader("Content-Type", JSON_CONTENT_TYPE)
-        .authenticate("developer", "sdrfli.");
+        .authenticate("developer", "sdrfli.")
+        .setParameter("codeId", codeId);
 
     HttpResponse httpResponse = wsRequest.get();
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
@@ -290,7 +294,8 @@ public class Instances extends Controller {
   public static void importContracts(String instance, String codeId) {
     WSRequest wsRequest = WS.url(instance+PATH+"/"+CONTRACT_LIST)
         .setHeader("Content-Type", JSON_CONTENT_TYPE)
-        .authenticate("developer", "sdrfli.");
+        .authenticate("developer", "sdrfli.")
+        .setParameter("codeId", codeId);
 
     HttpResponse httpResponse = wsRequest.get();
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
@@ -331,7 +336,8 @@ public class Instances extends Controller {
   public static void importResidual(String instance, String codeId) {
     WSRequest wsRequest = WS.url(instance+PATH+"/"+RESIDUAL_LIST)
         .setHeader("Content-Type", JSON_CONTENT_TYPE)
-        .authenticate("developer", "sdrfli.");
+        .authenticate("developer", "sdrfli.")
+        .setParameter("codeId", codeId);
 
     HttpResponse httpResponse = wsRequest.get();
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
@@ -355,9 +361,10 @@ public class Instances extends Controller {
   }
   
   public static void importMealTicketResidual(String instance, String codeId) {
-    WSRequest wsRequest = WS.url(instance+PATH+"/"+RESIDUAL_LIST)
+    WSRequest wsRequest = WS.url(instance+PATH+"/"+MEAL_TICKET_RESIDUAL_LIST)
         .setHeader("Content-Type", JSON_CONTENT_TYPE)
-        .authenticate("developer", "sdrfli.");
+        .authenticate("developer", "sdrfli.")
+        .setParameter("codeId", codeId);
 
     HttpResponse httpResponse = wsRequest.get();
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
@@ -382,6 +389,15 @@ public class Instances extends Controller {
   }
   
   public static void importGroups(String instance, String codeId) {
-    
+    WSRequest wsRequest = WS.url(instance+PATH+"/"+GROUPS)
+        .setHeader("Content-Type", JSON_CONTENT_TYPE)
+        .authenticate("developer", "sdrfli.")
+        .setParameter("codeId", codeId);
+
+    HttpResponse httpResponse = wsRequest.get();
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      log.error("Errore di connessione: {}", httpResponse.getStatusText());
+      throw new ApiRequestException("Unauthorized");
+    }
   }
 }
