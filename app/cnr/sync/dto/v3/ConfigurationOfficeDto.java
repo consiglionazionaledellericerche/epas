@@ -26,17 +26,17 @@ import models.Configuration;
 @Data
 public class ConfigurationOfficeDto {
 
-  private String epasParam;
+  private EpasParam epasParam;
   private String fieldValue;
-  private LocalDate beginDate;
-  private LocalDate endDate;
+  private String beginDate;
+  private String endDate;
   
   public static ConfigurationOfficeDto build(Configuration configuration) {
     ModelMapper modelMapper = new ModelMapper();
     modelMapper.getConfiguration().setAmbiguityIgnored(true);
     val configurationDto = modelMapper.map(configuration, ConfigurationOfficeDto.class);
     if (configuration.getEpasParam() != null) {
-      configurationDto.setEpasParam(configuration.getEpasParam().name);
+      configurationDto.setEpasParam(configuration.getEpasParam());
     }
     return configurationDto;
   }

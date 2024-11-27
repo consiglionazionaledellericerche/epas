@@ -17,7 +17,7 @@ import org.modelmapper.ModelMapper;
 public class MealTicketResidualDto {
 
   private String number;
-  private LocalDate dateOfResidual;
+  private String dateOfResidual;
   private Long mealTicketResidual;
   
   public static MealTicketResidualDto build(PersonStampingRecap psDto) {
@@ -27,7 +27,7 @@ public class MealTicketResidualDto {
       mealTicketResidualDto.setNumber(psDto.person.getNumber());
       mealTicketResidualDto.setMealTicketResidual(psDto.contractMonths.stream()
           .mapToInt(cm -> cm.getValue().getRemainingMealTickets()).count());
-      mealTicketResidualDto.setDateOfResidual(LocalDate.now());
+      mealTicketResidualDto.setDateOfResidual(LocalDate.now().toString());
     }
     return mealTicketResidualDto;
   }
