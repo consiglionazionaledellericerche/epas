@@ -332,10 +332,15 @@ public class Instances extends Controller {
           newContract.setEndDate(Strings.isNullOrEmpty(dto.getEndDate()) ? null : LocalDate.parse(dto.getEndDate()));
           newContract.isOnCertificate();
           newContract.setPerson(person);
+          if (actualContract.get().isTemporaryMissing() && actualContract.get().getEndDate() == null) {
+            actualContract.get().setEndDate(LocalDate.parse(dto.getBeginDate()).minusDays(1));
+            actualContract.get().save();
+          }
           
           boolean esito = contractManager.properContractCreate(newContract, 
               com.google.common.base.Optional.absent(), true);
          if (esito) {
+           contractCounter++;
            log.debug("Salvato nuovo contratto per {} con date {} - {}", 
                person.getFullname(), newContract.getBeginDate(), newContract.getEndDate()); 
          } else {
@@ -363,7 +368,7 @@ public class Instances extends Controller {
         log.debug("Creata nuova persona {} {}", dto.getName(), dto.getSurname());
         peopleCounter++;
       }
-      contractCounter++;
+      
     }        
     flash.success("Inseriti %s nuovi contratti e %s nuove persone", contractCounter, peopleCounter);
     importInfo(instance, codeId);
@@ -448,7 +453,7 @@ public class Instances extends Controller {
     for (GroupShowDto dto : list) {
       group = new Group();
       group.setDescription(dto.getDescription());
-      group.setEndDate(dto.getEndDate());
+      group.setEndDate(Strings.isNullOrEmpty(dto.getEndDate()) ? null : java.time.LocalDate.parse(dto.getEndDate()));
       group.setName(dto.getName());
       group.setOffice(officeDao.byCodeId(codeId).get());
       group.setManager(personDao.getPersonByNumber(dto.getManager()));
