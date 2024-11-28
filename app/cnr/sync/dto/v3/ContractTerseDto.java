@@ -16,8 +16,8 @@ public class ContractTerseDto {
   private String name;
   private String surname;
   private String email;
-  private LocalDate beginDate;
-  private LocalDate endDate;
+  private String beginDate;
+  private String endDate;
   
   public static ContractTerseDto build (Contract contract) {
     ModelMapper modelMapper = new ModelMapper();
