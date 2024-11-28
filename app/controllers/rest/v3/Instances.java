@@ -30,6 +30,7 @@ import com.google.gson.GsonBuilder;
 import cnr.sync.dto.v2.GroupShowTerseDto;
 import cnr.sync.dto.v3.ConfigurationOfficeDto;
 import cnr.sync.dto.v3.ContractTerseDto;
+import cnr.sync.dto.v3.GroupShowDto;
 import cnr.sync.dto.v3.MealTicketResidualDto;
 import cnr.sync.dto.v3.OfficeShowTerseDto;
 import cnr.sync.dto.v3.PersonConfigurationList;
@@ -197,7 +198,7 @@ public class Instances extends Controller {
     val office = offices.getOfficeFromRequest(officeId, code, codeId);
     log.debug("Richiesta la lista dei gruppi dei dipendenti di {}", office);
     val list = 
-        office.getGroups().stream().map(group -> GroupShowTerseDto.build(group))
+        office.getGroups().stream().map(group -> GroupShowDto.build(group))
         .collect(Collectors.toSet());
     renderJSON(gsonBuilder.create().toJson(list));
   }

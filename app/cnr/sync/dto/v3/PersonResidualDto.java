@@ -30,7 +30,7 @@ public class PersonResidualDto {
 
   private String number;
   private Integer residual;
-  private LocalDate date;
+  private String date;
   
   
   public static PersonResidualDto build(PersonStampingRecap psDto) {
@@ -38,7 +38,7 @@ public class PersonResidualDto {
     val personResidualDto = new PersonResidualDto();
     if (psDto != null) {
       personResidualDto.setNumber(psDto.person.getNumber());
-      personResidualDto.setDate(LocalDate.now());
+      personResidualDto.setDate(LocalDate.now().toString());
       personResidualDto.setResidual(psDto.contractMonths.stream().mapToInt(cm -> cm.getValue().getRemainingMinutesLastYear() 
           + cm.getValue().getRemainingMinutesCurrentYear()).sum());
     }

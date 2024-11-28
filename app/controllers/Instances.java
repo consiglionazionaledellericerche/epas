@@ -32,6 +32,7 @@ import cnr.sync.dto.v2.GroupShowTerseDto;
 import cnr.sync.dto.v3.BadgeCreateDto;
 import cnr.sync.dto.v3.ConfigurationOfficeDto;
 import cnr.sync.dto.v3.ContractTerseDto;
+import cnr.sync.dto.v3.GroupShowDto;
 import cnr.sync.dto.v3.MealTicketResidualDto;
 import cnr.sync.dto.v3.OfficeShowTerseDto;
 import cnr.sync.dto.v3.PersonConfigurationList;
@@ -186,7 +187,8 @@ public class Instances extends Controller {
             epasParam.name, person.getFullname());
       }
     }
-    render("@importInfo", instance, codeId);
+    Office office = officeDao.byCodeId(codeId).get();
+    render("@importInfo", instance, codeId, office);
   }
 
   public static void importOfficeConfiguration(String instance, String codeId) {
@@ -206,11 +208,12 @@ public class Instances extends Controller {
     com.google.common.base.Optional<Office> office = officeDao.byCodeId(codeId);
     Configuration newConfiguration = null;
     EpasParam epasParam = null;
+    Optional<Configuration> configuration = Optional.empty();
     if (office.isPresent()) {
       
       for (ConfigurationOfficeDto dto : list) {
         epasParam = dto.getEpasParam();
-        Optional<Configuration> configuration = configurationManager
+        configuration = configurationManager
             .getConfigurationByOfficeAndType(office.get(), epasParam);
         switch(epasParam.epasParamValueType) {
           case BOOLEAN:
@@ -297,8 +300,8 @@ public class Instances extends Controller {
         consistencyManager.performRecomputation(office.get(),
             configuration.get().getEpasParam().recomputationTypes, recomputeRecap.recomputeFrom);
       }
-    }
-    render("@importInfo", instance, codeId);
+    }    
+    render("@importInfo", instance, codeId, office);
   }
 
   public static void importContracts(String instance, String codeId) {
@@ -313,9 +316,11 @@ public class Instances extends Controller {
       throw new ApiRequestException("Unauthorized");
     }
     List<ContractTerseDto> list = (List<ContractTerseDto>) new Gson()
-        .fromJson(httpResponse.getJson(), ContractTerseDto.class);
+        .fromJson(httpResponse.getJson(), new TypeToken<List<ContractTerseDto>>() {}.getType());
     Person person = null;
     Contract newContract = null;
+    int peopleCounter = 0;
+    int contractCounter = 0;
     for (ContractTerseDto dto : list) {
       person = personDao.getPersonByNumber(dto.getNumber());
       if (person != null) {
@@ -323,8 +328,8 @@ public class Instances extends Controller {
         com.google.common.base.Optional<Contract> actualContract = wrPerson.getCurrentContract();
         if (actualContract.isPresent()) {
           newContract = new Contract();
-          newContract.setBeginDate(dto.getBeginDate());
-          newContract.setEndDate(dto.getEndDate());
+          newContract.setBeginDate(LocalDate.parse(dto.getBeginDate()));
+          newContract.setEndDate(Strings.isNullOrEmpty(dto.getEndDate()) ? null : LocalDate.parse(dto.getEndDate()));
           newContract.isOnCertificate();
           newContract.setPerson(person);
           
@@ -356,9 +361,13 @@ public class Instances extends Controller {
         contractManager.recomputeContract(newContract, 
             com.google.common.base.Optional.<LocalDate>absent(), true, false);
         log.debug("Creata nuova persona {} {}", dto.getName(), dto.getSurname());
+        peopleCounter++;
       }
-    }
-    render("@importInfo", instance, codeId);
+      contractCounter++;
+    }        
+    flash.success("Inseriti %s nuovi contratti e %s nuove persone", contractCounter, peopleCounter);
+    importInfo(instance, codeId);
+    
   }
 
   public static void importResidual(String instance, String codeId) {
@@ -373,20 +382,22 @@ public class Instances extends Controller {
       throw new ApiRequestException("Unauthorized");
     }
     List<PersonResidualDto> list = (List<PersonResidualDto>) new Gson()
-        .fromJson(httpResponse.getJson(), PersonResidualDto.class);
+        .fromJson(httpResponse.getJson(), new TypeToken<List<PersonResidualDto>>() {}.getType());
     Person person = null;
     for (PersonResidualDto dto : list) {
       person = personDao.getPersonByNumber(dto.getNumber());
       IWrapperPerson wrPerson = wrapperFactory.create(person);
       com.google.common.base.Optional<Contract> actualContract = wrPerson.getCurrentContract();
       if (actualContract.isPresent()) {
-        actualContract.get().setSourceDateResidual(dto.getDate());
+        actualContract.get().setSourceDateResidual(LocalDate.parse(dto.getDate()));
         actualContract.get().setSourceRemainingMinutesCurrentYear(dto.getResidual());
         actualContract.get().save();
         log.debug("Salvato residuo di {} minuti per {}",dto.getResidual(), person.getFullname());
       }
     }
-    render("@importInfo", instance, codeId);
+    Office office = officeDao.byCodeId(codeId).get();
+    flash.success("Importati i residui orari di %s persone", list.size());
+    render("@importInfo", instance, codeId, office);
   }
   
   public static void importMealTicketResidual(String instance, String codeId) {
@@ -401,7 +412,7 @@ public class Instances extends Controller {
       throw new ApiRequestException("Unauthorized");
     }
     List<MealTicketResidualDto> list = (List<MealTicketResidualDto>) new Gson()
-        .fromJson(httpResponse.getJson(), MealTicketResidualDto.class);
+        .fromJson(httpResponse.getJson(), new TypeToken<List<MealTicketResidualDto>>() {}.getType());
     Person person = null;
     for (MealTicketResidualDto dto : list) {
       person = personDao.getPersonByNumber(dto.getNumber());
@@ -409,13 +420,15 @@ public class Instances extends Controller {
       com.google.common.base.Optional<Contract> actualContract = wrPerson.getCurrentContract();
       if (actualContract.isPresent()) {
         actualContract.get().setSourceDateMealTicket(LocalDate.parse(dto.getDateOfResidual()));
-        actualContract.get().setSourceRemainingMealTicket(dto.getMealTicketResidual().intValue());
+        actualContract.get().setSourceRemainingMealTicket(dto.getMealTicketResidual());
         actualContract.get().save();
         log.debug("Salvato residuo di {} buoni pasto per {}",
             dto.getMealTicketResidual(), person.getFullname());
       }
     }
-    render("@importInfo", instance, codeId);
+    Office office = officeDao.byCodeId(codeId).get();
+    flash.success("Importati i buoni residui di %s persone", list.size());
+    render("@importInfo", instance, codeId, office);
   }
   
   public static void importGroups(String instance, String codeId) {
@@ -429,19 +442,21 @@ public class Instances extends Controller {
       log.error("Errore di connessione: {}", httpResponse.getStatusText());
       throw new ApiRequestException("Unauthorized");
     }
-    List<GroupShowTerseDto> list = (List<GroupShowTerseDto>) new Gson()
-        .fromJson(httpResponse.getJson(), GroupShowTerseDto.class);
+    List<GroupShowDto> list = (List<GroupShowDto>) new Gson()
+        .fromJson(httpResponse.getJson(), new TypeToken<List<GroupShowDto>>() {}.getType());
     Group group = null;
-    for (GroupShowTerseDto dto : list) {
+    for (GroupShowDto dto : list) {
       group = new Group();
       group.setDescription(dto.getDescription());
       group.setEndDate(dto.getEndDate());
       group.setName(dto.getName());
       group.setOffice(officeDao.byCodeId(codeId).get());
-      group.setManager(personDao.getPersonByNumber(dto.getManager().getNumber()));
+      group.setManager(personDao.getPersonByNumber(dto.getManager()));
       group.save();
       log.debug("Inserito gruppo {} con manager {}", group.getName(), group.getManager().getFullname());
     }
-    render("@importInfo", instance, codeId);
+    Office office = officeDao.byCodeId(codeId).get();
+    flash.success("Importati %s gruppi", list.size());
+    render("@importInfo", instance, codeId, office);
   }
 }

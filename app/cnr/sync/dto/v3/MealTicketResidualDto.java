@@ -18,7 +18,7 @@ public class MealTicketResidualDto {
 
   private String number;
   private String dateOfResidual;
-  private Long mealTicketResidual;
+  private Integer mealTicketResidual;
   
   public static MealTicketResidualDto build(PersonStampingRecap psDto) {
     
@@ -26,7 +26,7 @@ public class MealTicketResidualDto {
     if (psDto != null) {
       mealTicketResidualDto.setNumber(psDto.person.getNumber());
       mealTicketResidualDto.setMealTicketResidual(psDto.contractMonths.stream()
-          .mapToInt(cm -> cm.getValue().getRemainingMealTickets()).count());
+          .mapToInt(cm -> cm.getValue().getRemainingMealTickets()).sum());
       mealTicketResidualDto.setDateOfResidual(LocalDate.now().toString());
     }
     return mealTicketResidualDto;
