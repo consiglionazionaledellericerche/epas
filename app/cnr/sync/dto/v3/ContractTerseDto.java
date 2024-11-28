@@ -13,6 +13,9 @@ import models.Contract;
 public class ContractTerseDto {
 
   private String number;
+  private String name;
+  private String surname;
+  private String email;
   private LocalDate beginDate;
   private LocalDate endDate;
   
@@ -22,6 +25,9 @@ public class ContractTerseDto {
     val contractDto = modelMapper.map(contract, ContractTerseDto.class);
     if (contract.getPerson() != null) {
       contractDto.setNumber(contract.getPerson().getNumber());
+      contractDto.setEmail(contract.getPerson().getEmail());
+      contractDto.setName(contract.getPerson().getName());
+      contractDto.setSurname(contract.getPerson().getSurname());
     }
     return contractDto;
   }

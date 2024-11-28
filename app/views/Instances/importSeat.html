@@ -2,20 +2,23 @@
 #{set header:'navbar' /}
 #{set title:'ePAS - Importazione da altre istanze' /}
 
-
+#{set breadcrumbs:['Importa istanza':@Instances.importInstance(), 
+  (instance):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
 <div class="container">
+#{title title: title /}
 
 	#{alert color:'info'}
   		<p>
-    	Seleziona la sede di cui vuoi importare le informazioni
+    	Seleziona la sede di cui vuoi importare le informazioni presente sul sito <strong>${instance}</strong>
   		</p>
   	#{/alert}
-	#{form @Instances.importInfo(), method:'POST', autocomplete:false, class:'form form-horizontal'}
+	
+	
 	<ul class="list-group">
-
+	#{list items:list, as:'item'}
+		<a href="@{Instances.importInfo(instance, item.codeId)}" class="list-group-item list-group-item-action">${item.name} - ${item.codeId}</a>		
+	#{/list}
 	</ul>
-	#{b.buttons center:true}
-		<button type="submit" class="btn btn-default">Vai</button>
-	#{/b.buttons}
-	#{/form}
+	
 </div>
