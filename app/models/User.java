@@ -183,6 +183,11 @@ public class User extends BaseModel {
         .anyMatch(uro -> Arrays.asList(args).contains(uro.getRole().getName()));
   }
 
+  public boolean hasAccountRoles(AccountRole... args) {
+    return roles.stream()
+        .anyMatch(role -> Arrays.asList(args).contains(role));
+  }
+
   public void updatePassword(String newPassword) {
     password = cryptPasswordMd5(newPassword); 
     passwordSha512 = cryptPasswordSha512(newPassword);
