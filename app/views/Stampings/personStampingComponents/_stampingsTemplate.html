@@ -1,3 +1,8 @@
+%{
+  canEditAllStampings = 
+    currentUser?.hasAccountRoles(models.enumerate.AccountRole.ADMIN, models.enumerate.AccountRole.DEVELOPER) || 
+      currentUser?.hasRoles(models.Role.PERSONNEL_ADMIN)
+}%
 
  #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
 
@@ -17,9 +22,15 @@
         ${stampingTemplate.hour}
       #{/if}
       #{elseif stampingTemplate.date}
-        #{secure.link @Stampings.edit(stampingTemplate.stampingId), target:stampingTemplate.stamping , 'data-async-modal':'#modalStamping'}
-          ${stampingTemplate.hour}
-        #{/secure.link}
+        #{if canEditAllStampings}
+            <a href="@{Stampings.edit(stampingTemplate.stampingId)}" data-async-modal="#modalStamping">
+              ${stampingTemplate.hour}
+            </a>
+        #{/if} #{else}
+          #{secure.link @Stampings.edit(stampingTemplate.stampingId), target:stampingTemplate.stamping , 'data-async-modal':'#modalStamping'}
+            ${stampingTemplate.hour}
+          #{/secure.link}
+        #{/else}
       #{/elseif}
 
       #{elseif stampingTemplate.pairPosition.equals("center")}
