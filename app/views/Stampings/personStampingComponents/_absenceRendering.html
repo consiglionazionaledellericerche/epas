@@ -1,3 +1,9 @@
+%{
+  canEditAllAbsences = 
+    currentUser?.hasAccountRoles(models.enumerate.AccountRole.ADMIN, models.enumerate.AccountRole.DEVELOPER) || 
+      currentUser?.hasRoles(models.Role.PERSONNEL_ADMIN)
+}%
+
     <!-- Calcolo dei gruppi coinvolti -->
     %{ 
       involvedGroups = absence.absenceType.involvedGroupAbsenceType(true);  
@@ -17,9 +23,16 @@
 	        #{include './_absenceLabel.html' /}
 	      #{/if}
 	      #{else}
-		      #{secure.link @AbsenceGroups.edit(absence.id), target: absence, 'data-async-modal':'#modalAbsence', 'hide-popover-on-click':true}
-				#{include './_absenceLabel.html' /}
-			  #{/secure.link}
+	          #{if canEditAllAbsences}
+	            <a href="@{AbsenceGroups.edit(absence.id)}" data-async-modal="#modalAbsence" hide-popover-on-click="true">
+	              #{include './_absenceLabel.html' /}
+	            </a>
+	          #{/if}
+	          #{else}
+		        #{secure.link @AbsenceGroups.edit(absence.id), target: absence, 'data-async-modal':'#modalAbsence', 'hide-popover-on-click':true}
+				  #{include './_absenceLabel.html' /}
+			    #{/secure.link}
+			  #{/else}
 		  #{/else}
     
     #{/else}
