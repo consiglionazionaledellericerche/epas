@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.21.0] - UNRELEASED
 ### Changed
   - Semplificati i controlli di sicurezza sulle assenze modificabili dagli amministratori del personale
+  - Semplificati i controlli di sicurezza sulle voci del menu flussi di lavoro
 
 ## [2.20.4] - 2024-12-03
 ### Changed

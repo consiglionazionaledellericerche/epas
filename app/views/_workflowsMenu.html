@@ -9,29 +9,44 @@
   'CompetenceRequests.list'] 
   /}
 
+%{
+  compensatoryRestRequests = templateUtility.compensatoryRestRequests()
+  vacationRequests = templateUtility.vacationRequests()
+  overtimeRequests = templateUtility.overtimeRequests()
+  vacationPastYearAfterDeadlineRequests = templateUtility.vacationPastYearAfterDeadlineRequests()
+  changeReperibilityRequests = templateUtility.changeReperibilityRequests()
+  teleworkRequests = templateUtility.teleworkRequests()
+  serviceRequests = templateUtility.serviceRequests()
+  illnessRequests = templateUtility.illnessRequests()
+  personalPermissionRequests = templateUtility.personalPermissionRequests()
+  changeReperibilityRequests = templateUtility.changeReperibilityRequests()
+  overtimeRequestsInAdvance = templateUtility.overtimeRequestsInAdvance()
+  enableIllnessFlow = templateUtility.enableIllnessFlow()
+}%
+
   <li class="dropdown #{if request.action in actions}active#{/if}">
 
     *{ responsività dropDown }*
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
 		<i class="fa fa-recycle fa-fw"></i>  
-		    #{if templateUtility.compensatoryRestRequests() > 0 || templateUtility.vacationRequests() > 0
+		    #{if compensatoryRestRequests > 0 || vacationRequests > 0
 		    	|| templateUtility.overtimeRequests() > 0
-		    	|| templateUtility.personalPermissionRequests() > 0
-		    	|| templateUtility.vacationPastYearAfterDeadlineRequests() > 0
-		    	|| templateUtility.changeReperibilityRequests() > 0 || templateUtility.teleworkRequests() > 0
-		    	|| templateUtility.serviceRequests() > 0 || templateUtility.illnessRequests() > 0
-		    	|| templateUtility.personalPermissionRequests() > 0 
-		    	|| templateUtility.changeReperibilityRequests() > 0
-		    	|| templateUtility.overtimeRequestsInAdvance() > 0}
-      			<span class="label label-danger label-badge">${templateUtility.compensatoryRestRequests() 
-      				+ templateUtility.vacationRequests() 
-      				+ templateUtility.overtimeRequests()
-      				+ templateUtility.personalPermissionRequests()
-      				+ templateUtility.vacationPastYearAfterDeadlineRequests()
-      				+ templateUtility.teleworkRequests() + templateUtility.serviceRequests()
-      				+ templateUtility.illnessRequests()
-      				+ templateUtility.changeReperibilityRequests()
-      				+ templateUtility.overtimeRequestsInAdvance()}
+		    	|| personalPermissionRequests > 0
+		    	|| vacationPastYearAfterDeadlineRequests > 0
+		    	|| changeReperibilityRequests > 0 || teleworkRequests > 0
+		    	|| serviceRequests > 0 || illnessRequests > 0
+		    	|| personalPermissionRequests > 0 
+		    	|| changeReperibilityRequests > 0
+		    	|| overtimeRequestsInAdvance > 0}
+      			<span class="label label-danger label-badge">${compensatoryRestRequests 
+      				+ vacationRequests 
+      				+ overtimeRequests
+      				+ personalPermissionRequests
+      				+ vacationPastYearAfterDeadlineRequests
+      				+ teleworkRequests + serviceRequests
+      				+ illnessRequests
+      				+ changeReperibilityRequests
+      				+ overtimeRequestsInAdvance}
       			</span>
     		#{/if}
 	     <!-- visualizza l'username -->
@@ -44,167 +59,167 @@
     *{ items }*
     <ul class="dropdown-menu">
       #{secure.check 'CompetenceRequests.enabled'}
-      #{secure.li @CompetenceRequests.overtimes()}
-        <i class="fa fa-money" aria-hidden="true"></i>
-      #{/secure.li}
+        #{secure.li @CompetenceRequests.overtimes()}
+          <i class="fa fa-money" aria-hidden="true"></i>
+        #{/secure.li}
       #{/secure.check}
-    
+
       <li class="divider"></li>
 
       #{secure.check 'CompetenceRequests.enableReperibilityChange'}
-      #{secure.li @CompetenceRequests.changeReperibility()}
-        <i class="fa fa-money" aria-hidden="true"></i>        
-      #{/secure.li}
-      <li class="divider"></li>
-      #{/secure.check}
+        #{secure.li @CompetenceRequests.changeReperibility()}
+          <i class="fa fa-money" aria-hidden="true"></i>
+        #{/secure.li}
+        <li class="divider"></li>
+        #{/secure.check}
 
       %{
          absenceRequestLabel = 
            (currentUser.person != null && currentUser.person.isTopQualification() && !templateUtility.absenceRequestAuthorizationTopLevelEnabled()) ? 'AbsenceRequests.vacationsTopLevel' : 'AbsenceRequests.vacations'
       }%
-      #{secure.li @AbsenceRequests.vacations(), label:absenceRequestLabel}
+      #{b.li @AbsenceRequests.vacations(), label:absenceRequestLabel}
         <i class="fa fa-plane" aria-hidden="true"></i>
-      #{/secure.li}
+      #{/b.li}
 
-      #{secure.li @AbsenceRequests.compensatoryRests()}
+      #{b.li @AbsenceRequests.compensatoryRests()}
         <i class="fa fa-bath" aria-hidden="true"></i>
-      #{/secure.li}
+      #{/b.li}
 
-      #{secure.li @AbsenceRequests.personalPermissions()}
+      #{b.li @AbsenceRequests.personalPermissions()}
         <i class="fa fa-exclamation" aria-hidden="true"></i>
-      #{/secure.li}
+      #{/b.li}
 
       #{secure.check 'AbsenceRequests.pastYearEnabled'}
-      %{
-         absenceRequestPastYearLabel = 
-           currentUser.person != null && currentUser.person.isTopQualification() && !templateUtility.absenceRequestAuthorizationTopLevelEnabled() ? 'AbsenceRequests.vacationsPastYearAfterDeadlineTopLevel' : 'AbsenceRequests.vacationsPastYearAfterDeadline'
-      }%
-      #{secure.li @AbsenceRequests.vacationsPastYearAfterDeadline(), label:absenceRequestPastYearLabel}
-        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-      #{/secure.li}
+        %{
+           absenceRequestPastYearLabel = 
+             currentUser.person != null && currentUser.person.isTopQualification() && !templateUtility.absenceRequestAuthorizationTopLevelEnabled() ? 'AbsenceRequests.vacationsPastYearAfterDeadlineTopLevel' : 'AbsenceRequests.vacationsPastYearAfterDeadline'
+        }%
+        #{secure.li @AbsenceRequests.vacationsPastYearAfterDeadline(), label:absenceRequestPastYearLabel}
+          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+        #{/secure.li}
       #{/secure.check}
 
       #{secure.check 'InformationRequests.enabled'}
-      #{secure.li @InformationRequests.teleworks()}
-        <i class="fa fa-laptop" aria-hidden="true"></i>
-      #{/secure.li}
-      #{secure.check 'InformationRequests.serviceExit'}
-      #{secure.li @InformationRequests.serviceExit()}
-        <i class="fa fa-sign-out" aria-hidden="true"></i>
-      #{/secure.li}
+        #{secure.li @InformationRequests.teleworks()}
+          <i class="fa fa-laptop" aria-hidden="true"></i>
+        #{/secure.li}
+        #{secure.check 'InformationRequests.serviceExit'}
+          #{secure.li @InformationRequests.serviceExit()}
+            <i class="fa fa-sign-out" aria-hidden="true"></i>
+          #{/secure.li}
+        #{/secure.check}
+        #{secure.check 'InformationRequests.parentalLeave'}
+          #{secure.li @InformationRequests.parentalLeave()}
+            <i class="fa fa-child" aria-hidden="true"></i>
+          #{/secure.li}
+        #{/secure.check}
+
+        #{if enableIllnessFlow}
+          #{b.li @InformationRequests.illness()}
+            <i class="fa fa-h-square" aria-hidden="true"></i>
+          #{/b.li}
+          <li class="divider"></li>
+        #{/if}
       #{/secure.check}
-      #{secure.check 'InformationRequests.parentalLeave'}
-      #{secure.li @InformationRequests.parentalLeave()}
-        <i class="fa fa-child" aria-hidden="true"></i>
-      #{/secure.li}
-      #{/secure.check}
-      
-      #{if templateUtility.enableIllnessFlow()}
-         #{secure.li @InformationRequests.illness()}
-           <i class="fa fa-h-square" aria-hidden="true"></i>
-         #{/secure.li}
-        <li class="divider"></li>
-      #{/if}
-	  #{/secure.check}
-	  
+
       #{secure.check 'CompetenceRequests.enableReperibilityChange'}
-      <li class="divider"></li>
-      #{secure.li @CompetenceRequests.changeReperibilityToApprove()}
-        <i class="fa fa-money" aria-hidden="true"></i>
-         
-       	#{if templateUtility.changeReperibilityRequests() > 0}
-      		<span class="label label-danger label-badge">${templateUtility.changeReperibilityRequests()}</span>
-    	#{/if} 
-    	
-      #{/secure.li}
-      #{/secure.check}            
+        <li class="divider"></li>
+        #{secure.li @CompetenceRequests.changeReperibilityToApprove()}
+          <i class="fa fa-money" aria-hidden="true"></i>
+           #{if changeReperibilityRequests > 0}
+            <span class="label label-danger label-badge">${changeReperibilityRequests}</span>
+           #{/if} 
+        #{/secure.li}
+      #{/secure.check}
 
       <li class="divider"></li>
       #{secure.check 'CompetenceRequests.handleEnabled'}
       #{secure.li @CompetenceRequests.overtimesToApprove()}
         <i class="fa fa-money" aria-hidden="true"></i>
-       	#{if templateUtility.overtimeRequests() > 0}
-      		<span class="label label-danger label-badge">${templateUtility.overtimeRequests()}</span>
+       	#{if overtimeRequests > 0}
+      		<span class="label label-danger label-badge">${overtimeRequests}</span>
     	#{/if} 
       #{/secure.li}
       #{if templateUtility.enableOvertimeRequestInAdvance()}
             #{secure.li @CompetenceRequests.overtimesToApproveInAdvance()}
         	<i class="fa fa-money" aria-hidden="true"></i>
-       		#{if templateUtility.overtimeRequestsInAdvance() > 0}
-      			<span class="label label-danger label-badge">${templateUtility.overtimeRequestsInAdvance()}</span>
+       		#{if overtimeRequestsInAdvance > 0}
+      			<span class="label label-danger label-badge">${overtimeRequestsInAdvance}</span>
     		#{/if} 
       #{/secure.li}
       #{/if}
       #{/secure.check}
-      
-     <li class="divider"></li>
-      
-	  #{secure.li @AbsenceRequests.vacationsToApprove()}
-        <i class="fa fa-plane" aria-hidden="true"></i>
-       	#{if templateUtility.vacationRequests() > 0}
-      		<span class="label label-danger label-badge">${templateUtility.vacationRequests()}</span>
-    	#{/if} 
-      #{/secure.li}
 
-      #{secure.li @AbsenceRequests.compensatoryRestsToApprove()}
+      #{secure.check 'AbsenceRequests.listToApprove'}
+
+        <li class="divider"></li>
+
+      #{b.li @AbsenceRequests.vacationsToApprove()}
+        <i class="fa fa-plane" aria-hidden="true"></i>
+        #{if templateUtility.vacationRequests() > 0}
+          <span class="label label-danger label-badge">${templateUtility.vacationRequests()}</span>
+        #{/if}
+      #{/b.li}
+
+      #{b.li @AbsenceRequests.compensatoryRestsToApprove()}
         <i class="fa fa-bath" aria-hidden="true"></i>
         #{if templateUtility.compensatoryRestRequests() > 0}
-      		<span class="label label-danger label-badge">${templateUtility.compensatoryRestRequests()}</span>
-    	#{/if}
-      #{/secure.li}
+          <span class="label label-danger label-badge">${templateUtility.compensatoryRestRequests()}</span>
+        #{/if}
+      #{/b.li}
 
-
-      #{secure.li @AbsenceRequests.permissionsToApprove()}
+      #{b.li @AbsenceRequests.permissionsToApprove()}
         <i class="fa fa-exclamation" aria-hidden="true"></i>
         #{if templateUtility.personalPermissionRequests() > 0}
-      		<span class="label label-danger label-badge">${templateUtility.personalPermissionRequests()}</span>
-    	#{/if}
-      #{/secure.li}
-      
+          <span class="label label-danger label-badge">${templateUtility.personalPermissionRequests()}</span>
+        #{/if}
+      #{/b.li}
+
       #{secure.check 'AbsenceRequests.pastYearEnabled'}
-      #{secure.li @AbsenceRequests.vacationsPastYearAfterDeadlineToApprove()}
-        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-          
-        #{if templateUtility.vacationPastYearAfterDeadlineRequests() > 0}
-      		<span class="label label-danger label-badge">${templateUtility.vacationPastYearAfterDeadlineRequests()}</span>
-    	#{/if}
-    	
-      #{/secure.li}
+        #{b.li @AbsenceRequests.vacationsPastYearAfterDeadlineToApprove()}
+          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+          #{if templateUtility.vacationPastYearAfterDeadlineRequests() > 0}
+            <span class="label label-danger label-badge">${templateUtility.vacationPastYearAfterDeadlineRequests()}</span>
+          #{/if}
+        #{/b.li}
       #{/secure.check}
-      
-      
+    #{/secure.check}
+
+      <!--  Flussi informativi -->
       #{secure.check 'InformationRequests.enabled'}
-      <li class="divider"></li>
-      
-      #{secure.li @InformationRequests.teleworksToApprove()}
-        <i class="fa fa-laptop" aria-hidden="true"></i>
-        #{if templateUtility.teleworkRequests() > 0}
-      		<span class="label label-danger label-badge">${templateUtility.teleworkRequests()}</span>
-    	#{/if}
-      #{/secure.li}
-      
-      #{secure.li @InformationRequests.serviceExitToApprove()}
-        <i class="fa fa-sign-out" aria-hidden="true"></i>
-        #{if templateUtility.serviceRequests() > 0}
-      		<span class="label label-danger label-badge">${templateUtility.serviceRequests()}</span>
-    	#{/if}
-      #{/secure.li}
-      #{secure.li @InformationRequests.parentalLeaveToApprove()}
-      <i class="fa fa-child" aria-hidden="true"></i>
-        #{if templateUtility.parentalLeaveRequests() > 0}
-      		<span class="label label-danger label-badge">${templateUtility.parentalLeaveRequests()}</span>
-    	#{/if}
-      #{/secure.li}
-      
-      #{if templateUtility.enableIllnessFlow()}
-      #{secure.li @InformationRequests.illnessToApprove()}
-        <i class="fa fa-h-square" aria-hidden="true"></i>
-        #{if templateUtility.illnessRequests() > 0}
-      		<span class="label label-danger label-badge">${templateUtility.illnessRequests()}</span>
-    	#{/if}
-      #{/secure.li}
-      #{/if}
-      #{/secure.check}
+        #{secure.check 'InformationRequests.listToApprove'}
+          <li class="divider"></li>
+          #{b.li @InformationRequests.teleworksToApprove()}
+            <i class="fa fa-laptop" aria-hidden="true"></i>
+            #{if teleworkRequests > 0}
+              <span class="label label-danger label-badge">${teleworkRequests}</span>
+            #{/if}
+          #{/b.li}
+
+          #{b.li @InformationRequests.serviceExitToApprove()}
+            <i class="fa fa-sign-out" aria-hidden="true"></i>
+            #{if serviceRequests > 0}
+              <span class="label label-danger label-badge">${serviceRequests}</span>
+            #{/if}
+          #{/b.li}
+
+          #{b.li @InformationRequests.parentalLeaveToApprove()}
+            <i class="fa fa-child" aria-hidden="true"></i>
+            #{if parentalLeaveRequests > 0}
+              <span class="label label-danger label-badge">${parentalLeaveRequests}</span>
+            #{/if}
+          #{/b.li}
+
+         #{if templateUtility.enableIllnessFlow()}
+           #{b.li @InformationRequests.illnessToApprove()}
+             <i class="fa fa-h-square" aria-hidden="true"></i>
+             #{if illnessRequests > 0}
+               <span class="label label-danger label-badge">${illnessRequests}</span>
+             #{/if}
+           #{/b.li}
+         #{/if}
+       #{/secure.check}
+    #{/secure.check}
 
     </ul>
     *{ end items }*
