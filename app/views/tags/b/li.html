@@ -1,0 +1,7 @@
+*{ arg: (href) required
+target: optional target
+class: optional classes for a element
+hide: optional set true if the link must be hidden
+}*
+#{if request.action == _arg.action}#{set active='active' /}#{/if}
+<li class="${active} ${_class}" ${helpers.Web.serialize(_attrs, "arg", "class", "target", "hide").raw()}><a href="${_arg}">#{doBody /} #{if _label}&{_label}#{/if}#{else}&{_arg.action}#{/else}</a></li>

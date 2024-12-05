@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.21.0] - UNRELEASED
 ### Changed
   - Accorparti e resi più efficienti i controlli di sicurezza sul tabellone delle timbrature
+  - Semplificati i controlli di sicurezza sulle voci del menu flussi di lavoro
 
 ## [2.20.4] - 2024-12-03
 ### Changed
