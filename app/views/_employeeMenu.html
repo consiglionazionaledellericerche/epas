@@ -133,14 +133,12 @@
         <i class="fa fa-key" aria-hidden="true"></i>
       #{/navbar.li}
 
-      #{secure.li @Absences.absencesVisibleForEmployee(session.get("yearSelected"), session.get("monthSelected"), session.get("daySelected")) }
+      #{secure.check 'Absences.absencesVisibleForEmployee'}
         <li class="divider"></li>
-        <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
-      #{/secure.li}
-      
-	  
-	  
-	  
+        #{navbar.li @Absences.absencesVisibleForEmployee(session.get("yearSelected"), session.get("monthSelected"), session.get("daySelected")) }
+          <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+        #{/navbar.li}
+      #{/secure.check}
 
     </ul>
     *{ end items }*
