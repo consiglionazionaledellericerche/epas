@@ -1873,6 +1873,23 @@ end
 
 
 /*******************************************************************************
+ * Visualizzazione dello storico del giorno
+ ******************************************************************************/
+
+rule CanViewPersonDayHistory
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ Role(name in (Role.SEAT_SUPERVISOR, Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)) from $uro.role
+ $c: PermissionCheck(action in (
+        "PersonDays.personDayHistory"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+
+/*******************************************************************************
  * Azioni utente con ruolo almeno PERSONNEL_ADMIN_MINI
  ******************************************************************************/
 

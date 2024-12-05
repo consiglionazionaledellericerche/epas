@@ -169,7 +169,19 @@ public class Stampings extends Controller {
     // un determinato mese
     final YearMonth yearMonth = new YearMonth(year, month);
 
-    render("@personStamping", psDto, person, yearMonth);
+    val currentUser = currentPerson.getUser();
+    val canEditAllStampingsAndAbsences = 
+        currentUser.hasAccountRoles(models.enumerate.AccountRole.ADMIN, models.enumerate.AccountRole.DEVELOPER) 
+          || currentUser.hasRoles(models.Role.PERSONNEL_ADMIN);
+    val canInsertAbsences = 
+        rules.check("AbsenceGroups.insert", yearMonth) && rules.check("AbsenceGroups.insert", person);
+    
+    val canInsertStampings = 
+        rules.check("Stampings.insert", yearMonth) && rules.check("Stampings.insert", person);
+    val canViewPersonDayHistory = rules.check("PersonDays.personDayHistory", person.getOffice());
+
+    render("@personStamping", psDto, person, yearMonth, 
+        canEditAllStampingsAndAbsences, canInsertAbsences, canInsertStampings, canViewPersonDayHistory);
   }
 
 
@@ -215,7 +227,19 @@ public class Stampings extends Controller {
         stampingsRecapFactory.create(
             person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
 
-    render(psDto, person, yearMonth);
+    val currentUser = Security.getUser();
+    val canEditAllStampingsAndAbsences = 
+        currentUser.isPresent() &&
+        (currentUser.get().hasAccountRoles(models.enumerate.AccountRole.ADMIN, models.enumerate.AccountRole.DEVELOPER) 
+          || currentUser.get().hasRoles(models.Role.PERSONNEL_ADMIN));
+    val canInsertAbsences = 
+        rules.check("AbsenceGroups.insert", yearMonth) && rules.check("AbsenceGroups.insert", person);
+    val canInsertStampings = 
+        rules.check("Stampings.insert", yearMonth) && rules.check("Stampings.insert", person);
+    val canViewPersonDayHistory = rules.check("PersonDays.personDayHistory", person.getOffice());
+
+    render(psDto, person, yearMonth, 
+        canEditAllStampingsAndAbsences, canInsertAbsences, canInsertStampings, canViewPersonDayHistory);
   }
 
   /**

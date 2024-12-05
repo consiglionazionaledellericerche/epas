@@ -1,12 +1,6 @@
-%{
-  canEditAllAbsences = 
-    currentUser?.hasAccountRoles(models.enumerate.AccountRole.ADMIN, models.enumerate.AccountRole.DEVELOPER) || 
-      currentUser?.hasRoles(models.Role.PERSONNEL_ADMIN)
-}%
-
     <!-- Calcolo dei gruppi coinvolti -->
     %{ 
-      involvedGroups = absence.absenceType.involvedGroupAbsenceType(true);  
+      involvedGroups = absence.absenceType.involvedGroupAbsenceType(true);
     }%
     
     <!-- Assenza da non visualizzare perchè è un rimpiazzamento corretto -->
@@ -23,7 +17,7 @@
 	        #{include './_absenceLabel.html' /}
 	      #{/if}
 	      #{else}
-	          #{if canEditAllAbsences}
+	          #{if canEditAllStampingsAndAbsences}
 	            <a href="@{AbsenceGroups.edit(absence.id)}" data-async-modal="#modalAbsence" hide-popover-on-click="true">
 	              #{include './_absenceLabel.html' /}
 	            </a>
