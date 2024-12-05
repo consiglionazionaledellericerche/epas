@@ -1,13 +1,11 @@
 <td class="assenza default-single">
-  #{secure.check 'AbsenceGroups.insert', target: yearMonth }
-    #{secure.check 'AbsenceGroups.insert',  target:person}
+  #{if canInsertAbsences}
     <a href="@{AbsenceGroups.insert(dayRecap.personDay.person.id, dayRecap.personDay.date?.format())}" data-async-modal="#modalGroupAbsence"
        title="Inserimento assenza ${dayRecap.personDay.date?.format()}"
        aria-label="Inserimento assenza ${dayRecap.personDay.date?.format()}">
       __
     </a>
-    #{/secure.check}
-  #{/secure.check}
+  #{/if}
 
   #{list items:dayRecap.personDay.absences, as:'absence'}
     
