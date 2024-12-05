@@ -1,8 +1,8 @@
   #{title title:'Da approvare', administration:true /}
-  
+
   <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
 	<thead>
-		
+
 		<tr>
 			<th width="10%" rowspan="2">Data e ora sottomissione</th>
 			#{if !onlyOwn}
@@ -10,8 +10,8 @@
 			#{/if}
 			
 		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>dal</th>
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>al</th>			
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Nome</th>			
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>al</th>
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Nome</th>
 			
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
@@ -19,8 +19,8 @@
 			<th #{if approvalRequired}rowspan="2"#{/if}>Stato attuale</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Visualizza</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Azioni</th>
-				
-		</tr>			
+
+		</tr>
 		#{if approvalRequired}
 			<tr>
 				#{if config.officeHeadApprovalRequired}
@@ -52,11 +52,10 @@
 				#{/if}
 				<td>${item.actualEvent().eventType.label()}</td>
 				<td>
-				#{secure.check 'InformationRequests.show', target: item }
-				#{secure.link @InformationRequests.show(item.id, type)}	    	  	
-	        	<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
-	        	#{/secure.link}
-	        	#{/secure.check}
+				#{secure.link @InformationRequests.show(item.id, type)}
+					<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
+				#{/secure.link}
+
 				</td>
 				<td>
 				#{secure.check 'InformationRequests.approval', target: item }

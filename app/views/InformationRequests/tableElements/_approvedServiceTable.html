@@ -19,8 +19,7 @@
 			#{/if}
 			<th #{if approvalRequired}rowspan="2"#{/if}>Stato attuale</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Visualizza</th>
-			<th #{if approvalRequired}rowspan="2"#{/if}>Azioni</th>
-				
+
 		</tr>			
 		#{if approvalRequired}
 			<tr>
@@ -48,24 +47,12 @@
 				#{/if}
 				<td>${item.actualEvent().eventType.label()}</td>
 				<td>
-				#{secure.check 'InformationRequests.show', target: item }
-				#{secure.link @InformationRequests.show(item.id, type)}	    	  	
-	        	<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
-	        	#{/secure.link}
-	        	#{/secure.check}
+
+				#{b.link @InformationRequests.show(item.id, type)}
+					<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
+				#{/b.link}
+
 				</td>
-				<td>
-				#{secure.check 'InformationRequests.approval', target: item }
-				<a class="btn btn-success btn-xs" href="@{InformationRequests.approval(item.id)}">
-        		Approva 
-      			</a>
-      			#{/secure.check}
-      			#{secure.check 'InformationRequests.disapproval', target: item }
-      			<a class="btn btn-warning btn-xs" href="@{InformationRequests.disapproval(item.id)}" data-async-modal="#defaultModal" color="warning" title="Rifiuta">
-        		Rifiuta
-      			</a>
-      			#{/secure.check}
-      			</td>
 			</tr>
 		#{/list}
 	</tbody>

@@ -1,5 +1,5 @@
   #{title title:'Da approvare', administration:true /}
-  
+
   <table  class="table table-striped table-hover table-bordered table-condensed center" datatable width="100%">
 	<thead>
 		
@@ -10,18 +10,18 @@
 			#{/if}
 			
 		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>dal</th>
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>al</th>			
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>al</th>
 			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Certificato nascita</th>
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Documento data presunto parto</th>			
-			
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Documento data presunto parto</th>
+
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
 			#{/if}
 			<th #{if approvalRequired}rowspan="2"#{/if}>Stato attuale</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Visualizza</th>
 			<th #{if approvalRequired}rowspan="2"#{/if}>Azioni</th>
-				
-		</tr>			
+
+		</tr>
 		#{if approvalRequired}
 			<tr>
 				#{if config.officeHeadApprovalRequired}
@@ -51,12 +51,12 @@
 	 	  			Apri allegato <a href="@{InformationRequests.downloadAttachment(item.id)}">
 						<span class="glyphicon glyphicon-envelope"></span>
 					</a>
-	 			</div>					
+	 			</div>
 				#{/else}
 				</td>
 				<td>
 				#{if !item.expectedDateOfBirth.exists()}
-					Nessun documento allegato					
+					Nessun documento allegato
 				#{/if}
 				#{else}
 					<div class="alert alert-warning center">
@@ -74,11 +74,10 @@
 				#{/if}
 				<td>${item.actualEvent().eventType.label()}</td>
 				<td>
-				#{secure.check 'InformationRequests.show', target: item }
-				#{secure.link @InformationRequests.show(item.id, type)}	    	  	
-	        	<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
-	        	#{/secure.link}
-	        	#{/secure.check}
+				#{secure.link @InformationRequests.show(item.id, type)}
+					<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
+				#{/secure.link}
+
 				</td>
 				<td>
 				#{secure.check 'InformationRequests.approval', target: item }
