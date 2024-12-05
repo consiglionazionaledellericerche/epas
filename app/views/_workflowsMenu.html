@@ -94,9 +94,9 @@
            absenceRequestPastYearLabel = 
              currentUser.person != null && currentUser.person.isTopQualification() && !templateUtility.absenceRequestAuthorizationTopLevelEnabled() ? 'AbsenceRequests.vacationsPastYearAfterDeadlineTopLevel' : 'AbsenceRequests.vacationsPastYearAfterDeadline'
         }%
-        #{secure.li @AbsenceRequests.vacationsPastYearAfterDeadline(), label:absenceRequestPastYearLabel}
+        #{b.li @AbsenceRequests.vacationsPastYearAfterDeadline(), label:absenceRequestPastYearLabel}
           <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-        #{/secure.li}
+        #{/b.li}
       #{/secure.check}
 
       #{secure.check 'InformationRequests.enabled'}

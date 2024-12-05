@@ -55,16 +55,17 @@
         <i class="fa fa-calendar" aria-hidden="true"></i>
       #{/navbar.li}
       #{if teleworkStampingsActive}
-        #{secure.li @TeleworkStampings.teleworkStampings(session.get("yearSelected"), session.get("monthSelected")) }
-          <i class="fa fa-calendar-times-o" aria-hidden="true"></i>
-        #{/secure.li}
+        #{secure.check 'TeleworkStampings.teleworkStampings'}
+          #{b.li @TeleworkStampings.teleworkStampings(session.get("yearSelected"), session.get("monthSelected")) }
+            <i class="fa fa-calendar-times-o" aria-hidden="true"></i>
+          #{/b.li}
 
-        #{secure.li @InformationRequests.teleworks()}
-        <i class="fa fa-laptop" aria-hidden="true"></i>
-        #{/secure.li}
-
+          #{b.li @InformationRequests.teleworks()}
+            <i class="fa fa-laptop" aria-hidden="true"></i>
+          #{/b.li}
+        #{/secure.check}
       #{/if}
-      
+
       #{navbar.li @Absences.absences(session.get("yearSelected"), session.get("monthSelected")) }
         <i class="fa fa-user-times" aria-hidden="true"></i>
       #{/navbar.li}
@@ -101,19 +102,22 @@
         <i class="fa fa-clock-o" aria-hidden="true"></i>
       #{/navbar.li}
 
-      #{secure.li @MealTickets.mealTickets() }
-      <i class="fa fa-cutlery" aria-hidden="true"></i>
-      #{/secure.li}
-      
-      #{secure.li @Groups.seatOrganizationChart() }
-      <i class="fa fa-users" aria-hidden="true"></i>
-      #{/secure.li}
+      #{if currentUser.person != null}
+        #{b.li @MealTickets.mealTickets() }
+        <i class="fa fa-cutlery" aria-hidden="true"></i>
+        #{/b.li}
 
-      <li class="divider"></li>
+        #{b.li @Groups.seatOrganizationChart() }
+        <i class="fa fa-users" aria-hidden="true"></i>
+        #{/b.li}
 
-      #{navbar.li @Charts.excelFile(session.get("yearSelected"), session.get("monthSelected"))}
-        <i class="fa fa-print" aria-hidden="true"></i>
-      #{/navbar.li}
+        <li class="divider"></li>
+
+        #{navbar.li @Charts.excelFile(session.get("yearSelected"), session.get("monthSelected"))}
+          <i class="fa fa-print" aria-hidden="true"></i>
+        #{/navbar.li}
+
+      #{/if}
 
       #{navbar.li @PrintTags.showTag('id':session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"), true) }
         <i class="fa fa-print" aria-hidden="true"></i>
