@@ -9,7 +9,7 @@
 			#{/if}
 			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Anno</th>
 		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Mese</th>
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Contenuto</th>					
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Contenuto</th>
 			
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
@@ -41,9 +41,9 @@
 				#{/if}
 				<td>${item.actualEvent().eventType.label()}</td>
 				<td>
-				#{secure.link @InformationRequests.show(item.id, type)}	    	  	
-	        	<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
-	        	#{/secure.link}
+				#{b.link @InformationRequests.show(item.id, type)}
+					<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
+				#{/b.link}
 				</td>
 			</tr>
 		#{/list}

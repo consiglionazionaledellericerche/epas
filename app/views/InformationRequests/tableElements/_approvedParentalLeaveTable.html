@@ -7,9 +7,9 @@
 				<th width="15%" #{if approvalRequired}rowspan="2"#{/if}>&{'informationRequest.person'}</th>
 			#{/if}
 		    <th width="10%" #{if approvalRequired}rowspan="2"#{/if}>dal</th>
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>al</th>			
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>al</th>
 			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Certificato nascita</th>
-			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Documento data presunta parto</th>	
+			<th width="10%" #{if approvalRequired}rowspan="2"#{/if}>Documento data presunta parto</th>
 			#{if approvalRequired}
 				<th colspan="${approvalsRequired}">Date di Approvazione/Disapprovazione</th>
 			#{/if}		
@@ -52,10 +52,11 @@
 				#{/if}
 				#{else}
 					<div class="alert alert-warning center">
-	 	  			Apri allegato <a href="@{InformationRequests.downloadAttachment(item.id)}">
-						<span class="glyphicon glyphicon-envelope"></span>
-					</a>
-	 				</div>
+						Apri allegato 
+						<a href="@{InformationRequests.downloadAttachment(item.id)}">
+							<span class="glyphicon glyphicon-envelope"></span>
+						</a>
+					</div>
 				#{/else}
 				</td>
 				#{if config.officeHeadApprovalRequired}
@@ -64,13 +65,12 @@
 				#{if config.administrativeApprovalRequired}
 					<td>#{f.value 'item.administrativeApproved', value:item.administrativeApproved /}</td>
 				#{/if}
-	
+
 				<td>
-				#{secure.check 'InformationRequests.show', target: item }
-				#{secure.link @InformationRequests.show(item.id, type)}	    	  	
-	        	<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
-	        	#{/secure.link}
-	        	#{/secure.check}
+				#{b.link @InformationRequests.show(item.id, type)}
+					<i class="fa fa-eye" aria-hidden="true"></i> Visualizza
+				#{/b.link}
+
 				</td>
 			</tr>
 		#{/list}

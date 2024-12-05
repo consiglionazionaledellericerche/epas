@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
   - Accorparti e resi più efficienti i controlli di sicurezza sul tabellone delle timbrature
   - Semplificati i controlli di sicurezza sulle voci del menu flussi di lavoro
+  - Rimossi i pulsanti di approva e rifiuta dai flussi informativi terminati
+  - Corretto il permesso per visualizzare la voce di menu per i permessi genitorali
 
 ## [2.20.4] - 2024-12-03
 ### Changed

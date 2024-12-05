@@ -103,16 +103,12 @@
         #{secure.li @InformationRequests.teleworks()}
           <i class="fa fa-laptop" aria-hidden="true"></i>
         #{/secure.li}
-        #{secure.check 'InformationRequests.serviceExit'}
-          #{secure.li @InformationRequests.serviceExit()}
-            <i class="fa fa-sign-out" aria-hidden="true"></i>
-          #{/secure.li}
-        #{/secure.check}
-        #{secure.check 'InformationRequests.parentalLeave'}
-          #{secure.li @InformationRequests.parentalLeave()}
-            <i class="fa fa-child" aria-hidden="true"></i>
-          #{/secure.li}
-        #{/secure.check}
+        #{secure.li @InformationRequests.serviceExit()}
+          <i class="fa fa-sign-out" aria-hidden="true"></i>
+        #{/secure.li}
+        #{secure.li @InformationRequests.parentalLeave()}
+          <i class="fa fa-child" aria-hidden="true"></i>
+        #{/secure.li}
 
         #{if enableIllnessFlow}
           #{b.li @InformationRequests.illness()}
@@ -203,12 +199,12 @@
             #{/if}
           #{/b.li}
 
-          #{b.li @InformationRequests.parentalLeaveToApprove()}
+          #{secure.li @InformationRequests.parentalLeaveToApprove()}
             <i class="fa fa-child" aria-hidden="true"></i>
             #{if parentalLeaveRequests > 0}
               <span class="label label-danger label-badge">${parentalLeaveRequests}</span>
             #{/if}
-          #{/b.li}
+          #{/secure.li}
 
          #{if templateUtility.enableIllnessFlow()}
            #{b.li @InformationRequests.illnessToApprove()}
