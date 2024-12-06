@@ -17,9 +17,15 @@
         ${stampingTemplate.hour}
       #{/if}
       #{elseif stampingTemplate.date}
-        #{secure.link @Stampings.edit(stampingTemplate.stampingId), target:stampingTemplate.stamping , 'data-async-modal':'#modalStamping'}
-          ${stampingTemplate.hour}
-        #{/secure.link}
+        #{if canEditAllStampingsAndAbsences}
+            <a href="@{Stampings.edit(stampingTemplate.stampingId)}" data-async-modal="#modalStamping">
+              ${stampingTemplate.hour}
+            </a>
+        #{/if} #{else}
+          #{secure.link @Stampings.edit(stampingTemplate.stampingId), target:stampingTemplate.stamping , 'data-async-modal':'#modalStamping'}
+            ${stampingTemplate.hour}
+          #{/secure.link}
+        #{/else}
       #{/elseif}
 
       #{elseif stampingTemplate.pairPosition.equals("center")}
@@ -50,8 +56,7 @@
     #{/if}
     #{/list}
 
-    #{secure.check 'Stampings.insert', target: person}
-      #{secure.check 'Stampings.insert', target: yearMonth }
+    #{if canInsertStampings}
       <td class="inserisciTimbratura default-single">
         #{if !dayRecap.personDay.future}
           <a href="@{Stampings.insert(dayRecap.personDay.person.id, dayRecap.personDay.date.format())}"
@@ -62,6 +67,5 @@
       		</a>
       	#{/if}
       </td>
-      #{/secure.check}
-    #{/secure.check}
+    #{/if}
     

@@ -6,8 +6,6 @@
   #{stylesheet 'stampingsTable.css'/}
 #{/set}
 
-
-
 <div class="col-xs-12 col-lg-8">
 
   <table id="tabellonetimbrature" class="table table-bordered table-condensed">
@@ -44,9 +42,13 @@
 
         <td class="${dayRecap.personDay.holiday ? 'festivi' : 'capitalized'} default-single">
           #{if dayRecap.firstDay }<i class="fa fa-flag-checkered" aria-hidden="true" webui-popover-hover data-content="&{'firstDay'}"></i>#{/if}
-          #{secure.link @PersonDays.personDayHistory(dayRecap.personDay.id), 'data-async-modal':'#defaultModal'}
+          #{if canViewPersonDayHistory}
+            <a href="@{PersonDays.personDayHistory(dayRecap.personDay.id)}" data-async-modal="#defaultModal">
+              ${dayRecap.personDay.date.shortDayName()}
+            </a>
+          #{/if} #{else}
             ${dayRecap.personDay.date.shortDayName()}
-          #{/secure.link}
+          #{/else}
         </td>
 
         #{include './personStampingComponents/_mealTicketsTemplate.html' /}
@@ -99,6 +101,3 @@
 <div id="modalGroupAbsence" class="modal fade container" tabindex="-1"></div>
 
 <div id="modalVariation" class="modal fade container" tabindex="-1"></div>
-
-
-
