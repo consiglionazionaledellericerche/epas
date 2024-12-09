@@ -97,6 +97,35 @@ sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i ${APP_HOME}/conf/prod.conf
+
+### Creazione e configurazione del pool di connessione al DB
+DB_POOL_TIMEOUT=${DB_POOL_TIMEOUT}
+if [ -z "${DB_POOL_TIMEOUT}" ]; then
+  sed -n '/DB_POOL_TIMEOUT/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{DB_POOL_TIMEOUT}}#'"${DB_POOL_TIMEOUT}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+DB_POOL_MAX_SIZE=${DB_POOL_MAX_SIZE}
+if [ -z "${DB_POOL_MAX_SIZE}" ]; then
+  sed -n '/DB_POOL_MAX_SIZE/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{DB_POOL_MAX_SIZE}}#'"${DB_POOL_MAX_SIZE}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+DB_POOL_MIN_SIZE=${DB_POOL_MIN_SIZE}
+if [ -z "${DB_POOL_MIN_SIZE}" ]; then
+  sed -n '/DB_POOL_MIN_SIZE/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{DB_POOL_MIN_SIZE}}#'"${DB_POOL_MIN_SIZE}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+### Configurazione Pool di Thread del Play, di default nb processors + 1 threads in PROD mode ###
+PLAY_POOL=${PLAY_POOL}
+if [ -z "${PLAY_POOL}" ]; then
+  sed -n '/PLAY_POOL/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{PLAY_POOL}}#'"${PLAY_POOL}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
 sed 's#{{PROTOCOL}}#'"${PROTOCOL}"'#' -i ${APP_HOME}/conf/prod.conf
 
 sed 's#{{EVOLUTIONS_ENABLED}}#'"${EVOLUTIONS_ENABLED}"'#' -i ${APP_HOME}/conf/prod.conf
