@@ -45,6 +45,8 @@ services:
       #- URL_PASS=
       ####### JVM ############
       #- JAVA_OPTIONS=-XX:MaxRAMPercentage=50
+      ###### PLAY ############
+      #- PLAY_POOL=20                          # default: nb processors + 1 threads in PROD mode.
       ######## LOGS ###########
       #- LOG_LEVEL=                            # Opzionale. default: INFO   -- (OFF,FATAL,ERROR,WARN,INFO,DEBUG,TRACE,ALL)
       - APPENDERS=file                         # Opzionale. default: stdout, stderr -- (stdout, stderr, file, graylog2). Abilita i log sulla console, file e server graylog
@@ -61,6 +63,9 @@ services:
       - DB_PASS=${DB_PASS}                     # Obbligatoria. Password per accedere al database server
       #- DB_PORT=5432                          # default: 5432
       #- DB_USER=${DB_USER}                    # default: postgres
+      #- DB_POOL_TIMEOUT=1000              # default :1000
+      #- DB_POOL_MAX_SIZE=60                   # default :30
+      #- DB_POOL_MIN_SIZE=10                   # default :10
       #### server SMTP ####
       - SMTP_HOST=${SMTP_HOST}                # default: smtp.cnr.it
       #- SMTP_PORT=${SMTP_PORT}                # default: 25 se SMTP_CHANNEL è impostato clear o starttls; 465 se impostato su ssl
