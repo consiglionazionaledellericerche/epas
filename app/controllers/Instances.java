@@ -40,6 +40,7 @@ import cnr.sync.dto.v3.PersonConfigurationShowDto;
 import cnr.sync.dto.v3.PersonResidualDto;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.QualificationDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import helpers.rest.ApiRequestException;
@@ -106,6 +107,8 @@ public class Instances extends Controller {
   static ContractManager contractManager;
   @Inject
   static PersonManager personManager;
+  @Inject
+  static QualificationDao qualificationDao;
 
   public static void importInstance() {
     render();
@@ -205,20 +208,22 @@ public class Instances extends Controller {
     
     List<ConfigurationOfficeDto> list = (List<ConfigurationOfficeDto>) new Gson()
         .fromJson(httpResponse.getJson(), new TypeToken<List<ConfigurationOfficeDto>>() {}.getType());
-    com.google.common.base.Optional<Office> office = officeDao.byCodeId(codeId);
+    com.google.common.base.Optional<Office> officeOpt = officeDao.byCodeId(codeId);
     Configuration newConfiguration = null;
     EpasParam epasParam = null;
     Optional<Configuration> configuration = Optional.empty();
-    if (office.isPresent()) {
-      
+    Office office = null;
+    if (officeOpt.isPresent()) {
+      office = officeOpt.get();
       for (ConfigurationOfficeDto dto : list) {
         epasParam = dto.getEpasParam();
+        log.debug("Parametro da cambiare: {}", epasParam.name);
         configuration = configurationManager
-            .getConfigurationByOfficeAndType(office.get(), epasParam);
+            .getConfigurationByOfficeAndType(office, epasParam);
         switch(epasParam.epasParamValueType) {
           case BOOLEAN:
             newConfiguration = (Configuration) configurationManager.updateBoolean(epasParam,
-                office.get(), Boolean.getBoolean(dto.getFieldValue()),
+                office, Boolean.getBoolean(dto.getFieldValue()),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getBeginDate())),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getEndDate())), false);
             break;
@@ -226,25 +231,25 @@ public class Instances extends Controller {
             MonthDay dayMonth = (MonthDay) EpasParamValueType
                 .parseValue(EpasParamValueType.DAY_MONTH, dto.getFieldValue());
             newConfiguration = (Configuration) configurationManager.updateDayMonth(epasParam,
-                office.get(), dayMonth.getDayOfMonth(), dayMonth.getMonthOfYear(),
+                office, dayMonth.getDayOfMonth(), dayMonth.getMonthOfYear(),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getBeginDate())),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getEndDate())), false);
             break;
           case EMAIL:
             newConfiguration = (Configuration) configurationManager.updateEmail(epasParam,
-                office.get(), dto.getFieldValue(),
+                office, dto.getFieldValue(),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getBeginDate())),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getEndDate())), false);
             break;
           case ENUM:
             newConfiguration = (Configuration) configurationManager.updateEnum(epasParam,
-                office.get(), BlockType.valueOf(dto.getFieldValue()),
+                office, BlockType.valueOf(dto.getFieldValue()),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getBeginDate())),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getEndDate())), false);
             break;
           case INTEGER:
             newConfiguration = (Configuration) configurationManager.updateInteger(epasParam,
-                office.get(), Integer.getInteger(dto.getFieldValue()),
+                office, Integer.getInteger(dto.getFieldValue()),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getBeginDate())),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getEndDate())), false);
             break;
@@ -252,13 +257,13 @@ public class Instances extends Controller {
             IpList ipList = (IpList) EpasParamValueType.parseValue(
                 epasParam.epasParamValueType, dto.getFieldValue());
             newConfiguration = (Configuration) configurationManager.updateIpList(epasParam,
-                office.get(), ipList.ipList,
+                office, ipList.ipList,
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getBeginDate())),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getEndDate())), false);
             break;
           case LOCALDATE:
             newConfiguration = (Configuration) configurationManager.updateLocalDate(epasParam,
-                office.get(), LocalDate.parse(dto.getFieldValue()),
+                office, LocalDate.parse(dto.getFieldValue()),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getBeginDate())),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getEndDate())), false);
             break;
@@ -266,7 +271,7 @@ public class Instances extends Controller {
             LocalTime localtime = (LocalTime) EpasParamValueType
             .parseValue(EpasParamValueType.LOCALTIME, dto.getFieldValue());
             newConfiguration = (Configuration) configurationManager.updateLocalTime(epasParam,
-                office.get(), localtime,
+                office, localtime,
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getBeginDate())),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getEndDate())), false);
             break;
@@ -275,13 +280,13 @@ public class Instances extends Controller {
             .parseValue(EpasParamValueType.LOCALTIME_INTERVAL, dto.getFieldValue());
             newConfiguration = (Configuration) configurationManager
                 .updateLocalTimeInterval(epasParam,
-                office.get(), localtimeInterval.from, localtimeInterval.to,
+                office, localtimeInterval.from, localtimeInterval.to,
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getBeginDate())),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getEndDate())), false);
             break;
           case MONTH:
             newConfiguration = (Configuration) configurationManager.updateMonth(epasParam,
-                office.get(), Integer.getInteger(dto.getFieldValue()),
+                office, Integer.getInteger(dto.getFieldValue()),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getBeginDate())),
                 com.google.common.base.Optional.fromNullable(LocalDate.parse(dto.getEndDate())), false);
             break;
@@ -291,13 +296,13 @@ public class Instances extends Controller {
         List<IPropertyInPeriod> periodRecaps = periodManager
             .updatePeriods(newConfiguration, false);
         RecomputeRecap recomputeRecap =
-            periodManager.buildRecap(office.get().getBeginDate(),
+            periodManager.buildRecap(office.getBeginDate(),
                 com.google.common.base.Optional.fromNullable(LocalDate.now()),
                 periodRecaps, com.google.common.base.Optional.<LocalDate>absent());
         recomputeRecap.epasParam = configuration.get().getEpasParam();
         periodManager.updatePeriods(newConfiguration, true);
 
-        consistencyManager.performRecomputation(office.get(),
+        consistencyManager.performRecomputation(office,
             configuration.get().getEpasParam().recomputationTypes, recomputeRecap.recomputeFrom);
       }
     }    
@@ -332,10 +337,15 @@ public class Instances extends Controller {
           newContract.setEndDate(Strings.isNullOrEmpty(dto.getEndDate()) ? null : LocalDate.parse(dto.getEndDate()));
           newContract.isOnCertificate();
           newContract.setPerson(person);
+          if (actualContract.get().isTemporaryMissing() && actualContract.get().getEndDate() == null) {
+            actualContract.get().setEndDate(LocalDate.parse(dto.getBeginDate()).minusDays(1));
+            actualContract.get().save();
+          }
           
           boolean esito = contractManager.properContractCreate(newContract, 
               com.google.common.base.Optional.absent(), true);
          if (esito) {
+           contractCounter++;
            log.debug("Salvato nuovo contratto per {} con date {} - {}", 
                person.getFullname(), newContract.getBeginDate(), newContract.getEndDate()); 
          } else {
@@ -350,9 +360,15 @@ public class Instances extends Controller {
         person.setName(WordUtils.capitalizeFully(dto.getName()));
         person.setSurname(WordUtils.capitalizeFully(dto.getSurname()));
         person.setEmail(dto.getEmail());
+        person.setNumber(dto.getNumber());
+        person.setOffice(officeDao.byCodeId(codeId).get());
+        person.setQualification(qualificationDao.byQualification(dto.getQualification()).get());
         personManager.properPersonCreate(person);
         person.save();
         newContract = new Contract();
+        newContract.setBeginDate(LocalDate.parse(dto.getBeginDate()));
+        newContract.setEndDate(Strings.isNullOrEmpty(dto.getEndDate()) ? null : LocalDate.parse(dto.getEndDate()));
+        newContract.isOnCertificate();
         newContract.setPerson(person);
         contractManager.properContractCreate(newContract, 
             com.google.common.base.Optional.absent(), false);
@@ -363,7 +379,7 @@ public class Instances extends Controller {
         log.debug("Creata nuova persona {} {}", dto.getName(), dto.getSurname());
         peopleCounter++;
       }
-      contractCounter++;
+      
     }        
     flash.success("Inseriti %s nuovi contratti e %s nuove persone", contractCounter, peopleCounter);
     importInfo(instance, codeId);
@@ -448,7 +464,7 @@ public class Instances extends Controller {
     for (GroupShowDto dto : list) {
       group = new Group();
       group.setDescription(dto.getDescription());
-      group.setEndDate(dto.getEndDate());
+      group.setEndDate(Strings.isNullOrEmpty(dto.getEndDate()) ? null : java.time.LocalDate.parse(dto.getEndDate()));
       group.setName(dto.getName());
       group.setOffice(officeDao.byCodeId(codeId).get());
       group.setManager(personDao.getPersonByNumber(dto.getManager()));

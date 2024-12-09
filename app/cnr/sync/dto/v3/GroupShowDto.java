@@ -18,7 +18,7 @@ public class GroupShowDto {
 
   private String name;
   private String description;
-  private LocalDate endDate;
+  private String endDate;
   private String manager;
   
   @JsonIgnore

@@ -18,6 +18,7 @@ public class ContractTerseDto {
   private String email;
   private String beginDate;
   private String endDate;
+  private int qualification;
   
   public static ContractTerseDto build (Contract contract) {
     ModelMapper modelMapper = new ModelMapper();
@@ -28,6 +29,7 @@ public class ContractTerseDto {
       contractDto.setEmail(contract.getPerson().getEmail());
       contractDto.setName(contract.getPerson().getName());
       contractDto.setSurname(contract.getPerson().getSurname());
+      contractDto.setQualification(contract.getPerson().getQualification().getQualification());
     }
     return contractDto;
   }
