@@ -49,6 +49,7 @@ import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import manager.configurations.ConfigurationManager;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Configuration;
@@ -79,6 +80,8 @@ public class Instances extends Controller {
   static IWrapperFactory wrapperFactory;
   @Inject
   static PersonStampingRecapFactory stampingsRecapFactory;
+  @Inject
+  static ConfigurationManager configurationManager;
 
   @BasicAuth  
   public static void list() {
@@ -153,9 +156,14 @@ public class Instances extends Controller {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val office = offices.getOfficeFromRequest(officeId, code, codeId);
     log.debug("Richiesta la lista delle configurazioni della sede {}", office);
-    List<Configuration> configurationList = office.getConfigurations();
-    val list = configurationList.stream().map(c -> ConfigurationOfficeDto.build(c)).collect(Collectors.toList());
+    List<Configuration> configurationList = office.getConfigurations().stream()
+        .filter(c -> c.getBeginDate().isBefore(LocalDate.now()) 
+            && (c.getEndDate() == null || c.getEndDate().isAfter(LocalDate.now())))
+        .collect(Collectors.toList());
+    val list = configurationList.stream().map(c -> ConfigurationOfficeDto.build(c))
+        .collect(Collectors.toList());
     renderJSON(gsonBuilder.create().toJson(list));
+    
   }
 
   /**
