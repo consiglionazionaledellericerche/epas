@@ -216,14 +216,14 @@ public class Instances extends Controller {
     com.google.common.base.Optional<Office> officeOpt = officeDao.byCodeId(codeId);
     Configuration newConfiguration = null;
     EpasParam epasParam = null;
-    Optional<Configuration> configuration = Optional.empty();
+    
     Office office = null;
     if (officeOpt.isPresent()) {
       office = officeOpt.get();
       for (ConfigurationOfficeDto dto : list) {
         epasParam = dto.getEpasParam();
         log.debug("Parametro da cambiare: {}", epasParam.name);
-        configuration = configurationManager
+        Optional<Configuration> configuration = configurationManager
             .getConfigurationByOfficeAndType(office, epasParam);
         LocalDate beginNew = LocalDate.parse(dto.getBeginDate());
         LocalDate toUse = null;
@@ -316,7 +316,10 @@ public class Instances extends Controller {
           default:
             break;
         }
-
+        if(configuration.get().getEpasParam().epasParamValueType.equals(EpasParamValueType.BOOLEAN)) {
+          log.debug("Proviamo a non fare ricalcoli per i parametri booleani");
+          continue;
+        }
         List<IPropertyInPeriod> periodRecaps = periodManager
             .updatePeriods(newConfiguration, false);
         RecomputeRecap recomputeRecap =
@@ -324,7 +327,7 @@ public class Instances extends Controller {
                 com.google.common.base.Optional.fromNullable(LocalDate.now()),
                 periodRecaps, com.google.common.base.Optional.<LocalDate>absent());
         recomputeRecap.epasParam = configuration.get().getEpasParam();
-        periodManager.updatePeriods(newConfiguration, true);
+        periodRecaps =  periodManager.updatePeriods(newConfiguration, true);
 
         consistencyManager.performRecomputation(office,
             configuration.get().getEpasParam().recomputationTypes, recomputeRecap.recomputeFrom);
