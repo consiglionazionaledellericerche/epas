@@ -25,6 +25,7 @@ import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import dao.ConfigurationDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import it.cnr.iit.epas.DateInterval;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.PeriodManager;
 import manager.configurations.EpasParam.EpasParamTimeType;
@@ -64,17 +66,20 @@ public class ConfigurationManager {
   private final PeriodManager periodManager;
   private final OfficeDao officeDao;
   private final PersonDao personDao;
+  private final ConfigurationDao configurationDao;
 
   /**
    * Default constructor per l'injection.
    */
   @Inject
   ConfigurationManager(JPQLQueryFactory queryFactory, Provider<EntityManager> emp,
-      PeriodManager periodManager, OfficeDao officeDao, PersonDao personDao) {
+      PeriodManager periodManager, OfficeDao officeDao, PersonDao personDao,
+      ConfigurationDao configurationDao) {
     this.queryFactory = new JPAQueryFactory(emp);
     this.periodManager = periodManager;
     this.officeDao = officeDao;
     this.personDao = personDao;
+    this.configurationDao = configurationDao;
   }
 
   /**
@@ -441,9 +446,11 @@ public class ConfigurationManager {
         .filter(conf -> conf.getEpasParam().equals(param)).findFirst();
   }
   
-  public java.util.Optional<PersonConfiguration> getConfigurtionByPersonAndType(Person person, EpasParam param) {
-    return person.getPersonConfigurations().stream()
-        .filter(conf -> conf.getEpasParam().equals(param)).findFirst();
+  public java.util.Optional<PersonConfiguration> getConfigurationByPersonAndType(Person person, EpasParam param) {
+//    List<PersonConfiguration> list = person.getPersonConfigurations();
+//    return list.stream()
+//        .filter(conf -> conf.getEpasParam().equals(param)).findFirst();
+    return configurationDao.byPersonAndParam(person, param);
   }
 
   /**

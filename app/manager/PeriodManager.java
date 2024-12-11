@@ -33,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.configurations.EpasParam;
 import manager.recaps.recomputation.RecomputeRecap;
+import models.Person;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import org.joda.time.LocalDate;
@@ -187,7 +188,25 @@ public class PeriodManager {
         log.debug("...");
       }
       for (IPropertyInPeriod periodInsert : periodList) {
+        if (!JPA.em().contains(periodInsert)) {
+          log.debug("Riattacco l'oggetto {} all'entity manager", periodInsert.toString());
+          periodInsert = JPA.em().merge(periodInsert);
+        }
         periodInsert._save();
+      }
+      if (!JPA.em().contains(propertyInPeriod.getOwner())) {
+        log.debug("Riattacco l'oggetto {} all'entity manager", propertyInPeriod.toString());
+        /*
+         * TODO: qui il problema è sull'owner del propertyInPeriod...come lo riattacco?
+         * Succede sia con owner person che office
+         * La lista di configurazioni della persona sembra sia caricata lazy 
+         * mentre quella della sede eager
+         */
+        if (propertyInPeriod.getOwner().getClass().equals(Person.class)) {
+          
+        } else {
+          
+        }
       }
       propertyInPeriod.getOwner()._save();
       JPA.em().flush();
