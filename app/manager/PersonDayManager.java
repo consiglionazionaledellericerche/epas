@@ -418,7 +418,7 @@ public class PersonDayManager {
 
     // Patch persone fixed
     if (fixedTimeAtWork) {
-      return updateTimeAtWorkFixed(personDay, wttd);
+      personDay = updateTimeAtWorkFixed(personDay, wttd);
     }
 
     // Gli invarianti del calcolo.
@@ -685,20 +685,20 @@ public class PersonDayManager {
       return personDay;
     }
 
-    if (getAllDay(personDay).isPresent() 
-        && getAllDay(personDay).get().getAbsenceType().getMealTicketBehaviour()
-        .equals(MealTicketBehaviour.notAllowMealTicket)
-        || (getAssignAllDay(personDay).isPresent() 
-            && getAssignAllDay(personDay).get().getAbsenceType().getMealTicketBehaviour()
-            .equals(MealTicketBehaviour.notAllowMealTicket))
-        || (getCompleteDayAndAddOvertime(personDay).isPresent() 
-            && getCompleteDayAndAddOvertime(personDay).get()
-            .getAbsenceType().getMealTicketBehaviour()
-            .equals(MealTicketBehaviour.notAllowMealTicket))) {
-      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.notAllowMealTicket);
-    } else {
-      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.allowMealTicket);
-    }
+//    if (getAllDay(personDay).isPresent() 
+//        && getAllDay(personDay).get().getAbsenceType().getMealTicketBehaviour()
+//        .equals(MealTicketBehaviour.notAllowMealTicket)
+//        || (getAssignAllDay(personDay).isPresent() 
+//            && getAssignAllDay(personDay).get().getAbsenceType().getMealTicketBehaviour()
+//            .equals(MealTicketBehaviour.notAllowMealTicket))
+//        || (getCompleteDayAndAddOvertime(personDay).isPresent() 
+//            && getCompleteDayAndAddOvertime(personDay).get()
+//            .getAbsenceType().getMealTicketBehaviour()
+//            .equals(MealTicketBehaviour.notAllowMealTicket))) {
+//      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.notAllowMealTicket);
+//    } else {
+//      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.allowMealTicket);
+//    }
 
     if (getAllDay(personDay).isPresent()
         || getCompleteDayAndAddOvertime(personDay).isPresent()) {

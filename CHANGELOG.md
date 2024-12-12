@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
   - Rimossa dicitura "assenza" sul tabellone delle timbrature e nelle modali di inserimento/modifica assenza
     oltre che nello storico del giorno. Rimossa anche da viste che riepilogano i codici.
+  - Modificato l'algoritmo che calcola il buono pasto per le persone con presenza automatica: ora il buono viene
+    assegnato solo se esiste abbastanza tempo a lavoro da timbrature rispetto all'orario di lavoro associato.
 
 ## [2.21.1] - 2024-12-09
 ### Added
