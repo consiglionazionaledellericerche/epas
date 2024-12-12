@@ -65,6 +65,7 @@ import models.query.QPersonShift;
 import models.query.QPersonShiftShiftType;
 import models.query.QUser;
 import models.query.QWorkingTimeType;
+import models.query.QWorkingTimeTypeDay;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import org.testng.util.Strings;
@@ -1202,6 +1203,19 @@ public final class PersonDao extends DaoBase {
       return surname + ' ' + name;
     }
 
+  }
+  
+  public List<Person> getCunningPeople(List<Office> enabledOffice) {
+    final QPerson person = QPerson.person;
+    final QContract contract = QContract.contract;
+    final QWorkingTimeType workingTimeType = QWorkingTimeType.workingTimeType;
+    final QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
+    final QWorkingTimeTypeDay wttd = QWorkingTimeTypeDay.workingTimeTypeDay;
+    
+    return getQueryFactory().selectFrom(person).leftJoin(person.contracts, contract)
+    .leftJoin(contract.contractWorkingTimeType, cwtt)
+    .leftJoin(cwtt.workingTimeType, workingTimeType).leftJoin(workingTimeType.workingTimeTypeDays, wttd)
+    .where(wttd.mealTicketTime.loe(360).and(workingTimeType.horizontal).and(wttd.workingTime.eq(432).and(person.office.in(enabledOffice)))).fetch();
   }
 
 }

@@ -1301,4 +1301,10 @@ public class Administration extends Controller {
     renderText(String.format("Procedura completata correttamente. Rimossi %s codici 37 e inseriti %s codici 31", count, count31));
   }
   
+  public static void normalizeMealTicketTime() {
+    List<Office> list = officeDao.allEnabledOffices();
+    List<Person> people = personDao.getCunningPeople(list);
+    log.debug("La lista di persone con tempo per buono pasto ridotto contiene {} personaggi", people.size());
+  }
+  
 }
