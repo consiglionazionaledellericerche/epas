@@ -1529,7 +1529,7 @@ description.TR_COMPENSATORY= L&apos;abilitazione del parametro <strong>&{TR_COMP
 ###########################################################################
 
 absenceFile=Allegato
-absenceType= Codice assenza
+absenceType= Codice
 absenceType.certificateCode= Attestati
 absenceType.code= Codice
 absenceType.consideredWeekEnd= Festivi

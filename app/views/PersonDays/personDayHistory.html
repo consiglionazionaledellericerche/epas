@@ -69,12 +69,12 @@
 	#{/accordionGroup}
 	
 	#{accordionGroup 'info'}
-	  #{accordionItem 'absences', parent:'info', title:'Storico Assenze', open:true}
+	  #{accordionItem 'absences', parent:'info', title:'Storico Codici', open:true}
 	  #{if historyAbsencesList.empty } Non ci sono assenze. #{/if}
 	  #{else}
 	  <!-- Per ogni assenza una tabella -->
 	  #{list items:historyAbsencesList, as:'historyAbsence'}
-	  <h5>Storico assenza codice ${historyAbsence.get(0).value?.absenceType.code}
+	  <h5>Storico codice ${historyAbsence.get(0).value?.absenceType.code}
 	    (id=${historyAbsence.get(0).value?.id})</h5>
 	
 	  <table class="table table-condensed table-bordered">

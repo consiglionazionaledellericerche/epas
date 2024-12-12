@@ -1,5 +1,5 @@
 #{modalAsync id:'modalAbsence', button:'Salva',
-title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
+title:'Nuovo codice in data ' + absenceForm.from?.format()
 + ' per ' + absenceForm.person.fullname }
 
 <div id="absenceData">
@@ -7,7 +7,7 @@ title:'Nuovo codice assenza in data ' + absenceForm.from?.format()
  #{absences.insertAbsencesTabs absenceRequestForm:absenceForm, findCode:true /}
    
    #{alert color:'info'}
-     <p>Ricerca dei codici di assenza attualmente configurati.</p>
+     <p>Ricerca dei codici attualmente configurati.</p>
      <p>Una volta individuato il codice da inserire navigare la sua <em>Tipologia</em> oppure cliccare su <em>Seleziona</em>.</p>
    #{/alert}
  
