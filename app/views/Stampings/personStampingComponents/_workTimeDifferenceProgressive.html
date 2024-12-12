@@ -8,6 +8,11 @@
 
 
 #{if showWorkTime}
+  #{if dayRecap.wrPersonDay.isFixedTimeAtWork()}
+  <td class="tempoLavoro default-single"></td>
+  #{/if}
+  #{else}
+  
   #{if showWithPopover}
     <td class="tempoLavoro default-single" 
       webui-popover-hover
@@ -29,6 +34,7 @@
   #{/if}
   #{else}
     <td class="tempoLavoro default-single">${personDay.timeAtWork.printHourMinute()}</td>
+  #{/else}
   #{/else}
 #{/if}
 #{else}
