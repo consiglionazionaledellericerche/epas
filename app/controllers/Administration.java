@@ -38,9 +38,11 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.UserDao;
+import dao.WorkingTimeTypeDao;
 import dao.absences.AbsenceComponentDao;
 import dao.history.HistoryValue;
 import dao.history.PersonDayHistoryDao;
+import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
@@ -95,6 +97,7 @@ import models.CompetenceCode;
 import models.Configuration;
 import models.Contract;
 import models.ContractMonthRecap;
+import models.ContractWorkingTimeType;
 import models.GeneralSetting;
 import models.Institute;
 import models.Office;
@@ -106,6 +109,7 @@ import models.Role;
 import models.Stamping;
 import models.User;
 import models.UsersRolesOffices;
+import models.WorkingTimeType;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.CategoryTab;
@@ -201,6 +205,8 @@ public class Administration extends Controller {
   static PeriodManager periodManager;
   @Inject
   static AbsenceService absenceService;
+  @Inject
+  static WorkingTimeTypeDao wttDao;
 
   /**
    * Utilizzabile solo da developer e admin permette di prelevare un token del client
@@ -1303,8 +1309,36 @@ public class Administration extends Controller {
   
   public static void normalizeMealTicketTime() {
     List<Office> list = officeDao.allEnabledOffices();
-    List<Person> people = personDao.getCunningPeople(list);
-    log.debug("La lista di persone con tempo per buono pasto ridotto contiene {} personaggi", people.size());
+    WorkingTimeType normal = wttDao.workingTypeTypeByDescription("Normale", Optional.absent());
+    LocalDate start = new LocalDate(2025,1,1);
+    List<WorkingTimeType> workingTimeTypesList = wttDao.getCunningPeople(list);
+    log.debug("La lista di orari di lavoro con tempo per buono pasto ridotto contiene {} elementi", workingTimeTypesList.size());
+    List<Person> people = workingTimeTypesList.stream().flatMap(wtt -> wtt.getContractWorkingTimeType().stream()
+        .map(cwtt -> cwtt.getContract().getPerson())).collect(Collectors.toList());
+    log.debug("La lista contiene {} persone che hanno o hanno avuto un orario di lavoro facilitato", people.size());
+    List<ContractWorkingTimeType> cwttList = wttDao.actualCwttList(workingTimeTypesList);
+    log.debug("Attualmente ci sono {} contratti attivi che hanno associato un orario con tempo per buono pasto ridotto", cwttList.size());
+    int counter = 0;
+    for (ContractWorkingTimeType cwtt : cwttList) {
+      log.debug("Cambio l'orario di lavoro per {}", cwtt.getContract().getPerson().getFullname());
+      IWrapperContract wrappedContract = wrapperFactory.create(cwtt.getContract());
+      Contract contract = cwtt.getContract();
+      ContractWorkingTimeType newCwtt = new ContractWorkingTimeType();
+      newCwtt.setContract(cwtt.getContract());
+      newCwtt.setWorkingTimeType(normal);
+      newCwtt.setBeginDate(start);
+      List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newCwtt, false);
+      RecomputeRecap recomputeRecap =
+          periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
+              Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+              periodRecaps, Optional.fromNullable(contract.getSourceDateResidual()));
+      recomputeRecap.initMissing = wrappedContract.initializationMissing();
+      periodManager.updatePeriods(newCwtt, true);
+      log.debug("Aggiornato al {} l'orario di lavoro per {}", start, cwtt.getContract().getPerson().getFullname());
+      counter++;
+
+    }
+    renderText("Aggiornati gli orari di %s persone", counter);
   }
   
 }
