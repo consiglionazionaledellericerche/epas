@@ -1312,15 +1312,18 @@ public class Administration extends Controller {
     WorkingTimeType normal = wttDao.workingTypeTypeByDescription("Normale", Optional.absent());
     LocalDate start = new LocalDate(2025,1,1);
     List<WorkingTimeType> workingTimeTypesList = wttDao.getCunningPeople(list);
-    log.debug("La lista di orari di lavoro con tempo per buono pasto ridotto contiene {} elementi", workingTimeTypesList.size());
-    List<Person> people = workingTimeTypesList.stream().flatMap(wtt -> wtt.getContractWorkingTimeType().stream()
-        .map(cwtt -> cwtt.getContract().getPerson())).collect(Collectors.toList());
-    log.debug("La lista contiene {} persone che hanno o hanno avuto un orario di lavoro facilitato", people.size());
+    log.info("La lista di orari di lavoro con tempo per buono pasto ridotto contiene {} elementi", workingTimeTypesList.size());
+        
     List<ContractWorkingTimeType> cwttList = wttDao.actualCwttList(workingTimeTypesList);
-    log.debug("Attualmente ci sono {} contratti attivi che hanno associato un orario con tempo per buono pasto ridotto", cwttList.size());
+    log.info("Attualmente ci sono {} contratti attivi che hanno associato un orario con tempo per buono pasto ridotto", cwttList.size());
     int counter = 0;
     for (ContractWorkingTimeType cwtt : cwttList) {
-      log.debug("Cambio l'orario di lavoro per {}", cwtt.getContract().getPerson().getFullname());
+      if ((cwtt.getContract().getEndDate() != null && cwtt.getContract().getEndDate().isBefore(LocalDate.now()) 
+          || (cwtt.getContract().getEndContract() != null && cwtt.getContract().getEndContract().isBefore(LocalDate.now())))) {
+        log.info("Salto i controlli per il contratto scaduto di {}", cwtt.getContract().getPerson().getFullname());
+        continue;
+      }
+      log.info("Cambio l'orario di lavoro per {}", cwtt.getContract().getPerson().getFullname());
       IWrapperContract wrappedContract = wrapperFactory.create(cwtt.getContract());
       Contract contract = cwtt.getContract();
       ContractWorkingTimeType newCwtt = new ContractWorkingTimeType();
@@ -1334,7 +1337,7 @@ public class Administration extends Controller {
               periodRecaps, Optional.fromNullable(contract.getSourceDateResidual()));
       recomputeRecap.initMissing = wrappedContract.initializationMissing();
       periodManager.updatePeriods(newCwtt, true);
-      log.debug("Aggiornato al {} l'orario di lavoro per {}", start, cwtt.getContract().getPerson().getFullname());
+      log.info("Aggiornato al {} l'orario di lavoro per {}", start, cwtt.getContract().getPerson().getFullname());
       counter++;
 
     }
