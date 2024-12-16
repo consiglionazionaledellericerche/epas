@@ -39,6 +39,7 @@ import cnr.sync.dto.v3.PersonResidualDto;
 import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
+import dao.AffiliationDao;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -57,6 +58,8 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonConfiguration;
+import models.flows.Affiliation;
+import models.flows.Group;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -82,6 +85,8 @@ public class Instances extends Controller {
   static PersonStampingRecapFactory stampingsRecapFactory;
   @Inject
   static ConfigurationManager configurationManager;
+  @Inject
+  static AffiliationDao affiliationDao;
 
   @BasicAuth  
   public static void list() {

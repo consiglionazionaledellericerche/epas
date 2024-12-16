@@ -38,6 +38,7 @@ import cnr.sync.dto.v3.ContractTerseDto;
 import cnr.sync.dto.v3.GroupShowDto;
 import cnr.sync.dto.v3.MealTicketResidualDto;
 import cnr.sync.dto.v3.OfficeShowTerseDto;
+import cnr.sync.dto.v3.PersonAffiliationShowDto;
 import cnr.sync.dto.v3.PersonConfigurationList;
 import cnr.sync.dto.v3.PersonConfigurationShowDto;
 import cnr.sync.dto.v3.PersonResidualDto;
@@ -72,6 +73,7 @@ import models.absences.definitions.DefaultGroup;
 import models.base.IPropertyInPeriod;
 import models.dto.TeleworkDto;
 import models.enumerate.BlockType;
+import models.flows.Affiliation;
 import models.flows.Group;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
@@ -396,10 +398,22 @@ public class Instances extends Controller {
       group.setOffice(officeDao.byCodeId(codeId).get());
       group.setManager(personDao.getPersonByNumber(dto.getManager()));
       group.save();
+      for (PersonAffiliationShowDto pasDto : dto.getList()) {
+        log.debug("Inizio a costruire le affiliazioni");
+        Affiliation affiliation = new Affiliation();
+        affiliation.setPerson(personDao.getPersonByNumber(pasDto.getNumber()));
+        affiliation.setBeginDate(java.time.LocalDate.parse(pasDto.getBeginDate()));
+        affiliation.setEndDate(pasDto.getBeginDate() != null ? 
+            java.time.LocalDate.parse(pasDto.getBeginDate()) : null);
+        affiliation.save();
+        log.debug("Salvata affiliazione della matricola {} al gruppo {}", pasDto.getNumber(), group.getName());
+      }
       log.debug("Inserito gruppo {} con manager {}", group.getName(), group.getManager().getFullname());
     }
     Office office = officeDao.byCodeId(codeId).get();
     flash.success("Importati %s gruppi", list.size());
     render("@importInfo", instance, codeId, office);
   }
+  
+  
 }
