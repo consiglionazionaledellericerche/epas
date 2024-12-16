@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2024 Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -22,6 +22,7 @@ import com.google.common.collect.Sets;
 import dao.absences.AbsenceComponentDao;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.absences.AbsenceType;
@@ -81,9 +82,12 @@ public class EnumAllineator {
     
     List<AbsenceType> allAbsenceType = AbsenceType.findAll();
     for (AbsenceType absenceType : allAbsenceType) {
-      Optional<DefaultAbsenceType> defaultAbsenceType = DefaultAbsenceType.byCode(absenceType); 
+      Optional<DefaultAbsenceType> defaultAbsenceType = DefaultAbsenceType.byCode(absenceType);
+      if (!absenceType.isToUpdate()) {
+        log.info("Ignorato aggiornamento del codice {}", absenceType.getCode());
+        continue;
+      }
       if (defaultAbsenceType.isPresent()) {
-        if (absenceType.isToUpdate()) {
           //gli absenceType che esistono le allineo all'enum
           absenceType.setCode(defaultAbsenceType.get().getCode());
           absenceType.setCertificateCode(defaultAbsenceType.get().certificationCode);
@@ -109,9 +113,8 @@ public class EnumAllineator {
           absenceType.save();
           updateBehaviourSet(absenceType, absenceType.getJustifiedBehaviours(), 
               defaultAbsenceType.get().behaviour);
-          
+
           absenceType.save();
-        }
 
       } else {
         //gli absenceType che non sono enumerati li tolgo dai gruppi.
@@ -128,11 +131,8 @@ public class EnumAllineator {
           complation.save();
         }
         //e li disabilito
-        if (absenceType.isToUpdate()) {
-          absenceType.setValidFrom(new LocalDate(2016, 01, 01));
-          absenceType.setValidTo(new LocalDate(2016, 01, 01));
-        }
-        
+        absenceType.setValidFrom(new LocalDate(2016, 01, 01));
+        absenceType.setValidTo(LocalDate.now().minusDays(1));
         absenceType.save();
       }
     }
@@ -413,7 +413,7 @@ public class EnumAllineator {
    
     //Eliminare quelli non più contenuti
     List<AbsenceType> toRemove = Lists.newArrayList();
-    for (AbsenceType absenceType : entitySet) {
+    for (AbsenceType absenceType : entitySet.stream().filter(a -> a.isToUpdate()).collect(Collectors.toList())) {
       if (!newStringSet.contains(absenceType.getCode())) {
         toRemove.add(absenceType);
       }

@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     assegnato solo se esiste abbastanza tempo a lavoro da timbrature rispetto all'orario di lavoro associato.
   - Rimosso contenuto delle celle della colonna tempo a lavoro per i giorni in cui il dipendente ha la presenza
     automatica abilitata
-
+  - Evitate rimozioni delle associazioni con gruppi, tab, takable, delle tipologie di assenze impostate
+    come da non aggiornare
 
 ## [2.21.1] - 2024-12-09
 ### Added
