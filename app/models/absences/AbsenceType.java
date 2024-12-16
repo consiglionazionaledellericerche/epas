@@ -95,6 +95,7 @@ public class AbsenceType extends BaseModel {
   //  @Column(name = "time_for_mealticket")
   //  public boolean timeForMealTicket = false;
 
+  @Required
   @Getter
   @Enumerated(EnumType.STRING)
   @Column(name = "meal_ticket_behaviour")
