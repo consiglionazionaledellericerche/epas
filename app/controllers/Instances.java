@@ -42,6 +42,7 @@ import cnr.sync.dto.v3.PersonAffiliationShowDto;
 import cnr.sync.dto.v3.PersonConfigurationList;
 import cnr.sync.dto.v3.PersonConfigurationShowDto;
 import cnr.sync.dto.v3.PersonResidualDto;
+import dao.GroupDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
@@ -124,6 +125,8 @@ public class Instances extends Controller {
   static QualificationDao qualificationDao;
   @Inject
   static ImportManager importManager;
+  @Inject
+  static GroupDao groupDao;
 
   public static void importInstance() {
     render();
@@ -387,30 +390,42 @@ public class Instances extends Controller {
       log.error("Errore di connessione: {}", httpResponse.getStatusText());
       throw new ApiRequestException("Unauthorized");
     }
+    Office office = officeDao.byCodeId(codeId).get();
     List<GroupShowDto> list = (List<GroupShowDto>) new Gson()
         .fromJson(httpResponse.getJson(), new TypeToken<List<GroupShowDto>>() {}.getType());
     Group group = null;
     for (GroupShowDto dto : list) {
-      group = new Group();
-      group.setDescription(dto.getDescription());
-      group.setEndDate(Strings.isNullOrEmpty(dto.getEndDate()) ? null : java.time.LocalDate.parse(dto.getEndDate()));
-      group.setName(dto.getName());
-      group.setOffice(officeDao.byCodeId(codeId).get());
-      group.setManager(personDao.getPersonByNumber(dto.getManager()));
-      group.save();
-      for (PersonAffiliationShowDto pasDto : dto.getList()) {
-        log.debug("Inizio a costruire le affiliazioni");
+      if (groupDao.checkGroupByOfficeAndName(office, dto.getName()).isPresent()) {
+        log.debug("Gruppo {} già esistente, procedo solo con le affiliazioni", dto.getName());
+        group = groupDao.checkGroupByOfficeAndName(office, dto.getName()).get();
+      } else {
+        group = new Group();
+        group.setDescription(dto.getDescription());
+        group.setEndDate(Strings.isNullOrEmpty(dto.getEndDate()) ? null : java.time.LocalDate.parse(dto.getEndDate()));
+        group.setName(dto.getName());
+        group.setOffice(officeDao.byCodeId(codeId).get());
+        group.setManager(personDao.getPersonByNumber(dto.getManager()));
+        group.save();
+      }      
+      log.debug("Inizio a costruire le affiliazioni");
+      for (PersonAffiliationShowDto pasDto : dto.getList()) {   
+        Person person = personDao.getPersonByNumber(pasDto.getNumber());
+        if (person == null) {
+          continue;
+        }
+        log.debug("Creo affiliazione per {}", person.getFullname());
         Affiliation affiliation = new Affiliation();
         affiliation.setPerson(personDao.getPersonByNumber(pasDto.getNumber()));
         affiliation.setBeginDate(java.time.LocalDate.parse(pasDto.getBeginDate()));
-        affiliation.setEndDate(pasDto.getBeginDate() != null ? 
-            java.time.LocalDate.parse(pasDto.getBeginDate()) : null);
+        affiliation.setEndDate(pasDto.getEndDate() != null ? 
+            java.time.LocalDate.parse(pasDto.getEndDate()) : null);
+        affiliation.setGroup(group);
         affiliation.save();
-        log.debug("Salvata affiliazione della matricola {} al gruppo {}", pasDto.getNumber(), group.getName());
+        log.debug("Salvata affiliazione di {} al gruppo {}", person.getFullname(), group.getName());
       }
       log.debug("Inserito gruppo {} con manager {}", group.getName(), group.getManager().getFullname());
     }
-    Office office = officeDao.byCodeId(codeId).get();
+    
     flash.success("Importati %s gruppi", list.size());
     render("@importInfo", instance, codeId, office);
   }
