@@ -417,7 +417,7 @@ public class Instances extends Controller {
         Affiliation affiliation = new Affiliation();
         affiliation.setPerson(personDao.getPersonByNumber(pasDto.getNumber()));
         affiliation.setBeginDate(java.time.LocalDate.parse(pasDto.getBeginDate()));
-        affiliation.setEndDate(pasDto.getEndDate() != null ? 
+        affiliation.setEndDate(!Strings.isNullOrEmpty(pasDto.getEndDate()) ? 
             java.time.LocalDate.parse(pasDto.getEndDate()) : null);
         affiliation.setGroup(group);
         affiliation.save();
