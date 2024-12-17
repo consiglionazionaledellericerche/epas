@@ -34,8 +34,12 @@ import models.Office;
 import models.Person;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
+import models.query.QContract;
 import models.query.QContractWorkingTimeType;
+import models.query.QOffice;
+import models.query.QPerson;
 import models.query.QWorkingTimeType;
+import models.query.QWorkingTimeTypeDay;
 import org.joda.time.LocalDate;
 
 /**
@@ -183,6 +187,25 @@ public class WorkingTimeTypeDao extends DaoBase {
     final QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
     return getQueryFactory().selectFrom(cwtt)
         .where(cwtt.id.eq(id)).fetchOne();
+  }
+  
+  public List<WorkingTimeType> getCunningPeople(List<Office> enabledOffice) {
+    final QWorkingTimeType workingTimeType = QWorkingTimeType.workingTimeType;
+    final QWorkingTimeTypeDay wttd = QWorkingTimeTypeDay.workingTimeTypeDay;
+        
+    return getQueryFactory().selectFrom(workingTimeType)
+        .leftJoin(workingTimeType.workingTimeTypeDays, wttd)
+        .where(workingTimeType.office.beginDate.loe(LocalDate.now())
+            .andAnyOf(workingTimeType.office.endDate.isNull(), workingTimeType.office.endDate.goe(LocalDate.now()))
+            .and(workingTimeType.horizontal.isTrue()).and(wttd.mealTicketTime.lt(360))
+            .and(wttd.workingTime.eq(432))).distinct().fetch();
+  }
+  
+  public List<ContractWorkingTimeType> actualCwttList(List<WorkingTimeType> list) {
+    final QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
+    
+    return getQueryFactory().selectFrom(cwtt).where(cwtt.workingTimeType.in(list)
+        .and(cwtt.beginDate.loe(LocalDate.now()).andAnyOf(cwtt.endDate.isNull(), cwtt.endDate.goe(LocalDate.now())))).fetch();
   }
 
 }

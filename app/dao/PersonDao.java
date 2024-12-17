@@ -65,6 +65,7 @@ import models.query.QPersonShift;
 import models.query.QPersonShiftShiftType;
 import models.query.QUser;
 import models.query.QWorkingTimeType;
+import models.query.QWorkingTimeTypeDay;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import org.testng.util.Strings;
@@ -1203,5 +1204,7 @@ public final class PersonDao extends DaoBase {
     }
 
   }
+  
+
 
 }
