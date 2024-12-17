@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.21.2] - Unreleased
+## [2.21.2] - 2024-12-17
 ### Added
   - Aggiunta procedura per impostare la maturazione del buono pasto a 6 ore per gli orari di 7:12
   - Aggiunto codice di assenza 31_2023 per la fruzione delle ferie 2023 oltre il 31/12/2024
+  - Aggiunti metodi per importare/esportare dati da un'istanza di epas ad un'altra
 
 ### Changed
   - Rimossa dicitura "assenza" sul tabellone delle timbrature e nelle modali di inserimento/modifica assenza
