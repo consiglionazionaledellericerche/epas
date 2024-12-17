@@ -236,7 +236,7 @@ public class Instances extends Controller {
     for (ConfigurationOfficeDto dto : list) {
       importManager.importConfig(dto, office.getId());
     }
-
+    flash.success("Importata configurazione per la sede {}", office.getName());
     render("@importInfo", instance, codeId, office);
   }
 
