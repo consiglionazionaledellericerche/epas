@@ -19,10 +19,12 @@ package dao;
 
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQueryFactory;
+import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.flows.Affiliation;
+import models.flows.Group;
 import models.flows.query.QAffiliation;
 
 /**
@@ -42,5 +44,15 @@ public class AffiliationDao extends DaoBase {
     QAffiliation affilation = QAffiliation.affiliation;
     return Optional.ofNullable((Affiliation) getQueryFactory().from(affilation)
         .where(affilation.id.eq(id)).fetchOne());
+  }
+  
+  /**
+   * Affiliazioni del gruppo.
+   * @param group il gruppo di cui si richiedono le affiliazioni
+   * @return la lista di affiliazioni delle persone al gruppo passato come parametro.
+   */
+  public List<Affiliation> byGroup(Group group) {
+    QAffiliation affiliation = QAffiliation.affiliation;
+    return getQueryFactory().selectFrom(affiliation).where(affiliation.group.eq(group)).fetch();
   }
 }

@@ -31,10 +31,15 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.var;
 import manager.configurations.EpasParam;
 import manager.recaps.recomputation.RecomputeRecap;
+import models.Contract;
+import models.Office;
+import models.Person;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
+import org.hamcrest.core.IsInstanceOf;
 import org.joda.time.LocalDate;
 import play.db.jpa.JPA;
 
@@ -91,10 +96,21 @@ public class PeriodManager {
           .stream().collect(Collectors.toList());
     }
     
+    var owner = propertyInPeriod.getOwner();
+    if (!JPA.em().contains(owner)) {
+      if (owner instanceof Office) {
+        owner = Office.findById(((Office) owner).getId());
+      } else if (owner instanceof Person) {
+        owner = Person.findById(((Person) owner).getId());
+      } else if (owner instanceof Contract) {
+        owner = Contract.findById(((Contract) owner).getId());
+      }
+    }
+    
     //copia dei periodi ordinata
     List<IPropertyInPeriod> originals = Lists.newArrayList();
     for (IPropertyInPeriod originalPeriod :
-          propertyInPeriod.getOwner().periods(propertyInPeriod.getType())) {
+          owner.periods(propertyInPeriod.getType())) {
       originals.add(originalPeriod);
     }
     originals = originals.stream().sorted().collect(Collectors.toList());
@@ -181,17 +197,24 @@ public class PeriodManager {
 
     if (persist) {
       for (IPropertyInPeriod periodRemoved : toRemove) {
+        if (!JPA.em().contains(periodRemoved)) {
+          periodRemoved = JPA.em().merge(periodRemoved);
+        }
         periodRemoved._delete();
       }
       if (propertyInPeriod.getType().equals(EpasParam.WORKING_OFF_SITE)) {
         log.debug("...");
       }
       for (IPropertyInPeriod periodInsert : periodList) {
+        if (!JPA.em().contains(periodInsert)) {
+          periodInsert = JPA.em().merge(periodInsert);
+        }
         periodInsert._save();
       }
-      propertyInPeriod.getOwner()._save();
+
+      owner._save();
       JPA.em().flush();
-      JPA.em().refresh(propertyInPeriod.getOwner());
+      JPA.em().refresh(owner);
     }
 
     return periodList;
