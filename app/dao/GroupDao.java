@@ -152,4 +152,10 @@ public class GroupDao extends DaoBase {
         .fetchFirst();
     return Optional.fromNullable(result);
   }
+  
+  public Optional<Group> checkGroupByOfficeAndName(Office office, String name) {
+    final QGroup group = QGroup.group;
+    return Optional.fromNullable(getQueryFactory().selectFrom(group)
+        .where(group.office.eq(office).and(group.name.equalsIgnoreCase(name))).fetchFirst());
+  }
 }
