@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.21.2] - Unreleased
 ### Added
   - Aggiunta procedura per impostare la maturazione del buono pasto a 6 ore per gli orari di 7:12
+  - Aggiunto codice di assenza 31_2023 per la fruzione delle ferie 2023 oltre il 31/12/2024
 
 ### Changed
   - Rimossa dicitura "assenza" sul tabellone delle timbrature e nelle modali di inserimento/modifica assenza

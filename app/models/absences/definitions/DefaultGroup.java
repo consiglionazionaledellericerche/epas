@@ -196,6 +196,12 @@ public enum DefaultGroup {
       DefaultCategoryType.PROROGA_FERIE_2022, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
       DefaultTakable.T_FERIE_CNR_PROROGA_2022, null, null, false, false),
+  
+  PROROGA_FERIE_2023("31_2023 - Proroga ferie 2023", "", 
+      DefaultCategoryType.PROROGA_FERIE_2023, 2, // must be greater than FERIE_CNR
+      GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, 
+      DefaultTakable.T_FERIE_CNR_PROROGA_2023, null, null, false, false),
+  
   FERIE_CNR_DIPENDENTI("Ferie e permessi legge", "",
       DefaultCategoryType.FERIE_DIPENDENTI, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
