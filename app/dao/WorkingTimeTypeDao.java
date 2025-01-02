@@ -195,9 +195,7 @@ public class WorkingTimeTypeDao extends DaoBase {
         
     return getQueryFactory().selectFrom(workingTimeType)
         .leftJoin(workingTimeType.workingTimeTypeDays, wttd)
-        .where(workingTimeType.office.beginDate.loe(LocalDate.now())
-            .andAnyOf(workingTimeType.office.endDate.isNull(), workingTimeType.office.endDate.goe(LocalDate.now()))
-            .and(workingTimeType.horizontal.isTrue()).and(wttd.mealTicketTime.lt(360))
+        .where(workingTimeType.horizontal.isTrue().and(wttd.mealTicketTime.lt(360))
             .and(wttd.workingTime.eq(432))).distinct().fetch();
   }
   
