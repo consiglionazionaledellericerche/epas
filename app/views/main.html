@@ -82,7 +82,7 @@
             || currentUser?.roles.contains(models.enumerate.AccountRole.DEVELOPER)
             || currentUser?.hasRoles(models.Role.PERSONNEL_ADMIN, models.Role.PERSONNEL_ADMIN_MINI, 
                 models.Role.SEAT_SUPERVISOR, models.Role.MEAL_TICKET_MANAGER,
-                models.Role.REGISTRY_MANAGER) }
+                models.Role.REGISTRY_MANAGER, models.Role.TECHNICAL_ADMIN) }
           #{include './_adminMenu.html' /}
         #{/if}
         

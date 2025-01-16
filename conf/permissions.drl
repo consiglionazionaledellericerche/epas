@@ -1449,7 +1449,14 @@ when
 
 		"Administrators.blank",
 		"Administrators.save",
-		"Administrators.delete"
+		"Administrators.delete",
+		"Persons.list",
+		"Persons.edit",
+		"Contracts.personContracts",
+		"Configurations.personShow",
+		"Affiliations.personAffiliations",
+		"BadgeSystems.personBadges"
+		
 
         ), target == null, granted == false)
 then
@@ -1543,7 +1550,13 @@ when
   	   "Zones.linkZones",
   	   "Zones.save",
   	   "Zones.saveLinks",
-  	   "Zones.deleteLink"
+  	   "Zones.deleteLink",
+  	   	"Persons.list",
+		"Persons.edit",
+		"Contracts.personContracts",
+		"Configurations.personShow",
+		"Affiliations.personAffiliations",
+		"BadgeSystems.personBadges"
 
        ), target == $o, granted == false)
 then
