@@ -128,7 +128,9 @@
 					#{secure.check 'Contracts.split'}
 					#{b.link @Contracts.split(contract.value.id), color:'danger', title:'Split'/}
         			#{/secure.check}
+					#{secure.check 'Contracts.edit'}
         			#{b.link @Contracts.edit(contract.value.id), color:'primary', title:'Gestisci'/}
+					#{/secure.check}
       			#{/b.buttons}
 		</td>
 		<td>#{secure.link @Historicals.contractHistory(contract.value.id, 'CONTRACT'), 'data-async-modal':'#defaultModal'}
