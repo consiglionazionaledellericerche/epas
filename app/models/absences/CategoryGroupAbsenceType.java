@@ -20,6 +20,8 @@ package models.absences;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
@@ -92,7 +94,9 @@ public class CategoryGroupAbsenceType extends BaseModel
         Maps.newTreeMap();
     
     //ogni gruppo lo inserisco con quelli della stessa priorità
-    for (GroupAbsenceType group : this.groupAbsenceTypes) {
+    List<GroupAbsenceType> list = this.groupAbsenceTypes.stream().sorted(Comparator.comparing(GroupAbsenceType::getId)).collect(Collectors.toList());
+        
+    for (GroupAbsenceType group : list) {
       if (onlyFirstOfChain && !group.getPreviousGroupChecked().isEmpty()) {
         continue;
       }
@@ -108,6 +112,7 @@ public class CategoryGroupAbsenceType extends BaseModel
     for (Set<GroupAbsenceType> set : setByPriority.values()) {
       orderedGroupInCateogory.addAll(set);
     }
+    orderedGroupInCateogory = orderedGroupInCateogory.stream().sorted(Comparator.comparing(GroupAbsenceType::getId)).collect(Collectors.toList());
     return orderedGroupInCateogory;
   }
   
