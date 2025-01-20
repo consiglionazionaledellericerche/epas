@@ -4,9 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.21.4] - Unreleased
+## [2.22.0] - 2025-01-20
 ### Changed
   - Modificato l'algoritmo che carica la lista dei gruppi di codici per i dipendenti
+  - Modificato il novero dei permessi per un amministratore tecnico che ora può anche vedere le info generiche sulle persone 
+    della lista persone
+  
 
 ## [2.21.3] - 2025-01-02
 ### Changed
