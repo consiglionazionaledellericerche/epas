@@ -88,6 +88,8 @@
 	   		
 	   		<div id="horizontal-mealticket" #{if !vwt.mealTicketEnabled} style="display: none" #{/if}>
 	  		#{workingTime.legend buonoPasto:'true', wttTips:'true' /}
+			
+			#{if !setting.disableMealTimeInWorkingTimeCreation}
 	  
       		#{workingTime.input 
 	    		type:'hoursAndMinutes', 
@@ -136,6 +138,56 @@
 		   	field:'vwt.ticketAfternoonWorkingTime',
 		   	value:vwt.ticketAfternoonWorkingTime /}  
 			</div>
+			#{/if}
+			#{else}
+						#{workingTime.show 
+				    		type:'hoursAndMinutes', 
+				    		title:'Tempo di lavoro minimo per diritto a usufruire del buono pasto', 
+				  			color:'danger', 
+				  			field:'vwt.mealTicketTime',
+				  			hourValue:vwt.mealTicketTimeHour,
+				  			minuteValue:vwt.mealTicketTimeMinute,
+				  			disabled:disable /}
+				  	
+				  		#{workingTime.show 
+				   			type:'minutes', 
+				   			title:'Durata minima intervallo pranzo', 
+				   			color:'danger',
+				   			field:'vwt.breakTicketTime',
+				   			value:vwt.breakTicketTime,
+				   			disabled:disable /}
+				  
+				  		<!-- Soglia buono pasto -->  
+				  
+				  
+				  		#{workingTime.show
+				   		type:'radio', 
+				   		title:'Condizione soglia pomeridiana attiva',
+				   		color:'danger',
+				   		field:'vwt.afternoonThresholdEnabled',
+				   		value:vwt.afternoonThresholdEnabled,
+				   		disabled:disable /}  
+				  
+				   		<div id="horizontal-afternoon" #{if !vwt.afternoonThresholdEnabled} style="display: none" #{/if}>
+				   
+				      	#{workingTime.legend sogliaPomeridiana:'true', wttTips:'true' /}
+				      	
+					  	#{workingTime.show 
+					   	type:'hoursAndMinutes',
+					   	title:'Soglia pomeridiana per buono pasto',
+					   	color:'danger',
+					   	field:'vwt.ticketAfternoonThreshold',
+					   	hourValue:vwt.ticketAfternoonThresholdHour,
+					   	minuteValue:vwt.ticketAfternoonThresholdMinute  /}
+					
+					  	#{workingTime.show
+					   	type:'minutes', 
+					   	title:'Lavoro minimo per buono pasto dopo soglia pomeridiana',
+					   	color:'danger',
+					   	field:'vwt.ticketAfternoonWorkingTime',
+					   	value:vwt.ticketAfternoonWorkingTime /}  
+						</div>
+			#{/else}
    			</div>
    			
    			<div class="center">

@@ -56,8 +56,11 @@
 	   field:'horizontalPattern.mealTicketEnabled',
 	   value:horizontalPattern.mealTicketEnabled /}  
   
+	  
 	  <div id="horizontal-mealticket" #{if !horizontalPattern.mealTicketEnabled} style="display: none" #{/if}>
 	  #{workingTime.legend buonoPasto:'true', wttTips:'true' /}
+	  
+	  #{if !setting.disableMealTimeInWorkingTimeCreation}
 	  
       #{workingTime.input 
 	    type:'hoursAndMinutes', 
@@ -104,9 +107,56 @@
 		   field:'horizontalPattern.ticketAfternoonWorkingTime',
 		   value:horizontalPattern.ticketAfternoonWorkingTime /}  
 		</div>	
-		
+		#{/if}
+		#{else}
+			  #{workingTime.show 
+			    type:'hoursAndMinutes', 
+			    title:'Tempo di lavoro minimo per diritto a usufruire del buono pasto', 
+			  	color:'danger', 
+			  	field:'horizontalPattern.mealTicketTime',
+			  	hourValue:horizontalPattern.mealTicketTimeHour,
+			  	minuteValue:horizontalPattern.mealTicketTimeMinute /}
+			  	
+			  #{workingTime.show 
+			   type:'minutes', 
+			   title:'Durata minima intervallo pranzo', 
+			   color:'danger',
+			   field:'horizontalPattern.breakTicketTime',
+			   value:horizontalPattern.breakTicketTime /}
+			  
+			  <!-- Soglia buono pasto -->
+			  
+			  
+			  
+			  #{workingTime.show
+			   type:'radio', 
+			   title:'Condizione soglia pomeridiana attiva',
+			   color:'danger',
+			   field:'horizontalPattern.afternoonThresholdEnabled',
+			   value:horizontalPattern.afternoonThresholdEnabled /}  
+			  
+			   <div id="horizontal-afternoon" #{if !horizontalPattern.afternoonThresholdEnabled} style="display: none" #{/if}>
+			   
+			      #{workingTime.legend sogliaPomeridiana:'true', wttTips:'true' /}
+			      	
+				  #{workingTime.show 
+				   type:'hoursAndMinutes',
+				   title:'Soglia pomeridiana per buono pasto',
+				   color:'danger',
+				   field:'horizontalPattern.ticketAfternoonThreshold',
+				   hourValue:horizontalPattern.ticketAfternoonThresholdHour,
+				   minuteValue:horizontalPattern.ticketAfternoonThresholdMinute  /}
+				
+				  #{workingTime.show
+				   type:'minutes', 
+				   title:'Lavoro minimo per buono pasto dopo soglia pomeridiana',
+				   color:'danger',
+				   field:'horizontalPattern.ticketAfternoonWorkingTime',
+				   value:horizontalPattern.ticketAfternoonWorkingTime /}  
+				</div>	
+		#{/else}	
 	   </div> 	
-	   
+
 	   
 	  *{		
 	  <div class="col-sm-12">
