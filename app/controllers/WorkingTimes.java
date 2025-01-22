@@ -181,8 +181,9 @@ public class WorkingTimes extends Controller {
         wttAllowedEnabled.add(wtt);
       }
     }
+    GeneralSetting setting = settingDao.generalSetting();
 
-    render(wttAllowedEnabled, wttAllowedDisabled, office);
+    render(wttAllowedEnabled, wttAllowedDisabled, office, setting);
   }
 
 
@@ -371,12 +372,13 @@ public class WorkingTimes extends Controller {
     final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().getUsername();
     List<VerticalWorkingTime> vwtProcessedList = processed(key);
     Set<Integer> daysProcessed = dayProcessed(vwtProcessedList);
+    GeneralSetting setting = settingDao.generalSetting();
 
     //Caso del cambio giorno ...
     if (switchDay) {
       Validation.clear();
       vwt = get(vwtProcessedList, step, Optional.<VerticalWorkingTime>absent());
-      render(office, vwt, name, reproportionEnabled, step, daysProcessed);
+      render(office, vwt, name, reproportionEnabled, step, daysProcessed, setting);
     }
 
     //Persistenza ...
@@ -392,7 +394,7 @@ public class WorkingTimes extends Controller {
     // Validazione dto
     if (Validation.hasErrors()) {
       flash.error("Occorre correggere gli errori riportati.");
-      render(office, vwt, name, externalId, reproportionEnabled, step, daysProcessed);
+      render(office, vwt, name, externalId, reproportionEnabled, step, daysProcessed, setting);
     }
 
     // Next step
@@ -404,7 +406,7 @@ public class WorkingTimes extends Controller {
       step++;
       vwt = get(vwtProcessedList, step, Optional.fromNullable(vwt));
     }
-    render(vwt, step, reproportionEnabled, name, externalId, office, daysProcessed);
+    render(vwt, step, reproportionEnabled, name, externalId, office, daysProcessed, setting);
 
 
   }
