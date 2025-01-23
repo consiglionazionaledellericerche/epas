@@ -151,9 +151,14 @@
 				        <td class="center">${wtt.value.office.name}</td>
 	
 				        <td class="center">
+							#{if !setting.disableMealTimeInWorkingTimeCreation}
 				          <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.value.id)}">
 				    	    <i data-toggle="tooltip" data-placement="bottom" title="Riattiva tipo orario" class="fa fa-power-off"></i>
 				    	  </a>
+						  #{/if}
+						  #{else}
+						  	Non riattivabile per configurazione
+						  #{/else}
 				        </td>
 	
 				        <td  class="center">

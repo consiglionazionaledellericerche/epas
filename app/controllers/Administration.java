@@ -1341,7 +1341,13 @@ public class Administration extends Controller {
       counter++;
 
     }
-    renderText("Aggiornati gli orari di %s persone", counter);
+    int workingTimeCounter = 0;
+    for (WorkingTimeType wtt : workingTimeTypesList) {
+      wtt.setDisabled(true);
+      wtt.save();
+      workingTimeCounter++;
+    }
+    renderText("Aggiornati gli orari di %s persone e disabilitati %s orari di lavoro", counter, workingTimeCounter);
   }
   
 }

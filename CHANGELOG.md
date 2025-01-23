@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.22.1] - 2025-01-23
+### Added
+  - Aggiunto parametro di configurazione generale per determinare se sia possibile modificare la quantità oraria per la
+    maturazione dei buoni pasto durante la creazione degli orari di lavoro
+    
+### Changed
+  - Modificato l'algoritmo che crea gli orari di lavoro in funzione del nuovo parametro generale creato.
+  - Nel metodo che aggiorna gli orari di lavoro, inserito controllo che disabilita gli orari riscontrati "non corretti" 
+    relativamente alla maturazione del buono pasto
+
 ## [2.22.0] - 2025-01-20
 ### Changed
   - Modificato l'algoritmo che carica la lista dei gruppi di codici per i dipendenti
