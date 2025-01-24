@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Aggiunto parametro di configurazione generale per determinare se sia possibile modificare la quantità oraria per la
     maturazione dei buoni pasto durante la creazione degli orari di lavoro
+  - Aggiunti i nuovi codici per le ferie e i riposi compensativi per missione in antartide.
     
 ### Changed
   - Modificato l'algoritmo che crea gli orari di lavoro in funzione del nuovo parametro generale creato.
