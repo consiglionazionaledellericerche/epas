@@ -26,6 +26,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.ConfigurationDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -49,6 +50,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import manager.competences.ShiftTimeTableDto;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Competence;
@@ -99,7 +102,7 @@ public class CompetenceManager {
   private final PersonReperibilityDayDao reperibilityDao;
   private final PersonStampingRecapFactory stampingsRecapFactory;
   private final PersonShiftDayDao personShiftDayDao;
-
+  private final ConfigurationManager configurationManager;
   private final PersonDao personDao;
 
 
@@ -119,7 +122,7 @@ public class CompetenceManager {
       PersonDayDao personDayDao, IWrapperFactory wrapperFactory,
       PersonDayManager personDayManager, PersonReperibilityDayDao reperibilityDao,
       PersonStampingRecapFactory stampingsRecapFactory, PersonShiftDayDao personshiftDayDao,
-      SecureManager secureManager, PersonDao personDao) {
+      SecureManager secureManager, ConfigurationManager configurationManager,PersonDao personDao) {
 
     this.competenceCodeDao = competenceCodeDao;
     this.officeDao = officeDao;
@@ -130,6 +133,7 @@ public class CompetenceManager {
     this.reperibilityDao = reperibilityDao;
     this.stampingsRecapFactory = stampingsRecapFactory;   
     this.personShiftDayDao = personshiftDayDao;    
+    this.configurationManager = configurationManager;
     this.personDao = personDao;
   }
 
@@ -403,13 +407,16 @@ public class CompetenceManager {
       case yearly:
         group = competenceCodeDao
         .getCodeWithGroup(comp.getCompetenceCode().getCompetenceCodeGroup(),
-            Optional.fromNullable(comp.getCompetenceCode()));
+            Optional.absent());
         compList = competenceDao
             .getCompetences(Optional.fromNullable(comp.getPerson()), comp.getYear(),
                 Optional.<Integer>absent(), group);
         sum = compList.stream().mapToInt(i -> i.getValueApproved()).sum();
-        if (sum + value > comp.getCompetenceCode().getCompetenceCodeGroup().getLimitValue()) {
-          result = Messages.get("CompManager.overYearLimit");
+        if (!(Boolean) configurationManager
+            .configValue(comp.getPerson(), EpasParam.DISABLE_OVERTIME_LIMIT)) {
+          if (sum + value > comp.getCompetenceCode().getCompetenceCodeGroup().getLimitValue()) {
+            result = Messages.get("CompManager.overYearLimit");
+          }
         }
         break;
       case onMonthlyPresence:

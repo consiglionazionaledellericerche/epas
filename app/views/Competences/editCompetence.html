@@ -22,7 +22,7 @@ title:person.fullname + ' - ' + code.description + ' ' + code.code}
     
     #{alert color:'warning'}
       <!-- Suggerimenti -->
-      #{if code.code.equals('S1')}
+      #{if code.code.equals('S1') || code.code.equals('S2')}
   		#{if psDto != null}
   		  <p><strong>Suggerimenti</strong></p>
   		  <p>
@@ -65,9 +65,17 @@ title:person.fullname + ' - ' + code.description + ' ' + code.code}
     <!-- Limiti -->
     <p><strong>Limiti</strong></p>	  
 	#{if code.code.equals('S1') || code.code.equals('S2')}
+	  #{if !check}
   	  <p>
   	    Massimo annuale per persona <strong class="text-danger">${code.competenceCodeGroup.limitValue} ore</strong>
   	  </p>	
+	  #{/if}
+	  #{else}
+		  <p>Per ${person.fullname} è stato disabilitato il limite delle 200 ore annue di straordinario. 
+			Se non è questo che si desidera, verificare la sua configurazione personale e modificare il valore del parametro
+			<em>Disabilitare limite 200 ore di straordinario annuale</em>
+		  </p>
+	  #{/else}
 	#{/if}
   	#{elseif code.code.equals('207')}
   		<p>Valore massimo assegnabile <strong class="text-danger">12 giorni</strong></p>

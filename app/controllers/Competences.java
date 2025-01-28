@@ -577,10 +577,12 @@ public class Competences extends Controller {
     notFoundIfNull(code);
     notFoundIfNull(person);
     Office office = person.getOffice();
-    if (code.getCode().equals("S1")) {
+    if (code.getCode().equals("S1") || code.getCode().equals("S2") || code.getCode().equals("S3")) {
+      boolean check = (Boolean) configurationManager
+          .configValue(person, EpasParam.DISABLE_OVERTIME_LIMIT);
       PersonStampingRecap psDto = stampingsRecapFactory.create(person,
           year, month, true);
-      render(person, code, year, month, psDto, office, competence);
+      render(person, code, year, month, psDto, office, competence, check);
     }
 
     render(person, code, year, month, office, competence);
