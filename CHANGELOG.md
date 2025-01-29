@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.22.2] - Unreleased
 ### Added
   - Aggiunto parametro di configurazione personale che consente di bypassare il limite delle 200 ore annue di straordinario.
+  - Aggiunti codici 25S e 252S relativi ai congedi parentali per primo e secondo figlio per genitore unico.
 
 ### Changed
   - Modificato l'algoritmo che assegna le ore di straordinario in funzione del parametro di cui alla sezione Added.
