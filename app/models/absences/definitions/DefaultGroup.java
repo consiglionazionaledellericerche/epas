@@ -289,6 +289,10 @@ public enum DefaultGroup {
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child1_0_12, DefaultTakable.T_25, DefaultComplation.C_25, DefaultGroup.G_25A,
       false, true), 
+  G_25S("25S - Congedo parentale genitore unico 30% 1 figlio 90 giorni",
+      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      PeriodType.child1_0_12, DefaultTakable.T_25S, DefaultComplation.C_25S, null,
+      false, true), 
 
   G_23O("23 - Astensione facoltativa post partum 100% primo figlio 0-12 anni 30 giorni",
       "23/25/24 - Astensione facoltativa post partum primo figlio",
@@ -314,6 +318,11 @@ public enum DefaultGroup {
   G_252("252 - Astensione facoltativa post partum 30% secondo figlio 0-12 anni 150 giorni", "",
       DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child2_0_12, DefaultTakable.T_252, DefaultComplation.C_252, DefaultGroup.G_252A,
+      false, true), 
+  
+  G_252S("252S - Congedo parentale genitore unico 30% 2 figlio 90 giorni", "",
+      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      PeriodType.child2_0_12, DefaultTakable.T_252S, DefaultComplation.C_252S, null,
       false, true), 
   
   G_232O("232O - Astensione facoltativa post partum 100% secondo figlio 0-12 anni 30 giorni",
