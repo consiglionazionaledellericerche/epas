@@ -660,6 +660,7 @@ public class ConfigurationManager {
    */
   public void updateConfigurations(IPropertiesInPeriodOwner owner) {
 
+    log.debug("Aggiornamento parametri di configurazione per {}", owner);
     for (EpasParam epasParam : EpasParam.values()) {
 
       // Casi uscita
@@ -690,6 +691,7 @@ public class ConfigurationManager {
           }
         }
         if (toCreate) {
+          log.debug("Necessario creare il parametro {} per {}", epasParam, owner);
           buildDefault(owner, epasParam);
         }
       }
