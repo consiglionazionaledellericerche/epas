@@ -23,15 +23,15 @@
   <p>
     La funzione di invio di attestati automatizza la trasmissione delle informazioni da ePas al
     server di
-    <a href="${templateUtility.attestatiUrl}" target="_blank">
+    <!--  <a href="${templateUtility.attestatiUrl}" target="_blank">-->
       <strong><em>Attestati</em></strong>.
-    </a>
+    <!--  </a>-->
   <br>
     La validazione finale degli attestati di presenza rimane compito dell'amministratore del
     personale e va eseguita direttamente sul server di
-    <a href="${templateUtility.attestatiUrl}" target="_blank">
+    <!--  <a href="${templateUtility.attestatiUrl}" target="_blank">-->
       <strong><em>Attestati</em></strong>.
-    </a>
+    <!--  </a>-->
   </p>
   #{/alert}
 
@@ -40,9 +40,9 @@
   <p>
     Per utilizzare questa funzionalità occorre prima aver effettuato lo stralcio per il mese
     interessato sul server di
-    <a href="${templateUtility.attestatiUrl}" target="_blank">
+    <!--  <a href="${templateUtility.attestatiUrl}" target="_blank">-->
       <strong><em>Attestati</em></strong>.
-    </a>
+    <!--  </a>-->
   <br>
     Per inviare le informazioni per tutto il personale utilizzare il pulsante
     <em>'Carica tutti i dati su Attestati'</em>
@@ -53,9 +53,9 @@
   <p><strong>Nota bene</strong><br>
     E' possibile inviare i dati più volte, fino a quando
     l'attestato non sarà validato attraverso la funzione <em>Valida Attestati</em> in
-    <a href="${templateUtility.attestatiUrl}" target="_blank">
+    <!--  <a href="${templateUtility.attestatiUrl}" target="_blank">-->
       <strong><em>Attestati</em></strong>.
-    </a>
+    <!--  </a>-->
     <br>
     L'operazione di invio non ha effetti per ogni attestato già validato <i class="fa fa-ban"></i>
   </p>
@@ -137,10 +137,11 @@
     #{b.link @clearCacheValues(office.id, validYear, validMonth), color:'info', fa:'refresh'}
       <span class="text-default">Aggiorna dati</span>
     #{/b.link}
+    <!--  
     #{b.link templateUtility.attestatiUrl, 'target':'_blank', color: 'default', fa: 'arrow-right', class: 'pull-right'}
       Vai su Attestati
     #{/b.link}
-
+    -->
   <br>
   <div id="loading">
     #{if process}
