@@ -8,9 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Aggiunta possibilità per l'amministratore tecnico di una sede di modificare l'externalId di una relazione
     persona-gruppo.
-    
+  - Aggiunta generazione parametri di configurazione della persona al metodo REST di creazione della persona
+
 ### Changed
-  - Rimosso il link al nuovo attestati da ogni parte sulla pagina di invio dati ad attestati.    g
+  - Rimosso il link al nuovo attestati da ogni parte sulla pagina di invio dati ad attestati.
 
 ## [2.22.2] - 2025-01-30
 ### Added
