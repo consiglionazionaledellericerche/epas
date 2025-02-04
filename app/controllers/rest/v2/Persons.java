@@ -43,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.PersonManager;
 import manager.UserManager;
+import manager.configurations.ConfigurationManager;
 import models.Person;
 import play.mvc.Controller;
 import play.mvc.Util;
@@ -64,6 +65,8 @@ public class Persons extends Controller {
   static UserManager userManager;
   @Inject
   static PersonManager personManager;
+  @Inject
+  static ConfigurationManager configurationManager;
   @Inject 
   static SecurityRules rules;
   @Inject
@@ -140,6 +143,7 @@ public class Persons extends Controller {
     
     personManager.properPersonCreate(person);
     person.save();
+    configurationManager.updateConfigurations(person);
 
     log.info("Created person {} via REST", person);
     renderJSON(gson.toJson(PersonShowDto.build(person)));
