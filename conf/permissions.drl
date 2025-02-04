@@ -1455,7 +1455,10 @@ when
 		"Contracts.personContracts",
 		"Configurations.personShow",
 		"Affiliations.personAffiliations",
-		"BadgeSystems.personBadges"
+		"BadgeSystems.personBadges",
+		"Affiliation.externalId",
+		"Affiliations.edit",
+		"Affiliations.save"
 		
 
         ), target == null, granted == false)
@@ -1556,7 +1559,10 @@ when
 		"Contracts.personContracts",
 		"Configurations.personShow",
 		"Affiliations.personAffiliations",
-		"BadgeSystems.personBadges"
+		"BadgeSystems.personBadges",
+		"Affiliation.externalId",
+		"Affiliations.edit",
+		"Affiliations.save"
 
        ), target == $o, granted == false)
 then
