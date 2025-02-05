@@ -600,8 +600,7 @@ public class CompetenceRequestManager {
    * @return true se l'approvazione dell'utente è andata a buon fine, false altrimenti
    */
   public boolean approval(CompetenceRequest competenceRequest, User user) {
-    boolean approved = false;
-
+    
     if (competenceRequest.isEmployeeApprovalRequired() 
         && competenceRequest.getEmployeeApproved() == null
         && user.hasRoles(Role.EMPLOYEE)) {
@@ -612,13 +611,13 @@ public class CompetenceRequestManager {
 
         managerApproval(competenceRequest.id, user);
       }
-      approved = true;
+      return true;      
     }
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
       if (competenceRequest.isManagerApprovalRequired()
           && competenceRequest.getManagerApproved() == null ) {
         managerApproval(competenceRequest.id, user);
-        approved = true;
+        return true;
       }
     } else {
       if (competenceRequest.isManagerApprovalRequired() 
@@ -626,16 +625,16 @@ public class CompetenceRequestManager {
           && competenceRequest.getPerson().getReperibility().stream()
           .anyMatch(pr -> pr.getPersonReperibilityType().getSupervisor().equals(user.getPerson()))) {
         managerApproval(competenceRequest.id, user);
-        approved = true;
+        return true;
       }
     }
 
     if (competenceRequest.isOfficeHeadApprovalRequired() 
         && competenceRequest.getOfficeHeadApproved() == null) {
       officeHeadApproval(competenceRequest.id, user);
-      approved = true;
+      return true;
     }    
-    return approved;
+    return false;
   }
 
 
@@ -777,16 +776,23 @@ public class CompetenceRequestManager {
        * Controllo la quantità già assegnata nel corso dell'anno agli appartenenti al gruppo 
        * del richiedente 
        */
-      Group group = groupDao
-          .checkManagerPerson(approver.getPerson(), competenceRequest.getPerson()).get();
+      Optional<Group> group = groupDao
+          .checkManagerPerson(approver.getPerson(), competenceRequest.getPerson());
+      if (!group.isPresent()) {
+        /*
+         *  sono il responsabile di sede che deve fare la seconda approvazione e devo trovare il gruppo
+         *  cui appartiene il dipendente che ha fatto richiesta
+         */        
+        //group = groupDao.
+      }
       Map<Integer, List<PersonOvertimeInMonth>> map = groupOvertimeManager
-          .groupOvertimeSituationInYear(group.getPeople(), competenceRequest.getYear());
+          .groupOvertimeSituationInYear(group.get().getPeople(), competenceRequest.getYear());
       overtimeHoursAlreadyAssigned = groupOvertimeManager.groupOvertimeAssignedInYear(map);
 
       /*
        * Controllo quante ore ha il mio gruppo a disposizione
        */
-      totalOvertimes = groupOvertimeManager.totalGroupOvertimes(group);
+      totalOvertimes = groupOvertimeManager.totalGroupOvertimes(group.get());
 
 
     }
