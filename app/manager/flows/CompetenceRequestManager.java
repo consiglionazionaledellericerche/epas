@@ -30,6 +30,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
 import dao.RoleDao;
+import dao.UserDao;
 import dao.UsersRolesOfficesDao;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +96,7 @@ public class CompetenceRequestManager {
   private CompetenceDao competenceDao;
   private CompetenceManager competenceManager;
   private GeneralSettingDao settingDao;
-
+  
 
   /**
    * DTO per la configurazione delle CompenteRequest.
@@ -782,8 +783,15 @@ public class CompetenceRequestManager {
         /*
          *  sono il responsabile di sede che deve fare la seconda approvazione e devo trovare il gruppo
          *  cui appartiene il dipendente che ha fatto richiesta
-         */        
-        //group = groupDao.
+         */ 
+        User manager = null;
+        for (CompetenceRequestEvent event: competenceRequest.getEvents()) {
+          if (event.eventType.equals(CompetenceRequestEventType.MANAGER_APPROVAL)) {
+            manager = event.owner;
+          }
+        }
+        group = groupDao
+            .checkManagerPerson(manager.getPerson(), competenceRequest.getPerson());
       }
       Map<Integer, List<PersonOvertimeInMonth>> map = groupOvertimeManager
           .groupOvertimeSituationInYear(group.get().getPeople(), competenceRequest.getYear());
