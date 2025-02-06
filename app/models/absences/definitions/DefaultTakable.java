@@ -307,7 +307,7 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_25, 
           DefaultAbsenceType.A_25M, 
           DefaultAbsenceType.A_25U), 
-      150, null),
+      90, null),
 
   T_24(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_24O, 
@@ -351,7 +351,7 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_252, 
           DefaultAbsenceType.A_252M, 
           DefaultAbsenceType.A_252U), 
-      150, null),
+      90, null),
 
   T_242(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_242, 
@@ -386,7 +386,7 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_253, 
           DefaultAbsenceType.A_253M, 
           DefaultAbsenceType.A_253U), 
-      150, null),
+      90, null),
 
   T_243(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_243, 
@@ -420,7 +420,7 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_254, 
           DefaultAbsenceType.A_254M, 
           DefaultAbsenceType.A_254U), 
-      150, null),
+      90, null),
 
   T_244(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_244, 
@@ -616,7 +616,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_NC, DefaultAbsenceType.A_62, DefaultAbsenceType.A_35R,
           DefaultAbsenceType.A_96, DefaultAbsenceType.A_96A, DefaultAbsenceType.A_96B,
           DefaultAbsenceType.A_98, DefaultAbsenceType.A_52, DefaultAbsenceType.A_100,
-          DefaultAbsenceType.A_403, DefaultAbsenceType.A_404,DefaultAbsenceType.A_414,
+          DefaultAbsenceType.A_404, DefaultAbsenceType.A_405,DefaultAbsenceType.A_415,
           DefaultAbsenceType.A_62,
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_98CV, 
           DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_46,
@@ -662,7 +662,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_NC, DefaultAbsenceType.A_62, DefaultAbsenceType.A_35R,
           DefaultAbsenceType.A_96, DefaultAbsenceType.A_96A, DefaultAbsenceType.A_96B,
           DefaultAbsenceType.A_98, DefaultAbsenceType.A_52, DefaultAbsenceType.A_100,
-          DefaultAbsenceType.A_403, DefaultAbsenceType.A_404,DefaultAbsenceType.A_414,
+          DefaultAbsenceType.A_404, DefaultAbsenceType.A_405,DefaultAbsenceType.A_415,
           DefaultAbsenceType.A_62,
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_98CV,
           DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_46,

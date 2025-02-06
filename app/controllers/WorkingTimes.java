@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import common.security.SecurityRules;
 import dao.ContractDao;
+import dao.GeneralSettingDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.WorkingTimeTypeDao;
@@ -43,6 +44,7 @@ import manager.PeriodManager;
 import manager.WorkingTimeTypeManager;
 import models.Contract;
 import models.ContractWorkingTimeType;
+import models.GeneralSetting;
 import models.Office;
 import models.Person;
 import models.WorkingTimeType;
@@ -88,6 +90,8 @@ public class WorkingTimes extends Controller {
   private static PersonDao personDao;
   @Inject
   private static PeriodManager periodManager;
+  @Inject
+  private static GeneralSettingDao settingDao;
 
   /**
    * Form per l'aggiornamento della descrizione di una tipologia di orario
@@ -177,8 +181,9 @@ public class WorkingTimes extends Controller {
         wttAllowedEnabled.add(wtt);
       }
     }
+    GeneralSetting setting = settingDao.generalSetting();
 
-    render(wttAllowedEnabled, wttAllowedDisabled, office);
+    render(wttAllowedEnabled, wttAllowedDisabled, office, setting);
   }
 
 
@@ -274,12 +279,14 @@ public class WorkingTimes extends Controller {
     if (Validation.hasErrors()) {
       render(office, name, reproportionEnabled, externalId, workingTimeTypePattern);
     }
+    
+    GeneralSetting setting = settingDao.generalSetting();
 
     if (workingTimeTypePattern.equals(WorkingTimeTypePattern.HORIZONTAL)) {
       HorizontalWorkingTime horizontalPattern = new HorizontalWorkingTime();
       horizontalPattern.name = name;
       horizontalPattern.reproportionAbsenceCodesEnabled = reproportionEnabled;
-      render("@insertWorkingTime", horizontalPattern, office, name, externalId);
+      render("@insertWorkingTime", horizontalPattern, office, name, externalId, setting);
     } else {
       final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().getUsername();
       List<VerticalWorkingTime> vwtProcessedList = processed(key);
@@ -288,7 +295,7 @@ public class WorkingTimes extends Controller {
       VerticalWorkingTime vwt = get(vwtProcessedList, step, Optional.<VerticalWorkingTime>absent());
 
       render("@insertVerticalWorkingTime", office, vwt, name, reproportionEnabled, 
-          externalId, step, daysProcessed);
+          externalId, step, daysProcessed, setting);
     }
   }
 
@@ -365,12 +372,13 @@ public class WorkingTimes extends Controller {
     final String key = VERTICAL_WORKING_TIME_STEP + name + Security.getUser().get().getUsername();
     List<VerticalWorkingTime> vwtProcessedList = processed(key);
     Set<Integer> daysProcessed = dayProcessed(vwtProcessedList);
+    GeneralSetting setting = settingDao.generalSetting();
 
     //Caso del cambio giorno ...
     if (switchDay) {
       Validation.clear();
       vwt = get(vwtProcessedList, step, Optional.<VerticalWorkingTime>absent());
-      render(office, vwt, name, reproportionEnabled, step, daysProcessed);
+      render(office, vwt, name, reproportionEnabled, step, daysProcessed, setting);
     }
 
     //Persistenza ...
@@ -386,7 +394,7 @@ public class WorkingTimes extends Controller {
     // Validazione dto
     if (Validation.hasErrors()) {
       flash.error("Occorre correggere gli errori riportati.");
-      render(office, vwt, name, externalId, reproportionEnabled, step, daysProcessed);
+      render(office, vwt, name, externalId, reproportionEnabled, step, daysProcessed, setting);
     }
 
     // Next step
@@ -398,7 +406,7 @@ public class WorkingTimes extends Controller {
       step++;
       vwt = get(vwtProcessedList, step, Optional.fromNullable(vwt));
     }
-    render(vwt, step, reproportionEnabled, name, externalId, office, daysProcessed);
+    render(vwt, step, reproportionEnabled, name, externalId, office, daysProcessed, setting);
 
 
   }
@@ -567,7 +575,8 @@ public class WorkingTimes extends Controller {
 
       flash.error("Impossibile eliminare il tipo orario selezionato perchè "
           + "attualmente associato ad almeno un contratto attivo.");
-      redirectToManageWorkingTime(wtt.getOffice());
+      manageOfficeWorkingTime(wtt.getOffice().getId());
+      //redirectToManageWorkingTime(wtt.getOffice());
     }
 
     if (wtt.isDisabled()) {
@@ -576,15 +585,16 @@ public class WorkingTimes extends Controller {
       wtt.save();
       flash.success("Riattivato correttamente orario di lavoro.");
       log.info("Riattivata tipologia orario di lavoro {}, id={}", wtt.getDescription(), wtt.id);
-      redirectToManageWorkingTime(wtt.getOffice());
+      //redirectToManageWorkingTime(wtt.getOffice());
     } else {
 
       wtt.setDisabled(true);
       wtt.save();
       flash.success("Disattivato orario di lavoro.");
       log.info("Disattivata tipologia orario di lavoro {}, id={}", wtt.getDescription(), wtt.id);
-      redirectToManageWorkingTime(wtt.getOffice());
+      //redirectToManageWorkingTime(wtt.getOffice());
     }
+    manageOfficeWorkingTime(wtt.getOffice().getId());
 
   }
 

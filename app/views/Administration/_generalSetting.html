@@ -328,5 +328,17 @@
       #{/b.buttons}
     #{/form}
   #{/accordionItem}
+  
+  #{accordionItem 'disableMealTimeInWorkingTimeCreation', parent:'generalSetting', title:'Disabilita orario per pausa pranzo in creazione orario di lavoro', open:false}
+    #{form action:@saveGeneralSetting(), method:'POST', class:'form form-horizontal'}
+      #{f.hidden 'generalSetting.id' /}
+      #{alert color:'info'}Disabilita la possibilità da parte dell'utente di modificare la quantità oraria per la maturazione del buono pasto durante la 
+	  procedura di creazione dell'orario di lavoro.#{/alert}
+      #{f.booleanRadio 'generalSetting.disableMealTimeInWorkingTimeCreation' /}
+      #{b.buttons}
+        #{b.save /}
+      #{/b.buttons}
+    #{/form}
+  #{/accordionItem}
 
 #{/accordionGroup}

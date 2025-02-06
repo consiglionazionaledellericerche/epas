@@ -208,6 +208,9 @@ public enum DefaultComplation {
   C_25A(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_25AM), 
       ImmutableSet.of(DefaultAbsenceType.A_25AH7)),
+  C_25S(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_25SM), 
+      ImmutableSet.of(DefaultAbsenceType.A_25SH7)),
   C_24(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_24O), 
       ImmutableSet.of(DefaultAbsenceType.A_24OH7)),
@@ -232,6 +235,11 @@ public enum DefaultComplation {
   C_252(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_252M), 
       ImmutableSet.of(DefaultAbsenceType.A_252H7)),
+  
+  C_252S(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_252SM), 
+      ImmutableSet.of(DefaultAbsenceType.A_252SH7)),
+  
   C_252A(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_252AM), 
       ImmutableSet.of(DefaultAbsenceType.A_252AH7)),

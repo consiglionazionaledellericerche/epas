@@ -27,6 +27,8 @@ public class QGeneralSetting extends EntityPathBase<GeneralSetting> {
 
     public final BooleanPath cookiePolicyEnabled = createBoolean("cookiePolicyEnabled");
 
+    public final BooleanPath disableMealTimeInWorkingTimeCreation = createBoolean("disableMealTimeInWorkingTimeCreation");
+
     public final BooleanPath enableAbsenceTopLevelAuthorization = createBoolean("enableAbsenceTopLevelAuthorization");
 
     public final BooleanPath enableAutoconfigCovid19 = createBoolean("enableAutoconfigCovid19");

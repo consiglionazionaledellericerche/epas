@@ -168,6 +168,11 @@ public class GeneralSetting extends BaseModel {
    * Timeout in secondi per le chiamate REST effettuate ad Attestati.
    */
   private int timeoutAttestati = 60;
+  
+  /**
+   * Disabilita la possibilità di specificare la pausa pranzo nella creazione di orari di lavoro
+   */
+  private boolean disableMealTimeInWorkingTimeCreation = false;
 
 
 }

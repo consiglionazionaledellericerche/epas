@@ -516,6 +516,8 @@ generalSetting.enableOvertimePerPerson =Abilita il monte ore straordinari per di
 generalSetting.enableSsoForAttestati=Abilita l'utilizzo di SSO del CNR per Attestati
 generalSetting.timeoutAttestati=Timeout in secondi chiamate servizi REST Attestati
 
+generalSetting.disableMealTimeInWorkingTimeCreation=Disabilita modifica quantità pausa pranzo
+
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite
 group.limitValue =Quantità massima
@@ -1381,6 +1383,7 @@ AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE=Auto inserimento lavoro agile per dipen
 SMARTWORKING =Auto inserimento codice di assenza per smartworking
 AGILE_WORK =Inserimento codice di assenza per Lavoro Agile di cui alla nota del DG 22278 del 22 marzo 2022
 PARENTAL_LEAVE_FOR_FATHERS =Inserimento codici di congedo parentale per il padre
+DISABLE_OVERTIME_LIMIT =Disabilitare limite 200 ore di straordinario annuale
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.

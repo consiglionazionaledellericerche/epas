@@ -25,13 +25,14 @@ public class QServiceRequest extends EntityPathBase<ServiceRequest> {
 
     public final models.base.query.QInformationRequest _super;
 
-    public final DatePath<java.time.LocalDate> day = createDate("day", java.time.LocalDate.class);
-
     //inherited
     public final BooleanPath administrativeApprovalRequired;
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> administrativeApproved;
+    
+    //inherited
+    public final DatePath<org.joda.time.LocalDate> day = createDate("day", org.joda.time.LocalDate.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> endTo;

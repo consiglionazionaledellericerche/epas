@@ -287,6 +287,12 @@
       amministrazione che intende usufruire del permesso in questione. 
 	  </p> 
     #{/if}
+	
+	#{if configuration.epasParam.equals(manager.configurations.EpasParam.DISABLE_OVERTIME_LIMIT) }
+	  <p>Abilitando questa funzionalità sarà possibile per il dipendente <strong>${configuration.person.fullname}</strong> disabilitare il limite
+		delle 200 ore di straordinario annuale previste dalla normativa, consentendo quindi lo sforamento.
+	  </p> 
+	#{/if}
     
      #{if configuration.epasParam.equals(manager.configurations.EpasParam.MATERNITY_PERIOD) }
       <p>Inserire lo stato di maternità per il dipendente <strong>${configuration.person.fullname}</strong> e la date di inizio e fine periodo.</p>
