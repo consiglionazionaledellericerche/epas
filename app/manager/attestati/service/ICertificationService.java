@@ -34,6 +34,11 @@ import models.Person;
 public interface ICertificationService {
 
   /**
+   * Invalida la cache dell'oauth token.
+   */
+  void invalidateOauthTokenCache();
+
+  /**
    * Se il token è abilitato alla sede.
    *
    * @param office sede

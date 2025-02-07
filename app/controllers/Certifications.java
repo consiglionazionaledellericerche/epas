@@ -86,10 +86,14 @@ public class Certifications extends Controller {
   static CertificationManager certificationManager;
   @Inject
   static AbsenceManager absenceManager;
-  
-  
+
   private static final String PROCESS_COMMAND_KEY = "id-%s-year-%s-month-%s";
 
+  public static void invalidateOauthTokenCache() {
+    certService.invalidateOauthTokenCache();
+    flash.success("Invalidata cache OAuth Token");
+    Administration.utilities();
+  }
 
   /**
    * Pagina principale nuovo invio attestati.

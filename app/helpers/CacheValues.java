@@ -58,16 +58,15 @@ import org.joda.time.YearMonth;
 @RequiredArgsConstructor
 public final class CacheValues {
 
-  private static final int FIVE_MINUTES = 5 * DateTimeConstants.SECONDS_PER_MINUTE;
+  private static final int ONE_MINUTE = 1 * DateTimeConstants.SECONDS_PER_MINUTE;
 
   private final CertificationsComunication certification;
   private final ICertificationService certService;
   private final PersonDao personDao;
 
   public LoadingCache<String, OauthToken> oauthToken = CacheBuilder.newBuilder()
-      // Considerando che attestati fornisce i nuovi token con validità di 9:30 e i token tramite
-      // refresh-token con validità 12 ore, una scadenza di 13 ore sembra un buon default...
-      .expireAfterWrite(13, TimeUnit.HOURS)
+      //I Token hanno una scadenza tipo di 5 minuti
+      .expireAfterWrite(5, TimeUnit.MINUTES)
       .refreshAfterWrite(1, TimeUnit.MINUTES)
       .build(new OauthTokenCacheLoader());
 
@@ -137,18 +136,18 @@ public final class CacheValues {
         throws NoSuchFieldException {
       // Se non sta per scadere restituisco quello che ho già
       if (!LocalDateTime.now().isAfter(token.taken_at
-          .plusSeconds(token.expires_in - FIVE_MINUTES))) {
+          .plusSeconds(token.expires_in - ONE_MINUTE))) {
         log.info("Token Oauth gia' presente in cache: token {}, expires_in {}", token.access_token,
             token.expires_in);
         return Futures.immediateFuture(token);
       } else if (LocalDateTime.now().isAfter(token.taken_at.plusSeconds(token.expires_in))) {
         // Se è già scaduto lo richiedo in maniera sincrona
         log.info("Token Oauth presente in cache scaduto. Invio nuova richiesta per un " 
-            + "refresh-token: token {}, expires_in {}", token.access_token, token.expires_in);
+            + "token: token attuale {}, expires_in {}", token.access_token, token.expires_in);
         return Futures.immediateFuture(certification.refreshToken(token));
       } else {
         log.info("Token Oauth presente in cache in scadenza. Restituito valore attuale e invio " 
-            + "nuova richiesta (in modalita' asincrona) di un refresh Token: token {}, expires_in "
+            + "nuova richiesta (in modalita' asincrona) di un Token: token attuale {}, expires_in "
             + "{}", token.access_token, token.expires_in);
         // Faccio il refresh in maniera asincrona
         ListenableFutureTask<OauthToken> task = ListenableFutureTask

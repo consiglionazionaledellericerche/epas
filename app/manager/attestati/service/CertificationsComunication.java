@@ -109,6 +109,11 @@ public class CertificationsComunication {
   @Inject
   private GeneralSettingDao generalSettingDao;
 
+  public void invalidateOauthTokenCache() {
+    cacheValues.oauthToken.invalidate(OAUTH_TOKEN);
+    log.info("Invalidata cache OAuth Token");
+  }
+
   public OauthToken getToken() throws NoSuchFieldException {
     if (generalSettingDao.generalSetting().isEnableSsoForAttestati()) {
       return getTokenBySso();
@@ -159,6 +164,7 @@ public class CertificationsComunication {
   }
 
   public OauthToken getTokenBySso() {
+    log.info("Preparo invia richiesta nuovo Token da SSO");
     String clientId = openIdClientsModule.keycloakClientId();
     String clientSecret = openIdClientsModule.keycloakClientSecret();
     String url = openIdConnectClient.getConfig().getTokenEndpoint();
@@ -243,6 +249,7 @@ public class CertificationsComunication {
   public OauthToken refreshTokenBySso(OauthToken token) throws NoSuchFieldException {
 
     if (token.refresh_token == null) {
+      log.info("Refresh token vuoto, invio richiesta token standard");
       return getTokenBySso();
     }
 
