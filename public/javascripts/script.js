@@ -188,6 +188,9 @@ $(function($) {
       $('body').initepas();
       // disattiva la modale sopra (se c'è).
       $form.parents('.modal').modal('hide');
+	  if ($form.data('async-reload-parent')) {
+        window.parent.location.reload();
+	  }
     }).fail(function(xhr, status, error) {
       if (xhr.status == 400) {
         var $res = $(errorTarget, xhr.responseText);
