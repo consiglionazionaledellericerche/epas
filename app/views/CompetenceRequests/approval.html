@@ -8,7 +8,7 @@
 <p class=center>Specifica la quantità di ore di straordinario da salvare.</p> 
 #{/alert}
 #{form action:@approval(competenceRequest.id, approval, value), method:'POST', class:'form form-horizontal',
-	'data-async':'#page_content', 'data-async-error':'#approval'}
+	'data-async':'#page_content', 'data-async-error':'#approval', 'data-async-reload-parent':'true'}
 
 #{f.hidden 'competenceRequest.id', value:competenceRequest.id /}
 

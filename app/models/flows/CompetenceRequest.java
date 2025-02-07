@@ -31,14 +31,11 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import models.Person;
 import models.base.MutableModel;
 import models.enumerate.ShiftSlot;
 import models.flows.enumerate.CompetenceRequestType;
-
 import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import play.data.validation.Required;
@@ -49,7 +46,6 @@ import play.data.validation.Required;
  * @author Dario Tagliaferri
  *
  */
-@ToString
 @Getter
 @Setter
 @Entity
