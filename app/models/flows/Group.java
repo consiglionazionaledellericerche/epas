@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2025  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,6 @@
  *     You should have received a copy of the GNU Affero General Public License
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package models.flows;
 
 import com.google.common.base.Strings;
@@ -34,10 +33,8 @@ import lombok.Setter;
 import models.GroupOvertime;
 import models.Office;
 import models.Person;
-import models.TotalOvertime;
 import models.base.MutableModel;
 import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 
@@ -86,7 +83,7 @@ public class Group extends MutableModel {
    * vuote in null.
    */
   public void setExternalId(String externalId) {
-    externalId = Strings.emptyToNull(externalId) == null ? null : externalId.trim();
+    this.externalId = Strings.emptyToNull(externalId) == null ? null : externalId.trim();
   }
 
   /**

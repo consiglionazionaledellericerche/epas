@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
   - Cambiati defaut scadenza cache token OAuth
+  - Corretto salvataggio ExternalId dei gruppi
 
 ## [2.22.3] - 2025-02-04
 ### Added

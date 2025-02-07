@@ -99,8 +99,6 @@ public class Groups extends Controller {
   @Inject
   private static GroupOvertimeManager groupOvertimeManager;
   @Inject
-  private static ConfigurationManager configurationManager;
-  @Inject
   private static PersonOvertimeDao personOvertimeDao;
 
   /**
