@@ -77,6 +77,10 @@ public class CertificationService implements ICertificationService {
     this.monthData = monthData;
   }
 
+  public void invalidateOauthTokenCache() {
+    certificationsComunication.invalidateOauthTokenCache();
+  }
+
   /**
    * Verifica se il token è abilitato alla sede.
    *

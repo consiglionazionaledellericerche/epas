@@ -31,6 +31,13 @@
   #{/form}
   #{/panel}
 
+  <!-- CACHE TOKEN OAUTH -->
+  #{panel title:'Invalidazione cache del Token OAuth ', dim:12 }
+     #{form @Certifications.invalidateOauthTokenCache(),class:'form-horizontal'}
+      <button type="submit" class="btn btn-default">Invalida cache</button>
+     #{/form}
+  #{/panel}
+
   <!-- LE TIMBRATURE DISACCOPPIATE -->
   #{panel title:'Eliminazione timbrature disaccoppiate', dim:12 }
 
