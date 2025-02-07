@@ -4,10 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.23.0] - Unreleased
+## [2.23.0] - 2025-02-07
 ### Added
+  - Introdotta funzionalità per svuoltare la cache del Token OAuth
   - Aggiunta possibilità di doppia approvazione del flusso di richiesta straordinari da parte del responsabile
     di gruppo e del responsabile di sede.
+    
+### Changed
+  - Cambiati defaut scadenza cache token OAuth
+  - Corretto salvataggio ExternalId dei gruppi
 
 ## [2.22.3] - 2025-02-04
 ### Added
