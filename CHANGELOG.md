@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.23.1] - Unreleased
+### Added
+  - Aggiunto nuovo parametro generale che permette di inviare il report giornaliero sui problemi sui giorni che già viene inviato 
+    agli amministratori del personale anche ai responsabili di sede.
+
+### Changed
+  - Modificato l'algoritmo che invia il report giornaliero sui problemi sui giorni consentendo di considerare anche di inviarlo 
+    ai responsabili di sede nel caso nella loro sede sia stato messo a SI il parametro descritto nella sezione precedente.
+
 ## [2.23.0] - 2025-02-07
 ### Added
   - Introdotta funzionalità per svuoltare la cache del Token OAuth

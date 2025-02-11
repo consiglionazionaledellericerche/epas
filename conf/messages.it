@@ -1351,6 +1351,7 @@ ENABLE_REPERIBILITY_APPROVAL_BEFORE_END_MONTH=Abilta approvazione reperibilità 
 ENABLE_MISSIONS_INTEGRATION= Abilitazione integrazione con piattaforma Missioni
 SEND_FLOWS_NOTIFICATION=Invio notifica per terminazione flusso di approvazione
 SEND_MANAGER_NOTIFICATION_FOR_661=Invio notifica terminazione flusso permesso personale a responsabile di gruppo
+SEND_INFO_DAYS_JOB_TO_SEAT_SUPERVISOR=Invio mail al responsabile di sede per info su problemi giornalieri
 
 EXPIRY_VACATION_PAST_YEAR=Giorno massimo utilizzo ferie dell'anno precedente
 MONTH_EXPIRY_RECOVERY_DAYS_13=Mese massimo per utilizzo residui dell'anno precedente per i livelli da I a III

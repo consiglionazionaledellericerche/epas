@@ -17,6 +17,8 @@ import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayInTroubleManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import models.Office;
 import models.Person;
 import models.PersonDayInTrouble;
@@ -47,6 +49,8 @@ public class AlertNoInfoDaysJob extends Job {
   static PersonDao personDao;
   @Inject
   static PersonDayInTroubleManager personDayInTroubleManager;
+  @Inject
+  static ConfigurationManager configurationManager;
 
   private static final List<Integer> weekEnd = ImmutableList
       .of(DateTimeConstants.SATURDAY, DateTimeConstants.SUNDAY);
@@ -68,6 +72,12 @@ public class AlertNoInfoDaysJob extends Job {
       for (Office o : officeList) {
         List<User> userList = uroDao
             .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.PERSONNEL_ADMIN), o);
+        if ((Boolean) configurationManager
+            .configValue(o, EpasParam.SEND_INFO_DAYS_JOB_TO_SEAT_SUPERVISOR)) {
+          List<User> seatSupervisorList = uroDao
+              .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), o);
+          userList.addAll(seatSupervisorList);
+        }
         List<User> list = map.get(o);
         if (list == null || list.isEmpty()) {
           list = Lists.newArrayList();

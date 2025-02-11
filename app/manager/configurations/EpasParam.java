@@ -85,6 +85,14 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
+  SEND_INFO_DAYS_JOB_TO_SEAT_SUPERVISOR("send_info_days_job_to_seat_supervisor",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
+  
 
   //#######################################
   // PERSON PARAMS
