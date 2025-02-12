@@ -53,6 +53,11 @@
       Una volta inserito il codice, sarà possibile per il dipendente anche allegare il certificato rilasciato in sede 
       di visita medica.</p> 
     #{/if}
+	
+	#{if configuration.epasParam.equals(manager.configurations.EpasParam.SEND_INFO_DAYS_JOB_TO_SEAT_SUPERVISOR) }
+	  <p>Abilitando questa funzionalità si permette al responsabile della sede <strong>${configuration.office.name}</strong> di ricevere via mail la situazione
+		relativa a problemi sui giorni dei dipendenti della sede su cui è responsabile. Questa mail viene comunque sicuramente inviata agli amministratori del personale.</p> 
+	#{/if}
     
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.NUMBER_OF_VIEWING_COUPLE) }
       <p>Il numero di coppie di timbrature visibili di default nella pagina Timbrature.</p> 
@@ -128,7 +133,7 @@
       Per la configurazione del flusso di approvazione vedi la scheda: <strong>"Flussi di lavoro"</strong>.<p>
            
     #{/if}
-    
+	
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.EXPIRY_VACATION_PAST_YEAR) }
       <p>Questo parametro configurabile su base annuale specifica il giorno di scadenza delle ferie anno precedente.
       <p>Esempio: <em>impostando il valore 31/8 per l'anno 2016 si otterrà che le ferie dell'anno 2015 si

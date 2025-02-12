@@ -102,7 +102,7 @@
       #{else}
       <tr>
         <td>   
-        #{if conf.epasParam.equals(manager.configurations.EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM)}  
+        #{if conf.epasParam.equals(manager.configurations.EpasParam.SEND_INFO_DAYS_JOB_TO_SEAT_SUPERVISOR)}  
         	<p style="color:red;">New! <i class="fa fa-check"></i></p>
         #{/if}   		
         	#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
