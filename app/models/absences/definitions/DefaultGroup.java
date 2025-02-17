@@ -250,6 +250,11 @@ public enum DefaultGroup {
   MALATTIA_FIGLIO_4("124/134/144 - Malattia quarto figlio", "",
       DefaultCategoryType.MALATTIA_FIGLIO_4, 2, GroupAbsenceTypePattern.simpleGrouping,
       PeriodType.always, DefaultTakable.T_MALATTIA_FIGLIO_4, null, null, false, false),
+  
+  MALATTIA_FIGLIO_5("125/135/145 - Malattia quinto figlio", "",
+      DefaultCategoryType.MALATTIA_FIGLIO_5, 2, GroupAbsenceTypePattern.simpleGrouping,
+      PeriodType.always, DefaultTakable.T_MALATTIA_FIGLIO_5, null, null, false, false),
+  
   G_25A("25A - Astensione facoltativa post partum 30% primo figlio 0-12 anni 90 giorni",
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child1_0_12, DefaultTakable.T_25A, DefaultComplation.C_25A, null,

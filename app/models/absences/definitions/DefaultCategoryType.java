@@ -56,6 +56,7 @@ public enum DefaultCategoryType {
   MALATTIA_FIGLIO_2("Malattia secondo figlio", 10, DefaultTab.CONGEDI_PARENTALI), 
   MALATTIA_FIGLIO_3("Malattia terzo figlio", 11, DefaultTab.CONGEDI_PARENTALI),
   MALATTIA_FIGLIO_4("Malattia quarto figlio", 12, DefaultTab.CONGEDI_PARENTALI),
+  MALATTIA_FIGLIO_5("Malattia quinto figlio", 13, DefaultTab.CONGEDI_PARENTALI),
 
   CONGEDO_MATRIMONIO("Congedo per matrimonio", 12, DefaultTab.CONGEDI_PARENTALI),
 
