@@ -321,11 +321,11 @@ public enum DefaultTakable {
   T_24PROV(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_24PROV, DefaultAbsenceType.A_24MPROV), 
       ImmutableSet.of(DefaultAbsenceType.A_24PROV, DefaultAbsenceType.A_24MPROV), 
-      30, null),
+      60, null),
   T_242PROV(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_242PROV, DefaultAbsenceType.A_242MPROV), 
       ImmutableSet.of(DefaultAbsenceType.A_242PROV, DefaultAbsenceType.A_242MPROV), 
-      30, null),
+      60, null),
 
   T_232(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_232, 
@@ -554,6 +554,11 @@ public enum DefaultTakable {
   T_MALATTIA_FIGLIO_4(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_124, DefaultAbsenceType.A_134, DefaultAbsenceType.A_144),
       ImmutableSet.of(DefaultAbsenceType.A_124, DefaultAbsenceType.A_134, DefaultAbsenceType.A_144),
+      -1, null),
+  
+  T_MALATTIA_FIGLIO_5(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_125, DefaultAbsenceType.A_135, DefaultAbsenceType.A_145),
+      ImmutableSet.of(DefaultAbsenceType.A_125, DefaultAbsenceType.A_135, DefaultAbsenceType.A_145),
       -1, null),
 
   T_441(AmountType.units, 
