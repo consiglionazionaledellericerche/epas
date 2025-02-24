@@ -40,7 +40,7 @@
 	    <tr>
 	       <td>${block.codeBlock} (${block.first}-${block.last})</td>
            <td>
-	         #{secure.link @personMealTickets(block.contract.person.id), 
+	         #{secure.link @personMealTickets(block.contract.id), 
 	            target:block.contract.person.office}
                ${block.contract.person.fullname}
              #{/secure.link}
