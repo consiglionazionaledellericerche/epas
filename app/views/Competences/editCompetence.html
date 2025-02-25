@@ -22,7 +22,7 @@ title:person.fullname + ' - ' + code.description + ' ' + code.code}
     
     #{alert color:'warning'}
       <!-- Suggerimenti -->
-      #{if code.code.equals('S1') || code.code.equals('S2')}
+      #{if code.code.equals('S1')}
   		#{if psDto != null}
   		  <p><strong>Suggerimenti</strong></p>
   		  <p>
@@ -60,7 +60,34 @@ title:person.fullname + ' - ' + code.description + ' ' + code.code}
 			#{/list}
 		  <p>	 
 		#{/if}
-	  #{/if}	
+	  #{/if}
+	  #{elseif code.code.equals('S2')}
+	  	<table class="table table-condensed">
+	  			<tr>
+				    <td>
+				      <em>Tempo per straordinari festivi abilitabile</em>
+				      <i class="fa fa-question-circle" aria-hidden="true" webui-popover-hover 
+				           data-content="<strong>Tempo per straordinari festivi abilitabile</strong> La somma di tutte le differenze positive nel mese abilitabili nei giorni festivi.<br> 
+				                   <strong>Differenze positive</strong> Giorni in cui il dipendente ha svolto più ore di quelle <br>previste dal piano orario giornaliero."></i>
+				    </td>
+				    <td>
+				      <strong>${dto.decurtedTimeAtWork.toHourTime()}</strong>
+				      <a href="@{Stampings.personStamping(person.id, year, month)}">
+				        <i class="fa fa-search" aria-hidden="true" webui-popover-hover data-content="Visualizza Presenze"></i></a>
+				    </td>
+				  </tr>
+				  <tr>
+				    <td>
+				      <em>Tempo per straordinari festivi abilitato</em>
+				      <i class="fa fa-question-circle" aria-hidden="true" webui-popover-hover 
+    				       data-content="<strong>Tempo per straordinari festivi abilitato</strong> La somma di tutte le differenze positive nel mese abilitate nei giorni festivi."></i>
+				    </td>
+				    <td>
+                      <strong>${dto.assignedTimeAtWork.toHourTime()}</strong>
+				    </td>
+				  </tr>
+	  	</table>
+	  #{/elseif}	
 	  
     <!-- Limiti -->
     <p><strong>Limiti</strong></p>	  
