@@ -354,7 +354,7 @@ public class CompetenceManager {
   
   public HolydaysWorkingTimeSituation holidaysMinutesWorked(Person person, int year, int month) {
     List<PersonDay> list = personDayDao
-        .getHolidayWorkingTime(person, Optional.fromNullable(year), Optional.fromNullable(month));
+        .getHolidayWorkedDays(person, year, Optional.fromNullable(month));
     /*
      * TODO: cambiare il metodo qui sopra getHolidayWorkingTime con un altro metodo da creare ex novo che recupera
      * i personDays in cui il dipendente ha lavorato nel festivo: bisogna quindi controllare che il giorno

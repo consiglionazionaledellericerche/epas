@@ -257,6 +257,38 @@ public class PersonDayDao extends DaoBase {
         .orderBy(personDay.date.asc())
         .fetch();
   }
+  
+  /**
+   * I personday di giorni festivi in cui si è fatto dell'orario di lavoro.
+   * 
+   * @param person la persona da ricercare
+   * @param year l'anno di riferimento
+   * @param month il mese (opzionale) di riferimento
+   * @return la lista dei personday dei giorni festivi in cui il dipendente ha svolto del lavoro. 
+   */
+  public List<PersonDay> getHolidayWorkedDays(Person person, Integer year, Optional<Integer> month) {
+    QPersonDay personDay = QPersonDay.personDay;
+    final BooleanBuilder condition = new BooleanBuilder();
+
+    condition.and(personDay.person.eq(person));
+    condition.and(personDay.isHoliday.eq(true));
+    condition.and(personDay.onHoliday.isNotNull());
+    
+    if (month.isPresent()) {
+      LocalDate monthBegin = new LocalDate(year, month.get(), 1);
+      LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+      condition.and(personDay.date.between(monthBegin, monthEnd));
+    } else {
+      LocalDate yearBegin = new LocalDate(year, 1, 1);
+      LocalDate yearEnd = new LocalDate(year, 12, 31);
+      condition.and(personDay.date.between(yearBegin, yearEnd));
+    }
+
+    return getQueryFactory().selectFrom(personDay).where(condition)
+        .orderBy(personDay.person.surname.asc())
+        .orderBy(personDay.date.asc())
+        .fetch();
+  }
 
 
   /**
