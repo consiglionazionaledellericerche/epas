@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.23.2] - Unreleased
+### Added
+  - Aggiunto algoritmo che controlla le ore di straordinario festivo per assegnare le giuste quantità nell'interfacci di inserimento
+    da parte dell'amministratore del personale
 ### Changed
   - Risolto problema nella vista del returnedMealTicket
   - Modificata la fruibilità dei codici per legge 104: ora i codici giornalieri sono separati da quelli orari che hanno una limitazione in minuti

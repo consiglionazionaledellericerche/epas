@@ -72,6 +72,7 @@ import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.TotalOvertime;
+import models.dto.HolydaysWorkingTimeSituation;
 import models.dto.TimeTableDto;
 import models.enumerate.CalculationType;
 import org.apache.commons.lang.StringUtils;
@@ -349,6 +350,22 @@ public class CompetenceManager {
       }
     }
     return 0;
+  }
+  
+  public HolydaysWorkingTimeSituation holidaysMinutesWorked(Person person, int year, int month) {
+    List<PersonDay> list = personDayDao
+        .getHolidayWorkedDays(person, year, Optional.fromNullable(month));
+    /*
+     * TODO: cambiare il metodo qui sopra getHolidayWorkingTime con un altro metodo da creare ex novo che recupera
+     * i personDays in cui il dipendente ha lavorato nel festivo: bisogna quindi controllare che il giorno
+     * sia festivo e che il campo onHoliday sia maggiore di zero. 
+     */
+    HolydaysWorkingTimeSituation dto = new HolydaysWorkingTimeSituation();
+    for (PersonDay pd : list) {
+      dto.decurtedTimeAtWork = dto.decurtedTimeAtWork + pd.getOnHoliday();
+      dto.assignedTimeAtWork = dto.assignedTimeAtWork + pd.getApprovedOnHoliday();
+    }
+    return dto;
   }
 
 
