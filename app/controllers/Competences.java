@@ -91,6 +91,7 @@ import models.ShiftTimeTable;
 import models.ShiftType;
 import models.TotalOvertime;
 import models.User;
+import models.dto.HolydaysWorkingTimeSituation;
 import models.dto.OrganizationTimeTable;
 import models.dto.TimeTableDto;
 import models.enumerate.CalculationType;
@@ -578,11 +579,19 @@ public class Competences extends Controller {
     notFoundIfNull(person);
     Office office = person.getOffice();
     if (code.getCode().equals("S1") || code.getCode().equals("S2") || code.getCode().equals("S3")) {
+      PersonStampingRecap psDto = null;
       boolean check = (Boolean) configurationManager
           .configValue(person, EpasParam.DISABLE_OVERTIME_LIMIT);
-      PersonStampingRecap psDto = stampingsRecapFactory.create(person,
-          year, month, true);
-      render(person, code, year, month, psDto, office, competence, check);
+      if (code.getCode().equals("S1")) {
+        psDto = stampingsRecapFactory.create(person,
+            year, month, true);
+        render(person, code, year, month, psDto, office, competence, check);
+      }
+      if (code.getCode().equals("S2")) {
+        HolydaysWorkingTimeSituation dto = 
+            competenceManager.holidaysMinutesWorked(person, year, month);
+        render(person, code, year, month, psDto, office, competence, check, dto);
+      }      
     }
 
     render(person, code, year, month, office, competence);
