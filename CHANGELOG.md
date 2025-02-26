@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.23.2] - Unreleased
 ### Changed
   - Risolto problema nella vista del returnedMealTicket
+  - Modificata la fruibilità dei codici per legge 104: ora i codici giornalieri sono separati da quelli orari che hanno una limitazione in minuti
+    e che non supera le 18 ore mensili. A discrezione dell'amministratore usare gli uni o gli altri.
 
 ## [2.23.1] - 2025-02-18
 ### Added

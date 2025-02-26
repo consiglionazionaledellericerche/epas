@@ -36,11 +36,17 @@ public enum DefaultTakable {
 
   T_18(AmountType.units,
       ImmutableSet.of(DefaultAbsenceType.A_18, 
-          DefaultAbsenceType.A_18M,
-          DefaultAbsenceType.A_18P,
-          DefaultAbsenceType.A_18PM), 
-      ImmutableSet.of(DefaultAbsenceType.A_18, DefaultAbsenceType.A_18M), 
+          DefaultAbsenceType.A_18P), 
+      ImmutableSet.of(DefaultAbsenceType.A_18), 
       3, TakeAmountAdjustment.workingTimePercent),
+  
+  T_18M(AmountType.minutes,
+      ImmutableSet.of(DefaultAbsenceType.A_18M,
+          DefaultAbsenceType.A_18PM), 
+      ImmutableSet.of(DefaultAbsenceType.A_18M), 
+      1080, TakeAmountAdjustment.workingTimePercent),
+  
+  
   T_18P(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_18, 
           DefaultAbsenceType.A_18M,
@@ -51,11 +57,17 @@ public enum DefaultTakable {
 
   T_182(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_182, 
-          DefaultAbsenceType.A_182M,
-          DefaultAbsenceType.A_182P,
-          DefaultAbsenceType.A_182PM), 
-      ImmutableSet.of(DefaultAbsenceType.A_182, DefaultAbsenceType.A_182M), 
+          DefaultAbsenceType.A_182P), 
+      ImmutableSet.of(DefaultAbsenceType.A_182), 
       3, TakeAmountAdjustment.workingTimePercent),
+  
+  T_182M(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_182M,
+          DefaultAbsenceType.A_182PM), 
+      ImmutableSet.of(DefaultAbsenceType.A_182M), 
+      1080, null),
+  
+  
   T_182P(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_182, 
           DefaultAbsenceType.A_182M,
@@ -65,18 +77,27 @@ public enum DefaultTakable {
       3, null),
 
   T_183(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_183, 
-          DefaultAbsenceType.A_183M), 
-      ImmutableSet.of(DefaultAbsenceType.A_183, DefaultAbsenceType.A_183M), 
+      ImmutableSet.of(DefaultAbsenceType.A_183), 
+      ImmutableSet.of(DefaultAbsenceType.A_183), 
       3, TakeAmountAdjustment.workingTimePercent),
+  
+  T_183M(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_183M), 
+      ImmutableSet.of(DefaultAbsenceType.A_183M), 
+      1080, null),
 
   T_19(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_19, 
-          DefaultAbsenceType.A_19M,
-          DefaultAbsenceType.A_19P,
-          DefaultAbsenceType.A_19PM), 
-      ImmutableSet.of(DefaultAbsenceType.A_19, DefaultAbsenceType.A_19M), 
+          DefaultAbsenceType.A_19P), 
+      ImmutableSet.of(DefaultAbsenceType.A_19), 
       3, TakeAmountAdjustment.workingTimePercent),
+  
+  T_19M(AmountType.minutes,
+      ImmutableSet.of(DefaultAbsenceType.A_19M, 
+          DefaultAbsenceType.A_19PM), 
+      ImmutableSet.of(DefaultAbsenceType.A_19M), 
+      1080, null),
+  
   T_19P(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_19, 
           DefaultAbsenceType.A_19M,

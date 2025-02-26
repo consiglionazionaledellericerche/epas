@@ -550,6 +550,8 @@ public class AbsenceService {
             DefaultGroup.TELELAVORO_RICERCATORI_TECNOLOGI.name()).get();
     final GroupAbsenceType disabledPersonAbsence =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_19_DIPENDENTI.name()).get();
+    final GroupAbsenceType disabledPersonAbsenceHourly =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_19_DIPENDENTIM.name()).get();
     final GroupAbsenceType disabledPersonAbsenceTwoHours =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_26_DIPENDENTI.name()).get();
     final GroupAbsenceType rightToStudy =
@@ -562,10 +564,16 @@ public class AbsenceService {
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_OA_DIPENDENTI.name()).get();
     final GroupAbsenceType disabledRelativeAbsence = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_18_PARENTI_DIPENDENTI.name()).get();
+    final GroupAbsenceType disabledRelativeAbsenceHourly = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_18_PARENTI_DIPENDENTIM.name()).get();
     final GroupAbsenceType secondDisabledRelativeAbsence = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_182_PARENTI_DIPENDENTI.name()).get();
+    final GroupAbsenceType secondDisabledRelativeAbsenceHourly = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_182_PARENTI_DIPENDENTIM.name()).get();
     final GroupAbsenceType thirdDisabledRelativeAbsence = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_183_PARENTI_DIPENDENTI.name()).get();
+    final GroupAbsenceType thirdDisabledRelativeAbsenceHourly = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_183_PARENTI_DIPENDENTIM.name()).get();
     final GroupAbsenceType medicalExams = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_631_DIPENDENTI.name()).get();
     final GroupAbsenceType cod39LA = absenceComponentDao
@@ -592,6 +600,7 @@ public class AbsenceService {
       groupsPermitted.remove(employeeOffseat);
       groupsPermitted.remove(employeeCompensatory);
       groupsPermitted.remove(disabledPersonAbsence);
+      groupsPermitted.remove(disabledPersonAbsenceHourly);
       groupsPermitted.remove(disabledPersonAbsenceTwoHours);
       groupsPermitted.remove(rightToStudy);
       for (AbsenceType abt : covid19.getCategory().getAbsenceTypes()) {
@@ -599,21 +608,13 @@ public class AbsenceService {
           groupsPermitted.remove(covid19);
         }
       }
-      //      for (AbsenceType abt : employeeVacationExtension.getCategory().getAbsenceTypes()) {
-      //        if (abt.isExpired()) {
-      //          groupsPermitted.remove(employeeVacationExtension);
-      //        }
-      //      }
-      //groupsPermitted.remove(covid19);
       groupsPermitted.remove(medicalExams);
       groupsPermitted.remove(disabledRelativeAbsence);
       groupsPermitted.remove(additionalHours);
       groupsPermitted.remove(secondDisabledRelativeAbsence);
+      groupsPermitted.remove(secondDisabledRelativeAbsenceHourly);
       groupsPermitted.remove(thirdDisabledRelativeAbsence);
-      //groupsPermitted.remove(parentalLeaveForFathers);
-      //groupsPermitted.remove(parentalLeaveTwinsForFathers);
-      //groupsPermitted.remove(lagile);
-      //groupsPermitted.remove(cod39LA);
+      groupsPermitted.remove(thirdDisabledRelativeAbsenceHourly);
       for (AbsenceType abt : smart.getCategory().getAbsenceTypes()) {
         if (abt.isExpired() || !templateUtility.enableSmartworking()) {
           groupsPermitted.remove(smart);
@@ -640,16 +641,6 @@ public class AbsenceService {
         groupsPermitted.add(employeeOffseat);
       }
 
-      //  if ((Boolean) confManager.configValue(person.getOffice(), EpasParam.TR_VACATIONS)
-      //      && person.getQualification().getQualification() <= 3) {
-      //    groupsPermitted.add(employeeVacation);
-      //  }
-      //
-      //  if ((Boolean) confManager.configValue(person.getOffice(), EpasParam.TR_COMPENSATORY)
-      //      && person.getQualification().getQualification() <= 3) {
-      //    groupsPermitted.add(employeeCompensatory);
-      //      }
-
       if ((Boolean) confManager.configValue(person, EpasParam.TELEWORK)) {
         groupsPermitted.add(telework);
       }
@@ -661,6 +652,7 @@ public class AbsenceService {
 
       if ((Boolean) confManager.configValue(person, EpasParam.DISABLED_PERSON_PERMISSION)) {
         groupsPermitted.add(disabledPersonAbsence);
+        groupsPermitted.add(disabledPersonAbsenceHourly);
         groupsPermitted.add(disabledPersonAbsenceTwoHours);
       }
 
@@ -682,11 +674,14 @@ public class AbsenceService {
 
       if ((Boolean) confManager.configValue(person, EpasParam.DISABLED_RELATIVE_PERMISSION)) {
         groupsPermitted.add(disabledRelativeAbsence);
+        groupsPermitted.add(disabledRelativeAbsenceHourly);
         if ((Boolean) confManager.configValue(person, 
             EpasParam.SECOND_DISABLED_RELATIVE_PERMISSION)) {
           groupsPermitted.add(secondDisabledRelativeAbsence);
+          groupsPermitted.add(secondDisabledRelativeAbsenceHourly);
           if ((Boolean) confManager.configValue(person, EpasParam.THIRD_DISABLED_RELATIVE_PERMISSION)) {
             groupsPermitted.add(thirdDisabledRelativeAbsence);
+            groupsPermitted.add(thirdDisabledRelativeAbsenceHourly);
           }
         }
       }
@@ -721,14 +716,10 @@ public class AbsenceService {
   private List<String> namesOfChildGroups() {
     List<String> names = Lists.newArrayList();
     names.add(DefaultGroup.G_23.name());
-    //  names.add(DefaultGroup.G_24.name());
     names.add(DefaultGroup.G_25.name());
     names.add(DefaultGroup.G_25A.name());
     names.add(DefaultGroup.G_232.name());
     names.add(DefaultGroup.G_233.name());
-    //  names.add(DefaultGroup.G_242.name());
-    //  names.add(DefaultGroup.G_243.name());
-    //  dnames.add(DefaultGroup.G_244.name());
     names.add(DefaultGroup.G_234.name());
     names.add(DefaultGroup.G_252.name());
     names.add(DefaultGroup.G_253.name());
@@ -741,7 +732,6 @@ public class AbsenceService {
     names.add(DefaultGroup.MALATTIA_FIGLIO_3.name());
     names.add(DefaultGroup.MALATTIA_FIGLIO_4.name());
     names.add(DefaultGroup.G_25P.name());
-    //    names.add(DefaultGroup.G_COV50.name());
     
     return names;
   }
