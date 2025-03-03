@@ -63,13 +63,13 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
           LocalDateTime.parse(getDateFromJson(jsonObject.get("data_inizio").getAsString()));
       mission.dataFine = 
           LocalDateTime.parse(getDateFromJson(jsonObject.get("data_fine").getAsString()));
-      if (jsonObject.get("destinazione_nel_comunediresidenza") == null
-          || jsonObject.get("destinazione_nel_comunediresidenza").isJsonNull()) {
-        mission.destinazioneNelComuneDiResidenza = null;
+      if (jsonObject.has("nel_comune_di_residenza")) {
+        mission.destinazioneNelComuneDiResidenza = jsonObject.get("nel_comune_di_residenza").getAsBoolean();
+      } else if (jsonObject.has("destinazione_nel_comunediresidenza")) {
+        mission.destinazioneNelComuneDiResidenza = jsonObject.get("destinazione_nel_comunediresidenza").getAsBoolean();
       } else {
-        mission.destinazioneNelComuneDiResidenza = 
-            jsonObject.get("destinazione_nel_comunediresidenza").getAsBoolean();
-      }       
+        mission.destinazioneNelComuneDiResidenza = null;
+      }
           
       if (jsonObject.get("id_ordine") == null 
           || jsonObject.get("id_ordine").isJsonNull()) {
