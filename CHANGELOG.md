@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.24.0] - Unreleased
+### Changed
+  - Modificato il binder per l'integrazione del componente missioni con epas. Consentito di specificare un nuovo nome per il campo
+    delle missioni nel comune di residenza. 
+
 ## [2.23.2] - 2025-02-26
 ### Added
   - Aggiunto algoritmo che controlla le ore di straordinario festivo per assegnare le giuste quantità nell'interfaccia di inserimento
