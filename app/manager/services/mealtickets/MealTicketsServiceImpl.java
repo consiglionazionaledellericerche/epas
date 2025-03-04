@@ -102,7 +102,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     List<MealTicket> expireOrderedAsc = mealTicketDao
         .contractMealTickets(contract, Optional.absent(),
             MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC, false);
-    
+
     List<MealTicket> expireOrderedAscPostInit = mealTicketDao
         .contractMealTickets(contract, dateInterval,
             MealTicketOrder.ORDER_BY_EXPIRE_DATE_ASC, false);
@@ -178,7 +178,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
       } else {
         mealTicket.setCode("" + codeBlock + i);
       }
-      
+
       mealTicketList.add(mealTicket);
     }
 
@@ -215,7 +215,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     List<MealTicket> contractMealTicketsDesc = mealTicketDao
         .contractMealTickets(previousContract, Optional.absent(), 
             MealTicketOrder.ORDER_BY_DELIVERY_DATE_DESC, false);
-      
+
     LocalDate pastDate = LocalDate.now();
     for (int i = 0; i < recap.get().getRemainingMealTickets(); i++) {
 
@@ -254,17 +254,29 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     int buoniElettronici = 0;
     int buoniUsati = monthRecap.getBuoniPastoUsatiNelMese();
     int buoniDaConteggiare = 0;
+
+    final java.util.Optional<Configuration> conf = 
+        contract.getPerson().getOffice().getConfigurations().stream()
+        .filter(configuration -> 
+        configuration.getEpasParam() == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
+
     MealTicketComposition composition = new MealTicketComposition();
-    //TODO: controllare che esista una inizializzazione e inserirla nel computo dei buoni
+
     List<BlockMealTicket> list = recap.getBlockMealTicketReceivedDeliveryDesc();
+    if (list.size() == 0) {
+
+      if (conf.isPresent()) {
+        composition.blockType = BlockType.valueOf(conf.get().getFieldValue()); 
+        composition.electronicMealTicket = monthRecap.getBuoniPastoUsatiNelMese();
+        composition.paperyMealTicket = 0;
+      }                 
+
+      return composition;
+    }
     if (monthRecap.getRemainingMealTickets() < 0) {
       //devo guardare quale sia il default e contare quanti sono i buoni senza copertura
       buoniDaConteggiare = buoniUsati;
-      composition.isBlockMealTicketTypeKnown = false;
-      final java.util.Optional<Configuration> conf = 
-          contract.getPerson().getOffice().getConfigurations().stream()
-          .filter(configuration -> 
-          configuration.getEpasParam() == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
+      composition.isBlockMealTicketTypeKnown = false;      
       if (conf.isPresent()) {
         try { 
           blockType = BlockType.valueOf(conf.get().getFieldValue()); 

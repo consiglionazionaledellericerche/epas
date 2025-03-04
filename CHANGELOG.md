@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.24.0] - Unreleased
+### Changed
+  - Modificato algoritmo che calcola i buoni pasto maturati da inviare ad attestati.
+
 ## [2.23.2] - 2025-02-26
 ### Added
   - Aggiunto algoritmo che controlla le ore di straordinario festivo per assegnare le giuste quantità nell'interfaccia di inserimento
