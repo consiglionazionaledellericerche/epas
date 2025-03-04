@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
   - Modificato il binder per l'integrazione del componente missioni con epas. Consentito di specificare un nuovo nome per il campo
     delle missioni nel comune di residenza. 
+  - Modificato algoritmo che calcola i buoni pasto maturati da inviare ad attestati.
 
 ## [2.23.2] - 2025-02-26
 ### Added
