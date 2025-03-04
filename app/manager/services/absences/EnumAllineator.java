@@ -44,6 +44,7 @@ import models.absences.definitions.DefaultTab;
 import models.absences.definitions.DefaultTakable;
 import org.joda.time.LocalDate;
 import org.testng.collections.Lists;
+import play.Play;
 
 /**
  * Allinea gli Enum presenti nel codice e che rappresentato la configurazione
@@ -53,6 +54,7 @@ import org.testng.collections.Lists;
 public class EnumAllineator {
   
   private final AbsenceComponentDao absenceComponentDao;
+  private boolean cleanAll;
 
   /**
    * Constructor for injection.
@@ -60,6 +62,7 @@ public class EnumAllineator {
   @Inject
   public EnumAllineator(AbsenceComponentDao absenceComponentDao) {
     this.absenceComponentDao = absenceComponentDao;
+    cleanAll = "true".equalsIgnoreCase(Play.configuration.getProperty("cleanAbsenceTypesConfigurations", "true"));
   }
  
   /**
@@ -165,7 +168,7 @@ public class EnumAllineator {
     if (initialization) {
       return;
     }
-    
+
     List<ComplationAbsenceBehaviour> allComplation = ComplationAbsenceBehaviour.findAll();
     for (ComplationAbsenceBehaviour complation : allComplation) {
       Optional<DefaultComplation> defaultComplation = DefaultComplation.byName(complation); 
@@ -176,17 +179,22 @@ public class EnumAllineator {
         updateSet(complation.getReplacingCodes(), defaultComplation.get().replacingCodes);
         complation.save();
       } else {
-        //le complation che non sono enumerate le elimino
-        for (GroupAbsenceType group : complation.getGroupAbsenceTypes()) {
-          group.setComplationAbsenceBehaviour(null);
-          group.save();
+        if (cleanAll) {
+          //le complation che non sono enumerate le elimino
+          for (GroupAbsenceType group : complation.getGroupAbsenceTypes()) {
+            group.setComplationAbsenceBehaviour(null);
+            group.save();
+          }
+          complation.delete();
+          log.info("Cancellato complation {}", complation.getName());
+        } else {
+          log.info("Il complation {} non e' enumerato in Java ma non lo elimino", complation.getName());
         }
-        complation.delete();
       }
     }
     
   }
-  
+
   /**
    * Allinea i comportamenti di prendibilità.
    */
@@ -228,17 +236,20 @@ public class EnumAllineator {
         updateSet(takable.getTakenCodes(), defaultTakable.get().takenCodes);
         updateSet(takable.getTakableCodes(), defaultTakable.get().takableCodes);
         takable.save();
-      } else {
-        //i takable che non sono enumerate  le elimino
+      } else if (cleanAll) {
+        //i takable che non sono enumerate li elimino
         for (GroupAbsenceType group : takable.getGroupAbsenceTypes()) {
           group.setTakableAbsenceBehaviour(null);
           group.save();
         }
         takable.delete();
-      }
+        log.info("Cancellato takable {}", takable.getName());
+      } else {
+        log.info("Il takable {} non e' enumerato in Java ma non lo elimino", takable.getName());
+       }
     }
   }
-  
+
   /**
    * Allinea i gruppi.
    */
@@ -310,9 +321,12 @@ public class EnumAllineator {
           group.setComplationAbsenceBehaviour(null);
         }
         group.save();
-      } else {
+      } else if (cleanAll) {
         //i gruppi non enumerati li elimino
         group.delete();
+        log.info("Cancellato GroupAbsenceType {}", group.getName());
+      } else {
+        log.info("Il gruppo {} non è enumerato in Java, ma non viene eliminato.", group.getName());
       }
     }
   }
@@ -349,11 +363,14 @@ public class EnumAllineator {
         categoryTab.setTab(absenceComponentDao
             .tabByName(defaultCategory.get().categoryTab.name()).get());
         categoryTab.save();
-      } else {
+      } else if (cleanAll) {
         //le category che non sono enumerate e non sono associate ad alcun gruppo le elimino
         if (categoryTab.getGroupAbsenceTypes().isEmpty()) {
           categoryTab.delete();
+          log.info("Cancellata CategoryGroupAbsenceType {}", categoryTab.getName());
         }
+      } else {
+        log.info("La CategoryGroupAbsenceType {} non e' enumerata ma non la cancello.", categoryTab.getName());
       }
     }
   }
@@ -386,15 +403,18 @@ public class EnumAllineator {
         categoryTab.setDescription(defaultTab.get().description);
         categoryTab.setPriority(defaultTab.get().priority);
         categoryTab.save();
-      } else {
+      } else if (cleanAll) {
         //le tab che non sono enumerate e non sono associate ad alcuna categoria le elimino
         if (categoryTab.getCategoryGroupAbsenceTypes().isEmpty()) {
+          log.info("Eliminata Category Tab {}", categoryTab.getName());
           categoryTab.delete();
         }
+      } else {
+        log.info("La Category Tab {} non e' enumerata ma non viene cancellata.", categoryTab);
       }
     }
   }
-  
+
   /**
    * Allinea le liste di codici.
    *
