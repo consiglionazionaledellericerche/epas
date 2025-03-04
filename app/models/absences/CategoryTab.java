@@ -69,6 +69,9 @@ public class CategoryTab extends BaseModel implements Comparable<CategoryTab> {
    * @return categoria
    */
   public CategoryGroupAbsenceType firstByPriority() {
+    if (categoryGroupAbsenceTypes.isEmpty()) {
+      return null;
+    }
     CategoryGroupAbsenceType candidate = categoryGroupAbsenceTypes.iterator().next();
     for (CategoryGroupAbsenceType category : categoryGroupAbsenceTypes) {
       if (candidate.getPriority() > category.getPriority()) {

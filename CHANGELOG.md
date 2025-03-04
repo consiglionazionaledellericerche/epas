@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.24.0] - Unreleased
+### Added
+  - Aggiunto parametro di configurazione CLEAN_ABSENCE_TYPES_CONFIGURATIONS nel docker-compose.yml per
+    disattivare la cancellazione delle configurazioni delle assenze non presenti nel codice sorgente.
+
 ### Changed
   - Modificato il binder per l'integrazione del componente missioni con epas. Consentito di specificare un nuovo nome per il campo
     delle missioni nel comune di residenza. 

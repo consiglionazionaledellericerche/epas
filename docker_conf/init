@@ -510,6 +510,16 @@ sed 's#{{GREENPASS_ACTIVE}}#'"${GREENPASS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.c
 
 ### Fine configurazione parametri relativi al Green PAss
 
+### Configurazione per l'attivazione del pulizia del DB in funzione dell'Enum dei tipi assenza
+
+if [ -z "${CLEAN_ABSENCE_TYPES_CONFIGURATIONS}" ]; then
+  sed -n '/CLEAN_ABSENCE_TYPES_CONFIGURATIONS/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{CLEAN_ABSENCE_TYPES_CONFIGURATIONS}}#'"${CLEAN_ABSENCE_TYPES_CONFIGURATIONS}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
+### Fine configurazione per l'attivazione del pulizia del DB in funzione dell'Enum dei tipi assenza
+
 ### Configurazione dei parametri per la JVM Java 
 
 export _JAVA_OPTIONS=${JAVA_OPTIONS:--XX:MaxRAMPercentage=50}

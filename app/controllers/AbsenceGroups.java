@@ -265,8 +265,23 @@ public class AbsenceGroups extends Controller {
   public static void showGroups(Long categoryId) {
 
     List<CategoryTab> categoryTabs = absenceComponentDao.tabsByPriority();
+    if (categoryTabs.isEmpty()) {
+      flash.error("Non sono presenti Category Tabs");
+      Application.index();
+      return;
+    }
 
-    CategoryGroupAbsenceType selected = categoryTabs.get(0).firstByPriority();
+    int index = 0;
+    CategoryTab categoryTab = null;
+
+    while(categoryTab == null && index < categoryTabs.size()) {
+      if (!categoryTabs.get(index).getCategoryGroupAbsenceTypes().isEmpty()) {
+        categoryTab = categoryTabs.get(index);
+      }
+      index++;
+    }
+
+    CategoryGroupAbsenceType selected = categoryTab.firstByPriority();
     if (categoryId != null) {
       selected = CategoryGroupAbsenceType.findById(categoryId);
     }

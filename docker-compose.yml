@@ -105,7 +105,11 @@ services:
       #- TELEWORK_BASEURL=${TELEWORK_BASEURL}   # default: http://telework-stampings:8080
       #- TELEWORK_USER=${TELEWORK_USER}   # default: app.epas
       #- TELEWORK_PASS=${TELEWORK_PASS}   # default: chiedere al team di sviluppo
-      
+
+      # Impostando CLEAN_ABSENCE_TYPES_CONFIGURATIONS all'avvio non vengono rimosse le configurazioni delle assenze
+      # presenti nel database ma non nel codice sorgente.
+      #- CLEAN_ABSENCE_TYPES_CONFIGURATIONS=${CLEAN_ABSENCE_TYPES_CONFIGURATIONS} #Opzionale. Possibili valori true o false. Default: true
+
     restart: unless-stopped
 
   postgres:
