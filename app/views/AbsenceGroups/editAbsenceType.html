@@ -28,7 +28,7 @@
  		#{f.date 'absenceType.validTo',view:'year',custom_popover:'true' /}
 
  		<div class="form-group">
- 			<label class="col-sm-3 control-label">Utilizzabile per le categorie:</label>
+ 			<label class="col-sm-3 control-label">Utilizzabile per le categorie*:</label>
  				<div class="col-sm-6">
  					<label class="checkbox-inline">
 						<input name="tecnologi" type="checkbox"#{if tecnologi} checked#{/if}> Livelli I-III 
@@ -53,7 +53,8 @@
         #{f.input 'absenceType.justifiedTime', type:'number' /}   
         #{f.input 'absenceType.replacingTime', type:'number' /}
                 
-        #{f.selectEnum 'absenceType.mealTicketBehaviour', items:models.enumerate.MealTicketBehaviour.values(), custom_popover:'true' /}
+        #{f.selectEnum 'absenceType.mealTicketBehaviour', items:models.enumerate.MealTicketBehaviour.values(), 
+        custom_popover:'true', required:true /}
         #{f.booleanRadio 'absenceType.reperibilityCompatible', custom_popover:'true' /}
         #{f.booleanRadio 'absenceType.shiftCompatible', custom_popover:'true' /}
 		#{f.booleanRadio 'absenceType.realAbsence', custom_popover:'true' /}
