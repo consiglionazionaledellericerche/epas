@@ -24,12 +24,15 @@ package models.enumerate;
 public enum VacationCode {
 
   CODE_28_4("28+4", 28, 4),
+  CODE_27_4("27+4", 27, 4),
   CODE_26_4("26+4", 26, 4),
+  CODE_25_4("25+4", 25, 4),
   CODE_21_4("21+4", 21, 4),
 
   // Part time verticale 2 giorni
   CODE_11_2("11+2", 11, 2),
   CODE_10_2("10+2", 10, 2),
+  CODE_10_1("10+1", 10, 1),
   CODE_9_1("9+1", 9, 1),
   
   // Part-time verticali 3 giorni
@@ -104,6 +107,12 @@ public enum VacationCode {
     if (this.vacations == 26) {
       return accruedProgression26(days);
     }
+    if (this.vacations == 25) {
+      return accruedProgression25(days);
+    }
+    if (this.vacations == 27) {
+      return accruedProgression27(days);
+    }
     if (this.vacations == 22) {
       return accruedProgression22(days);
     }
@@ -145,6 +154,57 @@ public enum VacationCode {
       return accruedProgression1(days);
     }
     return 0;
+  }
+  
+  /**
+   * Progressione su 26 giorni.
+   *
+   * @param days giorni passati
+   * @return giorni maturati
+   */
+  private int accruedProgression25(int days) {
+
+    if (days <= 0) {
+      return 0;
+    }
+    if (days >= 1 && days <= 15) {
+      return 0;
+    }
+    if (days >= 16 && days <= 45) {
+      return 2;
+    }
+    if (days >= 46 && days <= 75) {
+      return 4;
+    }
+    if (days >= 76 && days <= 106) {
+      return 6;
+    }
+    if (days >= 107 && days <= 136) {
+      return 8;
+    }
+    if (days >= 137 && days <= 167) {
+      return 10;
+    }
+    if (days >= 168 && days <= 197) {
+      return 12;
+    }
+    if (days >= 198 && days <= 227) {
+      return 14;
+    }
+    if (days >= 228 && days <= 258) {
+      return 16;
+    }
+    if (days >= 259 && days <= 288) {
+      return 18;
+    }
+    if (days >= 289 && days <= 319) {
+      return 20;
+    }
+    if (days >= 320 && days <= 349) {
+      return 22;
+    } else {
+      return 25;
+    }
   }
 
 
@@ -199,6 +259,58 @@ public enum VacationCode {
     }
   }
 
+  /**
+   * Progressione su 28 giorni.
+   *
+   * @param days giorni passati
+   * @return giorni maturati
+   */
+  private int accruedProgression27(int days) {
+
+    if (days <= 0) {
+      return 0;
+    }
+    if (days >= 1 && days <= 15) {
+      return 0;
+    }
+    if (days >= 16 && days <= 45) {
+      return 2;
+    }
+    if (days >= 46 && days <= 75) {
+      return 4;
+    }
+    if (days >= 76 && days <= 106) {
+      return 6;
+    }
+    if (days >= 107 && days <= 136) {
+      return 9;
+    }
+    if (days >= 137 && days <= 167) {
+      return 11;
+    }
+    if (days >= 168 && days <= 197) {
+      return 14;
+    }
+    if (days >= 198 && days <= 227) {
+      return 16;
+    }
+    if (days >= 228 && days <= 258) {
+      return 18;
+    }
+    if (days >= 259 && days <= 288) {
+      return 20;
+    }
+    if (days >= 289 && days <= 319) {
+      return 22;
+    }
+    if (days >= 320 && days <= 349) {
+      return 24;
+    } else {
+      return 27;
+    }
+  }
+  
+  
   /**
    * Progressione su 28 giorni.
    *
