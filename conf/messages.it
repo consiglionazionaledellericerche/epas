@@ -425,6 +425,7 @@ timeSlot.disable=Disabilitato
 
 VacationCode.CODE_28_4= 28+4
 VacationCode.CODE_26_4= 26+4
+VacationCode.CODE_27_4= 27+4
 VacationCode.CODE_25_4= 25+4
 VacationCode.CODE_21_4= 21+4
 VacationCode.CODE_16_2= 16+2
@@ -436,6 +437,7 @@ VacationCode.CODE_21_3= 21+3
 VacationCode.CODE_20_3= 20+3
 VacationCode.CODE_30_4= 30+4
 VacationCode.CODE_32_4= 32+4
+VacationCode.CODE_10_1= 10+1
 VacationCode.CODE_9_1= 9+1
 VacationCode.CODE_13_2= 13+2
 VacationCode.CODE_14_2= 14+2
