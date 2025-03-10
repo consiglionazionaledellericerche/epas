@@ -243,6 +243,12 @@ else
   sed 's#{{REPORT_TO}}#'"${REPORT_TO}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
+if [ -z "${REPORT_ALWAYS_TO_PERSONNEL_ADMINS}" ]; then
+  sed -n '/REPORT_ALWAYS_TO_PERSONNEL_ADMINS/!p' -i ${APP_HOME}/conf/prod.conf
+else
+  sed 's#{{REPORT_ALWAYS_TO_PERSONNEL_ADMINS}}#'"${REPORT_ALWAYS_TO_PERSONNEL_ADMINS}"'#' -i ${APP_HOME}/conf/prod.conf
+fi
+
 if [ -z "${REPORT_FROM}" ]; then
   sed -n '/REPORT_FROM/!p' -i ${APP_HOME}/conf/prod.conf
 else

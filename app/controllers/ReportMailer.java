@@ -59,6 +59,7 @@ public class ReportMailer extends Mailer {
   private static final String EMAIL_FROM = "report.from";
   private static final String EMAIL_SUBJECT = "report.subject";
 
+  private static final String EMAIL_ALWAYS_TO_PERSONNEL_ADMINS = "report.always_to_personnel_admins";
   // default decenti
 
   private static final String DEFAULT_EMAIL_FROM = "segnalazioni@epas.tools.iit.cnr.it";
@@ -84,7 +85,10 @@ public class ReportMailer extends Mailer {
 
     boolean toPersonnelAdmin = false;
 
-    if (user.isPresent() && !userDao.hasAdminRoles(user.get())) {
+    boolean alwaysToPersonnelAdmins = 
+        "true".equalsIgnoreCase(Play.configuration.getProperty(EMAIL_ALWAYS_TO_PERSONNEL_ADMINS, "false"));
+
+    if (user.isPresent() && (!userDao.hasAdminRoles(user.get()) || alwaysToPersonnelAdmins)) {
       if (user.get().getPerson() != null) {
         dests = userDao.getUsersWithRoles(user.get().getPerson().getOffice(), 
             Role.PERSONNEL_ADMIN).stream()
