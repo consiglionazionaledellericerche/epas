@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2025  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -24,7 +24,12 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import lombok.extern.slf4j.Slf4j;
 import models.exports.MissionFromClient;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.threeten.bp.LocalDate;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
@@ -59,10 +64,8 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
         mission.id = jsonObject.get("id").getAsLong();
       }
       mission.matricola = jsonObject.get("matricola").getAsString();
-      mission.dataInizio = 
-          LocalDateTime.parse(getDateFromJson(jsonObject.get("data_inizio").getAsString()));
-      mission.dataFine = 
-          LocalDateTime.parse(getDateFromJson(jsonObject.get("data_fine").getAsString()));
+      mission.dataInizio = getLocalDateTime(jsonObject.get("data_inizio").getAsString());
+      mission.dataFine = getLocalDateTime(jsonObject.get("data_fine").getAsString());
       if (jsonObject.has("nel_comune_di_residenza")) {
         mission.destinazioneNelComuneDiResidenza = jsonObject.get("nel_comune_di_residenza").getAsBoolean();
       } else if (jsonObject.has("destinazione_nel_comunediresidenza")) {
@@ -101,10 +104,14 @@ public class JsonMissionBinder implements TypeBinder<MissionFromClient> {
    * Estrazione della data dalla stringa passata.
    *
    * @param string la stringa contenente la data passata nel json
-   * @return la sottostringa contenente la data nel formato yyyy-mm-dd.
    */
-  private String getDateFromJson(String string) {
-    String date = string.substring(0, 19);
-    return date;
+  public LocalDateTime getLocalDateTime(String string) {
+    //Questo è il caso legacy di date non nel formato ISO8601, tipo 2025-04-30T00:30:00
+    //in questo caso si assume che il timezone sia quello del server.
+    if (string.length() >= 19 && string.length() <= 23) {
+      return LocalDateTime.parse(string.substring(0, 19));
+    }
+    return ISODateTimeFormat.dateTime().parseDateTime(string).toLocalDateTime();
   }
+
 }
