@@ -18,7 +18,7 @@
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
-
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
@@ -586,9 +587,12 @@ public class Reperibility extends Controller {
     Office office = reperibilityType.getOffice();
     List<User> directors = uroDao
         .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office);
-    if (!directors.isEmpty()) {
+    if (directors.size() == 1) {
       seatSupervisor = directors.get(0).getPerson().getFullname();
-    } else {
+    } else if (directors.size() > 1) {
+      seatSupervisor = Joiner.on(", ").join(directors.stream().map(d -> d.getPerson().getFullname()).collect(Collectors.toList()));
+    }
+    else {
       seatSupervisor = "responsabile di sede non configurato";
     }
 
