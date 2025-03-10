@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Modificato algoritmo che calcola i buoni pasto maturati da inviare ad attestati.
   - Rimossa riduzione percentuale al DefaultTakable del gruppo relativo ai codici per 104 a ore e minuti per il primo parente disabile.
   - Modificato il codice orario che deve essere ritornato per il completamento dell'intera giornata del codice 252AM.
+  - Nel Pdf mensile delle reperibilità mostrare come direttore tutte le persone con ruolo responsabile di sede
 
 ## [2.23.2] - 2025-02-26
 ### Added
