@@ -4,10 +4,10 @@
 
 publiccodeYmlVersion: '0.2'
 name: epas
-releaseDate: '2025-02-26'
+releaseDate: '2025-03-10'
 url: 'https://github.com/consiglionazionaledellericerche/epas'
 applicationSuite: epas
-softwareVersion: 2.23.2
+softwareVersion: 2.24.0
 developmentStatus: stable
 softwareType: standalone/web
 platforms:
@@ -17,6 +17,7 @@ usedBy:
   - Consiglio Nazionale delle Ricerche
   - Istituto Nazionale di Astrofisica
   - Consorzio LAMMA
+  - Ministero dei Trasporti
 categories:
   - employee-management
   - time-management

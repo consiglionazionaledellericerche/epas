@@ -100,7 +100,10 @@ services:
       #- REPORT_TO=${REPORT_TO}                 # default: epas@iit.cnr.it
       #- REPORT_FROM=${REPORT_FROM}             # default: segnalazioni@epas.tools.iit.cnr.it
       #- REPORT_SUBJECT=${REPORT_SUBJECT}       # default: Segnalazione ePAS
-      
+      # Abilitare per forzare l'invio via email delle segnalazioni solo ai responsabili del personale, anche quelle 
+      #dei responsabili di sede e amministatori tecnici) 
+      #- REPORT_ALWAYS_TO_PERSONNEL_ADMINS=${REPORT_ALWAYS_TO_PERSONNEL_ADMINS} #Opzionale. Possibili valori true o false. Default: false
+
       #- TELEWORK_ACTIVE=${TELEWORK_ACTIVE}   # default: false 
       #- TELEWORK_BASEURL=${TELEWORK_BASEURL}   # default: http://telework-stampings:8080
       #- TELEWORK_USER=${TELEWORK_USER}   # default: app.epas
