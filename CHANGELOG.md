@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Modificato il binder per l'integrazione del componente missioni con epas. Consentito di specificare un nuovo nome per il campo
     delle missioni nel comune di residenza. 
   - Modificato algoritmo che calcola i buoni pasto maturati da inviare ad attestati.
+  - Rimossa riduzione percentuale al DefaultTakable del gruppo relativo ai codici per 104 a ore e minuti per il primo parente disabile.
   - Modificato il codice orario che deve essere ritornato per il completamento dell'intera giornata del codice 252AM.
 
 ## [2.23.2] - 2025-02-26
