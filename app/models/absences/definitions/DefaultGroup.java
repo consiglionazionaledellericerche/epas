@@ -39,18 +39,20 @@ public enum DefaultGroup {
   // Quindi non viene abilitato il comportamento sui completamenti del tipo C_18, C_182, C_19.
   G_18("18 - Permesso assistenza parenti/affini disabili L. 104/92 tre giorni mese", "",
       DefaultCategoryType.L_104, 0, GroupAbsenceTypePattern.programmed, PeriodType.month,
-      DefaultTakable.T_18, null, null, false, false),
+      DefaultTakable.T_18, null, null, false, false),  
+  G_18_PARENTI_DIPENDENTI("18 - Permesso assistenza parenti/affini disabili L. 104/92 "
+      + "tre giorni mese", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 0, 
+      GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_18, 
+      null, null, false, false), 
+  
   G_18M("18 Ore e minuti - Permesso assistenza parenti/affini disabili L. 104/92 tre giorni mese in ore e minuti", "",
       DefaultCategoryType.L_104, 0, GroupAbsenceTypePattern.programmed, PeriodType.month,
       DefaultTakable.T_18M, DefaultComplation.C_18, null, false, false),
-  G_18_PARENTI_DIPENDENTI("18 - Permesso assistenza parenti/affini disabili L. 104/92 "
-      + "tre giorni mese", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 2, 
-      GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_18, 
-      null, null, false, false), 
   G_18_PARENTI_DIPENDENTIM("18 Ore e minuti - Permesso assistenza parenti/affini disabili L. 104/92 "
-      + "tre giorni mese in ore e minuti", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 2, 
-      GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_18, 
+      + "tre giorni mese in ore e minuti", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 0, 
+      GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_18M, 
       DefaultComplation.C_18, null, false, false), 
+  
   G_18P("18P - Permesso provv. assistenza parenti/affini disabili L. 104/92 tre giorni mese",
       "", DefaultCategoryType.PERMESSI_PROVVISORI_104, 0, GroupAbsenceTypePattern.programmed, 
       PeriodType.month, DefaultTakable.T_18P, DefaultComplation.C_18P, null, false, false),
@@ -59,7 +61,7 @@ public enum DefaultGroup {
       DefaultCategoryType.L_104, 1, GroupAbsenceTypePattern.programmed, PeriodType.month,
       DefaultTakable.T_182, null, null, false, false), 
   G_182_PARENTI_DIPENDENTI("182 - Permesso assistenza parenti/affini disabili L. 104/92 "
-      + "secondo parente tre giorni mese", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 2, 
+      + "secondo parente tre giorni mese", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 1, 
       GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_182, 
       null, null, false, false),
   
@@ -67,7 +69,7 @@ public enum DefaultGroup {
       DefaultCategoryType.L_104, 1, GroupAbsenceTypePattern.programmed, PeriodType.month,
       DefaultTakable.T_182M, DefaultComplation.C_182, null, false, false), 
   G_182_PARENTI_DIPENDENTIM("182 Ore e minuti - Permesso assistenza parenti/affini disabili L. 104/92 "
-      + "secondo parente tre giorni mese in ore e minuti", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 2, 
+      + "secondo parente tre giorni mese in ore e minuti", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 1, 
       GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_182M, 
       DefaultComplation.C_182, null, false, false),
   
@@ -75,7 +77,7 @@ public enum DefaultGroup {
       DefaultCategoryType.L_104, 1, GroupAbsenceTypePattern.programmed, PeriodType.month,
       DefaultTakable.T_183, null, null, false, false), 
   G_183_PARENTI_DIPENDENTI("183 - Permesso assistenza parenti/affini disabili L. 104/92 "
-      + "terzo parente tre giorni mese", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 2, 
+      + "terzo parente tre giorni mese", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 1, 
       GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_183, 
       null, null, false, false),
   
@@ -83,7 +85,7 @@ public enum DefaultGroup {
       DefaultCategoryType.L_104, 1, GroupAbsenceTypePattern.programmed, PeriodType.month,
       DefaultTakable.T_183M, DefaultComplation.C_183, null, false, false), 
   G_183_PARENTI_DIPENDENTIM("183 Ore e minuti - Permesso assistenza parenti/affini disabili L. 104/92 "
-      + "terzo parente tre giorni mese in ore e minuti", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 2, 
+      + "terzo parente tre giorni mese in ore e minuti", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 1, 
       GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_183M, 
       DefaultComplation.C_183, null, false, false),
   
@@ -622,6 +624,10 @@ public enum DefaultGroup {
 
   public static List<String> employeeDisabledRelativeCodes() {
     return getCodes(DefaultGroup.G_18_PARENTI_DIPENDENTI);
+  }
+  
+  public static List<String> employeeDisabledRelativeHourlyCodes() {
+    return getCodes(DefaultGroup.G_18_PARENTI_DIPENDENTIM);
   }
 
   public static List<String> employeeSecondDisabledRelativeCodes() {
