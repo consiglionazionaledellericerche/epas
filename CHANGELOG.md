@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Aggiunto parametro di configurazione REPORT_ALWAYS_TO_PERSONNEL_ADMINS per inviare le segnalazioni 
     via email sempre agli amministratori del personale (anche quelle dei responsabili di sede e amministratori tecnici).
   - Aggiunti piani ferie 9+1, 25+4, 27+4
+  - Abilitate in visualizzazione tutte le funzionalità del menu "amministrazione" per i responsabili di sede
 
 ### Changed
   - Modificato il binder per l'integrazione del componente missioni con epas. Consentito di specificare un nuovo nome per il campo

@@ -61,7 +61,8 @@ public class SecureManager {
 
     ImmutableList<String> rolesNames = ImmutableList.of(
         Role.PERSONNEL_ADMIN,
-        Role.PERSONNEL_ADMIN_MINI);
+        Role.PERSONNEL_ADMIN_MINI,
+        Role.SEAT_SUPERVISOR);
 
     return getOfficeAllowed(user, rolesNames);
   }
