@@ -1915,7 +1915,7 @@ end
 rule AtLeastPersonnelAdminMini_Generic
 when
  $uro: UsersRolesOffices()
- Role(name in (Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)) from $uro.role
+ Role(name in (Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.SEAT_SUPERVISOR)) from $uro.role
  $c: PermissionCheck(action in (
 
         /* Permesso per vedere la lista delle richieste di assenza*/
@@ -2032,7 +2032,7 @@ when
         "TimeSlots.delete",
         "TimeSlots.toogle",
  		"TimeSlots.showContracts",
-        "TimeSlots.showContractMandatoryTimeSlot"        
+        "TimeSlots.showContractMandatoryTimeSlot"
 
         ), target == null, granted == false)
 then
@@ -2043,7 +2043,7 @@ rule AtLeastPersonnelAdminMini_InOffice
 when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
- Role(name in (Role.PERSONNEL_ADMIN,Role.PERSONNEL_ADMIN_MINI)) from $uro.role
+ Role(name in (Role.PERSONNEL_ADMIN,Role.PERSONNEL_ADMIN_MINI, Role.SEAT_SUPERVISOR)) from $uro.role
  $c: PermissionCheck(action in (
 
  	   /* Vecchio permesso viewPerson */
