@@ -63,6 +63,7 @@ import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.absences.Absence;
 import models.base.IPropertyInPeriod;
+import models.enumerate.ContractType;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -147,13 +148,14 @@ public class Contracts extends Controller {
     LocalDate beginDate = contract.getBeginDate();
     LocalDate endDate = contract.getEndDate();
     LocalDate endContract = contract.getEndContract();
-    boolean onCertificate = contract.isOnCertificate();
+    ContractType contractType = contract.getContractType();
+    //boolean onCertificate = contract.isOnCertificate();
     boolean isTemporaryMissing = contract.isTemporaryMissing();
     boolean linkedToPreviousContract = contract.getPreviousContract() != null ? true : false;
     String perseoId = contract.getPerseoId();
     LocalDate sourceDateRecoveryDay = contract.getSourceDateRecoveryDay();
     render(person, contract, wrappedContract, beginDate, endDate, endContract,
-        onCertificate, isTemporaryMissing, perseoId, sourceDateRecoveryDay, 
+        contractType, isTemporaryMissing, perseoId, sourceDateRecoveryDay, 
         linkedToPreviousContract);
   }
 

@@ -33,6 +33,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -47,6 +49,7 @@ import lombok.Setter;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
+import models.enumerate.ContractType;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -165,8 +168,12 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   private List<MealTicket> mealTickets;
 
+//  @Required
+//  private boolean onCertificate = true;
+  
   @Required
-  private boolean onCertificate = true;
+  @Enumerated(EnumType.STRING)
+  private ContractType contractType;
 
   @Transient
   private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;

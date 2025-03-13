@@ -47,6 +47,7 @@ import models.Institute;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.enumerate.ContractType;
 import models.flows.query.QAffiliation;
 import models.flows.query.QGroup;
 import models.query.QBadge;
@@ -843,7 +844,7 @@ public final class PersonDao extends DaoBase {
   private void filterOnlyOnCertificate(BooleanBuilder condition, boolean value) {
     if (value) {
       final QContract contract = QContract.contract;
-      condition.and(contract.onCertificate.isTrue());
+      condition.and(contract.contractType.eq(ContractType.structured_public_administration));
     }
   }
   
@@ -1051,7 +1052,7 @@ public final class PersonDao extends DaoBase {
 
     // Requisiti sul contratto
     // il contratto è attivo per l'invio attestati
-    baseCondition.and(contract.onCertificate.isTrue());
+    baseCondition.and(contract.contractType.eq(ContractType.structured_public_administration));
     // il contratto deve essere attivo oggi
     final LocalDate today = LocalDate.now();
     filterContract(baseCondition, Optional.of(today), Optional.of(today));
@@ -1124,7 +1125,7 @@ public final class PersonDao extends DaoBase {
 
     // Requisiti sul contratto
     // il contratto è attivo per l'invio attestati
-    baseCondition.and(contract.onCertificate.isTrue());
+    baseCondition.and(contract.contractType.eq(ContractType.structured_public_administration));
     // il contratto deve essere attivo oggi
     final LocalDate today = LocalDate.now();
     filterContract(baseCondition, Optional.of(today), Optional.of(today));

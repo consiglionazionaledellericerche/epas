@@ -14,7 +14,8 @@
 	  #{f.date 'contract.beginDate', required:true /}
 	  #{f.date 'contract.endDate' /}
 	  *{ #{f.date 'contract.endContract' /} }*
-	  #{f.booleanRadio 'contract.onCertificate' /}
+	  
+	  #{f.selectEnum 'contract.contractType',items:models.enumerate.ContractType,select2:'off'/}
 	  
 	  #{f.selectModel 'wtt', items:templateUtility.getEnabledWorkingTimeTypeForOffice(contract.person.office) /}
 	  <div class="text-center">
