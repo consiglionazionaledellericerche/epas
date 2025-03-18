@@ -43,9 +43,12 @@
     <div class="panel-body">
       #{f.date 'contract.beginDate',view:'year',required:'true'/} 
       #{f.date 'contract.endDate',view:'year'/} 
-      #{f.checkbox 'contract.onCertificate', title:'Include/esclude il contratto della persona dall invio degli Attestati di presenza'/}
+      #{f.selectEnum 'contract.contractType',items:models.enumerate.ContractType, value:contract.contractType, select2:'on'/}
 
       <p>
+		L'inquadramento consente di stabilire se il dipendente inserito è strutturato con contratto TD (Tempo Determinato) o TI (Tempo Indeterminato),
+		oppure se è un interinale (considerabile nella stampa del proprio cartellino per fini stipendiali dell'agenzia di cui fa parte) o, infine,
+		se è appartiene ad una qualsiasi altra categoria (assegnisti, borsisti, co.co.co., ecc...)<br>
         Alla creazione del contratto verrà assegnato il tipo orario di default <strong><em>Normale</em></strong>.<br>
         Sarà possibile modificarlo in un secondo momento scegliendo fra i tipi orario definiti per la sede selezionata.<br>
         <strong>Importante:</strong> Per motivi di sicurezza al personale non in Attestati non può essere attribuito 
