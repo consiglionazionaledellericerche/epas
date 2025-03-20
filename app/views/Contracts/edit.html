@@ -86,7 +86,7 @@
 			#{f.simpleView 'contract.endDate', value:contract.endDate?.format(), hidden:true /}
 			#{f.simpleView 'contract.endContract', value:contract.endContract?.format(), hidden:true /}
 			
-			#{f.simpleView 'contract.contractType',value:contract.contractType /}
+			#{f.simpleView 'contract.contractType',value:contract.contractType, hidden:true /}
 			#{f.booleanRadio 'linkedToPreviousContract', value:linkedToPreviousContract, readOnly:true /}
 			#{secure.check 'Contracts.updateIsTemporyMissing'}
 				#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing, readOnly:true /}
