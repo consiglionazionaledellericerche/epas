@@ -74,6 +74,7 @@ import models.absences.definitions.DefaultGroup;
 import models.base.IPropertyInPeriod;
 import models.dto.TeleworkDto;
 import models.enumerate.BlockType;
+import models.enumerate.ContractType;
 import models.flows.Affiliation;
 import models.flows.Group;
 import play.db.jpa.JPA;
@@ -266,7 +267,7 @@ public class Instances extends Controller {
           newContract = new Contract();
           newContract.setBeginDate(LocalDate.parse(dto.getBeginDate()));
           newContract.setEndDate(Strings.isNullOrEmpty(dto.getEndDate()) ? null : LocalDate.parse(dto.getEndDate()));
-          newContract.isOnCertificate();
+          newContract.setContractType(ContractType.structured_public_administration);
           newContract.setPerson(person);
           if (actualContract.get().isTemporaryMissing() && actualContract.get().getEndDate() == null) {
             actualContract.get().setEndDate(LocalDate.parse(dto.getBeginDate()).minusDays(1));
@@ -299,7 +300,7 @@ public class Instances extends Controller {
         newContract = new Contract();
         newContract.setBeginDate(LocalDate.parse(dto.getBeginDate()));
         newContract.setEndDate(Strings.isNullOrEmpty(dto.getEndDate()) ? null : LocalDate.parse(dto.getEndDate()));
-        newContract.isOnCertificate();
+        newContract.setContractType(ContractType.structured_public_administration);
         newContract.setPerson(person);
         contractManager.properContractCreate(newContract, 
             com.google.common.base.Optional.absent(), false);

@@ -54,7 +54,7 @@
 			#{f.date 'contract.beginDate', value:contract.beginDate?.format() /}
 	    	#{f.date 'contract.endDate', value:contract.endDate?.format() /}
 	    	#{f.date 'contract.endContract', value:contract.endContract?.format() /}
-	    	#{f.booleanRadio 'contract.onCertificate', value:contract.onCertificate /}
+			#{f.selectEnum 'contract.contractType',items:models.enumerate.ContractType, value:contract.contractType, select2:'on', required:true /}
     		#{f.booleanRadio 'linkedToPreviousContract', value:linkedToPreviousContract /}
 	    	
 	    	#{secure.check 'Contracts.updateIsTemporyMissing'}
@@ -85,7 +85,8 @@
 			#{f.simpleView 'contract.beginDate', value:contract.beginDate?.format(), hidden:true /}
 			#{f.simpleView 'contract.endDate', value:contract.endDate?.format(), hidden:true /}
 			#{f.simpleView 'contract.endContract', value:contract.endContract?.format(), hidden:true /}
-			#{f.booleanRadio 'contract.onCertificate', value:contract.onCertificate, readOnly:true /}
+			
+			#{f.simpleView 'contract.contractType',value:contract.contractType, hidden:true /}
 			#{f.booleanRadio 'linkedToPreviousContract', value:linkedToPreviousContract, readOnly:true /}
 			#{secure.check 'Contracts.updateIsTemporyMissing'}
 				#{f.booleanRadio 'isTemporaryMissing', value:isTemporaryMissing, readOnly:true /}

@@ -310,6 +310,7 @@ contract= Contratto
 Contract= Contratto
 contract.endContract= Terminato Il
 contract.endDate= Fine Contratto
+contract.contractType= Inquadramento
 contract.onCertificate= In attestati
 contract.onCertificate.true= Si
 contract.onCertificate.false= No
@@ -1250,6 +1251,10 @@ CalculationType.percentage=Calcolo percentuale (es.:INAF)
 chartType= Tipo di grafico
 ChartTypes.BARS= Grafico a barre
 ChartTypes.COLUMNS= Grafico a colonne
+
+ContractType.interim= Interinale
+ContractType.unstructured= Non strutturato
+ContractType.structured_public_administration= Dipendente strutturato TD o TI
 
 LimitType.monthly= Mensile
 LimitType.yearly= Annuale

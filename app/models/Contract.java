@@ -33,6 +33,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -47,6 +49,7 @@ import lombok.Setter;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
+import models.enumerate.ContractType;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -165,8 +168,12 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   private List<MealTicket> mealTickets;
 
-  @Required
+  //@Required
   private boolean onCertificate = true;
+  
+  @Required
+  @Enumerated(EnumType.STRING)
+  private ContractType contractType;
 
   @Transient
   private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
@@ -328,5 +335,19 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   public boolean overlap(Contract otherContract) {
     return overlap(otherContract.getRange());
+  }
+  
+  
+  public boolean setContractType(ContractType contractType) {
+    if (contractType == null) {
+      return false;
+    }
+    this.contractType = contractType;
+    if (contractType.equals(ContractType.structured_public_administration)) {
+      this.onCertificate = true;
+    } else {
+      this.onCertificate = false;
+    }
+    return true;
   }
 }
