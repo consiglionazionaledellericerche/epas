@@ -43,7 +43,7 @@
     <div class="panel-body">
       #{f.date 'contract.beginDate',view:'year',required:'true'/} 
       #{f.date 'contract.endDate',view:'year'/} 
-      #{f.selectEnum 'contract.contractType',items:models.enumerate.ContractType, value:contract.contractType, select2:'on'/}
+      #{f.selectEnum 'contract.contractType',items:models.enumerate.ContractType, value:contract.contractType, select2:'on', required:'true' /}
 
       <p>
 		L'inquadramento consente di stabilire se il dipendente inserito è strutturato con contratto TD (Tempo Determinato) o TI (Tempo Indeterminato),

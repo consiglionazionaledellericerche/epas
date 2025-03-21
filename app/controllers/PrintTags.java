@@ -30,6 +30,7 @@ import dao.wrapper.IWrapperFactory;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -37,12 +38,14 @@ import manager.PrintTagsManager;
 import manager.SecureManager;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
+import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.dto.OffSiteWorkingTemp;
 import models.dto.PrintTagsInfo;
+import models.enumerate.ContractType;
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -107,15 +110,17 @@ public class PrintTags extends Controller {
     if (!forAll) {
       personList.add(person);
     } else {
-      if (interim) {
-        
-      } else {
-        Set<Office> set = Sets.newHashSet();
-        set.add(office);
-        personList = personDao.list(
-            Optional.<String>absent(),
-            set,
-            false, date, date.dayOfMonth().withMaximumValue(), true).list();
+      Set<Office> set = Sets.newHashSet();
+      set.add(office);
+      personList = personDao.list(
+          Optional.<String>absent(),
+          set,
+          false, date, date.dayOfMonth().withMaximumValue(), true).list();
+      if (!interim) {
+        List<Contract> contractList = personList.stream().flatMap(p -> p.getContracts().stream()
+            .filter(c -> c.getContractType().equals(ContractType.structured_public_administration)))
+            .collect(Collectors.toList());
+        personList = contractList.stream().map(c -> c.getPerson()).collect(Collectors.toList());
       }
     }
 

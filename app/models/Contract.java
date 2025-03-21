@@ -168,8 +168,8 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   private List<MealTicket> mealTickets;
 
-//  @Required
-//  private boolean onCertificate = true;
+  //@Required
+  private boolean onCertificate = true;
   
   @Required
   @Enumerated(EnumType.STRING)
@@ -335,5 +335,19 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
    */
   public boolean overlap(Contract otherContract) {
     return overlap(otherContract.getRange());
+  }
+  
+  
+  public boolean setContractType(ContractType contractType) {
+    if (contractType == null) {
+      return false;
+    }
+    this.contractType = contractType;
+    if (contractType.equals(ContractType.structured_public_administration)) {
+      this.onCertificate = true;
+    } else {
+      this.onCertificate = false;
+    }
+    return true;
   }
 }

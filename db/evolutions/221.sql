@@ -17,9 +17,6 @@ source_recovery_day_used, source_remaining_minutes_current_year,  source_remaini
 source_remaining_meal_ticket, source_by_admin, source_date_meal_ticket, perseo_id, is_temporary, source_date_vacation, source_date_recovery_day, previous_contract_id,
 external_id, contract_type FROM contracts;
 
-ALTER TABLE contracts DROP COLUMN on_certificate;
-ALTER TABLE contracts_history DROP COLUMN on_certificate;
-
 
 # --- !Downs
 # -- Non è necessaria una down

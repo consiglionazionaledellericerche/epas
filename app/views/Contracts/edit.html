@@ -54,7 +54,7 @@
 			#{f.date 'contract.beginDate', value:contract.beginDate?.format() /}
 	    	#{f.date 'contract.endDate', value:contract.endDate?.format() /}
 	    	#{f.date 'contract.endContract', value:contract.endContract?.format() /}
-			#{f.selectEnum 'contract.contractType',items:models.enumerate.ContractType, value:contract.contractType, select2:'on'/}
+			#{f.selectEnum 'contract.contractType',items:models.enumerate.ContractType, value:contract.contractType, select2:'on', required:true /}
     		#{f.booleanRadio 'linkedToPreviousContract', value:linkedToPreviousContract /}
 	    	
 	    	#{secure.check 'Contracts.updateIsTemporyMissing'}
