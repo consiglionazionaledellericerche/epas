@@ -27,6 +27,9 @@
   	<input type="hidden" name="year" value="${date.getYear()}"/>
   	<input type="hidden" name="officeId" value="${office.id}"/>
   #{f.booleanRadio 'forAll', label:'Per tutti' /}
+  <div id="inter" #{if !forAll} style="display: none" #{/if}>
+  #{f.booleanRadio 'interim', label:'Includi interinali' /}
+  </div>
   <div id="single-person" #{if forAll} style="display: none" #{/if}>	
   #{f.selectModel 'person', items:personList /}
   </div>
@@ -50,7 +53,16 @@
 			jQuery( "#single-person" ).toggle(0);
 		
 		});
+		
+		$("input[name='forAll']").change(function(){
+					
+			jQuery( "#inter" ).toggle(0);
+				
+		});
 		       
 	 });
 	</script>
+
 #{/set}
+
+

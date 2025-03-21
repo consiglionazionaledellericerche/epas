@@ -81,7 +81,7 @@ public class PrintTags extends Controller {
    * @param includeStampingDetails se includere anche i dettagli
    */
   public static void showTag(Person person, int year, int month, boolean includeStampingDetails, 
-      boolean forAll, Long officeId) {
+      boolean forAll, boolean interim, Long officeId) {
 
     if (person == null && !forAll) {
       flash.error("Selezionare una persona dall'elenco del personale.");
@@ -107,12 +107,16 @@ public class PrintTags extends Controller {
     if (!forAll) {
       personList.add(person);
     } else {
-      Set<Office> set = Sets.newHashSet();
-      set.add(office);
-      personList = personDao.list(
-          Optional.<String>absent(),
-          set,
-          false, date, date.dayOfMonth().withMaximumValue(), true).list();
+      if (interim) {
+        
+      } else {
+        Set<Office> set = Sets.newHashSet();
+        set.add(office);
+        personList = personDao.list(
+            Optional.<String>absent(),
+            set,
+            false, date, date.dayOfMonth().withMaximumValue(), true).list();
+      }
     }
 
     for (Person p : personList) {
