@@ -14,7 +14,7 @@ schermata:
    
 Come nella schermata relativa alla lista persone 
 (v. :doc:`Gestione e inserimento personale <managePerson>`), anche in questo caso possiamo notare
-come vengano listati di default 10 dipendenti.
+come vengano listati di default 15 dipendenti.
 Grazie alla form in alto a sinistra è comunque possibile specificare quanti elementi visualizzare.
 Anche qui è usabile la form di ricerca per visualizzare esclusivamente il dipendente richiesto
 scrivendone il nome o il cognome nel riquadro in alto a destra rispetto alla tabella principale.
@@ -25,19 +25,17 @@ colonna specifica è possibile ordinare in modo discendente o ascendente rispett
 
 All'interno della tabella, si possono distinguere differenti voci:
 
-   * le ferie fatte l'anno precedente
-   * le ferie fatte l'anno corrente
-   * i **permessi legge fatti**
-   * le ferie residue dell'anno passato (contrassegnate da una "x" rossa se non più disponibili
-     secondo quanto specificato in configurazione (v. :doc:`Gestione parametri <parameters>`)
-   * le ferie residue dell'anno in corso totali
-   * le ferie residue dell'anno in corso maturate
-   * i permessi residui totali 
-   * i permessi residui maturati
-   * i **limiti** eventuali per l'utilizzo dei residui per l'anno in corso
+   * le ferie residue dell'anno precedente
+   * le ferie residue dell'anno corrente
+   * i **permessi legge residui**
+   * il totale
    
 Cliccando poi sui numeri relativi a ciascun nominativo, in corrispondenza delle colonne di ferie
-fatte dell'anno passato e dell'anno corrente e dei permessi legge fatti, verrà visualizzata una
-finestra che conterrà la lista dei giorni relativi all'anno passato o all'anno in corso contenente
-i giorni specifici in cui si è usufruito di un codice di ferie.
+residue dell'anno passato o dell'anno corrente o dei permessi legge residui, verrà visualizzata una
+finestra che conterrà varie informazioni tra cui:
+   
+   * la lista dei giorni specifici in cui si è usufruito di un codice di ferie o di permesso
+   * un riepilogo della situazione di ferie o permessi
+   * il calcolo dei giorni totali
+   * il calcolo dei giorni maturati
 
