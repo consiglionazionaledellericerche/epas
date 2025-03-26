@@ -61,6 +61,10 @@ Quando il calendario sarà stato completato tra giorni feriali e festivi la situ
    
    Calendario reperibilità completo
    
+All'interno dei giorni del calendario vengono anche riportate le eventuali assenze (a sfondo rosso) dei reperibili che possono essere inseriti nel calendario. 
+Per quei giorni ovviamente i reperibili assenti non possono essere inseriti negli slot di turno. 
+Inoltre nel calendario sono visibili anche gli eventuali giorni di Lavoro Agile dei reperibili.
+   
 A questo punto il calendario è completo, i conteggi nei riepiloghi laterali si aggiornano giorno dopo giorno fino allo scavallamento del mese, momento in cui 
 il responsabile del servizio può procedere con l'approvazione del calendario.
 
