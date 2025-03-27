@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Gestiti timezone diversi da Europe/Rome nella creazione delle missioni via REST.
 
+### Changed
+  - Modificata la documentazione aggiornandola alle novità rilasciate nel tempo
+
 ## [2.24.0] - 2025-03-10
 ### Added
   - Aggiunto parametro di configurazione CLEAN_ABSENCE_TYPES_CONFIGURATIONS nel docker-compose.yml per

@@ -56,7 +56,7 @@ cliccare sul link in alto a sinistra nella pagina: "*Inserisci una nuova persona
 
 La pagina che si aprirà sarà come quella presentata nelle figure seguenti:
 
-.. figure:: _static/images/inseriscimentoPersona.png
+.. figure:: _static/images/inserimentoPersona.png
    :scale: 40
    :align: center
 
@@ -108,11 +108,7 @@ intuitivo dove andare a cercare l'informazione specifica che si richiede o che s
 modificare.
 Nel pannello relativo ai dati personali, è possibile trovare alcune informazioni aggiuntive
 rispetto alla precedente versione.
-Difatti, esiste la possibilità di specificare se la persona in questione è Responsabile di un
-gruppo di lavoro (e in tal caso può usufruire della possibilità di vedere le timbrature delle
-persone che afferiscono al proprio gruppo e la loro presenza giornaliera 
-v. :menuselection:`Amministrazione --> Timbrature`);
-è possibile inoltre specificare se la persona può/non può ricevere le mail per le informazioni
+E'possibile inoltre specificare se la persona può/non può ricevere le mail per le informazioni
 circa la propria situazione di timbrature e assenze (invio email).
 E' stato aggiunto inoltre un pannello relativo alle *altre informazioni*, contenente anche il campo
 in cui specificare l'eventuale **eppn** ovvero il campo utilizzato dalla piattaforma *Shibboleth*
