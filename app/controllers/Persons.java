@@ -171,6 +171,9 @@ public class Persons extends Controller {
     if (contract.getEndDate() != null && !contract.getEndDate().isAfter(contract.getBeginDate())) {
       Validation.addError("contract.endDate", "Dev'essere successivo all'inizio del contratto");
     }
+    if (contract.getContractType() == null) {
+      Validation.addError("contract.contractType", "Specificare una tipologia contrattuale");      
+    }
 
     if (Validation.hasErrors()) {
       flash.error("Correggere gli errori indicati");
@@ -186,6 +189,7 @@ public class Persons extends Controller {
     person.save();
 
     contract.setPerson(person);
+    
 
     if (!contractManager.properContractCreate(contract, Optional.absent(), false)) {
       flash.error(

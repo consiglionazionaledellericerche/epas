@@ -98,7 +98,7 @@ public class Historicals extends Controller {
         if (!historicalManager.checkDates(temp.getBeginDate(), con.getBeginDate())
             || !historicalManager.checkDates(temp.getEndDate(), con.getEndDate())
             || !historicalManager.checkDates(temp.getEndContract(), con.getEndContract()) 
-            || temp.isOnCertificate() != con.isOnCertificate()
+            || temp.getContractType() != con.getContractType()
             || !historicalManager.checkObjects(temp, con)) {
           contractModifications.add(story);
         }

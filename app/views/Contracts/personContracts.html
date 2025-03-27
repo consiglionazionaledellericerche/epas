@@ -63,7 +63,7 @@
         #{f.view 'Terminazione Contratto', label:'Terminazione Contratto', value:wrCurrentContract.value.endContract.format() /}
       #{/if}
       
-      #{f.view 'In Attestati', value:wrCurrentContract.value.onCertificate /}
+      #{f.view 'Inquadramento', value:wrCurrentContract.value.getContractType() /}
    
       <!-- Tipo Orario -->
       #{f.view 'Tipo Orario', value:wrPerson.currentWorkingTimeType.get() /}

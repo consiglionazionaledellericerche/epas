@@ -35,6 +35,8 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final SetPath<models.ContractStampProfile, QContractStampProfile> contractStampProfile = this.<models.ContractStampProfile, QContractStampProfile>createSet("contractStampProfile", models.ContractStampProfile.class, QContractStampProfile.class, PathInits.DIRECT2);
 
+    public final EnumPath<models.enumerate.ContractType> contractType = createEnum("contractType", models.enumerate.ContractType.class);
+
     public final SetPath<models.ContractWorkingTimeType, QContractWorkingTimeType> contractWorkingTimeType = this.<models.ContractWorkingTimeType, QContractWorkingTimeType>createSet("contractWorkingTimeType", models.ContractWorkingTimeType.class, QContractWorkingTimeType.class, PathInits.DIRECT2);
 
     public final DatePath<org.joda.time.LocalDate> endContract = createDate("endContract", org.joda.time.LocalDate.class);

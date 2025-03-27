@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.24.1] - UNRELEASED
 ### Added
   - Gestiti timezone diversi da Europe/Rome nella creazione delle missioni via REST.
+  - Aggiunto il campo ContractType nel Contract che specifica se un dipendente è strutturato, interinale o non strutturato.
+  
+### Changed
+  - Modificata interfaccia per specificare quale debba essere la discriminante se far finire un dipendente nella lista del personale che
+    va su Attestati. Modificato il comportamento del setter del ContractType garantendo la contestuale modifica del campo "onCertificate"
+    che determina la presenza o meno su attestati di quel contratto.
 
 ## [2.24.0] - 2025-03-10
 ### Added
