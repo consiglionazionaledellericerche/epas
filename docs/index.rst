@@ -29,6 +29,7 @@ rilasciati anche questi come opensource:
 
    overview/index
    admin/index
+   calendars/index
    techAdmin/index
    user/index
    missions/index

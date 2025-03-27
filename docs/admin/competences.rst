@@ -15,17 +15,14 @@ seguente schermata:
 Le competenze, come si evince dall'immagine, sono consultabili (e modificabili) per ogni persona in
 un certo anno e in un certo mese (è sufficiente nel caso andare a selezionare anno e mese dal menu
 a tendina in alto).
-La schermata principale presenta tre panelli:
-
-   * il pannello relativo all'assegnamento delle competenze (a sinistra nell'immagine), in cui
-     troviamo il codice competenza che si vuole assegnare (selezionabile dal menu a tendina),
-     la lista dei nominativi a cui è stata assegnata quella competenza suddivisi in pagine di 10
-     elementi ciascuna, e un box in cui poter ricercare dipendenti per nome o cognome.
-   * il pannello relativo al riepilogo delle ore di straordinario pagate (a destra e in alto 
-     nell'immagine) nel mese in questione, nell'anno in corso e il totale del monte ore usabile
-     per gli straordinari assegnato all'istituto.
-   * il pannello relativo alle note per una corretta compilazione dei quantitativi 
-     orari/giornalieri delle competenze
+La schermata principale presenta la possibilità di assegnare le competenze. Dal menu a tendina si può selezionare
+la tipologia di competenza e la pagina si aggiorna con la lista delle persone appartenenti alla sede che hanno 
+abilitata la competenza selezionata. 
+Nella tabella è poi presente la possibilità di modificare a mano il valore per quella competenza cliccando sul bottone 
+presente sotto la colonna *Modifica* in corrispondenza del dipendente per cui vogliamo inserire la quantità.
+A seconda della tipologia di competenza, la finestra che comparirà dopo aver cliccato sul bottone di modifica presenterà
+un piccolo vademecum in cui verranno spiegate le regole di inserimento e gli eventuali limiti presenti 
+per le quantità da inserire.
 
 Come nel caso dei parametri (v. :doc:`Gestione parametri <parameters>` ), troviamo al di sopra
 dei pannelli un menu a tendina che specifica per quale sede intendiamo assegnare le competenze.
@@ -37,9 +34,8 @@ parte del proprio istituto.
 Abilita competenze
 ------------------
 
-Nella tab "Abilita competenze" troviamo la lista del personale afferente all'istituto selezionato
-con di fianco tutte le eventuali competenze assegnate a ciascun dipendente, contrassegnate con una
-spunta.
+Nella tab "Abilita competenze" troviamo la lista del personale afferente all'istituto selezionato, il nome del dipendente comparirà tante volte
+nella lista quante sono le competenze che gli sono state assegnate.
 
 .. figure:: _static/images/abilitaCompetenze.png
    :scale: 40
@@ -60,8 +56,8 @@ Si aprirà una pagina di questo tipo:
    
    Finestra di modifica competenze
    
-Selezionando le competenze che si intende aggiungere al dipendente e premendo su "Ok", la pagina
-precedente verrà ricaricata con i simboli di spunta in presenza delle competenze che sono state
+Selezionando le competenze che si intende aggiungere al dipendente dal menu a tendina e premendo su "Ok", la pagina
+precedente verrà ricaricata con l'aggiunta di tante righe contenenti il nome del dipendente quante sono le competenze che sono state
 assegnate al dipendente.
 
 Configurazione monte ore

@@ -2,7 +2,7 @@ Invio attestati di presenza
 ===========================
 
 Il sistema ePAS consente all'amministratore di interfacciarsi con le funzionalità di sottomissione
-di assenze e competenze presenti sul sito *https://attestati.rm.cnr.it/attestati*
+di assenze e competenze presenti sul sito *https://attestati.cnr.it/*
 Dal menu :menuselection:`Amministrazione --> Invio attestati`, l'amministratore si troverà di
 fronte a questa schermata:
 
@@ -12,99 +12,59 @@ fronte a questa schermata:
    
    Schermata home invio attestati
    
-A questo livello è possibile selezionare il mese e l'anno di cui si intende sottomettere, alla sede
+A questo livello è possibile selezionare, dal menu a tendina in alto, il mese e l'anno di cui si intende sottomettere, alla sede
 centrale, assenze e competenze del personale (di default il sistema seleziona il mese precedente al
 mese attuale).
-Una volta selezionati i valori che ci interessano è possibile fare la login al sistema cliccando su
-"login attestati".
-
-Si entrerà a questo punto nell'area di login:
-
-.. figure:: _static/images/loginAttestati.png
-   :scale: 40
-   :align: center
    
-   Schermata di login attestati
-   
-A questo livello viene posta all'attenzione dell'amministratore tutta la procedura da seguire per
-effettuare un corretto invio degli attestati di presenza, a partire dallo stralcio dei dati fino
-alla spiegazione punto per punto di quel che farà la procedura di ePAS una volta collegato al
-sistema centrale all'indirizzo *https://attestati.rm.cnr.it/attestati*
+Fondamentale per poter procedere con l'invio dei dati mensili è aver effettuato **lo stralcio** dei dati della propria sede
+sul sistema centrale all'indirizzo *https://attestati.cnr.it/attestati*
 
 Le credenziali per l'accesso al sistema della sede centrale sono quelle relative agli account
 **SIPER** in dotazione a ciascun dipendente del personale amministrativo.
 
-Una volta effettuato l'accesso, l'amministratore si troverà di fronte a una schermata di questo tipo:
+In questa schermata è possibile trovare, sopra la lista del personale per cui inviare le informazioni mensili, un riepilogo di quelli
+che possono essere gli eventuali problemi riscontrati dal sistema. Gli eventuali problemi possono essere del tipo:
 
-.. figure:: _static/images/primaInvioAttestati.png
-   :scale: 40
-   :align: center
-   
-   Schermata prima inizio elaborazione
-   
-Per ogni dipendente registrato nella lista persone 
-(v. :doc:`Gestione e inserimento personale <managePerson>`), si presenta:
+* mancanza di allegati per codici che necessitano di allegato (es.: codici per congedo parentale)
+* mancanza di approvazione del calendario di reperibilità e/o turno in caso di servizio definito (v. :doc:`Gestione servizi <services>`)
 
-   * la matricola
-   * l'esito dell'elaborazione (nel caso un dipendente, dopo la procedura di stralcio, risulti non
-     in CNR o non in lista dipendenti, viene segnalato in questa colonna)
-   * i dati elaborati
-   * i problemi riscontrati
-   * la possibilità di elaborare singolarmente il dipendente
    
-Al di sopra del pannello troviamo due bottoni, quello di ritorno al menu iniziale in cui impostare
-mese e anno per l'elaborazione e il pulsante che permette l'elaborazione di tutta la lista del
-personale.
-Una volta premuto questo pulsante, ePAS inizierà l'elaborazione dei dati relativi a ciascun
-dipendente e, una volta terminato, apparirà una schermata più o meno come questa:
+Per ogni dipendente attivo nell'anno e mese selezionati viene proposta una riga di base colorata di giallo dove del dipendente
+vengono riportati:
 
-.. figure:: _static/images/riepilogoAttestati.png
-   :scale: 40
-   :align: center
-   
-   Schermata di esito elaborazione
-   
-Per ogni dipendente viene riassunta la situazione al termine dell'elaborazione.
-Se la riga si colora di verde, tutto è andato a buon fine, altrimenti se si colora di rosso, ci
-sono stati errori durante l'elaborazione.
-In particolare, è possibile per ciascun dipendente andare a controllare quali sono stati i dati
-elaborati cliccando in corrispondenza della voce "*dati*" nella colonna Dati elaborati.
+* codici di assenza e date di utilizzo
+* quantità di codici di competenza
+* quantità di buoni pasto maturati nel mese
+* eventuali ore di formazione inserite nel mese
 
-Si aprirà una finestra come questa:
+Su questa riga sono poi presenti un bottone bianco sotto al nome che consente l'invio esclusivo per quel dipendente delle informazioni mensili (che vedremo più avanti) e 
+il simbolo di una nuvola con una freccia rivolta verso l'alto che simboleggia il fatto che i dati sono pronti per essere inviati al sistema di Attestati.
 
-.. figure:: _static/images/datiElaborazione.png
-   :scale: 40
-   :align: center
-      
-   Dati di elaborazione
-   
-Risultano visibili, all'interno della finestra:
-   * le assenze, rappresentate attraverso una terna di numeri che sono:
-      * il codice di assenza
-      * il giorno di inizio utilizzo del codice
-      * il giorno di fine utilizzo del codice
-   * le competenze, rappresentate da una coppia di valori che sono:
-      * il codice di competenza
-      * il quantitativo espresso in giorni o ore di utilizzo di quella competenza
-   * le ore di formazione
-   * i buoni pasto, rappresentati attraverso una coppia di valori che sono:
-      * il numero di buoni cartacei utilizzati
-      * il numero di buoni elettronici utilizzati
-      
-*N.B.:* Attestati non riceve più il numero dei buoni pasto maturati nel mese, bensì il numero di buoni pasto 
-cartacei/elettronici necessari a coprire la maturazione dei buoni pasto ed è questa informazione che verrà inviata 
-ad Attestati che vedrete nel riepilogo, per ciascun dipendente, nella schermata di "Invio dati ad Attestati" 
-nella voce relativa ai buoni pasto. 
-Nello specifico, la voce dei buoni pasto sarà modificata nella forma: Buoni pasto x;y 
-dove x sta per la quantità di buoni cartacei utilizzati per coprire la maturazione dei buoni pasto del mese 
-e y sta per la quantità di buoni elettronici utilizzati per coprire la maturazione dei buoni pasto del mese. 
+Tra la lista dei dipendenti e le informazioni di riepilogo su eventuali problemi troviamo i due pulsanti per la gestione dell'invio dati:
 
-Nel caso, invece, si fossero verificati dei problemi durante l'elaborazione, sarà possibile andare
-a controllare cosa non è andato a buon fine cliccando su "*problemi*". Si aprirà una finestra come
-questa:
+* Carica tutti i dati su Attestati (color arancione)
+* Aggiorna dati (color azzurro)
 
-.. figure:: _static/images/problemiElaborazione.png
-   :scale: 40
-   :align: center
-   
-   Problemi durante elaborazione
+Premendo il primo bottone si effettua un caricamento massivo delle informazioni di ciascun dipendente Attestati. 
+
+Il caricamento può comportare un esito positivo e, in questo caso, la riga del dipendente si colora di **verde** e compare il simbolo della spunta 
+(sempre di colore verde) di fianco al nome del dipendente. Inoltre a fianco di ciascun dato inviato compare la scritta (sempre in verde) "*Ok*".
+
+Qualora qualcosa non venisse correttamente recepito da Attestati, la riga di quel dipendente rimarrà di colore **giallo** e, di fianco all'elemento 
+che ha riscontrato un errore nel caricamento, comparirà la scritta "*Non inviato*" oltre a un Triangolo rosso rovesciato. 
+Passando il mouse sopra quel triangolo apparirà un messaggio che niente altro è che **la risposta che Attestati invia ad ePAS con la causa della
+mancata ricezione di quel tipo di dato**.
+
+Leggendo attentamente la risposta è quindi possibile capire se il problema della mancata ricezione di quel dato sia da imputare ad Attestati (e quindi
+occorrerà rivolgersi all'helpdesk di Attestati per risolvere il problema) o se è possibile risolvere la situazione lavorando sul cartellino del dipendente.
+Ecco che in questo caso ci viene in soccorso il secondo bottone, quello di *Aggiorna dati*
+
+Dopo aver infatti modificato il cartellino del dipendente (nel caso Attestati ci dica, ad esempio, che occorre cambiare un certo codice di assenza con un altro),
+occorre premere il bottone di *Aggiorna dati* per consentire alla procedura di invio dati ad Attestati di recepire le modifiche effettuate sul cartellino, mostrarle
+e renderle disponibili per un nuovo invio.
+A questo punto, è possibile premere il bottone bianco di *Invio dati ad Attestati* presente sotto al nome del dipendente in questione per inviare singolarmente 
+i suoi dati senza dover reinviare tutti i dati di tutti i dipendenti. 
+
+Una volta che l'attestato di presenza verrà poi successivamente validato, tutte le righe di tutti i dipendenti presenteranno, al posto della spunta verde di fianco 
+al nome, il simbolo del divieto di color rosso che significa che qualunque modifica effettuata su ePAS ai dati di quei dipendenti per quell'anno/mese non sarà
+più inviabile ad Attestati.

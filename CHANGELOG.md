@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     va su Attestati. Modificato il comportamento del setter del ContractType garantendo la contestuale modifica del campo "onCertificate"
     che determina la presenza o meno su attestati di quel contratto.
 
+### Changed
+  - Modificata la documentazione aggiornandola alle novità rilasciate nel tempo
+
 ## [2.24.0] - 2025-03-10
 ### Added
   - Aggiunto parametro di configurazione CLEAN_ABSENCE_TYPES_CONFIGURATIONS nel docker-compose.yml per
