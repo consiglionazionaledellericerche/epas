@@ -26,18 +26,10 @@ Entrambe le liste presentano gli stessi campi, ovvero:
    * il tipo di orario di lavoro assegnato alla persona
    * il piano ferie attualmente disponibile per la persona 
    * il livello di contratto
-   * se la persona ha selezionata la possibilità di avere la timbratura automatica 
-     (v. **Decisioni implementative** dal menu *Documentazioni*)
-   * la mail di riferimento per le comunicazioni
-   * gli eventuali altri contatti (passando sopra con il mouse si apre una finestra con elencati i
-     numeri utili)
-   * l'inizializzazione, ovvero nel caso il dipendente provenga da altro istituto e si porti dietro
-     una situazione definita in termini di ferie, residui orari e buoni pasto, cliccando qui è
-     possibile inserirla, datandola, e il sistema la terrà presente per i calcoli
+   * la sede di lavoro
    * l'invio mail, ovvero se per il dipendente è stata selezionata la possibilità di ricevere mail
      informative circa la propria situazione di mancate timbrature, mancate assenze o timbrature
      disaccoppiate che rendono non veritiero il calcolo dei residui
-   * eventuali note
 
 Naturalmente, per quanto concerne la lista del personale non attivo, la situazione visualizzata è
 limitata ai soli campi nome e cognome, matricola e mail.
@@ -50,11 +42,16 @@ Le tabelle, infine, sono entrambe ordinabili per campo, nel senso che è possibi
 l'ordinamento delle righe (inizialmente per ordine alfabetico) a seconda del campo più di interesse
 (numero di matricola, data di inizio lavoro ecc...).
 
+Nella parte alta della pagina è presente un disclaimer contenente l'informazione relativa al fatto che
+l'inserimento manuale dei dipendenti (senza passare quindi dalla sincronizzazione con i dati SIPER),
+può comportare problemi nell'inserimento delle corrette informazioni anagrafiche e contrattuali del
+nuovo dipendente oltre che provocare problemi nella login del nuovo dipendente sulla piattaforma ePAS.
+
 
 Inserimento persona
 -------------------
 
-Nel caso si intenda inserire una nuova persona in anagrafica sarà per prima cosa necessario
+Nel caso si intenda comunque procedere con l'inserimento di una nuova persona in anagrafica sarà per prima cosa necessario
 cliccare sul link in alto a sinistra nella pagina: "*Inserisci una nuova persona*".
 
 La pagina che si aprirà sarà come quella presentata nelle figure seguenti:
