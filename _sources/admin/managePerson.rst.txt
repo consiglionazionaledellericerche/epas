@@ -26,18 +26,10 @@ Entrambe le liste presentano gli stessi campi, ovvero:
    * il tipo di orario di lavoro assegnato alla persona
    * il piano ferie attualmente disponibile per la persona 
    * il livello di contratto
-   * se la persona ha selezionata la possibilità di avere la timbratura automatica 
-     (v. **Decisioni implementative** dal menu *Documentazioni*)
-   * la mail di riferimento per le comunicazioni
-   * gli eventuali altri contatti (passando sopra con il mouse si apre una finestra con elencati i
-     numeri utili)
-   * l'inizializzazione, ovvero nel caso il dipendente provenga da altro istituto e si porti dietro
-     una situazione definita in termini di ferie, residui orari e buoni pasto, cliccando qui è
-     possibile inserirla, datandola, e il sistema la terrà presente per i calcoli
+   * la sede di lavoro
    * l'invio mail, ovvero se per il dipendente è stata selezionata la possibilità di ricevere mail
      informative circa la propria situazione di mancate timbrature, mancate assenze o timbrature
      disaccoppiate che rendono non veritiero il calcolo dei residui
-   * eventuali note
 
 Naturalmente, per quanto concerne la lista del personale non attivo, la situazione visualizzata è
 limitata ai soli campi nome e cognome, matricola e mail.
@@ -50,35 +42,38 @@ Le tabelle, infine, sono entrambe ordinabili per campo, nel senso che è possibi
 l'ordinamento delle righe (inizialmente per ordine alfabetico) a seconda del campo più di interesse
 (numero di matricola, data di inizio lavoro ecc...).
 
+Nella parte alta della pagina è presente un disclaimer contenente l'informazione relativa al fatto che
+l'inserimento manuale dei dipendenti (senza passare quindi dalla sincronizzazione con i dati SIPER),
+può comportare problemi nell'inserimento delle corrette informazioni anagrafiche e contrattuali del
+nuovo dipendente oltre che provocare problemi nella login del nuovo dipendente sulla piattaforma ePAS.
+
 
 Inserimento persona
 -------------------
 
-Nel caso si intenda inserire una nuova persona in anagrafica sarà per prima cosa necessario
+Nel caso si intenda comunque procedere con l'inserimento di una nuova persona in anagrafica sarà per prima cosa necessario
 cliccare sul link in alto a sinistra nella pagina: "*Inserisci una nuova persona*".
 
 La pagina che si aprirà sarà come quella presentata nelle figure seguenti:
 
-.. figure:: _static/images/inserisciPersonaTop.png
+.. figure:: _static/images/inserimentoPersona.png
    :scale: 40
    :align: center
 
-   Schermata modifica persona (top)
+   Schermata inserimento nuova persona
    
-.. figure:: _static/images/inserisciPersonaBottom.png
-   :scale: 40
-   :align: center
-
-   Schermata modifica persona (bottom)
-   
-In queste due schermate sono presenti i campi da compilare (in grassetto quelli obbligatori) per
+In questa schermata sono presenti i campi da compilare (asteriscati quelli obbligatori) per
 poter inserire una persona in anagrafica.
 Tutti i campi sono decisamente esplicativi, quelli particolari presentano una breve descrizione
 che ne esplica il funzionamento.
-Inoltre, nella parte finale della schermata, dove occorre definire lo username con cui tale
-dipendente potrà loggarsi su epas, è presente un campo autogenerante che popola lo username di
-default con i valori *nome* e *cognome* del dipendente separati dal "**.**".
-Naturalmente questo valore è modificabile.
+Tra questi, una menzione particolare per il campo *Inquadramento* che contiene la tipologia di contratto
+da assegnare al dipendente.
+Può assumere tre diversi valori:
+
+* Dipendente strutturato TD o TI
+* Interinale
+* Non strutturato (co.co.co., assegnisti, borsisti, ecc...)
+
 
 
 Modifica persona
@@ -87,26 +82,23 @@ Modifica persona
 In caso si vogliano modificare i dati di una certa persona la schermata che potremo visualizzare
 sarà di questo tipo
 
-.. figure:: _static/images/modificaPersonaTop.png
+.. figure:: _static/images/modificaPersona.png
    :scale: 40
    :align: center
 
-   Schermata modifica persona (top)
+   Schermata modifica persona
    
-.. figure:: _static/images/modificaPersonaBottom.png
-   :scale: 40
-   :align: center
-
-   Schermata modifica persona (bottom)
-
 Si può notare in alto la barra con le schede che separano la gestione di tutte le componenti
 relative al dipendente stesso:
  
   * Dati anagrafici (quella aperta in avvio) 
   * Dati contrattuali 
+  * Configurazione personale
+  * Gruppi
   * Badge 
   * Figli 
   * Elimina
+
 
 Dati Anagrafici
 ---------------
@@ -116,11 +108,7 @@ intuitivo dove andare a cercare l'informazione specifica che si richiede o che s
 modificare.
 Nel pannello relativo ai dati personali, è possibile trovare alcune informazioni aggiuntive
 rispetto alla precedente versione.
-Difatti, esiste la possibilità di specificare se la persona in questione è Responsabile di un
-gruppo di lavoro (e in tal caso può usufruire della possibilità di vedere le timbrature delle
-persone che afferiscono al proprio gruppo e la loro presenza giornaliera 
-v. :menuselection:`Amministrazione --> Timbrature`);
-è possibile inoltre specificare se la persona può/non può ricevere le mail per le informazioni
+E'possibile inoltre specificare se la persona può/non può ricevere le mail per le informazioni
 circa la propria situazione di timbrature e assenze (invio email).
 E' stato aggiunto inoltre un pannello relativo alle *altre informazioni*, contenente anche il campo
 in cui specificare l'eventuale **eppn** ovvero il campo utilizzato dalla piattaforma *Shibboleth*

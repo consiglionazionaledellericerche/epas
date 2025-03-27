@@ -16,7 +16,7 @@ fronte la seguente schermata:
    
    Schermata sedi e amministratori
    
-In particolare si può notare come l'istituto in questione presenti due sedi distinte.
+In particolare si può notare come l'istituto in questione presenti tre sedi distinte, di cui una chiusa.
 Chi detiene diritti di amministrazione sulla sede, può modificare i parametri relativi alle 
 informazioni di ubicazione della sede stessa cliccando sul nome.
 Per ognuna delle sedi presenti, vengono visualizzati gli account corrispondenti ai lettori badge da
@@ -34,12 +34,4 @@ sedi, se si hanno diritti di amministrazione, eventuali altri amministratori.
 Sarà sufficiente cliccare sul link che permette l'aggiunta di utenti amministratori e scegliere la
 persona dalla lista.
 
-E' inoltre possibile, come si può notare dall'immagine ad inizio pagina, inserire delle tipologie
-di account di sistema.
-Epas offre la possibilità di definire, tramite questa schermata, account di sistema quali 
-**BadgeReader** e **RestClient**.
-I primi devono essere associati con username e password ai client che si occupano di scaricare su
-ePAS le timbrature prese dai lettori badge dai quali i dipendenti comunmente timbrano.
-I secondi, invece, sono account di tipo *rest* che servono per chiamare i metodi rest che ePAS
-mette a disposizione di eventuali applicazioni che intendono interagire con Epas stesso 
-(v. Documentazioni -> Documentazione servizi rest).
+

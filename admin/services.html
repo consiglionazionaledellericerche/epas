@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="it" class="no-js" prefix="og: http://ogp.me/ns#">
+
+<!--
+  ~ Copyright (C) 2020  Consiglio Nazionale delle Ricerche
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU Affero General Public License as
+  ~     published by the Free Software Foundation, either version 3 of the
+  ~     License, or (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU Affero General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU Affero General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electronic Personnel Attendance System | 2.15. Gestione servizi</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css">
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css">
+
+    <!-- Relations -->
+    <link rel="index" title="Indice" href="../index.html">
+    <link rel="top" title="Electronic Personnel Attendance System" href="../index.html">
+    <link rel="up" title="2. Documentazione per gli amministratori del personale" href="index.html">
+    <link rel="next" title="2.16. Utilità" href="utility.html">
+    <link rel="prev" title="2.14. Schermate di riepilogo" href="variousRecap.html">
+
+
+    <!-- Favicons -->
+    <link rel="icon" href="../_static/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="../_static/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="icon" href="../_static/favicon.ico">
+    <meta name="theme-color" content="#0066CC">
+
+    <meta name="robots" content="noindex, nofollow">
+</head>
+
+<body class="docs-italia">
+  <script>
+	if (document.location.href.indexOf('?payload=') >= 0)
+		document.body.className += ' loading';
+</script>
+  <!--
+  ~ Copyright (C) 2020  Consiglio Nazionale delle Ricerche
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU Affero General Public License as
+  ~     published by the Free Software Foundation, either version 3 of the
+  ~     License, or (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU Affero General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU Affero General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<header class="container-fluid container-fluid--desktop px-0 header">
+  <nav class="navbar navbar-expand-lg primary-bg-a7 navbar-dark slim-header justify-content-start p-0 pl-lg-4 pr-lg-5">
+    <span class="navbar-brand ml-4">
+      <a class="text-white" href="https://www.cnr.it">Consiglio Nazionale delle Ricerche</a>
+    </span>
+    <button class="navbar-toggler collapsed text-white px-2 py-0 mr-3"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation">
+    <span class="navbar__icon it-expand my-auto ml-1"></span></button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item px-lg-2 pl-3">
+          <a class="nav-link" target="docker" href="https://search.maven.org/search?q=it.cnr.si">Maven Central</a>
+        </li>        
+        <li class="nav-item px-lg-2 pl-3">
+          <a class="nav-link" target="docker" href="https://hub.docker.com/u/consiglionazionalericerche">Docker Hub</a>
+        </li>
+        <li class="nav-item px-lg-2 pl-3">
+          <a class="nav-link" target="github" href="https://github.com/consiglionazionaledellericerche">GitHub</a>
+        </li>
+      </ul>
+    </div>
+    
+    <div class="ml-auto">
+      
+    </div>
+  </nav>
+
+  <div class="row p-4 px-lg-5 m-0 bg-primary--dark align-items-center">
+    <div class="row w-100">
+      <div class="logo--header">
+        <a href="../index.html" tabindex="-1" aria-hidden="true" class="d-block"><img src="../_static/logo.png"></a>
+      </div>
+      <div class="col pl-3 pl-sm-4">
+        <h1 class="h1--header mb-1">
+          <a href="../index.html" class="site-title text-white">
+            Electronic Personnel Attendance System
+          </a>
+        </h1>
+        <h2 class="text-white mb-0 h2--header">Documenti pubblici, digitali.</h2>
+      </div>
+    </div>
+  </div>
+</header>
+<!--
+  ~ Copyright (C) 2020  Consiglio Nazionale delle Ricerche
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU Affero General Public License as
+  ~     published by the Free Software Foundation, either version 3 of the
+  ~     License, or (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU Affero General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU Affero General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<div class="doc-header container-fluid container-fluid--desktop bg-white">
+  <div class="row py-3 px-4 px-lg-5 align-items-center flex-nowrap justify-content-between">
+    <div class="col-auto d-md-none d-flex align-items-center order-1">
+      <a href="#" class="btn p-2" role="button" id="searchbox-toggle" data-toggle="collapse" data-target="#searchbox" aria-controls="searchbox" aria-expanded="false" aria-label="Toggle searchbox">
+        <span class="docs-icon-search d-inline-block">
+          <span class="sr-only">Cerca nel documento</span>
+        </span>
+      </a>
+    </div>
+    <div class="col-3 d-none d-md-flex pl-0">
+      
+  <div class="w-100" role="search">
+    <form class="mr-md-3" id="rtd-search-form" action="../search.html" method="get">
+      <div class="input-group" role="search">
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+        <input type="text" class="p-2 text-grey form-control" style="" required="" id="cerca" name="q" placeholder="Cerca nel documento...">
+				<span class="input-group-append">
+					<button type="submit" class="btn btn-default text-primary px-3 py-2" role="search">
+            <span class="docs-icon-search d-block my-auto">
+							<span class="sr-only">Cerca nel documento</span>
+						</span>
+					</button>
+				</span>
+			</div>
+    </form>
+  </div>
+    </div>
+    <div class="col-auto d-flex align-items-center justify-content-center flex-md-grow-1 order-0 order-md-1 pl-0">
+      
+      <a href="#" role="button" class="btn p-2" data-toggle="modal" data-target="#document-info">
+        <span class="docs-icon-info"></span>
+        <span class="d-none d-md-inline align-middle">Informazioni</span>
+      </a>
+      
+    </div>
+    <div class="col-auto d-none d-md-flex flex-grow-1 align-items-center order-1">
+      <!--
+  ~ Copyright (C) 2020  Consiglio Nazionale delle Ricerche
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU Affero General Public License as
+  ~     published by the Free Software Foundation, either version 3 of the
+  ~     License, or (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU Affero General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU Affero General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<div class="document-actions d-flex flex-column flex-md-row justify-content-around w-100 p-2 p-md-0 text-blue">
+  <div class="dropdown p-3 px-md-2 py-md-0 d-flex flex-wrap">
+    <a class="btn dropdown-toggle p-2 flex-grow-1 text-left" href="#" id="downloads-dropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span class="docs-icon-download align-middle"></span>
+      <span class="align-middle">Scarica</span>
+    </a>
+    <div class="dropdown-menu w-100" aria-labelledby="downloads-dropdown" aria-disabled="false">
+      <div class="link-list-wrapper">
+        <ul class="link-list">
+          
+          <a class="dropdown-item" href="/epas/Manuale-ePAS.epub" download>
+            epub
+          </a>
+          
+          <li>
+            <span class="divider"></span>
+          </li>
+          
+          
+          <a class="dropdown-item" href="/epas/Manuale-ePAS.pdf" download>
+            pdf
+          </a>
+          
+          
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  
+  
+    
+  
+  <div class="p-3 px-md-2 py-md-0">
+    <a href="https://github.com/consiglionazionaledellericerche/epas/blob/master/docs/admin/services.rst" role="button" class="btn p-2" aria-disabled="false">
+        <span class="docs-icon-github"></span>
+        <span class="align-middle">Sorgente</span>
+    </a>
+  </div>
+</div>
+    </div>
+    
+    <div class="col-auto pr-0 d-md-none d-flex align-items-center justify-content-end order-1">
+      <a href="#" role="button" class="btn py-2 px-0" data-toggle="modal" data-target="#document-actions">
+        <span class="docs-icon-more"></span>
+        <span class="sr-only">Azioni</span>
+      </a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="progress-container">
+      <div class="progress-bar" id="scrollprogressBar"></div>
+    </div>
+  </div>
+</div>
+
+	<!--
+  Forum Italia comments templates
+-->
+
+<script id="forum-italia-comments" type="text/template">
+  <div class="block-comments" id="accordion-comments-{{ topicId }}" data-topic="{{ topicId }}">
+    <!-- Top header -->
+    <div class="block-comments__header d-flex border-top border-bottom border-width-2 pt-3 pb-3 align-items-center justify-content-between">
+      <h6 class="col-auto text-uppercase mb-0">{{ commentsCount }} Commenti</h6>
+      <button class="col-auto block-comments__toggle-btn rounded-circle border border-medium-blue border-width-2 collapsed" data-toggle="collapse" data-target="#comments-{{ topicId }}" aria-expanded="false">
+        <span class="docs-icon-plus"></span>
+        <span class="docs-icon-minus"></span>
+      </button>
+    </div>
+  </div>
+  <div class="block-comments__body collapse" data-parent="#accordion-comments-{{ topicId }}" id="comments-{{ topicId }}">
+    <!-- Input row -->
+    <div class="d-flex align-items-center mb-4 block-comments__input">
+      <div class="box-comment {{ canPost }}" data-topic="{{ topicId }}"></div>
+    </div>
+    <div class="row">
+      <div class="block-comments__container col">
+        <div class="row mt-4">
+          <ul class="block-comments__list col items mb-0" id="accordion-comment-item" data-topic="{{ topicId }}"></ul>
+        </div>
+      </div>
+    </div>
+    <div class="block-comments__header d-flex border-bottom border-width-2 pt-3 pb-3 mb-4 align-items-center justify-content-end">
+      <button class="col-auto block-comments__toggle-btn rounded-circle border border-medium-blue border-width-2 collapsed" data-toggle="collapse" data-target="#comments-{{ topicId }}" aria-expanded="false">
+        <span class="docs-icon-plus"></span>
+        <span class="docs-icon-minus"></span>
+      </button>
+    </div>
+  </div>
+</script>
+
+<script id="forum-italia__comment" type="text/template">
+  <li id="comment-{{ post.id }}" class="row mb-4 block-comments__item {{ hidden }} {{ isNew }}"
+      data-topic="{{ post.topic_id }}" data-comment="{{ post.id }}">
+    <div id="reply-to-{{ post.id }}" class="block-comments__reply-anchor"></div>
+    <figure class="col-auto mb-0">
+      <img class="block-comments__img rounded-circle" src="{{ avatarUrl }}">
+    </figure>
+    <div class="col block-comments__content">
+      <div class="row align-items-center justify-content-between" id="comment-heading-1">
+        <div class="col-auto">
+          <span class="block-comments__name text-capitalize mb-0">{{ displayName }}</span>
+        </div>
+        <div class="col-auto">
+          <p class="d-inline-block mr-2 block-comments__date mb-0">{{ date }}</p>
+          <button class="block-comments__item-btn" data-toggle="collapse"
+                  data-target="#collapse-{{ post.id }}">
+            <i class="it-collapse"></i>
+            <i class="it-expand"></i>
+          </button>
+        </div>
+      </div>
+      <p class="text-uppercase block-comments__role">{{ publicUserField }}</p>
+      <div class="my-3">{{ replyLink }}</div>
+      <div id="collapse-{{ post.id }}" class="block-comments__paragraph pl-3 border-left collapse show"
+           aria-labelledby="comment-heading-1">
+        {{ post.cooked }}
+      </div>
+      <div class="block-comments__actions mb-2 mt-3">
+        {{ postActions }}
+      </div>
+    </div>
+  </li>
+</script>
+
+<script id="forum-italia__like-button" type="text/template">
+  <small>
+      <button id="{{ buttonAction }}-like-{{ post.id }}" type="button" class="btn btn-primary btn-sm mr-2 px-2 py-1">
+        {{ likeCount }}
+        <i class="it-favorite ml-1 mr-0"></i>
+      </button>
+      {{ likeDone }}
+    </small>
+</script>
+
+<script id="forum-italia__like-info" type="text/template">
+  <small>
+      <span id="like-{{ post.id }}" class="border rounded btn-sm mr-2 px-2 py-1">
+        {{ likeCount }}
+        <i class="it-favorite ml-1 mr-0"></i>
+      </span>
+      {{ likeDone }}
+    </small>
+</script>
+
+<script id="forum-italia__reply-link" type="text/template">
+  <div>
+    <small>In risposta al 
+      <a class="reply-to-post" href="#reply-to-{{ replyDest.id }}">
+        commento di {{ replyDest.name }}
+      </a>
+    </small>
+  </div>
+</script>
+
+<script id="forum__login" type="text/template">
+  <div class="box-comment__user-image box-comment__user-image--anon">
+    <i class="docs-icon-user"></i>
+  </div>
+  <div class="box-comment__login">
+    <div><button class="login-button btn-link p-0 border-0 align-baseline">Accedi al Forum</button> per commentare</div>
+  </div>
+</script>
+
+<script id="forum__comment" type="text/template">
+  <div class="form group">
+    <div class="box-comment__errors-box"></div>
+    <!-- Write -->
+    <div class="d-flex align-items-center mt-4 mb-4 block-comments__input box-comment__write">
+      <figure class="col-auto mb-0">
+        <img class="block-comments__img box-comment__figure rounded-circle" src="">
+          <figcaption>
+            <a href="#logout" class="block-comments__logout-link block-comments__logout-link--visible" data-toggle="modal" data-target="#logout-modal" title="Logout" alt="Logout">Logout</a>
+          </figcaption>
+      </figure>
+      <textarea class="form-control box-comment__body col ml-2 p-2" id="comments-input" placeholder="Scrivi qui un commento. Per formattare il testo puoi usare Markdown. Clicca sul bottone 'suggerimenti' per vedere alcuni esempi." rows="4"></textarea>
+    </div>
+    <!-- Buttons -->
+    <div class="box-comment__buttons">
+      <button type="button" class="btn btn-primary btn-sm box-comment__submit mr-2" disabled="true"><div>invia</div></button>
+      <button type="button" class="btn btn-sm btn-secondary new-comment__suggestions" data-container="body" data-toggle="popover" data-content="html">suggerimenti</button><span class="loading no-bg">&nbsp;</span>
+    </div>
+    <div class="box-comment__required">
+      <span>Scrivi almeno altri <span class="required-chars">20</span> caratteri</span>
+    </div>
+  </div>
+</script>
+
+<script id="forum-italia__missing_permission" type="text/template">
+	<div class="pl-2 block-comments__input missing_permission error error--{{ errorCode }} row">
+		<figure class="col-auto mb-0 mr-2">
+			<img class="block-comments__img new-comment__figure rounded-circle" src="">
+			<figcaption>
+				<a href="#logout" class="block-comments__logout-link block-comments__logout-link--visible" data-toggle="modal" data-target="#logout-modal" title="Logout" alt="Logout">Logout</a>
+			</figcaption>
+		</figure>
+
+		<div class="missing_permission__text col pt-2">{{ errorText }}</div>
+	</div>
+</script>
+
+<script id="forum__logout--modal" type="text/template">
+  <div class="modal logout-modal" id="logout-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Logout</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Dopo il logout non sarà possibile scrivere nuovi commenti. Sicuro di voler procedere?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="logout-modal__submit">Conferma</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" id="logout-modal__cancel">Annulla</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</script>
+
+<script id="forum-italia__markup__tooltip" type="text/template">
+  <div class="tooltip tooltip--active doc-tooltip box-comment__suggestions__tooltip" role="tooltip">
+    <div class="tooltip__wrap">
+      Markdown per la formattazione del testo:
+      <ul class="tooltip__content">
+        <li><b>Grassetto:</b> __testo__ (o **testo**)</li>
+        <li><i>Corsivo</i>: _testo_</li>
+        <li>Link: [Testo](http://example.com)</li>
+        <li>Citazione: &gt; Testo citazione</li>
+      </ul>
+    </div>
+  </div>
+</script>
+
+<script id="forum-italia__silenced" type="text/template">
+  <div class="error error__silenced">
+    Il tuo account è stato temporaneamente sospeso, scopri di più leggendo
+    <a href="{{ notificationsUrl }}" target="_blank">le tue notifiche</a> su Forum Italia.
+    <br>
+  </div>
+</script>
+
+<script id="forum-italia__closedTopic" type="text/template">
+  <div class="error error__closed">
+    Questa discussione è in sola lettura.
+    <br>
+  </div>
+</script>
+
+<script id="section_navigation__comments" type="text/template">
+  <li class="chapter-nav__item">
+      <span class="it-comment mr-2 align-middle"></span>
+      <a href="#forum-italia-comments-{{ topicId }}" class="chapter-link chapter-link--expand">
+          {{ postsCount }} commenti
+      </a>
+  </li>
+</script>
+
+
+<!--
+  markup_modifier templates
+-->
+
+<script id="markup_modifier__chapter-header" type="text/template"> <div class="chapter-header clearfix row"><div class="title-wrap col"> </script>
+
+<script id="markup_modifier__icon" type="text/template">
+	<span class="docs-icon-{{ i }}"></span>
+</script>
+
+<script id="markup_modifier__note-action" type="text/template">
+	<div class='note-action'>
+		<button type='button' class='note-close-btn'>×</button>
+		<button type='button' class='note-back-btn'><i class='it-arrow-up'></i> {{ text }} </button>
+	</div>
+</script>
+
+<script id="markup_modifier__admonition" type="text/template">
+	<div class='admonition__toggle-wrap'>
+		<button type='button' class='admonition__toggle-btn'>
+			<span class='admonition__toggle-show-more'>
+				{{ more }} <span class='docs-icon-plus'></span>
+			</span>
+			<span class='admonition__toggle-show-less'>
+				{{ less }} <span class='docs-icon-minus'></span>
+			</span>
+		</button>
+	</div>
+</script>
+
+
+<!--
+  glossary_page templates
+-->
+
+<script id="glossary__btn" type="text/template">
+	<button class='glossary-page__btn collapsed border-top border-grey-light border-width-2 pt-3 pb-3' data-toggle='collapse' data-target='#glossary-{{ id }}' aria-expanded='true' aria-controls='glossary-{{ id }}'>
+		<span class='docs-icon-plus mr-3'> </span>
+		<span class='docs-icon-minus mr-3'> </span>
+		{{ text }}
+	</button>
+</script>
+
+<script id="glossary__copy-link" type="text/template">
+	<div class='glossary-page__copy-link-wrap mt-3'>
+		<i class='it-link mr-2 align-middle'></i>
+		<button type='button' class='glossary-page__copy-link'> {{ copyLink }} </button>
+	</div>
+</script>
+
+
+<!--
+  searchbox_collapse templates
+-->
+
+<script id="searchbox-collapse" type="text/template">
+	<div class="row p-2"><div class="col"></div></div>
+</script>
+
+
+<!--
+  section_navigation templates
+-->
+
+<script id="section_navigation__nav" type="text/template">
+    <div class="chapter-nav col-4">
+        <div class="chapter-nav__wrap">
+            <ul class="chapter-nav__list chapter-nav__list--visible">
+                <li class="chapter-nav__item">
+                    <span class="it-more-items mr-2 align-middle"></span>
+                    <button type="button" data-toggle="modal"
+                        class="chapter-link chapter-link--expand">{{ seeActions }}</button>
+                </li>
+            </ul>
+            <div class="{{ modalClass }} chapter-nav__list--hidden" tabindex="-1" role="dialog"
+                     aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                <div class="{{ modalContainerClass }}">
+                    <div class="{{ modalContentClass }} chapter-nav__list-wrap">
+                        <div class="chapter-nav__title"> {{ title }} </div>
+                        <ul class="chapter-nav__list">
+                            <li class="chapter-nav__item">
+                                <i class="it-link mr-2 align-middle"></i>
+                                <button type="button" class="chapter-link">{{ copyLink }}</button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+
+<!--
+  tooltip templates
+-->
+
+<script id="tooltip__main" type="text/template">
+	<div class='tooltip tooltip--active doc-tooltip' role='tooltip'>
+		<div class='tooltip__wrap'>
+			<button type='button' role='button' class='tooltip__close-btn' data-ref="{{ item.ref }}"></button>
+			<h2 class='tooltip__title'>{{ item.title }}</h2>
+			<p class='tooltip__content'>{{ item.body }}</p>
+		</div>
+	</div>
+</script>
+
+<script id="tooltip__glossary" type="text/template">
+	<div class='tooltip tooltip--active doc-tooltip' role='tooltip'>
+		<div class='tooltip__wrap'>
+			<button type='button' role='button' class='tooltip__close-btn' data-ref="{{ item.ref }}"></button>
+			<h2 class='tooltip__title'>{{ item.title }}</h2>
+			<p class='tooltip__content'>{{ trimmedSummary }}</p> {{ btnToGlossary }}
+		</div>
+	</div>
+</script>
+
+<script id="tooltip__note" type="text/template">
+	<div class='tooltip tooltip--active doc-tooltip doc-tooltip--note' role='tooltip'>
+		<div class='tooltip__wrap'>
+			<button type='button' role='button' class='tooltip__close-btn' data-ref="{{ item.ref }}"></button>
+			<h2 class='tooltip__title'>{{ item.title }}</h2>
+			<p class='tooltip__content'> {{ item.body }}</p>
+		</div>
+	</div>
+</script>
+
+
+  <div id="main" role="document">
+    <div class="container-fluid container-fluid--desktop main-container">
+      <div class="row">
+        <nav class="col--nav">
+          <section class="docs-menu">
+  <div id="desktop-menu" class="sidebar-nav">
+    <a class=""
+      aria-controls="desktop-menu" aria-label="esci dalla navigazione" title="esci dalla navigazione" href="#">
+      <span class="" aria-hidden="true"></span>
+    </a>
+
+    <button data-toggle="collapse" data-target="#content-index" aria-expanded="true" class="sidebar-btn p-3 sidebar-btn--desktop" type="button" aria-controls="content-index">
+      indice dei contenuti
+      <span class="it-collapse float-right"></span>
+      <span class="it-expand float-right"></span>
+    </button>
+    <div id="content-index" class="content-index--menu sidebar-list--wrapper sidebar-accordion-content collapse show">
+      <ul class="">
+        <li class="toctree-l1 ">
+          <a href='../index.html'>Sommario</a>
+        </li>
+      </ul>
+      
+      <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">2. Documentazione per gli amministratori del personale</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="inizialization.html">2.1. Inizializzazioni</a></li>
+<li class="toctree-l2"><a class="reference internal" href="managePerson.html">2.2. Gestione e inserimento Personale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workingTimeType.html">2.3. Gestione e inserimento orari di lavoro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timeSlot.html">2.4. Fasce orarie di lavoro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stampings.html">2.5. Gestione Timbrature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seat.html">2.6. Gestione Sedi e amministratori</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameters.html">2.7. Gestione parametri</a></li>
+<li class="toctree-l2"><a class="reference internal" href="absences.html">2.8. Assenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vacations.html">2.9. Gestione Ferie e Permessi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="competences.html">2.10. Gestione Competenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.15. Gestione servizi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html">2.16. Utilità</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../calendars/index.html">3. Calendari turni e reperibilità</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../calendars/reperibility.html">3.1. Calendario reperibilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../calendars/shift.html">3.2. Calendario turni</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">4. Documentazione per gli amministratori tecnici</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../techAdmin/sorgentiTimbrature.html">4.1. Sorgenti timbrature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../techAdmin/badgeSystem.html">4.2. Gestione badge</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user/index.html">5. Documentazione per i dipendenti</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../user/stampings.html">5.1. Situazione mensile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/monthlyAbsences.html">5.2. Assenze mensili</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/yearlyAbsences.html">5.3. Assenze annuali</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/vacations.html">5.4. Ferie</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/competences.html">5.5. Competenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/hourRecap.html">5.6. Riepilogo orario</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/trainingHours.html">5.7. Ore di formazione</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/managePassword.html">5.8. Gestione password</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/icalCalendars.html">5.9. Calendari iCal</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../missions/index.html">6. Integrazione ePAS &lt;-&gt; Missioni</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../missions/configurazione.html">6.1. Configurazione del servizio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../missions/comportamento.html">6.2. Comportamento del servizio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../missions/regole.html">6.3. Regole ed esempi del servizio</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/index.html">7. Documentazione utilizzo flussi</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/configurazioneGruppi.html">7.1. Creazione e modifica dei gruppi di lavoro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/configurazioneAssenze.html">7.2. Configurazione flussi di richiesta assenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/richiesteFerieRiposiPermessi.html">7.3. Richieste ferie, riposi, permessi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/approvazioneFerieRiposiPermessi.html">7.4. Approvazione/rifiuto richiesta ferie, riposi, permessi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/configurazioneCompetenze.html">7.5. Configurazione flussi di richiesta competenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/richiesteCambioReperibilita.html">7.6. Richieste cambio reperibilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/approvazioneCambioReperibilita.html">7.7. Approvazione/rifiuto richiesta cambio reperibilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/configurazioneFlussiInformativi.html">7.8. Configurazione flussi informativi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/richiestaTelelavoro.html">7.9. Richiesta presa visione telelavoro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/richiestaUscitaServizio.html">7.10. Richiesta uscita di servizio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/richiestaMalattia.html">7.11. Informazione contrazione malattia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/approvazioneTelelavoro.html">7.12. Approvazione telelavoro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/approvazioneUscitaServizio.html">7.13. Approvazione Uscita di servizio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/approvazioneMalattia.html">7.14. Presa visione informazioni di malattia</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../applicationAdmin/index.html">8. Configurazioni per l'amministratore dell'applicazione</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applicationAdmin/generalSettings.html">8.1. Parametri di configurazione generale del sistema</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../rest/index.html">9. Servizi REST di ePAS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rest/absencesServices.html">9.1. Consultazione ed inserimento assenze via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/certificationsServices.html">9.2. Consultazione situazione riepiloghi/attestati mensili via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/contractsServices.html">9.3. Consultazione e Gestione Contratti dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/officesServices.html">9.4. Consultazione Uffici via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/groupsAndAffiliationsServices.html">9.5. Consultazione e Gestione Gruppi e Affiliazione via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/leavesServices.html">9.6. Consultazione Periodi di Aspettativa dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/personDaysServices.html">9.7. Consultazione situazione giornaliera dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/competencesServices.html">9.8. Consultazione situazione competenze via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/personsServices.html">9.9. Consultazione e Gestione dati Anagrafici dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/childServices.html">9.10. Consultazione e Gestione figli/figlie dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/stampingsServices.html">9.11. Gestione delle timbrature via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/vacationServices.html">9.12. Consultazione situazione ferie e permessi dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/workingTimeTypesServices.html">9.13. Consultazione delle tipologie di orario di lavoro via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/missionsServices.html">9.14. Inserimento ordini e rimborsi di missione REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/badgeServices.html">9.15. Consultazione e Gestione dei badge dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/absenceTypesServices.html">9.16. Consultazione delle tipologie di assenze via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/mealTicketsServices.html">9.17. Gestione dei buoni pasto via REST</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../sysadmin/index.html">10. Configurazioni per l'amministratore di sistema</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/startup.html">10.1. Startup dell'applicazione</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazione.html">10.2. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneLdap.html">10.3. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneSaml.html">10.4. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneOidc.html">10.5. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">10.6. Configurazione dei log di ePAS</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix.html">Appendice</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../appendix.html#autori">Autori</a></li>
+</ul>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+    <button data-toggle="collapse" data-target="#figures-index" aria-expanded="true" class="sidebar-btn p-3 sidebar-btn--desktop collapsed" type="button" aria-controls="figures-index">
+      indice delle figure
+      <span class="it-collapse float-right"></span>
+      <span class="it-expand float-right"></span>
+    </button>
+    <div id="figures-index" class="figures-index--menu sidebar-list--wrapper sidebar-accordion-content collapse">
+      <ul>
+<li><a class="reference internal" href="../overview/index.html#id1">Fig. 1.1 - General Architecture Overview</a></li>
+</ul>
+
+    </div>
+    
+
+    
+
+    
+  </div>
+</section>
+          <!-- Toggle -->
+<div class="navbar-toggler--wrap navbar-toggler--wrap--bottom p-3">
+  <div class="navbar-toggler navbar-toggler--open p-0 border-0 ml-auto">
+    <div class="navbar-toggler-bottom__chapter align-middle text-truncate">
+      <span class="it-list mr-2"></span><span class="section-number">2.15. </span>Gestione servizi
+    </div>
+  </div>
+</div>
+
+<div class="sidebar-tabs">
+
+  <!-- Back button. -->
+  <div class="row">
+    <div class="col">
+      <button class="navbar-toggler navbar-toggler--back border-0 ml-auto" type="button" data-toggle="offcanvas">
+        <span class="it-arrow-left align-middle"></span>
+        <span class="navbar-toggler__chapter align-middle ml-2">
+          indici e glossario
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab -->
+  <ul class="row ml-3 mr-3 nav nav-tabs" role="tablist">
+    <li class="col text-center active">
+      <a id="content-index-mobile-tab" data-toggle="tab" href="#content-index-mobile" aria-controls="content-index-mobile" role="tab" aria-selected="true" class="sidebar-btn p-2 sidebar-btn--mobile active show">
+        contenuti
+      </a>
+    </li>
+    <li class="col text-center">
+      <a id="figures-index-mobile-tab" data-toggle="tab" href="#figures-index-mobile" aria-controls="figures-index-mobile" role="tab" aria-selected="false" class="col sidebar-btn p-2 sidebar-btn--mobile">
+        figure
+      </a>
+    </li>
+    <li class="col text-center">
+      <a id="table-index-mobile-tab" data-toggle="tab" href="#table-index-mobile" aria-controls="table-index-mobile" role="tab" aria-selected="false" class="col sidebar-btn p-2 sidebar-btn--mobile">
+        tabelle
+      </a>
+    </li>
+    <li class="col text-center">
+      <a id="glossary-index-mobile-tab" data-toggle="tab" href="#glossary-index-mobile" aria-controls="glossary-index-mobile" role="tab" aria-selected="false" class="col sidebar-btn p-2 sidebar-btn--mobile">
+        glossario
+      </a>
+    </li>
+  </ul>
+</div>
+
+
+<!-- Off canvas -->
+<section class="docs-offcanvas-menu" id="sidebar-nav">
+  <div class="tab-content sidebar-nav">
+
+      <div id="content-index-mobile" class="content-index--menu tab-pane sidebar-list--wrapper fade show active" role="tabpanel" aria-labelledby="content-index-mobile-tab">
+        <ul class="">
+          <li class="toctree-l1 ">
+            <a href='../index.html'>Sommario</a>
+          </li>
+        </ul>
+        
+        <p class="caption" role="heading"><span class="caption-text">Indice dei contenuti</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview/index.html">1. Architettura di Massima</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../overview/mainComponents.html">1.1. Componenti principali di ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview/mainFeatures.html">1.2. Funzionalità principali</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">2. Documentazione per gli amministratori del personale</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="inizialization.html">2.1. Inizializzazioni</a></li>
+<li class="toctree-l2"><a class="reference internal" href="managePerson.html">2.2. Gestione e inserimento Personale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workingTimeType.html">2.3. Gestione e inserimento orari di lavoro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timeSlot.html">2.4. Fasce orarie di lavoro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stampings.html">2.5. Gestione Timbrature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="seat.html">2.6. Gestione Sedi e amministratori</a></li>
+<li class="toctree-l2"><a class="reference internal" href="parameters.html">2.7. Gestione parametri</a></li>
+<li class="toctree-l2"><a class="reference internal" href="absences.html">2.8. Assenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vacations.html">2.9. Gestione Ferie e Permessi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="competences.html">2.10. Gestione Competenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electronicCards.html">2.11. Gestione tessere per buoni pasto elettronici</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tickets.html">2.12. Gestione buoni pasto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sendStampings.html">2.13. Invio attestati di presenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="variousRecap.html">2.14. Schermate di riepilogo</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.15. Gestione servizi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html">2.16. Utilità</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../calendars/index.html">3. Calendari turni e reperibilità</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../calendars/reperibility.html">3.1. Calendario reperibilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../calendars/shift.html">3.2. Calendario turni</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../techAdmin/index.html">4. Documentazione per gli amministratori tecnici</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../techAdmin/sorgentiTimbrature.html">4.1. Sorgenti timbrature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../techAdmin/badgeSystem.html">4.2. Gestione badge</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user/index.html">5. Documentazione per i dipendenti</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../user/stampings.html">5.1. Situazione mensile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/monthlyAbsences.html">5.2. Assenze mensili</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/yearlyAbsences.html">5.3. Assenze annuali</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/vacations.html">5.4. Ferie</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/competences.html">5.5. Competenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/hourRecap.html">5.6. Riepilogo orario</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/trainingHours.html">5.7. Ore di formazione</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/managePassword.html">5.8. Gestione password</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/icalCalendars.html">5.9. Calendari iCal</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../missions/index.html">6. Integrazione ePAS &lt;-&gt; Missioni</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../missions/configurazione.html">6.1. Configurazione del servizio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../missions/comportamento.html">6.2. Comportamento del servizio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../missions/regole.html">6.3. Regole ed esempi del servizio</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/index.html">7. Documentazione utilizzo flussi</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/configurazioneGruppi.html">7.1. Creazione e modifica dei gruppi di lavoro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/configurazioneAssenze.html">7.2. Configurazione flussi di richiesta assenza</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/richiesteFerieRiposiPermessi.html">7.3. Richieste ferie, riposi, permessi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/approvazioneFerieRiposiPermessi.html">7.4. Approvazione/rifiuto richiesta ferie, riposi, permessi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/configurazioneCompetenze.html">7.5. Configurazione flussi di richiesta competenze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/richiesteCambioReperibilita.html">7.6. Richieste cambio reperibilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/approvazioneCambioReperibilita.html">7.7. Approvazione/rifiuto richiesta cambio reperibilità</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/configurazioneFlussiInformativi.html">7.8. Configurazione flussi informativi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/richiestaTelelavoro.html">7.9. Richiesta presa visione telelavoro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/richiestaUscitaServizio.html">7.10. Richiesta uscita di servizio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/richiestaMalattia.html">7.11. Informazione contrazione malattia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/approvazioneTelelavoro.html">7.12. Approvazione telelavoro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/approvazioneUscitaServizio.html">7.13. Approvazione Uscita di servizio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/approvazioneMalattia.html">7.14. Presa visione informazioni di malattia</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../applicationAdmin/index.html">8. Configurazioni per l'amministratore dell'applicazione</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../applicationAdmin/generalSettings.html">8.1. Parametri di configurazione generale del sistema</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../rest/index.html">9. Servizi REST di ePAS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rest/absencesServices.html">9.1. Consultazione ed inserimento assenze via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/certificationsServices.html">9.2. Consultazione situazione riepiloghi/attestati mensili via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/contractsServices.html">9.3. Consultazione e Gestione Contratti dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/officesServices.html">9.4. Consultazione Uffici via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/groupsAndAffiliationsServices.html">9.5. Consultazione e Gestione Gruppi e Affiliazione via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/leavesServices.html">9.6. Consultazione Periodi di Aspettativa dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/personDaysServices.html">9.7. Consultazione situazione giornaliera dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/competencesServices.html">9.8. Consultazione situazione competenze via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/personsServices.html">9.9. Consultazione e Gestione dati Anagrafici dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/childServices.html">9.10. Consultazione e Gestione figli/figlie dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/stampingsServices.html">9.11. Gestione delle timbrature via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/vacationServices.html">9.12. Consultazione situazione ferie e permessi dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/workingTimeTypesServices.html">9.13. Consultazione delle tipologie di orario di lavoro via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/missionsServices.html">9.14. Inserimento ordini e rimborsi di missione REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/badgeServices.html">9.15. Consultazione e Gestione dei badge dei dipendenti via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/absenceTypesServices.html">9.16. Consultazione delle tipologie di assenze via REST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rest/mealTicketsServices.html">9.17. Gestione dei buoni pasto via REST</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../sysadmin/index.html">10. Configurazioni per l'amministratore di sistema</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/startup.html">10.1. Startup dell'applicazione</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazione.html">10.2. Configurazione autenticazione in ePAS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneLdap.html">10.3. Configurazione autenticazione LDAP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneSaml.html">10.4. Configurazione autenticazione SAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/autenticazioneOidc.html">10.5. Configurazione autenticazione OIDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sysadmin/configurazioneLog.html">10.6. Configurazione dei log di ePAS</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix.html">Appendice</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../appendix.html#autori">Autori</a></li>
+</ul>
+</li>
+</ul>
+
+        
+      </div>
+
+      <div id="figures-index-mobile" class="figures-index--menu tab-pane sidebar-list--wrapper fade" role="tabpanel" aria-labelledby="figures-index-mobile-tab">
+        <ul>
+<li><a class="reference internal" href="../overview/index.html#id1">Fig. 1.1 - General Architecture Overview</a></li>
+</ul>
+
+      </div>
+
+      <div id="table-index-mobile" class="table-index--menu tab-pane sidebar-list--wrapper fade" role="tabpanel" aria-labelledby="table-index-mobile-tab">
+        None
+      </div>
+
+      <div id="glossary-index-mobile" class="glossary-mobile--menu tab-pane sidebar-list--wrapper fade" role="tabpanel" aria-labelledby="glossary-index-mobile-tab">
+        None
+      </div>
+
+  </div>
+</section>
+        </nav>
+        <div id="doc-content" class="col-content">
+          <!--<div class="doc-content__consultation">
+            <span class="it-icon-edit"></span>
+            in consultazione
+          </div>-->
+          
+            <div class="footer-buttons footer-buttons--prev" role="navigation" aria-label="footer navigation">
+                <a href="variousRecap.html" class="" title="2.14. Schermate di riepilogo" accesskey="p" rel="prev"> Torna a <span class="section-number">2.14. </span>Schermate di riepilogo</a>
+            </div>
+          
+          
+  <section id="gestione-servizi">
+<h1><span class="section-number">2.15. </span>Gestione servizi<a class="headerlink" href="#gestione-servizi" title="Permalink to this heading">¶</a></h1>
+<p>I servizi di turno e reperibilità sono attività fondamentali per la gestione del personale.
+Attraverso questa funzionalità possono essere poi definiti i calendari per gestire al meglio le attività e per consentire l'inserimento dei giusti valori
+di competenza di turno e di reperibilità per le persone abilitate (v. <a class="reference internal" href="competences.html"><span class="doc">Gestione Competenze</span></a> ) attraverso un processo automatizzato che verrà
+trattato nella sezione relativa alla gestione dei calendari.
+In questa sezione trattiamo come devono essere definiti i servizi e quali sono le condizioni fondamentali per l'attribuzione corretta del personale.</p>
+<p>Dal menu <span class="menuselection">Configurazione ‣ gestione servizi</span>, l'amministratore potrà trovarsi
+di fronte una schermata come questa:</p>
+<figure class="align-center" id="id1">
+<a class="reference internal image-reference" href="../_images/homeServizi.png"><img alt="../_images/homeServizi.png" src="../_images/homeServizi.png" style="width: 2250.0px; height: 1184.4px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.65 </span><span class="caption-text">Pagina di configurazione servizi</span><a class="headerlink" href="#id1" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<p>Come si può notare, in alto si trovano due schede: la prima (quella in cui ci troviamo) relativa alla definizione di un nuovo servizio giornaliero
+(la Reperibilità) e l'altra relativa alla definizione di un nuovo servizio di turno.</p>
+<section id="reperibilita">
+<h2><span class="section-number">2.15.1. </span>Reperibilità<a class="headerlink" href="#reperibilita" title="Permalink to this heading">¶</a></h2>
+<p>Cliccando sul bottone verde presente al centro della pagina si definisce un nuovo servizio di reperibilità.</p>
+<figure class="align-center" id="id2">
+<a class="reference internal image-reference" href="../_images/definizioneReperibilita.png"><img alt="../_images/definizioneReperibilita.png" src="../_images/definizioneReperibilita.png" style="width: 1892.7px; height: 856.8000000000001px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.66 </span><span class="caption-text">Finestra di creazione reperibilità</span><a class="headerlink" href="#id2" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<dl class="simple">
+<dt>In questa finestra occorre definire il nome del servizio attraverso il campo <em>descrizione</em>, selezionare la tipologia di competenza mensile</dt><dd><p>(per il CNR è la reperibilità), selezionare dal menu a tendina il <em>responsabile del servizio</em>, ovvero colui il quale a fine mese dovrà validare il calendario
+della reperibilità (completando, di fatto, il flusso che inserisce le quantità di giorni di reperibilità feriale e festiva nelle competenze dei dipendenti
+abilitati alla reperibilità) e selezionare (questo però è un campo opzionale) uno o più gestori del calendario della reperibilità.</p>
+</dd>
+</dl>
+<p>Una volta definito il tutto, ciò che si ottiene è quanto evidenziato dalla schermata sottostante:</p>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="../_images/servizioReperibilitaDefinito.png"><img alt="../_images/servizioReperibilitaDefinito.png" src="../_images/servizioReperibilitaDefinito.png" style="width: 2250.9px; height: 855.0px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.67 </span><span class="caption-text">Servizio creato</span><a class="headerlink" href="#id3" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<p>A questo punto occorre associare le persone al servizio appena definito.
+La prima cosa da fare in questo caso è assegnare la competenza di reperibilità feriale e/o festiva ai dipendenti che vogliamo associare al servizio.
+Per come farlo si rimanda a v. <a class="reference internal" href="competences.html"><span class="doc">Gestione Competenze</span></a>.
+Una volta associate le competenze, occorre assegnare i reperibili al servizio.
+Per farlo è sufficiente cliccare sul link <strong>Gestisci</strong> presente nella colonna <em>Gestisci persone</em> presente nella tabella riepilogativa dei servizi di reperibilità.
+Una volta cliccato apparirà la seguente schermata:</p>
+<figure class="align-center" id="id4">
+<a class="reference internal image-reference" href="../_images/servizioReperibilitaDefinito.png"><img alt="../_images/servizioReperibilitaDefinito.png" src="../_images/servizioReperibilitaDefinito.png" style="width: 2250.9px; height: 855.0px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.68 </span><span class="caption-text">Associazione delle persone al servizio</span><a class="headerlink" href="#id4" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<p>Cliccando sul bottone verde si procede all'associazione delle persone al servizio attraverso la seguente finestra:</p>
+<figure class="align-center" id="id5">
+<a class="reference internal image-reference" href="../_images/personaServizioReperibilita.png"><img alt="../_images/personaServizioReperibilita.png" src="../_images/personaServizioReperibilita.png" style="width: 2250.9px; height: 855.0px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.69 </span><span class="caption-text">Associazione dipendente al servizio</span><a class="headerlink" href="#id5" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<p>Dal menu a tendina selezionare la persona da inserire nel servizio e, nel campo &quot;<em>data inizio</em>&quot; specificare la data da cui far partire l'associazione.
+Il nostro consiglio è di inserire come data il primo giorno del mese (es.: 01/03/2025).
+Cliccare infine su <em>Aggiungi</em>.</p>
+<p>Una volta terminata la procedura di associazione delle persone al servizio, il risultato sarà il seguente:</p>
+<figure class="align-center" id="id6">
+<a class="reference internal image-reference" href="../_images/risultatoAssociazione.png"><img alt="../_images/risultatoAssociazione.png" src="../_images/risultatoAssociazione.png" style="width: 2250.9px; height: 855.0px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.70 </span><span class="caption-text">Lista reperibili associati al servizio</span><a class="headerlink" href="#id6" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<p>In questa tabella vengono riportati i nomi dei reperibili associati, la data di inizio della loro attività sul servizio, l'eventuale data di fine associazione
+al servizio che può essere popolata attraverso il pulsante <em>Termina partecipazione</em> che consente di specificare quando la persona deve interrompere la propria
+associazione al servizio di reperibilità.</p>
+<p>A questo punto il servizio è definito e sarà quindi possibile procedere alla schedulazione delle persone sul calendario mensile dell'attività ().</p>
+</section>
+<section id="turni">
+<h2><span class="section-number">2.15.2. </span>Turni<a class="headerlink" href="#turni" title="Permalink to this heading">¶</a></h2>
+<p>Selezionando la voce <em>Turni</em> nel menu della homepage della sezione Gestione Servizi, si procede alla creazione del servizio di turno.
+Analogamente a quanto descritto sopra per il servizio di reperibilità, anche per il servizio di turno, cliccando sul bottone verde si procede a specificare
+il nome dell'attività, a selezionare il <em>responsabile del servizio</em> che, come nel caso della reperibilità, alla fine di ogni mese dovrà approvare le giornate
+di turno effettuate nel calendario procedendo quindi alla definizione della corretta quantità di ore di turno da inserire nelle competenze dei dipendenti
+abilitati al turno e presenti nel calendario, e a selezionare eventuali <em>Gestori di turno</em>, ovvero coloro che possono definire il calendario dei turni ma che
+non hanno diritto di approvazione mensile delle giornate del servizio.</p>
+<figure class="align-center" id="id7">
+<a class="reference internal image-reference" href="../_images/definizioneTurno.png"><img alt="../_images/definizioneTurno.png" src="../_images/definizioneTurno.png" style="width: 2250.9px; height: 855.0px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.71 </span><span class="caption-text">Finestra di creazione turno</span><a class="headerlink" href="#id7" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<p>Una volta definite tutte queste informazioni, comparirà sulla pagina il nuovo servizio.
+Oltre a questo, appena sotto al bottone verde, comparirà un banner di colore giallo denominato <em>Informazioni utili per configurare un turno</em>. Cliccandoci si espanderà
+e consentirà di avere una panoramica sulle operazioni da fare.</p>
+<p>A questo punto la procedura di definzione del servizio di turno si discosta da quella precedentemente descritta per la reperibilità.
+Infatti, una volta definito il servizio, occorre definire la o le attività su cui inserire i dipendenti all'interno del servizio di turno.
+Per farlo, è necessario cliccare sulla voce <em>+ crea attività per turno</em>.</p>
+<figure class="align-center" id="id8">
+<a class="reference internal image-reference" href="../_images/definisciTimeTable.png"><img alt="../_images/definisciTimeTable.png" src="../_images/definisciTimeTable.png" style="width: 2250.9px; height: 855.0px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.72 </span><span class="caption-text">Seleziona timetable da associare all'attività</span><a class="headerlink" href="#id8" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<p>Dalla schermata qui sopra occorre selezionare la timetable da associare all'attività, ovvero gli orari che il nostro turno deve coprire.
+Una volta scelto l'orario, premendo sul pulsante <em>Avanti</em> si procede alla definizione dell'attività e delle tolleranze sugli orari di ingresso/uscita.</p>
+<figure class="align-center" id="id9">
+<a class="reference internal image-reference" href="../_images/definisciTolleranze.png"><img alt="../_images/definisciTolleranze.png" src="../_images/definisciTolleranze.png" style="width: 2247.3px; height: 1191.6000000000001px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.73 </span><span class="caption-text">Definisci le caratteristiche dell'attività</span><a class="headerlink" href="#id9" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<p>In questa schermata si determina il nome dell'attività all'interno del servizio, le si attribuisce una descrizione, dopodiché si specifica se occorre
+prevedere disparità di personale tra gli slot di turno, ovvero se tra slot di mattina e slot di pomeriggio ci può essere una unità di differenza.
+Per fare un esempio pratico: <strong>se vogliamo che non ci sia disparità</strong> vogliamo che una persona sia in turno la mattina e una il pomeriggio;
+<strong>se invece vogliamo disparità</strong>, vogliamo che possa esserci una persona al mattimo e due al pomeriggio o viceversa.</p>
+<p>Occorre specificare quindi le tolleranze minime e massime su ingresso e uscita: questo determina quale sia la tolleranza entro la quale il turno
+viene comunque pagato per intero (tolleranza minima) e la tolleranza entro la quale il turno viene pagato decurtato di un'ora (tolleranza massima).
+<strong>L'ingresso oltre la tolleranza massima comporta il mancato pagamento del turno per quel giorno</strong>.</p>
+<figure class="align-center" id="id10">
+<a class="reference internal image-reference" href="../_images/definizioneRiepilogo.png"><img alt="../_images/definizioneRiepilogo.png" src="../_images/definizioneRiepilogo.png" style="width: 2247.3px; height: 1191.6000000000001px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.74 </span><span class="caption-text">Riepilogo delle caratteristiche dell'attività</span><a class="headerlink" href="#id10" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<p>Una volta quindi riepilogati i dati sull'attività, premendo il tasto <em>Crea</em>, viene creata effettivamente l'attività.</p>
+<p>A questo punto è necessario assegnare le persone all'attività così da poterle ritrovare sul calendario di turno e schedularle negli slot di mattina e pomeriggio
+dei vari giorni del mese.
+Per poterlo fare, dalla schermata sottostante, vediamo che è comparsa l'attività appena definita nel nostro servizio di turno.</p>
+<figure class="align-center" id="id11">
+<a class="reference internal image-reference" href="../_images/riepilogoAttivita.png"><img alt="../_images/riepilogoAttivita.png" src="../_images/riepilogoAttivita.png" style="width: 2252.7000000000003px; height: 661.5px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.75 </span><span class="caption-text">Riepilogo attività sul servizio</span><a class="headerlink" href="#id11" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<p>Cliccando sul link <em>Nome dell'attività</em> in corrispondenza della colonna <strong>Gestisci attività</strong> comparirà, come nel caso del servizio di reperibilità, la schermata per
+assegnare le persone all'attività. Anche in questo caso, si ricorda che è necessario preventivamente aver assegnato la competenza di turno ai dipendenti
+che intendiamo assegnare all'attività. Per farlo v. <a class="reference internal" href="competences.html"><span class="doc">Gestione Competenze</span></a>.</p>
+<figure class="align-center" id="id12">
+<a class="reference internal image-reference" href="../_images/associaPersoneTurno.png"><img alt="../_images/associaPersoneTurno.png" src="../_images/associaPersoneTurno.png" style="width: 2252.7000000000003px; height: 661.5px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.76 </span><span class="caption-text">Schermata per associare le persone al servizio di turno</span><a class="headerlink" href="#id12" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<p>Una volta cliccato sul nome dell'attività ci troveremo davanti questa schermata, nella quale compare in prima vista la possibilità di associare le persone
+all'attività di turno. Nella parte alta si notano anche le altre schede <em>Attività</em>, <em>Orario turno</em> e <em>Elimina</em> che contengono, rispettivamente:
+* le informazioni sull'attività
+* le informazioni sugli orari di inizio e fine degli slot di turno
+* la possibilità di eliminare l'attività (fattibile solo se non sono ancora state calendarizzate persone sull'attività)</p>
+<p>Cliccando invece sul bottone verde per associare le persone all'attività, otterremo la seguente schermata che ricalca quella per l'associazione delle persone
+al servizio di reperibilità:</p>
+<figure class="align-center" id="id13">
+<a class="reference internal image-reference" href="../_images/personaServizioTurno.png"><img alt="../_images/personaServizioTurno.png" src="../_images/personaServizioTurno.png" style="width: 2252.7000000000003px; height: 661.5px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.77 </span><span class="caption-text">Scheda per associare la persona al servizio di turno</span><a class="headerlink" href="#id13" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<p>Dal menu a tendina accanto al campo <em>Persona</em> si seleziona la persona da associare all'attività, nel campo <em>data inizio</em> si specifica la data da cui la persona
+inizia a fare parte dell'attività, mentre il campo <em>Jolly</em> serve a specificare se il dipendente è un turnista cosiddetto &quot;<em>tappabuchi</em>&quot; tra più attività (Jolly)
+oppure se è un titolare del servizio di turno (no Jolly).</p>
+<p>Una volta definiti i turnisti, la schermata riepilogativa delle persone associate all'attività comparirà come segue:</p>
+<figure class="align-center" id="id14">
+<a class="reference internal image-reference" href="../_images/personeTurno.png"><img alt="../_images/personeTurno.png" src="../_images/personeTurno.png" style="width: 2252.7000000000003px; height: 661.5px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 2.78 </span><span class="caption-text">I turnisti associati all'attività</span><a class="headerlink" href="#id14" title="Link a questa immagine">¶</a></p>
+</figcaption>
+</figure>
+<p>In questa tabella vengono riportati i nomi dei turnisti associati, la data di inizio della loro attività sul servizio, l'eventuale data di fine associazione
+al servizio che può essere popolata attraverso il pulsante <em>Termina partecipazione</em> che consente di specificare quando la persona deve interrompere la propria
+associazione al servizio di reperibilità.</p>
+<p>A questo punto il servizio è definito e sarà quindi possibile procedere alla schedulazione delle persone sul calendario mensile dell'attività ().</p>
+</section>
+</section>
+
+
+          
+            <div class="footer-buttons footer-buttons--next" role="navigation" aria-label="footer navigation">
+                  <a href="utility.html" class="" title="2.16. Utilità" accesskey="n" rel="next"><span class="section-number">2.16. </span>Utilità</a>
+              </div>
+            
+          </div>
+
+        </div>
+      </div>
+  </div>
+  <!--
+  ~ Copyright (C) 2020  Consiglio Nazionale delle Ricerche
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU Affero General Public License as
+  ~     published by the Free Software Foundation, either version 3 of the
+  ~     License, or (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU Affero General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU Affero General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<footer class="footer container-fluid container-fluid--desktop">
+  <div class="px-3 pt-md-3 pb-md-2 mx-md-5 mb-4 mb-md-0">
+    <div class="row align-items-center d-flex">
+      <div class="col-xs-12 col-sm-4 col-lg-3 pt-4 pt-sm-5">
+        <a href="https://www.cnr.it" target="_blank" class="d-inline-block" rel="noopener">
+          <div class="d-flex align-items-center">
+            <div class="px-2">
+                              <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="52px" height="55px" viewBox="0 0 52 55" enable-background="new 0 0 52 55" xml:space="preserve">  <image id="image0" width="52" height="55" x="0" y="0"
+                    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAAA3CAQAAADp5aHOAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
+                AAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAg9SURB
+                VFjDrZh9cFTVFcB/99232d1kyQcgiYAIflVQWqu2qEStWBVtHcdxdNCOWj9m9J86pc5op6Vjmdqx
+                tWMda21LOxYFRkUs1sGiRQtmnIKjgrYoEgmQQIRNNtnNbnbf7r737rv9Y9/bDxISk3L3j+Tce+79
+                3XPfueeeewXjFF3nXmJcKb7K2aKVphGtmdDJKBQeWunR+kv/rzkWxLnEuJebzdgY0xBMxSaPjYMe
+                a6zjgpwr5M/FZePZ6xnMIU2KYRTehEHZtvrfiZvHgwAoyVn0AS427gRB7nVyLVO/DAY8g9l4pEhj
+                jK05AqRWGCuP7dSX/uDorqHd2X4nXbM8QmuLBqKEkIgJgFYaKx4zHqqusZ3NnU93d+QQEHgXGvwP
+                r7EoYKNQY7sC1fOQwn7MeLgia73p0x/uPeQBbsS5vOHr9TNCUSG8ki3+PN1IvinTFG86Ij/+/L83
+                5tBQ6+ZyJNO9V1eV/qHrX5fr5frouuVbdnYVi3rc4hXtbcn7n5guQ1JKUQGVfpVFOk9XDfZxz+wN
+                8mX5wo+3JlLjI6qLSh59ZPFUGZFmCXYM6HDU+6yivGN/7CW5/rQNH3VPDBKU/J6XLpVNMiylFDUg
+                KZyfVdR298ZekuuvfG0wMzmM1lqr3La75UmyQZoBSgBYs6KdNJSgg8Nf2xJXl9VtuqYhWv0FNQOZ
+                hJV1RnOu+lBjZFajWbMptLt5+Q2vkqGAiwYTpAg9GGA092+Pq9P525JqzIH42n2r+3oVAl3j3lW+
+                G5M3tX7/tPZTAi8Q5tInHk8/1EGaPA5aQKq5+TB+4Hyz87v/Meyd7QvnBmNksit3PNWPifbDjOvv
+                GV2NQWAgCS2Z8cziM8tRJdu35NZdB0hhoUwpGm4LMI56YA/qJ20VzMG+pe/s1xhG/tbmG9rmNYaE
+                0EJXIEX7G2t8GwUhIlv7Lji08epvn1lqjbX+8cFFK1F4FEwwlgXd3ug6YNcXli8K5N5E+9Y+gXtn
+                0y+vbps22n53LHpxKOICkigxq+W6ga3L2r9Saj//2ptf37ADB9fYO122B92e3I/z01lNU4LZ3tTR
+                B8XVpz97/eiY0gZkmAG+oJv97KOTvd7eG589OuivqvHAbbTSRMRouzwIQ4dT72bI37IgGOGvu3ba
+                2H+Yd/vFx4WgBU2EccgySB9HOMxB9qf2Pr4m0Dj/m61zmEbMkIuDqu1x3HPEvNklySqs6Ma7tu7e
+                dsYonkErzdThUSTHMEP000vP028d6ipphMP3LWY6U0x5dtCpI4G9bEYgbetOK3K/vtIo745k5o2u
+                AwVXaFEJqipPC2kiSITSKOnhls7aD96Y84OSzkUL6SBhyjOCgd4fonjh9EDaEsdd4C0ot+46uGRH
+                1gT/SAg8L4fCqxziSkuPImBueusmH3TqTJppNA3fBq0/HaY4uznosiNN4Z6TAyltLX0/G8LFwqKI
+                Wx46T5IUeRxUFcpmeN3ev2RDMYCZLTTSaArfx/Ku42LHyvGgJ0dhfjm9ers7aVAkySApsjg+SGOT
+                I8UQhRqrFEWyTqIEioWpJ2YGPmc5KNxIKFAftClOiwRSp4VLil6+IMFwGQQKG4ssxeocqIQStu/i
+                gghRE6+UIdSH8HCLxYpD4VSOq7xHnkGO0EM/uVKY9LUUCntEsqVwRCVImYRNL2dMAYiYIRzPylap
+                qipVjUWKBAkS5PFqgqrGO/YAB7yq3hLTcBOl/w1xbgz64rXdg2J4FMgxTJY8tnKUW/VTakQ6rHTN
+                VASGUewOpEUtsPNgFaha08PFxsHFU+PkO6MUgTCy+wLp0jaM5/Z5vh3hY/M0D6+cbE2iGIc+LFt0
+                CvITq3t3SZo2Mk+aNATAWPNe0H3u1CtaMV9827fWnfygo4JWDaR2BcID51P3yO7eLh/kTX7YUUA4
+                +zYHwjUL5zUjVzznKRBFTqhNBs6jr7n5klAX+v1SQut6Nv4dZBZb/B/fZCTI3Zz4/LVAvOrCZWci
+                vrfp4+0yQ+4Egyj8arXrhx5D/PbOmY3KXvLMkaMMmSdw8QwUxRcOvvdiUDFj+pv3R8xMLj9IMuSc
+                SJCHjXXX6uQXQdWCczvuixpYpP/9j/zAiQOBg3Ww/xePqfJCXbB458Nn1GPf03HuHRtfjg+CoY4J
+                pBMHKY2iyPDTH76wulJ91qL3/vTQfERP5paNs39z3qpXOrGwx7/XjW0R2ORI3rVhy5uVhua5jz7/
+                0fKLppBj4JOuPV0kyWEHB/akQEqjyJOm/7pV/9xW1WQuvP2dV96/Y1mYI/QSJ0W+6sibYCndygQG
+                EVqYxby1dy27ShwTuTM9vR8d+SzVWd/bEF9QCOvwODCv0BgnmvswPL8km3/mgN8khQzJJnmavFTe
+                /qPns4XJX8G01tp5VzbIqfnyHVKukg/76aHSuBRIEefQU/+6+MntXZP9FgDFOqbTqGvWpfzOoLR0
+                sEgCeo+6LH3HhQ+2n9M6OZAVYTa2W3OiVT9oaByyaDxc7DWFNftuPPvuhd86NWpOkEOugTMY8mqu
+                mlWDKC3BIYeHSxGL4Vczr+6vb/7OnKtmzm+e09gSqQ99OVAxzEzMWpAYcWILQoSJ0cI0TuIkptFE
+                jAh1SMR4T0ulGTNMnKMMImljFo1Y9IxcFo2Dh8ImR5okU2mmiRj1hKnznwzGfmDyyGKRJ48gTRSb
+                POnR1l+jKPjLl2aAKUwhRgNRwv471tigUrKZJAN4uESxSQh5PHX/nk2ECBGiRKjzLRLj2OThYJEj
+                jyBKPXUoho8PKsEEBiYhQpiEMDEQX8IiVX6RNKlDorDHBlXjDIT/fcS4PTy0f6wIjNJb3/8AHcLF
+                HgFsrsYAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjAtMDktMjRUMDk6NDM6NTErMDA6MDDgPuDWAAAA
+                JXRFWHRkYXRlOm1vZGlmeQAyMDIwLTA5LTI0VDA5OjQzOjUxKzAwOjAwkWNYagAAAABJRU5ErkJg
+                gg==" /></svg>
+            </div>
+            <div class="px-2 border-white border-left team-logo--text text-white">
+              Consiglio Nazionale delle Ricerche
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-xs-12 col-sm-4 col-lg-3">
+        <span class="d-block m-2 in-collaboration">in collaborazione con</span>
+        <a href="http://teamdigitale.governo.it/" target="_blank" class="d-inline-block" rel="noopener">
+          <div class="d-flex align-items-center">
+            <div class="px-2">
+              <img class="team-logo--icon" src="../_static/images/team-digitale-logo.svg" alt="Team per la Trasformazione Digitale">
+            </div>
+            <div class="px-2 border-white border-left team-logo--text text-white">
+              Team per la Trasformazione Digitale
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-xs-12 col-sm-4 col-lg-3">
+        <span class="d-block m-2 in-collaboration">in collaborazione con</span>
+        <a href="https://www.agid.gov.it/" target="_blank" class="d-inline-block" rel="noopener">
+          <div class="d-flex align-items-center">
+            <div class="px-2">
+              <img class="agid-logo--icon" src="../_static/images/agid-logo.svg" alt="Agenzia per l'Italia Digitale">
+            </div>
+            <span class="agid-logo--separator border-white border-left"></span>
+            <div class="px-2 agid-logo--text text-white">
+              Agenzia per l'Italia Digitale
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-sm-12 col-lg-3 pt-4 pt-sm-5">
+        <div class="text-center text-lg-right social d-flex align-items-center justify-content-center justify-content-lg-end flex-column flex-lg-row">
+          <div class="mr-lg-1 mb-2 mb-lg-0">Seguici su</div>
+          <div>
+            <a href="https://github.com/consiglionazionaledellericerche/" class="d-inline-flex small-prints mx-1 social__link"><i class="d-inline-block it-github"></i></a>
+            <a href="https://twitter.com/CNRsocial_" class="d-inline-flex small-prints mx-1 social__link"><i class="d-inline-block it-twitter"></i></a>
+            <a href="https://www.linkedin.com/company/consiglio-nazionale-delle-ricerche" class="d-finline-lex small-prints mx-1 social__link"><i class="d-inline-block it-linkedin"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--/row-->
+
+    <div class="row pb-4 colophon mt-md-5 mt-sm-3 pt-3 pt-sm-2">
+      <ul class="col list-inline small">
+        
+        <li class="list-inline-item">
+          <strong><a class="footer-menu__link text-light-blue small-prints" href="/privacy-policy/">Privacy policy</a></strong>
+        </li>
+        
+        <li class="list-inline-item">
+          <strong><a class="footer-menu__link text-light-blue small-prints" href="/cookies-policy">Cookie policy</a></strong>
+        </li>
+        
+        <li class="list-inline-item">
+          <strong><a class="footer-menu__link text-light-blue small-prints" href="/note-legali">Note legali</a></strong>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+</footer>
+  <script type="text/javascript">
+var t = {
+  this : "it",
+  locale : "it_IT",
+  about_these_documents : "Informazioni su questi documenti",
+  active_lang : "lingua attiva",
+  cookiebar_accept : "Accetto",
+  cookiebar_msg : "Questo sito utilizza cookie tecnici, analytics e di terze parti. Proseguendo nella navigazione accetti l’utilizzo dei cookie.",
+  cookiebar_privacy_policy : "Cookie policy",
+  copyright : "Copyright",
+  documents : "Documentazione",
+  download : "Scarica",
+  footer_link_privacy_policy : "Privacy policy",
+  footer_link_cookies : "Cookie policy",
+  footer_link_legal_notes : "Note legali",
+  go_to : "Vai a",
+  index : "Indice",
+  last_updated : "Più recenti",
+  most_viewed_this_month : "Più visti questo mese",
+  navigation_menu_label : "Menu di navigazione",
+  navigation_menu_esc : "esci dalla navigazione",
+  search : "Cerca",
+  search_form_label : "Cerca nel documento",
+  search_form_off : "disattiva il form di ricerca",
+  search_form_on : "attiva il form di ricerca",
+  search_form_start : "avvia la ricerca",
+  search_results : "Risultati della ricerca",
+  search_no_results : "La tua ricerca non ha prodotto documenti. Assicurati di non aver commesso errori di digitazione.",
+  site_subtitle : "Documenti pubblici, digitali.",
+  site_title : "Docs Italia",
+  share_msg : "condividi",
+  skiplink_goto_content : "vai ai contenuti",
+  skiplink_goto_navigation : "vai alla navigazione del sito",
+  toggle_menu_label : "accedi al menu",
+  version : "versione",
+  compare : "Confronta",
+  copy_link : "copia link",
+  copied_link : "link copiato",
+  see_actions : "vedi azioni",
+  other_actions : "altre azioni",
+  comments : "commenti",
+  back_to_text : "torna al testo",
+  glossary_empty : "informazione non trovata",
+  glossary : "glossario",
+  go_to_glossary : "vai al glossario",
+  deepening : "approfondimento",
+  example : "esempio",
+  must : "si deve",
+  must_not : "non si deve",
+  should : "si dovrebbe",
+  should_not : "non si dovrebbe",
+  may : "si può",
+  use : "usa",
+  use_not : "non usare",
+  consultation : "consultazione",
+  show_more : "mostra tutto",
+  show_less : "mostra meno",
+  content_index : "indice dei contenuti",
+  table_index : "indice delle tabelle",
+  figures_index : "indice delle figure",
+  figures : "figure",
+  tables : "tabelle",
+  contents : "contenuti",
+  in_consultation : "in consultazione",
+  indices_and_glossary : "indici e glossario",
+  note : "nota",
+  no_description : "nessuna descrizione",
+  no_content : "nessuna sezione",
+  no_glossary : "nessun glossario",
+  no_figures : "nessuna figura",
+  no_tables : "nessuna tabella",
+  summary : "sommario",
+  project : "Progetto",
+  administration : "Amministrazione",
+  info : "Informazioni",
+  related : "Documenti correlati",
+  actions : "Azioni",
+  tags : "Tag",
+  view_source : "Sorgente",
+  previous : "precedente",
+  next : "successivo",
+  in_collaboration_with : "in collaborazione con",
+  follow_us : "seguici su",
+  header_link_trasformazione : "Piano Triennale",
+  header_link_piattaforme : "Piattaforme",
+  header_link_software : "Software",
+  header_link_api : "API",
+  header_link_community : "Le community",
+  header_link_developers : "Developers",
+  header_link_design : "Designers",
+  header_link_tools : "Gli strumenti",
+  header_link_forum : "Forum",
+  header_link_docs : "Docs",
+  header_link_github : "GitHub",
+  header_link_secondary_who_we_are : "Chi siamo",
+  header_link_projects : "Progetti",
+  header_link_documents : "Documenti",
+  header_link_administrations : "Amministrazioni",
+  header_link_whatis : "Che cos'è",
+}
+</script>
+  <a href="#" aria-hidden="true" data-attribute="return-to-top" class="return-to-top">
+  <i class="it-collapse"></i>
+</a>
+  
+  <script type="text/javascript">
+var PRODUCTION_DOMAIN = 'localhost';
+var DOCSITALIA_DATA = {
+  publisher_slug: 'organizzazione-demo',
+  publisher_project_slug: 'progetto-demo'
+}
+
+LOCAL = true;
+READTHEDOCS_DATA = {
+  project: 'demo-document',
+  version: 'bozza',
+  language: 'it',
+  api_host: '//' + PRODUCTION_DOMAIN
+}
+
+var DOCUMENTATION_OPTIONS = {
+    URL_ROOT: '../',
+    VERSION: '2.0.0',
+    LANGUAGE: 'it',
+    COLLAPSE_INDEX: false,
+    FILE_SUFFIX: '.html',
+    HAS_SOURCE: true,
+    SOURCELINK_SUFFIX: '.txt'
+};
+</script>
+<script src="../_static/js/theme.js"></script>
+<script type="text/javascript" src="../_static/documentation_options.js"></script>
+<script type="text/javascript" src="../_static/underscore.js"></script>
+<script type="text/javascript" src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+<script type="text/javascript" src="../_static/doctools.js"></script>
+<script type="text/javascript" src="../_static/sphinx_highlight.js"></script>
+<script type="text/javascript" src="../_static/translations.js"></script>
+  
+  <script type="text/javascript">
+  <!-- Google analytics -->
+  (function (i, s, o, g, r, a, m) {
+    i['GoogleAnalyticsObject'] = r;
+    i[r] = i[r] || function () {
+      (i[r].q = i[r].q || []).push(arguments)
+    }, i[r].l = 1 * new Date();
+    a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+    a.async = 1;
+    a.src = g;
+    m.parentNode.insertBefore(a, m)
+  })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+  $(document).ready(function() {
+    var sendGaPageview = function() {
+      ga('create', '', 'auto');
+      ga('set', 'anonymizeIp', true);
+      ga('send', 'pageview');
+      
+    };
+    if ($.fn['cookiebar'].Constructor._getCookieEU()) {
+      sendGaPageview();
+    } else {
+      $(document).on('close.bs.cookiebar', sendGaPageview);
+    }
+  });
+  <!-- End Google analytics -->
+  <!-- Matomo -->
+  /*
+  var _paq = _paq || [];
+  _paq.push(['setSiteId', '']);
+  (function () {
+    var u = '//italia.piwikpro.com/';
+    _paq.push(['setTrackerUrl', u + 'piwik.php']);
+    var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+    g.type = 'text/javascript'; g.async = true; g.defer = true; g.src = u + 'piwik.js'; s.parentNode.insertBefore(g, s);
+  })();
+
+  $(document).ready(function() {
+    var sendMatomoPageview = function() {
+      _paq.push(['setDocumentTitle', document.domain + '/' + document.title]);
+      _paq.push(['enableLinkTracking']);
+      _paq.push(['setDoNotTrack', 1]);
+      _paq.push(['trackPageView']);
+    };
+    if ($.fn['cookiebar'].Constructor._getCookieEU()) {
+      sendMatomoPageview();
+    } else {
+      $(document).on('close.bs.cookiebar', sendMatomoPageview);
+    }
+  });*/
+  <!-- End Matomo -->
+</script>
+  
+    <div class="cookiebar bg-dark p-4 hide" aria-hidden="true">
+  <div class="container">
+    <div class="row d-flex align-items-center">
+      <div class="col-12 col-md-7">
+        <span class="text-white">Questo sito utilizza cookie tecnici, analytics e di terze parti. Proseguendo nella navigazione accetti l’utilizzo dei cookie.</span>
+      </div>
+      <div class="col-12 col-md-5 mt-2 mt-md-0 text-right">
+        <a class="btn btn-link" href="/cookies-policy/">Cookie policy</a>
+        <button class="btn btn-sm btn-primary mr-2" data-accept="cookiebar">Accetto</button>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  
+  <!--
+  ~ Copyright (C) 2020  Consiglio Nazionale delle Ricerche
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU Affero General Public License as
+  ~     published by the Free Software Foundation, either version 3 of the
+  ~     License, or (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU Affero General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU Affero General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<div class="modal fade modal-sm-full" id="document-info" tabindex="-1" role="dialog" aria-labelledby="document-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content rounded">
+      <div class="modal-header">
+        <h4 class="modal-title" id="document-title">Electronic Personnel Attendance System</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>ePAS - Electronic Personnel Attendance System -  sistema di rilevazione e gestione delle presenze del personale</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" tabindex="-1" role="dialog" id="document-actions" aria-hidden="true">
+  <div class="modal-dialog mt-5" role="document">
+     <div class="modal-content rounded">
+        <div class="modal-body p-1">
+          <!--
+  ~ Copyright (C) 2020  Consiglio Nazionale delle Ricerche
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU Affero General Public License as
+  ~     published by the Free Software Foundation, either version 3 of the
+  ~     License, or (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU Affero General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU Affero General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<div class="document-actions d-flex flex-column flex-md-row justify-content-around w-100 p-2 p-md-0 text-blue">
+  <div class="dropdown p-3 px-md-2 py-md-0 d-flex flex-wrap">
+    <a class="btn dropdown-toggle p-2 flex-grow-1 text-left" href="#" id="downloads-dropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span class="docs-icon-download align-middle"></span>
+      <span class="align-middle">Scarica</span>
+    </a>
+    <div class="dropdown-menu w-100" aria-labelledby="downloads-dropdown" aria-disabled="false">
+      <div class="link-list-wrapper">
+        <ul class="link-list">
+          
+          <a class="dropdown-item" href="/epas/Manuale-ePAS.epub" download>
+            epub
+          </a>
+          
+          <li>
+            <span class="divider"></span>
+          </li>
+          
+          
+          <a class="dropdown-item" href="/epas/Manuale-ePAS.pdf" download>
+            pdf
+          </a>
+          
+          
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  
+  
+    
+  
+  <div class="p-3 px-md-2 py-md-0">
+    <a href="https://github.com/consiglionazionaledellericerche/epas/blob/master/docs/admin/services.rst" role="button" class="btn p-2" aria-disabled="false">
+        <span class="docs-icon-github"></span>
+        <span class="align-middle">Sorgente</span>
+    </a>
+  </div>
+</div>
+        </div>
+     </div>
+  </div>
+</div>
+  
+</body>
+</html>
