@@ -56,26 +56,24 @@ cliccare sul link in alto a sinistra nella pagina: "*Inserisci una nuova persona
 
 La pagina che si aprirà sarà come quella presentata nelle figure seguenti:
 
-.. figure:: _static/images/inserisciPersonaTop.png
+.. figure:: _static/images/inseriscimentoPersona.png
    :scale: 40
    :align: center
 
-   Schermata modifica persona (top)
+   Schermata inserimento nuova persona
    
-.. figure:: _static/images/inserisciPersonaBottom.png
-   :scale: 40
-   :align: center
-
-   Schermata modifica persona (bottom)
-   
-In queste due schermate sono presenti i campi da compilare (in grassetto quelli obbligatori) per
+In questa schermata sono presenti i campi da compilare (asteriscati quelli obbligatori) per
 poter inserire una persona in anagrafica.
 Tutti i campi sono decisamente esplicativi, quelli particolari presentano una breve descrizione
 che ne esplica il funzionamento.
-Inoltre, nella parte finale della schermata, dove occorre definire lo username con cui tale
-dipendente potrà loggarsi su epas, è presente un campo autogenerante che popola lo username di
-default con i valori *nome* e *cognome* del dipendente separati dal "**.**".
-Naturalmente questo valore è modificabile.
+Tra questi, una menzione particolare per il campo *Inquadramento* che contiene la tipologia di contratto
+da assegnare al dipendente.
+Può assumere tre diversi valori:
+
+* Dipendente strutturato TD o TI
+* Interinale
+* Non strutturato (co.co.co., assegnisti, borsisti, ecc...)
+
 
 
 Modifica persona
@@ -84,26 +82,23 @@ Modifica persona
 In caso si vogliano modificare i dati di una certa persona la schermata che potremo visualizzare
 sarà di questo tipo
 
-.. figure:: _static/images/modificaPersonaTop.png
+.. figure:: _static/images/modificaPersona.png
    :scale: 40
    :align: center
 
-   Schermata modifica persona (top)
+   Schermata modifica persona
    
-.. figure:: _static/images/modificaPersonaBottom.png
-   :scale: 40
-   :align: center
-
-   Schermata modifica persona (bottom)
-
 Si può notare in alto la barra con le schede che separano la gestione di tutte le componenti
 relative al dipendente stesso:
  
   * Dati anagrafici (quella aperta in avvio) 
   * Dati contrattuali 
+  * Configurazione personale
+  * Gruppi
   * Badge 
   * Figli 
   * Elimina
+
 
 Dati Anagrafici
 ---------------
