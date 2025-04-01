@@ -23,7 +23,7 @@ source_parsers = {
 }
 
 project = 'ePAS - Electronic Personnel Attendance System'
-release = '2.0.0'
+release = '2.24.0'
 author = u'IIT - Consiglio Nazionale delle Ricerche'
 
 # Version è utilizzato per la produzione dell'ePUB
