@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Modificata interfaccia per specificare quale debba essere la discriminante se far finire un dipendente nella lista del personale che
     va su Attestati. Modificato il comportamento del setter del ContractType garantendo la contestuale modifica del campo "onCertificate"
     che determina la presenza o meno su attestati di quel contratto.
+  - Modificato il comportamento del codice 7XR portandolo a ore e minuti come i 7M e 7DM
 
 ### Changed
   - Modificata la documentazione aggiornandola alle novità rilasciate nel tempo
