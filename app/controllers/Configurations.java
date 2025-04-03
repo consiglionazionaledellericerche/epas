@@ -437,6 +437,13 @@ public class Configurations extends Controller {
     notFoundIfNull(configuration.getPerson().getOffice());
 
     rules.checkIfPermitted(configuration.getPerson().getOffice());
+    
+    if (!configuration.getBeginDate().isEqual(configuration.getPerson().getBeginDate())) {
+      flash.error("La data di inizio della configurazione (%s) e la data di attivazione della persona (%s) sono diverse. "
+          + "Modificare la data di attivazione della persona nei dati anagrafici per procedere con la modifica di questo parametro.", 
+          configuration.getBeginDate(), configuration.getPerson().getBeginDate());
+      personShow(configuration.getPerson().id);
+    }
 
     PersonConfiguration newConfiguration = (PersonConfiguration) compute(configuration,
         configuration.getEpasParam(), configurationDto);
