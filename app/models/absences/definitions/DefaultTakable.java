@@ -210,6 +210,11 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_7DM),
       ImmutableSet.of(DefaultAbsenceType.A_7DM),
       -1, null),
+  
+  T_PERMESSI_RSU_DIRIGENTI(AmountType.minutes, 
+      ImmutableSet.of(DefaultAbsenceType.A_7RM),
+      ImmutableSet.of(DefaultAbsenceType.A_7RM),
+      -1, null),
 
   T_MISSIONE(AmountType.minutes, 
       ImmutableSet.of(DefaultAbsenceType.A_92M),
