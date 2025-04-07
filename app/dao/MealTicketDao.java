@@ -40,6 +40,7 @@ import models.query.QContract;
 import models.query.QMealTicket;
 import models.query.QPerson;
 import models.query.QPersonDay;
+import models.query.QPersonsOffices;
 import org.joda.time.LocalDate;
 
 /**
@@ -107,12 +108,14 @@ public class MealTicketDao extends DaoBase {
     final QMealTicket qmt = QMealTicket.mealTicket;
     final QPerson qp = QPerson.person;
     final QContract qc = QContract.contract;
+    final QPersonsOffices po = QPersonsOffices.personsOffices;
 
     return getQueryFactory().select(qmt.expireDate)
         .from(qmt)
         .leftJoin(qmt.contract, qc)
         .leftJoin(qc.person, qp)
-        .where(qp.office.id.eq(office.id))
+        .leftJoin(qp.personsOffices, po)
+        .where(po.office.id.eq(office.id))
         .groupBy(qmt.expireDate)
         .orderBy(qmt.expireDate.desc()).fetchFirst();
   }
@@ -155,6 +158,7 @@ public class MealTicketDao extends DaoBase {
     QMealTicket mealTicket = QMealTicket.mealTicket;
     QContract contract = QContract.contract;
     QPerson person = QPerson.person;
+    QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
 
     final JPQLQuery<MealTicket> query = getQueryFactory()
         .selectFrom(mealTicket);
@@ -162,11 +166,12 @@ public class MealTicketDao extends DaoBase {
     if (office.isPresent()) {
       query.leftJoin(mealTicket.contract, contract);
       query.leftJoin(contract.person, person);
+      query.leftJoin(person.personsOffices, personsOffices);
     }
 
     query.where(mealTicket.block.like("%" + code + "%"));
     if (office.isPresent()) {
-      query.where(person.office.eq(office.get()).and(mealTicket.returned.eq(false)));
+      query.where(personsOffices.office.eq(office.get()).and(mealTicket.returned.eq(false)));
     }
 
     return query.orderBy(mealTicket.block.asc()).orderBy(mealTicket.number.asc()).fetch();

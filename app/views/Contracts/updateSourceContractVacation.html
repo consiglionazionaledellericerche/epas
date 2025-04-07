@@ -73,7 +73,7 @@
 		#{/if}
 		
 		#{b.buttons center:true}
-            #{b.cancel @initializationsVacation(contract.person.office.id) /}
+            #{b.cancel @initializationsVacation(contract.person.getCurrentOffice().get().id) /}
             #{b.submit 'Conferma'/}
         #{/b.buttons}
       #{/form}	  

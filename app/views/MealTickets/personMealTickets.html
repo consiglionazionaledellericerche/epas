@@ -27,8 +27,10 @@
     #{form @MealTickets.submitPersonMealTicket(), class:'form-horizontal',
     'data-async':'#page_content', 'data-async-error':'#insertMeal', 'data-spinner':'#defaultSpinner' }
     <input type="hidden" name="contractId" value="${recap.contract.id}"/>
-	#{f.view 'office', value:person.office?.name /}
-	#{f.input 'codeBlock', type:'text', required:'true' /}
+
+	#{f.view 'office', value:person.getCurrentOffice().get()?.name /}
+    #{f.input 'codeBlock', type:'text', required:'true' /}
+
 	#{f.selectEnum 'blockType',items:models.enumerate.BlockType,select2:'off', required:'true' /}
     #{f.input 'ticketNumberFrom', type:'number', required:'true' /}
     #{f.input 'ticketNumberTo', type:'number', required:'true' /}

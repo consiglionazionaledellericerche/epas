@@ -118,10 +118,10 @@ public class MealTicketCards extends Controller {
   public static void addNewCard(Long personId) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     MealTicketCard mealTicketCard = new MealTicketCard();
     mealTicketCard.setPerson(person);
-    mealTicketCard.setDeliveryOffice(person.getOffice());
+    mealTicketCard.setDeliveryOffice(person.getCurrentOffice().get());
     render(person, mealTicketCard);
   }
 
@@ -163,7 +163,7 @@ public class MealTicketCards extends Controller {
 
     flash.success("Associata nuova tessera a %s", person.getFullname());
 
-    MealTicketCards.mealTicketCards(person.getOffice().id);
+    MealTicketCards.mealTicketCards(person.getCurrentOffice().get().id);
   }
 
   /**
@@ -187,7 +187,7 @@ public class MealTicketCards extends Controller {
     } else {
       flash.error("Nessuna tessera corrispondente all'id selezionato. Verificare.");
     }
-    MealTicketCards.mealTicketCards(mealTicketCard.get().getPerson().getOffice().id);
+    MealTicketCards.mealTicketCards(mealTicketCard.get().getPerson().getCurrentOffice().get().id);
   }
 
   /**
@@ -218,7 +218,7 @@ public class MealTicketCards extends Controller {
 
     //Preconditions.checkArgument(person.isPersistent());
     Preconditions.checkArgument(contract.getPerson().isPersistent());
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getOffice(new LocalDate(year, month, 1)));
 
     if (year == null || month == null) {
       year = LocalDate.now().getYear();
@@ -229,7 +229,7 @@ public class MealTicketCards extends Controller {
     LocalDate deliveryDate = LocalDate.now();
     MealTicketCard card = contract.getPerson().actualMealTicketCard();
     LocalDate expireDate = mealTicketDao
-        .getFurtherExpireDateInOffice(contract.getPerson().getOffice());
+        .getFurtherExpireDateInOffice(contract.getPerson().getCurrentOffice().get());
     List<MealTicket> unAssignedElectronicMealTickets = mealTicketDao
         .getUnassignedElectronicMealTickets(contract);
     User admin = Security.getUser().get();
@@ -252,7 +252,7 @@ public class MealTicketCards extends Controller {
       flash.error("Non sono presenti card associate al dipendente! "
           + "Assegnare una card e riprovare!");
       MealTickets.recapMealTickets(LocalDate.now().getYear(), 
-          LocalDate.now().getMonthOfYear(), person.getOffice().id);
+          LocalDate.now().getMonthOfYear(), person.getCurrentOffice().get().id);
     } 
     IWrapperPerson wrPerson = wrapperFactory.create(card.get().getPerson());
     Optional<Contract> actualContract = wrPerson.getCurrentContract();
@@ -285,8 +285,8 @@ public class MealTicketCards extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
-    Office office = person.getOffice();
+    rules.checkIfPermitted(person.getCurrentOffice().get());
+    Office office = person.getCurrentOffice().get();
     User admin = Security.getUser().get();
 
     mealTicketCardManager.saveElectronicMealTicketBlock(card, deliveryDate, tickets, 
@@ -311,7 +311,7 @@ public class MealTicketCards extends Controller {
     notFoundIfNull(personId);
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)));
 
     // riepilogo contratto corrente
     IWrapperPerson wrPerson = wrapperFactory.create(person);
@@ -336,7 +336,7 @@ public class MealTicketCards extends Controller {
     Contract contract = wrPerson.getCurrentContract().get();
     Preconditions.checkState(contract.isPersistent());
     Preconditions.checkArgument(contract.getPerson().isPersistent());
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getOffice(new LocalDate(year, month, 1)));
 
     MealTicketRecap recap;
     MealTicketRecap recapPrevious = null; // TODO: nella vista usare direttamente optional
@@ -370,7 +370,7 @@ public class MealTicketCards extends Controller {
       String codeBlock, int first, int last) {
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));
@@ -398,7 +398,7 @@ public class MealTicketCards extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     List<MealTicket> mealTicketList = mealTicketDao.getMealTicketsInCodeBlock(codeBlock,
         Optional.fromNullable(contract));

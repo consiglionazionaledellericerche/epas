@@ -112,9 +112,14 @@ public class PersonStampingDayRecap {
     wttd = this.wrPersonDay.getWorkingTimeTypeDay();
     
     lunchInterval = (LocalTimeInterval) configurationManager.configValue(
-        personDay.getPerson().getOffice(), EpasParam.LUNCH_INTERVAL, personDay.getDate());
+
+        personDay.getPerson().getOffice(personDay.getDate()).get(), EpasParam.LUNCH_INTERVAL, 
+        personDay.getDate());
+
     workInterval = (LocalTimeInterval) configurationManager.configValue(
-        personDay.getPerson().getOffice(), EpasParam.WORK_INTERVAL, personDay.getDate());
+        personDay.getPerson().getOffice(personDay.getDate()).get(), EpasParam.WORK_INTERVAL, 
+        personDay.getDate());
+
     
     /*Inizio nuovi campi per la gestione dell'orario personalizzato*/
     pwttd = this.wrPersonDay.getPersonalWorkingTime();

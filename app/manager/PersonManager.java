@@ -22,9 +22,11 @@ import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Range;
 import dao.AbsenceDao;
 import dao.ContractDao;
 import dao.PersonDayDao;
+import dao.PersonsOfficesDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
@@ -37,8 +39,10 @@ import javax.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import models.Contract;
+import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.PersonsOffices;
 import models.Role;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -61,6 +65,7 @@ public class PersonManager {
   private final AbsenceDao absenceDao;
   private final OfficeManager officeManager;
   private final UserManager userManager;
+
 
   /**
    * Costrutture.
@@ -87,6 +92,7 @@ public class PersonManager {
     this.wrapperFactory = wrapperFactory;
     this.officeManager = officeManager;
     this.userManager = userManager;
+    
   }
 
   /**
@@ -393,8 +399,22 @@ public class PersonManager {
     if (person.getEmail() != null && person.getEppn() == null) {
       person.setEppn(eppn(person.getUser().getUsername(), person.getEmail()));
     }
+
     Role employee = Role.find("byName", Role.EMPLOYEE).first();
-    officeManager.setUro(person.getUser(), person.getOffice(), employee);
+    officeManager.setUro(person.getUser(), person.getCurrentOffice().get(), employee);
+
   }
+  
+  /**
+   * Aggiunge il ruolo di impiegato alla persona in creazione.
+   * @param person la persona da creare
+   * @param office la sede su cui associare la persona
+   */
+  public void addRoleToPerson(Person person, Office office) {
+    Role employee = Role.find("byName", Role.EMPLOYEE).first();
+    officeManager.setUro(person.getUser(), office, employee);
+  }
+  
+
 
 }

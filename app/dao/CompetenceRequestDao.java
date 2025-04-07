@@ -45,6 +45,7 @@ import models.flows.query.QCompetenceRequest;
 import models.flows.query.QGroup;
 import models.query.QPerson;
 import models.query.QPersonReperibility;
+import models.query.QPersonsOffices;
 import org.joda.time.LocalDateTime;
 
 /**
@@ -104,7 +105,7 @@ public class CompetenceRequestDao extends DaoBase {
       LocalDateTime fromDate, Optional<LocalDateTime> toDate,
       CompetenceRequestType competenceRequestType, Person signer) {
     Preconditions.checkNotNull(fromDate);
-
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     final QPerson person = QPerson.person;
     final QPersonReperibility pr = QPersonReperibility.personReperibility;
@@ -122,17 +123,20 @@ public class CompetenceRequestDao extends DaoBase {
     .and(competenceRequest.type.eq(competenceRequestType)
         .and(competenceRequest.flowStarted.isTrue())
         .and(competenceRequest.flowEnded.isFalse())
-        .and(competenceRequest.person.office.in(officeList)));
+        .and(personsOffices.office.in(officeList)));
 
 
     JPQLQuery<CompetenceRequest> query;
     if (!signer.getReperibilityTypes().isEmpty()) {
       conditions.and(competenceRequest.employeeApprovalRequired.isTrue())
       .and(competenceRequest.employeeApproved.isNull())
+
       .and(competenceRequest.managerApprovalRequired.isTrue())
       .and(competenceRequest.managerApproved.isNull())
-      .and(person.office.eq(signer.getOffice()));
+      .and(personsOffices.in(signer.personsOffices));
+
       query = getQueryFactory().selectFrom(competenceRequest)
+          .leftJoin(competenceRequest.person.personsOffices, personsOffices)
           .join(competenceRequest.person, person)
           .leftJoin(person.reperibility, pr)
           .where(pr.personReperibilityType.in(signer.getReperibilityTypes()).and(conditions));
@@ -164,7 +168,7 @@ public class CompetenceRequestDao extends DaoBase {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     final QPerson person = QPerson.person;
     final QPersonReperibility pr = QPersonReperibility.personReperibility;
-
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     BooleanBuilder conditions = new BooleanBuilder();
 
     if (roleList.stream().noneMatch(uro -> uro.getRole().getName().equals(Role.EMPLOYEE)
@@ -189,6 +193,7 @@ public class CompetenceRequestDao extends DaoBase {
           List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
               .join(competenceRequest.person, person)
               .join(person.reperibility, pr)
+              .leftJoin(competenceRequest.person.personsOffices, personsOffices)
               .where(pr.personReperibilityType.supervisor.eq(signer).and(conditions))
               .fetch();
           results.addAll(queryResults);
@@ -229,10 +234,10 @@ public class CompetenceRequestDao extends DaoBase {
         results.addAll(queryResult);
         break;
       default:
-        break;          
+        break;
     }
-
     return results;
+
   }
 
   /**
@@ -249,6 +254,7 @@ public class CompetenceRequestDao extends DaoBase {
       LocalDateTime fromDate, Optional<LocalDateTime> toDate, CompetenceRequestType type,
       Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     final QPerson person = QPerson.person;
     final QPersonReperibility pr = QPersonReperibility.personReperibility;
 
@@ -259,7 +265,7 @@ public class CompetenceRequestDao extends DaoBase {
 
     conditions.and(competenceRequest.startAt.after(fromDate))
     .and(competenceRequest.type.eq(type).and(competenceRequest.flowEnded.isTrue())
-        .and(competenceRequest.person.office.in(officeList)));
+        .and(personsOffices.office.in(officeList)));
 
     if (toDate.isPresent()) {
       conditions.and(competenceRequest.endTo.before(toDate.get()));
@@ -310,9 +316,9 @@ public class CompetenceRequestDao extends DaoBase {
         results.addAll(queryResult);
         break;
       default:
-        break;          
-    }
+        break;         
 
+    }
     return results;
   }
 
@@ -331,14 +337,14 @@ public class CompetenceRequestDao extends DaoBase {
         .where(competenceRequest.person.eq(request.getPerson())
             .and(
                 competenceRequest.beginDateToAsk.between(request.getBeginDateToAsk(), request.getEndDateToAsk())
-                  .or(competenceRequest.endDateToAsk.between(request.getBeginDateToAsk(), request.getEndDateToAsk()))
-                  .or(competenceRequest.beginDateToGive.between(request.getBeginDateToGive(), request.getEndDateToGive()))
-                  .or(competenceRequest.endDateToGive.between(request.getBeginDateToGive(), request.getEndDateToGive()))
+                .or(competenceRequest.endDateToAsk.between(request.getBeginDateToAsk(), request.getEndDateToAsk()))
+                .or(competenceRequest.beginDateToGive.between(request.getBeginDateToGive(), request.getEndDateToGive()))
+                .or(competenceRequest.endDateToGive.between(request.getBeginDateToGive(), request.getEndDateToGive()))
                 )
             .and(competenceRequest.flowEnded.eq(false)))
         .fetch();
   }
-  
+
   /**
    * Verifica che esista una richiesta di straordinario con i dati uguali a quelli presenti nell'
    * attuale richiesta di competenza.
@@ -366,23 +372,25 @@ public class CompetenceRequestDao extends DaoBase {
   private BooleanBuilder managerQuery(List<Office> officeList, 
       BooleanBuilder condition, Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     condition.and(competenceRequest.managerApprovalRequired.isTrue())
     .and(competenceRequest.managerApproved.isNull())
     .andAnyOf(competenceRequest.employeeApproved.isNotNull(), 
         competenceRequest.employeeApprovalRequired.isFalse())
-    .and(competenceRequest.person.office.in(officeList));
+    .and(personsOffices.office.in(officeList));
     return condition;
 
   }
-  
+
   private BooleanBuilder managerApprovedQuery(List<Office> officeList, 
       BooleanBuilder condition, Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     condition.and(competenceRequest.managerApprovalRequired.isTrue())
     .and(competenceRequest.managerApproved.isNotNull())
     .andAnyOf(competenceRequest.employeeApproved.isNotNull(), 
         competenceRequest.employeeApprovalRequired.isFalse())
-    .and(competenceRequest.person.office.in(officeList));
+    .and(personsOffices.office.in(officeList));
     return condition;
 
   }
@@ -393,7 +401,7 @@ public class CompetenceRequestDao extends DaoBase {
     .and(competenceRequest.employeeApproved.isNull());
     return condition;
   }
-  
+
   private BooleanBuilder employeeApprovedQuery(BooleanBuilder condition, Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     condition.and(competenceRequest.employeeApprovalRequired.isTrue())
@@ -404,22 +412,24 @@ public class CompetenceRequestDao extends DaoBase {
   private BooleanBuilder officeHeadQuery(List<Office> officeList,
       BooleanBuilder condition, Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     condition.and(competenceRequest.officeHeadApprovalRequired.isTrue())
     .and(competenceRequest.officeHeadApproved.isNull())
     .andAnyOf(competenceRequest.managerApproved.isNotNull(), 
         competenceRequest.managerApprovalRequired.isFalse())
-    .and(competenceRequest.person.office.in(officeList));
+    .and(personsOffices.office.in(officeList));
     return condition;
   }
-  
+
   private BooleanBuilder officeHeadApprovedQuery(List<Office> officeList,
       BooleanBuilder condition, Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     condition.and(competenceRequest.officeHeadApprovalRequired.isTrue())
     .and(competenceRequest.officeHeadApproved.isNotNull())
     .andAnyOf(competenceRequest.managerApproved.isNotNull(), 
         competenceRequest.managerApprovalRequired.isFalse())
-    .and(competenceRequest.person.office.in(officeList));
+    .and(personsOffices.office.in(officeList));
     return condition;
   }
 

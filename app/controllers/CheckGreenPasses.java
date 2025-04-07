@@ -99,14 +99,17 @@ public class CheckGreenPasses extends Controller {
    */
   public static void save(Person person) {
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getCurrentOffice().get());
+
     CheckGreenPass greenPass = new CheckGreenPass();
     LocalDate date = LocalDate.now();
     greenPass.setPerson(person);
     greenPass.setCheckDate(date);
     greenPass.setChecked(false);
     greenPass.save();
-    Office office = person.getOffice();
+    Office office = person.getCurrentOffice().get();
+
     List<CheckGreenPass> list = passDao.listByDate(date, office);
     render("@dailySituation", list, office, date);
   }
@@ -119,9 +122,11 @@ public class CheckGreenPasses extends Controller {
   public static void deletePerson(long checkGreenPassId) {
     CheckGreenPass greenPass = passDao.getById(checkGreenPassId);
     notFoundIfNull(greenPass);
-    rules.checkIfPermitted(greenPass.getPerson().getOffice());
-    Office office = greenPass.getPerson().getOffice();
+
+    rules.checkIfPermitted(greenPass.getPerson().getCurrentOffice().get());
+    Office office = greenPass.getPerson().getCurrentOffice().get();
     LocalDate date = greenPass.getCheckDate();
+
     greenPass.delete();
     List<CheckGreenPass> list = passDao.listByDate(date, office);
     flash.error("Eliminato controllo per %s", greenPass.getPerson().fullName());
@@ -137,15 +142,19 @@ public class CheckGreenPasses extends Controller {
     
     CheckGreenPass greenPass = passDao.getById(checkGreenPassId);
     notFoundIfNull(greenPass);
-    rules.checkIfPermitted(greenPass.getPerson().getOffice());
+
+    rules.checkIfPermitted(greenPass.getPerson().getCurrentOffice().get());
     if (greenPass.isChecked()) {
       greenPass.setChecked(false);
+
     } else {
       greenPass.setChecked(true);
     }
     greenPass.save();
-    Office office = greenPass.getPerson().getOffice();
+
+    Office office = greenPass.getPerson().getCurrentOffice().get();
     LocalDate date = greenPass.getCheckDate();
+
     List<CheckGreenPass> list = passDao.listByDate(date, office);
     flash.success("Aggiornato il controllo per %s", greenPass.getPerson().fullName());
     render("@dailySituation", list, office, date);

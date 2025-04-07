@@ -61,7 +61,7 @@ public class PersonOvertimes extends Controller {
     
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     List<PersonOvertime> personOvertimes = personOvertimeDao.personListInYear(person, year);
     PersonOvertime personOvertime = new PersonOvertime();
     render(personOvertimes, person, year, personOvertime);
@@ -71,7 +71,7 @@ public class PersonOvertimes extends Controller {
       int year, Long personId) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
     
     if (personOvertime.getNumberOfHours() == null 
@@ -89,7 +89,7 @@ public class PersonOvertimes extends Controller {
     int totalOvertimes = 0;
     if (person.getGroups().isEmpty()) {
       List<TotalOvertime> totalList = competenceDao
-          .getTotalOvertime(LocalDate.now().getYear(), person.getOffice());
+          .getTotalOvertime(LocalDate.now().getYear(), person.getCurrentOffice().get());
       totalOvertimes = competenceManager.getTotalOvertime(totalList);
     } else {      
       List<GroupOvertime> list = person.getGroups().stream().flatMap(g -> g.getGroupOvertimes().stream()
@@ -112,7 +112,7 @@ public class PersonOvertimes extends Controller {
     personOvertime.save();
     flash.success("Aggiunta nuova quantità al monte ore per straordinari di %s", 
         person.getFullname());
-    Competences.totalOvertimeHours(year, person.getOffice().id);
+    Competences.totalOvertimeHours(year, person.getCurrentOffice().get().id);
     
   }
 }

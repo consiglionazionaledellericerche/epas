@@ -270,7 +270,7 @@ public class AbsenceService {
     long start = System.currentTimeMillis();
     log.trace("inizio creazione catena periodi, person = {}, from = {}, to = {}", 
         person.getFullname(), from, to);
-    
+
     List<PersonChildren> orderedChildren = personChildrenDao.getAllPersonChildren(person);
     List<Contract> fetchedContracts = person.getContracts(); // TODO: fetch
     List<InitializationGroup> initializationGroups =
@@ -337,7 +337,7 @@ public class AbsenceService {
         TemplateRow templateRow = new TemplateRow();
         templateRow.date = periodChain.date;
         templateRow.absenceErrors
-            .add(AbsenceError.builder().absenceProblem(AbsenceProblem.NoChildExist).build());
+        .add(AbsenceError.builder().absenceProblem(AbsenceProblem.NoChildExist).build());
         insertTemplateRows.add(templateRow);
       }
 
@@ -584,12 +584,12 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.G_21P.name()).get();
     final GroupAbsenceType parentalLeaveTwinsForFathers = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_21P2.name()).get();
-    
+
 
     final User currentUser = Security.getUser().get();
 
     final boolean officeWriteAdmin =
-        secureManager.officesWriteAllowed(currentUser).contains(person.getOffice());
+        secureManager.officesWriteAllowed(currentUser).contains(person.getCurrentOffice().get());
 
     log.debug("officeWriteAdmin = {}, officeWriteAllowed = {}", officeWriteAdmin,
         secureManager.officesWriteAllowed(currentUser));
@@ -629,22 +629,23 @@ public class AbsenceService {
       log.debug("configurazione gruppi per persona, officeWriteAdmin = {}", officeWriteAdmin);
       // vedere le configurazioni
       groupsPermitted = Lists.newArrayList();
-      
-      if ((Boolean) confManager.configValue(person.getOffice(), 
+
+      if ((Boolean) confManager.configValue(person.getCurrentOffice().get(),
           EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM)) {
         groupsPermitted.add(medicalExams);
       }
 
-      if ((Boolean) confManager.configValue(person.getOffice(), EpasParam.WORKING_OFF_SITE)
-          && (Boolean) confManager.configValue(person,
+      if ((Boolean) confManager.configValue(person.getCurrentOffice().get(), 
+          EpasParam.WORKING_OFF_SITE) && (Boolean) confManager.configValue(person,
               EpasParam.OFF_SITE_ABSENCE_WITH_CONVENTION)) {
         groupsPermitted.add(employeeOffseat);
       }
 
+      
       if ((Boolean) confManager.configValue(person, EpasParam.TELEWORK)) {
         groupsPermitted.add(telework);
       }
-      
+
       if ((Boolean) confManager.configValue(person, 
           EpasParam.ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME)) {
         groupsPermitted.add(teleworkResearcher);
@@ -663,7 +664,7 @@ public class AbsenceService {
       if ((Boolean) confManager.configValue(person, EpasParam.COVID_19)) {
         groupsPermitted.add(covid19);
       }
-      
+
       if ((Boolean) confManager.configValue(person, EpasParam.AGILE_WORK)) {
         groupsPermitted.add(lagile);
       }
@@ -685,22 +686,22 @@ public class AbsenceService {
           }
         }
       }
-      
+
       if ((Boolean) confManager.configValue(person, EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS)) {
         List<GroupAbsenceType> groups = 
             absenceComponentDao.groupsAbsenceTypeByName(namesOfChildGroups());
         groupsPermitted.addAll(groups);
       }
-      
+
       if ((Boolean) confManager.configValue(person, 
           EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE)) {
         groupsPermitted.add(cod39LA);
       }
-      
+
       if ((Boolean) confManager.configValue(person, EpasParam.SMARTWORKING)) {
         groupsPermitted.add(smart);
       }
-      
+
       if ((Boolean) confManager.configValue(person, EpasParam.PARENTAL_LEAVE_FOR_FATHERS)) {
         groupsPermitted.add(parentalLeaveForFathers);
         groupsPermitted.add(parentalLeaveTwinsForFathers);
@@ -712,7 +713,7 @@ public class AbsenceService {
 
     return Lists.newArrayList();
   }
-  
+
   private List<String> namesOfChildGroups() {
     List<String> names = Lists.newArrayList();
     names.add(DefaultGroup.G_23.name());
@@ -732,7 +733,7 @@ public class AbsenceService {
     names.add(DefaultGroup.MALATTIA_FIGLIO_3.name());
     names.add(DefaultGroup.MALATTIA_FIGLIO_4.name());
     names.add(DefaultGroup.G_25P.name());
-    
+
     return names;
   }
 
@@ -783,8 +784,8 @@ public class AbsenceService {
       templateRow.absence = absenceResponse.getAbsenceInError();
       if (absenceResponse.isHoliday()) {
         templateRow.absenceErrors
-            .add(AbsenceError.builder().absence(absenceResponse.getAbsenceAdded())
-                .absenceProblem(AbsenceProblem.NotOnHoliday).build());
+        .add(AbsenceError.builder().absence(absenceResponse.getAbsenceAdded())
+            .absenceProblem(AbsenceProblem.NotOnHoliday).build());
       } 
       if (!absenceResponse.getWarning().isEmpty()) {
         templateRow.absenceErrors.add(AbsenceError.builder()
@@ -792,8 +793,8 @@ public class AbsenceService {
             .absenceProblem(AbsenceProblem.MinimumTimeViolated).build());
       } else {
         templateRow.absenceErrors
-            .add(AbsenceError.builder().absence(absenceResponse.getAbsenceAdded())
-                .absenceProblem(AbsenceProblem.LimitExceeded).build());
+        .add(AbsenceError.builder().absence(absenceResponse.getAbsenceAdded())
+            .absenceProblem(AbsenceProblem.LimitExceeded).build());
       }
       insertReport.insertTemplateRows.add(templateRow);
     }
@@ -991,8 +992,8 @@ public class AbsenceService {
           && situation.currentYearCached != null // &&
           // situation.currentYearCached.date.isEqual(date)
           && situation.permissionsCached != null // &&
-      // situation.permissionsCached.date.isEqual(date)
-      ) {
+          // situation.permissionsCached.date.isEqual(date)
+          ) {
         // Tutto correttamente cachato.
         return situation;
       } else {

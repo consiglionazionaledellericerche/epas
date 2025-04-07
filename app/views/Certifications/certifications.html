@@ -169,11 +169,11 @@
     #{if !matchNumbers.empty && person.number in matchNumbers}
       #{if process}
         <!-- INVIO INFORMAZIONI AD ATTESTATI-->
-      <div data-load-async="@{process(person.id, validYear, validMonth, false)}">
+      <div data-load-async="@{process(office.id, person.id, validYear, validMonth, false)}">
       #{/if}
     #{else}
     <!-- CARICAMENTO INFORMAZIONI DA ATTESTATI -->
-      <div data-load-async="@{personStatus(person.id, validYear, validMonth)}">
+      <div data-load-async="@{personStatus(office.id, person.id, validYear, validMonth)}">
     #{/else}
       <li class="list-group-item">
         <div class="row">

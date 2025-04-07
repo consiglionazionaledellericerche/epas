@@ -247,7 +247,7 @@ public class MealTicketCardManager {
     style.setAlignment(CellStyle.ALIGN_CENTER);
     for (Person person : personList) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(person, year,
-          month, false);
+          month, false, Optional.absent());
       row = sheet.createRow(rownum);
       for (int cellnum = 0; cellnum < 5; cellnum++) {
         cell = row.createCell(cellnum);

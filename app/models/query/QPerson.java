@@ -80,8 +80,6 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final StringPath number = createString("number");
 
-    public final QOffice office;
-
     public final NumberPath<Long> oldId = createNumber("oldId", Long.class);
 
     public final StringPath othersSurnames = createString("othersSurnames");
@@ -108,6 +106,8 @@ public class QPerson extends EntityPathBase<Person> {
     public final ListPath<models.PersonShift, QPersonShift> personShifts = this.<models.PersonShift, QPersonShift>createList("personShifts", models.PersonShift.class, QPersonShift.class, PathInits.DIRECT2);
 
     public final ListPath<Person, QPerson> personsInCharge = this.<Person, QPerson>createList("personsInCharge", Person.class, QPerson.class, PathInits.DIRECT2);
+
+    public final SetPath<models.PersonsOffices, QPersonsOffices> personsOffices = this.<models.PersonsOffices, QPersonsOffices>createSet("personsOffices", models.PersonsOffices.class, QPersonsOffices.class, PathInits.DIRECT2);
 
     public final QQualification qualification;
 
@@ -156,7 +156,6 @@ public class QPerson extends EntityPathBase<Person> {
 
     public QPerson(Class<? extends Person> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
         this.personHourForOvertime = inits.isInitialized("personHourForOvertime") ? new QPersonHourForOvertime(forProperty("personHourForOvertime"), inits.get("personHourForOvertime")) : null;
         this.qualification = inits.isInitialized("qualification") ? new QQualification(forProperty("qualification")) : null;
         this.user = inits.isInitialized("user") ? new QUser(forProperty("user"), inits.get("user")) : null;

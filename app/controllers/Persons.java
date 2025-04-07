@@ -30,20 +30,26 @@ import dao.RoleDao;
 import dao.UserDao;
 import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
+import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
+import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import manager.ContractManager;
 import manager.EmailManager;
 import manager.OfficeManager;
+import manager.PeriodManager;
 import manager.PersonManager;
+import manager.PersonsOfficesManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
+import manager.recaps.recomputation.RecomputeRecap;
 import manager.services.absences.AbsenceService;
 import models.Badge;
 import models.Contract;
@@ -52,11 +58,14 @@ import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
+import models.PersonsOffices;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.base.IPropertyInPeriod;
+import models.flows.Affiliation;
 import org.apache.commons.lang.WordUtils;
 import org.joda.time.LocalDate;
 import play.data.validation.Equals;
@@ -116,6 +125,11 @@ public class Persons extends Controller {
   static RoleDao roleDao;
   @Inject
   static GeneralSettingDao generalSettingDao;
+  @Inject
+  static PersonsOfficesManager personsOfficesManager;
+  @Inject
+  static PeriodManager periodManager;
+
 
   /**
    * il metodo per ritornare la lista delle persone.
@@ -137,7 +151,8 @@ public class Persons extends Controller {
     boolean warningInsertPerson = generalSettingDao.generalSetting().isWarningInsertPerson();
     
     List<Person> simplePersonList = personDao
-        .listFetched(Optional.fromNullable(name), ImmutableSet.of(office), false, null, null, false)
+        .listFetched(Optional.fromNullable(name), ImmutableSet.of(office), false, 
+            LocalDate.now(), LocalDate.now(), false)
         .list();
 
     List<IWrapperPerson> personList =
@@ -166,7 +181,8 @@ public class Persons extends Controller {
    * @param person la persona da inserire
    * @param contract il contratto associato alla persona
    */
-  public static void save(@Valid @Required Person person, @Valid Contract contract) {
+  public static void save(@Valid @Required Person person, @Valid Contract contract, 
+      @Valid Office office) {
 
     if (contract.getEndDate() != null && !contract.getEndDate().isAfter(contract.getBeginDate())) {
       Validation.addError("contract.endDate", "Dev'essere successivo all'inizio del contratto");
@@ -177,19 +193,21 @@ public class Persons extends Controller {
 
     if (Validation.hasErrors()) {
       flash.error("Correggere gli errori indicati");
-      render("@insertPerson", person, contract);
+      render("@insertPerson", person, contract, office);
     }
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(office);
 
     person.setName(WordUtils.capitalizeFully(person.getName()));
     person.setSurname(WordUtils.capitalizeFully(person.getSurname()));
-
-    personManager.properPersonCreate(person);
+    person.setBeginDate(LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1));
+    personManager.properPersonCreate(person);    
+    personsOfficesManager.addPersonInOffice(person, office, person.getBeginDate(), Optional.absent());
+    personManager.addRoleToPerson(person, office);
+        
     person.save();
 
     contract.setPerson(person);
-    
 
     if (!contractManager.properContractCreate(contract, Optional.absent(), false)) {
       flash.error(
@@ -202,7 +220,7 @@ public class Persons extends Controller {
     person.save();
 
     userManager.generateRecoveryToken(person);
-    emailManager.newUserMail(person);
+    emailManager.newUserMail(person, office);
 
     log.info("Creata nuova persona: id[{}] - {}", person.id, person.fullName());
 
@@ -211,7 +229,9 @@ public class Persons extends Controller {
 
     // La ricomputazione nel caso di creazione persona viene fatta alla fine.
     person = personDao.getPersonById(person.id);
+
     person.setBeginDate(LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1));
+
     person.save();
 
     configurationManager.updateConfigurations(person);
@@ -233,7 +253,7 @@ public class Persons extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     render(person);
   }
@@ -253,18 +273,23 @@ public class Persons extends Controller {
       render("@edit", person);
     }
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
+
     //Aggiungo l'aggiornamento del ruolo di dipendente sull'eventuale nuova sede
+
     List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(person.getUser());
     if (uroList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.EMPLOYEE) 
-        && !uro.getOffice().equals(person.getOffice()))) {
+        && !uro.getOffice().equals(person.getCurrentOffice().get()))) {
+
       for (UsersRolesOffices uro : uroList) {
         if (uro.getRole().getName().equals(Role.EMPLOYEE)) {
           uro.delete();
         }
       }
       Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
-      officeManager.setUro(person.getUser(), person.getOffice(), employee); 
+
+      officeManager.setUro(person.getUser(), person.getCurrentOffice().get(), employee); 
+
     }
 
     person.setEppn(Optional.fromNullable(person.getEppn()).orNull());
@@ -291,7 +316,7 @@ public class Persons extends Controller {
 
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     render(person);
   }
@@ -312,7 +337,7 @@ public class Persons extends Controller {
     // FIX per oggetto in entityManager monco.
     person.refresh();
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     // FIXME: se non spezzo in transazioni errore HashMap.
     // Per adesso spezzo l'eliminazione della persona in tre fasi.
@@ -358,7 +383,7 @@ public class Persons extends Controller {
 
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
 
@@ -379,7 +404,7 @@ public class Persons extends Controller {
 
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
 
@@ -454,7 +479,8 @@ public class Persons extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     PersonChildren child = new PersonChildren();
     child.setPerson(person);
     render(child);
@@ -481,8 +507,9 @@ public class Persons extends Controller {
 
     PersonChildren child = personChildrenDao.getById(childId);
     notFoundIfNull(child);
+
     Person person = child.getPerson();
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     if (!confirmed) {
       render("@deleteChild", child);
@@ -535,7 +562,8 @@ public class Persons extends Controller {
       render("@insertChild", child);
     }
 
-    rules.checkIfPermitted(child.getPerson().getOffice());
+    rules.checkIfPermitted(child.getPerson().getCurrentOffice().get());
+
     child.save();
 
     JPA.em().flush();
@@ -549,4 +577,115 @@ public class Persons extends Controller {
     children(child.getPerson().id);
   }
 
+  /**
+   * Genera la form di tutto lo storico di afferenza alla sede.
+
+   * @param personId l'identificativo della persona di cui cambiare l'ufficio
+   */
+  public static void changeOffice(Long personId) {
+    val person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    val availableOffices = 
+        officeDao.getAllOffices();
+    val personOffice = new PersonsOffices();
+    personOffice.person = person;
+    render(person, personOffice, availableOffices);
+  }
+  
+  /**
+   * Genera la form di cambio afferenza alla sede.
+
+   * @param personId l'identificativo della persona di cui cambiare l'ufficio
+   */
+  public static void blankByPerson(Long personId) {
+    val person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    val availableOffices = 
+        officeDao.getAllOffices();
+    val personOffice = new PersonsOffices();
+    personOffice.person = person;
+    render(personOffice, person, availableOffices);
+  }
+  
+  /**
+   * Salva la nuova relazione periodica tra persona e sede.
+
+   * @param personOffice l'oggetto che contiene l'associazione persona/sede
+   * @param confirmed se confermata la richiesta di cambiamento
+   */
+  public static void saveOfficeChanged(@Valid PersonsOffices personOffice, boolean confirmed) {
+    
+    rules.checkIfPermitted(personOffice.person.getCurrentOffice().get());
+    
+    val availableOffices = 
+        officeDao.getAllOffices(); 
+    Person person = personOffice.person;
+    IWrapperPerson wrappedPerson = wrapperFactory.create(personOffice.person);
+    IWrapperContract wrappedContract = wrapperFactory
+        .create(wrappedPerson.getCurrentContract().get());
+    
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      log.warn("validation errors: {}", validation.errorsMap());
+      
+      render("@changeOffice", person, personOffice, availableOffices);
+    }
+    if (!Validation.hasErrors()) {
+      if (!DateUtility.isDateIntoInterval(personOffice.getBeginDate(),
+          wrappedContract.getContractDateInterval())) {
+        Validation.addError("personOffice.beginDate", "deve appartenere al contratto");
+      }
+      if (personOffice.getEndDate() != null && !DateUtility.isDateIntoInterval(personOffice.getEndDate(),
+          wrappedContract.getContractDateInterval())) {
+        Validation.addError("personOffice.endDate", "deve appartenere al contratto");
+      }
+      if (personOffice.office == null) {
+        Validation.addError("personOffice.office", "Specificare la sede");
+      }
+    }
+
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      render("@changeOffice", person, personOffice, availableOffices);
+    }
+    
+    Optional<LocalDate> end;
+    if (personOffice.getEndDate() != null) {
+      end = Optional.fromNullable(personOffice.getEndDate());
+    } else {
+      end = Optional.absent();
+    }
+    
+    List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(personOffice, false);
+    RecomputeRecap recomputeRecap =
+        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
+            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+            periodRecaps, Optional
+            .fromNullable(wrappedPerson.getCurrentContract().get().getSourceDateResidual()));
+
+    recomputeRecap.initMissing = wrappedContract.initializationMissing();
+    
+    if (!confirmed) {
+      confirmed = true;
+      render("@changeOffice", person, personOffice, availableOffices, confirmed, recomputeRecap);
+    } else {
+      periodManager.updatePeriods(personOffice, true);
+      Contract contract = wrappedPerson.getCurrentContract().get();
+      contract.getPerson().refresh();
+      if (recomputeRecap.needRecomputation) {
+        contractManager.recomputeContract(contract,
+            Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
+      }
+
+      flash.success(Web.msgSaved(PersonsOffices.class));
+
+      changeOffice(personOffice.person.id);
+    }
+    personsOfficesManager.addPersonInOffice(personOffice.person, personOffice.office, 
+        personOffice.getBeginDate(), end);
+    flash.success("Salvata nuova afferenza per %s nella sede %s", 
+        personOffice.person, personOffice.office);
+    changeOffice(personOffice.person.id);
+  }
+  
 }

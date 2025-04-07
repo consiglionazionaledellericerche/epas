@@ -72,7 +72,9 @@ public class Affiliations extends Controller {
     val person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     val activeGroups = 
-        groupDao.groupsByOffice(person.getOffice(), Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(person.getCurrentOffice().get(), Optional.absent(), 
+            Optional.of(false));
+
     val affiliation = new Affiliation();
     affiliation.setPerson(person);
     render(affiliation, person, activeGroups);
@@ -87,11 +89,14 @@ public class Affiliations extends Controller {
       log.warn("validation errors: {}", validation.errorsMap());
       val activeGroups = 
           groupDao.groupsByOffice(
-              affiliation.getPerson().getOffice(), Optional.absent(), Optional.of(false));      
+              affiliation.getPerson().getCurrentOffice().get(), Optional.absent(), 
+              Optional.of(false));      
+
       render("@blankByPerson", affiliation, activeGroups);
     }
 
-    rules.checkIfPermitted(affiliation.getPerson().getOffice());
+    rules.checkIfPermitted(affiliation.getPerson().getCurrentOffice().get());
+
     affiliation.save();
 
     log.info("Aggiunta/Modificata affiliazione di {} al gruppo {}", 
@@ -127,7 +132,9 @@ public class Affiliations extends Controller {
     notFoundIfNull(affiliation);
     val person = affiliation.getPerson();
     val activeGroups = 
-        groupDao.groupsByOffice(person.getOffice(), Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(person.getCurrentOffice().get(), Optional.absent(), 
+            Optional.of(false));
+
     render("@blankByPerson", affiliation, activeGroups);
   }
 }

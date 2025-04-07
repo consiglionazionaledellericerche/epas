@@ -35,6 +35,7 @@ import models.enumerate.StampTypes;
 import models.query.QPerson;
 import models.query.QPersonDay;
 import models.query.QPersonDayInTrouble;
+import models.query.QPersonsOffices;
 import models.query.QStamping;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -355,10 +356,12 @@ public class PersonDayDao extends DaoBase {
       LocalDate begin, LocalDate end) {
     QPersonDay personDay = QPersonDay.personDay;
     QPerson person = QPerson.person;
+    QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     
     return getQueryFactory().selectFrom(personDay)
         .leftJoin(personDay.person, person)
-        .where(person.office.eq(office).and(personDay.date.between(begin, end)))
+        .leftJoin(person.personsOffices, personsOffices).fetchAll()
+        .where(personsOffices.office.eq(office).and(personDay.date.between(begin, end)))
         .orderBy(personDay.date.asc()).fetch();
   }
 
@@ -388,9 +391,11 @@ public class PersonDayDao extends DaoBase {
       Office office, LocalDate begin, LocalDate end) {
     QPersonDay personDay = QPersonDay.personDay;
     QStamping stamping = QStamping.stamping;
+    QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     return getQueryFactory().selectFrom(personDay)
         .leftJoin(personDay.stampings, stamping)
-        .where(personDay.person.office.eq(office),
+        .leftJoin(personDay.person.personsOffices, personsOffices).fetchAll()
+        .where(personsOffices.office.eq(office),
             personDay.date.between(begin, end),
             stamping.stampType.eq(StampTypes.LAVORO_FUORI_SEDE)
               .or(
@@ -408,9 +413,11 @@ public class PersonDayDao extends DaoBase {
       StampTypes stampType, Office office, LocalDate begin, LocalDate end) {
     QPersonDay personDay = QPersonDay.personDay;
     QStamping stamping = QStamping.stamping;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     return getQueryFactory().selectFrom(personDay)
         .leftJoin(personDay.stampings, stamping)
-        .where(personDay.person.office.eq(office),
+        .leftJoin(personDay.person.personsOffices, personsOffices)
+        .where(personsOffices.office.eq(office),
             personDay.date.between(begin, end),
             stamping.stampType.eq(stampType))
         .distinct()

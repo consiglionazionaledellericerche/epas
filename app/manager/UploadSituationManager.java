@@ -103,7 +103,8 @@ public class UploadSituationManager {
         body = body + person.getNumber() + " F " + pmr.getFromDate().getDayOfMonth() + " " 
             + pmr.getToDate().getDayOfMonth() + " " + pmr.getTrainingHours() + " \r\n";
       }
-      PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
+      PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false, 
+          Optional.of(office));
       for (IWrapperContractMonthRecap cmr : psDto.contractMonths) {
         body = body + person.getNumber() + " B " + cmr.getValue().getBuoniPastoUsatiNelMese() + " " 
             + cmr.getValue().getBuoniPastoUsatiNelMese() + " \r\n";

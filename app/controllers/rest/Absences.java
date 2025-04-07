@@ -111,7 +111,7 @@ public class Absences extends Controller {
           + "mail cnr che serve per la ricerca.");
     }
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getOffice(begin).get());
 
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
@@ -156,7 +156,8 @@ public class Absences extends Controller {
           + "mail cnr che serve per la ricerca.");
     }
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getOffice(begin).get());
+
     log.info("Richiesto inserimento assenza via REST -> eppn = {}, email = {}, absenceCode = {}, "
         + "begin = {}, end = {}, hours = {}, minutes = {}", 
         eppn, email, absenceCode, begin, end, hours, minutes);
@@ -224,7 +225,7 @@ public class Absences extends Controller {
           + "mail cnr che serve per la ricerca.");
     }
 
-    rules.checkIfPermitted(person.get().getOffice());
+    rules.checkIfPermitted(person.get().getOffice(begin).get());
 
     if (begin == null || end == null || begin.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
@@ -271,7 +272,8 @@ public class Absences extends Controller {
 
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione delle assenze sull'office della persona passata.
-    rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
+
+    rules.checkIfPermitted(absence.getPersonDay().getPerson().getCurrentOffice().get());
 
     absenceManager.removeAbsence(absence);
 
@@ -301,7 +303,8 @@ public class Absences extends Controller {
         personPerseoId, fiscalCode, number);
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione delle assenze sull'office della persona passata.
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getOffice(begin).get());
 
     val absenceType = absenceTypeDao.getAbsenceTypeByCode(absenceCode);
     
@@ -330,7 +333,7 @@ public class Absences extends Controller {
       JsonResponse.badRequest("Mandatory parameters missing (begin, end)");
     }
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getOffice(begin).get());
 
     val groupAbsenceType = 
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
@@ -375,7 +378,8 @@ public class Absences extends Controller {
 
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione delle assenze sull'office della persona passata.
-    rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
+
+    rules.checkIfPermitted(absence.getPersonDay().getPerson().getCurrentOffice().get());
 
     if (absence.getAbsenceFile() == null) {
       JsonResponse.notFound();
@@ -409,7 +413,8 @@ public class Absences extends Controller {
 
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione delle assenze sull'office della persona passata.
-    rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
+
+    rules.checkIfPermitted(absence.getPersonDay().getPerson().getCurrentOffice().get());
 
     if (file == null) {
       JsonResponse.badRequest("Null or empty file");
@@ -433,7 +438,8 @@ public class Absences extends Controller {
 
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione delle assenze sull'office della persona passata.
-    rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
+
+    rules.checkIfPermitted(absence.getPersonDay().getPerson().getCurrentOffice().get());
 
     if (absence.getAbsenceFile() == null) {
       JsonResponse.notFound();
@@ -468,7 +474,9 @@ public class Absences extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
     //della persona associata all'assenza
-    rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
+
+    rules.checkIfPermitted(absence.getPersonDay().getPerson().getCurrentOffice().get());
+
     return absence;
   }
 

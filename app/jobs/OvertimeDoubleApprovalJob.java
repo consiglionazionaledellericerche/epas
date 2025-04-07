@@ -97,7 +97,7 @@ public class OvertimeDoubleApprovalJob extends Job {
         log.trace("Preparo invio mail per {}", user.getPerson().getFullname());
         SimpleEmail simpleEmail = new SimpleEmail();
         String reply = (String) configurationManager
-            .configValue(user.getPerson().getOffice(), EpasParam.EMAIL_TO_CONTACT);
+            .configValue(user.getPerson().getCurrentOffice().get(), EpasParam.EMAIL_TO_CONTACT);
 
         if (!reply.isEmpty()) {
           try {

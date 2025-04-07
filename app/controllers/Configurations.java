@@ -395,7 +395,7 @@ public class Configurations extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     List<PersonConfiguration> currentConfiguration = configurationManager
         .getPersonConfigurationsByDate(person, LocalDate.now());
@@ -412,7 +412,8 @@ public class Configurations extends Controller {
 
     PersonConfiguration configuration = PersonConfiguration.findById(configurationId);
     notFoundIfNull(configuration);
-    rules.checkIfPermitted(configuration.getPerson().getOffice());
+
+    rules.checkIfPermitted(configuration.getPerson().getCurrentOffice().get());
 
     ConfigurationDto configurationDto = new ConfigurationDto(configuration.getEpasParam(),
         configuration.getBeginDate(), configuration.calculatedEnd(),
@@ -433,11 +434,10 @@ public class Configurations extends Controller {
       ConfigurationDto configurationDto, boolean confirmed) {
 
     notFoundIfNull(configuration);
-    notFoundIfNull(configuration.getPerson());
-    notFoundIfNull(configuration.getPerson().getOffice());
 
-    rules.checkIfPermitted(configuration.getPerson().getOffice());
-    
+    notFoundIfNull(configuration.getPerson());
+    notFoundIfNull(configuration.getPerson().getCurrentOffice().get());
+
     if (!configuration.getBeginDate().isEqual(configuration.getPerson().getBeginDate())) {
       flash.error("La data di inizio della configurazione (%s) e la data di attivazione della persona (%s) sono diverse. "
           + "Modificare la data di attivazione della persona nei dati anagrafici per procedere con la modifica di questo parametro.", 
@@ -472,8 +472,9 @@ public class Configurations extends Controller {
     }
 
     if (configuration.getEpasParam().equals(EpasParam.OFF_SITE_STAMPING)
-        && !(Boolean) configurationManager.configValue(configuration.getPerson().getOffice(),
+        && !(Boolean) configurationManager.configValue(configuration.getPerson().getCurrentOffice().get(),
         EpasParam.WORKING_OFF_SITE)) {
+
       response.status = 400;
       flash.error("Prima abilitare la timbratura per lavoro fuori sede per i dipendenti "
           + "tra i parametri della sede.");

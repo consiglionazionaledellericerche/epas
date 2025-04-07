@@ -121,7 +121,7 @@ public class MonthsRecapManager {
       row = sheet.createRow(rownum);
       row.setHeightInPoints(30);
       PersonStampingRecap psDto = stampingsRecapFactory.create(person, beginDate.getYear(),
-          beginDate.getMonthOfYear(), false);
+          beginDate.getMonthOfYear(), false, Optional.of(office));
       // aggiorno il file aggiungendo un nuovo foglio per ogni persona...
       file = createFileXlsToExport(psDto, file, wb, row);
 

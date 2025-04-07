@@ -30,7 +30,9 @@ import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import controllers.rest.v3.Offices;
+import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonsOfficesDao;
 import helpers.JodaConverters;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
@@ -42,9 +44,12 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.PersonManager;
+import manager.PersonsOfficesManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
+import models.Office;
 import models.Person;
+import models.PersonsOffices;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
@@ -71,6 +76,12 @@ public class Persons extends Controller {
   static SecurityRules rules;
   @Inject
   static GsonBuilder gsonBuilder;
+  @Inject
+  static PersonsOfficesDao personOfficeDao;
+  @Inject
+  static PersonsOfficesManager personOfficeManager;
+  @Inject
+  static OfficeDao officeDao;
 
   /**
    * Lista JSON delle persone che appartengono alla sede
@@ -107,7 +118,7 @@ public class Persons extends Controller {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(PersonShowDto.build(person)));
@@ -139,11 +150,20 @@ public class Persons extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office indicato
     //nel DTO
-    rules.checkIfPermitted(person.getOffice());
+
+    Office office = officeDao.getOfficeById(personDto.getOfficeId());
+    rules.checkIfPermitted(office);
+
     
     personManager.properPersonCreate(person);
+
     person.save();
     configurationManager.updateConfigurations(person);
+
+    
+    personOfficeManager.addPersonInOffice(person, office, org.joda.time.LocalDate.now(), 
+        Optional.absent());
+    personManager.addRoleToPerson(person, office);
 
     log.info("Created person {} via REST", person);
     renderJSON(gson.toJson(PersonShowDto.build(person)));
@@ -167,7 +187,8 @@ public class Persons extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office attuale 
     //della persona
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     
     val gson = gsonBuilder.create();
     val personDto = gson.fromJson(body, PersonUpdateDto.class); 
@@ -181,7 +202,8 @@ public class Persons extends Controller {
     //Controlla anche che l'utente corrente abbia
     //i diritti di gestione anagrafica sull'office indicato 
     //nel DTO
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     if (!validation.valid(person).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
@@ -202,7 +224,8 @@ public class Persons extends Controller {
       Long id, String email, String eppn, Long personPerseoId, String fiscalCode, String number) {
     RestUtils.checkMethod(request, HttpMethod.DELETE);
     val person = getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     
     if (!person.getContracts().isEmpty()) {
       JsonResponse.conflict(

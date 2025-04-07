@@ -123,7 +123,7 @@
       <td><font color="#000000">${person.value.getQualification() != null ?
         person.value.getQualification().qualification : ''}</font></td>
       <td>
-        ${person.value.office.name}
+        ${person.value.getCurrentOffice().get().name}
       </td>
 
       <!-- Invio email -->

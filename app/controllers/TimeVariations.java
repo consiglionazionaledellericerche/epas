@@ -169,8 +169,9 @@ public class TimeVariations extends Controller {
     Verify.verifyNotNull(user.get().getPerson());
 
     Person person = user.get().getPerson();
-    
-    LocalDate date = person.getOffice().getBeginDate();
+
+    LocalDate date = person.getCurrentOffice().get().getBeginDate();
+
     List<Absence> absenceList = absenceDao.getAbsenceByCodeInPeriod(
         Optional.fromNullable(person), Optional.absent(), date, LocalDate.now(), 
         Optional.fromNullable(JustifiedTypeName.recover_time), false, true);

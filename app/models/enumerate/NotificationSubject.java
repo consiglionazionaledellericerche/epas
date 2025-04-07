@@ -152,7 +152,7 @@ public enum NotificationSubject {
         }
         params.put("month", competence.getMonth());
         params.put("year", competence.getYear());
-        params.put("officeId", competence.getPerson().getOffice().id);
+        params.put("officeId", competence.getPerson().getCurrentOffice().get().id);
         params.put("competenceCodeId", competence.getCompetenceCode().id);
         return toUrl("Competences.showCompetences", params);
       case ABSENCE_REQUEST:

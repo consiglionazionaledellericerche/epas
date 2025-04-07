@@ -31,6 +31,7 @@ import models.PersonDayInTrouble;
 import models.enumerate.Troubles;
 import models.query.QPersonDay;
 import models.query.QPersonDayInTrouble;
+import models.query.QPersonsOffices;
 import org.joda.time.LocalDate;
 
 /**
@@ -102,11 +103,12 @@ public class PersonDayInTroubleDao extends DaoBase {
       LocalDate begin, LocalDate end, Troubles trouble) {
     QPersonDayInTrouble pdit = QPersonDayInTrouble.personDayInTrouble;
     QPersonDay pd = QPersonDay.personDay;
+    QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     BooleanBuilder conditions = new BooleanBuilder();
     conditions.and(pdit.personDay.date.goe(begin));
     conditions.and(pdit.personDay.date.loe(end));
     conditions.and(pdit.cause.eq(trouble));
-    return getQueryFactory().selectFrom(pdit).leftJoin(pdit.personDay, pd)
-        .where(conditions.and(pd.person.office.eq(office))).fetch();
+    return getQueryFactory().selectFrom(pdit).leftJoin(pdit.personDay, pd).leftJoin(pdit.personDay.person.personsOffices, personsOffices)
+        .where(conditions.and(personsOffices.office.eq(office))).fetch();
   }
 }

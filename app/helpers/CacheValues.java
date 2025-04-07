@@ -22,12 +22,14 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import com.google.common.util.concurrent.MoreExecutors;
 import dao.PersonDao;
+import dao.PersonsOfficesDao;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,12 +38,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import manager.PersonsOfficesManager;
 import manager.attestati.service.CertificationsComunication;
 import manager.attestati.service.ICertificationService;
 import manager.attestati.service.OauthToken;
 import manager.attestati.service.PersonCertData;
 import models.Office;
 import models.Person;
+import models.PersonsOffices;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -63,6 +67,7 @@ public final class CacheValues {
   private final CertificationsComunication certification;
   private final ICertificationService certService;
   private final PersonDao personDao;
+  private final PersonsOfficesManager personOfficeManager;
 
   public LoadingCache<String, OauthToken> oauthToken = CacheBuilder.newBuilder()
       //I Token hanno una scadenza tipo di 5 minuti
@@ -104,19 +109,23 @@ public final class CacheValues {
    * E' ANCHE ALTAMENTE CONSIGLIATO INVALIDARE TUTTI I VALORI DI UN DETERMINATO UFFICIO
    * QUADO SI RIEFFETTUA IL REFRESH DELLA SCHERMATA DI ATTESTATI
    */
-  public LoadingCache<Map.Entry<Person, YearMonth>, PersonCertData> personStatus =
+  public LoadingCache<Map.Entry<PersonsOffices, YearMonth>, PersonCertData> personStatus =
       CacheBuilder.newBuilder()
           .expireAfterWrite(20, TimeUnit.MINUTES)
           .build(
-              new CacheLoader<Map.Entry<Person, YearMonth>, PersonCertData>() {
+              new CacheLoader<Map.Entry<PersonsOffices, YearMonth>, PersonCertData>() {
                 @Override
-                public PersonCertData load(Map.Entry<Person, YearMonth> key)
+                public PersonCertData load(Map.Entry<PersonsOffices, YearMonth> key)
                     throws ExecutionException {
-                  final Person person = key.getKey();
+                  final PersonsOffices personOffice = key.getKey();
                   int year = key.getValue().getYear();
                   int month = key.getValue().getMonthOfYear();
+                  LocalDate beginMonth = new LocalDate(year, month, 1);
+                  LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+                  Range<LocalDate> affiliationRange = personOfficeManager
+                      .monthlyAffiliation(personOffice, beginMonth, endMonth);
                   return certService
-                      .buildPersonStaticStatus(person, year, month);
+                      .buildPersonStaticStatus(personOffice.person, year, month, affiliationRange);
                 }
               }
           );

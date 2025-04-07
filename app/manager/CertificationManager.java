@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.attestati.service.PersonCertData;
 import models.Person;
+import models.PersonsOffices;
 import org.joda.time.YearMonth;
 
 
@@ -61,17 +62,19 @@ public class CertificationManager {
    * Informazioni sui dati mensili inviati ad Attestati prelevati
    * da attestati stesso.
    */
-  public PersonCertData getPersonCertData(Person person, Integer year, Integer month) {
-    final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
-        .SimpleEntry<>(person, new YearMonth(year, month));
+
+  public PersonCertData getPersonCertData(PersonsOffices personOffice, Integer year, Integer month) {    
+    final Map.Entry<PersonsOffices, YearMonth> cacheKey = new AbstractMap
+        .SimpleEntry<>(personOffice, new YearMonth(year, month));
+
     try {
       return cacheValues.personStatus.get(cacheKey);
     } catch (ExecutionException ex) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}",
-          person.getFullname(), ex);
+          personOffice.person.getFullname(), ex);
       throw new RuntimeException(
           String.format("Impossibile recuperare la percentuale di avanzamento per la persona %s",
-          person.getFullname()));
+          personOffice.person.getFullname()));
     }
     
   }

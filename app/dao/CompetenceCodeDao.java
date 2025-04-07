@@ -35,6 +35,7 @@ import models.enumerate.LimitType;
 import models.query.QCompetenceCode;
 import models.query.QCompetenceCodeGroup;
 import models.query.QPersonCompetenceCodes;
+import models.query.QPersonsOffices;
 import org.joda.time.LocalDate;
 
 /**
@@ -270,6 +271,7 @@ public class CompetenceCodeDao extends DaoBase {
   public List<PersonCompetenceCodes> listByCompetenceCode(CompetenceCode code,
       Optional<LocalDate> date, Office office) {
     final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     final BooleanBuilder condition = new BooleanBuilder();
     if (date.isPresent()) {
       condition.and(pcc.beginDate.loe(date.get().dayOfMonth().withMaximumValue())
@@ -277,8 +279,9 @@ public class CompetenceCodeDao extends DaoBase {
               pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
     }
     return getQueryFactory().selectFrom(pcc)
+        .leftJoin(pcc.person.personsOffices, personsOffices)
         .where(pcc.competenceCode.eq(code)
-            .and(pcc.person.office.eq(office)).and(condition))
+            .and(personsOffices.office.eq(office)).and(condition))
         .fetch();
   }
 
@@ -315,6 +318,7 @@ public class CompetenceCodeDao extends DaoBase {
   public List<PersonCompetenceCodes> listByCodesAndOffice(List<CompetenceCode> codesList,
       Office office, Optional<LocalDate> date) {
     final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     final BooleanBuilder condition = new BooleanBuilder();
     if (date.isPresent()) {
       condition.and(pcc.beginDate.loe(date.get().dayOfMonth().withMaximumValue())
@@ -322,7 +326,8 @@ public class CompetenceCodeDao extends DaoBase {
               pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
     }
     return getQueryFactory().selectFrom(pcc)
-        .where(pcc.competenceCode.in(codesList).and(pcc.person.office.eq(office)).and(condition))
+        .leftJoin(pcc.person.personsOffices, personsOffices)
+        .where(pcc.competenceCode.in(codesList).and(personsOffices.office.eq(office)).and(condition))
         .fetch();
   }
   

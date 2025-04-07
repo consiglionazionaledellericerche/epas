@@ -145,7 +145,8 @@ public class UsersRolesOfficesDao extends DaoBase {
           || uroItem.getUser().getPerson().getPerseoId() == null) {
         continue;
       }
-      if (office.isPresent() && !office.get().equals(uroItem.getUser().getPerson().getOffice())) {
+      if (office.isPresent() && !office.get()
+          .equals(uroItem.getUser().getPerson().getCurrentOffice().get())) {
         continue;
       }
       Set<String> personUros = urosMap.get(uroItem.getUser().getPerson().getPerseoId());

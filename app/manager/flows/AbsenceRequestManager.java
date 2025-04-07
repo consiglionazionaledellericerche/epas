@@ -99,7 +99,7 @@ public class AbsenceRequestManager {
   private PersonReperibilityDayDao personReperibilityDayDao;
   private PersonShiftDayDao personShiftDayDao;
   private GeneralSettingDao generalSettingDao;
-  
+
   /**
    * DTO per la configurazione delle AbsenceRequest.
    */
@@ -171,11 +171,13 @@ public class AbsenceRequestManager {
       return Lists.newArrayList();
     }
     if (config.isAdministrativeApprovalRequired() && uroDao
-        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.PERSONNEL_ADMIN), person.getOffice())
-        .isEmpty()) {
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.PERSONNEL_ADMIN), 
+            person.getCurrentOffice().get()).isEmpty()) {
+
       problems.add(String.format("Approvazione dell'amministratore del personale richiesta. "
           + "L'ufficio %s non ha impostato nessun amministratore del personale. "
-          + "Contattare l'ufficio del personale.", person.getOffice().getName()));
+          + "Contattare l'ufficio del personale.", person.getCurrentOffice().get().getName()));
+
     }
 
     if (config.isManagerApprovalRequired()
@@ -189,11 +191,13 @@ public class AbsenceRequestManager {
     }
 
     if (config.isOfficeHeadApprovalRequired() && uroDao
-        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), person.getOffice())
-        .isEmpty()) {
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), 
+            person.getCurrentOffice().get()).isEmpty()) {
+
       problems.add(String.format("Approvazione del responsabile di sede richiesta. "
           + "L'ufficio %s non ha impostato nessun responsabile di sede. "
-          + "Contattare l'ufficio del personale.", person.getOffice().getName()));
+          + "Contattare l'ufficio del personale.", person.getCurrentOffice().get().getName()));
+
     }
     return problems;
   }
@@ -209,13 +213,13 @@ public class AbsenceRequestManager {
   public AbsenceRequestConfiguration getConfiguration(AbsenceRequestType requestType,
       Person person) {
     val absenceRequestConfiguration = new AbsenceRequestConfiguration(person, requestType);
-    
+
     //Per i livelli I-III in configurazione generale può esserci scritto di
     //non abilitare la possibilità di chiedere autorizzazioni, in questo caso i flussi 
     //dei livelli I-III non hanno mai approvazioni richieste.
     val skipTopLevelAuthorization = 
         person.isTopQualification() && requestType.canBeInsertedByTopLevelWithoutApproval
-          && !generalSettingDao.generalSetting().isEnableAbsenceTopLevelAuthorization();
+        && !generalSettingDao.generalSetting().isEnableAbsenceTopLevelAuthorization();
 
     if (requestType.alwaysSkipAdministrativeApproval || skipTopLevelAuthorization) {
       absenceRequestConfiguration.administrativeApprovalRequired = false;
@@ -223,13 +227,15 @@ public class AbsenceRequestManager {
       if (person.isTopQualification()
           && requestType.administrativeApprovalRequiredTopLevel.isPresent()) {
         absenceRequestConfiguration.administrativeApprovalRequired =
-            (Boolean) configurationManager.configValue(person.getOffice(),
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(),
+
                 requestType.administrativeApprovalRequiredTopLevel.get(), LocalDate.now());
       }
       if (!person.isTopQualification()
           && requestType.administrativeApprovalRequiredTechnicianLevel.isPresent()) {
         absenceRequestConfiguration.administrativeApprovalRequired =
-            (Boolean) configurationManager.configValue(person.getOffice(),
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(),
+
                 requestType.administrativeApprovalRequiredTechnicianLevel.get(), LocalDate.now());
       }
     }
@@ -240,13 +246,13 @@ public class AbsenceRequestManager {
     } else {
       if (person.isTopQualification() && requestType.managerApprovalRequiredTopLevel.isPresent()) {
         absenceRequestConfiguration.managerApprovalRequired =
-            (Boolean) configurationManager.configValue(person.getOffice(),
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(),
                 requestType.managerApprovalRequiredTopLevel.get(), LocalDate.now());
       }
       if (!person.isTopQualification()
           && requestType.managerApprovalRequiredTechnicianLevel.isPresent()) {
         absenceRequestConfiguration.managerApprovalRequired =
-            (Boolean) configurationManager.configValue(person.getOffice(),
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(),
                 requestType.managerApprovalRequiredTechnicianLevel.get(), LocalDate.now());
       }
     }
@@ -255,14 +261,14 @@ public class AbsenceRequestManager {
     } else {
       if (person.isTopQualification()
           && requestType.officeHeadApprovalRequiredTopLevel.isPresent()) {
-        absenceRequestConfiguration.officeHeadApprovalRequired =
-            (Boolean) configurationManager.configValue(person.getOffice(),
+        absenceRequestConfiguration.officeHeadApprovalRequired =            
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(),            
                 requestType.officeHeadApprovalRequiredTopLevel.get(), LocalDate.now());
       }
       if (!person.isTopQualification()
           && requestType.officeHeadApprovalRequiredTechnicianLevel.isPresent()) {
         absenceRequestConfiguration.officeHeadApprovalRequired =
-            (Boolean) configurationManager.configValue(person.getOffice(),
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(),                
                 requestType.officeHeadApprovalRequiredTechnicianLevel.get(), LocalDate.now());
       }
 
@@ -272,7 +278,7 @@ public class AbsenceRequestManager {
     } else {
       if (person.isGroupManager()) {
         absenceRequestConfiguration.officeHeadApprovalForManagerRequired =
-            (Boolean) configurationManager.configValue(person.getOffice(),
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(),
                 requestType.officeHeadApprovalRequiredForManager.get(), LocalDate.now());
       }
     }
@@ -356,8 +362,9 @@ public class AbsenceRequestManager {
       }
       if (!uroDao
           .getUsersRolesOffices(absenceRequest.getPerson().getUser(),
-              roleDao.getRoleByName(Role.PERSONNEL_ADMIN), absenceRequest.getPerson().getOffice())
-          .isPresent()) {
+              roleDao.getRoleByName(Role.PERSONNEL_ADMIN), 
+              absenceRequest.getPerson().getCurrentOffice().get()).isPresent()) {
+
         return Optional.of(String.format("L'evento %s non può essere eseguito da %s perché non ha"
             + " il ruolo di amministratore del personale.", eventType, approver.getFullname()));
       }
@@ -374,9 +381,10 @@ public class AbsenceRequestManager {
         return Optional.of("Questa richiesta di assenza è già stata approvata "
             + "da parte del responsabile di sede.");
       }
-      if (!uroDao.getUsersRolesOffices(
-          approver.getUser(), roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
-          absenceRequest.getPerson().getOffice()).isPresent()) {
+
+      if (!uroDao.getUsersRolesOffices(approver.getUser(), roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
+          absenceRequest.getPerson().getCurrentOffice().get()).isPresent()) {
+        
         return Optional.of(String.format("L'evento %s non può essere eseguito da %s perché non ha"
             + " il ruolo di responsabile di sede.", eventType, approver.getFullname()));
       }
@@ -536,7 +544,7 @@ public class AbsenceRequestManager {
       for (Absence absence : insertReport.absencesToPersist) {
         PersonDay personDay = 
             personDayManager.getOrCreateAndPersistPersonDay(absenceRequest.getPerson(),
-            absence.getAbsenceDate());
+                absence.getAbsenceDate());
         absence.setPersonDay(personDay);
         if (absenceForm.justifiedTypeSelected.getName().equals(JustifiedTypeName.recover_time)) {
 
@@ -733,7 +741,7 @@ public class AbsenceRequestManager {
     log.info("{} auto approvata dal responsabile del gruppo {}.", absenceRequest,
         currentPerson.getFullname());
   }
-  
+
   /**
    * Da configurazione è possibile fare in modo che le richieste di assenza
    * dei livelli I-III siano automaticamente approvate.
@@ -883,7 +891,7 @@ public class AbsenceRequestManager {
     LocalDate temp = absenceRequest.startAtAsDate();
     Map<PersonReperibilityType, List<LocalDate>> repMap = Maps.newHashMap();
     Map<ShiftCategories, List<LocalDate>> shiftMap = Maps.newHashMap();
-    
+
     //splitto le date incriminate tra reperibilità e turno
     while (!temp.isAfter(absenceRequest.endToAsDate())) {
       Optional<PersonReperibilityDay> prd =
@@ -914,7 +922,7 @@ public class AbsenceRequestManager {
      *  di reperibilità
      */
     for (Map.Entry<PersonReperibilityType, List<LocalDate>> entry : repMap.entrySet()) {
-      
+
       notificationManager.sendEmailToSupervisorOrManager(absenceRequest,
           entry.getKey().getSupervisor(), Optional.<ShiftCategories>absent(),
           Optional.fromNullable(entry.getKey()), entry.getValue());

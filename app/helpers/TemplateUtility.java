@@ -133,7 +133,7 @@ public class TemplateUtility {
   private final CompetenceRequestDao competenceRequestDao;
   private final InformationRequestDao informationRequestDao;
   private final GeneralSettingDao generalSettingDao;
-  
+
 
   /**
    * Costruttotore di default per l'injection dei vari componenti.
@@ -178,7 +178,7 @@ public class TemplateUtility {
     this.informationRequestDao = informationRequestDao;
     this.generalSettingDao = generalSettingDao;
     this.timeSlotDao = timeSlotDao;
-   
+
 
     notifications = MemoizedResults
         .memoize(new Supplier<ModelQuery.SimpleResults<Notification>>() {
@@ -216,7 +216,7 @@ public class TemplateUtility {
     if (list.stream().anyMatch(r -> r.getName().equals(Role.GROUP_MANAGER) 
         || r.getName().equals(Role.SEAT_SUPERVISOR))) {
       if ((Boolean) configurationManager
-          .configValue(user.getPerson().getOffice(), 
+          .configValue(user.getPerson().getCurrentOffice().get(), 
               EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now())) {
         return true;
       }
@@ -270,11 +270,11 @@ public class TemplateUtility {
   public boolean enableOvertimeFlowsConfiguration() {
     return generalSettingDao.generalSetting().isShowOvertimeRequest();
   }
-  
+
   public boolean enableOvertimeRequestInAdvance() {
     return generalSettingDao.generalSetting().isEnableOvertimeRequestInAdvance();
   }
-  
+
   public boolean enableOvertimePerPerson() {
     return generalSettingDao.generalSetting().isEnableOvertimePerPerson();
   }
@@ -292,8 +292,8 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(
-            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(user.getPerson().getCurrentOffice().get(), Optional.absent(), 
+            Optional.of(false));
     Set<AbsenceRequest> results = absenceRequestDao
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.COMPENSATORY_REST, groups, user.getPerson());
@@ -313,9 +313,10 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(
-            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(user.getPerson().getCurrentOffice().get(), Optional.absent(), 
+            Optional.of(false));
     Set<AbsenceRequest> results = absenceRequestDao
+
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_REQUEST, groups, user.getPerson());
 
@@ -335,9 +336,10 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(
-            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(user.getPerson().getCurrentOffice().get(), Optional.absent(), 
+            Optional.of(false));
     Set<AbsenceRequest> results = absenceRequestDao
+
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.PERSONAL_PERMISSION, groups, user.getPerson());
 
@@ -357,9 +359,10 @@ public class TemplateUtility {
     }
     List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
     List<Group> groups = 
-        groupDao.groupsByOffice(
-            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
+        groupDao.groupsByOffice(user.getPerson().getCurrentOffice().get(), Optional.absent(), 
+            Optional.of(false));
     Set<AbsenceRequest> results = absenceRequestDao
+
         .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
             AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST, groups, user.getPerson());
 
@@ -469,7 +472,7 @@ public class TemplateUtility {
         .toApproveResults(roleList, 
             LocalDateTime.now().minusMonths(1), 
             Optional.absent(), CompetenceRequestType.OVERTIME_REQUEST, user.getPerson());
-    Office office = user.getPerson().getOffice();
+    Office office = user.getPerson().getCurrentOffice().get();
     java.util.Optional<Configuration> conf = office.getConfigurations().stream()
         .filter(c -> c.getEpasParam().equals(EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION))
         .findFirst();
@@ -605,7 +608,9 @@ public class TemplateUtility {
   }
 
   public List<BadgeReader> getAllBadgeReader(Person person) {
-    return badgeReaderDao.getBadgeReaderByOffice(person.getOffice());
+
+    return badgeReaderDao.getBadgeReaderByOffice(person.getCurrentOffice().get());
+
   }
 
   public List<CompetenceCode> allCodeList() {
@@ -733,7 +738,9 @@ public class TemplateUtility {
     List<Role> roles = Lists.newArrayList();
     Optional<User> user = Security.getUser();
     if (user.isPresent()) {
-      roles = rolesAssignable(user.get().getPerson().getOffice());
+
+      roles = rolesAssignable(user.get().getPerson().getCurrentOffice().get());
+
       roles.add(roleDao.getRoleByName(Role.EMPLOYEE));
       return roles;
     }

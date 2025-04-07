@@ -117,7 +117,7 @@
 		#{/if}
 		
 		#{b.buttons center:true}
-            #{b.cancel @initializationsStatus(contract.person.office.id) /}
+            #{b.cancel @initializationsStatus(contract.person.getCurrentOffice().get().id) /}
             #{b.submit 'Conferma'/}
         #{/b.buttons}
       #{/form}	  

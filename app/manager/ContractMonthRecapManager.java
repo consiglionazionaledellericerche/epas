@@ -193,7 +193,10 @@ public class ContractMonthRecapManager {
       EpasParam param = cmr.qualifica > 3 ? EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_49 :
           EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_13;
       Integer monthExpiryRecoveryDay = (Integer) configurationManager
-          .configValue(cmr.getPerson().getOffice(), param, cmr.getYear());
+
+          .configValue(cmr.person.getOffice(new LocalDate(cmr.getYear(), cmr.getMonth(), 1)).get(), 
+              param, cmr.getYear());
+
 
       if (monthExpiryRecoveryDay != 0 && cmr.getMonth() > monthExpiryRecoveryDay) {
         cmr.setPossibileUtilizzareResiduoAnnoPrecedente(false);
@@ -351,7 +354,10 @@ public class ContractMonthRecapManager {
     //DateInterval requestInterval = new DateInterval(firstDayOfRequestedMonth, calcolaFinoA);
 
     LocalDate dateStartMealTicketInOffice = (LocalDate) configurationManager
-        .configValue(contract.getPerson().getOffice(), EpasParam.DATE_START_MEAL_TICKET);
+
+        .configValue(contract.getPerson()
+            .getOffice(new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1)).get(), 
+            EpasParam.DATE_START_MEAL_TICKET);
 
     LocalDate today = LocalDate.now();
 

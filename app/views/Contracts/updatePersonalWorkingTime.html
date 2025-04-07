@@ -72,7 +72,7 @@
 			 #{f.date 'pwt.beginDate', value:pwt.beginDate?.format(), required:true /}
 			 #{f.date 'pwt.endDate', value:pwt.endDate?.format() /}
 			 #{f.selectModel 'pwt.timeSlot', 	
-			      items:templateUtility.getEnabledTimeSlotsForOffice(pwt.contract.person.office), required:true /}
+			      items:templateUtility.getEnabledTimeSlotsForOffice(pwt.contract.person.getCurrentOffice().get()), required:true /}
 			 #{b.buttons center:true}
 			   #{b.submit 'Applica'/}
 			 #{/b.buttons}

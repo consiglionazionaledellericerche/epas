@@ -180,11 +180,13 @@ public class CompetenceRequestManager {
               person.getFullname()));
     }
 
-    if (config.isEmployeeApprovalRequired()
-        && personDao.byOffice(person.getOffice()).isEmpty()) {
+    if (config.isEmployeeApprovalRequired() 
+        && personDao.byOffice(person.getCurrentOffice().get()).isEmpty()) {
+
       problems.add(String.format("Approvazione di un dipendente richiesta."
           + "L'ufficio %s non ha altri dipendenti."
-          + "Contattare l'ufficio del personale.", person.getOffice().getName()));
+          + "Contattare l'ufficio del personale.", person.getCurrentOffice().get().getName()));
+
     }
     return problems;
   }
@@ -207,7 +209,7 @@ public class CompetenceRequestManager {
       if (requestType.getOfficeHeadApprovalRequiredTechnicianLevel().isPresent()) {
         competenceRequestConfiguration.officeHeadApprovalRequired =
             (Boolean) configurationManager.configValue(
-                person.getOffice(), requestType.officeHeadApprovalRequiredTechnicianLevel.get(),
+                person.getCurrentOffice().get(), requestType.officeHeadApprovalRequiredTechnicianLevel.get(),
                 LocalDate.now());
       }
     }
@@ -218,8 +220,9 @@ public class CompetenceRequestManager {
       if (requestType.getManagerApprovalRequiredTechnicianLevel().isPresent()) {
         competenceRequestConfiguration.managerApprovalRequired =
             (Boolean) configurationManager.configValue(
-                person.getOffice(), requestType.getManagerApprovalRequiredTechnicianLevel().get(),
-                LocalDate.now());
+                person.getCurrentOffice().get(), requestType.getManagerApprovalRequiredTechnicianLevel().get(), 
+                LocalDate.now());  
+
       }
     }
 
@@ -229,8 +232,10 @@ public class CompetenceRequestManager {
       if (requestType.employeeApprovalRequired.isPresent()) {
         competenceRequestConfiguration.employeeApprovalRequired =
             (Boolean) configurationManager.configValue(
-                person.getOffice(), requestType.employeeApprovalRequired.get(),
-                LocalDate.now());
+
+                person.getCurrentOffice().get(), requestType.employeeApprovalRequired.get(), 
+                LocalDate.now());  
+
       }
     }
 
@@ -239,7 +244,7 @@ public class CompetenceRequestManager {
     } else {
       if (requestType.advanceApprovalRequired.isPresent()) {
         competenceRequestConfiguration.advanceApprovalRequired = 
-            (Boolean) configurationManager.configValue(person.getOffice(), 
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(), 
                 requestType.advanceApprovalRequired.get(), LocalDate.now());
       }      
     }
@@ -318,8 +323,10 @@ public class CompetenceRequestManager {
         return Optional.of("Questa richiesta di competenza è già stata approvata "
             + "da parte di un dipendente");
       }
+
       if (!uroDao.getUsersRolesOffices(approver.getUser(), roleDao.getRoleByName(Role.EMPLOYEE),
-          competenceRequest.getPerson().getOffice()).isPresent()) {
+          competenceRequest.getPerson().getCurrentOffice().get()).isPresent()) {
+
         return Optional.of(String.format("L'evento %s non può essere eseguito da %s perchè non ha"
             + " il ruolo di dipendente.", eventType, approver.getFullname()));
       }
@@ -643,7 +650,7 @@ public class CompetenceRequestManager {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     val currentPerson = Security.getUser().get().getPerson();
 
-    if ((Boolean) configurationManager.configValue(currentPerson.getOffice(), 
+    if ((Boolean) configurationManager.configValue(currentPerson.getCurrentOffice().get(), 
         EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now()) 
         && competenceRequest.getFirstApproved() == null) {      
       executeEvent(competenceRequest, currentPerson, 
@@ -669,7 +676,7 @@ public class CompetenceRequestManager {
 
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     val currentPerson = Security.getUser().get().getPerson();
-    if ((Boolean) configurationManager.configValue(currentPerson.getOffice(), 
+    if ((Boolean) configurationManager.configValue(currentPerson.getCurrentOffice().get(), 
         EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION, LocalDate.now()) 
         && competenceRequest.getFirstApproved() == null) {
       executeEvent(competenceRequest, currentPerson, 
@@ -811,7 +818,7 @@ public class CompetenceRequestManager {
       CompetenceCode competenceCode = competenceCodeDao.getCompetenceCodeByCode(code);
       Map<Integer, List<PersonOvertimeInMonth>> map = groupOvertimeManager
           .groupOvertimeSituationInYear(personDao.listForCompetence(competenceCode, 
-              Optional.absent(), Sets.newHashSet(approver.getPerson().getOffice()), true, 
+              Optional.absent(), Sets.newHashSet(approver.getPerson().getCurrentOffice().get()), true, 
               LocalDate.now().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), 
               LocalDate.now(), Optional.absent()).list(), competenceRequest.getYear());
       overtimeHoursAlreadyAssigned = groupOvertimeManager.groupOvertimeAssignedInYear(map);
@@ -820,7 +827,7 @@ public class CompetenceRequestManager {
        * Controllo quante ore ha la sede a disposizione
        */
       List<TotalOvertime> totalList = competenceDao
-          .getTotalOvertime(LocalDate.now().getYear(), approver.getPerson().getOffice());
+          .getTotalOvertime(LocalDate.now().getYear(), approver.getPerson().getCurrentOffice().get());
       totalOvertimes = competenceManager.getTotalOvertime(totalList);
 
     }

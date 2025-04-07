@@ -125,7 +125,9 @@ public class PrintTags extends Controller {
     }
 
     for (Person p : personList) {
-      PersonStampingRecap psDto = stampingsRecapFactory.create(p, year, month, false);
+      Optional<Office> officeOwner = Security.getUser().get().getPerson() != null 
+          ? Security.getUser().get().getPerson().getCurrentOffice() : Optional.absent();
+      PersonStampingRecap psDto = stampingsRecapFactory.create(p, year, month, false, officeOwner);
       log.debug("Creato il person stamping recap per {}", psDto.person.fullName());
       List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
       if (includeStampingDetails) {
@@ -189,7 +191,8 @@ public class PrintTags extends Controller {
   public static void autocertOffsite(int year, int month) {
     Person person = Security.getUser().get().getPerson();
     List<PrintTagsInfo> dtoList = Lists.newArrayList();
-    PersonStampingRecap psDto = stampingsRecapFactory.create(person, year, month, false);
+    PersonStampingRecap psDto = 
+        stampingsRecapFactory.create(person, year, month, false, Optional.absent());
     log.debug("Creato il person stamping recap per {}", psDto.person.fullName());
     List<OffSiteWorkingTemp> offSiteWorkingTemp = printTagsManager.getOffSiteStampings(psDto);
     renderPDF(dtoList, offSiteWorkingTemp, person);

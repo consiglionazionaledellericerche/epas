@@ -34,6 +34,7 @@ import lombok.val;
 import lombok.var;
 import manager.configurations.EpasParam;
 import manager.recaps.recomputation.RecomputeRecap;
+
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -294,9 +295,14 @@ public class PeriodManager {
    */
   private final boolean validatePeriods(IPropertiesInPeriodOwner owner, 
       List<IPropertyInPeriod> periods) {
-    val beginEndPeriods = getDateIntervalPeriod(periods);
+    Optional<DateInterval> beginEndPeriods = getDateIntervalPeriod(periods);
     if (!beginEndPeriods.isPresent()) {
       return false;
+    }
+    if (owner.getClass().equals(Person.class) 
+        && owner.getBeginDate().isBefore(beginEndPeriods.get().getBegin())) {
+      beginEndPeriods = Optional.fromNullable(beginEndPeriods.get().build(owner.getBeginDate(), 
+          beginEndPeriods.get().getEnd()));
     }
     //Confronto fra intervallo covered e quello dell'owner
     return DateUtility.areIntervalsEquals(beginEndPeriods.get(),

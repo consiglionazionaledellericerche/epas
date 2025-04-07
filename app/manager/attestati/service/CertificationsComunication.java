@@ -55,6 +55,7 @@ import manager.attestati.dto.show.SeatCertification;
 import models.Certification;
 import models.Office;
 import models.Person;
+import org.joda.time.LocalDate;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSRequest;
@@ -363,8 +364,9 @@ public class CertificationsComunication {
     }
 
     try {
-      String url = ATTESTATI_API_URL + "/" + person.getOffice().getCodeId()
-          + "/" + person.getNumber() + "/" + year + "/" + month;
+      String url = ATTESTATI_API_URL + "/" + person.getOffice(new LocalDate(year, month, 1)).get()
+          .getCodeId() + "/" + person.getNumber() + "/" + year + "/" + month;
+
 
       WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
       HttpResponse httpResponse = wsRequest.get();

@@ -17,7 +17,7 @@
 	  
 	  #{f.selectEnum 'contract.contractType',items:models.enumerate.ContractType,select2:'off'/}
 	  
-	  #{f.selectModel 'wtt', items:templateUtility.getEnabledWorkingTimeTypeForOffice(contract.person.office) /}
+	  #{f.selectModel 'wtt', items:templateUtility.getEnabledWorkingTimeTypeForOffice(contract.person.getCurrentOffice().get()) /}
 	  <div class="text-center">
 	    <input class="btn btn-primary" type="submit" value="Inserisci" />
 	  </div>

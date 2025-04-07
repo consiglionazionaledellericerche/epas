@@ -17,8 +17,10 @@
 
 package manager.attestati.service;
 
+import com.google.common.collect.Range;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import org.joda.time.LocalDate;
 import manager.attestati.dto.internal.CruscottoDipendente;
 import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.dto.show.CodiceAssenza;
@@ -55,7 +57,7 @@ public interface ICertificationService {
    * @param month   mese
    * @return lo stato
    */
-  PersonCertData buildPersonStaticStatus(Person person, int year, int month)
+  PersonCertData buildPersonStaticStatus(Person person, int year, int month, Range<LocalDate> range)
       throws ExecutionException;
 
   /**

@@ -26,6 +26,7 @@ import cnr.sync.dto.v2.PersonShowTerseDto;
 import cnr.sync.dto.v3.OfficeMonthValidationStatusDto;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
@@ -34,6 +35,7 @@ import controllers.Resecure.BasicAuth;
 import dao.AbsenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonsOfficesDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
@@ -46,10 +48,12 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.CertificationManager;
+import manager.PersonsOfficesManager;
 import manager.attestati.service.PersonMonthlySituationData;
 import models.Certification;
 import models.Office;
 import models.Person;
+import models.PersonsOffices;
 import models.WorkingTimeTypeDay;
 import models.absences.Absence;
 import models.absences.JustifiedType.JustifiedTypeName;
@@ -83,6 +87,11 @@ public class Certifications extends Controller {
   static CertificationManager certificationManager;
   @Inject
   static IWrapperFactory wrapperFactory;
+  @Inject
+  static PersonsOfficesDao personOfficeDao;
+  @Inject
+  static PersonsOfficesManager personOfficeManager;
+  
 
   /**
    * Metodo rest che ritorna la lista dello stato di invio al sistema
@@ -106,8 +115,14 @@ public class Certifications extends Controller {
         Sets.newHashSet(office.get()), false, monthBegin, monthEnd, true).list();
     val validationStatus = new OfficeMonthValidationStatusDto();
     people.stream().forEach(person -> {
-      val certData = 
-          certificationManager.getPersonCertData(person, year, month);
+
+      Optional<PersonsOffices> personOffice = 
+          personOfficeDao.affiliation(person, office.get(), year, month);
+      if (!personOffice.isPresent()) {
+        JsonResponse.notFound("La persona richiesta non afferisce alla sede richiesta");
+      }
+      val certData = certificationManager.getPersonCertData(personOffice.get(), year, month);
+
       if (certData.validate) {
         validationStatus.getValidatedPersons().add(PersonShowTerseDto.build(person));
       } else {
@@ -128,8 +143,17 @@ public class Certifications extends Controller {
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono entrambi obbligatori");
     }
-    rules.checkIfPermitted(person.getOffice());
-    val certData = certificationManager.getPersonCertData(person, year, month);
+
+    Office office = person.getOffice(new LocalDate(year, month, 1)).get();
+    rules.checkIfPermitted(office);
+    Optional<PersonsOffices> personOffice = 
+        personOfficeDao.affiliation(person, office, year, month);
+    if (!personOffice.isPresent()) {
+      JsonResponse.notFound("Non è stata trovata afferenza ad una sede per la persona "
+          + "passata come parametro");
+    }
+    val certData = certificationManager.getPersonCertData(personOffice.get(), year, month);
+
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(certData.validate));
   }
@@ -162,9 +186,17 @@ public class Certifications extends Controller {
           + "mail che serve per la ricerca.");
     }
 
-    rules.checkIfPermitted(person.get().getOffice());
+    Office office = person.get().getOffice(new LocalDate(year, month, 1)).get();
+    rules.checkIfPermitted(office);
+    Optional<PersonsOffices> personOffice = personOfficeDao
+        .affiliation(person.get(), office, year, month);
+    LocalDate beginMonth = new LocalDate(year, month, 1);
+    LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+    Range<LocalDate> affiliationRange = personOfficeManager
+        .monthlyAffiliation(personOffice.get(), beginMonth, endMonth);
+    Map<String, Certification> map = monthData
+        .getCertification(person.get(), year, month, affiliationRange);
 
-    Map<String, Certification> map = monthData.getCertification(person.get(), year, month);
     CertificationDto dto = generateCertDto(map, year, month, person.get());
 
     val wrapperPerson = wrapperFactory.create(person.get());
@@ -199,8 +231,9 @@ public class Certifications extends Controller {
     }
     Optional<Office> office = officeDao.byCodeId(sedeId);
     if (!office.isPresent()) {
-      JsonResponse.notFound(
-          String.format("Ufficio con sedeId = %s non trovato", sedeId));
+
+      JsonResponse.notFound(String.format("Ufficio con sedeId = %s non trovato", sedeId));
+
     }
     rules.checkIfPermitted(office.get()); 
     Set<Office> offices = Sets.newHashSet();
@@ -210,14 +243,16 @@ public class Certifications extends Controller {
     List<CertificationDto> list = Lists.newArrayList();
     List<Person> personList = personDao
         .listFetched(Optional.<String>absent(), offices, false, start, end, true).list();
-    val personCertificationsMap = monthData.getCertifications(personList, year, month);
 
-    val people = personCertificationsMap.keySet().stream()
-        .sorted((p1, p2) -> p1.getFullname().compareTo(p2.getFullname()))
-        .collect(Collectors.toList());
-    for (Person person : people) {
-      log.debug("analizzo la situazione mensile di {}...", person.getFullname());
-      Map<String, Certification> map = personCertificationsMap.get(person);
+    Optional<PersonsOffices> personOffice = Optional.absent();
+    for (Person person : personList) {
+      personOffice = personOfficeDao
+          .affiliation(person, office.get(), year, month);
+      Range<LocalDate> affiliationRange = personOfficeManager
+          .monthlyAffiliation(personOffice.get(), start, end);
+      Map<String, Certification> map = monthData
+          .getCertification(person, year, month, affiliationRange);
+
       CertificationDto dto = generateCertDto(map, year, month, person);
       val wrapperPerson = wrapperFactory.create(person);
       List<IWrapperContractMonthRecap> contractMonthRecaps = 

@@ -46,6 +46,7 @@ import manager.BadgeManager;
 import manager.ContractManager;
 import manager.OfficeManager;
 import manager.PeriodManager;
+import manager.PersonsOfficesManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
 import manager.sync.SynchronizationManager;
@@ -111,6 +112,8 @@ public class Synchronizations extends Controller {
   static UsersRolesOfficesDao usersRolesOfficesDao;
   @Inject
   static SynchronizationManager synchronizationManager;
+  @Inject
+  static PersonsOfficesManager personsOfficesManager;
   
   /**
    * Gli istituti perseo.
@@ -432,7 +435,8 @@ public class Synchronizations extends Controller {
       flash.success("Operazione effettuata correttamente");
     }
 
-    oldPeople(person.getOffice().id);
+    oldPeople(person.getCurrentOffice().get().id);
+
   }
 
   // TODO: spostare nell'updater?
@@ -535,9 +539,12 @@ public class Synchronizations extends Controller {
         people(null);
       }
 
-      personInPerseo.get().setOffice(office.get());
-      personInPerseo.get().setBeginDate(LocalDate.now().withDayOfMonth(1)
-          .withMonthOfYear(1).minusDays(1));
+
+      personsOfficesManager
+      .addPersonInOffice(personInPerseo.get(), office.get(), LocalDate.now(), Optional.absent());
+      //personInPerseo.get().office = office.get();
+      personInPerseo.get().setBeginDate(LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1));
+
 
       validation.valid(personInPerseo.get());
       if (Validation.hasErrors()) {
@@ -598,9 +605,12 @@ public class Synchronizations extends Controller {
             perseoPerson.getQualification(), perseoPerson.getPerseoId());
 
         // join dell'office (in automatico ancora non c'è...)
-        perseoPerson.setOffice(office);
-        perseoPerson.setBeginDate(LocalDate.now().withDayOfMonth(1)
-            .withMonthOfYear(1).minusDays(1));
+
+        //perseoPerson.office = office;
+        personsOfficesManager
+        .addPersonInOffice(perseoPerson, office, LocalDate.now(), Optional.absent());
+        perseoPerson.setBeginDate(LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1));
+
         validation.valid(perseoPerson);
         if (Validation.hasErrors()) {
           // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
@@ -704,7 +714,8 @@ public class Synchronizations extends Controller {
       flash.success("Operazione effettuata correttamente");
     }
 
-    oldActiveContracts(contract.getPerson().getOffice().id);
+    oldActiveContracts(contract.getPerson().getCurrentOffice().get().id);
+
   }
 
   /**
@@ -799,7 +810,8 @@ public class Synchronizations extends Controller {
       flash.error(syncResult.toString());
     }
 
-    people(person.getOffice().id);
+    people(person.getCurrentOffice().get().id);
+
   }
 
   /**
@@ -877,8 +889,8 @@ public class Synchronizations extends Controller {
 
       office.setPerseoId(null);
       office.save();
-      for (Person person : office.getPersons()) {
 
+      for (Person person : personsOfficesManager.affiliatePeople(office)) {
         person.setPerseoId(null);
         person.save();
         for (Contract contract : person.getContracts()) {
@@ -903,7 +915,8 @@ public class Synchronizations extends Controller {
     final Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
 
-    final List<Person> people = office.getPersons();
+    final List<Person> people = personsOfficesManager.affiliatePeople(office);
+
     render(office, people);
   }
 
@@ -944,7 +957,8 @@ public class Synchronizations extends Controller {
     final Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
 
-    final List<Person> people = office.getPersons();
+    final List<Person> people = personsOfficesManager.affiliatePeople(office);
+
     render(office, people);
   }
 
@@ -987,7 +1001,7 @@ public class Synchronizations extends Controller {
       }
     });
     flash.success("Sincronizzazione campo Eppn Terminata con Successo", people.size(),
-        office.getPersons().size());
+        personsOfficesManager.affiliatePeople(office).size());
 
     eppn(office.id);
   }
@@ -1029,6 +1043,8 @@ public class Synchronizations extends Controller {
     } else {
       flash.error("%s: %s", person.getFullname(), result.toString());
     }
-    people(person.getOffice().id);    
+
+    people(person.getCurrentOffice().get().id);    
+
   }
 }

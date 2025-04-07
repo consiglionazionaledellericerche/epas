@@ -87,7 +87,10 @@ public class PersonDays extends Controller {
     if (date == null) {
       JsonResponse.badRequest("Il parametro date è obbligatorio");
     }
-    rules.checkIfPermitted(person.getOffice());
+
+    org.joda.time.LocalDate localDate = new org.joda.time.LocalDate(date.getYear(), 
+        date.getMonthValue(), date.getDayOfMonth());
+    rules.checkIfPermitted(person.getOffice(localDate).get());
 
     PersonDay pd = 
         personDayDao.getPersonDay(person, JodaConverters.javaToJodaLocalDate(date)).orNull();
@@ -192,7 +195,10 @@ public class PersonDays extends Controller {
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono tutti obbligatori");
     }
-    rules.checkIfPermitted(person.getOffice());
+
+    org.joda.time.LocalDate localDate = new org.joda.time.LocalDate(year, month, 1);
+    rules.checkIfPermitted(person.getOffice(localDate).get());
+
     val personDays = personDayDao.getPersonDayInMonth(person, new YearMonth(year, month));
     val monthRecap = 
         PersonMonthRecapDto.builder().year(year).month(month)
@@ -217,7 +223,10 @@ public class PersonDays extends Controller {
     if (year == null || month == null) {
       JsonResponse.badRequest("I parametri year e month sono tutti obbligatori");
     }
-    rules.checkIfPermitted(person.getOffice());
+
+    org.joda.time.LocalDate localDate = new org.joda.time.LocalDate(year, month, 1);
+    rules.checkIfPermitted(person.getOffice(localDate).get());
+
     val gson = gsonBuilder.create();
     val yearMonth = new YearMonth(year, month);
     val personDays = personDayDao.getOffSitePersonDaysByPersonInPeriod(
@@ -280,7 +289,7 @@ public class PersonDays extends Controller {
     if (date == null || mealTicketDecision == null) {
       JsonResponse.badRequest("Il parametro date e mealTicketDecision sono obbligatori");
     }
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     PersonDay pd = 
         personDayDao.getPersonDay(person, JodaConverters.javaToJodaLocalDate(date)).orNull();

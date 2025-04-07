@@ -52,7 +52,8 @@ public class CancellazioneRigaCompetenza {
    * Constructor.
    */
   public CancellazioneRigaCompetenza(Certification certification) {
-    codiceSede = Integer.parseInt(certification.getPerson().getOffice().getCodeId());
+
+    codiceSede = Integer.parseInt(certification.getPerson().getCurrentOffice().get().getCodeId());
     anno = certification.getYear();
     mese = certification.getMonth();
 

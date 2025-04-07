@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.ContractManager;
 import manager.OfficeManager;
+import manager.PersonsOfficesManager;
 import manager.RegistryNotificationManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
@@ -61,6 +62,7 @@ public class SynchronizationManager {
   private OfficeManager officeManager;
   private RegistryNotificationManager registryNotificationManager;
   private ConfigurationManager configurationManager;
+  private PersonsOfficesManager personsOfficesManager;
 
   /**
    * Default constructor, useful for injection.  
@@ -70,7 +72,8 @@ public class SynchronizationManager {
       ContractPerseoConsumer contractPerseoConsumer,
       PersonDao personDao, UserManager userManager, 
       ContractManager contractManager, RoleDao roleDao,
-      OfficeManager officeManager, RegistryNotificationManager registryNotificationManager) {
+      OfficeManager officeManager, RegistryNotificationManager registryNotificationManager,
+      PersonsOfficesManager personsOfficesManager) {
     this.peoplePerseoConsumer = peoplePerseoConsumer;
     this.contractPerseoConsumer = contractPerseoConsumer;
     this.personDao = personDao;
@@ -79,6 +82,7 @@ public class SynchronizationManager {
     this.roleDao = roleDao;
     this.officeManager = officeManager;
     this.registryNotificationManager = registryNotificationManager;
+    this.personsOfficesManager = personsOfficesManager;
   }
 
   /**
@@ -95,7 +99,7 @@ public class SynchronizationManager {
       result.setFailed();
       result.add(
           String.format("Impossibile sincronizzare l'ufficio %s perché non ha un id anagrafica "
-          + "esterno impostato.", office.getLabel()));
+              + "esterno impostato.", office.getLabel()));
       return result;
     }
     val perseoPeople = peoplePerseoConsumer
@@ -114,7 +118,7 @@ public class SynchronizationManager {
 
     val epasPeopleByNumber = epasPeople.stream().filter(p -> p.getNumber() != null)
         .collect(Collectors.toMap(p -> p.getNumber(), p -> p));
-    
+
     for (Person perseoPerson : perseoPeople.values()) {
       //Se il perseoId e la matricola non sono presenti per l'ufficio corrente 
       //allora viene creata o trasferita la persona
@@ -154,26 +158,38 @@ public class SynchronizationManager {
       epasPerson = personDao.getPersonByNumber(perseoPerson.getNumber());
     }
 
-    if (epasPerson != null) {
+    if (epasPerson != null && epasPerson.getCurrentOffice().isPresent()) {
       log.info("La persona {} (matricola = {}) è presente in ePAS ed associata alla sede {}."
+
           + "Effettuo il cambio di sede verso {}.",
           epasPerson.getFullname(), epasPerson.getNumber(), 
-          epasPerson.getOffice().getName(), office);
 
-      Office oldOffice = epasPerson.getOffice(); 
-      epasPerson.setOffice(office);
-      epasPerson.save();
+          epasPerson.getCurrentOffice().get().getName());
+
+          Office oldOffice = epasPerson.getCurrentOffice().get(); 
+      //Salvo la nuova afferenza alla sede modificando i periodi
+      personsOfficesManager
+      .addPersonInOffice(epasPerson, office, LocalDate.now(), Optional.absent());
+      //      epasPerson.getCurrentOffice().get() = office;
+      //    epasPerson.save();
+
 
       registryNotificationManager.notifyPersonHasChangedOffice(epasPerson, oldOffice);
       return syncResult.add(
           String.format(
-              "Effettuato il campo di sede per %s. Vecchia sede %s, nuova sede %s.",
-              epasPerson.fullName(), oldOffice.getName(), epasPerson.getOffice().getName()));
+
+          "Effettuato il cambio di sede per %s. Vecchia sede %s, nuova sede %s.",
+          epasPerson.fullName(), oldOffice.getName(), epasPerson.getCurrentOffice().get().getName()));
+
     }
 
     // join dell'office (in automatico ancora non c'è...)
-    perseoPerson.setOffice(office);
+
+        //perseoPerson.office = office;
+        personsOfficesManager
+        .addPersonInOffice(perseoPerson, office, LocalDate.now(), Optional.absent());
     perseoPerson.setBeginDate(LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1));
+
     val validation = Validation.current.get(); 
     validation.valid(perseoPerson);
     if (Validation.hasErrors()) {
@@ -206,15 +222,14 @@ public class SynchronizationManager {
 
       log.info("Creata la nuova persona {}, matricola = {}, ufficio = {}",
           newPerson.get().getFullname(), newPerson.get().getNumber(), 
-          newPerson.get().getOffice().getName());
-
+          newPerson.get().getCurrentOffice().get().getName());
       syncResult.add(importContracts(newPerson.get()));
 
       registryNotificationManager.notifyNewPerson(newPerson.get());
       return syncResult.add(
           String.format("Creata la nuova persona %s, matricola = %s, ufficio = %s",
               newPerson.get().getFullname(), newPerson.get().getNumber(), 
-              newPerson.get().getOffice().getName()));
+              newPerson.get().getCurrentOffice().get().getName()));
     }
 
   }
@@ -229,7 +244,8 @@ public class SynchronizationManager {
       person.save();
 
       Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
-      officeManager.setUro(person.getUser(), person.getOffice(), employee);
+      officeManager.setUro(person.getUser(), person.getCurrentOffice().get(), employee);
+
       person.save();
       configurationManager.updateConfigurations(person);
     } catch (Exception ex) {
@@ -388,7 +404,7 @@ public class SynchronizationManager {
       // Salvare il contratto.
       if (!contractManager.properContractCreate(registryContract, Optional.absent(), false)) {
         syncResult.setFailed()
-            .add(String.format(
+        .add(String.format(
             "Il contratto di %s non può essere importato a causa di errori",
             person.getFullname()));
       }
@@ -403,7 +419,7 @@ public class SynchronizationManager {
       log.warn("Problemi nell'importazione del contratto di {}. "
           + "Contratto non presente in anagrafica.", person.getFullname());    
       syncResult.setFailed()
-          .add(String.format("Contratto di {} non presente in anagrafica", person.getFullname()));
+      .add(String.format("Contratto di {} non presente in anagrafica", person.getFullname()));
 
     }
     return syncResult;
@@ -455,7 +471,7 @@ public class SynchronizationManager {
             contractInRegistry, person.getFullname());
         if (!contractManager.properContractCreate(contractInRegistry, Optional.absent(), false)) { 
           syncResult.setFailed()
-              .add(String.format("Il contratto di %s non può essere importato a causa di errori",
+          .add(String.format("Il contratto di %s non può essere importato a causa di errori",
               person.getFullname()));
         } else {
           log.info("Creato in ePAS un nuovo contratto per {}. {}", 
@@ -488,7 +504,7 @@ public class SynchronizationManager {
             (c.getPerseoId() != null && c.getPerseoId().equals(contract.getPerseoId())) 
             || 
             (c.getBeginDate() != null && c.getBeginDate().equals(contract.getBeginDate())
-            ))
+                ))
         .findAny();
     if (matchingContract.isPresent()) {
       matchingContracts.setRegistryContract(contract);
@@ -543,7 +559,7 @@ public class SynchronizationManager {
           String.format("Aggiornato l'identificato anagrafico del contratto di %s a %s",
               epasContract.getPerson().getFullname(), epasContract.getPerseoId()));
     }
-    
+
     if (syncResult.getMessages().size() > 0) {
       if (contractManager.properContractUpdate(epasContract, null, false)) {
         log.info("Aggiornato il contratto di {}. {}", 
@@ -551,14 +567,14 @@ public class SynchronizationManager {
         epasContract.save();     
       } else {
         syncResult.setFailed()
-            .add(String.format("Il contratto di %s non può essere aggiornato a causa di errori.",
+        .add(String.format("Il contratto di %s non può essere aggiornato a causa di errori.",
             epasContract.getPerson().getFullname()));        
       }      
     }
-    
+
     return syncResult;
   }
-  
+
   private boolean matching(LocalDate firstDate, LocalDate secondDate) {
     return (firstDate != null && firstDate.equals(secondDate)) 
         || (firstDate == null && secondDate == null);

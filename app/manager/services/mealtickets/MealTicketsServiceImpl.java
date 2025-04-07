@@ -134,7 +134,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
         .getContractDatabaseIntervalForMealTicket();
 
     LocalDate officeStartDate = (LocalDate) configurationManager
-        .configValue(contract.getPerson().getOffice(), EpasParam.DATE_START_MEAL_TICKET);
+        .configValue(contract.getPerson().getCurrentOffice().get(), EpasParam.DATE_START_MEAL_TICKET);
 
     if (officeStartDate.isBefore(intervalForMealTicket.getBegin())) {
       return Optional.of(intervalForMealTicket);
@@ -256,7 +256,7 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     int buoniDaConteggiare = 0;
 
     final java.util.Optional<Configuration> conf = 
-        contract.getPerson().getOffice().getConfigurations().stream()
+        contract.getPerson().getCurrentOffice().get().getConfigurations().stream()
         .filter(configuration -> 
         configuration.getEpasParam() == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
 
@@ -276,13 +276,12 @@ public class MealTicketsServiceImpl implements IMealTicketsService {
     if (monthRecap.getRemainingMealTickets() < 0) {
       //devo guardare quale sia il default e contare quanti sono i buoni senza copertura
       buoniDaConteggiare = buoniUsati;
-      composition.isBlockMealTicketTypeKnown = false;      
-      if (conf.isPresent()) {
-        try { 
-          blockType = BlockType.valueOf(conf.get().getFieldValue()); 
-        } catch (Exception e) {
-          blockType = BlockType.electronic;
-        }
+
+      composition.isBlockMealTicketTypeKnown = false;
+      
+      if (conf.isPresent()) {        
+        blockType = blockType.valueOf(conf.get().getFieldValue());
+
         switch (blockType) {
           case electronic:
             buoniElettronici = buoniDaConteggiare;

@@ -69,7 +69,7 @@
 			 #{f.date 'cmts.beginDate', value:cmts.beginDate?.format(), required:true /}
 			 #{f.date 'cmts.endDate', value:cmts.endDate?.format() /}
 			 #{f.selectModel 'cmts.timeSlot', 	
-			      items:templateUtility.getEnabledTimeSlotsForOffice(cmts.contract.person.office), required:true /}
+			      items:templateUtility.getEnabledTimeSlotsForOffice(cmts.contract.person.getCurrentOffice().get()), required:true /}
 			 #{b.buttons center:true}
 			   #{b.submit 'Applica'/}
 			 #{/b.buttons}

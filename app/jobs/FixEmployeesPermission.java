@@ -62,8 +62,9 @@ public class FixEmployeesPermission {
 
       for (UsersRolesOffices uro : p.getUser().getUsersRolesOffices()) {
         //Rimuovo ruolo role se non appartiene più all'office
+
         if (uro.getRole().getName().equals(employeeRole.getName())) {
-          if (uro.getOffice().getCodeId().equals(p.getOffice().getCodeId())) {
+          if (uro.getOffice().getCodeId().equals(p.getCurrentOffice().get().getCodeId())) {
             exist = true;
           } else {
             uro.delete();
@@ -72,7 +73,7 @@ public class FixEmployeesPermission {
       }
 
       if (!exist) {
-        officeManager.setUro(p.getUser(), p.getOffice(), employeeRole);
+        officeManager.setUro(p.getUser(), p.getCurrentOffice().get(), employeeRole);
       }
     }
   }

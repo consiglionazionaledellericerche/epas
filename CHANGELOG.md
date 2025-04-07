@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Aggiunto il campo ContractType nel Contract che specifica se un dipendente è strutturato, interinale o non strutturato.
   - Aggiunto controllo in fase di modifica della configurazione di una persona che sospende l'operazione se la data di attivazione del
     dipendente e la data di inizio del parametro di configurazione sono diverse.
+  - Aggiunta la periodicizzazione dell'associazione tra persone ed uffici
   
 ### Changed
   - Modificata interfaccia per specificare quale debba essere la discriminante se far finire un dipendente nella lista del personale che

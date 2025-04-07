@@ -85,7 +85,15 @@
 	      	  <tbody>
 	      	  #{list items:compDto.compList, as:'competence'}
 	      		<tr>
-				  <td>${competence.person.fullname}</td>
+				  <td>
+				  	${competence.person.fullname}
+				  		#{if !competence.person.getCurrentOffice().get().equals(office)}
+				  			<a href="#" popover-hover
+                  				data-content="&{'competence.personOffice'}">
+                  				<i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
+               				</a>				  			
+				  		#{/if}				  		
+				  </td>
 				  <td>${competence.competenceCode.code}</td>
 				  <td>
 					#{if competence.id == null}

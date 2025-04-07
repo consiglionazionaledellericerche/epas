@@ -555,7 +555,7 @@ public class ChartsManager {
         LocalDate tempDate = beginDate;
         while (!tempDate.isAfter(endDate)) {
           PersonStampingRecap psDto = stampingsRecapFactory.create(person, tempDate.getYear(),
-              tempDate.getMonthOfYear(), false);
+              tempDate.getMonthOfYear(), false, Optional.of(office));
           file = createFileCsvToExport(psDto, onlyMission);
           // preparo lo stream da inviare al chiamante...
           FileInputStream in = new FileInputStream(file);
@@ -589,7 +589,7 @@ public class ChartsManager {
         LocalDate tempDate = beginDate;
         while (!tempDate.isAfter(endDate)) {
           PersonStampingRecap psDto = stampingsRecapFactory.create(person, tempDate.getYear(),
-              tempDate.getMonthOfYear(), false);
+              tempDate.getMonthOfYear(), false, Optional.of(office));
           // aggiorno il file aggiungendo un nuovo foglio per ogni persona...
           file = createFileXlsToExport(psDto, file, wb, onlyMission);
           tempDate = tempDate.plusMonths(1);

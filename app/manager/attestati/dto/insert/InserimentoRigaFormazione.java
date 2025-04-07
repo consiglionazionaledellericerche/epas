@@ -29,7 +29,8 @@ public class InserimentoRigaFormazione extends RichiestaInserimentoAttestati {
    * Constructor.
    */
   public InserimentoRigaFormazione(Certification certification) {
-    codiceSede = certification.getPerson().getOffice().getCodeId();
+
+    codiceSede = certification.getPerson().getCurrentOffice().get().getCodeId();
     anno = certification.getYear();
     mese = certification.getMonth();
 

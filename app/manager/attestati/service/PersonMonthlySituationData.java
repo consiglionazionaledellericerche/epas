@@ -20,6 +20,7 @@ package manager.attestati.service;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Range;
 import dao.AbsenceDao;
 import dao.CompetenceDao;
 import dao.ContractDao;
@@ -27,6 +28,7 @@ import dao.ContractMonthRecapDao;
 import dao.MealTicketDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
+import dao.PersonsOfficesDao;
 import it.cnr.iit.epas.DateInterval;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +39,9 @@ import lombok.val;
 import manager.PersonDayManager;
 import manager.configurations.EpasParam;
 import manager.services.mealtickets.BlockMealTicket;
+import manager.recaps.personstamping.PersonStampingDayRecap;
+import manager.recaps.personstamping.PersonStampingRecap;
+import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.mealtickets.IMealTicketsService;
 import manager.services.mealtickets.MealTicketRecap;
 import manager.services.mealtickets.MealTicketStaticUtility;
@@ -49,6 +54,7 @@ import models.ContractMonthRecap;
 import models.MealTicket;
 import models.Person;
 import models.PersonMonthRecap;
+import models.PersonsOffices;
 import models.absences.Absence;
 import models.dto.MealTicketComposition;
 import models.enumerate.BlockType;
@@ -68,8 +74,12 @@ public class PersonMonthlySituationData {
   private final IMealTicketsService mealTicketService;
   private final ContractDao contractDao;
   private final ContractMonthRecapDao contractMonthRecapDao;
+
   private final MealTicketDao mealTicketDao;
-  
+  private final PersonStampingRecapFactory stampingsRecapFactory;
+  private final PersonsOfficesDao personOfficeDao;
+
+
   /**
    * Injector.
    *
@@ -86,14 +96,22 @@ public class PersonMonthlySituationData {
       PersonMonthRecapDao personMonthRecapDao, AbsenceDao absenceDao,
       CompetenceDao competenceDao, PersonDayDao personDayDao, 
       IMealTicketsService mealTicketService, ContractDao contractDao,
-      ContractMonthRecapDao contractMonthRecapDao, MealTicketDao mealTicketDao) {
+      ContractMonthRecapDao contractMonthRecapDao, MealTicketDao mealTicketDao, 
+      PersonStampingRecapFactory stampingsRecapFactory,
+      PersonsOfficesDao personOfficeDao) {
+
     this.personMonthRecapDao = personMonthRecapDao;
     this.absenceDao = absenceDao;
     this.competenceDao = competenceDao;
     this.mealTicketService = mealTicketService;
     this.contractDao = contractDao;
     this.contractMonthRecapDao = contractMonthRecapDao;
+
     this.mealTicketDao = mealTicketDao;
+
+    this.stampingsRecapFactory = stampingsRecapFactory;
+    this.personOfficeDao = personOfficeDao;
+
   }
 
   /**
@@ -105,13 +123,15 @@ public class PersonMonthlySituationData {
    * @return la mappa contenente le info su assenze, competenze, buoni pasto e ore di formazione 
    *     del dipendente person nell'anno year e nel mese month.
    */
-  public Map<String, Certification> getCertification(Person person, int year, int month) {
-        
+  public Map<String, Certification> getCertification(Person person, int year, int month, 
+      Range<LocalDate> affiliationRange) {
+
     Map<String, Certification> actualCertifications = Maps.newHashMap();
-    actualCertifications = trainingHours(person, year, month, actualCertifications);
-    actualCertifications = absences(person, year, month, actualCertifications);
+    actualCertifications = trainingHours(person, year, month, 
+        actualCertifications, affiliationRange);
+    actualCertifications = absences(person, year, month, actualCertifications, affiliationRange);
     actualCertifications = competences(person, year, month, actualCertifications);
-    actualCertifications = mealTicket(person, year, month, actualCertifications);
+    actualCertifications = mealTicket(person, year, month, actualCertifications, affiliationRange);
 
     return actualCertifications;
   }
@@ -158,14 +178,30 @@ public class PersonMonthlySituationData {
    * @return certificazioni (sotto forma di mappa)
    */
   private Map<String, Certification> trainingHours(Person person, int year, int month,
-      Map<String, Certification> certifications) {
+      Map<String, Certification> certifications, Range<LocalDate> affiliationRange) {
+
     List<PersonMonthRecap> trainingHoursList = personMonthRecapDao
         .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
             Optional.fromNullable(month), Optional.absent());
     for (PersonMonthRecap personMonthRecap : trainingHoursList) {
-      // Nuova certificazione
-      Certification certification = certificationByPersonMonthRecap(personMonthRecap);
-      certifications.put(certification.aMapKey(), certification);
+
+
+      if (affiliationRange.contains(personMonthRecap.getFromDate()) 
+          && affiliationRange.contains(personMonthRecap.getToDate())) {
+        // Nuova certificazione
+        Certification certification = new Certification();
+        certification.setPerson(person);
+        certification.setYear(year);
+        certification.setMonth(month);
+        certification.setCertificationType(CertificationType.FORMATION);
+        certification.setContent(Certification
+            .serializeTrainingHours(personMonthRecap.getFromDate().getDayOfMonth(),
+                personMonthRecap.getToDate().getDayOfMonth(), personMonthRecap.getTrainingHours()));
+
+        certifications.put(certification.aMapKey(), certification);
+      }
+
+
     }
     return certifications;
   }
@@ -222,10 +258,11 @@ public class PersonMonthlySituationData {
    * @return certificazioni (sotto forma di mappa)
    */
   private Map<String, Certification> absences(Person person, int year, int month,
-      Map<String, Certification> certifications) {
+      Map<String, Certification> certifications, Range<LocalDate> affiliationRange) {
 
     List<Absence> absences = absenceDao
-        .getAbsencesNotInternalUseInMonth(person, year, month);
+        .getAbsenceWithNotInternalUseInMonth(person, affiliationRange.lowerEndpoint(), 
+            affiliationRange.upperEndpoint());
     if (absences.isEmpty()) {
       return certifications;
     }
@@ -360,41 +397,82 @@ public class PersonMonthlySituationData {
    * @return certification (sotto forma di mappa)
    */
   private Map<String, Certification> mealTicket(Person person, int year, int month,
-      Map<String, Certification> certifications) {
+      Map<String, Certification> certifications, Range<LocalDate> affiliationRange) {
 
     Certification certification = new Certification();
+
     certification.setPerson(person);
     certification.setYear(year);
     certification.setMonth(month);
     certification.setCertificationType(CertificationType.MEAL);
     //Inserire qui il conteggio dei buoni pasto
+
     LocalDate begin = new LocalDate(year, month, 1);
     LocalDate end = begin.dayOfMonth().withMaximumValue();
-    List<Contract> contractList = contractDao
-        .getActiveContractsInPeriod(person, begin, Optional.of(end));
-    YearMonth yearMonth = new YearMonth(year, month);
-    int buoniCartacei = 0;
-    int buoniElettronici = 0;
-    for (Contract contract : contractList) {
-      ContractMonthRecap monthRecap = contractMonthRecapDao
-          .getContractMonthRecap(contract, yearMonth);
-      if (monthRecap == null) {
-        log.info("ContractMonthRecap non presente nel mese {}/{} per {} ( id = {} )",
-            month, year, person.getFullname(), person.id);
-      } else {
-        MealTicketRecap recap = mealTicketService.create(contract).orNull();
-        MealTicketComposition composition = mealTicketService
-            .whichBlock(recap, monthRecap, contract);
-        buoniCartacei = buoniCartacei + composition.paperyMealTicket;
-        buoniElettronici = buoniElettronici + composition.electronicMealTicket;
-      }
-    }
-    certification.setContent(
-        String.valueOf(buoniCartacei) + ";" + String.valueOf(buoniElettronici));
-    log.trace("certification = {}, certification.key = {}", 
-        certification, certification.aMapKey());
 
-    certifications.put(certification.aMapKey(), certification);
+    int mealTickets = 0;
+    //Caso di più di un'afferenza nell'anno/mese
+    if (Range.closed(begin, end).encloses(affiliationRange) 
+        && (!begin.isEqual(affiliationRange.lowerEndpoint()) 
+            || !end.isEqual(affiliationRange.upperEndpoint()))) {
+      Optional<PersonsOffices> po = personOfficeDao.affiliationByPeriod(person, 
+          affiliationRange.lowerEndpoint(), affiliationRange.upperEndpoint());
+      PersonStampingRecap psDto = 
+          stampingsRecapFactory.create(person, year, month, true, 
+              Optional.absent());  
+      for (PersonStampingDayRecap recap : psDto.daysRecap) {
+        if (affiliationRange.contains(recap.personDay.getDate()) && recap.personDay.isTicketAvailable()) {
+          mealTickets ++;
+        }
+
+      }
+      BlockType blockType = null;
+      final java.util.Optional<Configuration> conf = 
+          po.get().office.getConfigurations().stream()
+          .filter(configuration -> 
+          configuration.getEpasParam() == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
+      if (conf.isPresent()) {
+        blockType = blockType.valueOf(conf.get().getFieldValue());
+        switch (blockType) {
+          case electronic:
+            certification.setContent(String.valueOf(0) + ";" + String.valueOf(mealTickets));           
+            break;
+          case papery:
+            certification.setContent(String.valueOf(mealTickets) + ";" + String.valueOf(0));
+            break;
+          default:
+            break;
+        }        
+        certifications.put(certification.aMapKey(), certification);
+      }
+
+    } else {
+      List<Contract> contractList = contractDao
+          .getActiveContractsInPeriod(person, begin, Optional.of(end));
+      YearMonth yearMonth = new YearMonth(year, month);
+      int buoniCartacei = 0;
+      int buoniElettronici = 0;
+      for (Contract contract : contractList) {
+        ContractMonthRecap monthRecap = contractMonthRecapDao
+            .getContractMonthRecap(contract, yearMonth);
+        if (monthRecap == null) {
+          log.info("ContractMonthRecap non presente nel mese {}/{} per {} ( id = {} )",
+              month, year, person.getFullname(), person.id);
+        } else {
+          MealTicketRecap recap = mealTicketService.create(contract).orNull();
+          MealTicketComposition composition = mealTicketService
+              .whichBlock(recap, monthRecap, contract);
+          buoniCartacei = buoniCartacei + composition.paperyMealTicket;
+          buoniElettronici = buoniElettronici + composition.electronicMealTicket;
+        }
+      }
+      certification.setContent(
+          String.valueOf(buoniCartacei) + ";" + String.valueOf(buoniElettronici));
+      log.trace("certification = {}, certification.key = {}", 
+          certification, certification.aMapKey());
+
+      certifications.put(certification.aMapKey(), certification);
+    }
 
     return certifications;
   }
@@ -423,7 +501,7 @@ public class PersonMonthlySituationData {
       certification.setMonth(month);
       certification.setCertificationType(CertificationType.MEAL);
       final java.util.Optional<Configuration> conf =
-          person.getOffice().getConfigurations().stream()
+          person.getOffice(new LocalDate(year, month, 1)).get().getConfigurations().stream()
           .filter(configuration -> 
           configuration.getEpasParam() == EpasParam.MEAL_TICKET_BLOCK_TYPE).findFirst();
       int buoniCartacei = 0;
@@ -455,3 +533,5 @@ public class PersonMonthlySituationData {
   }
 
 }
+
+

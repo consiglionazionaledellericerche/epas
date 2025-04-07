@@ -83,6 +83,7 @@ public class ReportMailer extends Mailer {
 
     List<String> dests = Lists.newArrayList();
 
+
     boolean toPersonnelAdmin = false;
 
     boolean alwaysToPersonnelAdmins = 
@@ -90,11 +91,12 @@ public class ReportMailer extends Mailer {
 
     if (user.isPresent() && (!userDao.hasAdminRoles(user.get()) || alwaysToPersonnelAdmins)) {
       if (user.get().getPerson() != null) {
-        dests = userDao.getUsersWithRoles(user.get().getPerson().getOffice(), 
+        dests = userDao.getUsersWithRoles(user.get().getPerson().getCurrentOffice().get(), 
             Role.PERSONNEL_ADMIN).stream()
             .filter(u -> u.getPerson() != null).map(u -> u.getPerson().getEmail())
             .collect(Collectors.toList());
         toPersonnelAdmin = true;
+
       }
     } else {
       dests = COMMAS.splitToList(Play.configuration

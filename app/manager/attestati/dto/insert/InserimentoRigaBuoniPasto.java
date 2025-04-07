@@ -28,7 +28,7 @@ public class InserimentoRigaBuoniPasto extends RichiestaInserimentoAttestati {
    * Constructor.
    */
   public InserimentoRigaBuoniPasto(Certification certification) {
-    codiceSede = certification.getPerson().getOffice().getCodeId();
+    codiceSede = certification.getPerson().getCurrentOffice().get().getCodeId();
     anno = certification.getYear();
     mese = certification.getMonth();
 

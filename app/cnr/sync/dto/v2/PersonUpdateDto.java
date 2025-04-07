@@ -17,10 +17,14 @@
 
 package cnr.sync.dto.v2;
 
+import com.google.common.base.Optional;
+import javax.inject.Inject;
 import lombok.Builder;
+import manager.PersonsOfficesManager;
 import models.Office;
 import models.Person;
 import models.Qualification;
+import org.joda.time.LocalDate;
 
 /**
  * Dati per l'aggiornamento di una persona via REST.
@@ -34,6 +38,15 @@ public class PersonUpdateDto extends PersonCreateDto {
   /**
    * Aggiorna i dati dell'oggetto Person passato con quelli
    * presenti nell'instanza di questo DTO.
+   */
+    
+  @Inject
+  static PersonsOfficesManager personsOfficesManager;
+  
+  /**
+   * Aggiorna la persona.
+       
+   * @param person la persona da aggiornare
    */
   public void update(Person person) {
     person.setName(getName());
@@ -55,7 +68,10 @@ public class PersonUpdateDto extends PersonCreateDto {
               .findFirst().get()));        
     }
     if (getOfficeId() != null) {
-      person.setOffice(Office.findById(getOfficeId()));  
+
+      Office office = Office.findById(getOfficeId());  
+      personsOfficesManager.addPersonInOffice(person, office, LocalDate.now(), Optional.absent());
+
     }
 
   }

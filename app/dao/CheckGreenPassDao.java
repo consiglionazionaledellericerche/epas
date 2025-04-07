@@ -29,6 +29,7 @@ import models.Office;
 import models.Person;
 import models.query.QCheckGreenPass;
 import models.query.QPerson;
+import models.query.QPersonsOffices;
 import org.joda.time.LocalDate;
 
 
@@ -55,10 +56,12 @@ public class CheckGreenPassDao extends DaoBase {
   public List<CheckGreenPass> listByDate(LocalDate date, Office office) {
     final QCheckGreenPass checkGreenPass = QCheckGreenPass.checkGreenPass;
     final QPerson person = QPerson.person;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     final JPQLQuery<CheckGreenPass> query = getQueryFactory()
         .selectFrom(checkGreenPass).leftJoin(checkGreenPass.person, person)
+        .leftJoin(person.personsOffices, personsOffices)
         .where(checkGreenPass.checkDate.eq(date)
-            .and(person.office.eq(office)))
+            .and(personsOffices.office.eq(office)))
         .orderBy(person.surname.asc());
     
     return query.fetch();

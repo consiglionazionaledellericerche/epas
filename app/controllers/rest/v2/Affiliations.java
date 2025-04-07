@@ -104,7 +104,8 @@ public class Affiliations extends Controller {
       String fiscalCode, String number, boolean includeInactive) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     List<AffiliationShowDto> affiliations = Lists.newArrayList();
     if (!includeInactive) {
@@ -156,7 +157,7 @@ public class Affiliations extends Controller {
     //i diritti di gestione anagrafica sull'office indicato
     //nel DTO
     rules.checkIfPermitted(affiliation.getGroup().getOffice());
-    rules.checkIfPermitted(affiliation.getPerson().getOffice());
+    rules.checkIfPermitted(affiliation.getPerson().getCurrentOffice().get());
 
     affiliation.save();
 
@@ -179,7 +180,8 @@ public class Affiliations extends Controller {
     //i diritti di gestione anagrafica sull'office attuale 
     //della persona
     rules.checkIfPermitted(affiliation.getGroup().getOffice());
-    rules.checkIfPermitted(affiliation.getPerson().getOffice());
+
+    rules.checkIfPermitted(affiliation.getPerson().getCurrentOffice().get());
 
     val gson = gsonBuilder.create();
     val affiliationDto = gson.fromJson(body, AffiliationUpdateDto.class); 
@@ -194,7 +196,8 @@ public class Affiliations extends Controller {
     //i diritti di gestione anagrafica sull'office indicato 
     //nel DTO
     rules.checkIfPermitted(affiliation.getGroup().getOffice());
-    rules.checkIfPermitted(affiliation.getPerson().getOffice());
+
+    rules.checkIfPermitted(affiliation.getPerson().getCurrentOffice().get());
 
     if (!validation.valid(affiliation).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());

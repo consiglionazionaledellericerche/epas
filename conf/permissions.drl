@@ -113,9 +113,9 @@ when
   $uro: UsersRolesOffices(role.getName() == Role.EMPLOYEE)
   $p: Person(qualification != null && qualification.getQualification() > 3 
   		&& reperibility != null && !reperibility.isEmpty()) from currentOperator.person
-  $o: Office() from $p.getOffice()
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.getConfigurations()
-  $c: PermissionCheck(action in ("CompetenceRequests.enableReperibilityChange"), granted == false, target == null)
+  $c: PermissionCheck(action in ("CompetenceRequests.enabled", "CompetenceRequests.handleEnabled"), granted == false, target == null)
 then
   $c.grant();
 end
@@ -128,7 +128,7 @@ rule isInformationFlowsVisible
 when
   $uro: UsersRolesOffices(role.getName() == Role.EMPLOYEE)
   $p: Person(qualification != null) from currentOperator.getPerson()
-  $o: Office() from $p.getOffice()
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_INFORMATION_FLOWS, fieldValue == true) from $o.getConfigurations()
   $c: PermissionCheck(action in ("InformationRequests.enabled"), granted == false, target == null)
 then
@@ -156,7 +156,7 @@ rule isCompetenceHandleFlowsVisible
 when
   $p: Person(qualification != null && qualification.qualification <= 3 
   		&& reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_COMPETENCE_FLOWS, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action == "CompetenceRequests.handleEnabled", granted == false, target == null)
 then
@@ -175,7 +175,7 @@ when
   $uro: UsersRolesOffices()
   Role(name == Role.EMPLOYEE) from $uro.role
   $p: Person() from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ABSENCES_FOR_EMPLOYEE, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action in (
   		"Absences.absencesVisibleForEmployee"), granted == false, target == null)
@@ -201,7 +201,7 @@ rule isShiftSupervisor_generic
 when 
   
   $p: Person(shiftCategories != null && !shiftCategories.isEmpty()) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in ("Calendar.show",
                                  "Calendar.shiftPeople",
@@ -223,7 +223,7 @@ end
 rule shiftSupervisorCanManageShiftType
 when
   $p: Person(shiftCategories != null && !shiftCategories.isEmpty()) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $sc: ShiftCategories() from $p.shiftCategories
   $st: ShiftType() from $sc.shiftTypes
@@ -243,7 +243,7 @@ end
 rule canManageShiftMonth
 when
   $p: Person(shiftCategories != null && !shiftCategories.isEmpty()) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $sc: ShiftCategories() from $p.shiftCategories
   $st: ShiftType() from $sc.shiftTypes
@@ -260,7 +260,7 @@ end
 rule canEditShiftTypeMonth
 when
   $p: Person(shiftCategories != null && !shiftCategories.isEmpty()) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $sc: ShiftCategories() from $p.shiftCategories
   $st: ShiftType() from $sc.shiftTypes
@@ -282,7 +282,7 @@ end
 rule isShiftManager_generic
 when 
   $p: Person(categories != null && !categories.isEmpty()) from currentOperator.person	
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in ("Calendar.show",
                                  "Calendar.shiftPeople",
@@ -301,7 +301,7 @@ end
 rule shiftManagerCanManageShiftType
 when
   $p: Person(categories != null && !categories.isEmpty()) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $sc: ShiftCategories() from $p.categories
   $st: ShiftType() from $sc.shiftTypes
@@ -321,7 +321,7 @@ end
 rule shiftManagercanManageShiftMonth
 when
   $p: Person(categories != null && !categories.isEmpty()) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $sc: ShiftCategories() from $p.categories
   $st: ShiftType() from $sc.shiftTypes
@@ -344,7 +344,7 @@ rule isReperibilitySupervisor_generic
 when 
   
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in ("CompetenceRequests.enableReperibilityChange",
   								 "ReperibilityCalendar.show",
@@ -369,7 +369,7 @@ end
 rule reperibilitySupervisorCanManagePersonReperibilityType
 when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $c: PermissionCheck(action in ("CompetenceRequests.enableReperibilityChange",
@@ -392,7 +392,7 @@ end
 rule canManageReperibilityMonth
 when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $target: ReperibilityTypeMonth((!approved && personReperibilityType == $prt) || this == null)
@@ -408,7 +408,7 @@ end
 rule canEditReperibilityTypeMonth
 when
   $p: Person(reperibilityTypes != null && !reperibilityTypes.isEmpty()) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $target: ReperibilityTypeMonth(personReperibilityType == $prt)
@@ -431,7 +431,7 @@ end
 rule isReperibilityManager_generic
 when 
   $p: Person(reperibilities != null && !reperibilities.isEmpty()) from currentOperator.person	
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
                                  "ReperibilityCalendar.reperibilityPeople",
@@ -452,7 +452,7 @@ end
 rule reperibilityManagerCanManagePersonReperibilityType
 when
   $p: Person(reperibilities != null && !reperibilities.isEmpty()) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilities
   $c: PermissionCheck(action in ("ReperibilityCalendar.show",
@@ -473,7 +473,7 @@ end
 rule reperibilityManagercanManageReperibilityMonth
 when
   $p: Person(reperibilities != null && !reperibilities.isEmpty()) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $prt: PersonReperibilityType() from $p.reperibilities
   $target: ReperibilityTypeMonth((!approved && personReperibilityType == $prt) || this == null)
@@ -495,7 +495,7 @@ when
   $uro: UsersRolesOffices()
   Role(name == Role.EMPLOYEE) from $uro.role
   $p: Person (personShifts != null && personShifts.size() > 0) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in (
      	"Calendar.show",
@@ -509,7 +509,7 @@ end
 rule isPersonShift_shiftType
 when
 	$p: Person (personShifts!= null && personShifts.size() > 0) from currentOperator.person
-	$o: Office() from $p.office
+	$o: Office() from $p.getCurrentOffice().get()
   	Configuration(epasParam == EpasParam.ENABLE_CALENDARSHIFT, fieldValue == true) from $o.configurations	
 	$ps: PersonShift() from $p.personShifts
 	$psst: PersonShiftShiftType() from $ps.personShiftShiftTypes
@@ -532,7 +532,7 @@ when
   $uro: UsersRolesOffices()
   Role(name == Role.EMPLOYEE) from $uro.role
   $p: Person (reperibility != null) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
   $c: PermissionCheck(action in (
   		"CompetenceRequests.changeReperibility",
@@ -554,7 +554,7 @@ end
 rule isAvailable_personReperibilityType
 when
 	$p: Person (reperibility != null) from currentOperator.person
-	$o: Office() from $p.office
+	$o: Office() from $p.getCurrentOffice().get()
   	Configuration(epasParam == EpasParam.ENABLE_CALENDAR_REPERIBILITY, fieldValue == true) from $o.configurations	
 	$pr: PersonReperibility() from $p.reperibility
 	$prt: PersonReperibilityType() from $pr.personReperibilityType
@@ -3067,7 +3067,7 @@ rule Working_offsite
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- $o: Office() from $p.office
+ $o: Office() from $p.getCurrentOffice().get()
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
@@ -3092,7 +3092,7 @@ rule Working_offsite_with_convention
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- $o: Office() from $p.office
+ $o: Office() from $p.getCurrentOffice().get()
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_ABSENCE_WITH_CONVENTION, fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
@@ -3142,7 +3142,7 @@ rule Absences_person_medical_exam
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- $o: Office() from $p.office
+ $o: Office() from $p.getCurrentOffice().get()
  Configuration(epasParam == EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM && fieldValue == true) from $o.configurations
  $c: PermissionCheck(action in (
     "AbsenceGroups.insert",
@@ -3163,7 +3163,7 @@ rule employeeCanInsertStampingsAndAbsencesOffsite
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- $o: Office() from $p.office
+ $o: Office() from $p.getCurrentOffice().get()
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_STAMPING, fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (//"AbsenceGroups.insert",
@@ -3185,7 +3185,7 @@ rule employeeCanEditStampingsOffsite
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- $o: Office() from $p.office
+ $o: Office() from $p.getCurrentOffice().get()
  $target: Stamping(UserDao.getAllowedStampTypes(currentOperator).contains(stampType), this.getOwner() == $p)
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.editOffSite", "Stampings.saveOffSite", "Stampings.delete"), target == $target, granted == false)
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
@@ -3221,7 +3221,7 @@ rule employeeCanInsertAbsencesOffsiteWithConvention
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- $o: Office() from $p.office
+ $o: Office() from $p.getCurrentOffice().get()
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_ABSENCE_WITH_CONVENTION, fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
@@ -3262,7 +3262,7 @@ rule employeeCanInsertMedicalExam
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- $o: Office() from $p.office
+ $o: Office() from $p.getCurrentOffice().get()
  Configuration(epasParam == EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM && fieldValue == true) from $o.configurations
  $c: PermissionCheck(action in ("AbsenceGroups.insert"), target == $p, granted == false)
 then
@@ -3277,7 +3277,7 @@ rule EmployeeCanEditOffSiteAbsenceWithConvention
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- $o: Office() from $p.office
+ $o: Office() from $p.getCurrentOffice().get()
  Configuration(epasParam == EpasParam.WORKING_OFF_SITE, fieldValue == true) from $o.configurations
  PersonConfiguration(epasParam == EpasParam.OFF_SITE_ABSENCE_WITH_CONVENTION, fieldValue == true) from $p.personConfigurations
  /** Sostituire il metodo che valuta che tipo di assenza può inserire il dipendente utilizzando la nuova modellazione **/
@@ -3509,7 +3509,7 @@ rule EmployeeCanEditMedicalExamAbsence
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- $o: Office() from $p.office
+ $o: Office() from $p.getCurrentOffice().get()
  Configuration(epasParam == EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM, fieldValue == true) from $o.configurations
  $target: Absence(DefaultGroup.medicalExamsCodes().contains(this.getCode()), this.getOwner() == $p)
  $c: PermissionCheck(action in ("AbsenceGroups.insert", "AbsenceGroups.edit", "AbsenceGroups.save", "AbsenceGroups.delete",
@@ -3528,7 +3528,7 @@ rule EmployeeCanAddAttachmentMedicalExam
 when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person() from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.PEOPLE_ALLOWED_INSERT_MEDICAL_EXAM, fieldValue == true) from $o.configurations
   //$target: Absence(DefaultGroup.medicalExamsCodes().contains(this.getCode()), this.getOwner() == $p)
   $c: PermissionCheck(action in ("Absences.addAttach", "Absences.removeAttach", "Absences.downloadAttachment"), target == null, granted == false)
@@ -3575,7 +3575,7 @@ rule employeeAutocertificationStampings
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
- $o: Office() from $p.office
+ $o: Office() from $p.getCurrentOffice().get()
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
  $c: PermissionCheck(action in ("Stampings.insert", 							 
  							"Stampings.edit",
@@ -3592,7 +3592,7 @@ rule employeeCanInsertStampings_OnPerson
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
- $o: Office() from $p.office
+ $o: Office() from $p.getCurrentOffice().get()
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
  $c: PermissionCheck(action == "Stampings.insert", target == $p, granted == false)
 then
@@ -3623,7 +3623,7 @@ rule employeeCanEditStampings
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
- $o: Office() from $p.office
+ $o: Office() from $p.getCurrentOffice().get()
  $target: Stamping(this.getOwner() == $p)
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.save", "Stampings.delete"), granted == false, target == $target)
  Configuration(epasParam == EpasParam.TR_AUTOCERTIFICATION, fieldValue == true) from $o.configurations
@@ -3660,7 +3660,6 @@ when
 then
  $c.grant();
 end
-
 
 /**************************************************************************************************
  * L'amministratore del personale può visualizzare la scheda di inserimento ore in più in missione 
@@ -4010,10 +4009,11 @@ rule isFlowsVisible
 when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person() from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_FLOWS, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action == "AbsenceRequests.enabled", granted == false, target == null)
 then
+  
   $c.grant();
 end
 
@@ -4078,7 +4078,7 @@ rule isVacationPastYearFlowsVisible
 when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person() from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_37_FLOW, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action == "AbsenceRequests.pastYearEnabled", granted == false, target == null)
 then

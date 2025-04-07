@@ -36,8 +36,10 @@ Sistemi Informativi del CNR.
 
    inizialization
    managePerson
+   periodicMembership
    workingTimeType
    timeSlot
+   attendanceRange
    stampings
    seat
    parameters

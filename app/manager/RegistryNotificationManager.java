@@ -47,12 +47,15 @@ public class RegistryNotificationManager {
 
     final String message = String.format(
         "La persona %s ha cambiato sede, la nuova sede è %s (sedeId = %s), "
-            + "la vecchia sede era %s (sedeId = %s)", 
-            person.getFullname(), person.getOffice().getName(),
-            person.getOffice().getCodeId(), oldOffice.getName(), oldOffice.getCodeId());
+
+            + "la vecchia sede era %s (sedeId = %s)", person.getFullname(), 
+            person.getCurrentOffice().get().getName(),
+            person.getCurrentOffice().get().getCodeId(), oldOffice.getName(), oldOffice.getCodeId());
+
 
     //Notifica ai nuovi amministratori della nuova persona da gestire.
-    person.getOffice().getUsersRolesOffices().stream()
+
+    person.getCurrentOffice().get().getUsersRolesOffices().stream()
         .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN) 
             || uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
         .map(uro -> uro.getUser()).forEach(user -> {
@@ -86,7 +89,7 @@ public class RegistryNotificationManager {
         person.getFullname(), person.getNumber());
 
     //Notifica ai nuovi amministratori della nuova persona da gestire.
-    person.getOffice().getUsersRolesOffices().stream()
+    person.getCurrentOffice().get().getUsersRolesOffices().stream()
         .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN) 
             || uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
         .map(uro -> uro.getUser()).forEach(user -> {

@@ -23,6 +23,7 @@ import db.h2support.base.H2WorkingTimeTypeSupport;
 import db.h2support.base.WorkingTimeTypeDefinitions.WorkingDefinition;
 import java.util.UUID;
 import manager.ContractManager;
+import manager.PersonsOfficesManager;
 import manager.configurations.ConfigurationManager;
 import models.Contract;
 import models.Office;
@@ -45,16 +46,19 @@ public class H2Examples {
   private final H2WorkingTimeTypeSupport h2WorkingTimeTypeSupport;
   private final ConfigurationManager configurationManager;
   private final ContractManager contractManager;
+  private final PersonsOfficesManager personsOfficesManager;
   
   /**
    * Injection. 
    */
   @Inject
   public H2Examples(H2WorkingTimeTypeSupport h2WorkingTimeTypeSupport, 
-      ConfigurationManager configurationManager, ContractManager contractManager) {
+      ConfigurationManager configurationManager, ContractManager contractManager,
+      PersonsOfficesManager personsOfficesManager) {
     this.h2WorkingTimeTypeSupport = h2WorkingTimeTypeSupport;
     this.configurationManager = configurationManager;
     this.contractManager = contractManager;
+    this.personsOfficesManager = personsOfficesManager;
   }
 
   /**
@@ -95,11 +99,13 @@ public class H2Examples {
     user.updatePassword("UnaPasswordQualsiasi");
     user.save();
     Person person = new Person();
+
     person.setName("Name " + username);
     person.setSurname("Surname " + username);
     person.setUser(user);
-    person.setOffice(office);
     person.setQualification(Qualification.findById(DEFAULT_PERSON_QUALIFICATION));
+    personsOfficesManager.addPersonInOffice(person, office, LocalDate.now(), Optional.absent());
+
     person.save();
     configurationManager.updateConfigurations(person);
     return person;

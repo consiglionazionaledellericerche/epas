@@ -257,7 +257,7 @@ Per individuare l'assenza di cui prelevare l'allegato si utilizza il parametro *
 
 La risposta sarà del tipo:
 
-.. code-block::
+.. code-block:: bash
 
   HTTP/1.1 200 OK
   Content-Disposition: attachment; filename="assenza-Galilei-Galileo-2021-02-12.pdf"

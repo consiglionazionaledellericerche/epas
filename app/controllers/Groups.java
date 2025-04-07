@@ -215,9 +215,11 @@ public class Groups extends Controller {
   public static void edit(long groupId) {
     Group group = Group.findById(groupId);
     notFoundIfNull(group);
-    rules.checkIfPermitted(group.getManager().getOffice());
-    Office office = group.getManager().getOffice();
+
+    rules.checkIfPermitted(group.getManager().getCurrentOffice().get());
+    Office office = group.getManager().getCurrentOffice().get();
     List<Person> peopleForGroups = personDao.byInstitute(office.getInstitute());
+
     render(group, office, peopleForGroups);
   }
 
@@ -329,7 +331,7 @@ public class Groups extends Controller {
     
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     List<PersonOvertime> personOvertimes = personOvertimeDao.personListInYear(person, year);
     PersonOvertime personOvertime = new PersonOvertime();
     render(personOvertimes, person, year, personOvertime);
@@ -339,7 +341,7 @@ public class Groups extends Controller {
       int year, Long personId) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
     Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
     
     if (personOvertime.getNumberOfHours() == null 

@@ -37,6 +37,7 @@ import models.query.QPerson;
 import models.query.QPersonShift;
 import models.query.QPersonShiftDay;
 import models.query.QPersonShiftShiftType;
+import models.query.QPersonsOffices;
 import models.query.QShiftCancelled;
 import models.query.QShiftCategories;
 import models.query.QShiftTimeTable;
@@ -242,9 +243,11 @@ public class ShiftDao extends DaoBase {
   public List<PersonShift> getPeopleForShift(Office office, LocalDate date) {
     final QPersonShift ps = QPersonShift.personShift;
     final QPerson person = QPerson.person;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     return getQueryFactory().select(ps).from(person)
         .leftJoin(person.personShifts, ps).fetchAll()
-        .where(person.office.eq(office)
+        .leftJoin(person.personsOffices, personsOffices).fetchAll()
+        .where(personsOffices.office.eq(office)
             .and(ps.beginDate.loe(date).andAnyOf(ps.endDate.isNull(), ps.endDate.goe(date)))
             .and(person.eq(ps.person).and(ps.disabled.eq(false)))).fetch();
   }

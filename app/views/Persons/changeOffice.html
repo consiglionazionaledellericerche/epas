@@ -1,0 +1,76 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione appartenenza alla sede di lavoro di ' + person.getFullname() /}
+
+#{set breadcrumbs:['Lista Persone':@Persons.list(), 
+  (person.fullname):null] /}
+#{breadcrumbs breadcrumbs, noHome:true, container:true /}
+
+#{include './../Persons/_tabs.html' /}
+
+<div class="container" id="updateWtt">	
+#{panel title:'Configurazione attuale di ' + person.getFullname(), color:'primary'}
+
+	#{if (person.personsOffices.isEmpty())}
+	   Al momento non sono presenti affiliazioni ad alcuna sede di lavoro.
+	#{/if}
+	#{else}
+	    <table class="table table-hover table-striped">
+	      <thead>
+	      <tr>
+	        <th>Sede</th>
+	        <th>Data di inizio</th>
+	        <th>Data di fine</th>	
+	      </tr>
+	      </thead>
+	      <tbody>
+	      #{list person.personsOffices, as:'po'}
+	    <tr>
+	      <td>${po.office.name}</td>
+	      <td>${po.beginDate.format()}</td>
+	      <td>#{if po.endDate} ${po.endDate.format()} #{/if} #{else}<em>Indeterminato</em>#{/else}</td>	  
+	    </tr>
+	    #{/list}
+	    </tbody>
+	    </table>
+	#{/else}
+#{/panel}
+#{secure.check 'Persons.blankByPerson'}
+<div class="alert alert-info">
+  <p>Utilizzare questa form per definire il nuovo periodo di afferenza: la sede, la data di inizio e la data di fine periodo.</p>
+  <p>Lasciando vuoto il campo <strong>&{'personOffice.endDate'}</strong> il nuovo tipo orario verrà applicato fino alla fine del contratto.<p>
+  <p><i class="fa fa-bell"></i> Per sicurezza in caso di ricalcoli necessari verrà visualizzato un riepilogo delle modifiche e chiesto un comando di conferma. </p>
+</div>
+	
+#{form action:@Persons.saveOfficeChanged(), class:'form-horizontal',
+		'data-async':'#page_content', 'data-async-error':'#updateWtt', 'data-spinner':'#defaultSpinner' }
+	
+	#{f.hidden 'personOffice.person.id' /}
+	
+	#{if !confirmed}	
+		 #{f.date 'personOffice.beginDate', value:personOffice.beginDate?.format(), required:true /}
+		 #{f.date 'personOffice.endDate', value:personOffice.endDate?.format() /}
+		 #{f.selectModel 'personOffice.office', items:availableOffices, required:true /}
+		 #{b.buttons center:true}
+		   #{b.submit 'Applica'/}
+		 #{/b.buttons}
+	#{/if}
+	#{else}
+	      #{f.hidden 'confirmed' /}
+		  #{f.simpleView 'personOffice.beginDate', value:personOffice.beginDate?.format(), hidden:true /}
+		  #{f.simpleView 'personOffice.endDate', value:personOffice.endDate?.format(), hidden:true /}
+		  #{f.simpleView 'personOffice.office' /}
+		  #{f.hidden 'personOffice.office.id' /}
+		  
+		  #{recomputeRecap.show recomputeRecap:recomputeRecap /}
+		  #{b.buttons center:true}
+		    #{b.cancel @changeOffice(person.id) /}
+		    #{b.submit 'Conferma'/}
+		  #{/b.buttons}
+		 
+	#{/else}
+	 
+#{/form}
+#{/secure.check}
+</div>
+#{include '_myModal.html' /}

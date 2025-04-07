@@ -98,7 +98,7 @@ public class MealTickets extends Controller {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val contract = contractDao.getContractById(contractId);
     RestUtils.checkIfPresent(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     // riepilogo contratto corrente
     Optional<MealTicketRecap> currentRecap = mealTicketService.create(contract);
@@ -122,14 +122,14 @@ public class MealTickets extends Controller {
 
     val contract = contractDao.getContractById(contractId);
     RestUtils.checkIfPresent(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     if (codeBlock == null || codeBlock.isEmpty()) {
       JsonResponse.notFound();
     }
 
     List<MealTicket> mealTicketList = mealTicketDao
-        .getMealTicketsMatchCodeBlock(codeBlock, Optional.of(contract.getPerson().getOffice()));
+        .getMealTicketsMatchCodeBlock(codeBlock, Optional.of(contract.getPerson().getCurrentOffice().get()));
 
     if (mealTicketList.size() <= 0) {
       JsonResponse.notFound();
@@ -217,7 +217,7 @@ public class MealTickets extends Controller {
 
     RestUtils.checkIfPresent(contract);
     val person = contract.getPerson();
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     val validationResult = validation.valid(blockMealTicketCreateDto);
     if (!validationResult.ok) {
@@ -253,7 +253,7 @@ public class MealTickets extends Controller {
 
     List<MealTicket> ticketToAddOrdered = Lists.newArrayList();
     ticketToAddOrdered.addAll(mealTicketService.buildBlockMealTicket(codeBlock, blockType,
-        first, last, expireDate, person.getOffice()));
+        first, last, expireDate, person.getCurrentOffice().get()));
 
     ticketToAddOrdered.forEach(ticket -> {
       ticket.setContract(contract);
@@ -295,7 +295,7 @@ public class MealTickets extends Controller {
       BlockMealTicketCreateDto blockMealTicketCreateDto, Person person) {
     val alreadyPresentMealTickets = 
         mealTicketDao.getMealTicketsMatchCodeBlock(
-            blockMealTicketCreateDto.getCodeBlock(), Optional.of(person.getOffice()));
+            blockMealTicketCreateDto.getCodeBlock(), Optional.of(person.getCurrentOffice().get()));
 
     List<MealTicket> matchingAlreadyExisting = Lists.newArrayList();
     IntStream.range(blockMealTicketCreateDto.getFirst(), blockMealTicketCreateDto.getLast() + 1)
@@ -349,7 +349,7 @@ public class MealTickets extends Controller {
     RestUtils.checkMethod(request, HttpMethod.DELETE);
     val contract = contractDao.getContractById(contractId);
     RestUtils.checkIfPresent(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     List<MealTicket> mealTicketList = mealTicketDao
         .getMealTicketsInCodeBlock(codeBlock, Optional.fromNullable(contract));
@@ -387,14 +387,14 @@ public class MealTickets extends Controller {
     RestUtils.checkMethod(request, HttpMethod.PUT);
     val contract = contractDao.getContractById(contractId);
     RestUtils.checkIfPresent(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     if (codeBlock == null || codeBlock.isEmpty()) {
       JsonResponse.notFound();
     }
 
     List<MealTicket> mealTicketList = mealTicketDao
-        .getMealTicketsMatchCodeBlock(codeBlock, Optional.of(contract.getPerson().getOffice()));
+        .getMealTicketsMatchCodeBlock(codeBlock, Optional.of(contract.getPerson().getCurrentOffice().get()));
     if (mealTicketList.size() <= 0) {
       JsonResponse.notFound();
     }
@@ -424,14 +424,14 @@ public class MealTickets extends Controller {
     RestUtils.checkMethod(request, HttpMethod.PUT);
     val contract = contractDao.getContractById(contractId);
     RestUtils.checkIfPresent(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     if (codeBlock == null || codeBlock.isEmpty()) {
       JsonResponse.notFound();
     }
 
     List<MealTicket> mealTicketList = mealTicketDao
-        .getMealTicketsMatchCodeBlock(codeBlock, Optional.of(contract.getPerson().getOffice()));
+        .getMealTicketsMatchCodeBlock(codeBlock, Optional.of(contract.getPerson().getCurrentOffice().get()));
     if (mealTicketList.size() <= 0) {
       JsonResponse.notFound();
     }

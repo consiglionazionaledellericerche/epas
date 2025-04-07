@@ -58,6 +58,8 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final DatePath<org.joda.time.LocalDate> joiningDate = createDate("joiningDate", org.joda.time.LocalDate.class);
 
+    public final StringPath label = createString("label");
+
     public final StringPath name = createString("name");
 
     public final NumberPath<Long> perseoId = createNumber("perseoId", Long.class);
@@ -67,7 +69,7 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final ListPath<models.PersonReperibilityType, QPersonReperibilityType> personReperibilityTypes = this.<models.PersonReperibilityType, QPersonReperibilityType>createList("personReperibilityTypes", models.PersonReperibilityType.class, QPersonReperibilityType.class, PathInits.DIRECT2);
 
-    public final ListPath<models.Person, QPerson> persons = this.<models.Person, QPerson>createList("persons", models.Person.class, QPerson.class, PathInits.DIRECT2);
+    public final ListPath<models.PersonsOffices, QPersonsOffices> personsOffices = this.<models.PersonsOffices, QPersonsOffices>createList("personsOffices", models.PersonsOffices.class, QPersonsOffices.class, PathInits.DIRECT2);
 
     public final ListPath<models.ShiftCategories, QShiftCategories> shiftCategories = this.<models.ShiftCategories, QShiftCategories>createList("shiftCategories", models.ShiftCategories.class, QShiftCategories.class, PathInits.DIRECT2);
 

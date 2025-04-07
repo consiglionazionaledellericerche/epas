@@ -30,6 +30,7 @@ import models.Office;
 import models.Person;
 import models.query.QMealTicket;
 import models.query.QMealTicketCard;
+import models.query.QPersonsOffices;
 
 /**
  * Dao per le info sulle tessere elettroniche.
@@ -79,11 +80,13 @@ public class MealTicketCardDao extends DaoBase {
    */
   public Optional<MealTicketCard> getMealTicketCardByNumberAndOffice(String number, Office office) {
     final QMealTicketCard mealTicketCard = QMealTicketCard.mealTicketCard;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     
     return Optional.ofNullable(getQueryFactory()
         .selectFrom(mealTicketCard)
-            .where(mealTicketCard.number.eq(number)
-                .and(mealTicketCard.person.office.eq(office))
+        .leftJoin(mealTicketCard.person.personsOffices, personsOffices)
+            .where(mealTicketCard.number.eq(number)                
+                .and(personsOffices.office.eq(office))
                 .and(mealTicketCard.isActive.eq(true))).fetchFirst());
   }
   

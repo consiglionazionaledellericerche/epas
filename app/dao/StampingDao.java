@@ -29,6 +29,7 @@ import models.StampModificationType;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.query.QPerson;
+import models.query.QPersonsOffices;
 import models.query.QStampModificationType;
 import models.query.QStamping;
 import org.joda.time.LocalDateTime;
@@ -99,15 +100,17 @@ public class StampingDao extends DaoBase {
   public List<Stamping> adminStamping(YearMonth yearMonth, Office office) {
     final QStamping stamping = QStamping.stamping;
     final QPerson person = QPerson.person;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     return getQueryFactory().selectFrom(stamping)
         .join(stamping.personDay.person, person)
+        .leftJoin(person.personsOffices, personsOffices).fetchAll()
         .where(stamping.markedByAdmin.eq(true)
             .and(stamping.personDay.date.goe(yearMonth.toLocalDate(1)))
             .and(stamping.personDay.date
                 .loe(yearMonth.toLocalDate(1).dayOfMonth()
                     .withMaximumValue()))
-            .and(person.office.isNotNull())
-            .and(person.office.eq(office)))
+            .and(personsOffices.office.isNotNull())
+            .and(personsOffices.office.eq(office)))
         .orderBy(person.surname.asc(), stamping.personDay.date.asc())
         .fetch();
   }

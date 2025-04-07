@@ -20,7 +20,11 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+
 import com.google.common.collect.Maps;
+
+import com.google.common.collect.Range;
+
 import com.google.common.collect.Sets;
 import common.security.SecurityRules;
 import controllers.RequestInit.CurrentData;
@@ -28,6 +32,7 @@ import dao.AbsenceDao;
 import dao.GeneralSettingDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonsOfficesDao;
 import dao.ShiftTypeMonthDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.CacheValues;
@@ -44,11 +49,13 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
 import manager.CertificationManager;
+import manager.PersonsOfficesManager;
 import manager.attestati.service.ICertificationService;
 import manager.attestati.service.PersonCertData;
 import manager.configurations.EpasParam;
 import models.Office;
 import models.Person;
+import models.PersonsOffices;
 import models.ShiftTypeMonth;
 import models.absences.Absence;
 import org.joda.time.LocalDate;
@@ -86,6 +93,11 @@ public class Certifications extends Controller {
   static CertificationManager certificationManager;
   @Inject
   static AbsenceManager absenceManager;
+  @Inject
+  static PersonsOfficesDao personOfficeDao;
+  @Inject
+  static PersonsOfficesManager personOfficeManager;
+
 
   private static final String PROCESS_COMMAND_KEY = "id-%s-year-%s-month-%s";
 
@@ -273,16 +285,30 @@ public class Certifications extends Controller {
    * @param year anno
    * @param month mese
    */
-  public static void personStatus(Long personId, int year, int month) {
+  public static void personStatus(Long officeId, Long personId, int year, int month) {
 
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person);
+    final Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
     PersonCertData personCertData = null;
+    LocalDate beginMonth = new LocalDate(year, month, 1);
+    LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
     try {
+      Optional<PersonsOffices> personOffice = 
+          personOfficeDao.affiliation(person, office, year, month);
+      if (!personOffice.isPresent()) {
+        log.warn("La persona {} non è affiliata alla sede {} nel periodo {} - {}. "
+            + "Non verrà quindi processata", person, office, beginMonth, endMonth);
+        return;
+      }
+      Range<LocalDate> affiliationRange = personOfficeManager
+          .monthlyAffiliation(personOffice.get(), beginMonth, endMonth);
       // Costruisco lo status generale
-      final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
-          .SimpleEntry<>(person, new YearMonth(year, month));
+      
+      final Map.Entry<PersonsOffices, YearMonth> cacheKey = new AbstractMap
+          .SimpleEntry<>(personOffice.get(), new YearMonth(year, month));
       personCertData = cacheValues.personStatus.get(cacheKey);
     } catch (Exception ex) {
       log.error("Errore nel recupero delle informazioni dal server di attestati per la persona {}: "
@@ -294,7 +320,9 @@ public class Certifications extends Controller {
     double stepSize;
     try {
       final Map.Entry<Office, YearMonth> key = new AbstractMap
-          .SimpleEntry<>(person.getOffice(), new YearMonth(year, month));
+          .SimpleEntry<>(person.getOffice(new LocalDate(year, month, 1)).get(), 
+              new YearMonth(year, month));
+
       stepSize = cacheValues.elaborationStep.get(key);
     } catch (Exception ex) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
@@ -325,18 +353,34 @@ public class Certifications extends Controller {
    * @param month mese.
    * @throws NoSuchFieldException gestisce eccezione di campo non presente
    */
-  public static void process(Long personId, int year, int month, boolean redirect) 
+  public static void process(Long officeId, Long personId, int year, int month, boolean redirect) 
       throws NoSuchFieldException {
 
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     rules.checkIfPermitted(person);
+    
+    final Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
 
     PersonCertData previousCertData = null;
+    LocalDate beginMonth = new LocalDate(year, month, 1);
+    LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+    Optional<PersonsOffices> personOffice = Optional.absent();
     try {
+      // Verifico il periodo di afferenza della person all'office
+      
+      personOffice = personOfficeDao.affiliation(person, office, year, month);
+      if (!personOffice.isPresent()) {
+        log.warn("La persona {} non è affiliata alla sede {} nel periodo {} - {}. "
+            + "Non verrà quindi processata", person, office, beginMonth, endMonth);
+        return;
+      }
+      Range<LocalDate> affiliationRange = personOfficeManager
+          .monthlyAffiliation(personOffice.get(), beginMonth, endMonth);
       // Costruisco lo status generale
-      // Non uso la cache qui per evitare eventuali stati incongruenti durante l'invio
-      previousCertData = certService.buildPersonStaticStatus(person, year, month);
+      // Non uso la cache qui per evitare eventuali stati incongruenti durante l'invio      
+      previousCertData = certService.buildPersonStaticStatus(person, year, month, affiliationRange);
     } catch (Exception ex) {
       log.error("Errore nel recupero delle informazioni dal server di attestati"
           + " per la persona {}: {}", person, cleanMessage(ex).getMessage());
@@ -354,8 +398,8 @@ public class Certifications extends Controller {
       }
     }
 
-    final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
-        .SimpleEntry<>(person, new YearMonth(year, month));
+    final Map.Entry<PersonsOffices, YearMonth> cacheKey = new AbstractMap
+        .SimpleEntry<>(personOffice.get(), new YearMonth(year, month));
 
     // Se riesco nell'invio ne aggiorno lo stato in cache
     if (personCertData != null) {
@@ -369,7 +413,10 @@ public class Certifications extends Controller {
     double stepSize;
     try {
       final Map.Entry<Office, YearMonth> key = new AbstractMap
-          .SimpleEntry<>(person.getOffice(), new YearMonth(year, month));
+
+          .SimpleEntry<>(person.getOffice(new LocalDate(year, month, 1)).get(), 
+              new YearMonth(year, month));
+
       stepSize = cacheValues.elaborationStep.get(key);
     } catch (Exception ex) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
@@ -380,7 +427,7 @@ public class Certifications extends Controller {
     // permette di chiamare questo controller anche in maniera sincrona per il reinvio delle
     // informazioni per una sola persona tramite link (button sulla singola persona)
     if (redirect) {
-      certifications(person.getOffice().id, year, month);
+      certifications(person.getOffice(new LocalDate(year, month, 1)).get().id, year, month);
     }
 
     render("@personStatus", personCertData, stepSize, person);

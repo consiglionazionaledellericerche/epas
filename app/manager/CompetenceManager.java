@@ -377,7 +377,7 @@ public class CompetenceManager {
    * @return La stringa contenente il messaggio da far visualizzare come errore, se riscontrato.
    *     Stringa vuota altrimenti.
    */
-  public String canAddCompetence(Competence comp, Integer value) {
+  public String canAddCompetence(Competence comp, Integer value, Office office) {
 
     String result = "";
     if (!isCompetenceEnabled(comp)) {
@@ -397,9 +397,11 @@ public class CompetenceManager {
                 Optional.fromNullable(comp.getMonth()), group);
         sum = compList.stream().mapToInt(i -> i.getValueApproved()).sum();
         //Caso Reperibilità:
-        if (StringUtils.containsIgnoreCase(comp.getCompetenceCode()
-            .getCompetenceCodeGroup().getLabel(), "reperibili")) {
-          if (!servicesActivated(comp.getPerson().getOffice())) {
+
+        if (StringUtils.containsIgnoreCase(comp.getCompetenceCode().getCompetenceCodeGroup().getLabel(),
+            "reperibili")) {
+          if (!servicesActivated(comp.getPerson()
+              .getOffice(new LocalDate(comp.getYear(), comp.getMonth(), 1)).get())) {
             result = Messages.get("CompManager.notConfigured");
             return result;
           }
@@ -438,7 +440,9 @@ public class CompetenceManager {
         break;
       case onMonthlyPresence:
         PersonStampingRecap psDto = 
-            stampingsRecapFactory.create(comp.getPerson(), comp.getYear(), comp.getMonth(), true);
+            stampingsRecapFactory.create(comp.getPerson(), comp.getYear(), comp.getMonth(), true, 
+                Optional.of(office));
+
         if (psDto.basedWorkingDays != value) {
           result = Messages.get("CompManager.diffBasedWorkingDay");
         }
@@ -522,15 +526,18 @@ public class CompetenceManager {
   private boolean handlerReperibility(Competence comp, Integer value, List<CompetenceCode> group) {
 
     int maxDays = countDaysForReperibility(new YearMonth(comp.getYear(), comp.getMonth()),
-        comp.getPerson().getOffice());
+        comp.getPerson().getOffice(new LocalDate(comp.getYear(), comp.getMonth(), 1)).get());
 
     List<String> groupCodes = group.stream().map(objA -> {
       String objB = new String();
       objB = objA.getCode();
       return objB;
     }).collect(Collectors.toList());
+
     List<Competence> peopleMonthList = competenceDao.getCompetencesInOffice(comp.getYear(),
-        comp.getMonth(), groupCodes, comp.getPerson().getOffice(), false);
+        comp.getMonth(), groupCodes, comp.getPerson()
+        .getOffice(new LocalDate(comp.getYear(), comp.getMonth(), 1)).get(), false);
+
     int peopleSum = peopleMonthList.stream()
         .filter(competence -> competence.id != comp.id).mapToInt(i -> i.getValueApproved()).sum();
     if (peopleSum - comp.getValueApproved() + value > maxDays) {
@@ -966,7 +973,7 @@ public class CompetenceManager {
           public void doJob() {
             final Person person = Person.findById(p.id);
 
-            applyBonusPerPerson(person, yearMonth, code);
+            applyBonusPerPerson(person, yearMonth, code, o);
             log.debug("Assegnata la competenza {} alla persona ... {}", code, person);
           }
         }.now());
@@ -984,7 +991,8 @@ public class CompetenceManager {
    * @param yearMonth l'anno/mese in cui fare i conteggi
    * @param code il codice di competenza da riconteggiare
    */
-  public void applyBonusPerPerson(Person person, YearMonth yearMonth, CompetenceCode code) {
+  public void applyBonusPerPerson(Person person, YearMonth yearMonth, 
+      CompetenceCode code, Office office) {
     LocalDate date = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1);
     Optional<PersonCompetenceCodes> pcc = competenceCodeDao
         .getByPersonAndCodeAndDate(person, code, date);
@@ -993,7 +1001,8 @@ public class CompetenceManager {
       switch (code.getLimitType()) {
         case onMonthlyPresence:
           PersonStampingRecap psDto = stampingsRecapFactory
-              .create(person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
+              .create(person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true, 
+                  Optional.of(office));
           addSpecialCompetence(person, yearMonth, code, Optional.fromNullable(psDto));
           break;
         case entireMonth:

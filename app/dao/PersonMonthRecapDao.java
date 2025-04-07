@@ -32,6 +32,7 @@ import models.Person;
 import models.PersonMonthRecap;
 import models.query.QCertificatedData;
 import models.query.QPersonMonthRecap;
+import models.query.QPersonsOffices;
 import org.joda.time.LocalDate;
 
 /**
@@ -133,11 +134,13 @@ public class PersonMonthRecapDao extends DaoBase {
    *     nell'anno year e nel mese month passati come parametro.
    */
   public List<PersonMonthRecap> getPeopleMonthRecaps(Integer year, Integer month, Office office) {
-    QPersonMonthRecap personMonthRecap = QPersonMonthRecap.personMonthRecap;
+    final QPersonMonthRecap personMonthRecap = QPersonMonthRecap.personMonthRecap;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     return getQueryFactory().selectFrom(personMonthRecap)
+        .leftJoin(personMonthRecap.person.personsOffices, personsOffices)
         .where(personMonthRecap.month.eq(month)
             .and(personMonthRecap.year.eq(year)
-                .and(personMonthRecap.person.office.eq(office))))
+                .and(personsOffices.office.eq(office))))
         .fetch();
   }
 

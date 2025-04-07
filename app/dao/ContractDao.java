@@ -40,6 +40,7 @@ import models.query.QContract;
 import models.query.QContractMandatoryTimeSlot;
 import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
+import models.query.QPersonsOffices;
 import org.joda.time.LocalDate;
 
 /**
@@ -121,6 +122,7 @@ public class ContractDao extends DaoBase {
       LocalDate begin, Optional<LocalDate> end, Optional<Office> office) {
 
     final QContract contract = QContract.contract;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
 
     final BooleanBuilder condition = new BooleanBuilder()
         .andAnyOf(contract.endContract.isNull().and(contract.endDate.isNull()),
@@ -137,10 +139,11 @@ public class ContractDao extends DaoBase {
     }
 
     if (office.isPresent()) {
-      condition.and(contract.person.office.eq(office.get()));
+      condition.and(personsOffices.office.eq(office.get()));
     }
 
-    return getQueryFactory().selectFrom(contract).where(condition).fetch();
+    return getQueryFactory().selectFrom(contract)
+        .leftJoin(contract.person.personsOffices, personsOffices).where(condition).fetch();
   }
 
   public List<Contract> getActiveContractsInPeriod(LocalDate begin, Optional<LocalDate> end,
@@ -167,7 +170,7 @@ public class ContractDao extends DaoBase {
       LocalDate begin, LocalDate end, Optional<Office> office) {
 
     final QContract contract = QContract.contract;
-
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     final BooleanBuilder condition = new BooleanBuilder().andAnyOf(
         contract.endDate.goe(begin).and(contract.endDate.loe(end)),
         contract.endContract.goe(begin).and(contract.endContract.loe(end)));
@@ -177,7 +180,7 @@ public class ContractDao extends DaoBase {
     }
 
     if (office.isPresent()) {
-      condition.and(contract.person.office.eq(office.get()));
+      condition.and(personsOffices.office.eq(office.get()));
     }
 
     return getQueryFactory().selectFrom(contract).where(condition).fetch();

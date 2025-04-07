@@ -69,7 +69,8 @@ public class Leaves extends Controller {
       String fiscalCode, String number, Integer year, boolean includeDetails) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = Persons.getPersonFromRequest(id, email, eppn, personPerseoId, fiscalCode, number);
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, 1, 1)).get());
 
     LocalDate start = new LocalDate(LocalDate.now().getYear(), 1, 1);
     LocalDate end = new LocalDate(LocalDate.now().getYear(), 12, 31);

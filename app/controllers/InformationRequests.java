@@ -765,8 +765,7 @@ public class InformationRequests extends Controller {
       Stampings.stampings(last.getYear(), last.getMonthOfYear());
     }
     PersonStampingRecap psDto = stampingsRecapFactory
-        .create(wrperson.getValue(), year, month, true);
-
+        .create(wrperson.getValue(), year, month, true, Optional.absent());
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
 
     list = manager.stampingsForReport(psDto);
@@ -800,7 +799,9 @@ public class InformationRequests extends Controller {
     }
 
     Preconditions.checkNotNull(person);
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getCurrentOffice().get());
+
     List<TeleworkApprovalDto> dtoList = Lists.newArrayList();
     List<TeleworkRequest> teleworkRequests = informationRequestDao.personTeleworkList(person);
     TeleworkApprovalDto dto = null;

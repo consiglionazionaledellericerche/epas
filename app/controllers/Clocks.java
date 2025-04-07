@@ -172,7 +172,8 @@ public class Clocks extends Controller {
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
-    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(person.getOffice())) {
+    if (!officeManager.getOfficesWithAllowedIp(addresses)
+        .contains(person.getCurrentOffice().get())) {
 
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -192,7 +193,9 @@ public class Clocks extends Controller {
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
-    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(user.getPerson().getOffice())) {
+    if (!officeManager.getOfficesWithAllowedIp(addresses)
+        .contains(user.getPerson().getCurrentOffice().get())) {
+
 
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -247,7 +250,8 @@ public class Clocks extends Controller {
     final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
         .split(Http.Request.current().remoteAddress));
 
-    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(user.getPerson().getOffice())) {
+    if (!officeManager.getOfficesWithAllowedIp(addresses)
+        .contains(user.getPerson().getCurrentOffice().get())) {
 
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"

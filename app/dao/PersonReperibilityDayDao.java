@@ -32,6 +32,7 @@ import models.PersonReperibilityType;
 import models.query.QPersonReperibility;
 import models.query.QPersonReperibilityDay;
 import models.query.QPersonReperibilityType;
+import models.query.QPersonsOffices;
 import org.joda.time.LocalDate;
 
 /**
@@ -309,9 +310,11 @@ public class PersonReperibilityDayDao extends DaoBase {
    * @return la lista di PersonReperibility per i parametri passati.
    */
   public List<PersonReperibility> byOffice(Office office, LocalDate date) {
-    QPersonReperibility pr = QPersonReperibility.personReperibility;
+    final QPersonReperibility pr = QPersonReperibility.personReperibility;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     return getQueryFactory().selectFrom(pr)
-        .where(pr.person.office.eq(office)
+        .leftJoin(pr.person.personsOffices, personsOffices)
+        .where(personsOffices.office.eq(office)
             .and(pr.startDate.isNotNull().andAnyOf(pr.endDate.isNull(), pr.endDate.goe(date))))
         .fetch();
   }

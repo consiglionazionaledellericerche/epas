@@ -161,7 +161,7 @@ public class Stampings extends Controller {
     }
 
     PersonStampingRecap psDto = stampingsRecapFactory
-        .create(wrperson.getValue(), year, month, true);
+        .create(wrperson.getValue(), year, month, true, Optional.absent());
 
     Person person = wrperson.getValue();
 
@@ -178,7 +178,7 @@ public class Stampings extends Controller {
     
     val canInsertStampings = 
         rules.check("Stampings.insert", yearMonth) && rules.check("Stampings.insert", person);
-    val canViewPersonDayHistory = rules.check("PersonDays.personDayHistory", person.getOffice());
+    val canViewPersonDayHistory = rules.check("PersonDays.personDayHistory", person.getOffice(new LocalDate(year,month,1)).get());
 
     render("@personStamping", psDto, person, yearMonth, 
         canEditAllStampingsAndAbsences, canInsertAbsences, canInsertStampings, canViewPersonDayHistory);
@@ -206,7 +206,7 @@ public class Stampings extends Controller {
     Person person = personDao.getPersonById(personId);
     Preconditions.checkNotNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     val yearMonth = new YearMonth(
         year != 0 ? year : YearMonth.now().getYear(),
@@ -222,10 +222,11 @@ public class Stampings extends Controller {
       YearMonth last = wrapperFactory.create(person).getLastActiveMonth();
       personStamping(personId, last.getYear(), last.getMonthOfYear());
     }
-
+    Optional<Office> officeOwner = Security.getUser().get().getPerson() != null 
+        ? Security.getUser().get().getPerson().getCurrentOffice() : Optional.absent();
     PersonStampingRecap psDto = 
         stampingsRecapFactory.create(
-            person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
+            person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true, officeOwner);
 
     val currentUser = Security.getUser();
     val canEditAllStampingsAndAbsences = 
@@ -236,7 +237,7 @@ public class Stampings extends Controller {
         rules.check("AbsenceGroups.insert", yearMonth) && rules.check("AbsenceGroups.insert", person);
     val canInsertStampings = 
         rules.check("Stampings.insert", yearMonth) && rules.check("Stampings.insert", person);
-    val canViewPersonDayHistory = rules.check("PersonDays.personDayHistory", person.getOffice());
+    val canViewPersonDayHistory = rules.check("PersonDays.personDayHistory", person.getOffice(new LocalDate(year, month, 1)).get());
 
     render(psDto, person, yearMonth, 
         canEditAllStampingsAndAbsences, canInsertAbsences, canInsertStampings, canViewPersonDayHistory);
@@ -304,7 +305,7 @@ public class Stampings extends Controller {
 
     if (user.getPerson() != null && user.getPerson().equals(person) 
         && !wrperson.isTechnician()) {
-      if (person.getOffice().checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
+      if (person.getOffice(date).get().checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")) {
         autocertification = true;
       }
     }
@@ -446,7 +447,8 @@ public class Stampings extends Controller {
       boolean disableInsert = false;
       User user = Security.getUser().get();
       if (user.getPerson() != null) {
-        if (person.getOffice().checkConf(EpasParam.WORKING_OFF_SITE, "true") 
+        if (person.getOffice(date).get().checkConf(EpasParam.WORKING_OFF_SITE, "true") 
+
             && person.checkConf(EpasParam.OFF_SITE_STAMPING, "true")) {
           disableInsert = true;
         }
@@ -707,8 +709,10 @@ public class Stampings extends Controller {
     }
 
     Role role = roleDao.getRoleByName(Role.GROUP_MANAGER);
-    Optional<UsersRolesOffices> uro = uroDao
-        .getUsersRolesOffices(user, role, user.getPerson().getOffice());
+
+    Optional<UsersRolesOffices> uro = uroDao.getUsersRolesOffices(user, role, 
+        user.getPerson().getCurrentOffice().get());
+
     List<Person> people = Lists.newArrayList();
     if (uro.isPresent()) {
 
@@ -725,7 +729,9 @@ public class Stampings extends Controller {
     List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 
     daysRecap = stampingManager.populatePersonStampingDayRecapList(people, date, numberOfInOut);
-    Office office = user.getPerson().getOffice();
+
+    Office office = user.getPerson().getCurrentOffice().get();
+
     Map<String, Integer> map = stampingManager.createDailyMap(daysRecap);
     //Per dire al template generico di non visualizzare i link di modifica e la tab di controllo
     boolean showLink = false;

@@ -155,7 +155,9 @@ public class Charts extends Controller {
    * esporta le ore e gli straordinari.
    */
   public static void exportHourAndOvertime() {
-    rules.checkIfPermitted(Security.getUser().get().getPerson().getOffice());
+
+    rules.checkIfPermitted(Security.getUser().get().getPerson().getCurrentOffice().get());
+
     //  List<Year> annoList = 
     //      chartsManager.populateYearList(Security.getUser().get().person.office);
 
@@ -195,7 +197,10 @@ public class Charts extends Controller {
    * @throws IOException eccezione in formazione del file
    */
   public static void export(Integer year) throws IOException {
-    rules.checkIfPermitted(Security.getUser().get().getPerson().getOffice());
+
+    rules.checkIfPermitted(Security.getUser().get()
+        .getPerson().getOffice(new LocalDate(year, 1, 1)).get());
+
 
     List<Person> personList = personDao.list(
         Optional.<String>absent(),
@@ -212,9 +217,13 @@ public class Charts extends Controller {
    * l'esportazione della situazione finale in termini di residuo/assenze...
    */
   public static void exportFinalSituation() {
-    rules.checkIfPermitted(Security.getUser().get().getPerson().getOffice());
+
+    rules.checkIfPermitted(Security.getUser().get().getPerson().getCurrentOffice().get());
+
     Set<Office> offices = Sets.newHashSet();
-    offices.add(Security.getUser().get().getPerson().getOffice());
+
+    offices.add(Security.getUser().get().getPerson().getCurrentOffice().get());
+
     String name = null;
     List<Person> personList = personDao.list(
         Optional.fromNullable(name),
@@ -230,7 +239,8 @@ public class Charts extends Controller {
    * @throws IOException eventuale eccezione generata dalla creazione del file
    */
   public static void exportDataSituation(Long personId) throws IOException {
-    rules.checkIfPermitted(Security.getUser().get().getPerson().getOffice());
+
+    rules.checkIfPermitted(Security.getUser().get().getPerson().getCurrentOffice().get());
 
     Person person = personDao.getPersonById(personId);
 
@@ -349,8 +359,10 @@ public class Charts extends Controller {
       List<Long> peopleIds = Lists.newArrayList();
       peopleIds.add(personId);
       file = chartsManager
-          .buildFile(
-              person.getOffice(), false, onlyMission, peopleIds, beginDate, endDate, exportFile);
+
+          .buildFile(person.getCurrentOffice().get(), false, onlyMission, peopleIds, beginDate, 
+              endDate, exportFile);
+
     } catch (ArchiveException | IOException ex) {
       flash.error("Errore durante l'esportazione del tempo al lavoro");
       excelFile(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());

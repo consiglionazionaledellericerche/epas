@@ -20,6 +20,7 @@ package manager.attestati.service;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import dao.CertificationDao;
 import java.util.List;
@@ -169,8 +170,8 @@ public class CertificationService implements ICertificationService {
    *    models.Person, int, int)
    */
   @Override
-  public PersonCertData buildPersonStaticStatus(Person person, int year, int month)
-      throws ExecutionException {
+  public PersonCertData buildPersonStaticStatus(Person person, int year, int month, 
+      Range<LocalDate> affiliationRange) throws ExecutionException {
 
     PersonCertData personCertData = new PersonCertData();
     personCertData.person = person;
@@ -202,7 +203,8 @@ public class CertificationService implements ICertificationService {
     // Lo stato attuale epas
     // chiamare qui il manager che genera lo stato attuale di epas
     Map<String, Certification> actualCertifications = Maps.newHashMap();
-    actualCertifications = monthData.getCertification(person, year, month);
+    
+    actualCertifications = monthData.getCertification(person, year, month, affiliationRange);
 
     if (attestatiCertifications != null) {
       // Riesco a scaricare gli attestati della persona
@@ -563,7 +565,8 @@ public class CertificationService implements ICertificationService {
 
       try {
         for (StatoAttestatoMese item : certificationsComunication
-            .getStatoAttestatoMese(person.getOffice(), year, yearMonth.getMonthOfYear())) {
+            .getStatoAttestatoMese(person.getOffice(new LocalDate(yearMonth.getYear(), 
+                yearMonth.getMonthOfYear(), 1)).get(), year, yearMonth.getMonthOfYear())) {
           if (person.getNumber().equals(item.dipendente.matricola)) {
             statoAttestatoMese = item;
           }

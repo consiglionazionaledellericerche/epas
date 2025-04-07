@@ -142,7 +142,7 @@ public class Instances extends Controller {
     PersonStampingRecap psDto = null;
     for (Person person : personList) {       
       psDto = stampingsRecapFactory.create(
-          person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
+          person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true, Optional.absent());
       log.debug("Carico {} nella lista", psDto.person.getFullname());
       list.add(psDto);      
       
@@ -235,7 +235,7 @@ public class Instances extends Controller {
     PersonStampingRecap psDto = null;
     for (Person person : personList) {       
       psDto = stampingsRecapFactory.create(
-          person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
+          person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true, Optional.absent());
       log.debug("Carico {} nella lista", psDto.person.getFullname());
       list.add(psDto);      
     }

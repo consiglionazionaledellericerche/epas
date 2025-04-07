@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.CheckGreenPass;
+import models.Office;
 import models.Person;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
@@ -118,13 +119,16 @@ public class EmailManager {
    * Invia la email per il recovery password successiva a creazione persona. (Solo se
    * il parametro send email della sua sede è attivo).  
    */
-  public void newUserMail(Person person) {
+  public void newUserMail(Person person, Office office) {
     Preconditions.checkState(person != null && person.isPersistent());
 
-    if (!(Boolean) configurationManager.configValue(person.getOffice(), EpasParam.SEND_EMAIL)) {
+    if (!(Boolean) configurationManager.configValue(office, 
+        EpasParam.SEND_EMAIL)) {
+
       log.info("Non verrà inviata la mail a {} in quanto "
           + "la sua sede {} ha invio mail disabilitato",
-          person.getFullname(), person.getOffice().getName());
+          person.getFullname(), person.getCurrentOffice().get().getName());
+
       return;
     }
     

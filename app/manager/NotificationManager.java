@@ -172,23 +172,25 @@ public class NotificationManager {
     } else {
       verso = "uscita";
     }
-    final String message = String.format(template, person.fullName(), 
-        stamping.getDate().toString(DTF),
+
+    final String message = String.format(template, person.fullName(), stamping.getDate().toString(DTF), 
         verso, stamping.getPlace(), stamping.getReason());
-    person.getOffice().getUsersRolesOffices().stream()
-    .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN)
+
+    person.getCurrentOffice().get().getUsersRolesOffices().stream()
+        .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN)
         || uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
-    .map(uro -> uro.getUser()).forEach(user -> {
-      if (operation != Crud.DELETE) {
-        Notification.builder().destination(user).message(message)
-        .subject(NotificationSubject.STAMPING, stamping.id).create();
-      } else {
-        // per la notifica delle delete niente redirect altrimenti tocca
-        // andare a prelevare l'entity dallo storico
-        Notification.builder().destination(user).message(message)
-        .subject(NotificationSubject.STAMPING).create();
-      }
-    });
+        .map(uro -> uro.getUser()).forEach(user -> {
+          if (operation != Crud.DELETE) {
+            Notification.builder().destination(user).message(message)
+            .subject(NotificationSubject.STAMPING, stamping.id).create();
+          } else {
+            // per la notifica delle delete niente redirect altrimenti tocca
+            // andare a prelevare l'entity dallo storico
+            Notification.builder().destination(user).message(message)
+            .subject(NotificationSubject.STAMPING).create();
+          }
+        });
+
   }
 
   /**
@@ -220,27 +222,32 @@ public class NotificationManager {
     final String message = String.format(template, modifier, absence.getPersonDay()
         .getDate().toString(DF), absence.getAbsenceType().getCode());
     // controllare se dalla configurazione è possibile notificare le assenze da flusso
-    val config = configurationManager.configValue(person.getOffice(), 
+
+    val config = configurationManager.configValue(person.getCurrentOffice().get(), 
+
         EpasParam.SEND_FLOWS_NOTIFICATION, LocalDate.now());
     if (config.equals(Boolean.FALSE)) {
       return;
     }
 
-    person.getOffice().getUsersRolesOffices().stream()
-    .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN)
-        || uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
-    .map(uro -> uro.getUser()).forEach(user -> {
-      Notification.builder().destination(user).message(message)
-      .subject(NotificationSubject.ABSENCE, absence.id).create();
-    });
+    person.getCurrentOffice().get().getUsersRolesOffices().stream()
+        .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN)
+            || uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
+        .map(uro -> uro.getUser()).forEach(user -> {
+          Notification.builder().destination(user).message(message)
+          .subject(NotificationSubject.ABSENCE, absence.id).create();
+        });
+
     /*
      * Verifico se si tratta di un 661 e invio la mail al responsabile di gruppo se esiste...
      */
+
     if (groupAbsenceType.getName().equals(DefaultGroup.G_661.name())) {
-      val sendManagerNotification = configurationManager.configValue(person.getOffice(),
+      val sendManagerNotification = configurationManager.configValue(person.getCurrentOffice().get(),
           EpasParam.SEND_MANAGER_NOTIFICATION_FOR_661, LocalDate.now());
       if (sendManagerNotification.equals(Boolean.TRUE)
           && !groupDao.myGroups(absence.getPersonDay().getPerson()).isEmpty()) {
+
         log.debug("Invio la notifica anche al responsabile di gruppo...");
         groupDao.myGroups(absence.getPersonDay().getPerson()).stream()
         .map(p -> p.getManager()).forEach(m -> {
@@ -319,13 +326,15 @@ public class NotificationManager {
       return;
     }
     List<User> users =
-        person.getOffice().getUsersRolesOffices().stream()
+        person.getCurrentOffice().get().getUsersRolesOffices().stream()
         .filter(uro -> uro.getRole().equals(roleDestination))
         .map(uro -> uro.getUser()).collect(Collectors.toList());
     if (roleDestination.getName().equals(Role.GROUP_MANAGER)) {
       log.info("Notifica al responsabile di gruppo per {}", absenceRequest);
-      List<Group> groups =
-          groupDao.groupsByOffice(person.getOffice(), Optional.absent(), Optional.of(false));
+      List<Group> groups = 
+          groupDao.groupsByOffice(person.getCurrentOffice().get(), Optional.absent(), 
+              Optional.of(false));
+
       log.debug("Gruppi da controllare {}", groups);
       for (User user : users) {
         for (Group group : groups) {
@@ -445,19 +454,23 @@ public class NotificationManager {
 
     // Se l'user che ha fatto l'inserimento è amministratore di se stesso esco
     if (secureManager.officesWriteAllowed(currentUser)
-        .contains(currentUser.getPerson().getOffice())) {
+        .contains(currentUser.getPerson().getCurrentOffice().get())) {
       return;
     }
 
     // Se l'user che ha fatto l'inserimento è tecnologo e può autocertificare le timbrature esco
-    if (currentUser.getPerson().getOffice().checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")
+    if (currentUser.getPerson().getCurrentOffice().get()
+        .checkConf(EpasParam.TR_AUTOCERTIFICATION, "true")
         && currentUser.getPerson().getQualification().getQualification() <= 3) {
+
       return;
     }
 
     // negli altri casi notifica agli amministratori del personale ed al responsabile sede
     // controllo se il parametro di abilitazione alle notifiche è true
-    val config = configurationManager.configValue(currentUser.getPerson().getOffice(),
+
+    val config = configurationManager.configValue(currentUser.getPerson().getCurrentOffice().get(),
+
         EpasParam.SEND_ADMIN_NOTIFICATION, LocalDate.now());
     if (config.equals(Boolean.FALSE)) {
       return;
@@ -494,9 +507,11 @@ public class NotificationManager {
     }
 
     // Se l'user che ha fatto l'inserimento è amministratore di se stesso esco
+
     if (currentUser.getPerson() != null
         && secureManager.officesWriteAllowed(currentUser)
-        .contains(currentUser.getPerson().getOffice())) {
+        .contains(currentUser.getPerson().getCurrentOffice().get())) {
+
       return;
     }
 
@@ -599,7 +614,7 @@ public class NotificationManager {
           a.getPersonDay().getDate().toString(DF)));
     });
 
-    person.getOffice().getUsersRolesOffices().stream().filter(uro -> uro.getRole()
+    person.getCurrentOffice().get().getUsersRolesOffices().stream().filter(uro -> uro.getRole()
         .getName().equals(role.getName()))
     .map(uro -> uro.getUser()).forEach(user -> {
       Notification.builder().destination(user).message(message.toString())
@@ -821,7 +836,7 @@ public class NotificationManager {
       return;
     }
 
-    person.getOffice().getUsersRolesOffices().stream().filter(uro -> 
+    person.getCurrentOffice().get().getUsersRolesOffices().stream().filter(uro -> 
     uro.getRole().equals(roleDestination))
     .map(uro -> uro.getUser()).forEach(user -> {
       SimpleEmail simpleEmail = new SimpleEmail();
@@ -872,30 +887,30 @@ public class NotificationManager {
 
     //Email al responsabile di sede per i livelli I-III che NON SONO
     //responsabili di gruppo
-    if (configurationManager.configValue(absenceRequest.getPerson().getOffice(),
+    if (configurationManager.configValue(absenceRequest.getPerson().getCurrentOffice().get(),
         EpasParam.ABSENCE_TOP_LEVEL_OFFICE_HEAD_NOTIFICATION, LocalDate.now()).equals(Boolean.TRUE)
         && !absenceRequest.getPerson().isGroupManager()) {
       recipients = 
-          absenceRequest.getPerson().getOffice().getUsersRolesOffices().stream()
+          absenceRequest.getPerson().getCurrentOffice().get().getUsersRolesOffices().stream()
           .filter(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
           .map(uro -> uro.getUser().getPerson())
           .collect(Collectors.toSet());
     }
     //Email al responsabile di sede per i livelli I-III che SONO
     //responsabili di gruppo
-    if (configurationManager.configValue(absenceRequest.getPerson().getOffice(),
+    if (configurationManager.configValue(absenceRequest.getPerson().getCurrentOffice().get(),
         EpasParam.ABSENCE_TOP_LEVEL_OF_GROUP_MANAGER_OFFICE_HEAD_NOTIFICATION, 
         LocalDate.now()).equals(Boolean.TRUE)
         && absenceRequest.getPerson().isGroupManager()) {
       recipients = 
-          absenceRequest.getPerson().getOffice().getUsersRolesOffices().stream()
+          absenceRequest.getPerson().getCurrentOffice().get().getUsersRolesOffices().stream()
           .filter(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
           .map(uro -> uro.getUser().getPerson())
           .collect(Collectors.toSet());
     }
     //Email al responsabile di gruppo per i livelli I-III del suo gruppo (se sono attive
     //notifiche al responsabile di gruppo nella configurazione del gruppo).
-    if (configurationManager.configValue(absenceRequest.getPerson().getOffice(),
+    if (configurationManager.configValue(absenceRequest.getPerson().getCurrentOffice().get(),
         EpasParam.ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION, 
         LocalDate.now()).equals(Boolean.TRUE)) {
       recipients.addAll(groupDao.myGroups(absenceRequest.getPerson()).stream()
@@ -907,6 +922,7 @@ public class NotificationManager {
     if (!recipients.isEmpty()) {
       recipients.forEach(r -> {
         try {
+
           SimpleEmail simpleEmail = new SimpleEmail();
           simpleEmail.addTo(r.getEmail());
           simpleEmail.setSubject(
@@ -1213,17 +1229,20 @@ public class NotificationManager {
         yearMonth.toString(DF), competence.getCompetenceCode().getCode());
     //controllare se dalla configurazione è possibile notificare le competenze da flusso 
     val config = configurationManager
-        .configValue(person.getOffice(), EpasParam.SEND_FLOWS_NOTIFICATION, LocalDate.now());
+        .configValue(person.getCurrentOffice().get(), EpasParam.SEND_FLOWS_NOTIFICATION, 
+            LocalDate.now());
+
     if (config.equals(Boolean.FALSE)) {
       return;
     }
-    person.getOffice().getUsersRolesOffices().stream()
-    .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN)
-        || uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
-    .map(uro -> uro.getUser()).forEach(user -> {
-      Notification.builder().destination(user).message(message)
-      .subject(NotificationSubject.COMPETENCE, competence.id).create();
-    });
+    person.getCurrentOffice().get().getUsersRolesOffices().stream()
+        .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN) 
+            || uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
+        .map(uro -> uro.getUser()).forEach(user -> {
+          Notification.builder().destination(user).message(message)
+          .subject(NotificationSubject.COMPETENCE, competence.id).create();
+        });
+
 
     //sendEmailAbsenceRequestConfirmation(absenceRequest);
 
@@ -1375,7 +1394,7 @@ public class NotificationManager {
       userDestination = getProperUser(competenceRequest);
     } else {
       Role role = getProperRole(competenceRequest);
-      List<User> usersList = uroDao.getUsersWithRoleOnOffice(role, competenceRequest.getPerson().getOffice());
+      List<User> usersList = uroDao.getUsersWithRoleOnOffice(role, competenceRequest.getPerson().getCurrentOffice().get());
       if (role.getName().equals(Role.GROUP_MANAGER)) {
         for (User user : usersList) {
           Optional<Group> group = groupDao.checkManagerPerson(user.getPerson(), competenceRequest.getPerson());
@@ -1573,13 +1592,13 @@ public class NotificationManager {
       return;
     }
     List<User> users =
-        person.getOffice().getUsersRolesOffices().stream()
+        person.getCurrentOffice().get().getUsersRolesOffices().stream()
         .filter(uro -> uro.getRole().equals(roleDestination))
         .map(uro -> uro.getUser()).collect(Collectors.toList());
     if (roleDestination.getName().equals(Role.GROUP_MANAGER)) {
       log.info("Notifica al responsabile di gruppo per {}", competenceRequest);
       List<Group> groups =
-          groupDao.groupsByOffice(person.getOffice(), Optional.absent(), Optional.of(false));
+          groupDao.groupsByOffice(person.getCurrentOffice().get(), Optional.absent(), Optional.of(false));
       log.debug("Gruppi da controllare {}", groups);
       for (User user : users) {
         for (Group group : groups) {
@@ -1614,9 +1633,11 @@ public class NotificationManager {
     }
 
     //Se l'user che ha fatto l'inserimento è amministratore di se stesso esco
-    if (currentUser.getPerson() != null
+
+    if (currentUser.getPerson() != null 
         && secureManager.officesWriteAllowed(currentUser)
-        .contains(currentUser.getPerson().getOffice())) {
+        .contains(currentUser.getPerson().getCurrentOffice().get())) {
+
       return;
     }
 
@@ -1867,16 +1888,10 @@ public class NotificationManager {
               informationRequest.getStartAt(), informationRequest.getEndTo());
       return;
     }
-    List<User> users = Lists.newArrayList();
-    if (roleDestination.equals(roleDao.getRoleByName(Role.GROUP_MANAGER))) {
-      users = person.getAffiliations().stream().map(gp -> gp.getGroup().getManager().getUser())
-          .collect(Collectors.toList());
-    } else {
-      users =
-          person.getOffice().getUsersRolesOffices().stream()
-          .filter(uro -> uro.getRole().equals(roleDestination))
-          .map(uro -> uro.getUser()).collect(Collectors.toList());
-    }
+
+    List<User> users =
+        person.getCurrentOffice().get().getUsersRolesOffices().stream().filter(uro -> uro.getRole().equals(roleDestination))
+        .map(uro -> uro.getUser()).collect(Collectors.toList());
 
     users.forEach(user -> {
       Notification.builder().destination(user).message(message)
@@ -1981,6 +1996,7 @@ public class NotificationManager {
               informationRequest.getStartAt(), informationRequest.getEndTo());
       return;
     }
+
     if (roleDestination.equals(roleDao.getRoleByName(Role.GROUP_MANAGER))) {
       person.getAffiliations().stream().map(gp -> gp.getGroup().getManager().getUser())
       .forEach(user -> {
@@ -2006,7 +2022,7 @@ public class NotificationManager {
                 simpleEmail.getSubject(), mailBody);
       });
     } else {
-      person.getOffice().getUsersRolesOffices().stream()
+      person.getCurrentOffice().get().getUsersRolesOffices().stream()
       .filter(uro -> uro.getRole().equals(roleDestination))
       .map(uro -> uro.getUser()).forEach(user -> {
         SimpleEmail simpleEmail = new SimpleEmail();
@@ -2029,9 +2045,7 @@ public class NotificationManager {
             informationRequest, user.getPerson().getEmail(), 
             simpleEmail.getSubject(), mailBody);
       });
-    }
-
-
+    }    
   }
 
   /**
@@ -2231,10 +2245,10 @@ public class NotificationManager {
     final Person person = mission.person;
     SimpleEmail simpleEmail = new SimpleEmail();
     String replayTo = (String) configurationManager
-        .configValue(person.getOffice(), EpasParam.EMAIL_TO_CONTACT);
+        .configValue(person.getCurrentOffice().get(), EpasParam.EMAIL_TO_CONTACT);
 
     if (Strings.isNullOrEmpty(replayTo)) {
-      person.getOffice().getUsersRolesOffices().stream()
+      person.getCurrentOffice().get().getUsersRolesOffices().stream()
       .filter(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))
       .map(uro -> uro.getUser()).forEach(u -> {
         try {

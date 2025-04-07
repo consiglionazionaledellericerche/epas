@@ -380,7 +380,9 @@ public class Competences extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)).get());
+
     boolean certificationsSent = false;
     List<Certification> certificationList = certificationDao
         .personCertifications(person, year, month);
@@ -410,7 +412,8 @@ public class Competences extends Controller {
       Long personId, int year, int month) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)).get());
 
     LocalDate date = new LocalDate(year, month, 1);
 
@@ -424,7 +427,9 @@ public class Competences extends Controller {
     flash.success(String.format("Aggiornate con successo le competenze per %s",
         person.fullName()));
     Competences.enabledCompetences(date.getYear(),
-        date.getMonthOfYear(), person.getOffice().id);
+
+        date.getMonthOfYear(), person.getOffice(date).get().id);
+
 
   }
 
@@ -547,12 +552,16 @@ public class Competences extends Controller {
     notFoundIfNull(person);
     CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceId);
     notFoundIfNull(code);
-    Office office = person.getOffice();
+
+    Office office = person.getOffice(new LocalDate(year, month, 1)).get();
+
     Competence competence = new Competence(person, code, year, month);
+
     if (competence.getCompetenceCode().getCode().equals("S1")) {
+      Optional<Office> officeOwner = Security.getUser().get().getPerson() != null 
+          ? Security.getUser().get().getPerson().getCurrentOffice() : Optional.absent();
       PersonStampingRecap psDto = stampingsRecapFactory.create(competence.getPerson(),
-          competence.getYear(), competence.getMonth(), true);
-      render("@editCompetence", competence, psDto, office, year, month, person);
+          competence.getYear(), competence.getMonth(), true, officeOwner);
     }
     render("@editCompetence", competence, office, year, month, person);
   }
@@ -577,14 +586,16 @@ public class Competences extends Controller {
 
     notFoundIfNull(code);
     notFoundIfNull(person);
-    Office office = person.getOffice();
+    Office office = person.getOffice(new LocalDate(year, month, 1)).get();
+    Optional<Office> officeOwner = Security.getUser().get().getPerson() != null 
+        ? Security.getUser().get().getPerson().getCurrentOffice() : Optional.absent();
     if (code.getCode().equals("S1") || code.getCode().equals("S2") || code.getCode().equals("S3")) {
       PersonStampingRecap psDto = null;
       boolean check = (Boolean) configurationManager
           .configValue(person, EpasParam.DISABLE_OVERTIME_LIMIT);
       if (code.getCode().equals("S1")) {
         psDto = stampingsRecapFactory.create(person,
-            year, month, true);
+            year, month, true, officeOwner);
         render(person, code, year, month, psDto, office, competence, check);
       }
       if (code.getCode().equals("S2")) {
@@ -606,14 +617,16 @@ public class Competences extends Controller {
 
     notFoundIfNull(competence);
 
-    Office office = competence.getPerson().getOffice();
+    Office office = competence.getPerson()
+        .getOffice(new LocalDate(competence.getYear(), competence.getMonth(), 1)).get();
+
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 
     String result = "";
 
     if (!Validation.hasErrors() && valueApproved != null && valueApproved > 0) {
-      result = competenceManager.canAddCompetence(competence, valueApproved);
+      result = competenceManager.canAddCompetence(competence, valueApproved, office);
       if (!result.isEmpty()) {
         Validation.addError("valueApproved", result);
       }
@@ -843,7 +856,7 @@ public class Competences extends Controller {
 
     beginMonth = new LocalDate(year, month, 1);
     
-    if (user.getPerson() == null || user.getPerson().getOffice() == null) {
+    if (user.getPerson() == null || user.getPerson().getOffice(new LocalDate(year, month, 1)) == null) {
       flash.error("%s è un'utenza di servizio non associata a nessuna persona, "
           + "non sono quindi presenti informazioni associate alla sua sede.", 
           user.getUsername());
@@ -853,13 +866,17 @@ public class Competences extends Controller {
     CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
     SimpleResults<Person> simpleResults = personDao.listForCompetence(code,
         Optional.<String>absent(),
-        Sets.newHashSet(user.getPerson().getOffice()),
+
+        Sets.newHashSet(user.getPerson().getOffice(beginMonth).get()),
+
         false,
         new LocalDate(year, month, 1),
         new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
         Optional.fromNullable(user.getPerson()));
     tableFeature = competenceManager.composeTableForOvertime(year, month,
-        null, null, user.getPerson().getOffice(), beginMonth, simpleResults, code);
+
+        null, null, user.getPerson().getOffice(beginMonth).get(), beginMonth, simpleResults, code);
+
 
     render(tableFeature, year, month, simpleResults);
 
@@ -1383,7 +1400,9 @@ public class Competences extends Controller {
   public static void handlePersonShiftShiftType(Long id) {
     PersonShiftShiftType psst = shiftDao.getById(id);
     notFoundIfNull(psst);
-    rules.checkIfPermitted(psst.getPersonShift().getPerson().getOffice());    
+
+    rules.checkIfPermitted(psst.getPersonShift().getPerson().getCurrentOffice().get());    
+
     render(psst);
   }
 
@@ -1393,7 +1412,9 @@ public class Competences extends Controller {
    * @param psst l'oggetto associazione tra persona e turno.
    */
   public static void updatePersonShiftShiftType(PersonShiftShiftType psst) {
-    rules.checkIfPermitted(psst.getPersonShift().getPerson().getOffice());
+
+    rules.checkIfPermitted(psst.getPersonShift().getPerson().getCurrentOffice().get());
+
     psst.save();
     flash.success("Informazioni salvate correttamente");
     manageShiftType(psst.getShiftType().id);
@@ -1490,7 +1511,9 @@ public class Competences extends Controller {
   public static void saveActivityConfiguration(PersonShift person, ShiftType activity, 
       LocalDate beginDate, boolean jolly) {
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getPerson().getOffice());
+
+    rules.checkIfPermitted(person.getPerson().getOffice(beginDate).get());
+
     if (beginDate == null) {
       Validation.addError("beginDate", "inserire una data di inizio!");
     }
@@ -1630,7 +1653,8 @@ public class Competences extends Controller {
         .stream().filter(e -> (linkedPeople.stream()
             .noneMatch(d -> d.getPerson().equals(e.getPerson()))))        
         .map(pcc -> pcc.getPerson()).distinct()
-        .filter(p -> p.getOffice().equals(type.getOffice())).collect(Collectors.toList());
+        .filter(p -> p.getCurrentOffice().get().equals(type.getOffice())).collect(Collectors.toList());
+
 
     render(available, type);
   }
@@ -1676,7 +1700,9 @@ public class Competences extends Controller {
   public static void saveReperibilityConfiguration(PersonReperibilityType type, 
       Person person, LocalDate beginDate) {
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getOffice(beginDate).get());
+
     notFoundIfNull(type);
     if (beginDate == null) {
       Validation.addError("beginDate", "inserire una data di inizio!");
@@ -1693,9 +1719,11 @@ public class Competences extends Controller {
       List<Person> available = competenceCodeDao
           .listByCodesAndOffice(codeList, type.getOffice(), Optional.fromNullable(LocalDate.now()))
           .stream().filter(e -> (personAssociated.stream()
+
               .noneMatch(d -> d.getPerson().equals(e.getPerson()))))        
           .map(pcc -> pcc.getPerson()).distinct()
-          .filter(p -> p.getOffice().equals(type.getOffice())).collect(Collectors.toList());
+          .filter(p -> p.getCurrentOffice().get().equals(type.getOffice())).collect(Collectors.toList());
+
       response.status = 400;
       render("@linkPeopleToReperibility", type, available);
     }

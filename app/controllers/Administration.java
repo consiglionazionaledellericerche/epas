@@ -651,7 +651,7 @@ public class Administration extends Controller {
       person.save();
       if (sendMail) {
         userManager.generateRecoveryToken(person);
-        emailManager.newUserMail(person);
+        emailManager.newUserMail(person, office);
       }
     });
 

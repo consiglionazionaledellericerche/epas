@@ -762,8 +762,10 @@ public class AbsenceGroups extends Controller {
     //se l'user è amministratore visualizzo lo switcher del gruppo
     final User currentUser = Security.getUser().get();
     if (currentUser.isSystemUser()
-        || userDao.getUsersWithRoles(person.getOffice(), 
-            Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI, Role.SEAT_SUPERVISOR)
+
+        || userDao.getUsersWithRoles(person.getCurrentOffice().get(), 
+            Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)
+
         .contains(currentUser)) {
       isAdmin = true;
     }
@@ -840,7 +842,7 @@ public class AbsenceGroups extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getOffice(date).get());
 
     GroupAbsenceType groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
     notFoundIfNull(groupAbsenceType);
@@ -897,7 +899,7 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(initializationGroup.getGroupAbsenceType());
     notFoundIfNull(initializationGroup.getDate());
 
-    rules.checkIfPermitted(initializationGroup.getPerson().getOffice());
+    rules.checkIfPermitted(initializationGroup.getPerson().getOffice(initializationGroup.getDate()).get());
 
     PeriodChain periodChain = absenceService.residual(initializationGroup.getPerson(),
         initializationGroup.getGroupAbsenceType(), initializationGroup.getDate());
@@ -941,8 +943,10 @@ public class AbsenceGroups extends Controller {
       groupStatus(initializationGroup.getPerson().id, initializationGroup.getGroupAbsenceType().id,
           initializationGroup.getDate());
     } else {
-      absenceInitializations(initializationGroup.getPerson().getOffice().id,
-          initializationGroup.getGroupAbsenceType().id);
+
+      absenceInitializations(initializationGroup.getPerson()
+          .getOffice(initializationGroup.getDate()).get().id, initializationGroup.getGroupAbsenceType().id);
+
     }
   }
 
@@ -956,7 +960,7 @@ public class AbsenceGroups extends Controller {
 
     notFoundIfNull(initializationGroup);
 
-    rules.checkIfPermitted(initializationGroup.getPerson().getOffice());
+    rules.checkIfPermitted(initializationGroup.getPerson().getOffice(initializationGroup.getDate()).get());
 
     initializationGroup.delete();
 
@@ -968,8 +972,10 @@ public class AbsenceGroups extends Controller {
       groupStatus(initializationGroup.getPerson().id, initializationGroup.getGroupAbsenceType().id,
           initializationGroup.getDate());
     } else {
-      absenceInitializations(initializationGroup.getPerson().getOffice().id,
-          initializationGroup.getGroupAbsenceType().id);
+
+      absenceInitializations(initializationGroup.getPerson()
+          .getOffice(initializationGroup.getDate()).get().id, initializationGroup.getGroupAbsenceType().id);
+
     }
 
   }
@@ -1371,7 +1377,8 @@ public class AbsenceGroups extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, 1, 1)).get());
 
     CertificationYearSituation yearSituation = absenceCertificationService
         .buildCertificationYearSituation(person, year, false);
@@ -1388,7 +1395,9 @@ public class AbsenceGroups extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getCurrentOffice().get());
+
     int year = LocalDate.now().getYear();
     if (LocalDate.now().getMonthOfYear() == DateTimeConstants.JANUARY) {
       year = year - 1;
@@ -1401,7 +1410,7 @@ public class AbsenceGroups extends Controller {
           + " all'interno della sede selezionata");
     }
 
-    importCertificationsAbsences(person.getOffice().id);
+    importCertificationsAbsences(person.getCurrentOffice().get().id);
 
   }
 
@@ -1413,7 +1422,9 @@ public class AbsenceGroups extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, 1, 1)).get());
+
     LocalDate updateFrom = LocalDate.now();
     LocalDate beginYear = updateFrom.monthOfYear().withMinimumValue()
         .dayOfMonth().withMinimumValue();
@@ -1456,7 +1467,8 @@ public class AbsenceGroups extends Controller {
 
     flash.success("Tutti i dati sono stati caricati correttamente.");
 
-    importCertificationsAbsences(person.getOffice().id);
+    importCertificationsAbsences(person.getCurrentOffice().get().id);
+
   }
 
 }

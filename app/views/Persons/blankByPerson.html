@@ -1,0 +1,37 @@
+%{
+  if(personOffice.persistent) 
+    modaltitle = 'Modifica afferenza per ' + personOffice.person.fullname;
+  else
+    modaltitle = 'Inserimento afferenza per ' + personOffice.person.fullname;
+}%
+  
+#{modalAsync id:'defaultModal', title:modaltitle }
+
+  <div id="blankByPerson">
+    #{alert color:'info'}
+	  Inserire i dati dell'appartenenza alla sede di lavoro. 
+	#{/alert}
+
+	#{form @saveOfficeChanged(), class:'form-horizontal', method:'POST', autocomplete:false, 
+		        'data-async':'#page_content', 'data-async-error':'#blankByPerson'}
+
+	  #{if personOffice.persistent }
+	    <input type="hidden" name="personOffice.id" value="${personOffice.id}"/>
+	  #{/if}
+	  <input type="hidden" name="personOffice.person.id" value="${personOffice.person.id}"/>
+
+	  #{f.selectModel 'personOffice.office', items:availableOffices, required:true, getLabel:true /}
+	  
+
+	  #{f.date 'personOffice.beginDate' /}
+	  #{f.date 'personOffice.endDate' /}
+
+	  #{b.buttons center:true}
+	   #{if personOffice.persistent }<input class="text-center btn btn-primary" type="submit" value="Modifica" />#{/if}
+	   #{else}<input class="text-center btn btn-primary" type="submit" value="Inserisci" />#{/else}
+	  #{/b.buttons}  
+	
+	#{/form}
+  </div>
+  
+#{/modalAsync}

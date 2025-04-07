@@ -160,7 +160,9 @@ public class Absences extends Controller {
     
     Optional<User> currentUser = Security.getUser();
     if (!currentUser.isPresent() || currentUser.get().hasRoles(Role.PERSONNEL_ADMIN)) {
-      rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
+
+      rules.checkIfPermitted(absence.getPersonDay().getPerson().getCurrentOffice().get());
+
     } else {
       rules.checkIfPermitted(absence);
     }    
@@ -194,7 +196,9 @@ public class Absences extends Controller {
     //TODO: va completata la business logic di questo metodo!!!
     Absence absence = absenceDao.getAbsenceById(absenceId);
     Verify.verify(absence.isPersistent(), "Assenza specificata inesistente!");
-    rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
+
+    rules.checkIfPermitted(absence.getPersonDay().getPerson().getCurrentOffice().get());
+
     if (hours == null || minutes == null) {
       flash.error("Quantità non corrette di ore e minuti.");
       Stampings.personStamping(absence.getPersonDay().getPerson().id,
@@ -269,7 +273,9 @@ public class Absences extends Controller {
     //Provvisoriamente mangengo solo quelle di persone dell'office
     List<Absence> absenceList = Lists.newArrayList();
     for (Absence absence : absenceListAux) {
-      if (absence.getPersonDay().getPerson().getOffice().equals(office)) {
+
+      if (absence.getPersonDay().getPerson().getOffice(absence.getPersonDay().getDate()).get().equals(office)) {
+
         absenceList.add(absence);
       }
     }
@@ -320,7 +326,9 @@ public class Absences extends Controller {
 
     Optional<User> currentUser = Security.getUser();
     if (!currentUser.isPresent() || currentUser.get().hasRoles(Role.PERSONNEL_ADMIN)) {
-      rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
+
+      rules.checkIfPermitted(absence.getPersonDay().getPerson().getCurrentOffice().get());
+
     } else {
       rules.checkIfPermitted(absence);
     }
@@ -347,7 +355,10 @@ public class Absences extends Controller {
    * @throws IOException eccezione di IO
    */
   public static void zipAttachment(String code, Integer year, Integer month) throws IOException {
-    rules.checkIfPermitted(Security.getUser().get().getPerson().getOffice());
+
+    rules.checkIfPermitted(Security.getUser().get().getPerson()
+        .getOffice(new LocalDate(year, month, 1)).get());
+
     FileOutputStream fos = new FileOutputStream("attachment" + '-' + code + ".zip");
     ZipOutputStream zos = new ZipOutputStream(fos);
 
@@ -397,7 +408,8 @@ public class Absences extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)).get());
+
 
     List<Absence> personAbsenceListWithFile = new ArrayList<Absence>();
     List<Absence> personAbsenceList = absenceDao
@@ -425,7 +437,7 @@ public class Absences extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getOffice(from).get());
 
     //Se le date non sono specificate imposto il giorno corrente
     if (from == null || to == null) {
@@ -454,7 +466,6 @@ public class Absences extends Controller {
       render(personList, person, from, to, missioni, ferie, riposiCompensativi, altreAssenze);
     }
 
-    rules.checkIfPermitted(person.getOffice());
 
     List<Absence> absenceList = absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), 
         from, Optional.fromNullable(to), false);
@@ -490,7 +501,7 @@ public class Absences extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, 1, 1)).get());
     YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(
         person, year, absenceDao.getYearlyAbsence(person, year));
     render(yearlyAbsencesRecap, year, personId, person);
@@ -580,7 +591,8 @@ public class Absences extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getOffice(monthBegin).get());
+
     List<Absence> absenceToRender = new ArrayList<Absence>();
 
     if (absenceTypeCode.equals("Totale")) {
@@ -610,8 +622,9 @@ public class Absences extends Controller {
       Persons.list(null, null);
     }
     if (!(Boolean) confManager
-        .configValue(Security.getUser().get().getPerson().getOffice(), 
-            EpasParam.ABSENCES_FOR_EMPLOYEE)) {
+        .configValue(Security.getUser().get().getPerson()
+            .getOffice(new LocalDate(year, month, day)).get(), EpasParam.ABSENCES_FOR_EMPLOYEE)) {
+
       flash.error("Per accedere a questa funzione, occorre modificare il valore del "
           + "parametro 'Assenze visibili dai dipendenti'.");
       Stampings.stampings(year, month);
@@ -624,8 +637,11 @@ public class Absences extends Controller {
     } else {
       date = new LocalDate(year, month, day);
     }
+
     Person person = Security.getUser().get().getPerson();
-    List<Person> list = personDao.byOffice(person.getOffice());
+    
+    List<Person> list = personDao.byOffice(person.getOffice(new LocalDate(year, month, day)).get());
+
     List<PersonDay> pdList = personDayDao.getPersonDayForPeopleInDay(list, date);
     render(pdList, person, date);
   }

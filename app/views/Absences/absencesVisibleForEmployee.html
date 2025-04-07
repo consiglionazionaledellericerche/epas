@@ -5,7 +5,7 @@
 #{switcher year:true, month:true, day:true /}
 
 <div class="container">
-#{title title:('Presenze giornaliere dei colleghi della sede ' + person.office.name) + ' in data ' + date.format()/}
+#{title title:('Presenze giornaliere dei colleghi della sede ' + person.getOffice(date).get().name) + ' in data ' + date.format()/}
 
 	<div class="alert alert-warning">
 		Le presenze sono calcolate in funzione dell'ultima timbratura rilevata dal sistema.

@@ -65,7 +65,7 @@ public class InformationRequestManager {
   private RoleDao roleDao;
   private InformationRequestDao dao;
   private NotificationManager notificationManager;
-  
+
   /**
    * DTO per la configurazione delle InformationRequest.
    */
@@ -79,7 +79,7 @@ public class InformationRequestManager {
     boolean administrativeApprovalRequired;
     boolean managerApprovalRequired;
   }
-  
+
   /**
    * Costruttore injector. 
    *
@@ -99,7 +99,7 @@ public class InformationRequestManager {
     this.dao = dao;
     this.notificationManager = notificationManager;
   }
-  
+
   /**
    * Verifica quali sono le approvazioni richiesta per questo tipo di assenza per questa persona.
    *
@@ -118,13 +118,13 @@ public class InformationRequestManager {
       if (person.isTopQualification()
           && requestType.officeHeadApprovalRequiredTopLevel.isPresent()) {
         informationRequestConfiguration.officeHeadApprovalRequired =
-            (Boolean) configurationManager.configValue(person.getOffice(),
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(),
                 requestType.officeHeadApprovalRequiredTopLevel.get(), LocalDate.now());
       }
       if (!person.isTopQualification()
           && requestType.officeHeadApprovalRequiredTechnicianLevel.isPresent()) {
         informationRequestConfiguration.officeHeadApprovalRequired =
-            (Boolean) configurationManager.configValue(person.getOffice(),
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(),
                 requestType.officeHeadApprovalRequiredTechnicianLevel.get(), LocalDate.now());
       }
     }
@@ -133,14 +133,14 @@ public class InformationRequestManager {
     } else {
       if (person.isTopQualification()
           && requestType.administrativeApprovalRequiredTopLevel.isPresent()) {
-        informationRequestConfiguration.administrativeApprovalRequired = 
-            (Boolean) configurationManager.configValue(person.getOffice(), 
+        informationRequestConfiguration.administrativeApprovalRequired =            
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(),            
                 requestType.administrativeApprovalRequiredTopLevel.get(), LocalDate.now());
       }
       if (!person.isTopQualification()
           && requestType.administrativeApprovalRequiredTechnicianLevel.isPresent()) {
         informationRequestConfiguration.administrativeApprovalRequired = 
-            (Boolean) configurationManager.configValue(person.getOffice(), 
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(),            
                 requestType.administrativeApprovalRequiredTechnicianLevel.get(), LocalDate.now());
       }
     }
@@ -150,20 +150,20 @@ public class InformationRequestManager {
       if (person.isTopQualification() 
           && requestType.managerApprovalRequiredTopLevel.isPresent()) {
         informationRequestConfiguration.managerApprovalRequired = 
-            (Boolean) configurationManager.configValue(person.getOffice(), 
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(), 
                 requestType.managerApprovalRequiredTopLevel.get(), LocalDate.now());
       }
       if (!person.isTopQualification() 
           && requestType.managerApprovalRequiredTechnicianLevel.isPresent()) {
         informationRequestConfiguration.managerApprovalRequired = 
-            (Boolean) configurationManager.configValue(person.getOffice(), 
+            (Boolean) configurationManager.configValue(person.getCurrentOffice().get(), 
                 requestType.managerApprovalRequiredTechnicianLevel.get(), LocalDate.now());
       }
     }
-    
+
     return informationRequestConfiguration;
   }
-  
+
   /**
    * Imposta nella richiesta di assenza i tipi di approvazione necessari in funzione del tipo di
    * assenza e della configurazione specifica della sede del dipendente.
@@ -176,8 +176,8 @@ public class InformationRequestManager {
       Optional<ServiceRequest> serviceRequest, Optional<TeleworkRequest> teleworkRequest,
       Optional<ParentalLeaveRequest> parentalLeaveRequest) {
     val request = serviceRequest.isPresent() ? serviceRequest.get() : 
-        (teleworkRequest.isPresent() ? teleworkRequest.get() : 
-          (illnessRequest.isPresent() ? illnessRequest.get() : parentalLeaveRequest.get()));
+      (teleworkRequest.isPresent() ? teleworkRequest.get() : 
+        (illnessRequest.isPresent() ? illnessRequest.get() : parentalLeaveRequest.get()));
     Verify.verifyNotNull(request.getInformationType());
     Verify.verifyNotNull(request.getPerson());
 
@@ -189,7 +189,7 @@ public class InformationRequestManager {
       request.setAdministrativeApprovalRequired(config.administrativeApprovalRequired);
     }    
   }
-  
+
   /**
    * Verifica che gruppi ed eventuali responsabile di sede siano presenti per poter richiedere il
    * tipo di assenza.
@@ -208,24 +208,28 @@ public class InformationRequestManager {
     if (person.getUser().hasRoles(Role.GROUP_MANAGER, Role.SEAT_SUPERVISOR)) {
       return Lists.newArrayList();
     }
-    
+
     if (config.isOfficeHeadApprovalRequired() && uroDao
-        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), person.getOffice())
-        .isEmpty()) {
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), 
+            person.getCurrentOffice().get()).isEmpty()) {
+
       problems.add(String.format("Approvazione del responsabile di sede richiesta. "
           + "L'ufficio %s non ha impostato nessun responsabile di sede. "
-          + "Contattare l'ufficio del personale.", person.getOffice().getName()));
+          + "Contattare l'ufficio del personale.", person.getCurrentOffice().get().getName()));
+
     }
-    if (config.isAdministrativeApprovalRequired() && uroDao
-        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.PERSONNEL_ADMIN), person.getOffice())
-        .isEmpty()) {
+    if (config.isAdministrativeApprovalRequired() && uroDao        
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.PERSONNEL_ADMIN), 
+            person.getCurrentOffice().get()).isEmpty()) {
+
       problems.add(String.format("Approvazione dell'amministratore del personale richiesta. "
           + "L'ufficio %s non ha impostato nessun amministratore del personale. "
-          + "Contattare l'ufficio del personale.", person.getOffice().getName()));
+          + "Contattare l'ufficio del personale.", person.getCurrentOffice().get().getName()));
+
     }
     return problems;
   }
-  
+
   /**
    * Metodo di utilità per parsare una stringa e renderla un LocalTime.
    *
@@ -260,8 +264,8 @@ public class InformationRequestManager {
       Person person, InformationRequestEventType eventType, Optional<String> reason) {
 
     val request = serviceRequest.isPresent() ? serviceRequest.get() : 
-        (teleworkRequest.isPresent() ? teleworkRequest.get() : 
-          (illnessRequest.isPresent() ? illnessRequest.get() : parentalLeaveRequest.get()));
+      (teleworkRequest.isPresent() ? teleworkRequest.get() : 
+        (illnessRequest.isPresent() ? illnessRequest.get() : parentalLeaveRequest.get()));
 
     val problem = checkInformationRequestEvent(serviceRequest, illnessRequest, teleworkRequest, 
         parentalLeaveRequest, person, eventType);
@@ -298,38 +302,38 @@ public class InformationRequestManager {
         notificationManager.notificationInformationRequestRefused(serviceRequest, 
             illnessRequest, teleworkRequest, parentalLeaveRequest, person);
         break;
-        
+
       case ADMINISTRATIVE_ACKNOWLEDGMENT:
         //TODO: completare con controllo su IllnessRequest
         request.setAdministrativeApproved(java.time.LocalDateTime.now());
         request.setEndTo(java.time.LocalDateTime.now());
         request.setFlowEnded(true);
         break;
-        
+
       case ADMINISTRATIVE_REFUSAL:
         resetFlow(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest);
         break;
-        
+
       case MANAGER_ACKNOWLEDGMENT:
         //TODO: completare con controllo su IllnessRequest
         request.setManagerApproved(java.time.LocalDateTime.now());
         request.setEndTo(java.time.LocalDateTime.now());
         //request.flowEnded = true;
         break;
-        
+
       case MANAGER_REFUSAL:
         resetFlow(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest);
         request.setFlowEnded(true);
         notificationManager.notificationInformationRequestRefused(serviceRequest, 
             illnessRequest, teleworkRequest, parentalLeaveRequest, person);
         break;
-        
+
       case COMPLETE:
         request.setOfficeHeadApproved(java.time.LocalDateTime.now());
         request.setEndTo(java.time.LocalDateTime.now());
         request.setFlowEnded(true);
         break;
-        
+
       case DELETE:
         // Impostato flowEnded a true per evitare di completare il flusso inserendo l'assenza
         request.setFlowEnded(true);
@@ -358,7 +362,7 @@ public class InformationRequestManager {
     checkAndCompleteFlow(serviceRequest, illnessRequest, teleworkRequest, parentalLeaveRequest);
     return Optional.absent();
   }
-  
+
 
   /**
    * Verifica se il tipo di evento è eseguibile dall'utente indicato.
@@ -374,11 +378,11 @@ public class InformationRequestManager {
       Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest,
       Optional<ParentalLeaveRequest> parentalLeaveRequest,
       Person approver, InformationRequestEventType eventType) {
-    
+
     val request = serviceRequest.isPresent() ? serviceRequest.get() : 
-        (teleworkRequest.isPresent() ? teleworkRequest.get() : 
-          (illnessRequest.isPresent() ? illnessRequest.get() : parentalLeaveRequest.get()));
-    
+      (teleworkRequest.isPresent() ? teleworkRequest.get() : 
+        (illnessRequest.isPresent() ? illnessRequest.get() : parentalLeaveRequest.get()));
+
     if (eventType == InformationRequestEventType.STARTING_APPROVAL_FLOW) {
       if (!request.getPerson().equals(approver)) {
         return Optional.of("Il flusso può essere avviato solamente dal diretto interessato.");
@@ -394,14 +398,15 @@ public class InformationRequestManager {
         return Optional.of("Questa richiesta di assenza è già stata approvata "
             + "da parte del responsabile di sede.");
       }
-      if (!uroDao.getUsersRolesOffices(approver.getUser(), 
-          roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
-          request.getPerson().getOffice()).isPresent()) {
+
+      if (!uroDao.getUsersRolesOffices(approver.getUser(), roleDao.getRoleByName(Role.SEAT_SUPERVISOR),
+          request.getPerson().getCurrentOffice().get()).isPresent()) {
+        
         return Optional.of(String.format("L'evento %s non può essere eseguito da %s perché non ha"
             + " il ruolo di responsabile di sede.", eventType, approver.getFullname()));
       }
     }
-    
+
     if (eventType == InformationRequestEventType.ADMINISTRATIVE_ACKNOWLEDGMENT
         || eventType == InformationRequestEventType.ADMINISTRATIVE_REFUSAL) {
       if (!request.isAdministrativeApprovalRequired()) {
@@ -412,9 +417,9 @@ public class InformationRequestManager {
         return Optional.of("Questa richiesta di assenza è già stata approvata "
             + "da parte dell'amministrazione del personale.");
       }
-      if (!uroDao
+      if (!uroDao          
           .getUsersRolesOffices(approver.getUser(),
-              roleDao.getRoleByName(Role.PERSONNEL_ADMIN), request.getPerson().getOffice())
+              roleDao.getRoleByName(Role.PERSONNEL_ADMIN), request.getPerson().getCurrentOffice().get())          
           .isPresent()) {
         return Optional.of(String.format("L'evento %s non può essere eseguito da %s perché non ha"
             + " il ruolo di amministratore del personale.", eventType, approver.getFullname()));
@@ -453,7 +458,7 @@ public class InformationRequestManager {
       parentalLeaveRequest.get().setAdministrativeApproved(null);
     }
   }
-  
+
   /**
    * Controlla se una richiesta informativa può essere terminata con successo.
    *
@@ -487,7 +492,7 @@ public class InformationRequestManager {
       }
     }
   }
- 
+
   /**
    * Certifica il completamento del flusso.
    *
@@ -515,7 +520,7 @@ public class InformationRequestManager {
       parentalLeaveRequest.get().save();
     }
   }
-  
+
   /**
    * Segue l'approvazione del flusso controllando i vari casi possibili. 
    *
@@ -538,7 +543,7 @@ public class InformationRequestManager {
         managerApproval(serviceRequest.get().id, user);
         return true;
       }
-      
+
     }
     if (illnessRequest.isPresent()) {
       if (illnessRequest.get().isOfficeHeadApprovalRequired() 
@@ -571,10 +576,10 @@ public class InformationRequestManager {
         return true;
       }
     }
-    
+
     return false;
   }
-  
+
 
   /**
    * Approvazione richiesta informativa da parte del responsabile di sede. 
@@ -610,11 +615,11 @@ public class InformationRequestManager {
         Optional.absent());
     log.info("{} approvata dal responsabile di sede {}.", request,
         currentPerson.getFullname());
-    
+
     notificationManager.notificationInformationRequestPolicy(user, request, true);
   }
-  
- 
+
+
   /**
    * Disapprovazione richiesta di flusso informativo da parte del responsabile di sede.
    *
@@ -650,7 +655,7 @@ public class InformationRequestManager {
     log.info("{} disapprovata dal responsabile di sede {}.", request,
         currentPerson.getFullname());
   }
-  
+
   /**
    * Approvazione della richiesta di flusso informativo da parte dell'amministratore del personale.
    *
@@ -685,10 +690,10 @@ public class InformationRequestManager {
         Optional.absent());
     log.info("{} approvata dall'amministratore del personale {}.", request,
         currentPerson.getFullname());
-    
+
     notificationManager.notificationInformationRequestPolicy(user, request, true);
   }
-  
+
   /**
    * Approvazione della richiesta di flusso informativo da parte dell'amministratore del personale.
    *
@@ -724,7 +729,7 @@ public class InformationRequestManager {
     log.info("{} disapprovata dal responsabile di sede {}.", request,
         currentPerson.getFullname());
   }
-  
+
   /**
    * Approvazione del responsabile di gruppo.
    *
@@ -759,10 +764,10 @@ public class InformationRequestManager {
         Optional.absent());
     log.info("{} approvata dal responsabile di gruppo {}.", request,
         currentPerson.getFullname());
-    
+
     notificationManager.notificationInformationRequestPolicy(user, request, true);
   }
-  
+
   /**
    * Respinta del responsabile di gruppo.
    *

@@ -109,8 +109,10 @@ public class GroupManager {
       return true;
     }
     Optional<UsersRolesOffices> uro = 
-        uroDao.getUsersRolesOffices(
-            group.getManager().getUser(), role, group.getManager().getOffice());
+
+        uroDao.getUsersRolesOffices(group.getManager().getUser(), role, 
+            group.getManager().getCurrentOffice().get());
+
     if (uro.isPresent()) {
       uro.get().delete();
       log.debug("Eliminato ruolo {} per l'utente {}", 
@@ -174,17 +176,17 @@ public class GroupManager {
       }
     }
     if (role.getName().equals(Role.MEAL_TICKET_MANAGER)) {
-      map.put(role, getMealTicketsManager(person.getOffice()));
+      map.put(role, getMealTicketsManager(person.getCurrentOffice().get()));
     }
 
     if (role.getName().equals(Role.PERSONNEL_ADMIN)) {
-      map.put(role, getPersonnelAdminInSeat(person.getOffice()));
+      map.put(role, getPersonnelAdminInSeat(person.getCurrentOffice().get()));
     }
     if (role.getName().equals(Role.PERSONNEL_ADMIN_MINI)) {
-      map.put(role, getPersonnelAdminMiniInSeat(person.getOffice()));
+      map.put(role, getPersonnelAdminMiniInSeat(person.getCurrentOffice().get()));
     }
     if (role.getName().equals(Role.REGISTRY_MANAGER)) {
-      map.put(role, getRegistryManager(person.getOffice()));
+      map.put(role, getRegistryManager(person.getCurrentOffice().get()));
     }
     if (role.getName().equals(Role.REPERIBILITY_MANAGER)) {
       if (!person.getReperibility().isEmpty()) {
@@ -195,7 +197,7 @@ public class GroupManager {
     }
 
     if (role.getName().equals(Role.SEAT_SUPERVISOR)) {
-      map.put(role, getSeatSupervisor(person.getOffice()));
+      map.put(role, getSeatSupervisor(person.getCurrentOffice().get()));
     }
     if (role.getName().equals(Role.SHIFT_MANAGER)) {
       if (!person.getPersonShifts().isEmpty()) {
@@ -206,7 +208,7 @@ public class GroupManager {
       } 
     }
     if (role.getName().equals(Role.TECHNICAL_ADMIN)) {
-      map.put(role, getTechnicalAdminInSeat(person.getOffice()));
+      map.put(role, getTechnicalAdminInSeat(person.getCurrentOffice().get()));
     }
 
 

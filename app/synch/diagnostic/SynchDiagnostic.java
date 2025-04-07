@@ -120,9 +120,12 @@ public class SynchDiagnostic {
     }
 
     //Stessa sede ...
-    return epasPerson.getOffice().getPerseoId() != null
+
+    return epasPerson.getCurrentOffice().get().getPerseoId() != null
         && perseoPerson.getPerseoOfficeId() != null
-        && Objects.equals(epasPerson.getOffice().getPerseoId(), perseoPerson.getPerseoOfficeId());
+        && Objects.equals(epasPerson.getCurrentOffice().get().getPerseoId(), 
+            perseoPerson.getPerseoOfficeId());
+
   }
 
   /**

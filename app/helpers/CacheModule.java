@@ -23,6 +23,7 @@ import com.google.inject.Singleton;
 import common.injection.AutoRegister;
 import dao.PersonDao;
 import lombok.extern.slf4j.Slf4j;
+import manager.PersonsOfficesManager;
 import manager.attestati.service.CertificationService;
 import manager.attestati.service.CertificationsComunication;
 import manager.attestati.service.ICertificationService;
@@ -44,9 +45,9 @@ public class CacheModule extends AbstractModule {
   @Singleton
   public CacheValues getCacheValues(
       CertificationsComunication certification, ICertificationService certService,
-      PersonDao personDao) {
+      PersonDao personDao, PersonsOfficesManager personOfficeManager) {
     CacheValues cacheValues = 
-        new CacheValues(certification, certService, personDao);
+        new CacheValues(certification, certService, personDao, personOfficeManager);
     log.info("Creata nuova cacheValues: {}", cacheValues);
     return cacheValues;
   }

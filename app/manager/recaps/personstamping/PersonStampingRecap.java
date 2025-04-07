@@ -32,8 +32,10 @@ import manager.PersonDayManager;
 import manager.PersonManager;
 import models.Contract;
 import models.ContractMonthRecap;
+import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.PersonsOffices;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.Stamping;
@@ -114,7 +116,7 @@ public class PersonStampingRecap {
   public PersonStampingRecap(PersonDayManager personDayManager, PersonDayDao personDayDao,
       PersonManager personManager, PersonStampingDayRecapFactory stampingDayRecapFactory,
       IWrapperFactory wrapperFactory, int year, int month, Person person,
-      boolean considerExitingNow) {
+      boolean considerExitingNow, Optional<Office> officeOwner) {
 
     // DATI DELLA PERSONA
     if (Session.current() != null && Security.getUser() != null && Security.getUser().isPresent()) {
@@ -131,8 +133,22 @@ public class PersonStampingRecap {
       this.currentMonth = true;
     }
 
-    LocalDate begin = new LocalDate(year, month, 1);
-    LocalDate end = begin.dayOfMonth().withMaximumValue();
+    LocalDate begin = null;
+    LocalDate end = null;
+    if (officeOwner.isPresent()) {
+      java.util.Optional<PersonsOffices> personOffice = person.personsOffices.stream()
+          .filter(po -> po.office.equals(officeOwner.get())).findFirst();
+      if (personOffice.isPresent()) {
+        begin = personOffice.get().getBeginDate().isBefore(new LocalDate(year, month, 1)) 
+            ? new LocalDate(year, month, 1) : personOffice.get().getBeginDate();
+        end = personOffice.get().getEndDate() == null 
+            || personOffice.get().getEndDate().isAfter(begin.dayOfMonth().withMaximumValue()) 
+            ? begin.dayOfMonth().withMaximumValue() : personOffice.get().getEndDate();
+      }
+    } else {
+      begin = new LocalDate(year, month, 1);
+      end = begin.dayOfMonth().withMaximumValue();
+    }    
 
 
     List<PersonDay> personDays =
@@ -217,13 +233,17 @@ public class PersonStampingRecap {
     // this.positiveResidualInMonth = wrapperFactory.create(person)
     // .getPositiveResidualInMonth(this.year, this.month);
 
-    this.numberOfCompensatoryRestUntilToday =
-        personManager.numberOfCompensatoryRestUntilToday(person, year, month);
+    this.numberOfCompensatoryRestUntilToday = end.isBefore(new LocalDate(year, month, 1)
+        .dayOfMonth().withMaximumValue()) 
+        ? personManager.numberOfCompensatoryRestUntilToday(person, new LocalDate(year, 1, 1), end) 
+            : personManager.numberOfCompensatoryRestUntilToday(person, year, month);
 
     this.basedWorkingDays = personManager.basedWorkingDays(personDays, monthContracts, end);
     this.absenceCodeMap = personManager.countAbsenceCodes(totalPersonDays);
     this.absenceList = personManager.listAbsenceCodes(totalPersonDays);
-    LocalDate from = person.getOffice().getBeginDate();
+    
+    LocalDate from = person.getCurrentOffice().get().getBeginDate();
+
     List<Absence> list = personManager.absencesToRecover(person, from, LocalDate.now(),
         JustifiedTypeName.recover_time);
     this.absencesToRecoverList = personManager.dtoList(list);

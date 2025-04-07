@@ -163,7 +163,7 @@ public class MissionManager {
       return false;
     }
 
-    Office office = body.person.getOffice();
+    Office office = body.person.getCurrentOffice().get();
 
     //verifico il parametro di ora inizio lavoro in sede
     LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
@@ -333,11 +333,15 @@ public class MissionManager {
       return false;
     }
     LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(
-        body.person.getOffice(), 
+
+        body.person.getOffice(body.dataInizio.toLocalDate()).get(), 
+
         EpasParam.WORK_INTERVAL_MISSION_DAY, body.dataInizio.toLocalDate());
     if (workInterval == null) {
       log.warn(LOG_PREFIX +  "Il parametro di orario di lavoro missione "
-          + "non è valorizzato per la sede {}", body.person.getOffice().getName());
+          + "non è valorizzato per la sede {}", body.person.getOffice(body.dataInizio.toLocalDate())
+          .get().getName());
+
       return false;
     }
     //AbsenceForm absenceForm = buildAbsenceForm(body);

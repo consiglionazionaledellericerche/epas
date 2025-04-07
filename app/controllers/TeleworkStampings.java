@@ -49,6 +49,7 @@ import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.absences.AbsenceService;
 import manager.services.telework.errors.Errors;
 import manager.telework.service.TeleworkComunication;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
@@ -141,7 +142,8 @@ public class TeleworkStampings extends Controller {
       Stampings.stampings(last.getYear(), last.getMonthOfYear());
     }
     PersonStampingRecap psDto = stampingsRecapFactory
-        .create(wrperson.getValue(), year, month, true);
+        .create(wrperson.getValue(), year, month, true, Optional.absent());
+ 
 
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
     list = manager.getMonthlyStampings(psDto);
@@ -200,7 +202,7 @@ public class TeleworkStampings extends Controller {
 
     Preconditions.checkNotNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)).get());
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
 
@@ -214,10 +216,10 @@ public class TeleworkStampings extends Controller {
     }
 
     List<TeleworkPersonDayDto> list = Lists.newArrayList();
-
+    Optional<Office> officeOwner = Security.getUser().get().getPerson() != null 
+        ? Security.getUser().get().getPerson().getCurrentOffice() : Optional.absent();
     PersonStampingRecap psDto = stampingsRecapFactory
-        .create(wrPerson.getValue(), year, month, true);
-
+        .create(wrPerson.getValue(), year, month, true, officeOwner);
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
     list = manager.getMonthlyStampings(psDto);
     if (list.isEmpty()) {
@@ -428,7 +430,7 @@ public class TeleworkStampings extends Controller {
       Stampings.stampings(last.getYear(), last.getMonthOfYear());
     }
     PersonStampingRecap psDto = stampingsRecapFactory
-        .create(wrperson.getValue(), year, month, true);
+        .create(wrperson.getValue(), year, month, true, Optional.absent());
     LocalDate date = LocalDate.now();
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
     list = manager.stampingsForReport(psDto);

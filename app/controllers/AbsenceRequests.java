@@ -253,9 +253,11 @@ public class AbsenceRequests extends Controller {
     log.debug("Prelevo le richieste da approvare di assenze di tipo {} a partire da {}", type,
         fromDate);
     List<Group> groups = 
-        groupDao.groupsByOffice(person.getOffice(), Optional.absent(), Optional.of(false));
-    List<UsersRolesOffices> roleList = 
-        uroDao.getAdministrativeUsersRolesOfficesByUser(person.getUser());
+
+        groupDao.groupsByOffice(person.getCurrentOffice().get(), Optional.absent(), 
+            Optional.of(false));
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(person.getUser());
+
     List<AbsenceRequest> results =
         absenceRequestDao.allResults(roleList, fromDate, Optional.absent(), type, groups, person);
     Set<AbsenceRequest> myResults = absenceRequestDao.toApproveResults(roleList, Optional.absent(),
@@ -319,8 +321,9 @@ public class AbsenceRequests extends Controller {
       groupAbsenceType = absenceComponentDao
           .groupAbsenceTypeByName(DefaultGroup.RIPOSI_CNR.name()).get();
       PersonStampingRecap psDto = stampingsRecapFactory.create(person, LocalDate.now().getYear(),
-          LocalDate.now().getMonthOfYear(), true);
-      int maxDays = (Integer) configurationManager.configValue(person.getOffice(),
+
+          LocalDate.now().getMonthOfYear(), true, Optional.absent());
+      int maxDays = (Integer) configurationManager.configValue(person.getCurrentOffice().get(),
           EpasParam.MAX_RECOVERY_DAYS_13, LocalDate.now().getYear());
       compensatoryRestAvailable = maxDays - psDto.numberOfCompensatoryRestUntilToday;
       handleCompensatoryRestSituation = true;
@@ -486,13 +489,14 @@ public class AbsenceRequests extends Controller {
     absenceRequestManager.checkAbsenceRequestDates(absenceRequest, insertReport);
 
     int compensatoryRestAvailable = 0;
+
     if (absenceRequest.getType().equals(AbsenceRequestType.COMPENSATORY_REST)
         && absenceRequest.getPerson().isTopQualification()) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(absenceRequest.getPerson(),
-          LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(), true);
-      int maxDays = (Integer) configurationManager
-          .configValue(absenceRequest.getPerson().getOffice(),
-          EpasParam.MAX_RECOVERY_DAYS_13, LocalDate.now().getYear());
+          LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(), true, Optional.absent());
+      int maxDays = (Integer) configurationManager.configValue(absenceRequest.getPerson()
+          .getCurrentOffice().get(), EpasParam.MAX_RECOVERY_DAYS_13, LocalDate.now().getYear());
+
       compensatoryRestAvailable = maxDays - psDto.numberOfCompensatoryRestUntilToday;
 
     }

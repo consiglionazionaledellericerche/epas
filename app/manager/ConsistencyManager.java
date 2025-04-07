@@ -98,6 +98,7 @@ public class ConsistencyManager {
   private final AbsenceService absenceService;
   private final AbsenceComponentDao absenceComponentDao;
   private final AbsenceDao absenceDao;
+  private final PersonsOfficesManager personsOfficesManager;
 
   /**
    * Constructor.
@@ -129,7 +130,8 @@ public class ConsistencyManager {
       ShiftManager2 shiftManager2,
       AbsenceService absenceService,
       AbsenceComponentDao absenceComponentDao,
-      IWrapperFactory wrapperFactory, AbsenceDao absenceDao) {
+      IWrapperFactory wrapperFactory, AbsenceDao absenceDao,
+      PersonsOfficesManager personsOfficesManager) {
 
     this.secureManager = secureManager;
     this.officeDao = officeDao;
@@ -146,6 +148,7 @@ public class ConsistencyManager {
     this.personShiftDayDao = personShiftDayDao;
     this.shiftManager2 = shiftManager2;
     this.absenceDao = absenceDao;
+    this.personsOfficesManager = personsOfficesManager;
   }
 
   /**
@@ -292,7 +295,9 @@ public class ConsistencyManager {
     List<Person> personToRecompute = Lists.newArrayList();
 
     if (target instanceof Office) {
-      personToRecompute = ((Office) target).getPersons();
+
+      personToRecompute = personsOfficesManager.affiliatePeople((Office) target);
+
     } else if (target instanceof Person) {
       personToRecompute.add((Person) target);
     }
@@ -421,7 +426,7 @@ public class ConsistencyManager {
    */
   private LocalDate personFirstDateForEpasComputation(Person person, Optional<LocalDate> from) {
 
-    LocalDate officeLimit = person.getOffice().getBeginDate();
+    LocalDate officeLimit = person.getCurrentOffice().get().getBeginDate();
 
     // Calcolo a partire da
     LocalDate lowerBoundDate = new LocalDate(person.getBeginDate());
@@ -490,8 +495,9 @@ public class ConsistencyManager {
             pd.getValue().getPerson().getFullname(), pd.getValue().getDate()));
 
     LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
-        pd.getValue().getPerson().getOffice(), EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
 
+        pd.getValue().getPerson().getOffice(pd.getValue().getDate()).get(), EpasParam.LUNCH_INTERVAL, 
+        pd.getValue().getDate());
     
     LocalTimeInterval workInterval = null;
     Optional<PersonalWorkingTime> pwt = pd.getPersonalWorkingTime();
@@ -500,7 +506,10 @@ public class ConsistencyManager {
           pwt.get().getTimeSlot().getEndSlot());
     } else {
       workInterval = (LocalTimeInterval) configurationManager.configValue(
-        pd.getValue().getPerson().getOffice(), EpasParam.WORK_INTERVAL, pd.getValue().getDate());
+
+        pd.getValue().getPerson().getOffice(pd.getValue().getDate()).get(), 
+        EpasParam.WORK_INTERVAL, pd.getValue().getDate());
+
     }
     
     personDayManager.updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
@@ -547,8 +556,10 @@ public class ConsistencyManager {
     if (lastStampingPreviousDay != null && lastStampingPreviousDay.isIn()) {
 
       // TODO: controllare, qui esiste un caso limite. Considero pd.date o previous.date?
-      LocalTime maxHour = (LocalTime) configurationManager
-          .configValue(pd.getValue().getPerson().getOffice(),
+
+      LocalTime maxHour = (LocalTime) configurationManager.configValue(pd.getValue().getPerson()
+          .getOffice(pd.getValue().getDate()).get(),
+
           EpasParam.HOUR_MAX_TO_CALCULATE_WORKTIME, pd.getValue().getDate());
 
       Collections.sort(pd.getValue().getStampings());
@@ -616,8 +627,10 @@ public class ConsistencyManager {
           log.error("No vacation period {}", contract.toString());
           continue;
         }
-        
-        LocalDate begin = person.getOffice().getBeginDate();
+        // Usiamo l'inizio della sede in cui il dipendente stava in yearMonthFrom
+        LocalDate begin = person.getOffice(new LocalDate(yearMonthFrom.getYear(), 
+            yearMonthFrom.getMonthOfYear(), 1)).get().getBeginDate();
+
         LocalDate end = new LocalDate(yearMonthFrom.getYear(), 
             yearMonthFrom.getMonthOfYear(), 1).dayOfMonth().withMaximumValue();
         

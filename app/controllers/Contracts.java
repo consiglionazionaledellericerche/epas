@@ -118,7 +118,8 @@ public class Contracts extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     IWrapperPerson wrPerson = wrapperFactory.create(person);
-    rules.checkIfPermitted(person.getOffice());
+
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     IWrapperContract wrCurrentContract = null;
     if (wrPerson.getCurrentContract().isPresent()) {
@@ -140,8 +141,10 @@ public class Contracts extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
     Person person = contract.getPerson();
+
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
 
@@ -167,7 +170,8 @@ public class Contracts extends Controller {
   public static void split(Long contractId) {
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     LocalDate dateToSplit = new LocalDate();
 
@@ -184,8 +188,8 @@ public class Contracts extends Controller {
   public static void splitContract(@Valid Contract contract, @Required LocalDate dateToSplit, 
       boolean attestatiSync) {
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
 
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
     if (!DateUtility.isDateIntoInterval(dateToSplit, 
         new DateInterval(contract.getBeginDate(), contract.calculatedEnd()))) {
       Validation.addError("dateToSplit", "La data deve appartenere al contratto!!!");
@@ -272,8 +276,8 @@ public class Contracts extends Controller {
   public static void merge(Long contractId) {
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
     Person person = contract.getPerson();
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     Contract previousContract = personDao.getPreviousPersonContract(contract);    
 
@@ -290,9 +294,11 @@ public class Contracts extends Controller {
       boolean attestatiSync) {
     notFoundIfNull(contract);
     notFoundIfNull(previousContract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
     Optional<LocalDate> to = contract.getEndDate() != null 
         ? Optional.fromNullable(contract.getEndDate()) : Optional.absent();
+
 
     //1) si eliminano le assenze a partire da contract.beginDate
     List<Absence> copy = Lists.newArrayList();
@@ -372,7 +378,8 @@ public class Contracts extends Controller {
       LocalDate sourceDateRecoveryDay, boolean linkedToPreviousContract) { 
 
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
     
@@ -463,7 +470,7 @@ public class Contracts extends Controller {
 
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getCurrentOffice().get());
 
     Contract contract = new Contract();
     contract.setPerson(person);
@@ -482,7 +489,7 @@ public class Contracts extends Controller {
     notFoundIfNull(contract);
     notFoundIfNull(wtt);
 
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     if (!Validation.hasErrors()) {
       if (!contractManager.properContractCreate(contract, Optional.of(wtt), true)) {
@@ -514,7 +521,7 @@ public class Contracts extends Controller {
 
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     if (!confirmed) {
       render("@delete", contract);
@@ -545,7 +552,7 @@ public class Contracts extends Controller {
     Contract contract = contractDao.getContractById(id);
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
 
@@ -572,7 +579,7 @@ public class Contracts extends Controller {
     Verify.verify(cwtt.getContract().isPersistent());
     Verify.verify(cwtt.getWorkingTimeType().isPersistent());
 
-    rules.checkIfPermitted(cwtt.getContract().getPerson().getOffice());
+    rules.checkIfPermitted(cwtt.getContract().getPerson().getCurrentOffice().get());
 
     IWrapperContract wrappedContract = wrapperFactory.create(cwtt.getContract());
     Contract contract = cwtt.getContract();
@@ -635,7 +642,7 @@ public class Contracts extends Controller {
     Contract contract = contractDao.getContractById(id);
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
 
@@ -660,8 +667,9 @@ public class Contracts extends Controller {
     notFoundIfNull(pwt.getTimeSlot());
     Verify.verify(pwt.getContract().isPersistent());
     Verify.verify(pwt.getTimeSlot().isPersistent());
-    
-    rules.checkIfPermitted(pwt.getContract().getPerson().getOffice());
+
+    rules.checkIfPermitted(pwt.getContract().getPerson().getCurrentOffice().get());
+
 
     IWrapperContract wrappedContract = wrapperFactory.create(pwt.getContract());
     Contract contract = pwt.getContract();
@@ -736,7 +744,7 @@ public class Contracts extends Controller {
 
     notFoundIfNull(pwt);
 
-    rules.checkIfPermitted(pwt.getContract().getPerson().getOffice());
+    rules.checkIfPermitted(pwt.getContract().getPerson().getCurrentOffice().get());
 
     boolean deletion = true;
     val contract = pwt.getContract();
@@ -772,7 +780,7 @@ public class Contracts extends Controller {
     Contract contract = contractDao.getContractById(id);
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
 
@@ -801,7 +809,7 @@ public class Contracts extends Controller {
     Verify.verify(cmts.getContract().isPersistent());
     Verify.verify(cmts.getTimeSlot().isPersistent());
 
-    rules.checkIfPermitted(cmts.getContract().getPerson().getOffice());
+    rules.checkIfPermitted(cmts.getContract().getPerson().getCurrentOffice().get());
 
     IWrapperContract wrappedContract = wrapperFactory.create(cmts.getContract());
     Contract contract = cmts.getContract();
@@ -878,7 +886,7 @@ public class Contracts extends Controller {
 
     notFoundIfNull(cmts);
 
-    rules.checkIfPermitted(cmts.getContract().getPerson().getOffice());
+    rules.checkIfPermitted(cmts.getContract().getPerson().getCurrentOffice().get());
 
     boolean deletion = true;
     val contract = cmts.getContract();
@@ -914,7 +922,7 @@ public class Contracts extends Controller {
     Contract contract = contractDao.getContractById(id);
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
 
@@ -935,7 +943,7 @@ public class Contracts extends Controller {
     notFoundIfNull(vp);
     notFoundIfNull(vp.getContract());
 
-    rules.checkIfPermitted(vp.getContract().getPerson().getOffice());
+    rules.checkIfPermitted(vp.getContract().getPerson().getCurrentOffice().get());
 
     IWrapperContract wrappedContract = wrapperFactory.create(vp.getContract());
     Contract contract = vp.getContract();
@@ -996,7 +1004,7 @@ public class Contracts extends Controller {
     Contract contract = contractDao.getContractById(id);
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
 
@@ -1017,7 +1025,7 @@ public class Contracts extends Controller {
     notFoundIfNull(csp);
     notFoundIfNull(csp.getContract());
 
-    rules.checkIfPermitted(csp.getContract().getPerson().getOffice());
+    rules.checkIfPermitted(csp.getContract().getPerson().getCurrentOffice().get());
 
     IWrapperContract wrappedContract = wrapperFactory.create(csp.getContract());
     Contract contract = csp.getContract();
@@ -1075,13 +1083,14 @@ public class Contracts extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     if (contract.getSourceDateResidual() == null) {
       contractManager.cleanResidualInitialization(contract);
     }
 
-    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getOffice());
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getCurrentOffice().get());
     IWrapperPerson wrPerson = wrapperFactory.create(contract.getPerson());
 
     Integer hoursCurrentYear = 0;
@@ -1110,7 +1119,8 @@ public class Contracts extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     IWrapperContract wrContract = wrapperFactory.create(contract);
     if (contract.getSourceDateVacation() == null) {
@@ -1121,7 +1131,8 @@ public class Contracts extends Controller {
     Integer sourceVacationCurrentYearUsed = contract.getSourceVacationCurrentYearUsed();
     Integer sourcePermissionUsed = contract.getSourcePermissionUsed();
 
-    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getOffice());
+
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getCurrentOffice().get());
     IWrapperPerson wrPerson = wrapperFactory.create(contract.getPerson());
 
     render(contract, wrContract, wrOffice, wrPerson, 
@@ -1135,14 +1146,15 @@ public class Contracts extends Controller {
 
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     IWrapperContract wrContract = wrapperFactory.create(contract);
     if (contract.getSourceDateMealTicket() == null) {
       contractManager.cleanMealTicketInitialization(contract);
     }
 
-    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getOffice());
+    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getCurrentOffice().get());
     IWrapperPerson wrPerson = wrapperFactory.create(contract.getPerson());
 
     render(contract, wrContract, wrOffice, wrPerson);
@@ -1165,10 +1177,12 @@ public class Contracts extends Controller {
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getCurrentOffice().get());
 
     IWrapperContract wrContract = wrapperFactory.create(contract);
-    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getOffice());
+
+    IWrapperOffice wrOffice = wrapperFactory
+        .create(contract.getPerson().getOffice(sourceDateResidual).get());
     IWrapperPerson wrPerson = wrapperFactory.create(contract.getPerson());
 
     if (sourceDateResidual != null) {
@@ -1243,7 +1257,8 @@ public class Contracts extends Controller {
       flash.success(
           "Contratto di %s inizializzato correttamente.", contract.getPerson().fullName());
     }
-    initializationsStatus(contract.getPerson().getOffice().id);
+
+    initializationsStatus(contract.getPerson().getOffice(sourceDateResidual).get().id);
 
   }
 
@@ -1258,11 +1273,13 @@ public class Contracts extends Controller {
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getOffice(sourceDateVacation).get());
 
     IWrapperContract wrContract = wrapperFactory.create(contract);
-    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getOffice());
+    IWrapperOffice wrOffice = wrapperFactory
+        .create(contract.getPerson().getOffice(sourceDateVacation).get());
     IWrapperPerson wrPerson = wrapperFactory.create(contract.getPerson());
+
 
     if (sourceDateVacation != null) {
       validation.future(sourceDateVacation.toDate(),
@@ -1319,7 +1336,7 @@ public class Contracts extends Controller {
       flash.success(
           "Contratto di %s inizializzato correttamente.", contract.getPerson().fullName());
     }
-    initializationsVacation(contract.getPerson().getOffice().id);
+    initializationsVacation(contract.getPerson().getOffice(sourceDateVacation).get().id);
 
   }
 
@@ -1336,11 +1353,14 @@ public class Contracts extends Controller {
 
     notFoundIfNull(contract);
 
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    rules.checkIfPermitted(contract.getPerson().getOffice(sourceDateMealTicket).get());
 
     IWrapperContract wrContract = wrapperFactory.create(contract);
-    IWrapperOffice wrOffice = wrapperFactory.create(contract.getPerson().getOffice());
+
+    IWrapperOffice wrOffice = wrapperFactory
+        .create(contract.getPerson().getOffice(sourceDateMealTicket).get());
     IWrapperPerson wrPerson = wrapperFactory.create(contract.getPerson());
+
 
     // TODO: per adesso per definire il residuo dei buoni devo avere l'inizializazione generale
     // quando richiesta.
@@ -1398,7 +1418,8 @@ public class Contracts extends Controller {
     flash.success(
         "Buoni pasto di %s inizializzati correttamente.", contract.getPerson().fullName());
 
-    initializationsMeal(contract.getPerson().getOffice().id);
+    initializationsMeal(contract.getPerson().getOffice(sourceDateMealTicket).get().id);
+
   }
 
   /**

@@ -124,7 +124,7 @@
       <td><font color="#808080">${person.value.getQualification() != null ?
         person.value.getQualification().qualification : ''}</font></td>
       <td class="alignLeft">${person.value.user.username}</td>
-      <td>${person.value.office}</td>
+      <td>${person.value.getCurrentOffice().get()}</td>
     </tr>
     #{/else}
     #{/list}

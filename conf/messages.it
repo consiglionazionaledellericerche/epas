@@ -604,6 +604,8 @@ mealTicket=Buono Pasto
 mealTicket.error= Il blocco è già stato assegnato a un dipendente della propria sede
 modifierType= Calcolo Orario
 
+competence.personOffice=Il dipendente in questo mese afferisce a più di una sede di lavoro. \n Il conteggio della competenza potrebbe non essere del tutto corretto. Controllare anche l'invio dell'attestato di presenza.
+
 MealTicketDecision.COMPUTED=Calcolato
 MealTicketDecision.FORCED_TRUE=Forzato Si
 MealTicketDecision.FORCED_FALSE=Forzato No
@@ -712,6 +714,7 @@ PDFReport.thIncompleteTime=Orario incompleto
 PDFReport.thMissingTime=Orario insufficiente
 PDFReport.thWarnStampings=Orario incompleto fuori tolleranza
 
+
 personOvertime.numberOfHours =Quantità
 personOvertime.dateOfUpdate =Data inserimento
 
@@ -721,6 +724,12 @@ qualification.description=Descrizione
 qualification.persons.size=Numero persone associate
 qualification.absenceTypes.size=Numero tipi di assenza associati
 qualification.absenceTypes=Tipi di assenza associati
+
+personOffice.person = Persona
+personOffice.office = Sede
+personOffice.beginDate = Data di inizio afferenza
+personOffice.endDate = Data di fine afferenza
+
 
 ################### CALENDARIO SHIFT #################################################
 
@@ -951,9 +960,6 @@ vacations.takable=Usufruibili
 takableTotal=Limite Totale
 takableUsed=Limite Consumato
 complationUsed=Completato
-
-
-
 
 wtt.description= Nome Tipo Orario
 wtt.office=Sede
@@ -1192,6 +1198,7 @@ Persons.changePassword= Cambio Password
 Persons.children= Figli
 Persons.deletePerson= Elimina
 Persons.edit= Dati Anagrafici
+Persons.changeOffice= Sede di afferenza
 Persons.list= Lista Persone
 Persons.workGroup= Gruppo Di Lavoro
 PrintTags.listPersonForPrintTags= Stampa Cartellino

@@ -136,8 +136,10 @@ public class User extends BaseModel {
   
   @Override
   public String getLabel() {
-    if (this.person != null) {
-      return this.person.fullName() + " - " + this.person.getOffice().getName();
+
+    if (this.person != null && this.person.getCurrentOffice().isPresent()) {
+      return this.person.fullName() + " - " + this.person.getCurrentOffice().get().getName();
+
     } else if (this.getBadgeReader() != null) {
       return this.getBadgeReader().getCode();
 
@@ -168,7 +170,9 @@ public class User extends BaseModel {
    * @return true se ce l'ha, false altrimenti.
    */
   public boolean hasRelationWith(Office office) {
-    return owner == office || (person != null && person.getOffice() == office);
+
+    return owner == office || (person != null && person.getCurrentOffice().get() == office);
+
   }
 
   /**

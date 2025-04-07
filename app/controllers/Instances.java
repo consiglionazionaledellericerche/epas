@@ -55,6 +55,7 @@ import manager.ConsistencyManager;
 import manager.ContractManager;
 import manager.PeriodManager;
 import manager.PersonManager;
+import manager.PersonsOfficesManager;
 import manager.attestati.dto.show.ListaDipendenti;
 import manager.configurations.ConfigurationDto;
 import manager.configurations.ConfigurationManager;
@@ -128,6 +129,8 @@ public class Instances extends Controller {
   static ImportManager importManager;
   @Inject
   static GroupDao groupDao;
+  @Inject
+  static PersonsOfficesManager personsOfficesManager;
 
   public static void importInstance() {
     render();
@@ -293,7 +296,8 @@ public class Instances extends Controller {
         person.setSurname(WordUtils.capitalizeFully(dto.getSurname()));
         person.setEmail(dto.getEmail());
         person.setNumber(dto.getNumber());
-        person.setOffice(officeDao.byCodeId(codeId).get());
+        personsOfficesManager.addPersonInOffice(person, officeDao.byCodeId(codeId).get(), 
+            person.getBeginDate(), com.google.common.base.Optional.absent());        
         person.setQualification(qualificationDao.byQualification(dto.getQualification()).get());
         personManager.properPersonCreate(person);
         person.save();

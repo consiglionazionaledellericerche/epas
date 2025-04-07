@@ -17,17 +17,13 @@
 
 package controllers.rest;
 
-import javax.inject.Inject;
-
-import org.joda.time.LocalDateTime;
-
 import com.google.common.base.Optional;
-
 import controllers.Resecure;
 import controllers.Resecure.BasicAuth;
 import dao.OfficeDao;
 import helpers.JsonResponse;
 import it.cnr.iit.epas.JsonMissionBinder;
+import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.MissionManager;
 import manager.NotificationManager;
@@ -35,6 +31,8 @@ import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Office;
 import models.exports.MissionFromClient;
+import org.joda.time.LocalDateTime;
+import org.joda.time.LocalDate;
 import play.cache.Cache;
 import play.data.binding.As;
 import play.mvc.Controller;
@@ -114,7 +112,7 @@ public class Missions extends Controller {
       officeByMessage = officeDao.byCodeId(body.codiceSede);
     }    
     //Ufficio associato alla persona prelevata tramite la matricola passata nel JSON
-    Office office = body.person.getOffice();
+    Office office = body.person.getOffice(new LocalDate(body.dataInizio.toLocalDate())).get();
 
     if (!officeByMessage.isPresent()) {
       log.warn("--- Possibile messaggio proveniente da integrazione col nuovo Missioni Cineca ---");

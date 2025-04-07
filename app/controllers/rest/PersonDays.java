@@ -72,7 +72,7 @@ public class PersonDays extends Controller {
               + "mail cnr che serve per la ricerca.");
     }
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getOffice(date).get());
 
     PersonDay pd = personDayDao.getPersonDay(person, date).orNull();
     if (pd == null) {

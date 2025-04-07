@@ -251,7 +251,7 @@ public class PersonMonths extends Controller {
    * @param personMonthRecapId l'id del personMonthRecap
    */
   public static void deleteTrainingHours(Long personMonthRecapId) {
-        
+
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthRecapId);
     if (pm == null) {
       flash.error("Ore di formazioni inesistenti. Operazione annullata.");
@@ -259,7 +259,7 @@ public class PersonMonths extends Controller {
     }
     render(pm);
   }
-  
+
   /**
    * Permette la cancellazione delle ore di formazione.
    *
@@ -310,7 +310,7 @@ public class PersonMonths extends Controller {
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthRecapId);
-    
+
     pm.delete();
     flash.error("Ore di formazione eliminate con successo.");
     PersonMonths.visualizePeopleTrainingHours(pm.getYear(), pm.getMonth(), officeId);
@@ -372,7 +372,8 @@ public class PersonMonths extends Controller {
       @Required @Valid @Min(0) Integer value, Integer month, Integer year, Person person,
       Long personMonthSituationId) {
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)).get());
+
     checkErrors(begin, end, year, month, value);
     if (personMonthSituationId != null) {
       PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
@@ -390,15 +391,21 @@ public class PersonMonths extends Controller {
       pm.setTrainingHours(value);
       pm.save();
       flash.success("Ore di formazione aggiornate.", value);
-      visualizePeopleTrainingHours(year, month, pm.getPerson().getOffice().id);
-      
+
+      visualizePeopleTrainingHours(year, month, 
+          pm.getPerson().getOffice(new LocalDate(year, month, 1)).get().id);
+
+
     } else {
       checkPerson(person);
     }
-    
+
     if (Validation.hasErrors()) {
       List<Person> simplePersonList = personDao.listFetched(Optional.<String>absent(),
-          ImmutableSet.of(person.getOffice()), false, null, null, false).list();
+
+          ImmutableSet.of(person.getOffice(new LocalDate(year, month, 1)).get()), 
+          false, null, null, false).list();
+
       response.status = 400;
       render("@insertPeopleTrainingHours",
           person, month, year, begin, end, value, simplePersonList);
@@ -406,7 +413,10 @@ public class PersonMonths extends Controller {
 
     personMonthsManager.saveTrainingHours(person, year, month, begin, end, false, value);
     flash.success("Salvate %d ore di formazione per %s", value, person.fullName());
-    PersonMonths.visualizePeopleTrainingHours(year, month, person.getOffice().id);
+
+    PersonMonths.visualizePeopleTrainingHours(year, month, 
+        person.getOffice(new LocalDate(year, month, 1)).get().id);
+
   }
 
   /**
