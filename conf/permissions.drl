@@ -934,7 +934,7 @@ end
 rule showAbsenceRequest
 when 
   $ar: AbsenceRequest(person != currentOperator.person)
-  UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN, office == $ar.person.office)
+  UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN, office == $ar.person.getCurrentOffice().get())
   $c: PermissionCheck(action == "AbsenceRequests.show", target==$ar, granted == false)
 then
   $c.grant();
@@ -943,7 +943,7 @@ end
 rule showInformationRequest
 when
   $ir: InformationRequest(person != currentOperator.person) 
-  UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN, office == $ir.person.office)
+  UsersRolesOffices(role.name == Role.SEAT_SUPERVISOR || role.name == Role.PERSONNEL_ADMIN, office == $ir.person.getCurrentOffice().get())
   $c: PermissionCheck(action == "InformationRequests.show", target==$ir, granted == false)
 then
   $c.grant();
@@ -3204,7 +3204,7 @@ rule employeeCanEditStampingsServiceReasons
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- $o: Office() from $p.office
+ $o: Office() from $p.getCurrentOffice().get()
  $target: Stamping(isServiceReasons(), this.getOwner() == $p)
  $c: PermissionCheck(action in ("Stampings.edit", "Stampings.editServiceReasons", "Stampings.saveServiceReasons"), 
    target == $target, granted == false)
@@ -4024,7 +4024,7 @@ rule isOvertimeFlowsVisible
 when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person(qualification != null && qualification.qualification > 3) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_OVERTIME_FLOWS, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action in ("CompetenceRequests.enabled"), granted == false, target == null)
 then
@@ -4039,7 +4039,7 @@ rule isOvertimeHandleFlowsVisible
 when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_OVERTIME_FLOWS, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action == "CompetenceRequests.handleEnabled", granted == false, target == null)
 then
@@ -4050,7 +4050,7 @@ rule isOvertimeQuantityForEmployeeEnabled
 when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person(qualification != null && qualification.qualification > 3) from currentOperator.person
-  $o: Office() from $p.office
+  $o: Office() from $p.getCurrentOffice().get()
   Configuration(epasParam == EpasParam.ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action == "CompetenceRequests.overtimesQuantityEnabled", granted == false, target == null)
 then
