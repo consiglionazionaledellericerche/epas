@@ -30,6 +30,7 @@ import dao.GroupDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.PersonsOfficesDao;
 import dao.RoleDao;
 import dao.StampingDao;
 import dao.UserDao;
@@ -131,6 +132,8 @@ public class Stampings extends Controller {
   static RoleDao roleDao;
   @Inject
   static GroupDao groupDao;
+  @Inject
+  static PersonsOfficesDao personsOfficesDao;
 
 
   /**
@@ -206,7 +209,14 @@ public class Stampings extends Controller {
     Person person = personDao.getPersonById(personId);
     Preconditions.checkNotNull(person);
 
-    rules.checkIfPermitted(person.getCurrentOffice().get());
+    if (personsOfficesDao.monthlyAffiliations(person, year, month).size() > 1) {
+      if (person.getCurrentOffice().get() != Security.getUser().get().getPerson().getCurrentOffice().get()) {
+        rules.checkIfPermitted(person.getOffice(new LocalDate(year, month, 1)).get());
+      }
+    } else {
+      rules.checkIfPermitted(person.getCurrentOffice().get());
+    }
+    
 
     val yearMonth = new YearMonth(
         year != 0 ? year : YearMonth.now().getYear(),

@@ -123,4 +123,22 @@ public class PersonsOfficesDao extends DaoBase {
         .and(personsOffices.beginDate.before(LocalDate.now())
             .andAnyOf(personsOffices.endDate.isNull(), personsOffices.endDate.after(LocalDate.now())))).fetch();
   }
+  
+  /**
+   * Ritorna la lista delle affiliazioni di una persona nell'anno/mese passati come parametro.
+   * 
+   * @param person la persona di cui si cerca l'affiliazione
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento 
+   * @return la lista delle affiliazioni della persona nell'anno/mese passati come parametro.
+   */
+  public List<PersonsOffices> monthlyAffiliations(Person person, int year, int month) {
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
+    LocalDate beginMonth = new LocalDate(year, month, 1);
+    LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+    return getQueryFactory().selectFrom(personsOffices)
+        .where(personsOffices.person.eq(person)
+            .and(personsOffices.beginDate.loe(endMonth))
+            .andAnyOf(personsOffices.endDate.isNull(), personsOffices.endDate.goe(beginMonth))).fetch();
+  }
 }
