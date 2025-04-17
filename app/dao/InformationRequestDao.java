@@ -84,6 +84,7 @@ public class InformationRequestDao extends DaoBase {
       InformationType informationType, Person signer) {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
     final QPerson person = QPerson.person;
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     final QGroup group = QGroup.group;
 
     BooleanBuilder conditions = new BooleanBuilder();
@@ -117,11 +118,12 @@ public class InformationRequestDao extends DaoBase {
       final QAffiliation affiliation = QAffiliation.affiliation;
       List<InformationRequest> queryResults = getQueryFactory().selectFrom(informationRequest)
           .join(informationRequest.person, person).fetchJoin()
+          .leftJoin(informationRequest.person.personsOffices, personsOffices)
           .join(person.affiliations, affiliation)
             .on(affiliation.beginDate.before(LocalDate.now())
                 .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
           .join(affiliation.group, group)
-          .where(group.manager.eq(signer).and(groupManagerQuery(officeList, conditions, signer)))
+          .where(group.manager.eq(signer).and(groupManagerQuery(officeList, conditions, signer, personsOffices)))
           .distinct()
           .fetch();
       results.addAll(queryResults);
@@ -451,7 +453,7 @@ public class InformationRequestDao extends DaoBase {
         || uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))) {
       List<Office> officeList = uros.stream().map(u -> u.getOffice()).collect(Collectors.toList());
 
-      conditions = seatSupervisorQuery(officeList, conditions, signer);
+      conditions = seatSupervisorQuery(officeList, conditions, signer, personsOffices);
       return getQueryFactory().selectFrom(informationRequest)
           .leftJoin(informationRequest.person.personsOffices, personsOffices)
           .where(conditions).fetch();
@@ -470,7 +472,7 @@ public class InformationRequestDao extends DaoBase {
 
     if (uros.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))) {
       List<Office> officeList = uros.stream().map(u -> u.getOffice()).collect(Collectors.toList());
-      conditions = personnelAdminQuery(officeList, conditions, signer);
+      conditions = personnelAdminQuery(officeList, conditions, signer, personsOffices);
       return getQueryFactory().selectFrom(informationRequest)
           .leftJoin(informationRequest.person.personsOffices, personsOffices)
           .where(conditions).fetch();
@@ -489,9 +491,9 @@ public class InformationRequestDao extends DaoBase {
    * @return le condizioni per determinare se il responsabile di sede è coinvolto nell'approvazione.
    */
   private BooleanBuilder seatSupervisorQuery(List<Office> officeList,
-      BooleanBuilder condition, Person signer) {
+      BooleanBuilder condition, Person signer, QPersonsOffices personsOffices) {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
-    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;    
+        
     BooleanBuilder isGroupManagerStaff = 
         new BooleanBuilder(informationRequest.managerApprovalRequired.isTrue())
           .and(informationRequest.managerApproved.isNull());    
@@ -511,8 +513,8 @@ public class InformationRequestDao extends DaoBase {
    * @return le condizioni per determinare se il responsabile di sede è coinvolto nell'approvazione.
    */
   private BooleanBuilder personnelAdminQuery(List<Office> officeList,
-      BooleanBuilder condition, Person signer) {
-    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
+      BooleanBuilder condition, Person signer, QPersonsOffices personsOffices) {
+    
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
     condition.and(personsOffices.office.in(officeList))
         .and(informationRequest.administrativeApprovalRequired.isTrue()
@@ -532,9 +534,9 @@ public class InformationRequestDao extends DaoBase {
    * @throws CloneNotSupportedException 
    */
   private BooleanBuilder groupManagerQuery(List<Office> officeList, 
-      BooleanBuilder condition, Person signer) {
+      BooleanBuilder condition, Person signer, QPersonsOffices personsOffices) {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
-    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
+    
     val groupCondition = new BooleanBuilder(condition);
     return groupCondition.and(personsOffices.office.in(officeList))
         .and(informationRequest.managerApprovalRequired.isTrue()
@@ -591,7 +593,6 @@ public class InformationRequestDao extends DaoBase {
     final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
     final QPerson person = QPerson.person;
-    final QOffice office = QOffice.office;
     List<Office> officeList = uros.stream().map(u -> u.getOffice()).collect(Collectors.toList());
     BooleanBuilder conditions = new BooleanBuilder();
     conditions.and(informationRequest.startAt.after(fromDate))
@@ -624,10 +625,7 @@ public class InformationRequestDao extends DaoBase {
     return getQueryFactory().selectFrom(informationRequest)
         .leftJoin(informationRequest.person.personsOffices, personsOffices)
         .join(informationRequest.person, person)
-        //.join(person.office, office)
-        .where(office.in(uros.stream().map(
-                userRoleOffices -> userRoleOffices.getOffice())
-            .collect(Collectors.toSet())).and(conditions))
+        .where(conditions)
         .orderBy(informationRequest.startAt.desc())
         .fetch();
   }

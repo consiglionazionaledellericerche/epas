@@ -189,7 +189,7 @@ public class RequestInit extends Controller {
         officeId = officesNotClosed.stream().sorted((o, o1) -> o.getName().compareTo(o1.getName())).findFirst().get().id;
       }
     } else if (currentUser.getPerson() != null && currentUser.getPerson().getCurrentOffice().get() != null) {
-
+      officeId = currentUser.getPerson().getCurrentOffice().get().getId();
     }
     
     session.put("officeSelected", officeId);

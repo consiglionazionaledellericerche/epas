@@ -110,4 +110,17 @@ public class PersonsOfficesDao extends DaoBase {
                 .andAnyOf(personsOffices.endDate.isNull(), personsOffices.endDate.goe(end))))
         .fetchFirst());
   }
+  
+  /**
+   * La lista delle affiliazioni alla sede passata come parametro in questo momento.
+   * 
+   * @param office la sede di cui si vogliono le affiliazioni
+   * @return la lista delle affiliazioni alla sede passata come parametro in questo momento.
+   */
+  public List<PersonsOffices> affiliationByCurrentOffice(List<Office> officeList) {
+    final QPersonsOffices personsOffices = QPersonsOffices.personsOffices;
+    return getQueryFactory().selectFrom(personsOffices).where(personsOffices.office.in(officeList)
+        .and(personsOffices.beginDate.before(LocalDate.now())
+            .andAnyOf(personsOffices.endDate.isNull(), personsOffices.endDate.after(LocalDate.now())))).fetch();
+  }
 }
