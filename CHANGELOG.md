@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.24.1] - UNRELEASED
+## [2.24.1] - 2025-04-24
 ### Added
   - Gestiti timezone diversi da Europe/Rome nella creazione delle missioni via REST.
   - Aggiunto il campo ContractType nel Contract che specifica se un dipendente è strutturato, interinale o non strutturato.
@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     va su Attestati. Modificato il comportamento del setter del ContractType garantendo la contestuale modifica del campo "onCertificate"
     che determina la presenza o meno su attestati di quel contratto.
   - Modificato il comportamento del codice 7XR portandolo a ore e minuti come i 7M e 7DM
+  - Rimosso codice 65 e modificato comportamento del codice 61.
 
 ### Changed
   - Modificata la documentazione aggiornandola alle novità rilasciate nel tempo
