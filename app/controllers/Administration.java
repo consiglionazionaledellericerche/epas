@@ -81,6 +81,7 @@ import manager.EmailManager;
 import manager.PeriodManager;
 import manager.PersonDayInTroubleManager;
 import manager.PersonDayManager;
+import manager.PersonManager;
 import manager.SecureManager;
 import manager.UserManager;
 import manager.attestati.dto.internal.clean.ContrattoAttestati;
@@ -122,6 +123,7 @@ import models.enumerate.LimitType;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.lang.WordUtils;
+import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 import org.joda.time.YearMonth;
@@ -207,6 +209,8 @@ public class Administration extends Controller {
   static AbsenceService absenceService;
   @Inject
   static WorkingTimeTypeDao wttDao;
+  @Inject
+  static PersonManager personManager;
 
   /**
    * Utilizzabile solo da developer e admin permette di prelevare un token del client
@@ -1348,6 +1352,11 @@ public class Administration extends Controller {
       workingTimeCounter++;
     }
     renderText("Aggiornati gli orari di %s persone e disabilitati %s orari di lavoro", counter, workingTimeCounter);
+  }
+  
+  public static void checkWeeklyWorkingTime() throws EmailException {
+    int counter = personManager.checkWeeklyWorkingTime(2880);
+    renderText("Trovati %s dipendenti che superano l'orario massimo settimanale", counter);
   }
   
 }

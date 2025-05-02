@@ -24,7 +24,10 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 import dao.AbsenceDao;
 import dao.ContractDao;
+import dao.OfficeDao;
+import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPersonDay;
@@ -35,16 +38,22 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import lombok.val;
 import models.Contract;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.Role;
+import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.dto.AbsenceToRecoverDto;
+import org.apache.commons.mail.EmailException;
 import org.assertj.core.util.Lists;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import play.db.jpa.JPA;
 
@@ -61,6 +70,12 @@ public class PersonManager {
   private final AbsenceDao absenceDao;
   private final OfficeManager officeManager;
   private final UserManager userManager;
+  private final OfficeDao officeDao;
+  private final UsersRolesOfficesDao uroDao;
+  private final RoleDao roleDao;
+  private final PersonDao personDao;
+  private final ConfigurationManager configurationManager;
+  private final PersonDayInTroubleManager personDayInTroubleManager;
 
   /**
    * Costrutture.
@@ -79,7 +94,10 @@ public class PersonManager {
       IWrapperFactory wrapperFactory,
       UsersRolesOfficesDao uroDao,
       OfficeManager officeManager,
-      UserManager userManager) {
+      UserManager userManager, OfficeDao officeDao,
+      RoleDao roleDao, PersonDao personDao,
+      ConfigurationManager configurationManager,
+      PersonDayInTroubleManager personDayInTroubleManager) {
     this.contractDao = contractDao;
     this.personDayDao = personDayDao;
     this.absenceDao = absenceDao;
@@ -87,6 +105,12 @@ public class PersonManager {
     this.wrapperFactory = wrapperFactory;
     this.officeManager = officeManager;
     this.userManager = userManager;
+    this.officeDao = officeDao;
+    this.uroDao = uroDao;
+    this.roleDao = roleDao;
+    this.personDao = personDao;
+    this.configurationManager = configurationManager;
+    this.personDayInTroubleManager = personDayInTroubleManager;
   }
 
   /**
@@ -397,4 +421,47 @@ public class PersonManager {
     officeManager.setUro(person.getUser(), person.getOffice(), employee);
   }
 
+  public int checkWeeklyWorkingTime(int maxWeeklyMinutes) throws EmailException {
+    LocalDate begin = LocalDate.now().minusWeeks(1);
+    
+    LocalDate end = begin.withDayOfWeek(DateTimeConstants.FRIDAY);
+    log.info("Intervallo date da controllare: {} - {}", begin.toString(), end.toString());
+    int counter = 0;
+    
+    List<Office> officeList = officeDao.allEnabledOffices();
+    Map<Office, List<User>> map = Maps.newHashMap();
+    for (Office o : officeList) {
+      List<User> userList = uroDao
+          .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.PERSONNEL_ADMIN), o);
+      if ((Boolean) configurationManager
+          .configValue(o, EpasParam.SEND_INFO_DAYS_JOB_TO_SEAT_SUPERVISOR)) {
+        List<User> seatSupervisorList = uroDao
+            .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), o);
+        userList.addAll(seatSupervisorList);
+      }
+      List<User> list = map.get(o);
+      if (list == null || list.isEmpty()) {
+        list = Lists.newArrayList();
+      }
+      list.addAll(userList);
+      map.put(o, list);
+    }
+    for (Map.Entry<Office, List<User>> entry : map.entrySet()) {
+      log.info("Analizzo la sede di {}", entry.getKey().getName());
+      List<Person> personList = personDao.activeWithNumber(entry.getKey());
+      for (Person person : personList) {
+        //cerco i personday di ogni dipendente della settimana precedente a oggi
+        List<PersonDay> list = personDayDao
+            .getPersonDayInPeriod(person, begin, Optional.fromNullable(end));
+        if (maxWeeklyMinutes < list.stream().mapToInt(pd -> pd.getTimeAtWork()).sum()) {
+          counter++;
+          log.info("L'utente {} ha superato il limte orario settimanale previsto. "
+              + "Si avvisano i suoi amministratori", person.getFullname());
+          personDayInTroubleManager
+          .sendTrespassingWeeklyWorkingTimeThreshold(entry.getValue(), entry.getKey(), person);
+        }
+      }
+    }
+    return counter;
+  }
 }

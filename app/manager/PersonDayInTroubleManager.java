@@ -324,6 +324,41 @@ public class PersonDayInTroubleManager {
   }
   
   /**
+   * 
+   * @param administrators
+   * @param office
+   * @param person
+   * @throws EmailException
+   */
+  public void sendTrespassingWeeklyWorkingTimeThreshold(List<User> administrators, Office office, Person person)
+      throws EmailException {
+    String message = createMessageForTrepassingWeeklyTimeAtWorkThreshold(person);
+    for (User user: administrators) {
+      SimpleEmail simpleEmail = new SimpleEmail();
+      simpleEmail.setSubject("ePAS Controllo superamento limite orario settimanale");
+      simpleEmail.setMsg(message);
+      if (user == null || user.getPerson() == null) {
+        log.info("Trovato utente senza persona associata: {}", user.getUsername());
+        continue;
+      }
+      if (user.getPerson().getEmail() == null) {
+        continue;
+      }
+      simpleEmail.addTo(user.getPerson().getEmail());
+      try {
+        Mail.send(simpleEmail);
+      } catch (Exception ex) {
+        log.error("Fallito invio email all'amministratore {} della sede {} per {}",
+            user.getPerson().getFullname(), office.getName(), ex);
+      }
+      
+      log.info("Inviata mail a {} per segnalare il superamento del limite orario settimanale di {}",
+          user.getPerson().getFullname(), person.getFullname());
+    }
+    
+  }
+  
+  /**
    * Metodo privato che genera la mappa Persona-lista di stringhe contenente le giornate in cui
    * il dipendente ha un trouble.
    * @param daysInTrouble la lista di trouble 
@@ -365,5 +400,17 @@ public class PersonDayInTroubleManager {
         .append("Il team di ePAS");
       
     return message.toString();      
+  }
+  
+  private String createMessageForTrepassingWeeklyTimeAtWorkThreshold(Person person) {
+    final StringBuilder message = new StringBuilder()
+        .append(String.format("Il dipendente: %s", person.getFullname()));
+    message.append(String.format("\r\nha superato il limite settimanale previsto dalla circolare "
+        + "12/2004 di 48 ore lavorative."));          
+    message.append("\r\nLa preghiamo di verificare con il dipendente il problema in oggetto.\r\n")
+        .append("\r\nSaluti,\r\n")
+        .append("Il team di ePAS");
+      
+    return message.toString(); 
   }
 }
