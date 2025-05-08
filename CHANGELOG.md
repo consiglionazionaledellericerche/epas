@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     superato il limite di 48 ore di lavoro settimanale previsto dalla circolare 12/2004. Per quei dipendenti viene inviata una mail
     al responsabile della sede e all'amministratore del personale della sede di afferenza del dipendente.
 
+### Changed
+  - Modificata la visibilità dei parametri relativi al mese di fruizione dei residui per i livelli 4-8 e al numero di riposi compensativi
+    prendibili in un anno per i livelli 4-8: ora non possono più essere modificati.
+
 
 ## [2.24.1] - 2025-04-24
 ### Added
