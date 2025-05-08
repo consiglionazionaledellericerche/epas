@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     superato il limite di 48 ore di lavoro settimanale previsto dalla circolare 12/2004. Per quei dipendenti viene inviata una mail
     al responsabile della sede e all'amministratore del personale della sede di afferenza del dipendente.
 
+### Changed
+  - Modificato il comportamento nei festivi dei codici 24PROV, 242PROV e 39
+
 
 ## [2.24.1] - 2025-04-24
 ### Added
