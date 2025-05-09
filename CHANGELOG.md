@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
   - Modificata la visibilità dei parametri relativi al mese di fruizione dei residui per i livelli 4-8 e al numero di riposi compensativi
     prendibili in un anno per i livelli 4-8: ora non possono più essere modificati.
+  - Modificato il comportamento nei festivi dei codici 24PROV, 242PROV e 39
 
 
 ## [2.24.1] - 2025-04-24
