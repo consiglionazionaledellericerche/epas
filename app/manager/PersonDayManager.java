@@ -564,7 +564,7 @@ public class PersonDayManager {
   }
 
   /**
-   * Questo metodo controlla che il dipendente sia un I-III livello, che la missione sia oraria e
+   * Questo metodo controlla che la missione sia oraria e
    * che la quantità giustificata sia maggiore di 4 ore. In quel caso il buono pasto non viene 
    * assegnato. In qualsiasi altro caso invece viene assegnato.
    *
@@ -574,7 +574,6 @@ public class PersonDayManager {
    */
   private boolean denyMealTicketOnMission(Absence abs) {
     if (isOnHourlyMission(abs.getPersonDay()) 
-        && abs.getPersonDay().getPerson().isTopQualification()
         && abs.getJustifiedMinutes() >= MAX_QUANTITY_TO_ALLOW_MEAL_TICKET) {
       return true;
     }
