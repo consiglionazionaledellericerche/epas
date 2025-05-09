@@ -1599,6 +1599,20 @@ then
  $c.grant();
 end
 
+rule CanModifyTechinicianExpiryRecoveryDays
+when 
+ $uro: UsersRolesOffices()
+ $target: Configuration(office == $uro.office, epasParam in(EpasParam.MAX_RECOVERY_DAYS_49, EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_49))
+ $c: PermissionCheck(action in (
+		"Configurations.show",
+		"Configurations.edit",
+		"Configurations.update"
+
+        ), target == $target)
+then
+ $c.revoke();
+end
+
 /*******************************************************************************
  * Azioni utente con ruolo SEAT_SUPERVISOR
  ******************************************************************************/
