@@ -785,7 +785,7 @@ public enum DefaultAbsenceType {
       Sets.newHashSet(), null, null, false, true, true, null),
   
   A_24PROV("24", "Retribuzione 80% 1 figlio", false,
-      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, 
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, 
       MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), new LocalDate(2024, 1, 1), 
       null, false, true, true, null), 
   A_24MPROV("24M", "Retribuzione 80% 1 figlio in ore e minuti", true,
@@ -803,7 +803,7 @@ public enum DefaultAbsenceType {
       new LocalDate(2024, 1, 1), null, false, true, true, null), 
   
   A_242PROV("24", "Retribuzione 80% 2 figlio", false,
-      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, 
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, 
       MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), new LocalDate(2024, 1, 1), 
       null, false, true, true, null), 
   A_242MPROV("24M", "Retribuzione 80% 2 figlio in ore e minuti", true,
@@ -1675,7 +1675,7 @@ public enum DefaultAbsenceType {
       MealTicketBehaviour.notAllowMealTicket, 0, null,
       Sets.newHashSet(), null, null, false, true, true, null), 
   A_39("39", "aspettativa infortunio in itinere riconosciuto", false,
-      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, 
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, 
       MealTicketBehaviour.notAllowMealTicket, 0, null,
       Sets.newHashSet(), null, null, false, true, true, null), 
   A_681("681", "permesso lutto di famiglia", false,
