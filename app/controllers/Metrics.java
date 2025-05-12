@@ -18,7 +18,7 @@
 package controllers;
 
 import common.metrics.MetricsProbe;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import javax.inject.Inject;
 import play.mvc.Controller;
 import play.mvc.With;
