@@ -459,6 +459,16 @@ public enum DefaultGroup {
       PeriodType.always, DefaultTakable.T_21P, null, null,
       false, true),
   
+  G_212P("212P - Congedo paternità secondo figlio",
+      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
+      PeriodType.always, DefaultTakable.T_212P, null, null,
+      false, true),
+  
+  G_213P("213P - Congedo paternità terzo figlio",
+      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
+      PeriodType.always, DefaultTakable.T_213P, null, null,
+      false, true),
+  
   G_21P2("21P2 - Congedo paternità gemelli",
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
       PeriodType.always, DefaultTakable.T_21P2, null, null,

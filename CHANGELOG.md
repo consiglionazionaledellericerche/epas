@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Aggiunto job schedulato a cadenza settimanale (il lunedì) che controlla quanti dipendenti, nella settimana appena conclusa, hanno
     superato il limite di 48 ore di lavoro settimanale previsto dalla circolare 12/2004. Per quei dipendenti viene inviata una mail
     al responsabile della sede e all'amministratore del personale della sede di afferenza del dipendente.
+  - Aggiunti codici interni 212P e 213P che consentono di inviare ad Attestati il codice 21P per congedo parentale per il padre per il 
+    secondo e terzo figlio così da evitare il limite di 10 giorni previsto per il codice 21P del primo figlio.
 
 ### Changed
   - Modificata la visibilità dei parametri relativi al mese di fruizione dei residui per i livelli 4-8 e al numero di riposi compensativi
