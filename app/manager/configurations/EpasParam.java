@@ -651,10 +651,9 @@ public enum EpasParam {
 
   //#####################################################################
   //FLOWS PARAMS COMPETENCES
-  
-  
+
   /**
-   * Attivazione della possibilità per il dipendente di richiedere le ore di straordinario
+   * Attivazione della possibilità per il dipendente di richiedere le ore di straordinario.
    */
   ENABLE_EMPLOYEE_REQUEST_OVERTIME_QUANTITY(
       "enable_employee_request_overtime_quantity",
@@ -847,7 +846,7 @@ public enum EpasParam {
   
   /**
    * Per i responsabili di gruppo è necessaria l'approvazione dei permessi personali da parte del 
-   * responsabile di sede.s
+   * responsabile di sede.
    */
   PERSONAL_PERMISSION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED(
       "personal_permission_manager_request_office_head_approval_required",
@@ -1104,7 +1103,7 @@ public enum EpasParam {
   }
 
   /**
-   * Tipologie di periodicità temporale del parametro.s
+   * Tipologie di periodicità temporale del parametro.
    */
   public enum EpasParamTimeType {
     GENERAL, YEARLY, PERIODIC;

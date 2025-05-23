@@ -29,3 +29,4 @@ lib/
 /postgres
 .idea
 /epas
+/src/docs/.bundle
