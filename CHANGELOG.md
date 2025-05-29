@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Modificato il comportamento nei festivi dei codici 24PROV, 242PROV e 39
   - Modificato l'algoritmo che assegna il buono pasto durante le missioni orarie: eliminata la clausola che limitava ai soli livelli 1-3
     di vedersi non assegnato il buono pasto se la missione oraria supera le 4 ore.
-
+  - Risolto il problema della visualizzazione e conteggio dei nuovi piani ferie 25+4 e 27+4
 
 ## [2.24.1] - 2025-04-24
 ### Added
