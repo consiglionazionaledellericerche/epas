@@ -311,6 +311,11 @@ public class PersonDays extends Controller {
           .stampings(stampingId);
       historyStampingsList.add(historyStamping);
     }
+    
+    //Lista delle revisioni del personday
+    List<HistoryValue<PersonDay>> historyPersonDayList = 
+        personDayHistoryDao.personDayHistory(personDayId);
+    
     boolean zoneDefined = false;
     List<ZoneToZones> link = personDay.getPerson().getBadges().stream()
         .<ZoneToZones>flatMap(b -> b.getBadgeReader().getZones().stream()
@@ -319,7 +324,8 @@ public class PersonDays extends Controller {
     if (!link.isEmpty()) {
       zoneDefined = true;
     }
-    render(historyStampingsList, historyAbsencesList, personDay, found, zoneDefined);
+    render(historyStampingsList, historyAbsencesList, personDay, found, zoneDefined, 
+        historyPersonDayList);
   }
 
   

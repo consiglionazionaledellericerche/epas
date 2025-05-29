@@ -99,6 +99,33 @@
 	  #{/else}
 	  #{/accordionItem}
 	#{/accordionGroup}
+	
+	#{accordionGroup 'info'}
+	  #{accordionItem 'mealTickets', parent:'info', title:'Storico modifica buono pasto', open:true}
+	  #{if historyPersonDayList.empty} Non ci sono modifiche al buono pasto. #{/if}
+	  #{else}
+	  <table class="table table-condensed table-bordered">
+		<tr class="success">
+			<th>Valore buono pasto</th>
+			<th>Buono pasto forzato dall'amministratore</th>
+			<th>&{'modification.date'}</th>
+			<th>&{'done.by'}</th>
+			
+		</tr>
+		#{list items:historyPersonDayList, as:'historyPersonDay'}
+			<tr class="warning">
+				  <td>${historyPersonDay.value.isTicketAvailable ? 'SI' : 'NO'}</td>
+			      <td>${historyPersonDay.value.isTicketForcedByAdmin ? 'SI' : 'NO'}</td>
+			      <td>${historyPersonDay.formattedRevisionDate()}</td>
+			      <td>${historyPersonDay.formattedOwner()}</td>
+			
+			</tr>
+		#{/list}
+	  </table>
+	  
+	  #{/else}
+	  #{/accordionItem}
+	#{/accordionGroup}
   #{/if}
   #{else}
     <p>Nessuna assenza o timbratura nella storia del giorno.</p>
