@@ -44,6 +44,7 @@ public class VacationPeriodCreateDto {
   @Required
   private LocalDate beginDate;
   private LocalDate endDate;
+  @Required
   private VacationCode vacationCode;
   
   /**

@@ -226,7 +226,7 @@ public class Contracts extends Controller {
   @Util
   private void applyPreviousContract(Long id, boolean linkedToPreviousContract) {
     RestUtils.checkMethod(request, HttpMethod.PUT);
-    val contract = getContractFromRequest(id);  
+    val contract = getContractFromRequest(id);
 
     if (!contractManager.applyPreviousContractLink(contract, linkedToPreviousContract)) {
       JsonResponse.badRequest("Non esiste alcun contratto precedente cui linkare il contratto "
@@ -290,7 +290,13 @@ public class Contracts extends Controller {
     }
 
     val gson = gsonBuilder.create();
-    val vacationPeriodDto = gson.fromJson(body, VacationPeriodCreateDto.class); 
+    val vacationPeriodDto = gson.fromJson(body, VacationPeriodCreateDto.class);
+    
+    
+
+    //Si controlla anche i permessi
+    getContractFromRequest(vacationPeriodDto.getContractId());
+
     val validationResult = validation.valid(vacationPeriodDto); 
     if (!validationResult.ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
