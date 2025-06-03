@@ -1225,6 +1225,62 @@ Per cambiare il campo externalId è possibile utilizzare una <em>HTTP PUT</em> a
 </pre></div>
 </div>
 </section>
+<section id="tipologie-di-piani-ferie">
+<h2><span class="section-number">9.3.10. </span>Tipologie di piani ferie<a class="headerlink" href="#tipologie-di-piani-ferie" title="Permalink to this heading">¶</a></h2>
+<p>ePAS gestisce una serie di piani ferie predefiniti, associabili ai dipendenti.
+Il codice dei piani ferie è utilizzabile per aggiornare il piano ferie di un dipendente.
+Per ottenere la lista dei codici dei piani ferie disponibili è possibile utilizzare una <em>HTTP GET</em>
+all'endpoint <strong>/rest/v2/contracts/vacationCodes</strong>.</p>
+<p>Il nome del codice porta con se l'informazione del numero di giorni di ferie annuali e del numero
+di permessi legge, per esempio CODE_28_4, è il codice per 28 gg di ferie e 4 giorni di permesso legge.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_registry_manager
+<span class="w">    </span>GET<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/vacationCodes
+</pre></div>
+</div>
+<p>La risposta sarà del tipo:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">  </span><span class="s2">&quot;CODE_9_1&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_27_4&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_28_4&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_25_4&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_15_2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_26_4&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_14_2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_17_2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_16_2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_21_4&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_11_2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_22_3&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_32_4&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_10_2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_23_3&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_13_2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_20_3&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_30_4&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_21_3&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;CODE_10_1&quot;</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="aggiornamento-piano-ferie-di-un-dipendente">
+<h2><span class="section-number">9.3.11. </span>Aggiornamento piano ferie di un dipendente<a class="headerlink" href="#aggiornamento-piano-ferie-di-un-dipendente" title="Permalink to this heading">¶</a></h2>
+<p>Il piano ferie applicato a un dipendente e in particolare a uno suo contratto, è configurabile
+nel tempo e può cambiare per esempio da 26+4 a 28+4 dopo tre anni di assunzione, oppure a un
+piano ferie differente in caso di part time.
+Per cambiare il piano ferie associato a un dipendente è possibile utilizzare una <em>HTTP PUT</em>
+all'endpoint <strong>/rest/v2/contracts/updateContractVacationPeriod</strong>.</p>
+<p>Il nome del codice del piano ferie da indicare è uno di quelli presenti nel sistema, la cui
+lista può essere ottenuta come da documentazione del metodo sovrastante.</p>
+<p>I campi da indicare per cambiare il piano ferie il <strong>contractId</strong> del dipendente, la data di
+inizio del nuovo piano <strong>beginDate</strong>, l'eventuale data di fine del piano ferie <strong>endDate</strong> e il
+codice del piano ferie <strong>vacationCode</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>http<span class="w"> </span>-a<span class="w"> </span>istituto_xxx_registry_manager
+<span class="w">    </span>PUT<span class="w"> </span>https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/updateContractVacationPeriod
+<span class="w">    </span><span class="nv">contractId</span><span class="o">=</span><span class="m">4678</span><span class="w"> </span><span class="nv">beginDate</span><span class="o">=</span><span class="m">2025</span>-01-01<span class="w"> </span><span class="nv">endDate</span><span class="o">=</span><span class="m">2025</span>-06-01<span class="w"> </span><span class="nv">vacationCode</span><span class="o">=</span>CODE_16_2
+</pre></div>
+</div>
+</section>
 </section>
 
 

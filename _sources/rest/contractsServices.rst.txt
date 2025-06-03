@@ -328,3 +328,70 @@ Per cambiare il campo externalId è possibile utilizzare una *HTTP PUT* all'endp
   $ http -a istituto_xxx_registry_manager
       PUT https://epas-demo.devel.iit.cnr.it/rest/v2/contractworkingtimetypes/updateExternalId 
       id==680 externalId==myExternalId
+
+
+Tipologie di piani ferie
+------------------------
+
+ePAS gestisce una serie di piani ferie predefiniti, associabili ai dipendenti.
+Il codice dei piani ferie è utilizzabile per aggiornare il piano ferie di un dipendente.
+Per ottenere la lista dei codici dei piani ferie disponibili è possibile utilizzare una *HTTP GET* 
+all'endpoint **/rest/v2/contracts/vacationCodes**.
+
+Il nome del codice porta con se l'informazione del numero di giorni di ferie annuali e del numero
+di permessi legge, per esempio CODE_28_4, è il codice per 28 gg di ferie e 4 giorni di permesso legge.
+
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      GET https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/vacationCodes
+
+
+La risposta sarà del tipo:
+
+.. code-block:: json
+
+  [
+    "CODE_9_1",
+    "CODE_27_4",
+    "CODE_28_4",
+    "CODE_25_4",
+    "CODE_15_2",
+    "CODE_26_4",
+    "CODE_14_2",
+    "CODE_17_2",
+    "CODE_16_2",
+    "CODE_21_4",
+    "CODE_11_2",
+    "CODE_22_3",
+    "CODE_32_4",
+    "CODE_10_2",
+    "CODE_23_3",
+    "CODE_13_2",
+    "CODE_20_3",
+    "CODE_30_4",
+    "CODE_21_3",
+    "CODE_10_1"
+  ]
+
+Aggiornamento piano ferie di un dipendente
+------------------------------------------
+
+Il piano ferie applicato a un dipendente e in particolare a uno suo contratto, è configurabile 
+nel tempo e può cambiare per esempio da 26+4 a 28+4 dopo tre anni di assunzione, oppure a un 
+piano ferie differente in caso di part time.
+Per cambiare il piano ferie associato a un dipendente è possibile utilizzare una *HTTP PUT* 
+all'endpoint **/rest/v2/contracts/updateContractVacationPeriod**.
+
+Il nome del codice del piano ferie da indicare è uno di quelli presenti nel sistema, la cui
+lista può essere ottenuta come da documentazione del metodo sovrastante.
+
+I campi da indicare per cambiare il piano ferie il **contractId** del dipendente, la data di 
+inizio del nuovo piano **beginDate**, l'eventuale data di fine del piano ferie **endDate** e il
+codice del piano ferie **vacationCode**.
+
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      PUT https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/updateContractVacationPeriod 
+      contractId=4678 beginDate=2025-01-01 endDate=2025-06-01 vacationCode=CODE_16_2
