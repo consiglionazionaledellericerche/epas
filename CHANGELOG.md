@@ -4,13 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.24.2] - Unreleased
+## [2.24.2] - 2025-05-30
 ### Added
   - Aggiunto job schedulato a cadenza settimanale (il lunedì) che controlla quanti dipendenti, nella settimana appena conclusa, hanno
     superato il limite di 48 ore di lavoro settimanale previsto dalla circolare 12/2004. Per quei dipendenti viene inviata una mail
     al responsabile della sede e all'amministratore del personale della sede di afferenza del dipendente.
   - Aggiunti codici interni 212P e 213P che consentono di inviare ad Attestati il codice 21P per congedo parentale per il padre per il 
     secondo e terzo figlio così da evitare il limite di 10 giorni previsto per il codice 21P del primo figlio.
+  - Aggiunto storico delle modifiche sul buono pasto nel giorno.
 
 ### Changed
   - Modificata la visibilità dei parametri relativi al mese di fruizione dei residui per i livelli 4-8 e al numero di riposi compensativi
@@ -18,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Modificato il comportamento nei festivi dei codici 24PROV, 242PROV e 39
   - Modificato l'algoritmo che assegna il buono pasto durante le missioni orarie: eliminata la clausola che limitava ai soli livelli 1-3
     di vedersi non assegnato il buono pasto se la missione oraria supera le 4 ore.
-
+  - Risolto il problema della visualizzazione e conteggio dei nuovi piani ferie 25+4 e 27+4
 
 ## [2.24.1] - 2025-04-24
 ### Added

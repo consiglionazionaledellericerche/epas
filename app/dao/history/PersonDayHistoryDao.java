@@ -23,6 +23,7 @@ import com.google.inject.Provider;
 import dao.AbsenceTypeDao;
 import java.util.List;
 import javax.inject.Inject;
+import models.PersonDay;
 import models.Stamping;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -168,4 +169,19 @@ public class PersonDayHistoryDao {
         .toList();
   }
 
+  /**
+   * La lista delle revisioni del personday con id passato come parametro.
+   * 
+   * @param id l'identificativo del personday di cui recuperare le revisioni
+   * @return la lista delle revisioni del personday identificato dall'id passato come parametro.
+   */
+  public List<HistoryValue<PersonDay>> personDayHistory(long id) {
+    final AuditQuery query = auditReader.get().createQuery()
+        .forRevisionsOfEntity(PersonDay.class, false, false)
+        .add(AuditEntity.property("id").eq(id))
+        .addOrder(AuditEntity.revisionNumber().desc());
+    return FluentIterable.from(query.getResultList())
+        .transform(HistoryValue.fromTuple(PersonDay.class))
+        .toList();
+  }
 }
