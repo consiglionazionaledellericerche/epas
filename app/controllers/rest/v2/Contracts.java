@@ -21,6 +21,9 @@ import cnr.sync.dto.v2.ContractCreateDto;
 import cnr.sync.dto.v2.ContractShowDto;
 import cnr.sync.dto.v2.ContractShowTerseDto;
 import cnr.sync.dto.v2.ContractUpdateDto;
+import cnr.sync.dto.v2.VacationPeriodCreateDto;
+import cnr.sync.dto.v2.VacationPeriodShowDto;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Optional;
@@ -47,6 +50,8 @@ import manager.PeriodManager;
 import manager.recaps.recomputation.RecomputeRecap;
 import models.Contract;
 import models.WorkingTimeType;
+import models.enumerate.VacationCode;
+
 import org.joda.time.LocalDate;
 import play.mvc.Controller;
 import play.mvc.Util;
@@ -221,7 +226,7 @@ public class Contracts extends Controller {
   @Util
   private void applyPreviousContract(Long id, boolean linkedToPreviousContract) {
     RestUtils.checkMethod(request, HttpMethod.PUT);
-    val contract = getContractFromRequest(id);  
+    val contract = getContractFromRequest(id);
 
     if (!contractManager.applyPreviousContractLink(contract, linkedToPreviousContract)) {
       JsonResponse.badRequest("Non esiste alcun contratto precedente cui linkare il contratto "
@@ -270,5 +275,50 @@ public class Contracts extends Controller {
     //della persona
     rules.checkIfPermitted(contract.getPerson().getOffice());
     return contract;
+  }
+  
+  /**
+   * Aggiorna il piano ferie relativo a un contratto in funzione dei 
+   * parametri passati come JSON via HTTP PUT.
+   * Questo metodo può essere chiamato solo via HTTP PUT.
+   */
+  public static void updateContractVacationPeriod(
+      Long id, String body) {
+    RestUtils.checkMethod(request, HttpMethod.PUT);
+    if (body == null) {
+      JsonResponse.badRequest();
+    }
+
+    val gson = gsonBuilder.create();
+    val vacationPeriodDto = gson.fromJson(body, VacationPeriodCreateDto.class);
+    
+    
+
+    //Si controlla anche i permessi
+    getContractFromRequest(vacationPeriodDto.getContractId());
+
+    val validationResult = validation.valid(vacationPeriodDto); 
+    if (!validationResult.ok) {
+      JsonResponse.badRequest(validation.errorsMap().toString());
+    }
+    val vacationPeriod = VacationPeriodCreateDto.build(vacationPeriodDto);
+    val updated = contractManager.updateContractVacationPeriod(vacationPeriod);
+    if (!updated) {
+      JsonResponse.badRequest();
+    }
+    log.info("Created VacationPeriod {} via REST", vacationPeriod);
+    renderJSON(gson.toJson(VacationPeriodShowDto.build(vacationPeriod)));
+  }
+
+  /**
+   * Lista dei VacationPeriod codifica nel sistema.
+   */
+  public static void vacationCodes() {
+    val gson = gsonBuilder.create();
+    val codes = 
+        Lists.newArrayList(
+            VacationCode.values()).stream().map(VacationCode::name)
+              .collect(Collectors.toSet());
+    renderJSON(gson.toJson(codes));
   }
 }

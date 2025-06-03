@@ -29,3 +29,7 @@ lib/
 /postgres
 .idea
 /epas
+/src/docs/.bundle
+share/
+/lib64
+/pyvenv.cfg

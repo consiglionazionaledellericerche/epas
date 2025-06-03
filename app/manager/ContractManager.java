@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import javax.inject.Inject;
+
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.recaps.recomputation.RecomputeRecap;
 import models.Contract;
@@ -43,6 +45,8 @@ import models.base.IPropertyInPeriod;
 import models.enumerate.VacationCode;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
+
+import play.data.validation.Validation;
 import play.db.jpa.JPA;
 
 
@@ -131,7 +135,7 @@ public class ContractManager {
       return false;
     }
 
-    if (!isContractNotOverlapping(contract)) {     
+    if (!isContractNotOverlapping(contract)) {
       return false;
     }
 
@@ -264,7 +268,7 @@ public class ContractManager {
         if (!yearMonthFrom.isAfter(new YearMonth(cmr.getYear(), cmr.getMonth()))) {
           if (cmr.isPersistent()) {
             cmr.delete();
-          }          
+          }
         }
       }
 
@@ -631,4 +635,45 @@ public class ContractManager {
     });
     return contractFixed.get();
   }
+  
+  public boolean updateContractVacationPeriod(VacationPeriod vp) {
+    Verify.verifyNotNull(vp.getContract());
+    Verify.verifyNotNull(vp.getBeginDate());
+    Verify.verifyNotNull(vp.getVacationCode());
+    IWrapperContract wrappedContract = wrapperFactory.create(vp.getContract());
+    
+    if (!Validation.hasErrors()) {
+      if (!DateUtility.isDateIntoInterval(vp.getBeginDate(),
+          wrappedContract.getContractDateInterval())) {
+        log.warn("beginDate = {} deve appartenere al contratto id = {}", vp.getBeginDate(), vp.getContract().getId());
+        return false;
+      }
+      if (vp.getEndDate() != null && !DateUtility.isDateIntoInterval(vp.getEndDate(),
+          wrappedContract.getContractDateInterval())) {
+        log.warn("endDate = {} deve appartenere al contratto id = {}", vp.getEndDate(), vp.getContract().getId());
+        return false;
+        
+      }
+    }
+
+    //riepilogo delle modifiche
+    List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(vp, false);
+    RecomputeRecap recomputeRecap =
+        periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
+            Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+            periodRecaps, Optional.fromNullable(vp.getContract().getSourceDateResidual()));
+
+    recomputeRecap.initMissing = wrappedContract.initializationMissing();
+    
+    periodManager.updatePeriods(vp, true);
+    val contract = contractDao.getContractById(vp.getContract().id);
+    contract.getPerson().refresh();
+    if (recomputeRecap.needRecomputation) {
+      recomputeContract(contract,
+          Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
+    }
+
+    return true;
+  }
+
 }
