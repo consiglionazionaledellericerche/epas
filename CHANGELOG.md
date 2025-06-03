@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Aggiunta gestione piani ferie dei dipendenti via REST
 
+### Changed
+  - Limitato il nome delle schede Excel nell'esportazione periodica in Excel
+
 ## [2.24.2] - 2025-05-30
 ### Added
   - Aggiunto job schedulato a cadenza settimanale (il lunedì) che controlla quanti dipendenti, nella settimana appena conclusa, hanno
