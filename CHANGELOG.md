@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Aggiunta gestione piani ferie dei dipendenti via REST
 
 ### Changed
+  - Limitato il nome delle schede Excel nell'esportazione periodica in Excel
   - Aggiornamento delle librerie micrometer alla 1.15
 
 ## [2.24.2] - 2025-05-30

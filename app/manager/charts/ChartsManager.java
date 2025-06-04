@@ -737,9 +737,16 @@ public class ChartsManager {
       } else {
         fullname = psDto.person.fullName();
       }
+      //Il nome di una scheda è limito, per evitare che fullname_meseAnno 
+      //superino il limite (forse è 30?), viene limitato il fullname.
+      if (fullname.length() > 20) {
+        fullname = fullname.substring(0, 20);
+      }
       String sheetname = fullname + "_"
           + DateUtility.fromIntToStringMonth(psDto.month) + psDto.year;
-      
+      log.info("surname = {}, name = {}, Sheetname = {}", 
+          psDto.person.getSurname(), psDto.person.getName(), sheetname);
+
       if (sheetname != null && sheetname.length() > 31) {
         sheetname = sheetname.substring(0, 31);
       }
