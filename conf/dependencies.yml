@@ -79,7 +79,7 @@ require:
     - org.graylog2 -> gelfj 1.1.16
     - org.apache.commons -> commons-csv 1.8
     - org.apache.commons -> commons-compress 1.20
-    - io.micrometer -> micrometer-registry-prometheus 1.7.3
+    - io.micrometer -> micrometer-registry-prometheus 1.15.0
     - org.postgresql ->  postgresql 42.2.20:
        force: true
        exclude:
