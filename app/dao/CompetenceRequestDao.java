@@ -327,14 +327,20 @@ public class CompetenceRequestDao extends DaoBase {
    */
   public List<CompetenceRequest> existingCompetenceRequests(CompetenceRequest request) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    BooleanBuilder condition = new BooleanBuilder(
+        competenceRequest.beginDateToGive.between(
+              request.getBeginDateToGive(), request.getEndDateToGive()))
+        .or(competenceRequest.endDateToGive.between(
+            request.getBeginDateToGive(), request.getEndDateToGive()));
+    if (request.getBeginDateToAsk() != null && request.getEndDateToAsk() != null) {
+      condition.and(competenceRequest.beginDateToAsk.between(
+              request.getBeginDateToAsk(), request.getEndDateToAsk())
+          .or(competenceRequest.endDateToAsk.between(
+              request.getBeginDateToAsk(), request.getEndDateToAsk())));
+    }
     return getQueryFactory().selectFrom(competenceRequest)
         .where(competenceRequest.person.eq(request.getPerson())
-            .and(
-                competenceRequest.beginDateToAsk.between(request.getBeginDateToAsk(), request.getEndDateToAsk())
-                  .or(competenceRequest.endDateToAsk.between(request.getBeginDateToAsk(), request.getEndDateToAsk()))
-                  .or(competenceRequest.beginDateToGive.between(request.getBeginDateToGive(), request.getEndDateToGive()))
-                  .or(competenceRequest.endDateToGive.between(request.getBeginDateToGive(), request.getEndDateToGive()))
-                )
+            .and(condition)
             .and(competenceRequest.flowEnded.eq(false)))
         .fetch();
   }

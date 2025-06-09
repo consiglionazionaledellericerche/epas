@@ -4,14 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.25.0] - UNRELEASED
+## [2.25.0] - 2025-05-09
 ### Added
   - Aggiunta gestione piani ferie dei dipendenti via REST
 
 ### Changed
   - Limitato il nome delle schede Excel nell'esportazione periodica in Excel
   - Aggiornamento delle librerie micrometer alla 1.15
-
+  - Corretta procedura per cessione giorni di reperibilità senza cambio giorni
+  
 ## [2.24.2] - 2025-05-30
 ### Added
   - Aggiunto job schedulato a cadenza settimanale (il lunedì) che controlla quanti dipendenti, nella settimana appena conclusa, hanno
