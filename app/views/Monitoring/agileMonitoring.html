@@ -1,0 +1,43 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+
+#{set title: 'ePAS - Monitoraggio lavoro agile e timbrature'  /}
+
+<div class="container">
+
+#{title title:'Monitoraggio lavoro agile e timbrature della sede ' + office.name + ' ' +templateUtility.monthName(month) + ' ' + year /}
+
+#{if map != null && !map.isEmpty()}
+		<table class="table">
+        
+        <tr class="warning">
+          <th>Dipendente</th>
+          <th>Giorni con timbrature e lavoro agile</th>
+        </tr>
+		#{list items:map.entrySet(), as:'entry'}
+		<tr>
+		  <td>${entry.getKey().getFullname()}</td>
+		  <td>
+			  <ul>
+			  #{list items:entry.getValue(), as:'value'}
+			    #{if value.getStampingsTime() > 60}
+			  	<li>${value.getDate().format()} - <font color="red">${value.getStampingsTime()}</font> minuti</li>
+				#{/if}
+				#{else}
+				<li>${value.getDate().format()} - ${value.getStampingsTime()} minuti</li>
+				#{/else}
+			  #{/list}
+			  </ul>
+		  </td>
+		  
+		</tr>       
+		#{/list}
+		</table>
+#{/if}
+#{else}
+	#{alert color:'warning'}
+	<p>Non ci sono persone che, per lo stesso giorno, presentano timbrature e codice di lavoro agile.</p>
+	#{/alert}
+#{/else}
+        
+</div>

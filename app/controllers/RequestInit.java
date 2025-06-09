@@ -272,7 +272,8 @@ public class RequestInit extends Controller {
         "Charts.exportTimesheetSituation",
         "AbsenceGroups.absenceTroubles",
         "Stampings.stampingsByAdmin",
-        "PrintTags.listPersonForPrintTags");
+        "PrintTags.listPersonForPrintTags",
+        "Monitoring.agileMonitoring");
 
 
     final Collection<String> yearSwitcher = ImmutableList.of(
@@ -363,7 +364,8 @@ public class RequestInit extends Controller {
         "Stampings.stampingsByAdmin",
         "PrintTags.listPersonForPrintTags",
         "TimeVariations.show",
-        "MealTicketCards.mealTicketCards");
+        "MealTicketCards.mealTicketCards",
+        "Monitoring.agileMonitoring");
 
     final Collection<String> dropDownEmployeeActions = ImmutableList.of(
         "Stampings.insertWorkingOffSitePresence",
