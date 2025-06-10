@@ -1,5 +1,6 @@
 package controllers;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
@@ -40,7 +41,9 @@ public class Monitoring extends Controller{
     Optional<AbsenceType> abt = absenceTypeDao.getAbsenceTypeByCode("LAGILE");
     LocalDate begin = new LocalDate(year, month, 1);
     LocalDate end = begin.dayOfMonth().withMaximumValue();
-    Map<Person, List<PersonDay>> map = Maps.newHashMap();
+    Long count = personDayDao.countDaysWithAbsenceAndStampings(Optional.absent(), begin, end, abt.get());
+    Comparator<Person> customComparator = (k1, k2) -> k1.getFullname().compareTo(k2.getFullname());
+    Map<Person, List<PersonDay>> map = Maps.newTreeMap(customComparator);
     List<PersonDay> list = personDayDao.getPersonDaysByOfficeInPeriod(office, begin, end);
     for (PersonDay pd : list) {
       if (map.containsKey(pd.getPerson())) {
@@ -48,14 +51,14 @@ public class Monitoring extends Controller{
       } else {
         list = Lists.newArrayList();
       }
-      if (pd.getStampings().size() > 1 && pd.getAbsences().stream().anyMatch(abs -> abs.getAbsenceType().equals(abt.get()))) {
+      if (pd.getStampings().size() > 1 && pd.getAbsences().stream()
+          .anyMatch(abs -> abs.getAbsenceType().equals(abt.get()))) {
         list.add(pd);
         map.put(pd.getPerson(), list);
-      }
-      
+      }      
     }
-    //map.entrySet().stream().sorted(Map.Entry.<Person, List<PersonDay>>comparingByKey());
-    render(office, year, month, map);
+    
+    render(office, year, month, map, count);
   }
 
 }

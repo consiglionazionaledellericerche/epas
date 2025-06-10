@@ -7,6 +7,11 @@
 
 #{title title:'Monitoraggio lavoro agile e timbrature della sede ' + office.name + ' ' +templateUtility.monthName(month) + ' ' + year /}
 
+#{alert color:'info'}
+Nell'intera base di dati del CNR, per <strong>${templateUtility.monthName(month)} ${year}</strong>, ci sono <strong>${count}</strong> dipendenti che presentano giorni in cui ci sono
+sia timbrature che codici di lavoro agile.
+#{/alert}
+
 #{if map != null && !map.isEmpty()}
 		<table class="table">
         

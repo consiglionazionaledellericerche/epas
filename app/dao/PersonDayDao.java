@@ -29,6 +29,7 @@ import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 import models.enumerate.StampTypes;
@@ -425,5 +426,36 @@ public class PersonDayDao extends DaoBase {
       Office office, LocalDate begin, LocalDate end) {
     return getStampTypePersonDaysByOFficeInPeriod(
         StampTypes.MOTIVI_DI_SERVIZIO, office, begin, end);
+  }
+  
+  /**
+   * Il numero di persone che hanno sia timbrature che un determinato codice di assenza nello stessio giorno nel  
+   * periodo begin-end.
+   *  
+   * @param office se presente, la sede su cui cercare
+   * @param begin la data di inizio da cui cercare
+   * @param end la data di fine entro cui cercare
+   * @param abt il codice d'assenza su cui filtrare
+   * @return Il numero di giorni in cui ci sono sia timbrature che un determinato codice di assenza 
+   *   nel periodo begin-end.
+   */
+  public Long countDaysWithAbsenceAndStampings(Optional<Office> office, LocalDate begin, 
+      LocalDate end, AbsenceType abt) {
+    QPersonDay personDay = QPersonDay.personDay;
+    QStamping stamping = QStamping.stamping;
+    QAbsence absence = QAbsence.absence;
+    QPerson person = QPerson.person;
+    
+    BooleanBuilder condition = new BooleanBuilder();
+    if (office.isPresent()) {
+      condition.and(personDay.person.office.eq(office.get()));
+    }
+    return getQueryFactory().selectFrom(person)
+        .leftJoin(person.personDays, personDay)
+        .leftJoin(personDay.stampings, stamping)
+        .leftJoin(personDay.absences, absence)
+        .where(personDay.stampings.isNotEmpty(), 
+            personDay.date.between(begin, end),
+            absence.absenceType.eq(abt)).distinct().fetchCount();    
   }
 }
