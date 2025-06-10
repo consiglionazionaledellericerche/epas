@@ -12,7 +12,7 @@
         
         <tr class="warning">
           <th>Dipendente</th>
-          <th>Giorni con timbrature e lavoro agile</th>
+          <th>Giorni con timbrature e lavoro agile <br>(espresse nel formato hh:mm)</th>
         </tr>
 		#{list items:map.entrySet(), as:'entry'}
 		<tr>
@@ -21,10 +21,10 @@
 			  <ul>
 			  #{list items:entry.getValue(), as:'value'}
 			    #{if value.getStampingsTime() > 60}
-			  	<li>${value.getDate().format()} - <font color="red">${value.getStampingsTime()}</font> minuti</li>
+			  	<li>${value.getDate().format()} - <font color="red">${value.getStampingsTime().printHourMinute()}</font></li>
 				#{/if}
 				#{else}
-				<li>${value.getDate().format()} - ${value.getStampingsTime()} minuti</li>
+				<li>${value.getDate().format()} - ${value.getStampingsTime().printHourMinute()}</li>
 				#{/else}
 			  #{/list}
 			  </ul>

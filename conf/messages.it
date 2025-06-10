@@ -1184,6 +1184,8 @@ MealTickets.recapMealTickets= Buoni Pasto
 MealTickets.recapMealTickets= Riepilogo Buoni Pasto
 MealTickets.recapPersonMealTickets= Riepilogo Buoni Pasto Consegnati
 MealTickets.returnedMealTickets= Buoni Pasto Riconsegnati
+
+Monitoring.agileMonitoring=Monitoriaggio lavoro agile con timbrature
 MonthRecaps.showRecaps= Riepilogo Mensile
 PersonMonths.hourRecap= Riepilogo Orario
 PersonMonths.trainingHours= Ore di Formazione
