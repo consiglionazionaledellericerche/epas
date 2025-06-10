@@ -130,7 +130,7 @@ Nel caso di tratti di un'assenza oraria è possibile indicare i campi *hours* an
 
   $ http -a istituto_xxx_absence_manager 
       GET https://epas-demo.devel.iit.cnr.it/rest/absences/insertAbsence 
-      email==galileo.galilei@cnr.it begin==2021-02-02 end==2021-02-03 absenceCode==31
+      email==galileo.galilei@cnr.it begin==2021-02-02 end==2021-02-03 absenceCode==31 note=="Una nota"
 
 Il risultato sarà un json contenente i codici effettivamente inseriti nel sistema nei vari giorni.
 Con un risultato tipo il seguente:
@@ -143,6 +143,7 @@ Con un risultato tipo il seguente:
         "absenceTypeId": 297,
         "date": "2021-02-02",
         "isOk": true,
+        "note": "Una nota",
         "reason": ""
      },
      {
@@ -150,6 +151,7 @@ Con un risultato tipo il seguente:
         "absenceTypeId": 297,
         "date": "2021-02-03",
         "isOk": true,
+        "note": "Una nota",
         "reason": ""
      }
   ]
