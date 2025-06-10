@@ -1,0 +1,48 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+
+#{set title: 'ePAS - Monitoraggio lavoro agile e timbrature'  /}
+
+<div class="container">
+
+#{title title:'Monitoraggio lavoro agile e timbrature della sede ' + office.name + ' ' +templateUtility.monthName(month) + ' ' + year /}
+
+#{alert color:'info'}
+Nell'intera base di dati del CNR, per <strong>${templateUtility.monthName(month)} ${year}</strong>, ci sono <strong>${count}</strong> dipendenti che presentano giorni in cui ci sono
+sia timbrature che codici di lavoro agile.
+#{/alert}
+
+#{if map != null && !map.isEmpty()}
+		<table class="table">
+        
+        <tr class="warning">
+          <th>Dipendente</th>
+          <th>Giorni con timbrature e lavoro agile <br>(espresse nel formato hh:mm)</th>
+        </tr>
+		#{list items:map.entrySet(), as:'entry'}
+		<tr>
+		  <td>${entry.getKey().getFullname()}</td>
+		  <td>
+			  <ul>
+			  #{list items:entry.getValue(), as:'value'}
+			    #{if value.getStampingsTime() > 60}
+			  	<li>${value.getDate().format()} - <font color="red">${value.getStampingsTime().printHourMinute()}</font></li>
+				#{/if}
+				#{else}
+				<li>${value.getDate().format()} - ${value.getStampingsTime().printHourMinute()}</li>
+				#{/else}
+			  #{/list}
+			  </ul>
+		  </td>
+		  
+		</tr>       
+		#{/list}
+		</table>
+#{/if}
+#{else}
+	#{alert color:'warning'}
+	<p>Non ci sono persone che, per lo stesso giorno, presentano timbrature e codice di lavoro agile.</p>
+	#{/alert}
+#{/else}
+        
+</div>

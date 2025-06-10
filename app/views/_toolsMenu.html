@@ -9,7 +9,8 @@
   'Synchronizations.people',
   'Synchronizations.badges',
   'AbsenceGroups.certificationsAbsenceCodes',
-  'AbsenceGroups.certificationsAbsences'] /}
+  'AbsenceGroups.certificationsAbsences',
+  'Monitoring.agileMonitoring'] /}
 
   <li class="dropdown #{if request.action in actions}active#{/if}">
 
@@ -20,6 +21,9 @@
     </a>
 
     <ul class="dropdown-menu">
+      #{secure.li @Monitoring.agileMonitoring(currentData.year, currentData.month, currentData.officeId) }
+	  <i class="fa fa-desktop" aria-hidden="true"></i>
+      #{/secure.li}
 
       #{secure.li @Administration.utilities() }
       <i class="fa fa-wrench" aria-hidden="true"></i>
