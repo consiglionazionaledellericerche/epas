@@ -6,10 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.25.1] - UNRELEASED
 ### Added
-  - Aggiunta schermata di monitoraggio per verificare le casistiche di persone con lavoro agile e timbrature nella stessa giornata.
+  - Aggiunta schermata di monitoraggio per verificare le casistiche di persone con lavoro agile
+    e timbrature nella stessa giornata.
 
 ### Changed
-  - Permessa l'aggiunta delle note nell'inserimento via REST di un'assenza
+  - Permessa l'aggiunta delle note nell'inserimento via REST di un'assenza e anche come metodo
+    separato per le assenze già esistenti.
 
 ## [2.25.0] - 2025-06-09
 ### Added

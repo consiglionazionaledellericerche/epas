@@ -3787,6 +3787,7 @@ when
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
+        "rest.Absences.setNote",
         "manager.AbsenceManager.saveAbsences",
 
         "rest.Absences.checkAbsenceByPerseoId",
@@ -3807,6 +3808,7 @@ when
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
+        "rest.Absences.setNote",
         "manager.AbsenceManager.saveAbsences",
 
         "rest.Absences.checkAbsenceByPerseoId",
@@ -3829,6 +3831,7 @@ when
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
+        "rest.Absences.setNote",
         "manager.AbsenceManager.saveAbsences",
 
         "rest.Absences.checkAbsenceByPerseoId",
@@ -3862,6 +3865,7 @@ when
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
+        "rest.Absences.setNote",
         "manager.AbsenceManager.saveAbsences",
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId",
@@ -3897,6 +3901,7 @@ when
         "rest.Absences.absencesInPeriod",
         "rest.Absences.insertAbsence",
         "rest.Absences.checkAbsence",
+        "rest.Absences.setNote",
 
         "rest.Absences.checkAbsenceByPerseoId",
         "rest.Absences.insertAbsenceByPerseoId",

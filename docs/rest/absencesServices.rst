@@ -210,6 +210,21 @@ Con un risultato tipo il seguente.
 Anche con questo metodo, nel caso di inserimento di giorni di ferie in un periodo che comprende giorni festivi,
 il sistema inserirà i codice relativi alle ferie solo nei giorni feriali.
 
+Impostare le note in un'assenza
+-------------------------------
+
+È possibile impostare le note in assenza già presente tramite una HTTP POST all'indirizzo
+**/rest/absences/setNote**.
+
+Per individuare l'assenza sui cui impostare le si utilizza il parametro *id* dell'assenza, il testo
+delle note deve essere indicato nel campo *note*.
+
+.. code-block:: bash
+
+  $ http -a istituto_xxx_absence_manager 
+      DELETE https://epas-demo.devel.iit.cnr.it/rest/absences/setNote 
+      id==107109 note=="Note inserite via REST"
+
 Cancellazione di un'assenza
 ---------------------------
 

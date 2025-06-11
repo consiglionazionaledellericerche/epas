@@ -194,6 +194,24 @@ public class Absences extends Controller {
   }
 
   /**
+   * Imposta le note su un'assenza.
+   * Questo metodo può essere chiamato solo via HTTP POST.
+   */
+  public static void setNote(Long id, String note) {
+    RestUtils.checkMethod(request, HttpMethod.POST);
+    val absence = getAbsenceFromRequest(id);
+
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione delle assenze sull'office della assenza passata.
+    rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
+
+    absence.setNote(note);
+    absence.save();
+    log.info("Inserite note sul absence {} via REST", absence);
+    JsonResponse.ok();
+  }
+
+  /**
    * Verifica se è possibile prendere il tipo di assenza passato nel periodo indicato.
    * La persona viene individuata tramite il suo indirizzo email.
    * Il campo eppn se passato viene usato come preferenziale per cercare la persona. 
@@ -270,7 +288,7 @@ public class Absences extends Controller {
     val absence = getAbsenceFromRequest(id);
 
     //Controlla anche che l'utente corrente abbia
-    //i diritti di gestione delle assenze sull'office della persona passata.
+    //i diritti di gestione delle assenze sull'office dell'assenza passata.
     rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
 
     absenceManager.removeAbsence(absence);
