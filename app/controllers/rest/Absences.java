@@ -147,7 +147,7 @@ public class Absences extends Controller {
   public static void insertAbsence(
       Long id, String eppn, String email, Long personPerseoId, String fiscalCode, String number,
       @Required String absenceCode, @CheckWith(LocalDateNotTooFar.class) LocalDate begin, 
-      @CheckWith(LocalDateNotTooFar.class) LocalDate end, Integer hours, Integer minutes) {
+      @CheckWith(LocalDateNotTooFar.class) LocalDate end, Integer hours, Integer minutes, Optional<String> note) {
     Person person = 
         personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(id, 
             eppn, email, personPerseoId, fiscalCode, number).orNull();
@@ -176,7 +176,7 @@ public class Absences extends Controller {
       val justifiedType = absenceType.get().getJustifiedTypesPermitted().iterator().next();
       val groupAbsenceType = absenceType.get().defaultTakableGroup(); 
       val report = absenceService.insert(person, groupAbsenceType, begin, end, absenceType.get(),
-          justifiedType, hours, minutes, false, absenceManager);
+          justifiedType, hours, minutes, false, absenceManager, note);
 
       val list = report.insertTemplateRows.stream()
           .map(AbsenceAddedRest::build)
@@ -191,6 +191,24 @@ public class Absences extends Controller {
     }
 
 
+  }
+
+  /**
+   * Imposta le note su un'assenza.
+   * Questo metodo può essere chiamato solo via HTTP POST.
+   */
+  public static void setNote(Long id, String note) {
+    RestUtils.checkMethod(request, HttpMethod.POST);
+    val absence = getAbsenceFromRequest(id);
+
+    //Controlla anche che l'utente corrente abbia
+    //i diritti di gestione delle assenze sull'office della assenza passata.
+    rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
+
+    absence.setNote(note);
+    absence.save();
+    log.info("Inserite note sul absence {} via REST", absence);
+    JsonResponse.ok();
   }
 
   /**
@@ -270,7 +288,7 @@ public class Absences extends Controller {
     val absence = getAbsenceFromRequest(id);
 
     //Controlla anche che l'utente corrente abbia
-    //i diritti di gestione delle assenze sull'office della persona passata.
+    //i diritti di gestione delle assenze sull'office dell'assenza passata.
     rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
 
     absenceManager.removeAbsence(absence);

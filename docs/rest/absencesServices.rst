@@ -130,7 +130,7 @@ Nel caso di tratti di un'assenza oraria è possibile indicare i campi *hours* an
 
   $ http -a istituto_xxx_absence_manager 
       GET https://epas-demo.devel.iit.cnr.it/rest/absences/insertAbsence 
-      email==galileo.galilei@cnr.it begin==2021-02-02 end==2021-02-03 absenceCode==31
+      email==galileo.galilei@cnr.it begin==2021-02-02 end==2021-02-03 absenceCode==31 note=="Una nota"
 
 Il risultato sarà un json contenente i codici effettivamente inseriti nel sistema nei vari giorni.
 Con un risultato tipo il seguente:
@@ -143,6 +143,7 @@ Con un risultato tipo il seguente:
         "absenceTypeId": 297,
         "date": "2021-02-02",
         "isOk": true,
+        "note": "Una nota",
         "reason": ""
      },
      {
@@ -150,6 +151,7 @@ Con un risultato tipo il seguente:
         "absenceTypeId": 297,
         "date": "2021-02-03",
         "isOk": true,
+        "note": "Una nota",
         "reason": ""
      }
   ]
@@ -207,6 +209,21 @@ Con un risultato tipo il seguente.
 
 Anche con questo metodo, nel caso di inserimento di giorni di ferie in un periodo che comprende giorni festivi,
 il sistema inserirà i codice relativi alle ferie solo nei giorni feriali.
+
+Impostare le note in un'assenza
+-------------------------------
+
+È possibile impostare le note in assenza già presente tramite una HTTP POST all'indirizzo
+**/rest/absences/setNote**.
+
+Per individuare l'assenza sui cui impostare le si utilizza il parametro *id* dell'assenza, il testo
+delle note deve essere indicato nel campo *note*.
+
+.. code-block:: bash
+
+  $ http -a istituto_xxx_absence_manager 
+      DELETE https://epas-demo.devel.iit.cnr.it/rest/absences/setNote 
+      id==107109 note=="Note inserite via REST"
 
 Cancellazione di un'assenza
 ---------------------------

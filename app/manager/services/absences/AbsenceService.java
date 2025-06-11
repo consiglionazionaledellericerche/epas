@@ -222,7 +222,15 @@ public class AbsenceService {
         justifiedType, hours, minutes, groupsPermitted, absenceComponentDao, absenceEngineUtility);
   }
 
-
+  /**
+   * Effettua la simulazione dell'inserimento. Genera il report di inserimento. Senza il campo note.
+   *
+   */
+  public InsertReport insert(Person person, GroupAbsenceType groupAbsenceType, LocalDate from,
+      LocalDate to, AbsenceType absenceType, JustifiedType justifiedType, Integer hours,
+      Integer minutes, boolean forceInsert, AbsenceManager absenceManager) {
+    return insert(person, groupAbsenceType, from, to, absenceType, justifiedType, hours, minutes, forceInsert, absenceManager, Optional.absent());
+  }
 
   /**
    * Effettua la simulazione dell'inserimento. Genera il report di inserimento.
@@ -240,7 +248,7 @@ public class AbsenceService {
    */
   public InsertReport insert(Person person, GroupAbsenceType groupAbsenceType, LocalDate from,
       LocalDate to, AbsenceType absenceType, JustifiedType justifiedType, Integer hours,
-      Integer minutes, boolean forceInsert, AbsenceManager absenceManager) {
+      Integer minutes, boolean forceInsert, AbsenceManager absenceManager, Optional<String> note) {
 
     if ((from != null && from.isBefore(from.minusMonths(6)))
         || (to != null && to.isAfter(from.plusMonths(6)))) {
@@ -283,6 +291,7 @@ public class AbsenceService {
       absenceToInsert.date = currentDate;
       absenceToInsert.setAbsenceType(absenceType);
       absenceToInsert.setJustifiedType(justifiedType);
+      absenceToInsert.setNote(note.orNull());
       if (specifiedMinutes != null) {
         absenceToInsert.setJustifiedMinutes(specifiedMinutes);
       }
