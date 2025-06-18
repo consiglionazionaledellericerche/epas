@@ -4,12 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.25.1] - Unreleased
+## [2.25.1] - UNRELEASED
 ### Added
   - Aggiunta schermata di monitoraggio per verificare le casistiche di persone con lavoro agile e timbrature nella stessa giornata.
   
 ### Changed
   - Rimossa classe che conteneva il job per il controllo delle ore settimanali lavorate.
+  - Permessa l'aggiunta delle note nell'inserimento via REST di un'assenza e anche come metodo
+    separato per le assenze già esistenti.
+
 
 ## [2.25.0] - 2025-06-09
 ### Added
