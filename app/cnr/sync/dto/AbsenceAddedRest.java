@@ -32,6 +32,7 @@ public class AbsenceAddedRest {
   public String date;
   public boolean isOk;
   public String reason;
+  public String note;
   
   /**
    * Costruisce un'instanza del DTO AbsenceAddedRest a partire dal DTO templateRow.
@@ -41,6 +42,7 @@ public class AbsenceAddedRest {
     aar.date = templateRow.absence.getDate().toString();
     aar.absenceCode = templateRow.absence.getAbsenceType().getCode();
     aar.absenceTypeId = templateRow.absence.getAbsenceType().getId();
+    aar.note = templateRow.absence.getNote();
     aar.isOk = templateRow.absenceErrors.isEmpty();
     aar.reason = Joiner.on(", ").join(
         templateRow.absenceErrors.stream()
