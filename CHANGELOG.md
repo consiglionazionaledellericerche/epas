@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.25.1] - Unreleased
 ### Added
   - Aggiunta schermata di monitoraggio per verificare le casistiche di persone con lavoro agile e timbrature nella stessa giornata.
+  
+### Changed
+  - Rimossa classe che conteneva il job per il controllo delle ore settimanali lavorate.
 
 ## [2.25.0] - 2025-06-09
 ### Added
