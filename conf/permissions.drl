@@ -4099,19 +4099,7 @@ then
   $c.grant();
 end
 
-/*
- * Permesso per l'abilitazione alla visualizzazione delle richieste di ferie anno passato dopo il 31/8
- */
-rule isVacationPastYearFlowsVisible
-when
-  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
-  $p: Person() from currentOperator.person
-  $o: Office() from $p.office
-  Configuration(epasParam == EpasParam.ENABLE_37_FLOW, fieldValue == true) from $o.configurations
-  $c: PermissionCheck(action == "AbsenceRequests.pastYearEnabled", granted == false, target == null)
-then
-  $c.grant();
-end
+
 
 /*******************************************************************************
  * Azioni via REST per PERSONDAY READER

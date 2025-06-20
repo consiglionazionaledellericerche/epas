@@ -13,7 +13,6 @@
   compensatoryRestRequests = templateUtility.compensatoryRestRequests()
   vacationRequests = templateUtility.vacationRequests()
   overtimeRequests = templateUtility.overtimeRequests()
-  vacationPastYearAfterDeadlineRequests = templateUtility.vacationPastYearAfterDeadlineRequests()
   changeReperibilityRequests = templateUtility.changeReperibilityRequests()
   teleworkRequests = templateUtility.teleworkRequests()
   serviceRequests = templateUtility.serviceRequests()
@@ -32,7 +31,6 @@
 		    #{if compensatoryRestRequests > 0 || vacationRequests > 0
 		    	|| templateUtility.overtimeRequests() > 0
 		    	|| personalPermissionRequests > 0
-		    	|| vacationPastYearAfterDeadlineRequests > 0
 		    	|| changeReperibilityRequests > 0 || teleworkRequests > 0
 		    	|| serviceRequests > 0 || illnessRequests > 0
 		    	|| personalPermissionRequests > 0 
@@ -42,7 +40,6 @@
       				+ vacationRequests 
       				+ overtimeRequests
       				+ personalPermissionRequests
-      				+ vacationPastYearAfterDeadlineRequests
       				+ teleworkRequests + serviceRequests
       				+ illnessRequests
       				+ changeReperibilityRequests
@@ -89,15 +86,6 @@
         <i class="fa fa-exclamation" aria-hidden="true"></i>
       #{/b.li}
 
-      #{secure.check 'AbsenceRequests.pastYearEnabled'}
-        %{
-           absenceRequestPastYearLabel = 
-             currentUser.person != null && currentUser.person.isTopQualification() && !templateUtility.absenceRequestAuthorizationTopLevelEnabled() ? 'AbsenceRequests.vacationsPastYearAfterDeadlineTopLevel' : 'AbsenceRequests.vacationsPastYearAfterDeadline'
-        }%
-        #{b.li @AbsenceRequests.vacationsPastYearAfterDeadline(), label:absenceRequestPastYearLabel}
-          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-        #{/b.li}
-      #{/secure.check}
 
       #{secure.check 'InformationRequests.enabled'}
         #{secure.li @InformationRequests.teleworks()}
@@ -171,14 +159,6 @@
         #{/if}
       #{/b.li}
 
-      #{secure.check 'AbsenceRequests.pastYearEnabled'}
-        #{b.li @AbsenceRequests.vacationsPastYearAfterDeadlineToApprove()}
-          <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-          #{if templateUtility.vacationPastYearAfterDeadlineRequests() > 0}
-            <span class="label label-danger label-badge">${templateUtility.vacationPastYearAfterDeadlineRequests()}</span>
-          #{/if}
-        #{/b.li}
-      #{/secure.check}
     #{/secure.check}
 
       <!--  Flussi informativi -->

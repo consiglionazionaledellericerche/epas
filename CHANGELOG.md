@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Rimossa classe che conteneva il job per il controllo delle ore settimanali lavorate.
   - Permessa l'aggiunta delle note nell'inserimento via REST di un'assenza e anche come metodo
     separato per le assenze già esistenti.
+  - Rimossa l'intera gestione delle richieste ferie anno passato dopo deadline.
 
 
 ## [2.25.0] - 2025-06-09

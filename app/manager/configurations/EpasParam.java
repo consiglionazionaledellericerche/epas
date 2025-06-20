@@ -512,13 +512,13 @@ public enum EpasParam {
       Lists.<RecomputationType>newArrayList(),
       Office.class),
 
-  ENABLE_37_FLOW("enable_37_flow",
-      EpasParamCategory.FLOWS,
-      EpasParamTimeType.GENERAL,
-      EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(false),
-      Lists.<RecomputationType>newArrayList(),
-      Office.class),
+//  ENABLE_37_FLOW("enable_37_flow",
+//      EpasParamCategory.FLOWS,
+//      EpasParamTimeType.GENERAL,
+//      EpasParamValueType.BOOLEAN,
+//      EpasParamValueType.formatValue(false),
+//      Lists.<RecomputationType>newArrayList(),
+//      Office.class),
 
   /**
    * Per i livelli I-III è necessaria l'approvazione delle ferie da parte del responsabile di sede.

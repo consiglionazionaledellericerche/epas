@@ -344,27 +344,6 @@ public class TemplateUtility {
     return results.size();
   }
 
-  /**
-   * Metodo di utiiltà per far comparire il badge con la quantità di richieste ferie anno passato
-   * post deadline da approvare nel template.
-   *
-   * @return la quantità di richieste ferie anno passato post deadline da approvare.
-   */
-  public final int vacationPastYearAfterDeadlineRequests() {
-    User user = Security.getUser().get();
-    if (user.isSystemUser()) {
-      return 0;
-    }
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = 
-        groupDao.groupsByOffice(
-            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
-    Set<AbsenceRequest> results = absenceRequestDao
-        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
-            AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST, groups, user.getPerson());
-
-    return results.size();
-  }
 
   /**
    * Metodo di utilità per far comparire il badge con la quantità di richieste di cambio di 
