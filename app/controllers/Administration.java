@@ -1359,4 +1359,31 @@ public class Administration extends Controller {
     renderText("Trovati %s dipendenti che superano l'orario massimo settimanale", counter);
   }
   
+  public static void shiftPastVacationDate() {
+    List<Office> officeList = officeDao.allEnabledOffices();
+    LocalDate date = LocalDate.now();
+    int counter = 0;
+    for (Office office : officeList) {
+      log.debug("Modifico il parametro per la sede  {}", office.getName());
+      Configuration newConfiguration = (Configuration) configurationManager
+          .updateDayMonth(EpasParam.EXPIRY_VACATION_PAST_YEAR, office, 31, 12, 
+              Optional.fromNullable(date.minusYears(1).dayOfYear().withMinimumValue()), 
+              Optional.fromNullable(date.minusYears(1).dayOfYear().withMaximumValue()), false);              
+      
+      List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
+      RecomputeRecap recomputeRecap =
+          periodManager.buildRecap(newConfiguration.getOffice().getBeginDate(),
+              Optional.fromNullable(LocalDate.now()),
+              periodRecaps, Optional.<LocalDate>absent());
+      recomputeRecap.epasParam = newConfiguration.getEpasParam();
+      periodManager.updatePeriods(newConfiguration, true);
+
+      consistencyManager.performRecomputation(newConfiguration.getOffice(),
+          newConfiguration.getEpasParam().recomputationTypes, recomputeRecap.recomputeFrom);
+      log.debug("Effettuati i ricalcoli per {}", office.getName());
+      counter++;
+    }
+    renderText("Aggiornato il parametro della scadenza delle ferie anno passato per %s sedi", counter);
+  }
+  
 }

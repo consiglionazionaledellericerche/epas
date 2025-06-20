@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.25.1] - UNRELEASED
 ### Added
   - Aggiunta schermata di monitoraggio per verificare le casistiche di persone con lavoro agile e timbrature nella stessa giornata.
+  - Aggiunto metodo che modifica la data di fine delle ferie anno passato per tutte le sedi.
   
 ### Changed
   - Rimossa classe che conteneva il job per il controllo delle ore settimanali lavorate.
