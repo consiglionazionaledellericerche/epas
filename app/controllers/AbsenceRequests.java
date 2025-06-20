@@ -158,12 +158,7 @@ public class AbsenceRequests extends Controller {
     list(AbsenceRequestType.PERSONAL_PERMISSION);
   }
 
-  /**
-   * Lista delle richiesta di assenza di tipo ferie dell'anno passato oltre la scadenza.
-   */
-  public static void vacationsPastYearAfterDeadline() {
-    list(AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST);
-  }
+
   
   /**
    * Lista delle richiesta di assenza di tipo permesso breve.
@@ -193,12 +188,6 @@ public class AbsenceRequests extends Controller {
     listToApprove(AbsenceRequestType.PERSONAL_PERMISSION);
   }
   
-  /**
-   * Lista delle richiesta di assenza di tipo ferie anno passato oltre scadenza da approvare.
-   */
-  public static void vacationsPastYearAfterDeadlineToApprove() {
-    listToApprove(AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST);
-  }
 
   /**
    * Lista delle richiesta di assenza di tipo permesso breve da approvare.

@@ -1034,9 +1034,6 @@ public class NotificationManager {
       case COMPENSATORY_REST:
         requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
         break;
-      case VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST:
-        requestType = Messages.get("AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST");
-        break;
       case VACATION_REQUEST:
         requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST");
         break;
@@ -1057,10 +1054,6 @@ public class NotificationManager {
     switch (absenceRequest.getType()) {
       case COMPENSATORY_REST:
         requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST_TOP_LEVEL");
-        break;
-      case VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST:
-        requestType = Messages
-        .get("AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST_TOP_LEVEL");
         break;
       case VACATION_REQUEST:
         requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST_TOP_LEVEL");
@@ -1705,9 +1698,7 @@ public class NotificationManager {
       requestType = Messages.get("AbsenceRequestType.COMPENSATORY_REST");
     } else if (absenceRequest.getType() == AbsenceRequestType.PERSONAL_PERMISSION) {
       requestType = Messages.get("AbsenceRequestType.PERSONAL_PERMISSION");
-    } else if (absenceRequest.getType()
-        == AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST) {
-      requestType = Messages.get("AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST");
+    
     } else {
       requestType = Messages.get("AbsenceRequestType.VACATION_REQUEST");
     }

@@ -520,10 +520,7 @@ public class AbsenceRequestManager {
 
       }
     }
-    if (absenceRequest.getType().equals(
-        AbsenceRequestType.VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST)) {
-      absenceType = absenceDao.absenceTypeByCode(DefaultAbsenceType.A_37.getCode()).get();
-    }
+
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.getPerson(),
         absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
         false, absenceType, type, hours, minutes, false, true);
@@ -770,12 +767,6 @@ public class AbsenceRequestManager {
         break;
       case PERSONAL_PERMISSION:
         group = absenceDao.groupAbsenceTypeByName(PERMESSI_PERSONALI);
-        if (group.isPresent()) {
-          groupAbsenceType = group.get();
-        }
-        break;
-      case VACATION_PAST_YEAR_AFTER_DEADLINE_REQUEST:
-        group = absenceDao.groupAbsenceTypeByName(FERIE_37);
         if (group.isPresent()) {
           groupAbsenceType = group.get();
         }
