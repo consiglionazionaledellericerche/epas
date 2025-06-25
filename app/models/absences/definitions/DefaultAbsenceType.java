@@ -481,7 +481,7 @@ public enum DefaultAbsenceType {
 
   A_0M("0M", "Permesso assemblea in ore e minuti", true,
       ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, 
-      MealTicketBehaviour.allowMealTicket, 0, null,
+      MealTicketBehaviour.notAllowMealTicket, 0, null,
       Sets.newHashSet(new Behaviour(JustifiedBehaviourName.no_overtime)), null, null,
       false, true, true, "A"), 
   A_01("01", "Assemblea completamento 1 ora", false,
