@@ -313,14 +313,6 @@
       al proprio responsabile di gruppo o al proprio responsabile di sede o a entrambi in sequenza (a seconda di quale deve essere il flusso di approvazione standard presente nella sede).</p>
     #{/if}
     
-    #{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_37_FLOW) }
-      <p>Abilitando questo paramentro si permette ai dipendenti della sede <strong>${configuration.office.name}</strong> di usufruire della possibilità
-      di utilizzare i flussi di richiesta assenza anche per le ferie dell'anno passato post data di scadenza delle stesse 
-      (vedi parametro Annuale "<em>Giorno massimo utilizzo ferie dell'anno precedente</em>").<br>
-      Esso permette di far richiedere al dipendente un'assenza di tipo <strong>ferie anno passato</strong> anche successivamente alla data di 
-      termine utilizzo delle stesse, utilizzando il codice <strong>37</strong>.<br>
-      La richiesta seguirà lo stesso iter definito nella configurazione utilizzata per l'approvazione delle ferie standard.</p>
-    #{/if}
     
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED) }
       <p>Abilitando questo parametro si fa in modo che le richieste di ferie provenienti da dipendenti con

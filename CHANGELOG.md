@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.25.2] - Unreleased
+### Changed
+  - Rimosso tutorial sul parametro per l'abilitazione del flusso per le richieste ferie dopo il 31/8.
+
 ## [2.25.1] - 2025-06-25
 ### Added
   - Aggiunta schermata di monitoraggio per verificare le casistiche di persone con lavoro agile e timbrature nella stessa giornata.
