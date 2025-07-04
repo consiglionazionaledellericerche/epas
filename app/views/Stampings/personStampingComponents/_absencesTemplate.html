@@ -10,8 +10,7 @@
   #{list items:dayRecap.personDay.absences, as:'absence'}
     
     #{include './_absenceRendering.html' /}
-    
-    #{if absence.absenceFile.exists()}
+    #{if absence.absenceFile?.getUUID() && absence.absenceFile.getFile().length() > 0}
       #{secure.link @Absences.downloadAttachment(absence.id), fa:'paperclip'}#{/secure.link}
     #{/if}
   #{/list}
