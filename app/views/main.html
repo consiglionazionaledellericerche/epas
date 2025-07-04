@@ -40,7 +40,10 @@
   <!-- All JavaScript at the bottom, except for Modernizr / Respond.
   <!-- Modernizr enables HTML5 elements & feature detects; Respond is a polyfill for min/max-width CSS3 Media Queries -->
   <!-- For optimal performance, use a custom Modernizr build: www.modernizr.com/download/ -->
-  <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js" 
+    integrity="sha512-3n19xznO0ubPpSwYCRRBgHh63DrV+bdZfHK52b1esvId4GsfwStQNPJFjeQos2h3JwCmZl0/LgLxSKMAI55hgw=="
+    crossorigin="anonymous">
+  </script>
 
 </head>
 
@@ -204,13 +207,25 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.it.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment-with-locales.min.js"></script>  <!-- per combodate xeditable -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment-with-locales.min.js" 
+  integrity="sha512-fRhX4lA3s4YCzRrT9OYyt4jIVNrZGwBlpVGytxxsAyRzCgPT/A65YP0WbyrsPoDOvHLy9slz4zRIuxLFsISg8g=="
+  crossorigin="anonymous">
+</script>  <!-- per combodate xeditable -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js" 
+  integrity="sha512-6Cwk0kyyPu8pyO9DdwyN+jcGzvZQbUzQNLI0PadCY3ikWFXW9Jkat+yrnloE63dzAKmJ1WNeryPd1yszfj7kqQ=="
+  crossorigin="anonymous">
+</script>
 <script src="https://cdn.jsdelivr.net/jquery.webui-popover/2.1.15/jquery.webui-popover.min.js"></script>
 <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/plug-ins/1.12.1/sorting/datetime-moment.js"></script>  <!-- per sorting date in datatable -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.2.0/bootbox.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js" 
+  integrity="sha512-j4t/Zu3RKgAxOcA1NyhbIcvo2N4xkhdmWGW48b4ir3fJ2FUifmgNF0qfknzYGkuQO/HQmwawwB0zBjKWizYWGw=="
+  crossorigin="anonymous">
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.2.0/bootbox.min.js" 
+  integrity="sha512-j9tX0bO9lXR+wyUhoWDF8BJmAS6S8wjzmLzblWyl1LTqykCJ9zpNRcvrEy7ACqcYcG2xn7U8Atf75uxQEq0COw=="
+  crossorigin="anonymous">
+</script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 #{script 'feedback.min.js'/}
@@ -219,7 +234,10 @@
 #{script 'list-select.min.js' /}
 #{script 'pnotify.custom.min.js' /}
 #{script 'trumbowyg.min.js' /}
-<script src="//cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.10.0/langs/it.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.10.0/langs/it.min.js"
+  integrity="sha512-6QSIn+7o9d9Oh3WmGz7rkvy6vXTj52tTtTu2lIK/jCC5xI8qWSbpIvaALoX70pO30IKZM74X22nxNNinkcuNWg=="
+  crossorigin="anonymous">
+</script>
 
 #{if controllers.ApplicationInfo.isCookiePolicyEnabled()}
   #{include './_cookie_policy_banner.html'/}
