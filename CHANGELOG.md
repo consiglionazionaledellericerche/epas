@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.25.2] - Unreleased
 ### Changed
   - Rimosso tutorial sul parametro per l'abilitazione del flusso per le richieste ferie dopo il 31/8.
+  - Cambiato il meccanismo di controllo della presenza dei file allegati a un'assenza (nel tabellone
+    timbrature)
 
 ## [2.25.1] - 2025-06-25
 ### Added
