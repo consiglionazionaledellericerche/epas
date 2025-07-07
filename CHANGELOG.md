@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.25.2] - Unreleased
+### Added
+  - Aggiunto il controllo di integrity in alcune risorse js importate via CDN
+
 ### Changed
   - Rimosso tutorial sul parametro per l'abilitazione del flusso per le richieste ferie dopo il 31/8.
   - Cambiato il meccanismo di controllo della presenza dei file allegati a un'assenza (nel tabellone
