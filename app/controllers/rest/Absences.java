@@ -147,7 +147,8 @@ public class Absences extends Controller {
   public static void insertAbsence(
       Long id, String eppn, String email, Long personPerseoId, String fiscalCode, String number,
       @Required String absenceCode, @CheckWith(LocalDateNotTooFar.class) LocalDate begin, 
-      @CheckWith(LocalDateNotTooFar.class) LocalDate end, Integer hours, Integer minutes, Optional<String> note) {
+      @CheckWith(LocalDateNotTooFar.class) LocalDate end, Integer hours, Integer minutes, Optional<String> note,
+      Boolean forceInsert) {
     Person person = 
         personDao.byIdOrEppnOrEmailOrPerseoIdOrFiscalCodeOrNumber(id, 
             eppn, email, personPerseoId, fiscalCode, number).orNull();
@@ -174,9 +175,10 @@ public class Absences extends Controller {
       }
 
       val justifiedType = absenceType.get().getJustifiedTypesPermitted().iterator().next();
-      val groupAbsenceType = absenceType.get().defaultTakableGroup(); 
+      val groupAbsenceType = absenceType.get().defaultTakableGroup();
+      
       val report = absenceService.insert(person, groupAbsenceType, begin, end, absenceType.get(),
-          justifiedType, hours, minutes, false, absenceManager, note);
+          justifiedType, hours, minutes, Optional.fromNullable(forceInsert).or(false), absenceManager, note);
 
       val list = report.insertTemplateRows.stream()
           .map(AbsenceAddedRest::build)

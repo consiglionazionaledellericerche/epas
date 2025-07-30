@@ -159,6 +159,9 @@ Con un risultato tipo il seguente:
 Per esempio nel caso di inserimento di giorni di ferie in un periodo che comprende giorni festivi
 il sistema inserirà i codice relativi alle ferie solo nei giorni feriali.
 
+Analogamente a quando possibile dall'interfaccia web, è possibile passare il parametro
+aggiuntivo *forceInsert* per forzare l'inserimento dell'assenze.
+
 Inserimento di un giorno di ferie/permesso con codice assenza calcolato da ePAS
 -------------------------------------------------------------------------------
 
