@@ -361,6 +361,10 @@ public enum DefaultTakable {
       ImmutableSet.of(DefaultAbsenceType.A_242PROV, DefaultAbsenceType.A_242MPROV), 
       ImmutableSet.of(DefaultAbsenceType.A_242PROV, DefaultAbsenceType.A_242MPROV), 
       60, null),
+  T_243PROV(AmountType.units, 
+      ImmutableSet.of(DefaultAbsenceType.A_243PROV, DefaultAbsenceType.A_243MPROV), 
+      ImmutableSet.of(DefaultAbsenceType.A_243PROV, DefaultAbsenceType.A_243MPROV), 
+      60, null),
 
   T_232(AmountType.units, 
       ImmutableSet.of(DefaultAbsenceType.A_232, 
