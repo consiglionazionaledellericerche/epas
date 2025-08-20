@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.26.0] - UNRELEASED
 ### Added
   - Aggiunto parametro forceInsert nel metodo rest /rest/absences/insertAbsence
+  - Aggiunto codice 243PROV che permette di inserire il codice di congedo parentale all'80% per il terzo figlio.
 
 ## [2.25.2] - 2025-07-09
 ### Added
