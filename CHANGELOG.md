@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.25.2] - 2025-07-09
 ### Added
   - Aggiunto il controllo di integrity in alcune risorse js importate via CDN
+  - Aggiunto il codice 62s75v alla lista di quelli che decurtano le ferie.
 
 ### Changed
   - Rimosso tutorial sul parametro per l'abilitazione del flusso per le richieste ferie dopo il 31/8.
