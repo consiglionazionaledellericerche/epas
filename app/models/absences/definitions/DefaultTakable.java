@@ -823,7 +823,6 @@ public enum DefaultTakable {
 
   T_RIDUCE_FERIE_CNR(AmountType.units, 
       ImmutableSet.of(
-          DefaultAbsenceType.A_24PROV, 
           DefaultAbsenceType.A_25O, DefaultAbsenceType.A_25OH7,
           DefaultAbsenceType.A_242, DefaultAbsenceType.A_242H7,
           DefaultAbsenceType.A_252O, DefaultAbsenceType.A_252OH7,
@@ -847,7 +846,6 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_54B, DefaultAbsenceType.A_54TD,
           DefaultAbsenceType.A_62S75V), 
       ImmutableSet.of(
-          DefaultAbsenceType.A_24PROV, 
           DefaultAbsenceType.A_25O, DefaultAbsenceType.A_25OH7,
           DefaultAbsenceType.A_242, DefaultAbsenceType.A_242H7,
           DefaultAbsenceType.A_252O, DefaultAbsenceType.A_252OH7,
