@@ -6,7 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.26.1] - Unreleased
 ### Changed
-  - Rimossa la presenza del codice 24PROV dal gruppo di codici che decurtano le ferie. 
+  - Rimossa la presenza del codice 24PROV dal gruppo di codici che decurtano le ferie.
+  - Condizionata la visualizzazione della scheda della presenza automatica solo per le persone che hanno ruolo
+    responsabile di sede. 
 
 ## [2.26.0] - 2025-08-20
 ### Added
