@@ -17,7 +17,9 @@ title:('Riepilogo ore '+mese.value.contractDescription), open:true, color:'prima
   	#{if !person.isTopQualification()}
     <td class="col-xs-10">Tempo disponibile per straordinari: </td>
     #{if mese.value.progressivoFinalePositivoMese > 0}
-    	<td class="col-xs-2 success">${mese.value.progressivoFinalePositivoMese.toHourTime()} ore</td>
+    	<td class="col-xs-2 success">
+			<a href="@{PersonDays.checkPositiveResidualForOvertime(psDto.year, psDto.month, psDto.person.id)}" 
+			data-async-modal="#defaultModal">${mese.value.progressivoFinalePositivoPerStraordinari.toHourTime()} ore</a></td>
     #{/if}
     #{elseif mese.value.progressivoFinalePositivoMese == 0}
     	<td class="col-xs-2 warning">${mese.value.progressivoFinalePositivoMese.toHourTime()} ore</td>

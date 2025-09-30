@@ -104,6 +104,9 @@ public class ContractMonthRecap extends BaseModel {
    */
   @Column(name = "s_pfp")
   private int progressivoFinalePositivoMese = 0;
+  
+  @Column(name = "s_pfps")
+  private int progressivoFinalePositivoPerStraordinari = 0;
 
 
   @Column(name = "s_r_ap_usabile")
@@ -188,6 +191,9 @@ public class ContractMonthRecap extends BaseModel {
   @Transient
   public int progressivoFinalePositivoMeseAux = 0;    //person day
   // forse è usato... capire cosa contiene alla fine e fixare
+  
+  @Transient
+  public int progressivoFinalePositivoPerStraordinariAux = 0;
 
   //**************************************************************************
   // TRANSIENTI DA METTERE NEL WRAPPER

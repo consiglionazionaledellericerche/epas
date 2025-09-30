@@ -17,25 +17,34 @@
 
 package controllers;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import common.security.SecurityRules;
 import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.ShiftDao;
 import dao.history.AbsenceHistoryDao;
 import dao.history.HistoryValue;
 import dao.history.PersonDayHistoryDao;
 import dao.history.StampingHistoryDao;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 import lombok.extern.slf4j.Slf4j;
 import manager.ConsistencyManager;
+import models.ContractMonthRecap;
+import models.Person;
 import models.PersonDay;
+import models.PersonShiftDay;
 import models.Stamping;
 import models.ZoneToZones;
 import models.absences.Absence;
@@ -67,6 +76,8 @@ public class PersonDays extends Controller {
   static PersonDao personDao;
   @Inject
   static SecurityRules rules;
+  @Inject
+  static ShiftDao shiftDao;
 
   /**
    * Abilita / disabilita l'orario festivo.
@@ -80,7 +91,7 @@ public class PersonDays extends Controller {
     Preconditions.checkNotNull(personDay.isPersistent());
 
     rules.checkIfPermitted(personDay.getPerson().getOffice());
-    
+
     Integer hours = 0;
     Integer minutes = 0;
     if (personDay.getApprovedOnHoliday() > 0) {
@@ -90,20 +101,20 @@ public class PersonDays extends Controller {
 
     render(personDay, hours, minutes);
   }
-  
+
   /**
    * Action di approvazione del lavoro festivo.
    */
   public static void approveWorkingHoliday(Long personDayId, Integer hours, Integer minutes) {
-    
+
     PersonDay personDay = personDayDao.getPersonDayById(personDayId);
     Preconditions.checkNotNull(personDay);
     Preconditions.checkNotNull(personDay.isPersistent());
     Preconditions.checkNotNull(hours);
     Preconditions.checkNotNull(minutes);
-    
+
     rules.checkIfPermitted(personDay.getPerson().getOffice());
-    
+
     Integer approvedMinutes = (hours * 60) + minutes;
     if (approvedMinutes < 0 || approvedMinutes > personDay.getOnHoliday()) {
       Validation.addError("hours", "Valore non consentito.");
@@ -111,16 +122,16 @@ public class PersonDays extends Controller {
       response.status = 400;
       render("@workingHoliday", personDay, hours, minutes);
     }
-     
+
     personDay.setApprovedOnHoliday(approvedMinutes);
-    
+
     consistencyManager.updatePersonSituation(personDay.getPerson().id, personDay.getDate());
-    
+
     flash.success("Ore festive approvate correttamente.");
     Stampings.personStamping(personDay.getPerson().id, personDay.getDate().getYear(), 
         personDay.getDate().getMonthOfYear());
   }
-  
+
   /**
    * Abilita / disabilita l'orario lavorato fuori fascia apertura / chiusura.
    *
@@ -133,7 +144,7 @@ public class PersonDays extends Controller {
     Preconditions.checkNotNull(personDay.isPersistent());
 
     rules.checkIfPermitted(personDay.getPerson().getOffice());
-    
+
     Integer hours = 0;
     Integer minutes = 0;
     if (personDay.getApprovedOutOpening() > 0) {
@@ -143,20 +154,20 @@ public class PersonDays extends Controller {
 
     render(personDay, hours, minutes);
   }
-  
+
   /**
    * Action di approvazione del lavoro fuori fascia.
    */
   public static void approveWorkingOutOpening(Long personDayId, Integer hours, Integer minutes) {
-    
+
     PersonDay personDay = personDayDao.getPersonDayById(personDayId);
     Preconditions.checkNotNull(personDay);
     Preconditions.checkNotNull(personDay.isPersistent());
     Preconditions.checkNotNull(hours);
     Preconditions.checkNotNull(minutes);
-    
+
     rules.checkIfPermitted(personDay.getPerson().getOffice());
-    
+
     Integer approvedMinutes = (hours * 60) + minutes;
     if (approvedMinutes < 0 || approvedMinutes > personDay.getOutOpening()) {
       Validation.addError("hours", "Valore non consentito.");
@@ -164,11 +175,11 @@ public class PersonDays extends Controller {
       response.status = 400;
       render("@workingOutOpening", personDay, hours, minutes);
     }
-     
+
     personDay.setApprovedOutOpening(approvedMinutes);
-    
+
     consistencyManager.updatePersonSituation(personDay.getPerson().id, personDay.getDate());
-    
+
     flash.success("Ore approvate correttamente.");
     Stampings.personStamping(personDay.getPerson().id, personDay.getDate().getYear(), 
         personDay.getDate().getMonthOfYear());
@@ -255,7 +266,7 @@ public class PersonDays extends Controller {
   public enum MealTicketDecision {
     COMPUTED, FORCED_TRUE, FORCED_FALSE;
   }
-  
+
   /**
    * Visualizzazione dello storico dei PersonDay.
    *
@@ -311,11 +322,11 @@ public class PersonDays extends Controller {
           .stampings(stampingId);
       historyStampingsList.add(historyStamping);
     }
-    
+
     //Lista delle revisioni del personday
     List<HistoryValue<PersonDay>> historyPersonDayList = 
         personDayHistoryDao.personDayHistory(personDayId);
-    
+
     boolean zoneDefined = false;
     List<ZoneToZones> link = personDay.getPerson().getBadges().stream()
         .<ZoneToZones>flatMap(b -> b.getBadgeReader().getZones().stream()
@@ -328,7 +339,7 @@ public class PersonDays extends Controller {
         historyPersonDayList);
   }
 
-  
+
   /**
    * Mostra la form per impostare di ignore il calcolo del permesso breve su un giorno.
    */
@@ -354,5 +365,33 @@ public class PersonDays extends Controller {
     Stampings.personStamping(personDay.getPerson().id, personDay.getDate().getYear(),
         personDay.getDate().getMonthOfYear());
   }
-  
+
+  /**
+   * 
+   * @param year
+   * @param month
+   * @param personId
+   */
+  public static void checkPositiveResidualForOvertime(int year, int month, Long personId) {
+    Optional<Person> person = personDao.byId(personId);
+    Preconditions.checkNotNull(person.get());
+    Person p = person.get();
+    YearMonth yearMonth = new YearMonth(year, month);
+    LocalDate begin = new LocalDate(year, month, 1);
+    List<PersonDay> pdList = personDayDao.getPersonDayInMonth(person.get(), yearMonth);
+    List<PersonShiftDay> psdList = shiftDao.getPersonShiftDaysByPeriodAndType(
+        begin, begin.dayOfMonth().withMaximumValue(), Optional.absent(), person.get());
+
+    Map<LocalDate, Integer> map = Maps.newTreeMap();
+    for (PersonDay pd : pdList) {
+      if (pd.getDifference() > 0) {
+        java.util.Optional<PersonShiftDay> day = psdList.stream().filter(psd -> psd.getDate().isEqual(pd.getDate())).findFirst();
+        if (!day.isPresent()) {
+          map.put(pd.getDate(), pd.getDifference());
+        } 
+      }          
+    }
+    
+    render(map, p, year, month);
+  }
 }
