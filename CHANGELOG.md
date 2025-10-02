@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.26.1] - Unreleased
 ### Changed
   - Rimossa la presenza del codice 24PROV dal gruppo di codici che decurtano le ferie. 
+  - Inserita limitazione a 1 ora per i codici 18M e 19M.
 
 ## [2.26.0] - 2025-08-20
 ### Added
