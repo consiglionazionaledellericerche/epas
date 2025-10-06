@@ -9,7 +9,7 @@
     #{secure.li @Contracts.updatePersonalWorkingTime(contract.id) /}
     #{secure.li @Contracts.updateContractMandatoryTimeSlot(contract.id) /}
     #{secure.li @Contracts.updateContractVacationPeriod(contract.id) /}
-	#{if contract.person.isSeatSupervisor()}
+	#{if contract.person.isSeatSupervisor() || currentUser.isSystemUser()}
     #{secure.li @Contracts.updateContractStampProfile(contract.id), target:contract.person.office /}
 	#{/if}
     #{secure.li @Contracts.delete(contract.id) /}

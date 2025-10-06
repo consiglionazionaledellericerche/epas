@@ -339,4 +339,17 @@ public class ContractDao extends DaoBase {
     return getQueryFactory().selectFrom(contract)
         .where(contractEqPreviousCondition.or(previousConditionAfterCurrentContract)).fetch();
   }
+  
+  /**
+   * La lista di contratti attivi in una certa data
+   * 
+   * @param date la data in cui ricercare i contratti attivi
+   * @return la lista dei contratti attivi allal data date
+   */
+  public List<Contract> getActiveContractsInDate(LocalDate date) {
+    QContract contract = QContract.contract;
+    return getQueryFactory().selectFrom(contract)
+        .where(contract.beginDate.loe(date)
+            .andAnyOf(contract.endDate.isNull(), contract.endDate.goe(date))).fetch();
+  }
 }

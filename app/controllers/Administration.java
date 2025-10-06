@@ -98,6 +98,7 @@ import models.CompetenceCode;
 import models.Configuration;
 import models.Contract;
 import models.ContractMonthRecap;
+import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.GeneralSetting;
 import models.Institute;
@@ -1195,7 +1196,7 @@ public class Administration extends Controller {
 
     renderBinary(file, "export.zip", false);
   }
-  
+
   public void generateAbsenceCodeList() {
     List<AbsenceType> list = absenceTypeDao
         .list(java.util.Optional.empty(), java.util.Optional.of(LocalDate.now()), java.util.Optional.empty());
@@ -1209,7 +1210,7 @@ public class Administration extends Controller {
     }
     renderBinary(file, "codici.zip", false);
   }
-  
+
   public static void convertVacations() {
     /*
      * Prima cosa devo verificare che tutte le configurazioni delle sedi abbiano il 31/12 come limite
@@ -1262,13 +1263,13 @@ public class Administration extends Controller {
           abs.getAbsenceType().getCode(), abs.getPersonDay().getPerson(), abs.getPersonDay().getDate());
     }
     int count = 0;
-        
+
     for (Map.Entry<Person, List<Absence>> entry : map.entrySet()) {
       JPAPlugin.closeTx(false);
       JPAPlugin.startTx(false);
       log.debug("Rimuovo le assenze 37 di {}", entry.getKey().getFullname());
       for (Absence abs : entry.getValue()) {
-        
+
         int deleted = absenceManager
             .removeAbsencesInPeriod(entry.getKey(), abs.getPersonDay().getDate(), 
                 abs.getPersonDay().getDate(), abs.getAbsenceType());
@@ -1284,7 +1285,7 @@ public class Administration extends Controller {
      * Ora occorre inserire al posto dei 37 i 31
      */
     JPAPlugin.startTx(false);
-    
+
     InsertReport insertReport = null;
     int count31 = 0;
     for (Map.Entry<Person, List<Absence>> entry : map.entrySet()) {
@@ -1294,7 +1295,7 @@ public class Administration extends Controller {
           .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
       JustifiedType type = absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.all_day);
       for (Absence abs : entry.getValue()) {
-        
+
         log.debug("Cerco di inserire un codice 31 per il giorno {} per {}", 
             abs.getPersonDay().getDate(), abs.getPersonDay().getPerson().getFullname());
         Person person = personDao.getPersonById(entry.getKey().getId());
@@ -1310,14 +1311,14 @@ public class Administration extends Controller {
     }
     renderText(String.format("Procedura completata correttamente. Rimossi %s codici 37 e inseriti %s codici 31", count, count31));
   }
-  
+
   public static void normalizeMealTicketTime() {
     List<Office> list = officeDao.allEnabledOffices();
     WorkingTimeType normal = wttDao.workingTypeTypeByDescription("Normale", Optional.absent());
     LocalDate start = new LocalDate(2025,1,1);
     List<WorkingTimeType> workingTimeTypesList = wttDao.getCunningPeople(list);
     log.info("La lista di orari di lavoro con tempo per buono pasto ridotto contiene {} elementi", workingTimeTypesList.size());
-        
+
     List<ContractWorkingTimeType> cwttList = wttDao.actualCwttList(workingTimeTypesList);
     log.info("Attualmente ci sono {} contratti attivi che hanno associato un orario con tempo per buono pasto ridotto", cwttList.size());
     int counter = 0;
@@ -1353,12 +1354,12 @@ public class Administration extends Controller {
     }
     renderText("Aggiornati gli orari di %s persone e disabilitati %s orari di lavoro", counter, workingTimeCounter);
   }
-  
+
   public static void checkWeeklyWorkingTime() throws EmailException {
     int counter = personManager.checkWeeklyWorkingTime(2880);
     renderText("Trovati %s dipendenti che superano l'orario massimo settimanale", counter);
   }
-  
+
   public static void shiftPastVacationDate() {
     List<Office> officeList = officeDao.allEnabledOffices();
     LocalDate date = LocalDate.now();
@@ -1369,7 +1370,7 @@ public class Administration extends Controller {
           .updateDayMonth(EpasParam.EXPIRY_VACATION_PAST_YEAR, office, 31, 12, 
               Optional.fromNullable(date.minusYears(1).dayOfYear().withMinimumValue()), 
               Optional.fromNullable(date.minusYears(1).dayOfYear().withMaximumValue()), false);              
-      
+
       List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
       RecomputeRecap recomputeRecap =
           periodManager.buildRecap(newConfiguration.getOffice().getBeginDate(),
@@ -1385,5 +1386,36 @@ public class Administration extends Controller {
     }
     renderText("Aggiornato il parametro della scadenza delle ferie anno passato per %s sedi", counter);
   }
-  
+
+  public static void convertAutomaticPresence() {
+    List<Contract> contractList = contractDao.getActiveContractsInDate(LocalDate.now());
+    int counter = 0;
+    for (Contract contract : contractList) {
+      IWrapperPerson wrPerson = wrapperFactory.create(contract.getPerson());
+      IWrapperContract wrappedContract = wrapperFactory.create(contract);
+      Optional<ContractStampProfile> csp = wrPerson.getCurrentContractStampProfile();
+      if (csp.isPresent()) {
+        if (csp.get().isFixedworkingtime() && !contract.getPerson().isSeatSupervisor()) {
+          log.debug("Contract stamp profile da fixare di {}", contract.getPerson().getFullname());
+          List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(csp.get(), false);
+          RecomputeRecap recomputeRecap =
+              periodManager.buildRecap(wrappedContract.getContractDateInterval().getBegin(),
+                  Optional.fromNullable(wrappedContract.getContractDateInterval().getEnd()),
+                  periodRecaps, Optional.fromNullable(contract.getSourceDateResidual()));
+          
+          periodManager.updatePeriods(csp.get(), false);
+          contract = contractDao.getContractById(contract.id);
+          contract.getPerson().refresh();
+          if (recomputeRecap.needRecomputation) {
+            contractManager.recomputeContract(contract,
+                Optional.fromNullable(recomputeRecap.recomputeFrom), false, false);
+          }
+          counter++;
+        }
+      }
+      
+    }
+    renderText("Aggiornati i contractStampProfile di %s dipendenti", counter);
+  }
+
 }
