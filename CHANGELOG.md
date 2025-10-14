@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.26.1] - Unreleased
+### Added
+  - Aggiunta differenziazione nel conteggio del residuo per straordinari tra personale turnista e non turnista.
+  
 ### Changed
   - Rimossa la presenza del codice 24PROV dal gruppo di codici che decurtano le ferie. 
   - Inserita limitazione a 1 ora per i codici 18M e 19M.

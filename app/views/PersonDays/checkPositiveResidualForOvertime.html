@@ -1,0 +1,28 @@
+#{modalAsync id:'modalStamping', title:('Giorni di maturazione residuo per straordinari di ' + p.getFullname()) }
+ 
+ 
+ <div class="container-fluid">
+	#{alert color:'info'}
+	 <p>
+	In questa form si trovano i giorni in cui il dipendente ha maturato residuo positivo che può essere considerato per gli straordinari.
+	Nel caso in cui il dipendente sia turnista, verranno mostrate solo le quantità orarie positive maturate in giorni in cui il dipendente non era in turno.
+	 </p>
+		
+	#{/alert}
+	<table class="table table-bordered table-hover">
+	        
+	    <tr class="warning">
+	          <th>Data</th>
+	          <th>Ore per straordinario</th>
+	    </tr>
+	    #{list items:map.entrySet(), as:'entry'}
+	    <tr>
+	          <td>${entry.getKey()} </td>
+	          <td>${entry.getValue().toHourTime()}</td>
+	    </tr>       
+		#{/list}
+	</table>
+
+</div>
+
+#{/modalAsync}
