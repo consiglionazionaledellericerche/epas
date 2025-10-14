@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   
 ### Changed
   - Rimossa la presenza del codice 24PROV dal gruppo di codici che decurtano le ferie. 
-  
+  - Inserita limitazione a 1 ora per i codici 18M e 19M.
+  - Migliorato il controllo per le ore di turno in caso un dipendente abbia avuto in passato assegnato il turno festivo
+    ma che nel mese di riferimento non ce l'abbia più.
 
 ## [2.26.0] - 2025-08-20
 ### Added
