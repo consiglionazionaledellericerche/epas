@@ -26,7 +26,7 @@
 	</ul>
 	#{/accordionItem}
 
-	
+	#{if config.getFieldValue().equals('true')}
 	#{secure.check 'GroupOvertimes.save'}
 	#{form @GroupOvertimes.save(currentData.year), method:'POST', autocomplete:false, class:'form form-horizontal'}
 		#{f.hidden 'groupId', value: group.id /}
@@ -85,5 +85,6 @@
 	#{/accordionItem}
 	#{/if}
 	</div>
+	#{/if}
 	
 </div>

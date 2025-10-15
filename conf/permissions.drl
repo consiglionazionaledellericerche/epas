@@ -999,6 +999,7 @@ when
     		"Groups.handleOvertimeGroup",
     		"Groups.addHours",
     		"Groups.saveHours",
+    		"GroupOvertimes.save",
     		"AbsenceRequests.blank",
 			"AbsenceRequests.edit",
 			"AbsenceRequests.save",
@@ -1050,6 +1051,7 @@ when
     		"Groups.handleOvertimeGroup",
     		"Groups.addHours",
     		"Groups.saveHours",
+    		"GroupOvertimes.save",
     		"Groups.edit"), target==$o, granted==false)
 then
   $c.grant();
