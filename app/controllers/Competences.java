@@ -74,6 +74,7 @@ import models.Certification;
 import models.Competence;
 import models.CompetenceCode;
 import models.CompetenceCodeGroup;
+import models.Configuration;
 import models.Contract;
 import models.GeneralSetting;
 import models.MonthlyCompetenceType;
@@ -666,6 +667,13 @@ public class Competences extends Controller {
      */
     List<Person> personList = Lists.newArrayList();
     GeneralSetting settings = settingDao.generalSetting();
+    Configuration config = null;
+    java.util.Optional<Configuration> conf = office.getConfigurations().stream()
+        .filter(c -> c.getEpasParam().equals(EpasParam.HANDLE_OVERTIME))
+        .findFirst();
+    if (conf.isPresent()) {
+      config = conf.get();
+    }
     if (!settings.isEnableOvertimePerPerson()) {
       log.warn("Non abilitato il parametro per gli straordinari per persona!!");
     } else {
@@ -678,7 +686,7 @@ public class Competences extends Controller {
               .dayOfMonth().withMinimumValue(), LocalDate.now(), Optional.absent()).list();
     }
     
-    render(totalList, totale, year, office, personList);
+    render(totalList, totale, year, office, personList, config);
   }
 
   /**

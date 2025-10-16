@@ -3,7 +3,11 @@
  #{alert color:'info', textcolor:'dark'}   
     
     *{ howTo sui parametri }*
-    
+	#{if configuration.epasParam.equals(manager.configurations.EpasParam.HANDLE_OVERTIME) }
+	  <p>Abilita la visualizzazione delle informazioni nelle varie schermate relative all'utilizzo del flusso richiesta straordinari.
+	  </p> 
+	#{/if}
+	
     #{if configuration.epasParam.equals(manager.configurations.EpasParam.ABSENCES_FOR_EMPLOYEE) }
       <p>Abilitando questa funzionalità sarà possibile permettere ai dipendenti di sapere se i propri colleghi sono assenti in un determinato giorno.<br>
        Non verrà visualizzato il codice di assenza, ma solo la dicitura "Assente".

@@ -1340,6 +1340,7 @@ shifts.noJolly= Nessuna persona è configurata come Jolly nel periodo attuale
 
 # Parametri di configurazione
 
+HANDLE_OVERTIME=Abilita info flusso straordinari
 WEB_STAMPING_ALLOWED=Autorizzazione timbratura via web
 ADDRESSES_ALLOWED=Indirizzi IP autorizzati per timbratura via web
 NUMBER_OF_VIEWING_COUPLE=Numero di colonne di entrata/uscita da visualizzare

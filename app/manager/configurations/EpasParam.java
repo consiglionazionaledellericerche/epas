@@ -44,6 +44,14 @@ public enum EpasParam {
 
   //#######################################
   // GENERAL PARAMS
+  
+  HANDLE_OVERTIME("handle_overtime",
+      EpasParamCategory.GENERAL,
+      EpasParamTimeType.GENERAL,
+      EpasParamValueType.BOOLEAN,
+      EpasParamValueType.formatValue(false),
+      Lists.<RecomputationType>newArrayList(),
+      Office.class),
 
   ABSENCES_FOR_EMPLOYEE("absences_for_employee",
       EpasParamCategory.GENERAL,

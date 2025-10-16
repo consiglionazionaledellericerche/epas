@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.26.1] - Unreleased
 ### Added
   - Aggiunta differenziazione nel conteggio del residuo per straordinari tra personale turnista e non turnista.
+  - Aggiunto parametro di sede visibile solo ai ruoli di sistema per abilitare la gestione delle informazioni per i flussi
+    degli straordinari
   
 ### Changed
   - Rimossa la presenza del codice 24PROV dal gruppo di codici che decurtano le ferie. 

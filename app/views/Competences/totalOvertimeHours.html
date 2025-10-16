@@ -51,6 +51,7 @@
   #{/form}
   #{/secure.check}
   <br>
+  #{if config.getFieldValue().equals('true')}
   <div id="hoursList">
   #{if !personList.isEmpty()}
   #{alert color:'warning'}
@@ -79,6 +80,7 @@
   </table>
   #{/if}
   </div>
+  #{/if}
 
 </div>
 

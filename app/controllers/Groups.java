@@ -49,6 +49,7 @@ import manager.GroupManager;
 import manager.GroupOvertimeManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
+import models.Configuration;
 import models.GeneralSetting;
 import models.GroupOvertime;
 import models.Office;
@@ -290,6 +291,13 @@ public class Groups extends Controller {
     rules.checkIfPermitted(group.getOffice());
     //La quantità di ore di straordinario accordate al gruppo nell'anno
     int year = LocalDate.now().getYear();
+    Configuration config = null;
+    java.util.Optional<Configuration> conf = group.getOffice().getConfigurations().stream()
+        .filter(c -> c.getEpasParam().equals(EpasParam.HANDLE_OVERTIME))
+        .findFirst();
+    if (conf.isPresent()) {
+      config = conf.get();
+    }
     int totalGroupOvertimes = group.getGroupOvertimes().stream()
         .filter(go -> go.getYear().equals(year))
         .mapToInt(go -> go.getNumberOfHours()).sum();
@@ -322,7 +330,7 @@ public class Groups extends Controller {
     GeneralSetting settings = settingDao.generalSetting();
     boolean check = settings.isEnableOvertimePerPerson();
     render(group, totalGroupOvertimes, office, groupOvertime, hoursAvailable, map, 
-        groupOvertimesAvailable, groupOvertimeInYearList, year, check, totale);
+        groupOvertimesAvailable, groupOvertimeInYearList, year, check, totale, config);
   }
   
   public static void addHours(Long personId, int year) {
