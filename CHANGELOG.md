@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.26.1] - Unreleased
+## [2.27.0] - 2025-10-16
 ### Added
   - Aggiunta differenziazione nel conteggio del residuo per straordinari tra personale turnista e non turnista.
   - Aggiunto parametro di sede visibile solo ai ruoli di sistema per abilitare la gestione delle informazioni per i flussi
