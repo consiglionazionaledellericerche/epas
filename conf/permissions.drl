@@ -721,6 +721,7 @@ when
      	/* Situazione Mensile */
      	"Stampings.stampings",
      	"AbsenceGroups.groupStatus", 
+     	"PersonDays.checkPositiveResidualForOvertime",
 
      	/* Assenze mensili */
      	"Absences.absences",
@@ -812,7 +813,7 @@ when
      	"PersonMonths.modifyTrainingHours",
      	"PersonMonths.saveTrainingHours",
      	"PersonMonths.updateTrainingHours",
-
+     	
      	/* Modifica password */
      	"Persons.changePassword",
      	"Persons.savePassword",
