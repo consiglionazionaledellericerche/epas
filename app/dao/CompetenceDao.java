@@ -23,6 +23,8 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.jpa.JPQLQueryFactory;
 import dao.wrapper.IWrapperFactory;
+import lombok.val;
+
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
@@ -44,6 +46,7 @@ import models.query.QPersonReperibility;
 import models.query.QPersonReperibilityType;
 import models.query.QTotalOvertime;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 /**
  * DAO per le Compentence.
@@ -346,6 +349,8 @@ public class CompetenceDao extends DaoBase {
     final QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
     final QPersonReperibility rep = QPersonReperibility.personReperibility;
 
+    val startOfMonth = new YearMonth(year, month).toLocalDate(1);
+    
     return getQueryFactory().selectFrom(competence)
         .leftJoin(competence.person, person)
         .leftJoin(person.reperibility, rep)
@@ -353,7 +358,11 @@ public class CompetenceDao extends DaoBase {
         .where(prt.eq(type)
             .and(competence.year.eq(year)
                 .and(competence.month.eq(month)
-                    .and(competence.competenceCode.eq(code)))))
+                    .and(competence.competenceCode.eq(code))))
+            .and(rep.personReperibilityType.eq(prt))
+            .and(rep.startDate.loe(startOfMonth).or(rep.startDate.isNull()))
+            .and(rep.endDate.goe(startOfMonth.dayOfMonth().withMaximumValue()).or(rep.endDate.isNull()))
+            )
         .orderBy(competence.person.surname.asc()).fetch();
   }
 
