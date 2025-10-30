@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Aggiunto il permesso per l'utente per vedere quando, nel mese, sono state maturate le ore per gli straordinari
 
+### Changed
+  - Corretto il calcolo delle ore di straordinario disponibile nel gruppo nel caso in cui la configurazione della sede dica che
+    deve essere presente la doppia approvazione.
+  - Resa modificabile la motivazione alla base della richiesta di straordinario da parte dei soggetti approvatori.
+
 ## [2.27.0] - 2025-10-16
 ### Added
   - Aggiunta differenziazione nel conteggio del residuo per straordinari tra personale turnista e non turnista.

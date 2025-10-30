@@ -541,6 +541,7 @@ when
   		"CompetenceRequests.edit",
   		"CompetenceRequests.save",
   		"CompetenceRequests.show",
+  		"CompetenceRequests.updateNote",
   		"CompetenceRequests.listToApprove",
   		"CompetenceRequests.changeReperibilityToApprove",
      	"ReperibilityCalendar.show",
@@ -565,6 +566,7 @@ when
   		"CompetenceRequests.edit",
   		"CompetenceRequests.save",
   		"CompetenceRequests.show",
+  		"CompetenceRequests.updateNote",
   		"CompetenceRequests.listToApprove",
   		"CompetenceRequests.changeReperibilityToApprove",
         "ReperibilityCalendar.show",
@@ -752,6 +754,7 @@ when
 		"CompetenceRequests.edit",
 		"CompetenceRequests.save",
 		"CompetenceRequests.show",
+		"CompetenceRequests.updateNote",
 		"CompetenceRequests.overtimes",
 		
      	/* Ferie */
@@ -1021,6 +1024,7 @@ when
 			"AbsenceRequests.disapproval",
 
 			"CompetenceRequests.show",
+			"CompetenceRequests.updateNote",
 			"CompetenceRequests.approval",
 			"CompetenceRequests.disapproval",
 			"CompetenceRequests.managerApproval",
@@ -1098,7 +1102,8 @@ when
 			"CompetenceRequests.overtimesToApprove",	
 			"CompetenceRequests.overtimesToApproveInAdvance",		
 			"CompetenceRequests.managerApproval",
-			"CompetenceRequests.show"
+			"CompetenceRequests.show",
+			"CompetenceRequests.updateNote"
 			
 		), target == $cr, granted == false)
 then
@@ -1655,6 +1660,7 @@ when
 		"AbsenceRequests.approval",
 		"AbsenceRequests.disapproval",
 		"CompetenceRequests.show",
+		"CompetenceRequests.updateNote",
 		"CompetenceRequests.list",
 		"CompetenceRequests.approval",
 		"CompetenceRequests.disapproval",
@@ -1750,6 +1756,7 @@ when
 
 		"AbsenceRequests.show",
 		"CompetenceRequests.show",
+		"CompetenceRequests.updateNote",
 		"CompetenceRequests.list",
 		"CompetenceRequests.approval",
 		"CompetenceRequests.disapproval",
@@ -1834,6 +1841,7 @@ when
  $cr: CompetenceRequest(officeHeadApprovalRequired == true, !isOfficeHeadApproved(), flowEnded == false)
  $c: PermissionCheck(action in (
 		"CompetenceRequests.show",
+		"CompetenceRequests.updateNote",
 		"CompetenceRequests.approval",
 		"CompetenceRequests.disapproval"
 		), target == $cr, granted == false)
