@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Resa modificabile la motivazione alla base della richiesta di straordinario da parte dei soggetti approvatori.
   - Modificato PDF del calendario mensile reperibilità per non mostrare le persone non più assegnati al
     servizio di reperibilità nel mese selezionato.
-  
+  - Corretto calcolo orario minimo necessario per giorni di lavoro in sede in caso di timbrature con causale Permesso Breve
 
 ## [2.27.0] - 2025-10-16
 ### Added

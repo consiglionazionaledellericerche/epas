@@ -1606,6 +1606,7 @@ public class PersonDayManager {
         timeInSeat += pair.timeInPair;
       }
     }
+    log.trace("Date = {}, Time in seat: {}", day.getValue().getDate(), timeInSeat);
     if (timeInSeat >= day.getWorkingTimeTypeDay().get().getWorkingTime() / 2) {
       enough = true;
     }
@@ -1633,7 +1634,8 @@ public class PersonDayManager {
         if (stamping.isIn()) {
           if ((stamping.getStampType() == StampTypes.MOTIVI_DI_SERVIZIO && serviceStamping) 
               || (stamping.getStampType() == null && !serviceStamping)
-              || (stamping.getStampType() == StampTypes.PAUSA_PRANZO && !serviceStamping)) {
+              || (stamping.getStampType() == StampTypes.PAUSA_PRANZO && !serviceStamping) 
+              || (stamping.getStampType() == StampTypes.PERMESSO_BREVE && !serviceStamping)) {
             stampEnter = stamping;
             continue;
           }
