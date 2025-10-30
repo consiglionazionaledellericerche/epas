@@ -129,11 +129,13 @@
       			</a>
       			#{/secure.check}
       			</td>
-      			<td #{if item.note != null && !item.note.equals("")}
-      				webui-popover-hover data-content="${item.note}">
-      				<i class="fa fa-exclamation-triangle fa-2x text-danger" aria-hidden="true" ></i>
-      				#{/if}
-      			</td>
+      			<td>
+					#{secure.link @CompetenceRequests.updateNote(item.id, type)}	
+					<a href="@{CompetenceRequests.updateNote(item.id, type)}" data-async-modal="#defaultModal" title="Leggi">
+					<i class="fa fa-eye" aria-hidden="true"></i> Leggi
+					</a>					
+					#{/secure.link}
+				</td>
 			</tr>
 		#{/list}
 	</tbody>

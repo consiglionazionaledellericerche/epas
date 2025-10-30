@@ -771,7 +771,7 @@ public class CompetenceRequestManager {
     }
     int overtimePendingRequests = !results.isEmpty() ? 
         results.stream().mapToInt(cr -> cr.getValueRequested()).sum() : 0;
-    if (config.managerApprovalRequired) {
+    if (approver.hasRoles(Role.GROUP_MANAGER)) {
 
       /* 
        * Controllo la quantità già assegnata nel corso dell'anno agli appartenenti al gruppo 
@@ -804,7 +804,7 @@ public class CompetenceRequestManager {
 
 
     }
-    if (config.officeHeadApprovalRequired) {
+    if (approver.hasRoles(Role.SEAT_SUPERVISOR)) {
       /*
        * Controllo la quantità già assegnata nel corso dell'anno ai dipendenti della sede
        */

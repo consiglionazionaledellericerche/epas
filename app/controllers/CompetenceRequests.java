@@ -760,5 +760,20 @@ public class CompetenceRequests extends Controller {
     flash.error("Richiesta respinta");
     render("@show", competenceRequest, user);
   }
+  
+  public static void updateNote(long id, boolean confirmed, String reason) {
+    CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    if (!confirmed) {
+      confirmed = true;      
+      render("@updateNote", confirmed, competenceRequest);
+    }
+    competenceRequest.setNote(reason);
+    competenceRequest.save();
+    flash.success("Modificata motivazione della richiesta di %s", competenceRequest.getPerson());
+    listToApprove(competenceRequest.getType());
+    
+  }
+  
+  
 }
 
