@@ -356,8 +356,10 @@ public class CompetenceRequestDao extends DaoBase {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     return Optional.fromNullable(getQueryFactory().selectFrom(competenceRequest)
         .where(competenceRequest.person.eq(request.getPerson())
+            .and(competenceRequest.type.eq(request.getType()))
             .and(competenceRequest.month.eq(request.getMonth())
-                .and(competenceRequest.year.eq(request.getYear())))).fetchFirst());
+                .and(competenceRequest.year.eq(request.getYear())
+                    .and(competenceRequest.flowEnded.eq(false))))).fetchFirst());
   }
 
 
