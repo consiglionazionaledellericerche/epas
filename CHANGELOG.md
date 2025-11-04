@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Modificato PDF del calendario mensile reperibilità per non mostrare le persone non più assegnati al
     servizio di reperibilità nel mese selezionato.
   - Corretto calcolo orario minimo necessario per giorni di lavoro in sede in caso di timbrature con causale Permesso Breve
+  - Corretto funzionamento del metodo che verifica la presenza di una richiesta di straordinario per un anno/mese in fase di
+    sottomissione.
 
 ## [2.27.0] - 2025-10-16
 ### Added
