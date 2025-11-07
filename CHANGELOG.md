@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.27.1] - Unreleased
 ### Added
   - Aggiunto il permesso per l'utente per vedere quando, nel mese, sono state maturate le ore per gli straordinari
+  - Aggiunta la possibilità di fare approvazione simultanea delle ore di straordinario nel caso in cui l'approvatore sia 
+    responsabile di gruppo e responsabile di sede e la configurazione preveda la doppia approvazione.
 
 ### Changed
   - Corretto il calcolo delle ore di straordinario disponibile nel gruppo nel caso in cui la configurazione della sede dica che
