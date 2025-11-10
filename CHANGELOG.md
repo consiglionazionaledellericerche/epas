@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.27.1] - Unreleased
+## [2.27.1] - 2025-11-10
 ### Added
   - Aggiunto il permesso per l'utente per vedere quando, nel mese, sono state maturate le ore per gli straordinari
   - Aggiunta la possibilità di fare approvazione simultanea delle ore di straordinario nel caso in cui l'approvatore sia 
