@@ -615,9 +615,21 @@ public class CompetenceRequestManager {
       return true;      
     }
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
-      if (competenceRequest.isManagerApprovalRequired()
-          && competenceRequest.getManagerApproved() == null ) {
+//      if (competenceRequest.isManagerApprovalRequired()
+//          && competenceRequest.getManagerApproved() == null ) {
+//        managerApproval(competenceRequest.id, user);
+//        return true;
+//      }
+      if (competenceRequest.isManagerApprovalRequired() && competenceRequest.getManagerApproved() == null
+          && user.hasRoles(Role.GROUP_MANAGER)) {
+        // caso di approvazione da parte del responsabile di gruppo.
         managerApproval(competenceRequest.id, user);
+        if (user.getUsersRolesOffices().stream()
+            .anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
+            && competenceRequest.isOfficeHeadApprovalRequired()) {
+          // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
+          officeHeadApproval(competenceRequest.id, user);
+        }
         return true;
       }
     } else {

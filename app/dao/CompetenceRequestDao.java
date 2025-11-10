@@ -37,8 +37,8 @@ import models.Office;
 import models.Person;
 import models.Role;
 import models.UsersRolesOffices;
-import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
+import models.flows.Group;
 import models.flows.enumerate.CompetenceRequestType;
 import models.flows.query.QAffiliation;
 import models.flows.query.QCompetenceRequest;
@@ -171,12 +171,7 @@ public class CompetenceRequestDao extends DaoBase {
         || !signer.getReperibilityTypes().isEmpty())) {
       return Lists.newArrayList();
     }
-    conditions.and(competenceRequest.type.eq(type)
-        .and(competenceRequest.flowStarted.isTrue())
-        .and(competenceRequest.flowEnded.isFalse()));
-    if (toDate.isPresent()) {
-      conditions.and(competenceRequest.endTo.before(toDate.get()));
-    }
+    conditions = cleanConditions(conditions, type, toDate);
 
     List<CompetenceRequest> results = new ArrayList<>();
 
@@ -200,18 +195,18 @@ public class CompetenceRequestDao extends DaoBase {
         }
         break;
       case OVERTIME_REQUEST:
+        List<CompetenceRequest> queryResult = Lists.newArrayList();
         final QGroup group = QGroup.group;
+        
         if (roleList.stream().noneMatch(r -> r.getRole().getName().equals(Role.SEAT_SUPERVISOR) 
             || r.getRole().getName().equals(Role.GROUP_MANAGER))) {
           return results;
         }
         List<Office> officeList = 
-            roleList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
-        if (roleList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))) {
-          conditions = officeHeadQuery(officeList,conditions, signer);
-        } else {     
+            roleList.stream().map(u -> u.getOffice()).distinct().collect(Collectors.toList());
+        if (roleList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.GROUP_MANAGER))) {     
           final QAffiliation affiliation = QAffiliation.affiliation;
-          conditions = managerQuery(officeList, conditions, signer);
+          conditions.and(managerQuery(officeList, conditions, signer));
           List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
               .join(competenceRequest.person, person).fetchJoin()
               .join(person.affiliations, affiliation)
@@ -222,11 +217,19 @@ public class CompetenceRequestDao extends DaoBase {
               .distinct()
               .fetch();
           results.addAll(queryResults);
-          return results;
+          //return results;
         }
-        List<CompetenceRequest> queryResult = getQueryFactory()
-            .selectFrom(competenceRequest).where(conditions).fetch();
-        results.addAll(queryResult);
+        if (roleList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))) {
+          conditions = cleanConditions(conditions, type, toDate);
+          if (!results.isEmpty()) {            
+            conditions.and(officeHeadDoubleApprovalQuery(officeList, conditions, signer));
+          } else {
+            conditions.and(officeHeadQuery(officeList,conditions, signer));
+          }          
+          queryResult = getQueryFactory()
+              .selectFrom(competenceRequest).where(conditions).fetch();
+          results.addAll(queryResult);
+        } 
         break;
       default:
         break;          
@@ -361,7 +364,8 @@ public class CompetenceRequestDao extends DaoBase {
                 .and(competenceRequest.year.eq(request.getYear())
                     .and(competenceRequest.flowEnded.eq(false))))).fetchFirst());
   }
-
+  
+  
 
   /**
    * Metodo che aggiorna le condizioni di ricerca per il responsabile del servizio.
@@ -414,10 +418,35 @@ public class CompetenceRequestDao extends DaoBase {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     condition.and(competenceRequest.officeHeadApprovalRequired.isTrue())
     .and(competenceRequest.officeHeadApproved.isNull())
-    .andAnyOf(competenceRequest.managerApproved.isNotNull(), 
-        competenceRequest.managerApprovalRequired.isFalse())
+    .andAnyOf(competenceRequest.managerApprovalRequired.isFalse(),
+        competenceRequest.managerApproved.isNotNull())
     .and(competenceRequest.person.office.in(officeList));
     return condition;
+  }
+  
+  private BooleanBuilder officeHeadDoubleApprovalQuery(List<Office> officeList,
+      BooleanBuilder condition, Person signer) {
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    condition.and(competenceRequest.officeHeadApprovalRequired.isTrue())
+    .and(competenceRequest.officeHeadApproved.isNull())
+    .and(competenceRequest.managerApprovalRequired.isTrue())
+    .and(competenceRequest.managerApproved.isNotNull())
+    .and(competenceRequest.person.office.in(officeList));
+    return condition;
+  }
+  
+  private BooleanBuilder cleanConditions(BooleanBuilder conditions, CompetenceRequestType type,
+      Optional<LocalDateTime> toDate) {
+    conditions = new BooleanBuilder();
+    final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
+    conditions.and(competenceRequest.type.eq(type)
+        .and(competenceRequest.flowStarted.isTrue())
+        .and(competenceRequest.flowEnded.isFalse()));
+    if (toDate.isPresent()) {
+      conditions.and(competenceRequest.endTo.before(toDate.get()));
+    }  
+    
+    return conditions;
   }
   
   private BooleanBuilder officeHeadApprovedQuery(List<Office> officeList,
