@@ -79,6 +79,13 @@
     #{/if}
     #{f.view 'Unità di misura', value:group.limitUnit /}
     #{f.view 'Tipo Limite', value:group.limitType /}
+	
+		
+		#{secure.check 'Competences.editGroup'}
+		<a class="btn btn-sm btn-default" href="@{Competences.editGroup(group.id)}" data-async-modal="#defaultModal">
+		  <i class="fa fa-minus"></i> Modifica</a>
+		#{/secure.check}
+	
   </form>
   #{/alert}
   <div class="col-md-8 col-md-offset-2">

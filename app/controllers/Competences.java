@@ -290,6 +290,12 @@ public class Competences extends Controller {
 
     manageCompetenceCode();
   }
+  
+  public static void editGroup(Long id) {
+    CompetenceCodeGroup group = competenceCodeDao.getGroupById(id);
+    notFoundIfNull(group);
+    render(group);
+  }
 
   /**
    * salva il gruppo di codici competenza con i codici associati.
@@ -1711,4 +1717,5 @@ public class Competences extends Controller {
     flash.success("Aggiunto %s all'attività", person.fullName());
     manageReperibility(type.id);
   }
+  
 }

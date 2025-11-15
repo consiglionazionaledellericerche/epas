@@ -1,0 +1,15 @@
+#{modalAsync id:'defaultModal', title:('Modifica motivazione alla richiesta di ' + competenceRequest.person.fullname)}
+<div class="container-fluid">
+	#{alert color:'info'}
+	<p class=center>Modifica, se vuoi, la motivazione associata alla richiesta.</p> 
+	#{/alert}
+	#{f.hidden 'competenceRequest.id', value:competenceRequest.id /}
+	#{form action:@updateNote(competenceRequest.id, confirmed), method:'POST', class:'form form-horizontal'}
+	#{f.input 'reason', value: competenceRequest.note /}
+		    #{b.buttons center:true}   
+		      #{b.submit 'Modifica', color:'info', fa:'cross' /}
+		    #{/b.buttons}
+	#{/form}	
+	
+</div>
+#{/modalAsync}
