@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Aggiunta crud per la modifica dei gruppi di codici competenza.
 
+### Changed
+  - Modificato l'algoritmo di approvazione delle ore di straordinario: nel caso esista già una quantità di ore di straordinario
+    inserite manualmente per un certo anno/mese, l'approvazione le aggiorna
+
 ## [2.27.1] - 2025-11-10
 ### Added
   - Aggiunto il permesso per l'utente per vedere quando, nel mese, sono state maturate le ore per gli straordinari
