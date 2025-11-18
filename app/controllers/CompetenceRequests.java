@@ -754,11 +754,18 @@ public class CompetenceRequests extends Controller {
       //TODO: caso di disapprovazione da parte del dipendente reperibile
       competenceRequestManager.employeeDisapproval(id, reason);
     }
+    if (competenceRequest.isOfficeHeadApprovalRequired() 
+        && competenceRequest.getOfficeHeadApproved() == null 
+        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+      competenceRequestManager.officeHeadDisapproval(id, reason);
+    }
+    
     notificationManager
     .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
         Optional.absent(), false);
     flash.error("Richiesta respinta");
-    render("@show", competenceRequest, user);
+    show(competenceRequest.getId(), competenceRequest.getType());
+    
   }
   
   public static void updateNote(long id, boolean confirmed, String reason) {
