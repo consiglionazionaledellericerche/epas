@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.27.2] - Unreleased
 ### Added
   - Aggiunta crud per la modifica dei gruppi di codici competenza.
+  
+### Changed
+  - Aggiunta respinta della richiesta di straordinario da parte del responsabile di sede.
 
 ### Changed
   - Modificato l'algoritmo di approvazione delle ore di straordinario: nel caso esista già una quantità di ore di straordinario

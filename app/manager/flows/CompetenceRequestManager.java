@@ -749,9 +749,9 @@ public class CompetenceRequestManager {
   }
 
   /**
-   * Approvazione richiesta assenza da parte del responsabile di sede.
+   * Rifiuto richiesta competenza da parte del dipendente.
    *
-   * @param id id della richiesta di assenza.
+   * @param id id della richiesta di competenza.
    */
   public void employeeDisapproval(long id, String reason) {
 
@@ -760,6 +760,23 @@ public class CompetenceRequestManager {
     executeEvent(
         competenceRequest, currentPerson,
         CompetenceRequestEventType.EMPLOYEE_REFUSAL, Optional.fromNullable(reason));
+    log.info("{} disapprovata dal dipendente {}.",
+        competenceRequest, currentPerson.getFullname());
+
+  }
+  
+  /**
+   * Rifiuto richiesta competenza da parte del responsabile di sede.
+   *
+   * @param id id della richiesta di competenza.
+   */
+  public void officeHeadDisapproval(long id, String reason) {
+
+    CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().getPerson();
+    executeEvent(
+        competenceRequest, currentPerson,
+        CompetenceRequestEventType.OFFICE_HEAD_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dal responsabile di sede {}.",
         competenceRequest, currentPerson.getFullname());
 

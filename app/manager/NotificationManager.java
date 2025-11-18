@@ -1306,7 +1306,12 @@ public class NotificationManager {
         }
       }
     } else {
-      message.append(String.format("\r\n per un totale di %s ore", competenceRequest.getValue()));
+      if (competenceRequest.getValue() != null) {
+        message.append(String.format("\r\n per un totale di %s ore", competenceRequest.getValue()));
+      } else {
+        message.append(String.format("\r\n verificare con il responsabile di sede/responsabile di gruppo le motivazioni."));
+      }
+      
     }
 
     val mailBody = message.toString();
