@@ -4,12 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.27.2] - Unreleased
+## [2.28.0] - Unreleased
 ### Added
   - Aggiunta crud per la modifica dei gruppi di codici competenza.
   
 ### Changed
   - Aggiunta respinta della richiesta di straordinario da parte del responsabile di sede.
+  - Limitate le possibili pause pranzo durante l'eventuale fascia oraria obbligatoria a max 30 l'orario minimo
+    previsto per la pausa pranzo nel giorno.
 
 ### Changed
   - Modificato l'algoritmo di approvazione delle ore di straordinario: nel caso esista già una quantità di ore di straordinario
