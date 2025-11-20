@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.27.2] - Unreleased
 ### Added
   - Aggiunta crud per la modifica dei gruppi di codici competenza.
+  - Aggiunta possibilità di specificare il codice di assenza da inserire nel flusso di richiesta ferie.
 
 ## [2.27.1] - 2025-11-10
 ### Added

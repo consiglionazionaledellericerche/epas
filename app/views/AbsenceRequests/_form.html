@@ -28,19 +28,20 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 	#{f.date 'absenceRequest.endTo', class:'auto-submit-parent',
 		value:absenceRequest.endTo?.format("dd/MM/yyyy") /}
 	
-	#{if absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.PERSONAL_PERMISSION)}
+	#{if absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.PERSONAL_PERMISSION) || 
+		absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.VACATION_REQUEST)}
 	
 		#{if absenceForm != null}
 		#{f.hidden 'groupAbsenceType.id', value:absenceForm.groupSelected.id /}
      
 	    #{if absenceForm.hasAbsenceTypeChoice()} 
 			 #{f.selectModel 'absenceType', personalizeItems:true, class:'auto-submit-parent'}
-			   <!--  #{if absenceForm.automaticChoiceExists}
+				#{if absenceForm.automaticChoiceExists && absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.VACATION_REQUEST)}
 			      <optgroup label="Inserimento Automatico">
 			        <option value=""
 			          #{if absenceForm.automaticChoiceSelected} selected #{/if}>Codice selezionato da ePAS</option>
 				  <optgroup/>
-			   #{/if}-->   
+			   #{/if}   
 			   <optgroup label="Codice Specifico">
 			    #{list absenceForm.absenceTypes, as:'absenceType'}
 			    <option value="${absenceType?.id}"
@@ -55,7 +56,7 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 		   #{f.hidden 'absenceType.id', value:absenceForm.theOnlyAbsenceType().id /}
 		   *{ #{f.view 'absenceType', value:absenceForm.theOnlyAbsenceType() /} }*
 		 #{/else}
-
+		 #{f.hidden 'absenceCode', value:absenceForm.absenceTypeSelected? absenceForm.absenceTypeSelected : absenceType /}
 	     #{if absenceForm.hasJustifiedTypeChoice() }
 	       #{f.selectModel 'justifiedType', items:absenceForm.justifiedTypes, value:absenceForm.justifiedTypeSelected,
 	           class:'auto-submit-parent' /}
@@ -119,7 +120,13 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
       	
     	#{/if}
     #{/if}
-
+	#{if absenceForm.automaticChoiceSelected}
+		#{f.hidden 'absenceCode', value:' ' /}
+	#{/if}
+	#{else}
+		#{f.hidden 'absenceCode', value:absenceForm.absenceTypeSelected.code /}
+	#{/else}
+	
 	#{b.buttons center:true}
 		 #{b.link @list(absenceRequest.type), color:'default', title:'Indietro' /}
 		 #{if insertable && insertReport.howManySuccess() > 0}

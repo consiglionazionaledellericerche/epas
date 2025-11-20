@@ -520,7 +520,9 @@ public class AbsenceRequestManager {
 
       }
     }
-
+    if (absenceRequest.getAbsenceCode() != null) {
+      absenceType = absenceDao.absenceTypeByCode(absenceRequest.getAbsenceCode()).get();
+    }
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.getPerson(),
         absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
         false, absenceType, type, hours, minutes, false, true);
