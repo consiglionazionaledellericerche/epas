@@ -96,7 +96,7 @@ public class CompetenceRequestManager {
   private CompetenceDao competenceDao;
   private CompetenceManager competenceManager;
   private GeneralSettingDao settingDao;
-  
+
 
   /**
    * DTO per la configurazione delle CompenteRequest.
@@ -457,13 +457,22 @@ public class CompetenceRequestManager {
     log.info("Flusso relativo a {} terminato. ", competenceRequest);
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
       CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
-      Competence competence = new Competence();
-      competence.setMonth(competenceRequest.getMonth());
-      competence.setYear(competenceRequest.getYear());
-      competence.setValueApproved(competenceRequest.getValue());
-      competence.setPerson(competenceRequest.getPerson());
-      competence.setCompetenceCode(code);
-      competence.save();
+      Optional<Competence> competence = competenceDao
+          .getCompetence(competenceRequest.getPerson(), competenceRequest.getYear(), 
+              competenceRequest.getMonth(), code);
+      if (!competence.isPresent()) {
+        Competence comp = new Competence();
+        comp.setMonth(competenceRequest.getMonth());
+        comp.setYear(competenceRequest.getYear());
+        comp.setPerson(competenceRequest.getPerson());
+        comp.setCompetenceCode(code);
+        comp.setValueApproved(competenceRequest.getValue());
+        comp.save();
+      } else {
+        competence.get().setValueApproved(competenceRequest.getValue());
+        competence.get().save();
+      }
+
       consistencyManager.updatePersonSituation(competenceRequest.getPerson().id, 
           new LocalDate(competenceRequest.getYear(), competenceRequest.getMonth(), 1));
       return true;
@@ -601,7 +610,7 @@ public class CompetenceRequestManager {
    * @return true se l'approvazione dell'utente è andata a buon fine, false altrimenti
    */
   public boolean approval(CompetenceRequest competenceRequest, User user) {
-    
+
     if (competenceRequest.isEmployeeApprovalRequired() 
         && competenceRequest.getEmployeeApproved() == null
         && user.hasRoles(Role.EMPLOYEE)) {
@@ -615,11 +624,11 @@ public class CompetenceRequestManager {
       return true;      
     }
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
-//      if (competenceRequest.isManagerApprovalRequired()
-//          && competenceRequest.getManagerApproved() == null ) {
-//        managerApproval(competenceRequest.id, user);
-//        return true;
-//      }
+      //      if (competenceRequest.isManagerApprovalRequired()
+      //          && competenceRequest.getManagerApproved() == null ) {
+      //        managerApproval(competenceRequest.id, user);
+      //        return true;
+      //      }
       if (competenceRequest.isManagerApprovalRequired() && competenceRequest.getManagerApproved() == null
           && user.hasRoles(Role.GROUP_MANAGER)) {
         // caso di approvazione da parte del responsabile di gruppo.
@@ -740,9 +749,9 @@ public class CompetenceRequestManager {
   }
 
   /**
-   * Approvazione richiesta assenza da parte del responsabile di sede.
+   * Rifiuto richiesta competenza da parte del dipendente.
    *
-   * @param id id della richiesta di assenza.
+   * @param id id della richiesta di competenza.
    */
   public void employeeDisapproval(long id, String reason) {
 
@@ -751,6 +760,23 @@ public class CompetenceRequestManager {
     executeEvent(
         competenceRequest, currentPerson,
         CompetenceRequestEventType.EMPLOYEE_REFUSAL, Optional.fromNullable(reason));
+    log.info("{} disapprovata dal dipendente {}.",
+        competenceRequest, currentPerson.getFullname());
+
+  }
+  
+  /**
+   * Rifiuto richiesta competenza da parte del responsabile di sede.
+   *
+   * @param id id della richiesta di competenza.
+   */
+  public void officeHeadDisapproval(long id, String reason) {
+
+    CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    val currentPerson = Security.getUser().get().getPerson();
+    executeEvent(
+        competenceRequest, currentPerson,
+        CompetenceRequestEventType.OFFICE_HEAD_REFUSAL, Optional.fromNullable(reason));
     log.info("{} disapprovata dal responsabile di sede {}.",
         competenceRequest, currentPerson.getFullname());
 
@@ -861,7 +887,7 @@ public class CompetenceRequestManager {
     }
     return overtimeResidual;
   }
-  
+
   /**
    * Ritorna la quantità di ore di straordinario disponibili per l'intera sede.
    * 
@@ -873,17 +899,17 @@ public class CompetenceRequestManager {
     CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
     List<CompetenceCode> codeList = Lists.newArrayList();
     codeList.add(code);
-  //Il monte ore della sede
+    //Il monte ore della sede
     int totalOvertimes = 0;
     List<TotalOvertime> totalList = competenceDao
-      .getTotalOvertime(LocalDate.now().getYear(), office);
+        .getTotalOvertime(LocalDate.now().getYear(), office);
     totalOvertimes = competenceManager.getTotalOvertime(totalList);
-    
+
     return totalOvertimes - competenceDao
         .valueOvertimeApprovedByMonthAndYear(year, Optional.absent(), 
-        		Optional.absent(), Optional.fromNullable(office), codeList).or(0);
+            Optional.absent(), Optional.fromNullable(office), codeList).or(0);
   }
-  
+
   /**
    * 
    * @param person la persona appartenente al gruppo di cui si cercano gli straordinari residui

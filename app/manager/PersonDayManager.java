@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023  Consiglio Nazionale delle Ricerche
+ * Copyright (C) 2025  Consiglio Nazionale delle Ricerche
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU Affero General Public License as
@@ -39,8 +39,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
@@ -85,7 +85,6 @@ public class PersonDayManager {
   private final ZoneDao zoneDao;
   private final ContractDao contractDao;
   private final AbsenceComponentDao absenceComponentDao;
-
 
   /**
    * Costruttore.
@@ -1749,10 +1748,13 @@ public class PersonDayManager {
       }
     }
 
+    val wttd = workingTimeTypeDao.getWorkingTimeTypeDay(personDay.getDate(), personDay.getPerson());
+    val maxLunchTime = personDay.isTicketAvailable() ? wttd.isPresent() ? wttd.get().getBreakTicketTime() : 0 : 0;
+
     lunchTime = 
-        lunchTimeRangeSet.asRanges().stream().mapToInt(
+        Math.min(lunchTimeRangeSet.asRanges().stream().mapToInt(
             lt -> DateUtility.toMinute(lt.upperEndpoint()) 
-            - DateUtility.toMinute(lt.lowerEndpoint())).sum();
+            - DateUtility.toMinute(lt.lowerEndpoint())).sum(), maxLunchTime);
 
     return lunchTime;
   }
