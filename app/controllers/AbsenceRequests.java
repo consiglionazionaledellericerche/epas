@@ -510,7 +510,7 @@ public class AbsenceRequests extends Controller {
    * Salvataggio di una richiesta di assenza.
    */
   public static void save(@Required @Valid AbsenceRequest absenceRequest, 
-      Integer hours, Integer minutes, boolean allDay, AbsenceType absenceType) {
+      Integer hours, Integer minutes, boolean allDay, AbsenceType absenceType, String absenceCode) {
 
     log.debug("AbsenceRequest.startAt = {}, AbsenceRequest.endTo = {}", 
         absenceRequest.getStartAt(), absenceRequest.getEndTo());
@@ -540,7 +540,9 @@ public class AbsenceRequests extends Controller {
         absenceRequest.setMinutes(0);
       }    
     }
-    
+    if (!absenceCode.isBlank()) {
+      absenceRequest.setAbsenceCode(absenceCode);
+    }
 
     boolean isNewRequest = !absenceRequest.isPersistent();
     List<LocalDate> troubleDays = absenceRequestManager.getTroubleDays(absenceRequest);

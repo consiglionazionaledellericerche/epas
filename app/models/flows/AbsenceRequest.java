@@ -95,6 +95,11 @@ public class AbsenceRequest extends MutableModel {
    * Descrizione facoltativa della richiesta.
    */
   private String note;
+  
+  /**
+   * Eventuale codice di assenza se inserito esplicitamente dal dipendente
+   */
+  private String absenceCode;
 
   /**
    * Eventuale allegato alla richiesta.

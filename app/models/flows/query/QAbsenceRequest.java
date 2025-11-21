@@ -26,6 +26,8 @@ public class QAbsenceRequest extends EntityPathBase<AbsenceRequest> {
 
     public final models.base.query.QMutableModel _super = new models.base.query.QMutableModel(this);
 
+    public final StringPath absenceCode = createString("absenceCode");
+
     public final BooleanPath administrativeApprovalRequired = createBoolean("administrativeApprovalRequired");
 
     public final DateTimePath<org.joda.time.LocalDateTime> administrativeApproved = createDateTime("administrativeApproved", org.joda.time.LocalDateTime.class);
