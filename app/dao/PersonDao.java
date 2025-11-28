@@ -883,8 +883,8 @@ public final class PersonDao extends DaoBase {
 
     if (compCode.isPresent()) {
       final QPersonCompetenceCodes pcc = QPersonCompetenceCodes.personCompetenceCodes;
-      condition.and(pcc.competenceCode.eq(compCode.get())).and(pcc.beginDate.loe(date)
-          .andAnyOf(pcc.endDate.goe(date), pcc.endDate.isNull()));
+      condition.and(pcc.competenceCode.eq(compCode.get()))
+          .andAnyOf(pcc.endDate.goe(date), pcc.endDate.isNull());
     }
   }
 
