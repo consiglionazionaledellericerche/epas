@@ -4,10 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.28.1] - Unreleased
+## [2.28.1] - 2025-12-01
+### Added
+  - Aggiunto metodo in administration che permette di creare i riepiloghi per tutti i dipendenti attivi
+  
 ### Changed
   - Risolto bug che non permetteva di visualizzare correttamente la lista degli aventi diritto al monte ore personale
     per la richiesta di straordinari.
+  - Risolto bug che non permetteva la creazione di riepiloghi il primo giorno del mese
 
 ## [2.28.0] - 2025-11-21
 ### Added

@@ -317,6 +317,23 @@ public class Administration extends Controller {
   }
 
   /**
+   * Metodo potente per creare i riepiloghi di tutti i contratti attivi nell'anno/mese
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   * 
+   * Crea i riepiloghi di tutti i contratti attivi (da usare in casi disperati).
+   */
+  public static void fixAll(Integer year, Integer month) {
+    LocalDate date = new LocalDate(year, month, 1);
+    List<Contract> contractList = contractDao
+        .getActiveContractsInPeriod(date, Optional.fromNullable(date.dayOfMonth().withMaximumValue()), 
+            Optional.absent());
+    List<Person> personList = contractList.stream().map(c -> c.getPerson()).collect(Collectors.toList());
+
+    consistencyManager.fixPersonSituation(personList, date, false);
+    renderText("Fixati i riepiloghi mancanti");
+  }
+  /**
    * Metodo che resetta i codici 92H.
    */
   public static void reset92H() {
