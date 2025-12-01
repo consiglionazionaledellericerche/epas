@@ -217,9 +217,18 @@ public class ContractMonthRecapManager {
         contract);
 
     IWrapperContract wrContract = wrapperFactory.create(cmr.getContract());
-    List<PersonShiftDay> psdList = shiftDao.getPersonShiftDaysByPeriodAndType(
-        validDataForPersonDay.getBegin(), validDataForPersonDay.getEnd(), Optional.absent(), 
-        cmr.getPerson());
+    List<PersonShiftDay> psdList = Lists.newArrayList();
+    if (validDataForPersonDay != null) {
+      psdList = shiftDao.getPersonShiftDaysByPeriodAndType(
+          validDataForPersonDay.getBegin(), validDataForPersonDay.getEnd(), Optional.absent(),
+          cmr.getPerson());
+    } else {
+      LocalDate begin = new LocalDate(yearMonth.getYear(), yearMonth.getMonthOfYear(), 1);
+      LocalDate end = begin.dayOfMonth().withMaximumValue();
+      psdList = shiftDao.getPersonShiftDaysByPeriodAndType(
+          begin, end, Optional.absent(),
+          cmr.getPerson());
+    } 
     setMealTicketsInformation(cmr, validDataForMealTickets);
     setPersonDayInformation(cmr, validDataForPersonDay, otherCompensatoryRest, psdList);
     setPersonMonthInformation(cmr, wrContract,

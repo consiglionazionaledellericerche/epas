@@ -505,6 +505,7 @@ public final class PersonDao extends DaoBase {
         .where(condition).orderBy(person.number.asc()).fetch();
   }
 
+
   /**
    * Persona (se esiste) a partire dalla mail.
    *
