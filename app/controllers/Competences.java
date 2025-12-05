@@ -59,6 +59,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.CompetenceManager;
 import manager.ConsistencyManager;
+import manager.OvertimesManager;
 import manager.ShiftOrganizationManager;
 import manager.competences.ShiftTimeTableDto;
 import manager.configurations.ConfigurationManager;
@@ -94,6 +95,7 @@ import models.TotalOvertime;
 import models.User;
 import models.dto.HolydaysWorkingTimeSituation;
 import models.dto.OrganizationTimeTable;
+import models.dto.PersonOvertimeSummary;
 import models.dto.TimeTableDto;
 import models.enumerate.CalculationType;
 import models.enumerate.PaymentType;
@@ -159,6 +161,8 @@ public class Competences extends Controller {
   private static ConfigurationManager configurationManager;
   @Inject
   private static GeneralSettingDao settingDao;
+  @Inject
+  private static OvertimesManager overtimesManager;
 
   /**
    * Crud CompetenceCode.
@@ -672,6 +676,7 @@ public class Competences extends Controller {
        monte ore personale (previa verifica del parametro associato)
      */
     List<Person> personList = Lists.newArrayList();
+    List<PersonOvertimeSummary> list = Lists.newArrayList();
     GeneralSetting settings = settingDao.generalSetting();
     Configuration config = null;
     java.util.Optional<Configuration> conf = office.getConfigurations().stream()
@@ -684,15 +689,18 @@ public class Competences extends Controller {
       log.warn("Non abilitato il parametro per gli straordinari per persona!!");
     } else {
       CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+      List<CompetenceCode> codeList = Lists.newArrayList();
+      codeList.add(code);
       Set<Office> offices = Sets.newHashSet();
       offices.add(office);
       personList = personDao
           .listForCompetence(code, Optional.absent(), offices, true, 
               LocalDate.now().withYear(year).monthOfYear().withMinimumValue()
               .dayOfMonth().withMinimumValue(), LocalDate.now(), Optional.absent()).list();
+      list = overtimesManager.generatePeopleOvertimeSummary(personList, year, codeList);
     }
     
-    render(totalList, totale, year, office, personList, config);
+    render(totalList, totale, year, office, personList, config, list);
   }
 
   /**

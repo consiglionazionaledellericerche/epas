@@ -67,15 +67,17 @@
 		    <tr>
 		      <th>Persona</th>
 		      <th>Ore assegnate</th>
+			  <th>Ore residue</th>
 		      <th>Assegna ore</th>
 		    </tr>
 	     </thead>
 	     <tbody>
-			#{list items:group.getPeopleOvertimes(), as:'item'}
+			#{list items:list, as:'item'}
 			<tr>
-				<td>${item.fullName()}</td>
-				<td>${item.totalOvertimeHourInYear(year)}</td>
-				<td><a class="btn btn-primary btn-xs" href="@{Groups.addHours(item.id, year)}" data-async-modal="#defaultModal">
+				<td>${item.getPerson().fullName()}</td>
+				<td>${item.getAssignedHours()}</td>
+				<td>${item.getRemainingHours()}</td>
+				<td><a class="btn btn-primary btn-xs" href="@{Groups.addHours(item.getPerson().getId(), year)}" data-async-modal="#defaultModal">
         				Assegna ore
       				</a></td>
 			</tr>

@@ -18,14 +18,17 @@
 package manager;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 import dao.CompetenceDao;
+import java.util.List;
 import javax.inject.Inject;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonHourForOvertime;
+import models.dto.PersonOvertimeSummary;
 import models.exports.PersonsCompetences;
 import models.exports.PersonsList;
 import org.slf4j.Logger;
@@ -124,5 +127,27 @@ public class OvertimesManager {
           person.getFullname(), hours);
     }
     personHourForOvertime.save();
+  }
+  
+  /**
+   * Ritorna una lista di dto con le informazioni per le ore di straordinario.
+   * 
+   * @param personList la lista delle persone per cui recuperare la situazione delle ore di straordinario
+   * @param year l'anno di riferimento
+   * @param codeList la lista dei codici di competenza per cui ricercare le ore disponibili
+   * @return una lista di dto che contengono la situazione delle ore di straordinario dei dipendenti richiesti.
+   */
+  public List<PersonOvertimeSummary> generatePeopleOvertimeSummary(List<Person> personList, int year, List<CompetenceCode> codeList) {
+    List<PersonOvertimeSummary> list = Lists.newArrayList();
+    for (Person person : personList) {
+      PersonOvertimeSummary pos = new PersonOvertimeSummary();
+      pos.setPerson(person);
+      pos.setRemainingHours(person.totalOvertimeHourInYear(year) - 
+          competenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.absent(), 
+              Optional.fromNullable(person), Optional.absent(), codeList).or(0));
+      pos.setAssignedHours(person.totalOvertimeHourInYear(year));
+      list.add(pos);
+    }
+    return list;
   }
 }

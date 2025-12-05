@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import common.security.SecurityRules;
+import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.GeneralSettingDao;
 import dao.GroupDao;
@@ -47,8 +48,10 @@ import lombok.val;
 import manager.CompetenceManager;
 import manager.GroupManager;
 import manager.GroupOvertimeManager;
+import manager.OvertimesManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
+import models.CompetenceCode;
 import models.Configuration;
 import models.GeneralSetting;
 import models.GroupOvertime;
@@ -60,6 +63,7 @@ import models.TotalOvertime;
 import models.User;
 import models.UsersRolesOffices;
 import models.dto.PersonOvertimeInMonth;
+import models.dto.PersonOvertimeSummary;
 import models.flows.Group;
 import org.testng.util.Strings;
 import play.data.binding.As;
@@ -101,7 +105,11 @@ public class Groups extends Controller {
   private static GroupOvertimeManager groupOvertimeManager;
   @Inject
   private static PersonOvertimeDao personOvertimeDao;
-
+  @Inject
+  private static OvertimesManager overtimesManager;
+  @Inject
+  private static CompetenceCodeDao competenceCodeDao;
+  
   /**
    * Metodo che crea il gruppo.
    *
@@ -329,8 +337,12 @@ public class Groups extends Controller {
         .filter(go -> go.getYear().equals(year)).collect(Collectors.toList());
     GeneralSetting settings = settingDao.generalSetting();
     boolean check = settings.isEnableOvertimePerPerson();
+    CompetenceCode code = competenceCodeDao.getCompetenceCodeByCode("S1");
+    List<CompetenceCode> codeList = Lists.newArrayList();
+    codeList.add(code);
+    List<PersonOvertimeSummary> list = overtimesManager.generatePeopleOvertimeSummary(group.getPeople(), year, codeList);
     render(group, totalGroupOvertimes, office, groupOvertime, hoursAvailable, map, 
-        groupOvertimesAvailable, groupOvertimeInYearList, year, check, totale, config);
+        groupOvertimesAvailable, groupOvertimeInYearList, year, check, totale, config, list);
   }
   
   public static void addHours(Long personId, int year) {
