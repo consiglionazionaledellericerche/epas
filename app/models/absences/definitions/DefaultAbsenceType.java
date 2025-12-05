@@ -1790,6 +1790,10 @@ public enum DefaultAbsenceType {
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, 
       MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(),
       null, null, false, true, true, null),
+  A_62S40V("62S40V", "dist. sind.a temp. det. p. t. 40% vert.", false,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, false, 
+      MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(),
+      null, null, false, true, true, null),
 
   A_ES_L133("ES-L133", "esonero servizio art.72 L.133/08", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, true, 

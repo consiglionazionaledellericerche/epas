@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Aggiunto codice 31_2024 per la gestione della proroga delle ferie del 2024 nel 2026.
   - Aggiunta voce sulle ore di straordinario residue sia nella tabella per il responsabile di gruppo dove vengono
     assegnate le ore del monte ore del dipendente, sia nella tabella per il responsabile di sede.
+  - Aggiunto codice 62S40V per i part time verticali al 40%
   
 ## [2.28.1] - 2025-12-01
 ### Added
