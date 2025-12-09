@@ -76,6 +76,16 @@ public enum AbsenceRequestType {
 //      Optional.absent(),
 //      Optional.of(EpasParam.VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED),
 //      true),
+  //Richiesta Ferie
+  VACATION_DELAY_REQUEST(true, false, false, true, false, false,
+      Optional.of(EpasParam.VACATION_REQUEST_I_III_OFFICE_HEAD_APPROVAL_REQUIRED),
+      Optional.of(EpasParam.VACATION_REQUEST_IV_VIII_OFFICE_HEAD_APPROVAL_REQUIRED),
+      Optional.of(EpasParam.VACATION_REQUEST_I_III_MANAGER_APPROVAL_REQUIRED),
+      Optional.of(EpasParam.VACATION_REQUEST_IV_VIII_MANAGER_APPROVAL_REQUIRED),
+      Optional.absent(),
+      Optional.absent(),
+      Optional.of(EpasParam.VACATION_REQUEST_MANAGER_OFFICE_HEAD_APPROVAL_REQUIRED),
+      true),
   
   //Permessso breve
   SHORT_TERM_PERMIT(false, false, false, false, false, false,

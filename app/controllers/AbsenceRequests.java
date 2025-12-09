@@ -157,6 +157,10 @@ public class AbsenceRequests extends Controller {
   public static void personalPermissions() {
     list(AbsenceRequestType.PERSONAL_PERMISSION);
   }
+  
+  public static void vacationsDelay() {
+    list(AbsenceRequestType.VACATION_DELAY_REQUEST);
+  }
 
 
   
@@ -196,6 +200,13 @@ public class AbsenceRequests extends Controller {
     listToApprove(AbsenceRequestType.SHORT_TERM_PERMIT);
   }
 
+  /**
+   * Lista delle richiesta di assenza di tipo ferie da approvare.
+   */
+  public static void vacationsDelayToApprove() {
+    listToApprove(AbsenceRequestType.VACATION_DELAY_REQUEST);
+  }
+  
   /**
    * Lista delle richieste di assenza dell'utente corrente.
    *
@@ -333,6 +344,28 @@ public class AbsenceRequests extends Controller {
       absenceType = absenceComponentDao.absenceTypeByCode("661G").get();
       periodChain = absenceService
           .residual(person, groupAbsenceType, LocalDate.now());
+    }
+    if (type.equals(AbsenceRequestType.VACATION_DELAY_REQUEST)) {
+      groupAbsenceType = absenceComponentDao
+          .groupAbsenceTypeByName(DefaultGroup.PROROGA_FERIE_2024.name()).get();
+      absenceType = absenceComponentDao.absenceTypeByCode("31_2024").get();
+      periodChain = absenceService.residual(person, groupAbsenceType, LocalDate.now());
+      /**
+       * Qui occorre aggiungere un riepilogo dei giorni del 2024 disponibili prendendoli
+       * dal recap delle ferie.
+       */
+      Integer yearDelay = Integer.valueOf(absenceType.getCode().substring(3, absenceType.getCode().length()));
+      if (from.getYear() - yearDelay > 2) {
+        //Non posso chiedere le ferie prorogate perchè sono in un anno 
+        flash.error("Si sta chiedendo un giorno di ferie pregressa fuori dall'intervallo di fruibilità");
+        Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+      }
+      if (absenceType.getValidFrom().compareTo(from) < 0 
+          || absenceType.getValidTo().compareTo(from) > 0) {
+        //La data inizio richiesta non è contenuta nell'intervallo di validità del codice di assenza.
+        flash.error("Si vuole usare un codice non valido nei giorni richiesti!");
+        Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
+      }
     }
     
     absenceRequest.setStartAt(LocalDateTime.now().plusDays(1)); 

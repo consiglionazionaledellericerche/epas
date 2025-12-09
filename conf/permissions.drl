@@ -744,6 +744,7 @@ when
 		"AbsenceRequests.shortTermPermits",
 		"AbsenceRequests.personalPermissions",
 		"AbsenceRequests.vacationsPastYearAfterDeadline",
+		"AbsenceRequests.vacationsDelay",
 		"AbsenceRequests.show",
 		"AbsenceRequests.flush",
 		
