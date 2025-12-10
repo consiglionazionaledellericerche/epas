@@ -347,7 +347,7 @@ public class AbsenceRequests extends Controller {
     }
     if (type.equals(AbsenceRequestType.VACATION_DELAY_REQUEST)) {
       groupAbsenceType = absenceComponentDao
-          .groupAbsenceTypeByName(DefaultGroup.PROROGA_FERIE_2024.name()).get();
+          .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
       absenceType = absenceComponentDao.absenceTypeByCode("31_2024").get();
       periodChain = absenceService.residual(person, groupAbsenceType, LocalDate.now());
       /**
@@ -355,17 +355,31 @@ public class AbsenceRequests extends Controller {
        * dal recap delle ferie.
        */
       Integer yearDelay = Integer.valueOf(absenceType.getCode().substring(3, absenceType.getCode().length()));
-      if (from.getYear() - yearDelay > 2) {
+      LocalDate check;
+      if (from == null) {
+        check = LocalDate.now();
+      } else {
+        check = from;
+      }
+      if (check.getYear() - yearDelay < 2) {
         //Non posso chiedere le ferie prorogate perchè sono in un anno 
         flash.error("Si sta chiedendo un giorno di ferie pregressa fuori dall'intervallo di fruibilità");
         Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
       }
-      if (absenceType.getValidFrom().compareTo(from) < 0 
-          || absenceType.getValidTo().compareTo(from) > 0) {
+      if (absenceType.getValidFrom().compareTo(check) < 0 
+          || absenceType.getValidTo().compareTo(check) > 0) {
         //La data inizio richiesta non è contenuta nell'intervallo di validità del codice di assenza.
         flash.error("Si vuole usare un codice non valido nei giorni richiesti!");
         Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
       }
+      IWrapperPerson wperson = wrapperFactory.create(person);
+
+      for (Contract contract : wperson.orderedYearContracts(LocalDate.now().getYear())) {
+        VacationSituation vacationSituation = absenceService.buildVacationSituation(contract,
+            LocalDate.now().minusYears(1).getYear(), groupAbsenceType, Optional.absent(), false);
+        vacationSituations.add(vacationSituation);
+      }
+      
     }
     
     absenceRequest.setStartAt(LocalDateTime.now().plusDays(1)); 

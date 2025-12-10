@@ -86,6 +86,13 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 		  ${compensatoryRestAvailable}</span></h3>
 	</div>
 	#{/if}
+	
+	#{if absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.VACATION_DELAY_REQUEST)}
+		<div class="container-fluid">
+			<h3>Il dipendente ha a disposizione ancora ${vacationSituations.get(0).lastYear.usable()} giorni di ferie per l'anno ${vacationSituations.get(0).lastYear.year}</h3>
+		</div>
+	#{/if}
+	
 	#{if existing != null}
 	<div class="container-fluid"> 
 	#{include './existing.html' /}
