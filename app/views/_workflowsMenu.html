@@ -21,6 +21,7 @@
   changeReperibilityRequests = templateUtility.changeReperibilityRequests()
   overtimeRequestsInAdvance = templateUtility.overtimeRequestsInAdvance()
   enableIllnessFlow = templateUtility.enableIllnessFlow()
+  vacationDelayRequests = templateUtility.vacationDelayRequests()
 }%
 
   <li class="dropdown #{if request.action in actions}active#{/if}">
@@ -35,7 +36,8 @@
 		    	|| serviceRequests > 0 || illnessRequests > 0
 		    	|| personalPermissionRequests > 0 
 		    	|| changeReperibilityRequests > 0
-		    	|| overtimeRequestsInAdvance > 0}
+		    	|| overtimeRequestsInAdvance > 0
+				|| vacationDelayRequests > 0}
       			<span class="label label-danger label-badge">${compensatoryRestRequests 
       				+ vacationRequests 
       				+ overtimeRequests
@@ -43,7 +45,8 @@
       				+ teleworkRequests + serviceRequests
       				+ illnessRequests
       				+ changeReperibilityRequests
-      				+ overtimeRequestsInAdvance}
+      				+ overtimeRequestsInAdvance
+					+ vacationDelayRequests}
       			</span>
     		#{/if}
 	     <!-- visualizza l'username -->
@@ -86,6 +89,9 @@
         <i class="fa fa-exclamation" aria-hidden="true"></i>
       #{/b.li}
 
+      #{b.li @AbsenceRequests.vacationsDelay()}
+        <i class="fa fa-plane" aria-hidden="true"></i>
+      #{/b.li}
 
       #{secure.check 'InformationRequests.enabled'}
         #{secure.li @InformationRequests.teleworks()}
@@ -156,6 +162,13 @@
         <i class="fa fa-exclamation" aria-hidden="true"></i>
         #{if templateUtility.personalPermissionRequests() > 0}
           <span class="label label-danger label-badge">${templateUtility.personalPermissionRequests()}</span>
+        #{/if}
+      #{/b.li}
+      
+      #{b.li @AbsenceRequests.vacationsDelayToApprove()}
+        <i class="fa fa-plane" aria-hidden="true"></i>
+        #{if templateUtility.vacationDelayRequests() > 0}
+          <span class="label label-danger label-badge">${templateUtility.vacationDelayRequests()}</span>
         #{/if}
       #{/b.li}
 

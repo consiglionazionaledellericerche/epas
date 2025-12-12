@@ -474,6 +474,22 @@ public class TemplateUtility {
 
     return results.size();
   }
+  
+  public final int vacationDelayRequests() {
+    User user = Security.getUser().get();
+    if (user.isSystemUser()) {
+      return 0;
+    }
+    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
+    List<Group> groups = 
+        groupDao.groupsByOffice(
+            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
+    Set<AbsenceRequest> results = absenceRequestDao
+        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
+            AbsenceRequestType.VACATION_DELAY_REQUEST, groups, user.getPerson());
+
+    return results.size();
+  }
 
 
   /**

@@ -23,6 +23,7 @@ import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import common.security.SecurityRules;
+import dao.AbsenceDao;
 import dao.AbsenceRequestDao;
 import dao.GeneralSettingDao;
 import dao.GroupDao;
@@ -59,6 +60,7 @@ import models.Person;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
+import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
@@ -136,6 +138,9 @@ public class AbsenceRequests extends Controller {
 
   @Inject
   static GeneralSettingDao generalSettingDao;
+  
+  @Inject
+  static AbsenceDao absenceDao;
 
   /**
    * Lista delle richiesta di assenza di tipo ferie.
@@ -156,6 +161,10 @@ public class AbsenceRequests extends Controller {
    */
   public static void personalPermissions() {
     list(AbsenceRequestType.PERSONAL_PERMISSION);
+  }
+  
+  public static void vacationsDelay() {
+    list(AbsenceRequestType.VACATION_DELAY_REQUEST);
   }
 
 
@@ -196,6 +205,13 @@ public class AbsenceRequests extends Controller {
     listToApprove(AbsenceRequestType.SHORT_TERM_PERMIT);
   }
 
+  /**
+   * Lista delle richiesta di assenza di tipo ferie da approvare.
+   */
+  public static void vacationsDelayToApprove() {
+    listToApprove(AbsenceRequestType.VACATION_DELAY_REQUEST);
+  }
+  
   /**
    * Lista delle richieste di assenza dell'utente corrente.
    *
@@ -299,7 +315,7 @@ public class AbsenceRequests extends Controller {
     val absenceRequest = new AbsenceRequest();
     absenceRequest.setType(type);
     absenceRequest.setPerson(person);
-    
+    List<Absence> vacationDelayList = Lists.newArrayList();
     PeriodChain periodChain = null;
     GroupAbsenceType groupAbsenceType = null;
     AbsenceType absenceType = null;
@@ -334,6 +350,27 @@ public class AbsenceRequests extends Controller {
       periodChain = absenceService
           .residual(person, groupAbsenceType, LocalDate.now());
     }
+    if (type.equals(AbsenceRequestType.VACATION_DELAY_REQUEST)) {
+      groupAbsenceType = absenceComponentDao
+          .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+      absenceType = absenceComponentDao.absenceTypeByCode("31_2024").get();
+      periodChain = absenceService.residual(person, groupAbsenceType, LocalDate.now());
+      /**
+       * Qui occorre aggiungere un riepilogo dei giorni del 2024 disponibili prendendoli
+       * dal recap delle ferie.
+       */
+
+      IWrapperPerson wperson = wrapperFactory.create(person);
+
+      for (Contract contract : wperson.orderedYearContracts(LocalDate.now().getYear())) {
+        VacationSituation vacationSituation = absenceService.buildVacationSituation(contract,
+            LocalDate.now().minusYears(1).getYear(), groupAbsenceType, Optional.absent(), false);
+        vacationSituations.add(vacationSituation);
+      }
+      vacationDelayList = absenceDao
+          .absenceInPeriod(person, absenceType.getValidFrom(), absenceType.getValidTo(), absenceType.getCode());
+      
+    }
     
     absenceRequest.setStartAt(LocalDateTime.now().plusDays(1)); 
     absenceRequest.setEndTo(LocalDateTime.now().plusDays(1));
@@ -354,7 +391,7 @@ public class AbsenceRequests extends Controller {
     
     render("@edit", absenceRequest, insertable, insertReport, vacationSituations,
         compensatoryRestAvailable, handleCompensatoryRestSituation, showVacationPeriods,
-        retroactiveAbsence, absenceForm, periodChain);
+        retroactiveAbsence, absenceForm, periodChain, vacationDelayList);
 
   }
 
@@ -371,6 +408,8 @@ public class AbsenceRequests extends Controller {
     boolean insertable = true;
     GroupAbsenceType permissionGroup = groupAbsenceType;
     PeriodChain periodChain = null;
+    List<VacationSituation> vacationSituations = Lists.newArrayList();
+    List<Absence> vacationDelayList = Lists.newArrayList();
     if (!groupAbsenceType.getName().equals(DefaultGroup.RIPOSI_CNR.name())) {
       periodChain = absenceService
           .residual(absenceRequest.getPerson(), permissionGroup, LocalDate.now());
@@ -396,7 +435,36 @@ public class AbsenceRequests extends Controller {
           "Le richieste di assenza non possono essere per periodi maggiori di sei mesi. "
           + "Eventualmente effettuare più richieste di assenza.");
     }
+    
+    if (groupAbsenceType.getName().equals(DefaultGroup.PROROGA_FERIE_2024.name())) {
+      groupAbsenceType = absenceComponentDao
+          .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+      absenceType = absenceComponentDao.absenceTypeByCode("31_2024").get();
+      periodChain = absenceService.residual(absenceRequest.getPerson(), groupAbsenceType, LocalDate.now());
+      IWrapperPerson wperson = wrapperFactory.create(absenceRequest.getPerson());
 
+      for (Contract contract : wperson.orderedYearContracts(LocalDate.now().getYear())) {
+        VacationSituation vacationSituation = absenceService.buildVacationSituation(contract,
+            absenceRequest.getStartAt().minusYears(1).getYear(), groupAbsenceType, Optional.absent(), false);
+        vacationSituations.add(vacationSituation);
+      }
+      vacationDelayList = absenceDao
+          .absenceInPeriod(absenceRequest.getPerson(), absenceType.getValidFrom(), absenceType.getValidTo(), absenceType.getCode());
+
+      if (absenceRequest.getStartAt().toLocalDate().isBefore(absenceType.getValidFrom()) 
+          || absenceRequest.getStartAt().toLocalDate().isAfter(absenceType.getValidTo())) {
+        //La data inizio richiesta non è contenuta nell'intervallo di validità del codice di assenza.
+        Validation.addError("absenceRequest.startAt", "Si vuole usare un codice non valido nei giorni richiesti!");        
+      }
+      if (absenceRequest.getEndTo().toLocalDate().isBefore(absenceType.getValidFrom()) 
+          || absenceRequest.getEndTo().toLocalDate().isAfter(absenceType.getValidTo())) {
+        //La data inizio richiesta non è contenuta nell'intervallo di validità del codice di assenza.
+        Validation.addError("absenceRequest.endTo", "Si vuole usare un codice non valido nei giorni richiesti!");        
+      }
+      groupAbsenceType = absenceComponentDao
+          .groupAbsenceTypeByName(DefaultGroup.PROROGA_FERIE_2024.name()).get();
+    }
+    
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.getPerson(),
         absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
         false, absenceType, justifiedType, hours, minutes, false, true);
@@ -485,7 +553,7 @@ public class AbsenceRequests extends Controller {
       compensatoryRestAvailable = maxDays - psDto.numberOfCompensatoryRestUntilToday;
 
     }
-    List<VacationSituation> vacationSituations = Lists.newArrayList();
+    
     if (absenceRequest.getType().equals(AbsenceRequestType.VACATION_REQUEST)) {
       GroupAbsenceType vacationGroup =
           absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
@@ -503,7 +571,7 @@ public class AbsenceRequests extends Controller {
       allDay = false;
     }
     render(absenceRequest, insertReport, absenceForm, insertable, vacationSituations,
-        compensatoryRestAvailable, retroactiveAbsence, periodChain, allDay);
+        compensatoryRestAvailable, retroactiveAbsence, periodChain, allDay, vacationDelayList);
   }
 
   /**

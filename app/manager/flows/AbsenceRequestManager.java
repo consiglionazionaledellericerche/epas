@@ -151,6 +151,7 @@ public class AbsenceRequestManager {
   private static final String RIPOSI_CNR = "RIPOSI_CNR";
   private static final String PERMESSI_PERSONALI = "G_661";
   private static final String FERIE_37 = "FERIE_CNR_PROROGA";
+  private static final String FERIE_PROROGA = "PROROGA_FERIE_2024";
 
   /**
    * Verifica che gruppi ed eventuali responsabile di sede siano presenti per poter richiedere il
@@ -769,6 +770,12 @@ public class AbsenceRequestManager {
         break;
       case PERSONAL_PERMISSION:
         group = absenceDao.groupAbsenceTypeByName(PERMESSI_PERSONALI);
+        if (group.isPresent()) {
+          groupAbsenceType = group.get();
+        }
+        break;
+      case VACATION_DELAY_REQUEST:
+        group = absenceDao.groupAbsenceTypeByName(FERIE_PROROGA);
         if (group.isPresent()) {
           groupAbsenceType = group.get();
         }

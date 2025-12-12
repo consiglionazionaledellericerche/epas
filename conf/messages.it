@@ -1098,6 +1098,7 @@ Contracts.updateSourceContract= Inizializzazione
 Contracts.initializationsStatus=Dati Iniziali
 
 AbsenceRequests.vacations =Mie richieste di ferie
+AbsenceRequests.vacationsDelay =Mie richieste di ferie prorogate
 AbsenceRequests.vacationsTopLevel=Mie comunicazioni ferie
 AbsenceRequests.compensatoryRests =Miei riposi compensativi
 AbsenceRequests.shortTermPermit =Miei permessi brevi
@@ -1109,6 +1110,7 @@ AbsenceRequests.compensatoryRestsToApprove =Flussi di riposi compensativi
 AbsenceRequests.shortTermPermitToApprove =Flussi di permessi brevi
 AbsenceRequests.permissionsToApprove =Flussi di permessi personali
 AbsenceRequests.vacationsPastYearAfterDeadlineToApprove =Flussi di ferie anno passato dopo deadline
+AbsenceRequests.vacationsDelayToApprove =Flussi di richieste di ferie prorogate
 
 InformationRequests.illness =Mie richieste per malattia
 InformationRequests.teleworks =Mie richieste per telelavoro
@@ -1125,6 +1127,11 @@ AbsenceRequestType.VACATION_REQUEST.blank =nuova richiesta ferie
 AbsenceRequestType.VACATION_REQUEST_TOP_LEVEL =comunicazione di ferie
 AbsenceRequestType.VACATION_REQUESTS_TOP_LEVEL = Mie comunicazioni ferie
 AbsenceRequestType.VACATION_REQUEST_TOP_LEVEL.blank =nuova comunicazione ferie
+
+AbsenceRequestType.VACATION_DELAY_REQUESTS =Richiesta di ferie prorogate
+AbsenceRequestType.VACATION_DELAY_REQUEST.blank =nuova richiesta ferie prorogate
+AbsenceRequestType.VACATION_DELAY_REQUEST =proroga ferie
+
 
 AbsenceRequestType.COMPENSATORY_REST =riposo compensativo
 AbsenceRequestType.COMPENSATORY_REST_TOP_LEVEL =riposo compensativo

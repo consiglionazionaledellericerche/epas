@@ -520,10 +520,13 @@ public class AbsenceService {
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
     final GroupAbsenceType vacationPostDeadLine =
         absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.FERIE_CNR_PROROGA.name()).get();
+    final GroupAbsenceType vacationDelay =
+        absenceComponentDao.groupAbsenceTypeByName(DefaultGroup.PROROGA_FERIE_2024.name()).get();
     groupsPermitted.add(vacation);
     groupsPermitted.add(compensatory);
     groupsPermitted.add(permissions);
     groupsPermitted.add(vacationPostDeadLine);
+    groupsPermitted.add(vacationDelay);
     return groupsPermitted;
   }
 
