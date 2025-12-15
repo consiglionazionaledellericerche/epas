@@ -92,10 +92,8 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 		<div class="container-fluid">
 			<h3>Il dipendente ha a disposizione ancora ${vacationSituations.get(0).lastYear.usable() - vacationDelayList.size()} giorni di ferie per l'anno ${vacationSituations.get(0).lastYear.year}</h3>
 		</div>
-	#{/if}
 	
-	
-	#{if vacationSituations.get(0).lastYear.usable() - vacationDelayList.size() > 0}
+		#{if vacationSituations.get(0).lastYear.usable() - vacationDelayList.size() > 0}
 		#{if existing != null}
 			<div class="container-fluid"> 
 			#{include './existing.html' /}
@@ -104,14 +102,25 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 		<div class="container-fluid"> 
 	   	#{include './_report.html' /}
 		</div>
+		#{/if}
+		#{else}
+		#{alert color:info}
+		<strong>Modifica le date per richiedere le ferie prorogate.<br>
+			Si sta richiedendo di usare un codice di proroga ferie per l'anno ${absenceRequest.getStartAt().getYear() - 1} in una data dell'anno in corso.
+			<br>La proroga però vale esclusivamente per giorni dell'anno ${absenceRequest.getStartAt().getYear() + 1}
+		</strong>
+		#{/alert}
+		#{/else}
 	#{/if}
 	#{else}
-	#{alert color:info}
-	<strong>Modifica le date per richiedere le ferie prorogate.<br>
-		Si sta richiedendo di usare un codice di proroga ferie per l'anno ${absenceRequest.getStartAt().getYear() - 1} in una data dell'anno in corso.
-		<br>La proroga però vale esclusivamente per giorni dell'anno ${absenceRequest.getStartAt().getYear() + 1}
-	</strong>
-	#{/alert}
+		#{if existing != null}
+			<div class="container-fluid"> 
+			#{include './existing.html' /}
+			</div>
+		#{/if}
+		<div class="container-fluid"> 
+	   	#{include './_report.html' /}
+		</div>
 	#{/else}
 #{/form}
 
