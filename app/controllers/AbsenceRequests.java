@@ -312,10 +312,15 @@ public class AbsenceRequests extends Controller {
     List<VacationSituation> vacationSituations = Lists.newArrayList();
 
     boolean handleCompensatoryRestSituation = false;
+    boolean insertable = true;
     val absenceRequest = new AbsenceRequest();
     absenceRequest.setType(type);
     absenceRequest.setPerson(person);
+    absenceRequest.setStartAt(LocalDateTime.now().plusDays(1)); 
+    absenceRequest.setEndTo(LocalDateTime.now().plusDays(1));
+
     List<Absence> vacationDelayList = Lists.newArrayList();
+    int vacationDelayResidual = 0;
     PeriodChain periodChain = null;
     GroupAbsenceType groupAbsenceType = null;
     AbsenceType absenceType = null;
@@ -362,22 +367,23 @@ public class AbsenceRequests extends Controller {
 
       IWrapperPerson wperson = wrapperFactory.create(person);
 
-      for (Contract contract : wperson.orderedYearContracts(LocalDate.now().getYear())) {
+      for (Contract contract : wperson.orderedYearContracts(2024)) {
         VacationSituation vacationSituation = absenceService.buildVacationSituation(contract,
-            LocalDate.now().minusYears(1).getYear(), groupAbsenceType, Optional.absent(), false);
+            2024, groupAbsenceType, Optional.absent(), false);
         vacationSituations.add(vacationSituation);
       }
       vacationDelayList = absenceDao
           .absenceInPeriod(person, absenceType.getValidFrom(), absenceType.getValidTo(), absenceType.getCode());
-      
+      if (vacationSituations.size() > 0) {
+        vacationDelayResidual = vacationSituations.get(0).currentYear.usable();
+      }
+      if (vacationDelayResidual - vacationDelayList.size() <= 0 || absenceRequest.getStartAt().getYear() != 2026) {
+        insertable = false;
+      }
     }
-    
-    absenceRequest.setStartAt(LocalDateTime.now().plusDays(1)); 
-    absenceRequest.setEndTo(LocalDateTime.now().plusDays(1));
-    boolean insertable = true;
+
     groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
-    
-    
+
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.getPerson(),
         absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
         false, absenceType, null, null, null, false, true);
@@ -388,11 +394,44 @@ public class AbsenceRequests extends Controller {
             null, null, false, absenceManager);
     boolean showVacationPeriods = false;
     boolean retroactiveAbsence = false;
+    log.debug("blank- > insertReport.criicalErrors.size()= {}, howManyErrors={}, howManySuccess={}", 
+        insertReport.criticalErrors.size(),
+        insertReport.howManyError(),
+        insertReport.howManySuccess());
     
     render("@edit", absenceRequest, insertable, insertReport, vacationSituations,
         compensatoryRestAvailable, handleCompensatoryRestSituation, showVacationPeriods,
-        retroactiveAbsence, absenceForm, periodChain, vacationDelayList);
+        retroactiveAbsence, absenceForm, periodChain, vacationDelayList, vacationDelayResidual);
 
+  }
+
+  public static void ferie2024(Long personId) {
+    Person person = personDao.byId(personId).orNull();
+    List<VacationSituation> vacationSituations = Lists.newArrayList();
+    List<Absence> vacationDelayList = Lists.newArrayList();
+
+    GroupAbsenceType groupAbsenceType = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
+    AbsenceType absenceType = absenceComponentDao.absenceTypeByCode("31_2024").get();
+    IWrapperPerson wperson = wrapperFactory.create(person);
+
+    for (Contract contract : wperson.orderedYearContracts(2024)) {
+      VacationSituation vacationSituation = absenceService.buildVacationSituation(contract,
+          2024, groupAbsenceType, Optional.absent(), false);
+      vacationSituations.add(vacationSituation);
+    }
+    vacationDelayList = absenceDao
+        .absenceInPeriod(person, absenceType.getValidFrom(), absenceType.getValidTo(), absenceType.getCode());
+    int vacationDelayResidual = 0;
+    if (vacationSituations.size() > 0) {
+      vacationDelayResidual = vacationSituations.get(0).currentYear.usable();
+    }
+    renderText(String.format("%s -> ferie residue 2024 (senza proroga) = %s. "
+        + "Ferie 2024 prese con 31_2024 = %s. Ferie prorogabili = %s.", 
+        person.getFullname(), 
+        vacationDelayResidual,
+        vacationDelayList.size(),
+        vacationDelayResidual - vacationDelayList.size()));
   }
 
   /**
@@ -410,6 +449,8 @@ public class AbsenceRequests extends Controller {
     PeriodChain periodChain = null;
     List<VacationSituation> vacationSituations = Lists.newArrayList();
     List<Absence> vacationDelayList = Lists.newArrayList();
+    int vacationDelayResidual = 0;
+    
     if (!groupAbsenceType.getName().equals(DefaultGroup.RIPOSI_CNR.name())) {
       periodChain = absenceService
           .residual(absenceRequest.getPerson(), permissionGroup, LocalDate.now());
@@ -423,7 +464,8 @@ public class AbsenceRequests extends Controller {
       response.status = 400;
       insertable = false;
       render("@edit", absenceRequest, insertable, retroactiveAbsence, 
-          groupAbsenceType, absenceType, justifiedType, hours, minutes, periodChain);
+          groupAbsenceType, absenceType, justifiedType, hours, minutes, periodChain, 
+          vacationSituations, vacationDelayList, vacationDelayResidual);
     }
     if (absenceRequest.getStartAt().isAfter(absenceRequest.getEndTo())) {
       absenceRequest.setEndTo(absenceRequest.getStartAt());
@@ -443,14 +485,19 @@ public class AbsenceRequests extends Controller {
       periodChain = absenceService.residual(absenceRequest.getPerson(), groupAbsenceType, LocalDate.now());
       IWrapperPerson wperson = wrapperFactory.create(absenceRequest.getPerson());
 
-      for (Contract contract : wperson.orderedYearContracts(LocalDate.now().getYear())) {
+      for (Contract contract : wperson.orderedYearContracts(2024)) {
         VacationSituation vacationSituation = absenceService.buildVacationSituation(contract,
-            absenceRequest.getStartAt().minusYears(1).getYear(), groupAbsenceType, Optional.absent(), false);
+            2024, groupAbsenceType, Optional.absent(), false);
         vacationSituations.add(vacationSituation);
       }
       vacationDelayList = absenceDao
           .absenceInPeriod(absenceRequest.getPerson(), absenceType.getValidFrom(), absenceType.getValidTo(), absenceType.getCode());
-
+      if (vacationSituations.size() > 0) {
+        vacationDelayResidual = vacationSituations.get(0).currentYear.usable();
+      }
+      if (vacationDelayResidual - vacationDelayList.size() <= 0 || absenceRequest.getStartAt().getYear() != 2026) {
+        insertable = false;
+      }
       if (absenceRequest.getStartAt().toLocalDate().isBefore(absenceType.getValidFrom()) 
           || absenceRequest.getStartAt().toLocalDate().isAfter(absenceType.getValidTo())) {
         //La data inizio richiesta non è contenuta nell'intervallo di validità del codice di assenza.
@@ -478,7 +525,7 @@ public class AbsenceRequests extends Controller {
       response.status = 400;
       insertable = false;
       render("@edit", absenceRequest, insertable, existing, retroactiveAbsence, periodChain,
-          absenceForm);
+          absenceForm, vacationSituations, vacationDelayList, vacationDelayResidual);
     }
     if (!absenceRequest.getPerson()
         .checkLastCertificationDate(new YearMonth(absenceRequest.startAtAsDate().getYear(),
@@ -488,7 +535,7 @@ public class AbsenceRequests extends Controller {
       response.status = 400;
       insertable = false;
       render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain,
-          absenceForm);
+          absenceForm, vacationSituations, vacationDelayList, vacationDelayResidual);
     }
 
     boolean insideContracts = 
@@ -506,7 +553,7 @@ public class AbsenceRequests extends Controller {
       response.status = 400;
       insertable = false;
       render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain,
-          absenceForm);
+          absenceForm, vacationSituations, vacationDelayList, vacationDelayResidual);
     }
 
     if (Validation.hasErrors()) {
@@ -524,7 +571,8 @@ public class AbsenceRequests extends Controller {
             "Inserire una motivazione per l'assenza nel passato");
         response.status = 400;
         insertable = false;
-        render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain, absenceForm);
+        render("@edit", absenceRequest, insertable, retroactiveAbsence, periodChain, absenceForm,
+            vacationSituations, vacationDelayList, vacationDelayResidual);
       }
     }
     if (groupAbsenceType == null || !groupAbsenceType.isPersistent()) {
@@ -539,7 +587,7 @@ public class AbsenceRequests extends Controller {
             absenceForm.groupSelected, absenceForm.from,
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
             absenceForm.hours, absenceForm.minutes, false, absenceManager);
-    
+
     absenceRequestManager.checkAbsenceRequestDates(absenceRequest, insertReport);
 
     int compensatoryRestAvailable = 0;
@@ -571,7 +619,7 @@ public class AbsenceRequests extends Controller {
       allDay = false;
     }
     render(absenceRequest, insertReport, absenceForm, insertable, vacationSituations,
-        compensatoryRestAvailable, retroactiveAbsence, periodChain, allDay, vacationDelayList);
+        compensatoryRestAvailable, retroactiveAbsence, periodChain, allDay, vacationDelayList, vacationDelayResidual);
   }
 
   /**
