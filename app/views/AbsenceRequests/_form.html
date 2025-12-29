@@ -88,30 +88,39 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 	#{/if}
 	
 	#{if absenceRequest.type.equals(models.flows.enumerate.AbsenceRequestType.VACATION_DELAY_REQUEST)}
-	    
 		<div class="container-fluid">
-			<h3>Il dipendente ha a disposizione ancora ${vacationSituations.get(0).lastYear.usable() - vacationDelayList.size()} giorni di ferie per l'anno ${vacationSituations.get(0).lastYear.year}</h3>
+			<h3>Il dipendente ha a disposizione ancora ${vacationDelayResidual - vacationDelayList.size()} giorni di ferie per l'anno 2024</h3>
 		</div>
-	
-		#{if vacationSituations.get(0).lastYear.usable() - vacationDelayList.size() > 0}
-		#{if existing != null}
-			<div class="container-fluid"> 
-			#{include './existing.html' /}
-			</div>
+		*{ Le ferie 2024 residue possono essere prese solo a partire dal 2026 }*
+		#{if absenceRequest.startAt.getYear() != 2026}
+			#{alert color:info}
+			<strong>Modifica le date per richiedere le ferie prorogate.<br>
+				Si sta richiedendo di usare un codice di proroga ferie 2024 in una data dell'anno ${absenceRequest.startAt.getYear()}.
+				<br>Il codice di assenza per la proroga però può essere utilizzato esclusivamente per i giorni dell'anno 2025.
+			</strong>
+			#{/alert}
 		#{/if}
-		<div class="container-fluid"> 
-	   	#{include './_report.html' /}
-		</div>
-		#{/if}
+		*{ Questo è il caso dal 1 gennaio 2026 }*
 		#{else}
-		#{alert color:info}
-		<strong>Modifica le date per richiedere le ferie prorogate.<br>
-			Si sta richiedendo di usare un codice di proroga ferie per l'anno ${absenceRequest.getStartAt().getYear() - 1} in una data dell'anno in corso.
-			<br>La proroga però vale esclusivamente per giorni dell'anno ${absenceRequest.getStartAt().getYear() + 1}
-		</strong>
-		#{/alert}
+			#{if vacationDelayResidual - vacationDelayList.size() > 0}
+				#{if existing != null}
+					<div class="container-fluid"> 
+						#{include './existing.html' /}
+					</div>
+				#{/if}
+				<div class="container-fluid"> 
+					#{include './_report.html' /}
+				</div>
+			#{/if}
+			#{else}
+				#{alert color:info}
+					<strong>Non ci sono ferie 2024 da utilizzare.</strong>
+				#{/alert}
+			#{/else}
 		#{/else}
 	#{/if}
+	*{ Fine del trattamento speciale delle VACATION_DELAY_REQUEST }*
+
 	#{else}
 		#{if existing != null}
 			<div class="container-fluid"> 
@@ -119,7 +128,7 @@ riportando il/i codice/i inserito/i al completamento del flusso.  </p>
 			</div>
 		#{/if}
 		<div class="container-fluid"> 
-	   	#{include './_report.html' /}
+		#{include './_report.html' /}
 		</div>
 	#{/else}
 #{/form}
