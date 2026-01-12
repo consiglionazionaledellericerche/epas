@@ -88,7 +88,23 @@ public enum DefaultGroup {
       + "terzo parente tre giorni mese in ore e minuti", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 1, 
       GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_183M, 
       DefaultComplation.C_183, null, false, false),
+
+  G_184("184 - Permesso assistenza quarto parenti/affini disabili L. 104/92 tre gg. mese", "",
+      DefaultCategoryType.L_104, 1, GroupAbsenceTypePattern.programmed, PeriodType.month,
+      DefaultTakable.T_184, null, null, false, false), 
+  G_184_PARENTI_DIPENDENTI("184 - Permesso assistenza parenti/affini disabili L. 104/92 "
+      + "quarto parente tre giorni mese", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 1, 
+      GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_184, 
+      null, null, false, false),
   
+  G_184M("184 Ore e minuti - Permesso assistenza quarto parenti/affini disabili L. 104/92 tre gg. mese", "",
+      DefaultCategoryType.L_104, 1, GroupAbsenceTypePattern.programmed, PeriodType.month,
+      DefaultTakable.T_184M, DefaultComplation.C_184, null, false, false), 
+  G_184_PARENTI_DIPENDENTIM("184 Ore e minuti - Permesso assistenza parenti/affini disabili L. 104/92 "
+      + "quarto parente tre giorni mese in ore e minuti", "", DefaultCategoryType.L_104_PARENTI_DIPENDENTI, 1, 
+      GroupAbsenceTypePattern.programmed, PeriodType.month, DefaultTakable.T_184M, 
+      DefaultComplation.C_184, null, false, false),
+
   G_182P("182P - Permesso provv. assist. secondo parenti/affini dis. L. 104/92 tre gg. mese", "",
       DefaultCategoryType.PERMESSI_PROVVISORI_104, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.month, DefaultTakable.T_182P, DefaultComplation.C_182P, null, false, false),
