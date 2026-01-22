@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.30.0] - UNRELEASED
+### Changed
+  - Aggiunte le etichette per le comunicazioni di ferie prorogate per i livelli I-III
+
 ## [2.29.3] - 2025-12-29
 ### Changed
   - Rivisti controlli date per 31_2024 da richiedere a gennaio 2026.
