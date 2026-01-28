@@ -1131,7 +1131,9 @@ AbsenceRequestType.VACATION_REQUEST_TOP_LEVEL.blank =nuova comunicazione ferie
 AbsenceRequestType.VACATION_DELAY_REQUESTS =Richiesta di ferie prorogate
 AbsenceRequestType.VACATION_DELAY_REQUEST.blank =nuova richiesta ferie prorogate
 AbsenceRequestType.VACATION_DELAY_REQUEST =proroga ferie
-
+AbsenceRequestType.VACATION_DELAY_REQUEST_TOP_LEVEL =comunicazione di ferie prorogate
+AbsenceRequestType.VACATION_DELAY_REQUESTS_TOP_LEVEL = Mie comunicazioni ferie prorogate
+AbsenceRequestType.VACATION_DELAY_REQUEST_TOP_LEVEL.blank =nuova comunicazione ferie prorogate
 
 AbsenceRequestType.COMPENSATORY_REST =riposo compensativo
 AbsenceRequestType.COMPENSATORY_REST_TOP_LEVEL =riposo compensativo
