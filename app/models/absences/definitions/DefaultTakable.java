@@ -651,13 +651,8 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_FA3, DefaultAbsenceType.A_FA4, DefaultAbsenceType.A_FA5, 
           DefaultAbsenceType.A_FA6, DefaultAbsenceType.A_FA7,
 
-          //          DefaultAbsenceType.A_OA1, DefaultAbsenceType.A_OA2, 
-          //          DefaultAbsenceType.A_OA3, DefaultAbsenceType.A_OA4, DefaultAbsenceType.A_OA5, 
-          //          DefaultAbsenceType.A_OA6, DefaultAbsenceType.A_OA7,
-
           DefaultAbsenceType.A_33, DefaultAbsenceType.A_33B, DefaultAbsenceType.A_33C,
           DefaultAbsenceType.A_34, DefaultAbsenceType.A_38, DefaultAbsenceType.A_39,
-
 
           DefaultAbsenceType.A_681, DefaultAbsenceType.A_682, DefaultAbsenceType.A_683, 
           DefaultAbsenceType.A_441, DefaultAbsenceType.A_6N, DefaultAbsenceType.A_442,
@@ -676,8 +671,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_96, DefaultAbsenceType.A_96A, DefaultAbsenceType.A_96B,
           DefaultAbsenceType.A_98, DefaultAbsenceType.A_52, DefaultAbsenceType.A_100,
           DefaultAbsenceType.A_404, DefaultAbsenceType.A_405,DefaultAbsenceType.A_415,
-          DefaultAbsenceType.A_62, DefaultAbsenceType.A_62S40V,
-          DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_98CV, 
+          DefaultAbsenceType.A_62S40V, DefaultAbsenceType.A_98CV, 
           DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_46,
           DefaultAbsenceType.A_46RA/*, DefaultAbsenceType.A_VAC19*/),
       ImmutableSet.of(DefaultAbsenceType.A_COMANDO, DefaultAbsenceType.A_102,
@@ -701,9 +695,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_FA1, DefaultAbsenceType.A_FA2, 
           DefaultAbsenceType.A_FA3, DefaultAbsenceType.A_FA4, DefaultAbsenceType.A_FA5, 
           DefaultAbsenceType.A_FA6, DefaultAbsenceType.A_FA7,
-          //          DefaultAbsenceType.A_OA1, DefaultAbsenceType.A_OA2, 
-          //          DefaultAbsenceType.A_OA3, DefaultAbsenceType.A_OA4, DefaultAbsenceType.A_OA5, 
-          //          DefaultAbsenceType.A_OA6, DefaultAbsenceType.A_OA7,
+
           DefaultAbsenceType.A_33, DefaultAbsenceType.A_33B, DefaultAbsenceType.A_33C,
           DefaultAbsenceType.A_34, DefaultAbsenceType.A_38, DefaultAbsenceType.A_39,
           DefaultAbsenceType.A_681, DefaultAbsenceType.A_682, DefaultAbsenceType.A_683, 
@@ -722,8 +714,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_96, DefaultAbsenceType.A_96A, DefaultAbsenceType.A_96B,
           DefaultAbsenceType.A_98, DefaultAbsenceType.A_52, DefaultAbsenceType.A_100,
           DefaultAbsenceType.A_404, DefaultAbsenceType.A_405,DefaultAbsenceType.A_415,
-          DefaultAbsenceType.A_62, DefaultAbsenceType.A_62S40V,
-          DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D, DefaultAbsenceType.A_98CV,
+          DefaultAbsenceType.A_62S40V, DefaultAbsenceType.A_98CV,
           DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_46,
           DefaultAbsenceType.A_46RA/*, DefaultAbsenceType.A_VAC19*/),
       -1, null),
@@ -859,7 +850,8 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18,
           DefaultAbsenceType.A_C16, DefaultAbsenceType.A_35R,
           DefaultAbsenceType.A_54B, DefaultAbsenceType.A_54TD,
-          DefaultAbsenceType.A_62S75V), 
+          DefaultAbsenceType.A_62S75V, DefaultAbsenceType.A_62, 
+          DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D), 
       ImmutableSet.of(
           DefaultAbsenceType.A_25O, DefaultAbsenceType.A_25OH7,
           DefaultAbsenceType.A_242, DefaultAbsenceType.A_242H7,
@@ -882,7 +874,8 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18,
           DefaultAbsenceType.A_C16, DefaultAbsenceType.A_35R,
           DefaultAbsenceType.A_54B, DefaultAbsenceType.A_54TD,
-          DefaultAbsenceType.A_62S75V), 
+          DefaultAbsenceType.A_62S75V, DefaultAbsenceType.A_62, 
+          DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D), 
       -1, null),
 
   T_RIPOSI_CNR_ATTESTATI(AmountType.units, 
