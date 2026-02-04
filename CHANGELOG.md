@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
   - Aggiunte le etichette per le comunicazioni di ferie prorogate per i livelli I-III
+  - Modificato il comportamento dei codici 62, 62A e 62D che decurtano le ferie
 
 ## [2.29.3] - 2025-12-29
 ### Changed
