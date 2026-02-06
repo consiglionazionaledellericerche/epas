@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
   - Aggiunte le etichette per le comunicazioni di ferie prorogate per i livelli I-III
+  - Modificata la prendibilità dei codici 23 e 25 fino a 14 anni come da circolare.
 
 ## [2.29.3] - 2025-12-29
 ### Changed
