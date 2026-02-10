@@ -4,13 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.30.0] - UNRELEASED
+## [2.30.0] - 2026-02-10
 
 ### Added
   - Aggiunto codice 184 perm. assis. IV parente aff. handicap 
 
 ### Changed
   - Aggiunte le etichette per le comunicazioni di ferie prorogate per i livelli I-III
+  - Modificato il comportamento dei codici 62, 62A e 62D che decurtano le ferie
   - Modificata la prendibilità dei codici 23 e 25 fino a 14 anni come da circolare.
 
 ## [2.29.3] - 2025-12-29
