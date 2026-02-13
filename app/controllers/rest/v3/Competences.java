@@ -19,23 +19,41 @@ package controllers.rest.v3;
 
 import cnr.sync.dto.v3.CompetenceCodeShowDto;
 import cnr.sync.dto.v3.CompetenceCodeShowTerseDto;
+import cnr.sync.dto.v3.CompetenceShowDto;
 import cnr.sync.dto.v3.PersonCompetenceCodeShowDto;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.rest.v2.Persons;
 import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
+import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 import helpers.JodaConverters;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+import models.Competence;
 import models.CompetenceCode;
+import models.Contract;
+import models.Office;
+import models.Person;
+import models.PersonCompetenceCodes;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -47,6 +65,7 @@ import play.mvc.With;
  *
  */
 @With(Resecure.class)
+@Slf4j
 public class Competences extends Controller {
 
   @Inject 
@@ -57,6 +76,12 @@ public class Competences extends Controller {
   static PersonDao personDao;
   @Inject
   static CompetenceCodeDao competenceCodeDao;
+  @Inject
+  static CompetenceDao competenceDao;
+  @Inject
+  static OfficeDao officeDao;
+  @Inject
+  static IWrapperFactory wrapperFactory;
 
   /**
    * Metodo rest che ritorna un json contenente la lista dei codici di competenza
@@ -105,6 +130,101 @@ public class Competences extends Controller {
     }
     RestUtils.checkIfPresent(competenceCode);
     renderJSON(gsonBuilder.create().toJson(CompetenceCodeShowDto.build(competenceCode)));
+  }
+  
+  /**
+   * Metodo rest che ritorna la lista delle competenze approvate nell'anno/mese per la persona richiesta.
+   * Il mese può essere null e viene ritornata la lista delle competenze approvate nell'anno.
+   * 
+   * @param personId l'id della persona
+   * @param email la mail della persona
+   * @param eppn il codice eppn della persona
+   * @param personPerseoId l'identificativo dell'anagrafica
+   * @param fiscalCode il codice fiscale
+   * @param number la matricola
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   */
+  public static void competencesPerPerson(Long personId, String email, String eppn, Long personPerseoId, String fiscalCode, 
+      String number, Integer year, Integer month) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    log.debug("Chiamata competencesPerPerson, email = {}, eppn = {}, year = {}, month = {}", email, eppn, year, month);
+    val person = 
+        Persons.getPersonFromRequest(personId, email, eppn, personPerseoId, fiscalCode, number);
+    rules.checkIfPermitted(person.getOffice());
+    
+    List<PersonCompetenceCodes> pccList = competenceCodeDao
+        .listByPerson(person, Optional.fromNullable(org.joda.time.LocalDate.now()
+            .withMonthOfYear(month).withYear(year)));
+    List<CompetenceCode> codeListIds = Lists.newArrayList();
+    for (PersonCompetenceCodes pcc : pccList) {
+      codeListIds.add(pcc.getCompetenceCode());
+    }
+    
+    List<Competence> competenceList = competenceDao.getCompetences(Optional.fromNullable(person), 
+        year, Optional.fromNullable(month), codeListIds);
+    renderJSON(gsonBuilder.create().toJson(competenceList.stream().map(
+        comp -> CompetenceShowDto.build(comp)).collect(Collectors.toList())));
+    
+  }
+  
+  public static void approvedCompetenceInYear(Integer year, Integer month, boolean onlyDefined, Long officeId) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    log.debug("Chiamata approvedCompetenceInYear, year = {}, month = {}, officeId = {}", year, month, officeId);
+    
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+
+    rules.checkIfPermitted(office);
+    Set<Person> personSet = Sets.newTreeSet(Person.personComparator());
+
+    Map<Person, Map<CompetenceCode, Integer>> mapPersonCompetenceRecap = 
+        Maps.newTreeMap(Person.personComparator());
+    List<Competence> competenceInYear = competenceDao
+        .getCompetenceInYear(year, Optional.fromNullable(office));
+    
+    for (Competence competence : competenceInYear) {
+
+      //Filtro tipologia del primo contratto nel mese della competenza
+      if (onlyDefined) {
+        IWrapperPerson wrPerson = wrapperFactory.create(competence.getPerson());
+        Optional<Contract> firstContract = wrPerson
+            .getFirstContractInMonth(year, competence.getMonth());
+        if (!firstContract.isPresent()) {
+          continue;    //questo errore andrebbe segnalato, competenza senza che esista contratto
+        }
+        IWrapperContract wrContract = wrapperFactory.create(firstContract.get());
+        if (!wrContract.isDefined()) {
+          continue;    //scarto la competence.
+        }
+      }
+      //Filtro competenza non approvata
+      if (competence.getValueApproved() == 0) {
+        continue;
+      }
+
+      personSet.add(competence.getPerson());
+
+      //aggiungo la competenza alla mappa della persona
+      Person person = competence.getPerson();
+      Map<CompetenceCode, Integer> personCompetences = mapPersonCompetenceRecap.get(person);
+
+      if (personCompetences == null) {
+        personCompetences = Maps.newHashMap();
+      }
+      Integer value = personCompetences.get(competence.getCompetenceCode());
+      if (value != null) {
+        value = value + competence.getValueApproved();
+      } else {
+        value = competence.getValueApproved();
+      }
+
+      personCompetences.put(competence.getCompetenceCode(), value);
+
+      mapPersonCompetenceRecap.put(person, personCompetences);
+
+    }
+    //renderJSON(gsonBuilder.create().toJson(mapPersonCompetenceRecap.entrySet().stream().map(pcc -> CompetenceShowDto.build(null)))).
   }
 
 }
