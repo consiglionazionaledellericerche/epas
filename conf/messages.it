@@ -1404,6 +1404,8 @@ SMARTWORKING =Auto inserimento codice di assenza per smartworking
 AGILE_WORK =Inserimento codice di assenza per Lavoro Agile di cui alla nota del DG 22278 del 22 marzo 2022
 PARENTAL_LEAVE_FOR_FATHERS =Inserimento codici di congedo parentale per il padre
 DISABLE_OVERTIME_LIMIT =Disabilitare limite 200 ore di straordinario annuale
+ENABLE_632_CODE =Abilita utilizzo 10 ore aggiuntive per visite ed esami per malattie invalidanti o rare 
+ENABLE_633_CODE =Abilita utilizzo 10 ore aggiuntive per visite ed esami per figlio minorenne con malattie invalidanti o rare
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.

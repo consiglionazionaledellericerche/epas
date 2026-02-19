@@ -97,6 +97,8 @@ public enum DefaultCategoryType {
   ASTENSIONE_POSTPARTUM_DIPENDENTI("Astensione post partum dipendenti", 
       24, DefaultTab.CONGEDI_PARENTALI_DIPENDENTI),
   VISITA_MEDICA_DIPENDENTE("Visita medica dipendente", 24, DefaultTab.VISITA_MEDICA_DIPENDENTI),
+  NUOVO_CODICE_632("Ore agg. visite mediche per invalidità = >74% o mal. oncologiche", 25, DefaultTab.NUOVO_CODICE_632),
+  NUOVO_CODICE_633("Ore agg. visite mediche figli con invalidità =>74%", 26, DefaultTab.NUOVO_CODICE_633),
   CODICI_AUTOMATICI("Codici Automatici", 23, DefaultTab.AUTOMATICI);
 
   public String description;
