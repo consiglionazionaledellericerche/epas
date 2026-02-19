@@ -209,6 +209,14 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_631,
       DefaultComplation.C_631, null, false, true), 
   
+  G_632("632 - Ore aggiuntive visite mediche per invalidità = >74% o malattie oncologiche", "", DefaultCategoryType.NUOVO_CODICE_632, 1,
+      GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_632,
+      DefaultComplation.C_632, null, false, true), 
+  
+  G_633("633 - Ore aggiuntive visite mediche figli con invalidità =>74%", "", DefaultCategoryType.NUOVO_CODICE_633, 1,
+      GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_633,
+      DefaultComplation.C_633, null, false, true), 
+  
   G_631_DIPENDENTI("631 - Permesso per visita medica dipendenti", "", 
       DefaultCategoryType.VISITA_MEDICA_DIPENDENTE, 1,
       GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_631,
