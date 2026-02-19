@@ -6,12 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.30.1] - Unreleased
 ### Added
+  - Aggiunti i codici di congedo parentale per il quinto figlio.
   - Aggiunti i codici 632 e 633 che consentono l'utilizzo di 10 ore di permessi per visite secondo quanto stabilito
     dagli articoli 1 e 2 della legge 18 luglio 2025 n. 106
   - Aggiunti parametri di configurazione personale per l'abilitazione specifica dei singoli codici sul singolo 
     dipendente.
-
-### Added
   - Aggiunto codice 184 perm. assis. IV parente aff. handicap 
 
 ## [2.30.0] - 2026-02-10
