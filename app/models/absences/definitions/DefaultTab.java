@@ -51,6 +51,8 @@ public enum DefaultTab {
   LAVORO_AGILE("Lavoro agile", 20),
   COD39LA("Assistenza parenti immunodepressi", 18),
   SMART("Smartworking", 17),
+  NUOVO_CODICE_632("Ore agg. visite mediche per invalidità = >74% o mal. oncologiche - 632", 21),
+  NUOVO_CODICE_633("Ore agg. visite mediche figli con invalidità =>74% - 633", 22),
   ORE_AGGIUNTIVE_DIPENDENTI("Ore aggiuntive dipendenti", 15), 
   CONGEDI_PARENTALI_DIPENDENTI("Congedi Parentali dipendenti", 24),
   VISITA_MEDICA_DIPENDENTI("Visita medica dipendenti", 24),
