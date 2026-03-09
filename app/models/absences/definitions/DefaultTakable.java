@@ -698,7 +698,7 @@ public enum DefaultTakable {
 
           DefaultAbsenceType.A_681, DefaultAbsenceType.A_682, DefaultAbsenceType.A_683, 
           DefaultAbsenceType.A_441, DefaultAbsenceType.A_6N, DefaultAbsenceType.A_442,
-
+          DefaultAbsenceType.A_NOSTAMP,
           DefaultAbsenceType.A_67, DefaultAbsenceType.A_80, 
           DefaultAbsenceType.A_81, DefaultAbsenceType.A_82,
           DefaultAbsenceType.A_83, DefaultAbsenceType.A_84, 
@@ -737,7 +737,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_FA1, DefaultAbsenceType.A_FA2, 
           DefaultAbsenceType.A_FA3, DefaultAbsenceType.A_FA4, DefaultAbsenceType.A_FA5, 
           DefaultAbsenceType.A_FA6, DefaultAbsenceType.A_FA7,
-
+          DefaultAbsenceType.A_NOSTAMP,
           DefaultAbsenceType.A_33, DefaultAbsenceType.A_33B, DefaultAbsenceType.A_33C,
           DefaultAbsenceType.A_34, DefaultAbsenceType.A_38, DefaultAbsenceType.A_39,
           DefaultAbsenceType.A_681, DefaultAbsenceType.A_682, DefaultAbsenceType.A_683, 
@@ -888,7 +888,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_132, DefaultAbsenceType.A_133, 
           DefaultAbsenceType.A_14, DefaultAbsenceType.A_142, 
           DefaultAbsenceType.A_143, DefaultAbsenceType.A_54A17,
-          DefaultAbsenceType.A_98CV,
+          DefaultAbsenceType.A_98CV, DefaultAbsenceType.A_NOSTAMP,
           DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18,
           DefaultAbsenceType.A_C16, DefaultAbsenceType.A_35R,
           DefaultAbsenceType.A_54B, DefaultAbsenceType.A_54TD,
@@ -912,7 +912,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_132, DefaultAbsenceType.A_133, 
           DefaultAbsenceType.A_14, DefaultAbsenceType.A_142, 
           DefaultAbsenceType.A_143, DefaultAbsenceType.A_54A17,
-          DefaultAbsenceType.A_98CV,
+          DefaultAbsenceType.A_98CV, DefaultAbsenceType.A_NOSTAMP,
           DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18,
           DefaultAbsenceType.A_C16, DefaultAbsenceType.A_35R,
           DefaultAbsenceType.A_54B, DefaultAbsenceType.A_54TD,
