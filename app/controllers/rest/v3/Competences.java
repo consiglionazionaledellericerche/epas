@@ -20,6 +20,7 @@ package controllers.rest.v3;
 import cnr.sync.dto.v3.CompetenceCodeShowDto;
 import cnr.sync.dto.v3.CompetenceCodeShowTerseDto;
 import cnr.sync.dto.v3.CompetenceShowDto;
+import cnr.sync.dto.v3.ConfigurationOfficeDto;
 import cnr.sync.dto.v3.PersonCompetenceCodeShowDto;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -108,8 +109,8 @@ public class Competences extends Controller {
     RestUtils.checkMethod(request, HttpMethod.GET);
     renderJSON(gsonBuilder.create().toJson(
         competenceCodeDao.getAllCompetenceCode().stream()
-          .map(cc -> CompetenceCodeShowTerseDto.build(cc))
-          .collect(Collectors.toList())));
+        .map(cc -> CompetenceCodeShowTerseDto.build(cc))
+        .collect(Collectors.toList())));
   }
 
   /**
@@ -131,7 +132,7 @@ public class Competences extends Controller {
     RestUtils.checkIfPresent(competenceCode);
     renderJSON(gsonBuilder.create().toJson(CompetenceCodeShowDto.build(competenceCode)));
   }
-  
+
   /**
    * Metodo rest che ritorna la lista delle competenze approvate nell'anno/mese per la persona richiesta.
    * Il mese può essere null e viene ritornata la lista delle competenze approvate nell'anno.
@@ -152,7 +153,7 @@ public class Competences extends Controller {
     val person = 
         Persons.getPersonFromRequest(personId, email, eppn, personPerseoId, fiscalCode, number);
     rules.checkIfPermitted(person.getOffice());
-    
+
     List<PersonCompetenceCodes> pccList = competenceCodeDao
         .listByPerson(person, Optional.fromNullable(org.joda.time.LocalDate.now()
             .withMonthOfYear(month).withYear(year)));
@@ -160,36 +161,31 @@ public class Competences extends Controller {
     for (PersonCompetenceCodes pcc : pccList) {
       codeListIds.add(pcc.getCompetenceCode());
     }
-    
+
     List<Competence> competenceList = competenceDao.getCompetences(Optional.fromNullable(person), 
         year, Optional.fromNullable(month), codeListIds);
     renderJSON(gsonBuilder.create().toJson(competenceList.stream().map(
         comp -> CompetenceShowDto.build(comp)).collect(Collectors.toList())));
-    
+
   }
-  
+
   public static void approvedCompetenceInYear(Integer year, Integer month, boolean onlyDefined, Long officeId) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     log.debug("Chiamata approvedCompetenceInYear, year = {}, month = {}, officeId = {}", year, month, officeId);
-    
+
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
 
     rules.checkIfPermitted(office);
-    Set<Person> personSet = Sets.newTreeSet(Person.personComparator());
 
-    Map<Person, Map<CompetenceCode, Integer>> mapPersonCompetenceRecap = 
-        Maps.newTreeMap(Person.personComparator());
     List<Competence> competenceInYear = competenceDao
         .getCompetenceInYear(year, Optional.fromNullable(office));
-    
-    for (Competence competence : competenceInYear) {
-
-      //Filtro tipologia del primo contratto nel mese della competenza
-      if (onlyDefined) {
-        IWrapperPerson wrPerson = wrapperFactory.create(competence.getPerson());
+    List<Competence> helpList = Lists.newArrayList();
+    if (onlyDefined) {
+      for (Competence comp : competenceInYear) {
+        IWrapperPerson wrPerson = wrapperFactory.create(comp.getPerson());
         Optional<Contract> firstContract = wrPerson
-            .getFirstContractInMonth(year, competence.getMonth());
+            .getFirstContractInMonth(year, comp.getMonth());
         if (!firstContract.isPresent()) {
           continue;    //questo errore andrebbe segnalato, competenza senza che esista contratto
         }
@@ -197,34 +193,13 @@ public class Competences extends Controller {
         if (!wrContract.isDefined()) {
           continue;    //scarto la competence.
         }
+        helpList.add(comp);
       }
-      //Filtro competenza non approvata
-      if (competence.getValueApproved() == 0) {
-        continue;
-      }
-
-      personSet.add(competence.getPerson());
-
-      //aggiungo la competenza alla mappa della persona
-      Person person = competence.getPerson();
-      Map<CompetenceCode, Integer> personCompetences = mapPersonCompetenceRecap.get(person);
-
-      if (personCompetences == null) {
-        personCompetences = Maps.newHashMap();
-      }
-      Integer value = personCompetences.get(competence.getCompetenceCode());
-      if (value != null) {
-        value = value + competence.getValueApproved();
-      } else {
-        value = competence.getValueApproved();
-      }
-
-      personCompetences.put(competence.getCompetenceCode(), value);
-
-      mapPersonCompetenceRecap.put(person, personCompetences);
-
+      competenceInYear = helpList;
     }
-    //renderJSON(gsonBuilder.create().toJson(mapPersonCompetenceRecap.entrySet().stream().map(pcc -> CompetenceShowDto.build(null)))).
+    val list = competenceInYear.stream().map(c -> CompetenceShowDto.build(c))
+        .collect(Collectors.toList());
+    renderJSON(gsonBuilder.create().toJson(list));
   }
 
 }
