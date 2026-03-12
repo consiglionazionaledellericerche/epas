@@ -209,6 +209,14 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_631,
       DefaultComplation.C_631, null, false, true), 
   
+  G_632("632 - Ore aggiuntive visite mediche per invalidità = >74% o malattie oncologiche", "", DefaultCategoryType.NUOVO_CODICE_632, 1,
+      GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_632,
+      DefaultComplation.C_632, null, false, true), 
+  
+  G_633("633 - Ore aggiuntive visite mediche figli con invalidità =>74%", "", DefaultCategoryType.NUOVO_CODICE_633, 1,
+      GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_633,
+      DefaultComplation.C_633, null, false, true), 
+  
   G_631_DIPENDENTI("631 - Permesso per visita medica dipendenti", "", 
       DefaultCategoryType.VISITA_MEDICA_DIPENDENTE, 1,
       GroupAbsenceTypePattern.programmed, PeriodType.year, DefaultTakable.T_631,
@@ -329,6 +337,10 @@ public enum DefaultGroup {
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child4_0_14, DefaultTakable.T_254A, DefaultComplation.C_254A, null,
       false, true), 
+  G_255A("255A - Astensione facoltativa post partum 30% quinto figlio 0-14 anni 90 giorni",
+      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      PeriodType.child5_0_14, DefaultTakable.T_255A, DefaultComplation.C_255A, null,
+      false, true), 
   
   G_24PROV("24 - Retribuzione 80% 1 figlio", "24 - Retribuzione provvisoria 80% 1 figlio",
       DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
@@ -341,6 +353,14 @@ public enum DefaultGroup {
   G_243PROV("243 - Retribuzione 80% 3 figlio", "243 - Retribuzione provvisoria 80% 3 figlio",
       DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child3_0_6, DefaultTakable.T_243PROV, DefaultComplation.C_243PROV, null, false,
+      false), 
+  G_244PROV("244 - Retribuzione 80% 4 figlio", "244 - Retribuzione provvisoria 80% 4 figlio",
+      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      PeriodType.child4_0_6, DefaultTakable.T_244PROV, DefaultComplation.C_244PROV, null, false,
+      false), 
+  G_245PROV("245 - Retribuzione 80% 5 figlio", "245 - Retribuzione provvisoria 80% 5 figlio",
+      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      PeriodType.child5_0_6, DefaultTakable.T_245PROV, DefaultComplation.C_245PROV, null, false,
       false), 
 
   G_24("24 - Retribuzione 80% 1 figlio", "Retribuzione provvisoria 80% 1 figlio",
@@ -437,6 +457,10 @@ public enum DefaultGroup {
       "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
       PeriodType.child4_0_14, DefaultTakable.T_254, DefaultComplation.C_254, DefaultGroup.G_254A,
       false, true), 
+  G_255("255 - Astensione facoltativa post partum 30% quinto figlio 0-14 anni 150 giorni",
+      "", DefaultCategoryType.ASTENSIONE_POSTPARTUM, 0, GroupAbsenceTypePattern.programmed,
+      PeriodType.child5_0_14, DefaultTakable.T_255, DefaultComplation.C_255, DefaultGroup.G_255A,
+      false, true), 
   
   G_234O("234 - Astensione facoltativa post partum 100% quarto figlio 0-12 anni 30 giorni",
       "234/254/244 - Astensione facoltativa post partum quarto figlio",
@@ -448,6 +472,11 @@ public enum DefaultGroup {
       DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
       PeriodType.child4_0_14, DefaultTakable.T_234, DefaultComplation.C_234,
       DefaultGroup.G_254, false, true),
+  G_235("235 - Astensione facoltativa post partum 100% quinto figlio 0-14 anni 30 giorni",
+      "235/255/255A - Astensione facoltativa post partum quinto figlio",
+      DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, GroupAbsenceTypePattern.programmed,
+      PeriodType.child5_0_14, DefaultTakable.T_235, DefaultComplation.C_235,
+      DefaultGroup.G_255, false, true),
 
   G_25P("25P - Prolungamento astensione facoltativa post partum 30% (no limiti)", "",
       DefaultCategoryType.ASTENSIONE_POSTPARTUM, 1, // se fosse primo figlio:

@@ -302,6 +302,16 @@
 		delle 200 ore di straordinario annuale previste dalla normativa, consentendo quindi lo sforamento.
 	  </p> 
 	#{/if}
+	
+	#{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_632_CODE) }
+	  <p>Abilitando questa funzionalità sarà possibile inserire per il dipendente <strong>${configuration.person.fullname}</strong> il codice 632.
+	  </p> 
+	#{/if}
+	
+	#{if configuration.epasParam.equals(manager.configurations.EpasParam.ENABLE_633_CODE) }
+	  <p>Abilitando questa funzionalità sarà possibile inserire per il dipendente <strong>${configuration.person.fullname}</strong> il codice 633.
+	  </p> 
+	#{/if}
     
      #{if configuration.epasParam.equals(manager.configurations.EpasParam.MATERNITY_PERIOD) }
       <p>Inserire lo stato di maternità per il dipendente <strong>${configuration.person.fullname}</strong> e la date di inizio e fine periodo.</p>

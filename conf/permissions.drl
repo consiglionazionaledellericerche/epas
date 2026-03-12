@@ -4084,10 +4084,21 @@ end
 rule isOvertimeHandleFlowsVisible
 when
   $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
-  $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
+  $p: Person(qualification != null) from currentOperator.person
   $o: Office() from $p.office
   Configuration(epasParam == EpasParam.ENABLE_OVERTIME_FLOWS, fieldValue == true) from $o.configurations
   $c: PermissionCheck(action == "CompetenceRequests.handleEnabled", granted == false, target == null)
+then
+  $c.grant();
+end
+
+rule isOvertimeHandleFlowsVisibleBis
+when
+  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $p: Person(qualification != null && qualification.qualification <= 3) from currentOperator.person
+  $o: Office() from $p.office
+  Configuration(epasParam == EpasParam.ENABLE_OVERTIME_FLOWS, fieldValue == true) from $o.configurations
+  $c: PermissionCheck(action == "CompetenceRequests.overtimesToApprove", granted == false, target == null)
 then
   $c.grant();
 end

@@ -34,12 +34,9 @@ public enum DefaultCategoryType {
   MISSIONE_CNR("Missioni CNR", 1, DefaultTab.MISSIONE), 
   MISSIONE_CNR_ESTERO("Missioni CNR Estero", 2, DefaultTab.MISSIONE), 
   FERIE_CNR("Ferie e permessi legge", 2, DefaultTab.FERIE_PERMESSI_RIPOSI), 
-  //ESENZIONE_COVID19("Esenzione da lavoro causa COVID19", 3, DefaultTab.FERIE_PERMESSI_RIPOSI),
+
   RIPOSI_COMPENSATIVI_CNR("Riposi compensativi", 3, DefaultTab.FERIE_PERMESSI_RIPOSI),
-  //  PROROGA_FERIE_2020("Proroga ferie 2020", 4, DefaultTab.FERIE_PERMESSI_RIPOSI),
-  //  PROROGA_FERIE_2021("Proroga ferie 2021", 4, DefaultTab.FERIE_PERMESSI_RIPOSI),
-  //PROROGA_FERIE_2022("Proroga ferie 2022", 4, DefaultTab.FERIE_PERMESSI_RIPOSI),
-  //PROROGA_FERIE_2023("Proroga ferie 2023", 4, DefaultTab.FERIE_PERMESSI_RIPOSI),
+
   PROROGA_FERIE_2024("Proroga ferie 2024", 4, DefaultTab.FERIE_PERMESSI_RIPOSI),
   ASTENSIONE_POSTPARTUM("Astensione post partum", 5, DefaultTab.CONGEDI_PARENTALI), 
   CONGEDI_PRENATALI("Congedi prenatali", 7, DefaultTab.CONGEDI_PARENTALI),
@@ -97,6 +94,8 @@ public enum DefaultCategoryType {
   ASTENSIONE_POSTPARTUM_DIPENDENTI("Astensione post partum dipendenti", 
       24, DefaultTab.CONGEDI_PARENTALI_DIPENDENTI),
   VISITA_MEDICA_DIPENDENTE("Visita medica dipendente", 24, DefaultTab.VISITA_MEDICA_DIPENDENTI),
+  NUOVO_CODICE_632("Ore agg. visite mediche per invalidità = >74% o mal. oncologiche", 25, DefaultTab.NUOVO_CODICE_632),
+  NUOVO_CODICE_633("Ore agg. visite mediche figli con invalidità =>74%", 26, DefaultTab.NUOVO_CODICE_633),
   CODICI_AUTOMATICI("Codici Automatici", 23, DefaultTab.AUTOMATICI);
 
   public String description;

@@ -123,7 +123,9 @@
       #{/secure.check}
 
       <li class="divider"></li>
+	  
       #{secure.check 'CompetenceRequests.handleEnabled'}
+	  
       #{secure.li @CompetenceRequests.overtimesToApprove()}
         <i class="fa fa-money" aria-hidden="true"></i>
        	#{if overtimeRequests > 0}

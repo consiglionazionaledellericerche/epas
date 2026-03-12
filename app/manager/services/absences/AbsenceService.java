@@ -596,6 +596,10 @@ public class AbsenceService {
         .groupAbsenceTypeByName(DefaultGroup.G_21P.name()).get();
     final GroupAbsenceType parentalLeaveTwinsForFathers = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.G_21P2.name()).get();
+    final GroupAbsenceType rareDiseasesPermit = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_632.name()).get();
+    final GroupAbsenceType childRareDiseasesPermit = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_633.name()).get();
     
 
     final User currentUser = Security.getUser().get();
@@ -631,6 +635,14 @@ public class AbsenceService {
         if (abt.isExpired() || !templateUtility.enableSmartworking()) {
           groupsPermitted.remove(smart);
         }
+      }
+      if (!(Boolean) confManager.configValue(person, 
+          EpasParam.ENABLE_632_CODE)) {
+        groupsPermitted.remove(rareDiseasesPermit);
+      }
+      if (!(Boolean) confManager.configValue(person, 
+          EpasParam.ENABLE_633_CODE)) {
+        groupsPermitted.remove(childRareDiseasesPermit);
       }
       return groupsPermitted;
     }
