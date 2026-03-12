@@ -169,17 +169,17 @@ public class Competences extends Controller {
 
   }
 
-  public static void approvedCompetenceInYear(Integer year, Integer month, boolean onlyDefined, Long officeId) {
+  public static void approvedCompetenceInYear(Integer year, boolean onlyDefined, String codeId) {
     RestUtils.checkMethod(request, HttpMethod.GET);
-    log.debug("Chiamata approvedCompetenceInYear, year = {}, month = {}, officeId = {}", year, month, officeId);
+    log.debug("Chiamata approvedCompetenceInYear, year = {}, codeId = {}", year, codeId);
 
-    Office office = officeDao.getOfficeById(officeId);
-    notFoundIfNull(office);
+    Optional<Office> office = officeDao.byCodeId(codeId);
+    notFoundIfNull(office.get());
 
-    rules.checkIfPermitted(office);
+    rules.checkIfPermitted(office.get());
 
     List<Competence> competenceInYear = competenceDao
-        .getCompetenceInYear(year, Optional.fromNullable(office));
+        .getCompetenceInYear(year, Optional.fromNullable(office.get()));
     List<Competence> helpList = Lists.newArrayList();
     if (onlyDefined) {
       for (Competence comp : competenceInYear) {
