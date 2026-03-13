@@ -19,23 +19,42 @@ package controllers.rest.v3;
 
 import cnr.sync.dto.v3.CompetenceCodeShowDto;
 import cnr.sync.dto.v3.CompetenceCodeShowTerseDto;
+import cnr.sync.dto.v3.CompetenceShowDto;
+import cnr.sync.dto.v3.ConfigurationOfficeDto;
 import cnr.sync.dto.v3.PersonCompetenceCodeShowDto;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
 import controllers.Resecure;
 import controllers.rest.v2.Persons;
 import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
+import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperContract;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 import helpers.JodaConverters;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+import models.Competence;
 import models.CompetenceCode;
+import models.Contract;
+import models.Office;
+import models.Person;
+import models.PersonCompetenceCodes;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -47,6 +66,7 @@ import play.mvc.With;
  *
  */
 @With(Resecure.class)
+@Slf4j
 public class Competences extends Controller {
 
   @Inject 
@@ -57,6 +77,12 @@ public class Competences extends Controller {
   static PersonDao personDao;
   @Inject
   static CompetenceCodeDao competenceCodeDao;
+  @Inject
+  static CompetenceDao competenceDao;
+  @Inject
+  static OfficeDao officeDao;
+  @Inject
+  static IWrapperFactory wrapperFactory;
 
   /**
    * Metodo rest che ritorna un json contenente la lista dei codici di competenza
@@ -83,8 +109,8 @@ public class Competences extends Controller {
     RestUtils.checkMethod(request, HttpMethod.GET);
     renderJSON(gsonBuilder.create().toJson(
         competenceCodeDao.getAllCompetenceCode().stream()
-          .map(cc -> CompetenceCodeShowTerseDto.build(cc))
-          .collect(Collectors.toList())));
+        .map(cc -> CompetenceCodeShowTerseDto.build(cc))
+        .collect(Collectors.toList())));
   }
 
   /**
@@ -105,6 +131,75 @@ public class Competences extends Controller {
     }
     RestUtils.checkIfPresent(competenceCode);
     renderJSON(gsonBuilder.create().toJson(CompetenceCodeShowDto.build(competenceCode)));
+  }
+
+  /**
+   * Metodo rest che ritorna la lista delle competenze approvate nell'anno/mese per la persona richiesta.
+   * Il mese può essere null e viene ritornata la lista delle competenze approvate nell'anno.
+   * 
+   * @param personId l'id della persona
+   * @param email la mail della persona
+   * @param eppn il codice eppn della persona
+   * @param personPerseoId l'identificativo dell'anagrafica
+   * @param fiscalCode il codice fiscale
+   * @param number la matricola
+   * @param year l'anno di riferimento
+   * @param month il mese di riferimento
+   */
+  public static void competencesPerPerson(Long personId, String email, String eppn, Long personPerseoId, String fiscalCode, 
+      String number, Integer year, Integer month) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    log.debug("Chiamata competencesPerPerson, email = {}, eppn = {}, year = {}, month = {}", email, eppn, year, month);
+    val person = 
+        Persons.getPersonFromRequest(personId, email, eppn, personPerseoId, fiscalCode, number);
+    rules.checkIfPermitted(person.getOffice());
+
+    List<PersonCompetenceCodes> pccList = competenceCodeDao
+        .listByPerson(person, Optional.fromNullable(org.joda.time.LocalDate.now()
+            .withMonthOfYear(month).withYear(year)));
+    List<CompetenceCode> codeListIds = Lists.newArrayList();
+    for (PersonCompetenceCodes pcc : pccList) {
+      codeListIds.add(pcc.getCompetenceCode());
+    }
+
+    List<Competence> competenceList = competenceDao.getCompetences(Optional.fromNullable(person), 
+        year, Optional.fromNullable(month), codeListIds);
+    renderJSON(gsonBuilder.create().toJson(competenceList.stream().map(
+        comp -> CompetenceShowDto.build(comp)).collect(Collectors.toList())));
+
+  }
+
+  public static void approvedCompetenceInYear(Integer year, boolean onlyDefined, String codeId) {
+    RestUtils.checkMethod(request, HttpMethod.GET);
+    log.debug("Chiamata approvedCompetenceInYear, year = {}, codeId = {}", year, codeId);
+
+    Optional<Office> office = officeDao.byCodeId(codeId);
+    notFoundIfNull(office.get());
+
+    rules.checkIfPermitted(office.get());
+
+    List<Competence> competenceInYear = competenceDao
+        .getCompetenceInYear(year, Optional.fromNullable(office.get()));
+    List<Competence> helpList = Lists.newArrayList();
+    if (onlyDefined) {
+      for (Competence comp : competenceInYear) {
+        IWrapperPerson wrPerson = wrapperFactory.create(comp.getPerson());
+        Optional<Contract> firstContract = wrPerson
+            .getFirstContractInMonth(year, comp.getMonth());
+        if (!firstContract.isPresent()) {
+          continue;    //questo errore andrebbe segnalato, competenza senza che esista contratto
+        }
+        IWrapperContract wrContract = wrapperFactory.create(firstContract.get());
+        if (!wrContract.isDefined()) {
+          continue;    //scarto la competence.
+        }
+        helpList.add(comp);
+      }
+      competenceInYear = helpList;
+    }
+    val list = competenceInYear.stream().map(c -> CompetenceShowDto.build(c))
+        .collect(Collectors.toList());
+    renderJSON(gsonBuilder.create().toJson(list));
   }
 
 }

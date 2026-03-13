@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.31.0] - Unreleased
 ### Added
   - Aggiunta la possibilità per gli amministratori in sola lettura di scaricare gli allegati.
+  - Aggiunto metodo rest che ritorna la lista delle competenze assegnate in una sede in un anno. 
+    Possibile specificare anche solo i tempi determinati.
 
 ## [2.30.2] - 2026-02-26
 ### Changed

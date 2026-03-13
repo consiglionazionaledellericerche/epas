@@ -4185,7 +4185,8 @@ when
         "rest.Absences.attachment",
 
         "rest.v3.AbsenceTypes.list",
-        "rest.v3.AbsenceTypes.show"
+        "rest.v3.AbsenceTypes.show",
+        "rest.v3.Competences.approvedCompetenceInYear"
 
        ), target == null, granted == false)
 then
@@ -4240,7 +4241,8 @@ when
         "rest.Absences.attachment",
 
         "rest.v3.AbsenceTypes.list",
-        "rest.v3.AbsenceTypes.show"
+        "rest.v3.AbsenceTypes.show",
+        "rest.v3.Competences.approvedCompetenceInYear"
 
        ), target == $o, granted == false)
 then
