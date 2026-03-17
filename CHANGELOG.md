@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.31.0] - Unreleased
 ### Added
+  - Aggiunto codice NO_STAMP a uso interno e che decurta le ferie da utilizzare per i part time ciclici nei periodi
+    in cui il dipendente non va a lavoro così da decurtargli correttamente le ferie.
   - Aggiunta la possibilità per gli amministratori in sola lettura di scaricare gli allegati.
   - Aggiunto metodo rest che ritorna la lista delle competenze assegnate in una sede in un anno. 
     Possibile specificare anche solo i tempi determinati.

@@ -2822,6 +2822,11 @@ public enum DefaultAbsenceType {
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, 
       MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), null,
       null, false, true, true, null),
+  
+  A_NOSTAMP("no-stamp", "codice per giustificare mancata presenza in caso di orari strani", true,
+      ImmutableSet.of(JustifiedTypeName.all_day), 0, true, 
+      MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), null,
+      null, false, true, true, null),
 
   A_35R("35R", "dottorato di ricerca retribuito", false, ImmutableSet.of(JustifiedTypeName.all_day),
       0, true, MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), 
