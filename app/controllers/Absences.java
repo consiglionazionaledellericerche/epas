@@ -319,7 +319,7 @@ public class Absences extends Controller {
     notFoundIfNull(absence);
 
     Optional<User> currentUser = Security.getUser();
-    if (!currentUser.isPresent() || currentUser.get().hasRoles(Role.PERSONNEL_ADMIN)) {
+    if (!currentUser.isPresent() || currentUser.get().hasRoles(Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)) {
       rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
     } else {
       rules.checkIfPermitted(absence);
