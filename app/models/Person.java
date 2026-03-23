@@ -326,7 +326,20 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
             && (a.getEndDate() == null || a.getEndDate().isAfter(date)))
         .map(a -> a.getGroup()).collect(Collectors.toList());
   }
-  
+
+  /**
+   * Lista delle affiliazioni di una persona alla data indicata.
+   *
+   * @return la lista delle affiliazioni a cui appartiente una persona ad una data
+   *     passata per parametro.
+   */
+  @Transient
+  public List<Affiliation> getAffiliations(java.time.LocalDate date) {
+    return affiliations.stream()
+        .filter(a -> a.getBeginDate().isBefore(date) 
+            && (a.getEndDate() == null || a.getEndDate().isAfter(date))).collect(Collectors.toList());
+  }
+
   @Override
   public Collection<IPropertyInPeriod> periods(Object type) {
 

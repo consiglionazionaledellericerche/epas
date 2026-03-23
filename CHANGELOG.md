@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.32.0] - UNRELEASED
+### Changed
+  - Le notifiche per i flussi informativi vengono adesso correttamente inviate ai soli responsabili
+    di gruppo delle affiliazioni correnti (non anche delle affiliazioni passate).
+
 ## [2.31.0] - 2026-03-19
 ### Added
   - Aggiunto codice NO_STAMP a uso interno e che decurta le ferie da utilizzare per i part time ciclici nei periodi

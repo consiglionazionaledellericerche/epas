@@ -1865,7 +1865,7 @@ public class NotificationManager {
     }
     List<User> users = Lists.newArrayList();
     if (roleDestination.equals(roleDao.getRoleByName(Role.GROUP_MANAGER))) {
-      users = person.getAffiliations().stream().map(gp -> gp.getGroup().getManager().getUser())
+      users = person.getAffiliations(java.time.LocalDate.now()).stream().map(gp -> gp.getGroup().getManager().getUser())
           .collect(Collectors.toList());
     } else {
       users =
@@ -1978,7 +1978,7 @@ public class NotificationManager {
       return;
     }
     if (roleDestination.equals(roleDao.getRoleByName(Role.GROUP_MANAGER))) {
-      person.getAffiliations().stream().map(gp -> gp.getGroup().getManager().getUser())
+      person.getAffiliations(java.time.LocalDate.now()).stream().map(gp -> gp.getGroup().getManager().getUser())
       .forEach(user -> {
         SimpleEmail simpleEmail = new SimpleEmail();
         // Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.
