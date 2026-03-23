@@ -29,6 +29,8 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+
+import play.Play;
 import play.libs.OAuth2;
 import play.libs.WS;
 import play.mvc.results.Redirect;
@@ -184,8 +186,9 @@ public final class OpenIdConnectClient {
   public void logout(String idToken, String redirectUri) {
     // TODO: 06/05/20 c'è da ripulire la sessione, ma forse conviene farlo prima di chiamare
     // questo metodo
+    String redirectUriParamName = Play.configuration.getProperty("keycloak.redirect_uri_param_name", REDIRECT_URI);
     throw new Redirect(config.getEndSessionEndpoint(), Map.of(LOGOUT_IDTOKEN_PARAM, idToken,
-        REDIRECT_URI, redirectUri));
+        redirectUriParamName, redirectUri));
   }
 
   /**

@@ -96,6 +96,9 @@ services:
       #- KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}         #Opzionale. default: false.
       #- KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET} #Opzionale se OAUTH_LOGIN è false, altrimenti obbligatorio.
       #- KEYCLOAK_JWT_FIELD=${KEYCLOAK_JWT_FIELD}         #Opzionale. default: email
+	  #- KEYCLOAK_REDIRECT_URI_PARAM_NAME=redirect_uri    #Opzionale. default: redirect_uri. 
+	                                                      # Nome del parametro utilizzato per specificare l'url di reindirizzamento dopo il logout.
+                                                          # Per esempio se si utilizza un keycloak >=19 impostare a post_logout_redirect_uri.
       #### Invio Segnalazioni via email
       #- REPORT_TO=${REPORT_TO}                 # default: epas@iit.cnr.it
       #- REPORT_FROM=${REPORT_FROM}             # default: segnalazioni@epas.tools.iit.cnr.it
