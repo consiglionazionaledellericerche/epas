@@ -556,6 +556,18 @@ public class Configurations extends Controller {
   }
 
   public static void copyConfiguration(Office sourceOffice, Office destinationOffice) {
+    Preconditions.checkNotNull(sourceOffice);
+    Preconditions.checkNotNull(destinationOffice);
     
+    rules.checkIfPermitted(sourceOffice);
+    rules.checkIfPermitted(destinationOffice);
+    
+    List<Configuration> sourceConfiguration = sourceOffice.getConfigurations();
+    for (Configuration conf : sourceConfiguration) {
+      /*
+       * Creo un configurationDto per ogni parametro di configurazione e
+       * chiamo la update
+       */
+    }
   }
 }
