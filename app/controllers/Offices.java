@@ -201,6 +201,7 @@ public class Offices extends Controller {
       p.setOffice(destinationOffice);
       p.save();
     });
+    // aggiungere anche i ruoli sulla nuova sede e rimuovere quelli sulla vecchia?
     flash.success("Spostate %s persone da %s a %s", people.size(), sourceOffice, destinationOffice);
     Administration.utilities();
   }
