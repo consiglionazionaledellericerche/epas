@@ -1,0 +1,37 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Copia configurazione da una sede vecchia ad una nuova'  /}
+
+
+<div class="container">
+
+<h3><i class="fa fa-adjust"></i> Copia configurazione da una sede vecchia ad una nuova</h3>
+<br>
+#{alert color:'warning'}
+<p>Da utilizzare nel caso ci fosse un cambio di identificativo di sede per copiare la configurazione di una vecchia sede in una nuova.</p>
+#{/alert}
+
+  #{form @Configurations.copyConfiguration(),class:'form-horizontal'}
+  	<div class="col-sm-6">
+	#{alert color:'info', center:true}
+	Seleziona la sede da cui copiare la configurazione
+	#{/alert}
+	#{f.selectModel 'sourceOffice', items:activeOffices /}
+    
+	</div>
+  
+	<div class="col-sm-6">
+	#{alert color:'info', center:true}
+	Seleziona la sede in cui copiare la configurazione
+	#{/alert}
+	#{f.selectModel 'destinationOffice', items:destinationOffices /}
+    
+	</div>
+	
+  	<div class="col-sm-12">
+  	#{b.buttons center:true}
+  		<button type="submit" class="btn btn-default">Copia configurazione</button>
+  	#{/b.buttons}
+	</div>
+  #{/form}
+</div>
