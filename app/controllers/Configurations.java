@@ -555,4 +555,7 @@ public class Configurations extends Controller {
     renderBinary(attachment.getFile().get(), attachment.getFilename(), false);
   }
 
+  public static void copyConfiguration(Office sourceOffice, Office destinationOffice) {
+    
+  }
 }

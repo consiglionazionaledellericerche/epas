@@ -22,15 +22,18 @@ import com.google.gdata.util.common.base.Preconditions;
 import com.querydsl.core.QueryResults;
 import common.security.SecurityRules;
 import dao.OfficeDao;
+import dao.PersonDao;
 import dao.RoleDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 import helpers.Web;
+import java.util.List;
 import javax.inject.Inject;
 import manager.PeriodManager;
 import manager.configurations.ConfigurationManager;
 import models.Institute;
 import models.Office;
+import models.Person;
 import models.Role;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -59,6 +62,8 @@ public class Offices extends Controller {
   static SecurityRules rules;
   @Inject
   static PeriodManager periodManager;
+  @Inject
+  static PersonDao personDao;
 
   public static void index() {
     flash.keep();
@@ -172,6 +177,38 @@ public class Offices extends Controller {
     office.delete();
     flash.success(Web.msgDeleted(Office.class));
     Institutes.index();
+  }
+  
+  /**
+   * Metodo che renderizza la pagina di trasferimento massivo di personale.
+   */
+  public static void massiveTransfer() {
+    List<Office> activeOffices = officeDao.allEnabledOffices();
+    List<Office> destinationOffices = activeOffices;
+    render(activeOffices, destinationOffices);
+  }
+  
+  
+  public static void executeTransfer(Office sourceOffice, Office destinationOffice) {
+    Preconditions.checkNotNull(sourceOffice);
+    Preconditions.checkNotNull(destinationOffice);
+    
+    rules.checkIfPermitted(sourceOffice);
+    rules.checkIfPermitted(destinationOffice);
+    
+    List<Person> people = personDao.byOffice(sourceOffice);
+    people.stream().forEach(p -> {
+      p.setOffice(destinationOffice);
+      p.save();
+    });
+    flash.success("Spostate %s persone da %s a %s", people.size(), sourceOffice, destinationOffice);
+    Administration.utilities();
+  }
+  
+  public static void copyConfiguration() {
+    List<Office> activeOffices = officeDao.allEnabledOffices();
+    List<Office> destinationOffices = activeOffices;
+    render(activeOffices, destinationOffices);
   }
 
 }
