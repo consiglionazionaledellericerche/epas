@@ -24,17 +24,20 @@ import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
+import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 import helpers.Web;
 import java.util.List;
 import javax.inject.Inject;
+import manager.OfficeManager;
 import manager.PeriodManager;
 import manager.configurations.ConfigurationManager;
 import models.Institute;
 import models.Office;
 import models.Person;
 import models.Role;
+import models.UsersRolesOffices;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +67,10 @@ public class Offices extends Controller {
   static PeriodManager periodManager;
   @Inject
   static PersonDao personDao;
+  @Inject
+  static UsersRolesOfficesDao uroDao;
+  @Inject
+  static OfficeManager officeManager;
 
   public static void index() {
     flash.keep();
@@ -178,7 +185,7 @@ public class Offices extends Controller {
     flash.success(Web.msgDeleted(Office.class));
     Institutes.index();
   }
-  
+
   /**
    * Metodo che renderizza la pagina di trasferimento massivo di personale.
    */
@@ -187,25 +194,38 @@ public class Offices extends Controller {
     List<Office> destinationOffices = activeOffices;
     render(activeOffices, destinationOffices);
   }
-  
-  
+
+  /**
+   * Completa il trasferimento della persona da una sede ad un'altra.
+   * @param sourceOffice la sede di provenienza
+   * @param destinationOffice la sede di destinazione
+   */
   public static void executeTransfer(Office sourceOffice, Office destinationOffice) {
     Preconditions.checkNotNull(sourceOffice);
     Preconditions.checkNotNull(destinationOffice);
-    
+
     rules.checkIfPermitted(sourceOffice);
     rules.checkIfPermitted(destinationOffice);
-    
+
     List<Person> people = personDao.byOffice(sourceOffice);
     people.stream().forEach(p -> {
       p.setOffice(destinationOffice);
       p.save();
+      List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(p.getUser());
+
+      for (UsersRolesOffices uro : uroList) {
+        officeManager.setUro(p.getUser(), destinationOffice, uro.getRole());
+        uro.delete();
+      }
     });
-    // aggiungere anche i ruoli sulla nuova sede e rimuovere quelli sulla vecchia?
+
     flash.success("Spostate %s persone da %s a %s", people.size(), sourceOffice, destinationOffice);
     Administration.utilities();
   }
-  
+
+  /**
+   * Metodo che renderizza la pagina di trasferimento delle configurazioni della sede.
+   */
   public static void copyConfiguration() {
     List<Office> activeOffices = officeDao.allEnabledOffices();
     List<Office> destinationOffices = activeOffices;

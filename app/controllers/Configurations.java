@@ -564,10 +564,27 @@ public class Configurations extends Controller {
     
     List<Configuration> sourceConfiguration = sourceOffice.getConfigurations();
     for (Configuration conf : sourceConfiguration) {
-      /*
-       * Creo un configurationDto per ogni parametro di configurazione e
-       * chiamo la update
-       */
+      
+      ConfigurationDto dto = new ConfigurationDto(conf.getEpasParam(), conf.getBeginDate(), conf.getEndDate(), configurationManager.parseValue(
+          conf.getEpasParam(), conf.getFieldValue()));
+      
+      Configuration newConfiguration = (Configuration) compute(conf,
+          conf.getEpasParam(), dto);
+      
+      List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
+ 
+      RecomputeRecap recomputeRecap =
+          periodManager.buildRecap(destinationOffice.getBeginDate(),
+              Optional.fromNullable(LocalDate.now()),
+              periodRecaps, Optional.<LocalDate>absent());
+      recomputeRecap.epasParam = conf.getEpasParam();
+      
+      periodManager.updatePeriods(newConfiguration, true);
+
+      consistencyManager.performRecomputation(destinationOffice,
+          conf.getEpasParam().recomputationTypes, recomputeRecap.recomputeFrom);
     }
+    flash.success("Configurazione aggiornata per la sede %s", destinationOffice);
+    Administration.utilities();
   }
 }
