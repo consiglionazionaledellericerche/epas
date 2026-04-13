@@ -555,4 +555,36 @@ public class Configurations extends Controller {
     renderBinary(attachment.getFile().get(), attachment.getFilename(), false);
   }
 
+  public static void copyConfiguration(Office sourceOffice, Office destinationOffice) {
+    Preconditions.checkNotNull(sourceOffice);
+    Preconditions.checkNotNull(destinationOffice);
+    
+    rules.checkIfPermitted(sourceOffice);
+    rules.checkIfPermitted(destinationOffice);
+    
+    List<Configuration> sourceConfiguration = sourceOffice.getConfigurations();
+    for (Configuration conf : sourceConfiguration) {
+      
+      ConfigurationDto dto = new ConfigurationDto(conf.getEpasParam(), conf.getBeginDate(), conf.getEndDate(), configurationManager.parseValue(
+          conf.getEpasParam(), conf.getFieldValue()));
+      
+      Configuration newConfiguration = (Configuration) compute(conf,
+          conf.getEpasParam(), dto);
+      
+      List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
+ 
+      RecomputeRecap recomputeRecap =
+          periodManager.buildRecap(destinationOffice.getBeginDate(),
+              Optional.fromNullable(LocalDate.now()),
+              periodRecaps, Optional.<LocalDate>absent());
+      recomputeRecap.epasParam = conf.getEpasParam();
+      
+      periodManager.updatePeriods(newConfiguration, true);
+
+      consistencyManager.performRecomputation(destinationOffice,
+          conf.getEpasParam().recomputationTypes, recomputeRecap.recomputeFrom);
+    }
+    flash.success("Configurazione aggiornata per la sede %s", destinationOffice);
+    Administration.utilities();
+  }
 }
