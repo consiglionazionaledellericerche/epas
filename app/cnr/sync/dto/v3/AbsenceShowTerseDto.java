@@ -70,6 +70,7 @@ public class AbsenceShowTerseDto {
     absenceDto.setJustifiedType(absence.getJustifiedType().getName().name());
     absenceDto.setDate(JodaConverters.jodaToJavaLocalDate(absence.getAbsenceDate()));
     if (absence.getAbsenceType() != null) {
+      absenceDto.setDescription(absence.getAbsenceType().getDescription());
       absenceDto.setAbsenceTypeId(absence.getAbsenceType().getId());
       absenceDto.setExternalTypeId(absence.getAbsenceType().getExternalId());
       absenceDto.setIsRealAbsence(absence.getAbsenceType().isRealAbsence());
