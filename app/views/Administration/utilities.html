@@ -180,5 +180,31 @@
   	#{/b.buttons}
   #{/form}
   #{/panel}
+  
+  #{panel title:'Importazione massiva personale in altra sede', dim:12 }
+  #{alert color:'info'}
+  <p>
+    Visualizza la pagina di importazione personale in altra sede.
+  </p>
+  #{/alert}
+  #{form @Offices.massiveTransfer(), class:'form-horizontal'}
+  	#{b.buttons center:true}
+  		<button type="submit" class="btn btn-default">Apri</button>
+  	#{/b.buttons}
+  #{/form}
+  #{/panel}
+  
+  #{panel title:'Copia configurazione di una sede in una nuova sede', dim:12 }
+  #{alert color:'info'}
+  <p>
+    Visualizza la pagina che permette la copia della configurazione di una sede in un'altra sede.
+  </p>
+  #{/alert}
+  #{form @Offices.copyConfiguration(), class:'form-horizontal'}
+  	#{b.buttons center:true}
+  		<button type="submit" class="btn btn-default">Apri</button>
+  	#{/b.buttons}
+  #{/form}
+  #{/panel}
 
 </div>
