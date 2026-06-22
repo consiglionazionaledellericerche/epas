@@ -437,6 +437,16 @@ public class PersonDayManager {
       personDay.setOnHoliday(personDay.getStampingsTime());
     } else {
       personDay.setOutOpening(personDay.getStampingsTime() - stampingTimeInOpening);  
+      /*
+       * Controllo se il dipendente ha un part time orizzontale e limito il tempo a lavoro al tempo
+       * previsto dal part time
+       */
+      if (wttd.getWorkingTimeType().horizontalEuristic() 
+          && wttd.getWorkingTimeType().percentEuristic() < 100 
+          && stampingTimeInOpening > wttd.getWorkingTime()) {
+        personDay.setOutPartTime(stampingTimeInOpening - wttd.getWorkingTime());
+        stampingTimeInOpening = wttd.getWorkingTime(); 
+      }
     }
 
     //Caso assenza che assegna l'intera giornata ex 103, 103BP, 105BP
@@ -503,6 +513,7 @@ public class PersonDayManager {
         + personDay.getJustifiedTimeNoMeal()
         + personDay.getApprovedOnHoliday()
         + personDay.getApprovedOutOpening()
+        + personDay.getApprovedOutPartTime()
         + personDay.getJustifiedTimeBetweenZones();
 
     //TODO: il tempo ricavato deve essere persistito sul personDay su un nuovo campo

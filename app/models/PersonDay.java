@@ -149,6 +149,18 @@ public class PersonDay extends BaseModel {
    */
   @Column(name = "approved_on_holiday")
   private Integer approvedOnHoliday = 0;
+  
+  /**
+   * Tempo lavorato al di fuori dell'orario previsto dal part time orizzontale.
+   */
+  @Column(name = "out_part_time")
+  private Integer outPartTime = 0;
+
+  /**
+   * Tempo lavorato approvato al di fuori dell'orario previsto dal part time orizzontale.
+   */
+  @Column(name = "approved_out_part_time")
+  private Integer approvedOutPartTime = 0;
 
   private String note;
 

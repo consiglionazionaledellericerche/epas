@@ -4,6 +4,7 @@
   showWithPopover = personDay.timeAtWork > 0 || personDay.onHoliday > 0 || personDay.outOpening > 0;
   handleHolidayWork = personDay.onHoliday;
   handleOutOpeningWork = personDay.outOpening;
+  handleOutPartTimeWork = personDay.outPartTime;
 }%
 
 
@@ -65,6 +66,17 @@
         <a hide-popover-on-click href="@{PersonDays.workingOutOpening(personDay.id)}"  
            data-async-modal="#defaultModal">
           <i class="fa fa-pencil-square-o" aria-hidden="true"></i> <small>Gestisci lavoro fuori apertura</small>
+        </a><br>
+    #{/secure.check}
+    <br>
+  #{/if} 
+  
+  #{if handleOutPartTimeWork}
+    <small><em>Questo giorno contiene ore lavorate fuori orario giornaliero in part time <br>che possono essere approvate dall'amministratore.</em></small><br>
+    #{secure.check 'PersonDays.workingOutPartTime', target: personDay.person.office}
+        <a hide-popover-on-click href="@{PersonDays.workingOutPartTime(personDay.id)}"  
+           data-async-modal="#defaultModal">
+          <i class="fa fa-pencil-square-o" aria-hidden="true"></i> <small>Gestisci lavoro fuori orario part time</small>
         </a><br>
     #{/secure.check}
     <br>

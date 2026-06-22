@@ -186,6 +186,59 @@ public class PersonDays extends Controller {
   }
 
   /**
+   * Abilita/disabilita il lavoro svolto in eccesso in part time orizzontale.
+   * 
+   * @param personDayId l'identificativo del personDay
+   */
+  public static void workingOutPartTime(Long personDayId) {
+    
+    PersonDay personDay = personDayDao.getPersonDayById(personDayId);
+    Preconditions.checkNotNull(personDay);
+    Preconditions.checkNotNull(personDay.isPersistent());
+
+    rules.checkIfPermitted(personDay.getPerson().getOffice());
+    Integer hours = 0;
+    Integer minutes = 0;
+    if (personDay.getApprovedOutOpening() > 0) {
+      hours = personDay.getApprovedOutOpening() / 60;
+      minutes = personDay.getApprovedOutOpening() % 60;
+    }
+
+    render(personDay, hours, minutes);
+  }
+  
+  /**
+   * 
+   * @param personDayId
+   * @param hours
+   * @param minutes
+   */
+  public static void approveWorkingOutPartTime(Long personDayId, Integer hours, Integer minutes) {
+    PersonDay personDay = personDayDao.getPersonDayById(personDayId);
+    Preconditions.checkNotNull(personDay);
+    Preconditions.checkNotNull(personDay.isPersistent());
+    Preconditions.checkNotNull(hours);
+    Preconditions.checkNotNull(minutes);
+
+    rules.checkIfPermitted(personDay.getPerson().getOffice());
+    
+    Integer approvedMinutes = (hours * 60) + minutes;
+    if (approvedMinutes < 0 || approvedMinutes > personDay.getOutPartTime()) {
+      Validation.addError("hours", "Valore non consentito.");
+      Validation.addError("minutes", "Valore non consentito.");
+      response.status = 400;
+      render("@workingOutPartTime", personDay, hours, minutes);
+    }
+
+    personDay.setApprovedOutPartTime(approvedMinutes);
+
+    consistencyManager.updatePersonSituation(personDay.getPerson().id, personDay.getDate());
+
+    flash.success("Ore approvate correttamente.");
+    Stampings.personStamping(personDay.getPerson().id, personDay.getDate().getYear(), 
+        personDay.getDate().getMonthOfYear());
+  }
+  /**
    * Inserimento di note associate ad un personDay.
    */
   public static void note(Long personDayId, boolean confirmed, String note) {
