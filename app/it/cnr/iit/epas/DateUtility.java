@@ -133,6 +133,9 @@ public class DateUtility {
     if ((date.getMonthOfYear() == 11) && (date.getDayOfMonth() == 1)) {
       return true;
     }
+    if ((date.getMonthOfYear() == 10) && (date.getDayOfMonth() == 4)) {
+      return true;
+    }
 
     if (officePatron.isPresent()) {
 
