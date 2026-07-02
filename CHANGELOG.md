@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     part time orizzontale alla quantità di orario di lavoro prevista per quel giorno. 
   - Aggiunta possibilità per l'amministratore del personale di modificare il tempo a lavoro del punto precedente
     come già avviene per i casi di orario di lavoro festivo o fuori apertura.
+  - Aggiunto giorno festivo al 4 ottobre
 
 ## [2.32.2] - 2026-06-19
 ### Changed
