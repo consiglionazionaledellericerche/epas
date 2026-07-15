@@ -520,6 +520,7 @@ generalSetting.enableSsoForAttestati=Abilita l'utilizzo di SSO del CNR per Attes
 generalSetting.timeoutAttestati=Timeout in secondi chiamate servizi REST Attestati
 
 generalSetting.disableMealTimeInWorkingTimeCreation=Disabilita modifica quantità pausa pranzo
+generalSetting.disableCheckPartTimeWorkingTime=Disabilita controllo orario su part time orizzontale
 
 group.label =Nome gruppo
 group.limitType =Periodo di utililzzo limite

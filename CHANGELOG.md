@@ -4,13 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.33.0] - Unreleased
+## [2.33.0] - 2026-07-16
 ### Added
   - Aggiunto controllo nell'algoritmo del calcolo del tempo a lavoro che limita il tempo lavorato in un giorno di 
     part time orizzontale alla quantità di orario di lavoro prevista per quel giorno. 
   - Aggiunta possibilità per l'amministratore del personale di modificare il tempo a lavoro del punto precedente
     come già avviene per i casi di orario di lavoro festivo o fuori apertura.
   - Aggiunto giorno festivo al 4 ottobre
+  - Aggiunto parametro generale per decidere se impostare la disabilitazione del calcolo del residuo per i part time
+    orizzontali in modo che siano le istallazioni a decidere come comportarsi
+  - Aggiunto codice LAGILEBP che consente la maturazione del buono pasto e gestito a livello di istallazione
 
 ## [2.32.2] - 2026-06-19
 ### Changed

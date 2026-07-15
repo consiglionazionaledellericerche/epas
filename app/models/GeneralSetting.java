@@ -173,6 +173,12 @@ public class GeneralSetting extends BaseModel {
    * Disabilita la possibilità di specificare la pausa pranzo nella creazione di orari di lavoro
    */
   private boolean disableMealTimeInWorkingTimeCreation = false;
+  
+  /**
+   * Disabilita il controllo sull'orario lavorativo dei part time permettendo sempre maturazione
+   * di residuo orario.
+   */
+  private boolean disableCheckPartTimeWorkingTime = false;
 
 
 }

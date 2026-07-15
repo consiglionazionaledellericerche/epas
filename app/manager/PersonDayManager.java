@@ -27,6 +27,7 @@ import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 import dao.ContractDao;
+import dao.GeneralSettingDao;
 import dao.PersonDayDao;
 import dao.PersonShiftDayDao;
 import dao.WorkingTimeTypeDao;
@@ -45,6 +46,7 @@ import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType.LocalTimeInterval;
 import manager.services.PairStamping;
+import models.GeneralSetting;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
@@ -85,6 +87,7 @@ public class PersonDayManager {
   private final ZoneDao zoneDao;
   private final ContractDao contractDao;
   private final AbsenceComponentDao absenceComponentDao;
+  private final GeneralSettingDao settingDao;
 
   /**
    * Costruttore.
@@ -97,7 +100,7 @@ public class PersonDayManager {
   public PersonDayManager(ConfigurationManager configurationManager,
       PersonDayInTroubleManager personDayInTroubleManager, PersonDayDao personDayDao,
       PersonShiftDayDao personShiftDayDao, WorkingTimeTypeDao workingTimeTypeDao, ZoneDao zoneDao,
-      AbsenceComponentDao absenceComponentDao, ContractDao contractDao) {
+      AbsenceComponentDao absenceComponentDao, ContractDao contractDao, GeneralSettingDao settingDao) {
 
     this.configurationManager = configurationManager;
     this.personDayInTroubleManager = personDayInTroubleManager;
@@ -107,8 +110,9 @@ public class PersonDayManager {
     this.zoneDao = zoneDao;
     this.absenceComponentDao = absenceComponentDao;
     this.contractDao = contractDao;
+    this.settingDao = settingDao;
   }
-  
+
   /**
    * Assenza che impedisce la maturazione del buono pasto.
    */
@@ -393,7 +397,7 @@ public class PersonDayManager {
    * @param startWork inizio apertura sede
    * @param endWork fine apertura sede
    * @param exitingNow timbratura fittizia uscendo in questo momento 
-  
+
    * @return personDay modificato
    */
   public PersonDay updateTimeAtWork(PersonDay personDay, WorkingTimeTypeDay wttd,
@@ -441,11 +445,15 @@ public class PersonDayManager {
        * Controllo se il dipendente ha un part time orizzontale e limito il tempo a lavoro al tempo
        * previsto dal part time
        */
-      if (wttd.getWorkingTimeType().horizontalEuristic() 
-          && wttd.getWorkingTimeType().percentEuristic() < 100 
-          && stampingTimeInOpening > wttd.getWorkingTime()) {
-        personDay.setOutPartTime(stampingTimeInOpening - wttd.getWorkingTime());
-        stampingTimeInOpening = wttd.getWorkingTime(); 
+      GeneralSetting settings = settingDao.generalSetting();
+      if (!settings.isDisableCheckPartTimeWorkingTime()) {
+
+        if (wttd.getWorkingTimeType().horizontalEuristic() 
+            && wttd.getWorkingTimeType().percentEuristic() < 100 
+            && stampingTimeInOpening > wttd.getWorkingTime()) {
+          personDay.setOutPartTime(stampingTimeInOpening - wttd.getWorkingTime());
+          stampingTimeInOpening = wttd.getWorkingTime(); 
+        }
       }
     }
 
@@ -465,8 +473,8 @@ public class PersonDayManager {
           .getAbsenceType().getMealTicketBehaviour());
       return personDay;
     }
-    
-    
+
+
     //Giustificativi a grana minuti nel giorno
     for (Absence abs : personDay.getAbsences()) {
 
@@ -520,7 +528,7 @@ public class PersonDayManager {
     // così posso sfruttare quel campo nel tabellone timbrature
 
     personDay.setTimeAtWork(computedTimeAtWork);
-    
+
     mealTicketHandlerAndDecurtedMeal(personDay, wttd, stampingTimeInOpening, 
         startLunch, endLunch, exitingNow);
 
@@ -532,7 +540,7 @@ public class PersonDayManager {
     } else {
       personDay.setDecurtedMeal(0);
     }
-    
+
     if (getPreventMealTicket(personDay).isPresent()) {
       setTicketStatusIfNotForced(personDay, MealTicketBehaviour.preventMealTicket);
       return personDay;
@@ -694,20 +702,20 @@ public class PersonDayManager {
       return personDay;
     }
 
-//    if (getAllDay(personDay).isPresent() 
-//        && getAllDay(personDay).get().getAbsenceType().getMealTicketBehaviour()
-//        .equals(MealTicketBehaviour.notAllowMealTicket)
-//        || (getAssignAllDay(personDay).isPresent() 
-//            && getAssignAllDay(personDay).get().getAbsenceType().getMealTicketBehaviour()
-//            .equals(MealTicketBehaviour.notAllowMealTicket))
-//        || (getCompleteDayAndAddOvertime(personDay).isPresent() 
-//            && getCompleteDayAndAddOvertime(personDay).get()
-//            .getAbsenceType().getMealTicketBehaviour()
-//            .equals(MealTicketBehaviour.notAllowMealTicket))) {
-//      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.notAllowMealTicket);
-//    } else {
-//      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.allowMealTicket);
-//    }
+    //    if (getAllDay(personDay).isPresent() 
+    //        && getAllDay(personDay).get().getAbsenceType().getMealTicketBehaviour()
+    //        .equals(MealTicketBehaviour.notAllowMealTicket)
+    //        || (getAssignAllDay(personDay).isPresent() 
+    //            && getAssignAllDay(personDay).get().getAbsenceType().getMealTicketBehaviour()
+    //            .equals(MealTicketBehaviour.notAllowMealTicket))
+    //        || (getCompleteDayAndAddOvertime(personDay).isPresent() 
+    //            && getCompleteDayAndAddOvertime(personDay).get()
+    //            .getAbsenceType().getMealTicketBehaviour()
+    //            .equals(MealTicketBehaviour.notAllowMealTicket))) {
+    //      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.notAllowMealTicket);
+    //    } else {
+    //      setTicketStatusIfNotForced(personDay, MealTicketBehaviour.allowMealTicket);
+    //    }
 
     if (getAllDay(personDay).isPresent()
         || getCompleteDayAndAddOvertime(personDay).isPresent()) {
