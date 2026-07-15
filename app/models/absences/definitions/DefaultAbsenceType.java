@@ -53,13 +53,13 @@ public enum DefaultAbsenceType {
       "Lavoro agile", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
       MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), 
-      new LocalDate(2022, 3, 29), null, true, false, true, null),
+      new LocalDate(2022, 3, 29), new LocalDate(2026,7,1), true, false, true, null),
 
   A_LAGILEBP("L-AGILE",
       "Lavoro agile con maturazione buono pasto", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
       MealTicketBehaviour.allowMealTicket, 0, null, Sets.newHashSet(), 
-      new LocalDate(2022, 3, 29), new LocalDate(2022, 6, 28), true, false, true, null),
+      new LocalDate(2022, 3, 29), null, true, false, true, null),
 
   A_COVID19("COVID19",
       "Emergenza coronavirus, attività lavorativa presso il domicilio dei dipendenti", false,
@@ -788,7 +788,7 @@ public enum DefaultAbsenceType {
       ImmutableSet.of(JustifiedTypeName.all_day), 
       0, false, MealTicketBehaviour.notAllowMealTicket, 0, null, 
       Sets.newHashSet(), new LocalDate(2025, 12, 1), 
-      new LocalDate(2026, 7, 15), false, true, true, "F"),
+      new LocalDate(2026, 7, 1), false, true, true, "F"),
 
   A_31("31", "Ferie anno precedente", false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false,
       MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), 
