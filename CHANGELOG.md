@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.33.1] - 2026-07-17
+### Added
+  - Aggiunto codice 39LABP che consente la maturazione del buono pasto in lavoro agile per assistenza
+    parenti immunodepressi.
+### Changed
+  - Cambiato il comportamento dell'attribuzione del buono pasto per il LAGILEBP e il 39LABP in presenza
+    di un part time orizzontale
+
 ## [2.33.0] - 2026-07-16
 ### Added
   - Aggiunto controllo nell'algoritmo del calcolo del tempo a lavoro che limita il tempo lavorato in un giorno di 

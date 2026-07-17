@@ -461,8 +461,14 @@ public class PersonDayManager {
     Optional<Absence> assignAllDay = getAssignAllDay(personDay);
     if (assignAllDay.isPresent()) {
       personDay.setTimeAtWork(wttd.getWorkingTime());
-      setTicketStatusIfNotForced(personDay, assignAllDay.get()
-          .getAbsenceType().getMealTicketBehaviour());
+      if(wttd.getWorkingTimeType().horizontalEuristic() 
+            && wttd.getWorkingTimeType().percentEuristic() < 100) {
+        setTicketStatusIfNotForced(personDay, MealTicketBehaviour.notAllowMealTicket);
+      } else {
+        setTicketStatusIfNotForced(personDay, assignAllDay.get()
+            .getAbsenceType().getMealTicketBehaviour());
+      }
+      
       return personDay;
     }
 
