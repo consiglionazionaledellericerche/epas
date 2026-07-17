@@ -84,7 +84,13 @@ public enum DefaultAbsenceType {
       "Lavoro Agile per dipendenti fragili", false,
       ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
       MealTicketBehaviour.notAllowMealTicket, 0, null, Sets.newHashSet(), 
-      null, null, true, false, true, null),
+      null, new LocalDate(2026,7,1), true, false, true, null),
+  
+  A_39LABP("39LA",
+      "Lavoro Agile per dipendenti fragili con buono pasto", false,
+      ImmutableSet.of(JustifiedTypeName.assign_all_day), 0, false, 
+      MealTicketBehaviour.allowMealTicket, 0, null, Sets.newHashSet(), 
+      new LocalDate(2026,7,2), null, true, false, true, null),
 
   A_39LANOBP("39LA",
       "Lavoro agile per dipendenti fragili o per assistenza a disabile/immunodepresso "

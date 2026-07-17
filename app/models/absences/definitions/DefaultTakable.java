@@ -192,8 +192,8 @@ public enum DefaultTakable {
       10, null),
 
   T_39LA(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_39LA), 
-      ImmutableSet.of(DefaultAbsenceType.A_39LA), 
+      ImmutableSet.of(DefaultAbsenceType.A_39LABP), 
+      ImmutableSet.of(DefaultAbsenceType.A_39LABP), 
       -1, null),
 
   T_SMART(AmountType.units, 
