@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.33.2] - Unreleased
+### Changed
+  - Modificato l'algoritmo che assegna il buono pasto in presenza di codici come LAGILEBP E 39LABP:
+    il buono viene assegnato se e solo se nel giorno in questione il workingTime previsto è di almeno 
+    6 ore. Quindi sì nell'orario normale, sì nei part time orizzontali che abbiano almeno 6 ore giornaliere
+    e sì nei part time verticali nei giorni in cui si fanno almeno 6 ore.
+
 ## [2.33.1] - 2026-07-17
 ### Added
   - Aggiunto codice 39LABP che consente la maturazione del buono pasto in lavoro agile per assistenza
