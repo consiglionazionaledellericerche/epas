@@ -78,6 +78,7 @@ import play.jobs.Job;
 public class PersonDayManager {
 
   private static final Integer MAX_QUANTITY_TO_ALLOW_MEAL_TICKET = 240;
+  private static final Integer WORKING_TIME_TO_ALLOW_MEAL_TICKET = 360;
 
   private final ConfigurationManager configurationManager;
   private final PersonDayInTroubleManager personDayInTroubleManager;
@@ -461,8 +462,7 @@ public class PersonDayManager {
     Optional<Absence> assignAllDay = getAssignAllDay(personDay);
     if (assignAllDay.isPresent()) {
       personDay.setTimeAtWork(wttd.getWorkingTime());
-      if(wttd.getWorkingTimeType().horizontalEuristic() 
-            && wttd.getWorkingTimeType().percentEuristic() < 100) {
+      if(wttd.getWorkingTime() < WORKING_TIME_TO_ALLOW_MEAL_TICKET) {
         setTicketStatusIfNotForced(personDay, MealTicketBehaviour.notAllowMealTicket);
       } else {
         setTicketStatusIfNotForced(personDay, assignAllDay.get()
