@@ -35,6 +35,8 @@ import models.enumerate.LimitType;
 import models.query.QCompetenceCode;
 import models.query.QCompetenceCodeGroup;
 import models.query.QPersonCompetenceCodes;
+import models.query.QPersonOffice;
+import com.querydsl.jpa.JPAExpressions;
 import org.joda.time.LocalDate;
 
 /**
@@ -278,7 +280,13 @@ public class CompetenceCodeDao extends DaoBase {
     }
     return getQueryFactory().selectFrom(pcc)
         .where(pcc.competenceCode.eq(code)
-            .and(pcc.person.office.eq(office)).and(condition))
+            .and(pcc.person.id.in(
+                JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                    .where(QPersonOffice.personOffice.office.eq(office)
+                        .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
+                        .and(QPersonOffice.personOffice.endDate.isNull()
+                            .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
+                    .select(QPersonOffice.personOffice.person.id))).and(condition))
         .fetch();
   }
 
@@ -322,7 +330,14 @@ public class CompetenceCodeDao extends DaoBase {
               pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
     }
     return getQueryFactory().selectFrom(pcc)
-        .where(pcc.competenceCode.in(codesList).and(pcc.person.office.eq(office)).and(condition))
+        .where(pcc.competenceCode.in(codesList)
+            .and(pcc.person.id.in(
+                JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                    .where(QPersonOffice.personOffice.office.eq(office)
+                        .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
+                        .and(QPersonOffice.personOffice.endDate.isNull()
+                            .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
+                    .select(QPersonOffice.personOffice.person.id))).and(condition))
         .fetch();
   }
   

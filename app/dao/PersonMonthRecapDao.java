@@ -32,6 +32,8 @@ import models.Person;
 import models.PersonMonthRecap;
 import models.query.QCertificatedData;
 import models.query.QPersonMonthRecap;
+import models.query.QPersonOffice;
+import com.querydsl.jpa.JPAExpressions;
 import org.joda.time.LocalDate;
 
 /**
@@ -137,7 +139,13 @@ public class PersonMonthRecapDao extends DaoBase {
     return getQueryFactory().selectFrom(personMonthRecap)
         .where(personMonthRecap.month.eq(month)
             .and(personMonthRecap.year.eq(year)
-                .and(personMonthRecap.person.office.eq(office))))
+                .and(personMonthRecap.person.id.in(
+                    JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                        .where(QPersonOffice.personOffice.office.eq(office)
+                            .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
+                            .and(QPersonOffice.personOffice.endDate.isNull()
+                                .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
+                        .select(QPersonOffice.personOffice.person.id)))))
         .fetch();
   }
 

@@ -40,6 +40,8 @@ import models.query.QContract;
 import models.query.QContractMandatoryTimeSlot;
 import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
+import models.query.QPersonOffice;
+import com.querydsl.jpa.JPAExpressions;
 import org.joda.time.LocalDate;
 
 /**
@@ -137,7 +139,13 @@ public class ContractDao extends DaoBase {
     }
 
     if (office.isPresent()) {
-      condition.and(contract.person.office.eq(office.get()));
+      condition.and(contract.person.id.in(
+          JPAExpressions.selectFrom(QPersonOffice.personOffice)
+              .where(QPersonOffice.personOffice.office.eq(office.get())
+                  .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
+                  .and(QPersonOffice.personOffice.endDate.isNull()
+                      .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
+              .select(QPersonOffice.personOffice.person.id)));
     }
 
     return getQueryFactory().selectFrom(contract).where(condition).fetch();
@@ -177,7 +185,13 @@ public class ContractDao extends DaoBase {
     }
 
     if (office.isPresent()) {
-      condition.and(contract.person.office.eq(office.get()));
+      condition.and(contract.person.id.in(
+          JPAExpressions.selectFrom(QPersonOffice.personOffice)
+              .where(QPersonOffice.personOffice.office.eq(office.get())
+                  .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
+                  .and(QPersonOffice.personOffice.endDate.isNull()
+                      .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
+              .select(QPersonOffice.personOffice.person.id)));
     }
 
     return getQueryFactory().selectFrom(contract).where(condition).fetch();

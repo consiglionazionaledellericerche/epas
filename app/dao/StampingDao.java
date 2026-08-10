@@ -29,8 +29,11 @@ import models.StampModificationType;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.query.QPerson;
+import models.query.QPersonOffice;
 import models.query.QStampModificationType;
 import models.query.QStamping;
+import com.querydsl.jpa.JPAExpressions;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 
@@ -106,8 +109,14 @@ public class StampingDao extends DaoBase {
             .and(stamping.personDay.date
                 .loe(yearMonth.toLocalDate(1).dayOfMonth()
                     .withMaximumValue()))
-            .and(person.office.isNotNull())
-            .and(person.office.eq(office)))
+            .and(person.personOffices.isNotEmpty())
+            .and(person.id.in(
+                JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                    .where(QPersonOffice.personOffice.office.eq(office)
+                        .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
+                        .and(QPersonOffice.personOffice.endDate.isNull()
+                            .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
+                    .select(QPersonOffice.personOffice.person.id))))
         .orderBy(person.surname.asc(), stamping.personDay.date.asc())
         .fetch();
   }

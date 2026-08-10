@@ -36,7 +36,9 @@ import models.enumerate.StampTypes;
 import models.query.QPerson;
 import models.query.QPersonDay;
 import models.query.QPersonDayInTrouble;
+import models.query.QPersonOffice;
 import models.query.QStamping;
+import com.querydsl.jpa.JPAExpressions;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
@@ -359,7 +361,14 @@ public class PersonDayDao extends DaoBase {
     
     return getQueryFactory().selectFrom(personDay)
         .leftJoin(personDay.person, person)
-        .where(person.office.eq(office).and(personDay.date.between(begin, end)))
+        .where(person.id.in(
+                JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                    .where(QPersonOffice.personOffice.office.eq(office)
+                        .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
+                        .and(QPersonOffice.personOffice.endDate.isNull()
+                            .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
+                    .select(QPersonOffice.personOffice.person.id))
+            .and(personDay.date.between(begin, end)))
         .orderBy(personDay.date.asc()).fetch();
   }
 
@@ -391,7 +400,13 @@ public class PersonDayDao extends DaoBase {
     QStamping stamping = QStamping.stamping;
     return getQueryFactory().selectFrom(personDay)
         .leftJoin(personDay.stampings, stamping)
-        .where(personDay.person.office.eq(office),
+        .where(personDay.person.id.in(
+                JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                    .where(QPersonOffice.personOffice.office.eq(office)
+                        .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
+                        .and(QPersonOffice.personOffice.endDate.isNull()
+                            .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
+                    .select(QPersonOffice.personOffice.person.id)),
             personDay.date.between(begin, end),
             stamping.stampType.eq(StampTypes.LAVORO_FUORI_SEDE)
               .or(
@@ -411,7 +426,13 @@ public class PersonDayDao extends DaoBase {
     QStamping stamping = QStamping.stamping;
     return getQueryFactory().selectFrom(personDay)
         .leftJoin(personDay.stampings, stamping)
-        .where(personDay.person.office.eq(office),
+        .where(personDay.person.id.in(
+                JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                    .where(QPersonOffice.personOffice.office.eq(office)
+                        .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
+                        .and(QPersonOffice.personOffice.endDate.isNull()
+                            .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
+                    .select(QPersonOffice.personOffice.person.id)),
             personDay.date.between(begin, end),
             stamping.stampType.eq(stampType))
         .distinct()
@@ -448,7 +469,13 @@ public class PersonDayDao extends DaoBase {
     
     BooleanBuilder condition = new BooleanBuilder();
     if (office.isPresent()) {
-      condition.and(personDay.person.office.eq(office.get()));
+      condition.and(personDay.person.id.in(
+          JPAExpressions.selectFrom(QPersonOffice.personOffice)
+              .where(QPersonOffice.personOffice.office.eq(office.get())
+                  .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
+                  .and(QPersonOffice.personOffice.endDate.isNull()
+                      .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
+              .select(QPersonOffice.personOffice.person.id)));
     }
     return getQueryFactory().selectFrom(person)
         .leftJoin(person.personDays, personDay)

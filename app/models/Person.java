@@ -214,10 +214,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @Required
   private Qualification qualification;
 
-  @ManyToOne
-  @Required
-  private Office office;
-  
+  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
+  private List<PersonOffice> personOffices = Lists.newArrayList();
+
   @OneToMany(mappedBy = "person")
   private Set<MealTicketCard> mealTicketCards = Sets.newHashSet();
   
@@ -298,9 +297,35 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return getFullname();
   }
 
+  /**
+   * Ritorna l'ufficio cui la persona afferisce alla data odierna.
+   *
+   * @return l'ufficio corrente della persona, null se non presente.
+   */
+  @Transient
+  public Office getOffice() {
+    return getOfficeAt(LocalDate.now());
+  }
+
+  /**
+   * Ritorna l'ufficio cui la persona afferisce alla data passata come parametro.
+   *
+   * @param date la data di riferimento
+   * @return l'ufficio della persona alla data indicata, null se non presente.
+   */
+  @Transient
+  public Office getOfficeAt(LocalDate date) {
+    return personOffices.stream()
+        .filter(po -> po.contains(date))
+        .map(po -> po.getOffice())
+        .findFirst()
+        .orElse(null);
+  }
+
   @Transient
   public Institute getInstitute() {
-    return office == null ? null : office.getInstitute();    
+    Office currentOffice = getOffice();
+    return currentOffice == null ? null : currentOffice.getInstitute();
   }
   
   /**
