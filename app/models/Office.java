@@ -90,8 +90,8 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   private List<BadgeSystem> badgeSystems = Lists.newArrayList();
 
-  @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
-  private List<Person> persons = Lists.newArrayList();
+  @OneToMany(mappedBy = "office")
+  private List<PersonOffice> personOffices = Lists.newArrayList();
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   private List<Configuration> configurations = Lists.newArrayList();

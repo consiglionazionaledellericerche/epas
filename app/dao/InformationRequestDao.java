@@ -55,6 +55,8 @@ import models.informationrequests.query.QServiceRequest;
 import models.informationrequests.query.QTeleworkRequest;
 import models.query.QOffice;
 import models.query.QPerson;
+import models.query.QPersonOffice;
+import com.querydsl.jpa.JPAExpressions;
 
 /**
  * Dao per i flussi informativi.
@@ -486,7 +488,15 @@ public class InformationRequestDao extends DaoBase {
     BooleanBuilder isGroupManagerStaff = 
         new BooleanBuilder(informationRequest.managerApprovalRequired.isTrue())
           .and(informationRequest.managerApproved.isNull());
-    condition.and(informationRequest.person.office.in(officeList))
+    condition.and(informationRequest.person.id.in(
+            JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                .where(QPersonOffice.personOffice.office.in(officeList)
+                    .and(QPersonOffice.personOffice.beginDate
+                        .loe(org.joda.time.LocalDate.now()))
+                    .and(QPersonOffice.personOffice.endDate.isNull()
+                        .or(QPersonOffice.personOffice.endDate
+                            .goe(org.joda.time.LocalDate.now()))))
+                .select(QPersonOffice.personOffice.person.id)))
         .and(informationRequest.officeHeadApprovalRequired.isTrue()
             .and(informationRequest.officeHeadApproved.isNull())).andNot(isGroupManagerStaff);
 
@@ -505,7 +515,15 @@ public class InformationRequestDao extends DaoBase {
       BooleanBuilder condition, Person signer) {
 
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
-    condition.and(informationRequest.person.office.in(officeList))
+    condition.and(informationRequest.person.id.in(
+            JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                .where(QPersonOffice.personOffice.office.in(officeList)
+                    .and(QPersonOffice.personOffice.beginDate
+                        .loe(org.joda.time.LocalDate.now()))
+                    .and(QPersonOffice.personOffice.endDate.isNull()
+                        .or(QPersonOffice.personOffice.endDate
+                            .goe(org.joda.time.LocalDate.now()))))
+                .select(QPersonOffice.personOffice.person.id)))
         .and(informationRequest.administrativeApprovalRequired.isTrue()
             .and(informationRequest.administrativeApproved.isNull()));
 
@@ -526,7 +544,15 @@ public class InformationRequestDao extends DaoBase {
       BooleanBuilder condition, Person signer) {
     final QInformationRequest informationRequest = QInformationRequest.informationRequest;
     val groupCondition = new BooleanBuilder(condition);
-    return groupCondition.and(informationRequest.person.office.in(officeList))
+    return groupCondition.and(informationRequest.person.id.in(
+            JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                .where(QPersonOffice.personOffice.office.in(officeList)
+                    .and(QPersonOffice.personOffice.beginDate
+                        .loe(org.joda.time.LocalDate.now()))
+                    .and(QPersonOffice.personOffice.endDate.isNull()
+                        .or(QPersonOffice.personOffice.endDate
+                            .goe(org.joda.time.LocalDate.now()))))
+                .select(QPersonOffice.personOffice.person.id)))
         .and(informationRequest.managerApprovalRequired.isTrue()
         .and(informationRequest.managerApproved.isNull()));
   }
@@ -554,7 +580,15 @@ public class InformationRequestDao extends DaoBase {
     conditions.and(informationRequest.startAt.after(fromDate))
         .and(informationRequest.informationType.eq(informationType)
             .and(informationRequest.flowEnded.isTrue())
-            .and(informationRequest.person.office.in(officeList)));
+            .and(informationRequest.person.id.in(
+                JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                    .where(QPersonOffice.personOffice.office.in(officeList)
+                        .and(QPersonOffice.personOffice.beginDate
+                            .loe(org.joda.time.LocalDate.now()))
+                        .and(QPersonOffice.personOffice.endDate.isNull()
+                            .or(QPersonOffice.personOffice.endDate
+                                .goe(org.joda.time.LocalDate.now()))))
+                    .select(QPersonOffice.personOffice.person.id))));
 
     if (toDate.isPresent()) {
       conditions.and(informationRequest.endTo.before(toDate.get()));
@@ -584,7 +618,15 @@ public class InformationRequestDao extends DaoBase {
     conditions.and(informationRequest.startAt.after(fromDate))
         .and(informationRequest.informationType.eq(informationType)
             .and(informationRequest.flowEnded.isTrue())
-            .and(informationRequest.person.office.eq(signer.getOffice())));
+            .and(informationRequest.person.id.in(
+                JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                    .where(QPersonOffice.personOffice.office.eq(signer.getOffice())
+                        .and(QPersonOffice.personOffice.beginDate
+                            .loe(org.joda.time.LocalDate.now()))
+                        .and(QPersonOffice.personOffice.endDate.isNull()
+                            .or(QPersonOffice.personOffice.endDate
+                                .goe(org.joda.time.LocalDate.now()))))
+                    .select(QPersonOffice.personOffice.person.id))));
 
     if (toDate.isPresent()) {
       conditions.and(informationRequest.endTo.before(toDate.get()));
@@ -593,22 +635,51 @@ public class InformationRequestDao extends DaoBase {
       conditions.and(
           informationRequest.officeHeadApprovalRequired.isTrue()
               .and(informationRequest.officeHeadApproved.isNotNull())
-              .and(person.office.in(officeList)));
-    } 
+              .and(person.id.in(
+                  JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                      .where(QPersonOffice.personOffice.office.in(officeList)
+                          .and(QPersonOffice.personOffice.beginDate
+                              .loe(org.joda.time.LocalDate.now()))
+                          .and(QPersonOffice.personOffice.endDate.isNull()
+                              .or(QPersonOffice.personOffice.endDate
+                                  .goe(org.joda.time.LocalDate.now()))))
+                      .select(QPersonOffice.personOffice.person.id))));
+    }
     if (uros.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.PERSONNEL_ADMIN))) {
       conditions.and(
           informationRequest.administrativeApprovalRequired.isTrue()
               .and(informationRequest.administrativeApproved.isNotNull())
-              .and(person.office.in(officeList)));
+              .and(person.id.in(
+                  JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                      .where(QPersonOffice.personOffice.office.in(officeList)
+                          .and(QPersonOffice.personOffice.beginDate
+                              .loe(org.joda.time.LocalDate.now()))
+                          .and(QPersonOffice.personOffice.endDate.isNull()
+                              .or(QPersonOffice.personOffice.endDate
+                                  .goe(org.joda.time.LocalDate.now()))))
+                      .select(QPersonOffice.personOffice.person.id))));
     } else {
       conditions.and(
           informationRequest.managerApprovalRequired.isTrue()
               .and(informationRequest.managerApproved.isNotNull())
-              .and(person.office.in(officeList)));
+              .and(person.id.in(
+                  JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                      .where(QPersonOffice.personOffice.office.in(officeList)
+                          .and(QPersonOffice.personOffice.beginDate
+                              .loe(org.joda.time.LocalDate.now()))
+                          .and(QPersonOffice.personOffice.endDate.isNull()
+                              .or(QPersonOffice.personOffice.endDate
+                                  .goe(org.joda.time.LocalDate.now()))))
+                      .select(QPersonOffice.personOffice.person.id))));
     }
+    final QPersonOffice qPersonOffice = QPersonOffice.personOffice;
     return getQueryFactory().selectFrom(informationRequest)
         .join(informationRequest.person, person)
-        .join(person.office, office)
+        .join(person.personOffices, qPersonOffice)
+        .on(qPersonOffice.beginDate.loe(org.joda.time.LocalDate.now())
+            .and(qPersonOffice.endDate.isNull()
+                .or(qPersonOffice.endDate.goe(org.joda.time.LocalDate.now()))))
+        .join(qPersonOffice.office, office)
         .where(office.in(uros.stream().map(
                 userRoleOffices -> userRoleOffices.getOffice())
             .collect(Collectors.toSet())).and(conditions))

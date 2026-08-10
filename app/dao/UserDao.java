@@ -43,7 +43,10 @@ import models.enumerate.StampTypes;
 import models.enumerate.TeleworkStampTypes;
 import models.query.QBadgeReader;
 import models.query.QPerson;
+import models.query.QPersonOffice;
 import models.query.QUser;
+import com.querydsl.jpa.JPAExpressions;
+import org.joda.time.LocalDate;
 
 /**
  * DAO per gli User.
@@ -157,7 +160,13 @@ public class UserDao extends DaoBase {
 
     BooleanBuilder condition = new BooleanBuilder()
         // La persona associata all'utente fa parte di uno degli uffici specificati
-        .andAnyOf(person.office.in(offices),
+        .andAnyOf(person.id.in(
+            JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                .where(QPersonOffice.personOffice.office.in(offices)
+                    .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
+                    .and(QPersonOffice.personOffice.endDate.isNull()
+                        .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
+                .select(QPersonOffice.personOffice.person.id)),
             // oppure il proprietario dell'utente è tra gli uffici specificati
             user.owner.in(offices));
     // Filtro nome

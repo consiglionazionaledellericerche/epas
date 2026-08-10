@@ -40,6 +40,8 @@ import models.query.QContract;
 import models.query.QMealTicket;
 import models.query.QPerson;
 import models.query.QPersonDay;
+import models.query.QPersonOffice;
+import com.querydsl.jpa.JPAExpressions;
 import org.joda.time.LocalDate;
 
 /**
@@ -112,7 +114,13 @@ public class MealTicketDao extends DaoBase {
         .from(qmt)
         .leftJoin(qmt.contract, qc)
         .leftJoin(qc.person, qp)
-        .where(qp.office.id.eq(office.id))
+        .where(qp.id.in(
+            JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                .where(QPersonOffice.personOffice.office.eq(office)
+                    .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
+                    .and(QPersonOffice.personOffice.endDate.isNull()
+                        .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
+                .select(QPersonOffice.personOffice.person.id)))
         .groupBy(qmt.expireDate)
         .orderBy(qmt.expireDate.desc()).fetchFirst();
   }
@@ -166,7 +174,14 @@ public class MealTicketDao extends DaoBase {
 
     query.where(mealTicket.block.like("%" + code + "%"));
     if (office.isPresent()) {
-      query.where(person.office.eq(office.get()).and(mealTicket.returned.eq(false)));
+      query.where(person.id.in(
+          JPAExpressions.selectFrom(QPersonOffice.personOffice)
+              .where(QPersonOffice.personOffice.office.eq(office.get())
+                  .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
+                  .and(QPersonOffice.personOffice.endDate.isNull()
+                      .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
+              .select(QPersonOffice.personOffice.person.id))
+          .and(mealTicket.returned.eq(false)));
     }
 
     return query.orderBy(mealTicket.block.asc()).orderBy(mealTicket.number.asc()).fetch();

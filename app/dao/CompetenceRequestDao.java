@@ -44,7 +44,9 @@ import models.flows.query.QAffiliation;
 import models.flows.query.QCompetenceRequest;
 import models.flows.query.QGroup;
 import models.query.QPerson;
+import models.query.QPersonOffice;
 import models.query.QPersonReperibility;
+import com.querydsl.jpa.JPAExpressions;
 import org.joda.time.LocalDateTime;
 
 /**
@@ -122,7 +124,15 @@ public class CompetenceRequestDao extends DaoBase {
     .and(competenceRequest.type.eq(competenceRequestType)
         .and(competenceRequest.flowStarted.isTrue())
         .and(competenceRequest.flowEnded.isFalse())
-        .and(competenceRequest.person.office.in(officeList)));
+        .and(competenceRequest.person.id.in(
+            JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                .where(QPersonOffice.personOffice.office.in(officeList)
+                    .and(QPersonOffice.personOffice.beginDate
+                        .loe(org.joda.time.LocalDate.now()))
+                    .and(QPersonOffice.personOffice.endDate.isNull()
+                        .or(QPersonOffice.personOffice.endDate
+                            .goe(org.joda.time.LocalDate.now()))))
+                .select(QPersonOffice.personOffice.person.id))));
 
 
     JPQLQuery<CompetenceRequest> query;
@@ -131,7 +141,15 @@ public class CompetenceRequestDao extends DaoBase {
       .and(competenceRequest.employeeApproved.isNull())
       .and(competenceRequest.managerApprovalRequired.isTrue())
       .and(competenceRequest.managerApproved.isNull())
-      .and(person.office.eq(signer.getOffice()));
+      .and(person.id.in(
+          JPAExpressions.selectFrom(QPersonOffice.personOffice)
+              .where(QPersonOffice.personOffice.office.eq(signer.getOffice())
+                  .and(QPersonOffice.personOffice.beginDate
+                      .loe(org.joda.time.LocalDate.now()))
+                  .and(QPersonOffice.personOffice.endDate.isNull()
+                      .or(QPersonOffice.personOffice.endDate
+                          .goe(org.joda.time.LocalDate.now()))))
+              .select(QPersonOffice.personOffice.person.id)));
       query = getQueryFactory().selectFrom(competenceRequest)
           .join(competenceRequest.person, person)
           .leftJoin(person.reperibility, pr)
@@ -262,7 +280,15 @@ public class CompetenceRequestDao extends DaoBase {
 
     conditions.and(competenceRequest.startAt.after(fromDate))
     .and(competenceRequest.type.eq(type).and(competenceRequest.flowEnded.isTrue())
-        .and(competenceRequest.person.office.in(officeList)));
+        .and(competenceRequest.person.id.in(
+            JPAExpressions.selectFrom(QPersonOffice.personOffice)
+                .where(QPersonOffice.personOffice.office.in(officeList)
+                    .and(QPersonOffice.personOffice.beginDate
+                        .loe(org.joda.time.LocalDate.now()))
+                    .and(QPersonOffice.personOffice.endDate.isNull()
+                        .or(QPersonOffice.personOffice.endDate
+                            .goe(org.joda.time.LocalDate.now()))))
+                .select(QPersonOffice.personOffice.person.id))));
 
     if (toDate.isPresent()) {
       conditions.and(competenceRequest.endTo.before(toDate.get()));
@@ -380,21 +406,37 @@ public class CompetenceRequestDao extends DaoBase {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     condition.and(competenceRequest.managerApprovalRequired.isTrue())
     .and(competenceRequest.managerApproved.isNull())
-    .andAnyOf(competenceRequest.employeeApproved.isNotNull(), 
+    .andAnyOf(competenceRequest.employeeApproved.isNotNull(),
         competenceRequest.employeeApprovalRequired.isFalse())
-    .and(competenceRequest.person.office.in(officeList));
+    .and(competenceRequest.person.id.in(
+        JPAExpressions.selectFrom(QPersonOffice.personOffice)
+            .where(QPersonOffice.personOffice.office.in(officeList)
+                .and(QPersonOffice.personOffice.beginDate
+                    .loe(org.joda.time.LocalDate.now()))
+                .and(QPersonOffice.personOffice.endDate.isNull()
+                    .or(QPersonOffice.personOffice.endDate
+                        .goe(org.joda.time.LocalDate.now()))))
+            .select(QPersonOffice.personOffice.person.id)));
     return condition;
 
   }
-  
+
   private BooleanBuilder managerApprovedQuery(List<Office> officeList, 
       BooleanBuilder condition, Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     condition.and(competenceRequest.managerApprovalRequired.isTrue())
     .and(competenceRequest.managerApproved.isNotNull())
-    .andAnyOf(competenceRequest.employeeApproved.isNotNull(), 
+    .andAnyOf(competenceRequest.employeeApproved.isNotNull(),
         competenceRequest.employeeApprovalRequired.isFalse())
-    .and(competenceRequest.person.office.in(officeList));
+    .and(competenceRequest.person.id.in(
+        JPAExpressions.selectFrom(QPersonOffice.personOffice)
+            .where(QPersonOffice.personOffice.office.in(officeList)
+                .and(QPersonOffice.personOffice.beginDate
+                    .loe(org.joda.time.LocalDate.now()))
+                .and(QPersonOffice.personOffice.endDate.isNull()
+                    .or(QPersonOffice.personOffice.endDate
+                        .goe(org.joda.time.LocalDate.now()))))
+            .select(QPersonOffice.personOffice.person.id)));
     return condition;
 
   }
@@ -420,10 +462,18 @@ public class CompetenceRequestDao extends DaoBase {
     .and(competenceRequest.officeHeadApproved.isNull())
     .andAnyOf(competenceRequest.managerApprovalRequired.isFalse(),
         competenceRequest.managerApproved.isNotNull())
-    .and(competenceRequest.person.office.in(officeList));
+    .and(competenceRequest.person.id.in(
+        JPAExpressions.selectFrom(QPersonOffice.personOffice)
+            .where(QPersonOffice.personOffice.office.in(officeList)
+                .and(QPersonOffice.personOffice.beginDate
+                    .loe(org.joda.time.LocalDate.now()))
+                .and(QPersonOffice.personOffice.endDate.isNull()
+                    .or(QPersonOffice.personOffice.endDate
+                        .goe(org.joda.time.LocalDate.now()))))
+            .select(QPersonOffice.personOffice.person.id)));
     return condition;
   }
-  
+
   private BooleanBuilder officeHeadDoubleApprovalQuery(List<Office> officeList,
       BooleanBuilder condition, Person signer) {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
@@ -431,10 +481,18 @@ public class CompetenceRequestDao extends DaoBase {
     .and(competenceRequest.officeHeadApproved.isNull())
     .and(competenceRequest.managerApprovalRequired.isTrue())
     .and(competenceRequest.managerApproved.isNotNull())
-    .and(competenceRequest.person.office.in(officeList));
+    .and(competenceRequest.person.id.in(
+        JPAExpressions.selectFrom(QPersonOffice.personOffice)
+            .where(QPersonOffice.personOffice.office.in(officeList)
+                .and(QPersonOffice.personOffice.beginDate
+                    .loe(org.joda.time.LocalDate.now()))
+                .and(QPersonOffice.personOffice.endDate.isNull()
+                    .or(QPersonOffice.personOffice.endDate
+                        .goe(org.joda.time.LocalDate.now()))))
+            .select(QPersonOffice.personOffice.person.id)));
     return condition;
   }
-  
+
   private BooleanBuilder cleanConditions(BooleanBuilder conditions, CompetenceRequestType type,
       Optional<LocalDateTime> toDate) {
     conditions = new BooleanBuilder();
@@ -454,9 +512,17 @@ public class CompetenceRequestDao extends DaoBase {
     final QCompetenceRequest competenceRequest = QCompetenceRequest.competenceRequest;
     condition.and(competenceRequest.officeHeadApprovalRequired.isTrue())
     .and(competenceRequest.officeHeadApproved.isNotNull())
-    .andAnyOf(competenceRequest.managerApproved.isNotNull(), 
+    .andAnyOf(competenceRequest.managerApproved.isNotNull(),
         competenceRequest.managerApprovalRequired.isFalse())
-    .and(competenceRequest.person.office.in(officeList));
+    .and(competenceRequest.person.id.in(
+        JPAExpressions.selectFrom(QPersonOffice.personOffice)
+            .where(QPersonOffice.personOffice.office.in(officeList)
+                .and(QPersonOffice.personOffice.beginDate
+                    .loe(org.joda.time.LocalDate.now()))
+                .and(QPersonOffice.personOffice.endDate.isNull()
+                    .or(QPersonOffice.personOffice.endDate
+                        .goe(org.joda.time.LocalDate.now()))))
+            .select(QPersonOffice.personOffice.person.id)));
     return condition;
   }
 
