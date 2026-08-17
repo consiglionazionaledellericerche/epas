@@ -134,6 +134,9 @@ public class DateUtility {
       return true;
     }
     if ((date.getMonthOfYear() == 10) && (date.getDayOfMonth() == 4)) {
+      if (date.getYear() < 2026) {
+        return false;
+      }
       return true;
     }
 
