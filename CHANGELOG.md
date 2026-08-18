@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.33.2] - Unreleased
+### Added
+  - Aggiunto controllo che limita la festività del 4 ottobre agli anni a partire dal 2026 in poi.
+  
 ### Changed
   - Modificato l'algoritmo che assegna il buono pasto in presenza di codici come LAGILEBP E 39LABP:
     il buono viene assegnato se e solo se nel giorno in questione il workingTime previsto è di almeno 
@@ -15,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Aggiunto codice 39LABP che consente la maturazione del buono pasto in lavoro agile per assistenza
     parenti immunodepressi.
+    
 ### Changed
   - Cambiato il comportamento dell'attribuzione del buono pasto per il LAGILEBP e il 39LABP in presenza
     di un part time orizzontale
