@@ -160,9 +160,12 @@ public class SynchronizationManager {
           epasPerson.getFullname(), epasPerson.getNumber(), 
           epasPerson.getOffice().getName(), office);
 
-      Office oldOffice = epasPerson.getOffice(); 
-      epasPerson.setOffice(office);
+      Office oldOffice = epasPerson.getOffice();
+      //La relazione con la sede è periodicizzata: l'afferenza precedente viene chiusa
+      //e il trasferimento decorre dalla data odierna.
+      val personOffice = epasPerson.changeOffice(office, LocalDate.now());
       epasPerson.save();
+      personOffice.save();
 
       registryNotificationManager.notifyPersonHasChangedOffice(epasPerson, oldOffice);
       return syncResult.add(
@@ -172,8 +175,9 @@ public class SynchronizationManager {
     }
 
     // join dell'office (in automatico ancora non c'è...)
-    perseoPerson.setOffice(office);
     perseoPerson.setBeginDate(LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1));
+    //L'afferenza alla sede decorre dalla data di inizio della persona.
+    perseoPerson.changeOffice(office, perseoPerson.getBeginDate());
     val validation = Validation.current.get(); 
     validation.valid(perseoPerson);
     if (Validation.hasErrors()) {
@@ -227,6 +231,9 @@ public class SynchronizationManager {
     try {
       person.setUser(userManager.createUser(person));
       person.save();
+      //Le afferenze alle sedi vanno salvate dopo la persona perché la relazione
+      //con PersonOffice non è in cascata sul salvataggio.
+      person.getPersonOffices().forEach(personOffice -> personOffice.save());
 
       Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
       officeManager.setUro(person.getUser(), person.getOffice(), employee);

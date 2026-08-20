@@ -53,6 +53,7 @@ import models.Contract;
 import models.Institute;
 import models.Office;
 import models.Person;
+import models.PersonOffice;
 import models.Role;
 import models.UsersRolesOffices;
 import org.joda.time.LocalDate;
@@ -535,9 +536,11 @@ public class Synchronizations extends Controller {
         people(null);
       }
 
-      personInPerseo.get().setOffice(office.get());
       personInPerseo.get().setBeginDate(LocalDate.now().withDayOfMonth(1)
           .withMonthOfYear(1).minusDays(1));
+      //La relazione con la sede è periodicizzata: l'afferenza decorre dalla data
+      //di inizio della persona.
+      personInPerseo.get().changeOffice(office.get(), personInPerseo.get().getBeginDate());
 
       validation.valid(personInPerseo.get());
       if (Validation.hasErrors()) {
@@ -598,9 +601,10 @@ public class Synchronizations extends Controller {
             perseoPerson.getQualification(), perseoPerson.getPerseoId());
 
         // join dell'office (in automatico ancora non c'è...)
-        perseoPerson.setOffice(office);
         perseoPerson.setBeginDate(LocalDate.now().withDayOfMonth(1)
             .withMonthOfYear(1).minusDays(1));
+        //L'afferenza alla sede decorre dalla data di inizio della persona.
+        perseoPerson.changeOffice(office, perseoPerson.getBeginDate());
         validation.valid(perseoPerson);
         if (Validation.hasErrors()) {
           // notifica perseo ci ha mandato un oggetto che in epas non può essere accettato!
@@ -877,7 +881,11 @@ public class Synchronizations extends Controller {
 
       office.setPerseoId(null);
       office.save();
-      for (Person person : office.getPersons()) {
+      //La relazione con le persone è periodicizzata: la desincronizzazione riguarda tutte
+      //le persone che hanno afferito alla sede, non solo quelle attualmente assegnate.
+      List<Person> people = office.getPersonOffices().stream()
+          .map(PersonOffice::getPerson).distinct().collect(Collectors.toList());
+      for (Person person : people) {
 
         person.setPerseoId(null);
         person.save();
@@ -903,7 +911,7 @@ public class Synchronizations extends Controller {
     final Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
 
-    final List<Person> people = office.getPersons();
+    final List<Person> people = personDao.byOffice(office);
     render(office, people);
   }
 
@@ -944,7 +952,7 @@ public class Synchronizations extends Controller {
     final Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
 
-    final List<Person> people = office.getPersons();
+    final List<Person> people = personDao.byOffice(office);
     render(office, people);
   }
 
@@ -987,7 +995,7 @@ public class Synchronizations extends Controller {
       }
     });
     flash.success("Sincronizzazione campo Eppn Terminata con Successo", people.size(),
-        office.getPersons().size());
+        office.getPersonOffices().stream().filter(PersonOffice::isActive).count());
 
     eppn(office.id);
   }

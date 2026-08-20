@@ -46,6 +46,7 @@ import models.Configuration;
 import models.Office;
 import models.Person;
 import models.PersonConfiguration;
+import models.PersonOffice;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.enumerate.BlockType;
@@ -727,8 +728,11 @@ public class ConfigurationManager {
           }
         }        
       }.now();
-      log.info("Fine aggiornamento parametri per {} dipendenti di {}", 
-          office.getPersons().size(), office.getName());
+      //La relazione con le persone è periodicizzata: si contano le sole afferenze
+      //attive alla data odierna, che sono le persone considerate dal job.
+      log.info("Fine aggiornamento parametri per {} dipendenti di {}",
+          office.getPersonOffices().stream().filter(PersonOffice::isActive).count(),
+          office.getName());
     }
   }
 

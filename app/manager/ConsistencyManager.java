@@ -52,6 +52,7 @@ import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.PersonOffice;
 import models.PersonShiftDay;
 import models.PersonalWorkingTime;
 import models.StampModificationType;
@@ -292,7 +293,15 @@ public class ConsistencyManager {
     List<Person> personToRecompute = Lists.newArrayList();
 
     if (target instanceof Office) {
-      personToRecompute = ((Office) target).getPersons();
+      //La relazione con le persone è periodicizzata: vanno ricalcolate tutte le persone
+      //che afferiscono alla sede in un qualsiasi momento a partire da recomputeFrom,
+      //comprese quindi quelle che nel frattempo sono state trasferite altrove.
+      personToRecompute = ((Office) target).getPersonOffices().stream()
+          .filter(personOffice -> personOffice.getEndDate() == null
+              || !personOffice.getEndDate().isBefore(recomputeFrom))
+          .map(PersonOffice::getPerson)
+          .distinct()
+          .collect(Collectors.toList());
     } else if (target instanceof Person) {
       personToRecompute.add((Person) target);
     }

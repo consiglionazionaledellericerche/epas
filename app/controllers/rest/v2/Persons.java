@@ -143,6 +143,9 @@ public class Persons extends Controller {
     
     personManager.properPersonCreate(person);
     person.save();
+    //L'afferenza alla sede va salvata dopo la persona perché la relazione
+    //con PersonOffice non è in cascata sul salvataggio.
+    person.getPersonOffices().forEach(personOffice -> personOffice.save());
     configurationManager.updateConfigurations(person);
 
     log.info("Created person {} via REST", person);
@@ -187,6 +190,9 @@ public class Persons extends Controller {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
     person.save();
+    //Le afferenze alle sedi vanno salvate dopo la persona perché la relazione
+    //con PersonOffice non è in cascata sul salvataggio.
+    person.getPersonOffices().forEach(personOffice -> personOffice.save());
 
     log.info("Updated person {} via REST", person);
     renderJSON(gson.toJson(PersonShowDto.build(person)));

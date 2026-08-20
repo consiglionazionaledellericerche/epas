@@ -17,6 +17,7 @@
 
 package models;
 
+import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import helpers.validators.CodiceFiscaleCheck;
@@ -320,6 +321,46 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
         .map(po -> po.getOffice())
         .findFirst()
         .orElse(null);
+  }
+
+  /**
+   * Assegna alla persona la sede indicata a partire dalla data specificata.
+   * L'eventuale afferenza in corso a quella data viene chiusa il giorno precedente, in modo
+   * che non ci siano periodi sovrapposti; se invece esiste già un'afferenza che inizia
+   * esattamente a quella data ne viene solo aggiornata la sede.
+   * L'afferenza restituita non viene salvata: è compito del chiamante persisterla dopo aver
+   * salvato la persona, perché la relazione non è in cascata sul salvataggio.
+   *
+   * @param office la sede in cui trasferire la persona
+   * @param date la data di decorrenza dell'assegnazione
+   * @return l'afferenza, creata o aggiornata, verso la sede indicata.
+   */
+  @Transient
+  public PersonOffice changeOffice(Office office, LocalDate date) {
+    Verify.verifyNotNull(office);
+    Verify.verifyNotNull(date);
+    for (PersonOffice personOffice : personOffices) {
+      if (!personOffice.contains(date)) {
+        continue;
+      }
+      if (office.equals(personOffice.getOffice())) {
+        //La persona afferisce già a quella sede: non si spezza il periodo esistente.
+        return personOffice;
+      }
+      if (personOffice.getBeginDate().isBefore(date)) {
+        personOffice.setEndDate(date.minusDays(1));
+      } else {
+        //L'afferenza inizia alla data indicata: si corregge la sede.
+        personOffice.setOffice(office);
+        return personOffice;
+      }
+    }
+    PersonOffice personOffice = new PersonOffice();
+    personOffice.setPerson(this);
+    personOffice.setOffice(office);
+    personOffice.setBeginDate(date);
+    personOffices.add(personOffice);
+    return personOffice;
   }
 
   @Transient
