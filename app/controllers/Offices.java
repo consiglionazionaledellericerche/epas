@@ -18,6 +18,9 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gdata.util.common.base.Preconditions;
 import com.querydsl.core.QueryResults;
 import common.security.SecurityRules;
@@ -27,8 +30,13 @@ import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import manager.OfficeManager;
 import manager.PeriodManager;
@@ -71,6 +79,8 @@ public class Offices extends Controller {
   static UsersRolesOfficesDao uroDao;
   @Inject
   static OfficeManager officeManager;
+  @Inject
+  static WrapperModelFunctionFactory wrapperFunctionFactory;
 
   public static void index() {
     flash.keep();
@@ -230,6 +240,45 @@ public class Offices extends Controller {
     List<Office> activeOffices = officeDao.allEnabledOffices();
     List<Office> destinationOffices = activeOffices;
     render(activeOffices, destinationOffices);
+  }
+  
+  /**
+   * Metodo che renderizza la pagina di verifica di quante sedi stiano usando ePAS.
+   */
+  public static void checkWhoNotUseEpas() {
+    Map<Office, List<BigDecimal>> map = Maps.newHashMap();
+    List<Office> activeOffices = officeDao.allEnabledOffices();
+    for (Office office : activeOffices) {
+      log.debug("Analizzo la sede {}", office.getName());
+      if (office.getId() == 244 || office.getId() == 242 || office.getId() == 243) {
+        log.debug("ICAR");
+      }
+      int peopleToInitialize = 0;
+      List<Person> personList = personDao.activeWithNumber(office);
+      List<IWrapperPerson> list =
+          FluentIterable.from(personList).transform(wrapperFunctionFactory.person()).toList();
+      for (IWrapperPerson wp : list) {
+        log.debug("Analizzo {}", wp.getValue().getFullname());
+        if (wp.currentContractInitializationMissing()) {
+          log.debug("Manca inizializzazione per {}", wp.getValue().getFullname());
+          peopleToInitialize ++;
+        }
+      }
+      List<BigDecimal> people = Lists.newArrayList();
+      people.add(BigDecimal.valueOf(personList.size()));
+      people.add(BigDecimal.valueOf(peopleToInitialize));
+      if (peopleToInitialize > 0) {
+        BigDecimal risultato =
+            BigDecimal.valueOf(peopleToInitialize).divide(BigDecimal.valueOf(personList.size()), 2, RoundingMode.HALF_UP);
+        people.add(risultato);
+      } else {
+        people.add(BigDecimal.valueOf(0));
+      }
+      
+      map.put(office, people);
+      
+    }
+    render(map);
   }
 
 }

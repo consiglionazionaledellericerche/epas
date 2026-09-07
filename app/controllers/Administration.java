@@ -1403,4 +1403,45 @@ public class Administration extends Controller {
     renderText("Aggiornato il parametro della scadenza delle ferie anno passato per %s sedi", counter);
   }
   
+  /**
+   * Fixa i codici di lavoro agile senza buono pasto già inseriti per luglio 2026 prima che 
+   * entrasse in vigore la modifica al codice di lavoro agile che ora prevede il buono 
+   * pasto anche in lavoro agile.
+   */
+  public static void fixagile() {
+
+    int counter = 0;
+    LocalDate begin = LocalDate.now().withDayOfMonth(1).withMonthOfYear(7);
+    List<Absence> lagileList = absenceDao.getAbsenceByCodeInPeriod(Optional.absent(), 
+        Optional.fromNullable("LAGILE"), begin, begin.monthOfYear().withMaximumValue(), 
+        Optional.absent(), false, false);
+    log.info("Trovate {} assenze di lavoro agile già inserite", lagileList.size());
+    InsertReport insertReport = null;
+    GroupAbsenceType groupAbsenceType = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_LAGILE.name()).get();
+    JustifiedType type = absenceComponentDao
+        .getOrBuildJustifiedType(JustifiedTypeName.complete_day_and_add_overtime);
+    for (Absence abs : lagileList) {
+      log.info("Analizzo l'assenza {}", abs.toString());
+      //Logica
+      int deleted = absenceManager
+          .removeAbsencesInPeriod(abs.getPersonDay().getPerson(), abs.getAbsenceDate(), 
+              abs.getAbsenceDate(), abs.getAbsenceType());
+      if (deleted > 0) {
+        log.info("Rimossa assenza {} di {} del giorno {}", 
+            abs.getAbsenceType(), abs.getPersonDay().getPerson().getFullname(), abs.getDate());
+        counter++;
+      }
+      insertReport = absenceService.insert(abs.getPersonDay().getPerson(), 
+          groupAbsenceType, abs.getAbsenceDate(), abs.getAbsenceDate(),
+          null, type, 1, null, false, absenceManager);
+      
+      absenceManager.saveAbsences(insertReport, abs.getPersonDay().getPerson(), 
+          abs.getAbsenceDate(), null, type, groupAbsenceType);
+      log.info("Salvata nuova assenza per {} del giorno {}", 
+          abs.getPersonDay().getPerson().getFullname(), abs.getDate());
+    }
+    renderText("Aggiornati %s codici di lavoro agile senza buono pasto", counter);
+  }
+  
 }

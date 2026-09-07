@@ -206,5 +206,18 @@
   	#{/b.buttons}
   #{/form}
   #{/panel}
+  
+  #{panel title:'Verifica chi non sta usando ePAS', dim:12 }
+  #{alert color:'info'}
+  <p>
+    Visualizza la pagina che verifica quante e quali sono le sedi su ePAS che però non stanno usando il sistema.
+  </p>
+  #{/alert}
+  #{form @Offices.checkWhoNotUseEpas(), class:'form-horizontal'}
+  	#{b.buttons center:true}
+  		<button type="submit" class="btn btn-default">Apri</button>
+  	#{/b.buttons}
+  #{/form}
+  #{/panel}
 
 </div>
