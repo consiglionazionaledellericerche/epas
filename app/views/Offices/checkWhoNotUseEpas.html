@@ -13,13 +13,16 @@ Di fianco a sedi con percentuali prossime al 100% si può cliccare sull'apposito
 se queste compaiono nell'ultimo mese di modo da dare un'ulteriore livello di verifica.</p>
 #{/alert}
 
-		<table class="table table-bordered table-striped">
+		<table class="table table-hover table-condensed table-striped center" datatable>
+			<thead>
 			<tr>
 				<th>Sede</th>
 				<th>Dipendenti sede</th>
 				<th>Dipendenti non inizializzati</th>
 				<th>Percentuale</th>
 			</tr>
+			</thead>
+			<tbody>
 			#{list items:map.entrySet(), as:'entry'}
 			<tr>
 				<td>${entry.getKey().name} - ${entry.getKey().code}</font></td>  
@@ -35,6 +38,7 @@ se queste compaiono nell'ultimo mese di modo da dare un'ulteriore livello di ver
 				</td>
 			</tr>
 			#{/list}
+			</tbody>
 		</table>
 
 </div>
