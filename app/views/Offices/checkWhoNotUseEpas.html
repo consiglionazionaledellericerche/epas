@@ -1,0 +1,44 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Trasferimento massivo dipendenti'  /}
+
+<div class="container">
+
+<h3><i class="fa fa-adjust"></i> Verifica utilizzo ePAS nelle sedi</h3>
+<br>
+#{alert color:'warning'}
+<p>Per ogni sede è riportata la percentuale di contratti da inizializzare. Se questa percentuale è 100% o vicina a quella quantità
+c'è la seria possibilità che la sede non stia usando ePAS.
+Di fianco a sedi con percentuali prossime al 100% si può cliccare sull'apposito link per verificare tramite approfondimento sulle timbrature
+se queste compaiono nell'ultimo mese di modo da dare un'ulteriore livello di verifica.</p>
+#{/alert}
+
+		<table class="table table-hover table-condensed table-striped center" datatable>
+			<thead>
+			<tr>
+				<th>Sede</th>
+				<th>Dipendenti sede</th>
+				<th>Dipendenti non inizializzati</th>
+				<th>Percentuale</th>
+			</tr>
+			</thead>
+			<tbody>
+			#{list items:map.entrySet(), as:'entry'}
+			<tr>
+				<td>${entry.getKey().name} - ${entry.getKey().code}</font></td>  
+				   
+				<td>${entry.getValue().get(0)}</td>				
+				<td>${entry.getValue().get(1)}</td>
+				#{if entry.getValue().get(2) >= 0.5 && entry.getValue().get(2) <= 1}
+				<td class = "danger">${entry.getValue().get(2)}
+				#{/if}
+				#{else}
+				<td class = "success">${entry.getValue().get(2)}
+				#{/else}
+				</td>
+			</tr>
+			#{/list}
+			</tbody>
+		</table>
+
+</div>
