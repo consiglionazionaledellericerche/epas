@@ -6,7 +6,10 @@ ENV APP_HOME=/home/epas/epas
 
 USER root
 
-RUN apt-get update && \
+# Debian Bullseye is oldoldstable; its security repository metadata
+# is no longer usable with this legacy base image.
+RUN sed -i '/^deb .*debian-security.*bullseye-security/s/^/#/' /etc/apt/sources.list && \
+	apt-get update && \
     apt-get install -y postgresql-client cron && \
     apt-get clean && \
     rm -r /var/lib/apt/lists/* && \

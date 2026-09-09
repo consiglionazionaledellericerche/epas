@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
   - Ripristinati i codici LAGILE E 39LA nelle rispettive categorie  
+  - Modificato dockerfile con workaround per risoluzione problemi sulla debian bullseye presa per creare
+    l'immagine docker patchata del play
 
 ## [2.33.2] - 2026-08-24
 ### Added
