@@ -4,10 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.33.3] - Unreleased
+## [2.33.3] - 2026-09-09
 ### Added
   - Aggiunto controllo che permette di sapere quali sono le sedi che sono su epas ma che di fatto non lo
     stanno utilizzando.
+
+### Changed
+  - Ripristinati i codici LAGILE E 39LA nelle rispettive categorie  
 
 ## [2.33.2] - 2026-08-24
 ### Added
