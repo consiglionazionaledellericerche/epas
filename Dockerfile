@@ -1,4 +1,4 @@
-FROM criluc/play1:1.5.3-openjdk-11-patched
+FROM criluc/play1:1.5.3-temurin-11-patched
 
 ENV user=epas
 ENV APP=ePas
@@ -8,8 +8,7 @@ USER root
 
 # Debian Bullseye is oldoldstable; its security repository metadata
 # is no longer usable with this legacy base image.
-RUN sed -i '/^deb .*debian-security.*bullseye-security/s/^/#/' /etc/apt/sources.list && \
-	apt-get update && \
+RUN apt-get update && \
     apt-get install -y postgresql-client cron && \
     apt-get clean && \
     rm -r /var/lib/apt/lists/* && \
