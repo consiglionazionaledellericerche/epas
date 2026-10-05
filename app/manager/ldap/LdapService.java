@@ -18,6 +18,7 @@
 package manager.ldap;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.Hashtable;
 import javax.naming.AuthenticationException;
@@ -83,16 +84,23 @@ public class LdapService {
         + "LdapUrl = {}. StartTLS = {}, adminPrincipal = {}, adminCredentials = {}", 
         username, ldapUrl, ldapStartTls, adminPrincipal, adminCredentials);
 
+    if (Strings.isNullOrEmpty(username) || Strings.isNullOrEmpty(password)) {
+      log.info("LDAP authentication -> autenticazione rifiutata: username o password mancanti");
+      return Optional.absent();
+    }
+
+
     // Variabili usate solo se viene effettuata la prima connessione da 
     // utente amministatore 
     LdapContext authAdminContext = null;
     Optional<StartTlsResponse> tlsAdmin = Optional.absent();
 
     Optional<LdapUser> ldapUser = Optional.absent();
-    
+
     // Se è impostato un utente LDAP amministratore la prima connessione viene
     // effettuata con questo utente.
-    if (adminPrincipal != null && adminCredentials != null) {
+    if (!Strings.isNullOrEmpty(adminPrincipal)
+        && !Strings.isNullOrEmpty(adminCredentials)){
       log.debug("LDAP authentication -> Effettuo la prima connessione LDAP con "
           + "utente admin = {}", adminPrincipal);
 
@@ -110,7 +118,7 @@ public class LdapService {
             adminPrincipal, username, e);
         return Optional.absent();
       }
-      
+
       // Per l'autenticazione nell'LDAP del CNR è necessario effettuare una 
       // search come utente admin per trovare l'utente e poi una search in un 
       // contesto più largo.
@@ -135,7 +143,7 @@ public class LdapService {
         ldapUser = authenticateUser(username, password);
       }
 
-    // questo è il caso senza una pre-autenticazione come utente admin.
+      // questo è il caso senza una pre-autenticazione come utente admin.
     } else {
       ldapUser = authenticateUser(username, password);
     }
@@ -171,15 +179,15 @@ public class LdapService {
             searchControls());
     return userFromSearchResults(username, ldapSearchResult);
   }
-  
+
   private boolean authenticateUserByGenericSearch(String principal, String password) {
     LdapContext authContext = null;
     Optional<StartTlsResponse> tls = Optional.absent();
-    
+
     val authEnv = baseAuthEnv();
-    
+
     boolean authenticated = false;
-    
+
     try {
       authContext = new InitialLdapContext(authEnv, null);    
 
@@ -189,10 +197,10 @@ public class LdapService {
       // Se la search non solleva un'eccezione allora
       // l'utente è autenticato
       authContext.search(authenticateUserSearchDn, null);
-      
+
       authenticated = true;
       log.info("LDAP authentication -> LDAP Authentication Success for dn={}", principal);
-       
+
     } catch (AuthenticationException authEx) {
       log.info("LDAP authentication -> Authentication failed for dn={}",
           principal, authEx);
@@ -213,7 +221,7 @@ public class LdapService {
     }
     return authenticated;
   }
-  
+
   /**
    * Effettua una ricerca dell'utente su LDAP effettuando la query con le
    * credenziali dell'utente per verificare che siano corrispondenti a quelle
@@ -226,14 +234,14 @@ public class LdapService {
    *     se l'autenticazione non va a buon fine.
    */
   private Optional<LdapUser> authenticateUser(String username, String password) {
-    
+
     val authEnv = baseAuthEnv();
     String dn = userDn(username);
-    
+
     Optional<LdapUser> ldapUser = Optional.absent(); 
     LdapContext authContext = null;
     Optional<StartTlsResponse> tls = Optional.absent();
-    
+
     try {
       authContext = new InitialLdapContext(authEnv, null);    
 
@@ -282,7 +290,7 @@ public class LdapService {
     }
     return Optional.absent();
   }
-  
+
   /**
    * Costruisce le informazioni di ricerca da passare alla query LDAP per prelevare
    * le info degli utenti.
@@ -297,7 +305,7 @@ public class LdapService {
     ctrls.setSearchScope(SearchControls.SUBTREE_SCOPE); 
     return ctrls;
   }
-  
+
   /**
    * Costruisce un LdapUser dai risultati della ricerca LDAP.
    *
@@ -343,7 +351,7 @@ public class LdapService {
     authContext.addToEnvironment(Context.SECURITY_PRINCIPAL, principal);
     authContext.addToEnvironment(Context.SECURITY_CREDENTIALS, credentials);   
   }
-  
+
   /**
    * Costruisce il distinguished name (DN) dell'utente in funzione dei parametri LDAP.
    *
@@ -361,7 +369,7 @@ public class LdapService {
     log.debug("LDAP authentication -> DN dell'utente utilizzato per il login: {}", dn);
     return dn;
   }
-  
+
   /**
    * Utilizzato per decidere qualche attributo LDAP utilizzare per fare il mapping con l'attributo
    * eppn presente in ePAS.

@@ -19,6 +19,7 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import dao.UserDao;
 import java.lang.reflect.InvocationTargetException;
@@ -60,9 +61,15 @@ public class Security extends Secure.Security {
    */
   static boolean authenticate(String username, String password) {
     log.debug("Richiesta autenticazione di {}", username);
+    if (Strings.isNullOrEmpty(password)) {
+      return false;
+    }
+    if (Strings.isNullOrEmpty(username)) {
+      return false;
+    }
 
     User user = 
-        userDao.getUserByUsernameAndPassword(username, Optional.fromNullable(password));
+        userDao.getUserByUsernameAndPassword(username, password);
 
     if (user != null) {
       log.info("user {} successfully logged in from ip {}", user.getUsername(),

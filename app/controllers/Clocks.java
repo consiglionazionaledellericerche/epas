@@ -19,6 +19,7 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
@@ -149,6 +150,14 @@ public class Clocks extends Controller {
   public static void ldapLogin(String username, String password) {
     log.debug("Richiesta autenticazione su Timbrature via WEB con credenziali "
         + "LDAP username={}", username);
+    if (Strings.isNullOrEmpty(password)) {
+      flash.error("Oops! Password nulla o sconosciuta");
+      show();
+    }
+    if (Strings.isNullOrEmpty(username)) {
+      flash.error("Oops! Username nullo o sconosciuto");
+      show();
+    }
 
     Optional<LdapUser> ldapUser = ldapService.authenticate(username, password);
 
