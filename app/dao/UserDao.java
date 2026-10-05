@@ -104,27 +104,43 @@ public class UserDao extends DaoBase {
    * @param password (opzionale) la password dell'utente
    * @return l'user corrispondente a username e password passati come parametro.
    */
-  public User getUserByUsernameAndPassword(String username, Optional<String> password) {
+  public User getUserByUsernameAndPassword(String username, String password) {
+
     final QUser user = QUser.user;
+
     final BooleanBuilder condition = new BooleanBuilder()
         // Solo gli utenti attivi
-        .and(user.disabled.isFalse());
+        .and(user.disabled.isFalse())
+        // Username obbligatorio
+        .and(user.username.eq(username));
 
-    final BooleanBuilder passwordCondition = new BooleanBuilder();
-    if (password.isPresent()) {
-      passwordCondition
-        .and(user.password.eq(User.cryptPasswordMd5(password.get())))
-          .or(user.passwordSha512.eq(User.cryptPasswordSha512(password.get())));
+    // La password è obbligatoria per questo metodo.
+    if (Strings.isNullOrEmpty(password)) {
+      return null;
     }
 
+    final BooleanBuilder passwordCondition = new BooleanBuilder()
+        .and(
+            user.password.eq(User.cryptPasswordMd5(password))
+            .or(user.passwordSha512.eq(User.cryptPasswordSha512(password)))
+            );
+
     return getQueryFactory().selectFrom(user)
-        .where(condition.and(passwordCondition).and(user.username.eq(username)))
+        .where(condition.and(passwordCondition))
         .fetchOne();
   }
 
   public User byUsername(String username) {
-    return getUserByUsernameAndPassword(username, Optional.absent());
-  }
+
+    final QUser user = QUser.user;
+
+    return getQueryFactory().selectFrom(user)
+        .where(
+            user.disabled.isFalse()
+                .and(user.username.eq(username))
+        )
+        .fetchOne();
+}
 
   /**
    * Tutti gli username già presenti che contengono il pattern all'interno del proprio username.
@@ -223,7 +239,7 @@ public class UserDao extends DaoBase {
 
     return user.isSystemUser()
         || user.hasRoles(Role.SEAT_SUPERVISOR, Role.PERSONNEL_ADMIN,
-        Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN);
+            Role.PERSONNEL_ADMIN_MINI, Role.TECHNICAL_ADMIN);
   }
 
   /**
@@ -254,7 +270,7 @@ public class UserDao extends DaoBase {
     }
     return stampTypes;
   }
-  
+
   /**
    * Gli stamp types utilizzabili dall'user. In particolare gli utenti senza diritti di
    * amministrazione potranno usufruire della sola causale lavoro fuori sede.
@@ -263,7 +279,7 @@ public class UserDao extends DaoBase {
    * @return list
    */
   public static List<TeleworkStampTypes> getAllowedTeleworkStampTypes(final User user) {
-    
+
     if (user.isSystemUser()) {
       return TeleworkStampTypes.onlyActive();
     }
