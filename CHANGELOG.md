@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.34.0] - Unreleased
+## [2.34.0] - 2026-10-05
 ### Changed
   - Modificati i metodi authenticate della classe Security e getByUsernameAndPassword della classe UserDao
     per evitare che il passaggio di una password nulla generasse comunque un'autenticazione.
+  - Modificati anche i metodi che permettono l'autenticazione via ldap con la stessa logica.
 
 ## [2.33.3] - 2026-09-09
 ### Added

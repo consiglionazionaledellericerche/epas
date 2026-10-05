@@ -101,7 +101,7 @@ public class UserDao extends DaoBase {
    * L'user corrispondente all'username e alla password (opzionale) passati.
    *
    * @param username l'username dell'utente
-   * @param password (opzionale) la password dell'utente
+   * @param password la password dell'utente
    * @return l'user corrispondente a username e password passati come parametro.
    */
   public User getUserByUsernameAndPassword(String username, String password) {

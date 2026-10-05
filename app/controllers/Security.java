@@ -64,6 +64,9 @@ public class Security extends Secure.Security {
     if (Strings.isNullOrEmpty(password)) {
       return false;
     }
+    if (Strings.isNullOrEmpty(username)) {
+      return false;
+    }
 
     User user = 
         userDao.getUserByUsernameAndPassword(username, password);
