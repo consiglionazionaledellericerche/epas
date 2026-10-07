@@ -81,8 +81,8 @@ public class LdapService {
    */
   public Optional<LdapUser> authenticate(String username, String password) {
     log.debug("LDAP authentication -> autenticazione LDAP in corso per username {}. "
-        + "LdapUrl = {}. StartTLS = {}, adminPrincipal = {}, adminCredentials = {}", 
-        username, ldapUrl, ldapStartTls, adminPrincipal, adminCredentials);
+        + "LdapUrl = {}. StartTLS = {}, adminPrincipal = {}",
+        username, ldapUrl, ldapStartTls, adminPrincipal);
 
     if (Strings.isNullOrEmpty(username) || Strings.isNullOrEmpty(password)) {
       log.info("LDAP authentication -> autenticazione rifiutata: username o password mancanti");

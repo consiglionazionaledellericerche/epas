@@ -18,13 +18,11 @@
 package controllers;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import common.security.ClientAddress;
 import dao.UserDao;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -73,7 +71,7 @@ public class Security extends Secure.Security {
 
     if (user != null) {
       log.info("user {} successfully logged in from ip {}", user.getUsername(),
-          Http.Request.current().remoteAddress);
+          Http.Request.current() != null ? Http.Request.current().remoteAddress : null);
       if (user.getPasswordSha512() == null) {
         user.setPasswordSha512(User.cryptPasswordSha512(password));
         user.save();
@@ -134,16 +132,9 @@ public class Security extends Secure.Security {
    */
   @Util
   public static boolean checkForWebstamping() {
-
-    if (Http.Request.current() == null || Http.Request.current().remoteAddress == null) {
-      log.debug("Remote addresses not present, web stamping not permitted");
-      return false;
-    }
-    final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
-        .split(Http.Request.current().remoteAddress));
-
-    log.debug("Remote addresses = {}", addresses);
-    return !officeManager.getOfficesWithAllowedIp(addresses).isEmpty();
+    final Optional<String> address = ClientAddress.current();
+    log.debug("Remote address = {}", address);
+    return !officeManager.getOfficesWithAllowedIp(address).isEmpty();
   }
 
   /**
