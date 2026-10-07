@@ -18,9 +18,8 @@
 package controllers;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import common.security.ClientAddress;
 import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -51,7 +50,6 @@ import play.data.binding.As;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
-import play.mvc.Http;
 import play.mvc.Util;
 import play.mvc.With;
 
@@ -88,10 +86,9 @@ public class Clocks extends Controller {
   public static void show() {
     LocalDate data = new LocalDate();
 
-    final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
-        .split(Http.Request.current().remoteAddress));
+    final Optional<String> address = ClientAddress.current();
 
-    Set<Office> offices = officeManager.getOfficesWithAllowedIp(addresses);
+    Set<Office> offices = officeManager.getOfficesWithAllowedIp(address);
 
     if (offices.isEmpty()) {
       flash.error("Le timbrature web non sono permesse da questo terminale! "
@@ -178,10 +175,9 @@ public class Clocks extends Controller {
   
   @Util
   private static void checkIpEnabled(Person person) {
-    final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
-        .split(Http.Request.current().remoteAddress));
+    final Optional<String> address = ClientAddress.current();
 
-    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(person.getOffice())) {
+    if (!officeManager.getOfficesWithAllowedIp(address).contains(person.getOffice())) {
 
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -198,10 +194,9 @@ public class Clocks extends Controller {
     // Quindi non dovrebbe mai accadere di avere a questo punto uno user null.
     
     User user = Security.getUser().orNull();
-    final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
-        .split(Http.Request.current().remoteAddress));
+    final Optional<String> address = ClientAddress.current();
 
-    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(user.getPerson().getOffice())) {
+    if (!officeManager.getOfficesWithAllowedIp(address).contains(user.getPerson().getOffice())) {
 
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -253,10 +248,9 @@ public class Clocks extends Controller {
 
     final User user = Security.getUser().get();
         
-    final List<String> addresses = Lists.newArrayList(Splitter.on(",").trimResults()
-        .split(Http.Request.current().remoteAddress));
+    final Optional<String> address = ClientAddress.current();
 
-    if (!officeManager.getOfficesWithAllowedIp(addresses).contains(user.getPerson().getOffice())) {
+    if (!officeManager.getOfficesWithAllowedIp(address).contains(user.getPerson().getOffice())) {
 
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"

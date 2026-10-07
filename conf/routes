@@ -55,22 +55,8 @@ GET		/shift/renderPersonShiftServices/{shiftType}													Shift.renderPerson
 GET		/shift/renderShiftname/{shiftType}																Shift.renderShiftname
 GET		/shift/renderActivityname/{shiftType}															Shift.renderActivityname
 
-#Gestione straordinari (sist-org)
-GET		/overtimes/getPersonOvertimes/{email}/{year}/{month}						Overtimes.getPersonOvertimes
-PUT		/overtimes/setRequestedOvertime/{year}/{month}								Overtimes.setRequestOvertime
-POST 	/overtimes/exportMonthAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}	Overtimes.exportMonthAsPDF
-
-GET 	/overtimes/getSupervisorTotalOvertimes/{email}								Overtimes.getSupervisorTotalOvertimes
-PUT 	/overtimes/setSupervisorTotalOvertimes/{email}/{hours}						Overtimes.setSupervisorTotalOvertimes
-
 #Gestione timbrature via json
 PUT		/stampings/create						StampingsFromClient.create
-
-#Invio periodi di assenza 
-POST	/absenceFromJson/absenceInPeriod/{yearFrom}/{monthFrom}/{dayFrom}/{yearTo}/{monthTo}/{dayTo}				AbsenceFromJson.absenceInPeriod
-
-#Ricezione richiesta codici frequenti di assenza
-GET		/absenceFromJson/frequentAbsence/{yearFrom}/{monthFrom}/{dayFrom}/{yearTo}/{monthTo}/{dayTo}		AbsenceFromJson.frequentAbsence
 
 # EndPoints Rest
 
