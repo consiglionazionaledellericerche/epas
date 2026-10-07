@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
   - Migliorata la determinazione dell'indirizzo ip del client quando ePAS è dietro uno o più
     reverse proxy (parametro XForwardedSupport, configurabile nel docker con X_FORWARDED_SUPPORT).
+### Removed
+  - Rimossi i vecchi endpoint di integrazione con sist-org (/overtimes/* e /absenceFromJson/*),
+    non più utilizzati.
 
 ## [2.34.0] - 2026-10-05
 ### Changed
