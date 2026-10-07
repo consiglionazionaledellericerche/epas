@@ -1385,7 +1385,7 @@ public class Administration extends Controller {
       Configuration newConfiguration = (Configuration) configurationManager
           .updateDayMonth(EpasParam.EXPIRY_VACATION_PAST_YEAR, office, 31, 12, 
               Optional.fromNullable(date.minusYears(1).dayOfYear().withMinimumValue()), 
-              Optional.fromNullable(date.minusYears(1).dayOfYear().withMaximumValue()), false);              
+              Optional.fromNullable(date.dayOfYear().withMaximumValue()), true);              
       
       List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(newConfiguration, false);
       RecomputeRecap recomputeRecap =

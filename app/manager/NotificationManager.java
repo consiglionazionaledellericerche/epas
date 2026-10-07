@@ -505,7 +505,6 @@ public class NotificationManager {
         || groupAbsenceType.getName().equals(DefaultGroup.MISSIONE_ORARIA.name())
         || groupAbsenceType.getName().equals(DefaultGroup.RIPOSI_CNR_DIPENDENTI.name())
         || groupAbsenceType.getName().equals(DefaultGroup.G_661.name())
-        || groupAbsenceType.getName().equals(DefaultGroup.FERIE_CNR_PROROGA.name())
         || groupAbsenceType.getName().equals(DefaultGroup.LAVORO_FUORI_SEDE.name())) {
       if (insert) {
         notifyAbsence(absence, groupAbsenceType, currentUser, NotificationManager.Crud.CREATE);
