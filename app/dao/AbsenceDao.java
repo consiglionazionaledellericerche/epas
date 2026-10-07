@@ -17,7 +17,6 @@
 
 package dao;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Provider;
@@ -44,7 +43,6 @@ import models.absences.definitions.DefaultGroup;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
 import models.absences.query.QJustifiedType;
-import models.exports.FrequentAbsenceCode;
 import models.query.QPersonDay;
 import org.joda.time.LocalDate;
 
@@ -362,48 +360,6 @@ public class AbsenceDao extends DaoBase {
 
     return absences;
 
-  }
-
-  /**
-   * Ritorna le assenze frequenti nel periodo da from a to.
-   *
-   * @return la lista dei frequentAbsenceCode, ovvero dei codici di assenza più frequentemente usati
-   *     nel periodo compreso tra 'dateFrom' e 'dateTo'.
-   */
-  public List<FrequentAbsenceCode> getFrequentAbsenceCodeForAbsenceFromJson(
-      LocalDate dateFrom, LocalDate dateTo) {
-    List<FrequentAbsenceCode> frequentAbsenceCodeList = new ArrayList<>();
-    QAbsence absence = QAbsence.absence;
-    QPersonDay personDay = QPersonDay.personDay;
-
-    BooleanBuilder conditions = new BooleanBuilder(personDay.date.between(dateFrom, dateTo));
-
-    List<String> listaRiposiCompensativi =
-        getQueryFactory().select(absence.absenceType.code).from(absence)
-            .join(absence.personDay, personDay)
-            .where(conditions
-                .and(absence.absenceType.description.containsIgnoreCase("Riposo compensativo")))
-        .distinct().fetch();
-
-    List<String> listaFerie = getQueryFactory().select(absence.absenceType.code).from(absence)
-        .join(absence.personDay, personDay)
-        .where(conditions.and(absence.absenceType.description.containsIgnoreCase("ferie")
-            .or(absence.absenceType.code.eq("94"))))
-        .distinct().fetch();
-
-    List<String> listaMissioni = getQueryFactory().select(absence.absenceType.code)
-        .from(absence).join(absence.personDay, personDay)
-        .where(conditions.and(absence.absenceType.code.eq("92")))
-        .distinct().fetch();
-
-    Joiner joiner = Joiner.on("-").skipNulls();
-
-    frequentAbsenceCodeList.add(new FrequentAbsenceCode(joiner.join(listaFerie), "Ferie"));
-    frequentAbsenceCodeList.add(
-        new FrequentAbsenceCode(joiner.join(listaRiposiCompensativi), "Riposo compensativo"));
-    frequentAbsenceCodeList.add(new FrequentAbsenceCode(joiner.join(listaMissioni), "Missione"));
-
-    return frequentAbsenceCodeList;
   }
 
   /**

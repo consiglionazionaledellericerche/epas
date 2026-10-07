@@ -1,7 +1,0 @@
-
-  		{
-   			"yearResidualAtMonth" : ${personOvertimesData.yearResidualAtMonth},
-  			"monthResidual" : ${personOvertimesData.monthResidual},
-  			"overtime" : ${personOvertimesData.overtime}
-  		}
-
