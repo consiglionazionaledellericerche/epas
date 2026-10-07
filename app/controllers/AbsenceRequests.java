@@ -579,9 +579,7 @@ public class AbsenceRequests extends Controller {
       groupAbsenceType = absenceRequestManager.getGroupAbsenceType(absenceRequest);
     }
     
-    if (groupAbsenceType.getName().equals(DefaultGroup.FERIE_CNR_PROROGA.name())) {
-      absenceType = absenceComponentDao.absenceTypeByCode(DefaultAbsenceType.A_37.getCode()).get();
-    }
+
     InsertReport insertReport =
         absenceService.insert(absenceRequest.getPerson(), 
             absenceForm.groupSelected, absenceForm.from,

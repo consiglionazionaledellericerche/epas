@@ -250,8 +250,8 @@ public class Offices extends Controller {
     List<Office> activeOffices = officeDao.allEnabledOffices();
     for (Office office : activeOffices) {
       log.debug("Analizzo la sede {}", office.getName());
-      if (office.getId() == 244 || office.getId() == 242 || office.getId() == 243) {
-        log.debug("ICAR");
+      if (office.getId() == 821 || office.getId() == 822 || office.getId() == 823) {
+        log.debug("IASI");
       }
       int peopleToInitialize = 0;
       List<Person> personList = personDao.activeWithNumber(office);

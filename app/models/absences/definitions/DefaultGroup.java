@@ -272,9 +272,9 @@ public enum DefaultGroup {
       DefaultCategoryType.FERIE_DIPENDENTI, 2, // must be greater than FERIE_CNR
       GroupAbsenceTypePattern.vacationsCnr, PeriodType.always, DefaultTakable.T_FERIE_CNR, null,
       null, false, false), 
-  FERIE_CNR_PROROGA("37 - Ferie dopo 31/08", "",
-      DefaultCategoryType.FERIE_CNR, 1, GroupAbsenceTypePattern.vacationsCnr,
-      PeriodType.always, DefaultTakable.T_FERIE_CNR_PROROGA, null, null, false, false),
+//  FERIE_CNR_PROROGA("37 - Ferie dopo 31/08", "",
+//      DefaultCategoryType.FERIE_CNR, 1, GroupAbsenceTypePattern.vacationsCnr,
+//      PeriodType.always, DefaultTakable.T_FERIE_CNR_PROROGA, null, null, false, false),
 
   RIPOSI_CNR("91 - Riposo compensativo", "", DefaultCategoryType.RIPOSI_COMPENSATIVI_CNR, 0,
       GroupAbsenceTypePattern.compensatoryRestCnr, PeriodType.always, DefaultTakable.T_RIPOSI_CNR,

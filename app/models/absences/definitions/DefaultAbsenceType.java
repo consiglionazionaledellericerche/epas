@@ -816,7 +816,7 @@ public enum DefaultAbsenceType {
   A_37("37", "ferie anno precedente (dopo il 31/8)", false,
       ImmutableSet.of(JustifiedTypeName.all_day), 0, false, 
       MealTicketBehaviour.notAllowMealTicket, 0, null,
-      Sets.newHashSet(), null, null, false, true, true, "F"),
+      Sets.newHashSet(), null, new LocalDate(2026, 05, 1), false, true, true, "F"),
 
   A_91("91", "Riposo compensativo", false, ImmutableSet.of(JustifiedTypeName.all_day), 0, false,
       MealTicketBehaviour.notAllowMealTicket, 0, null, 
