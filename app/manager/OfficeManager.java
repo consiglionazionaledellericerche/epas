@@ -88,20 +88,24 @@ public class OfficeManager {
 
 
   /**
-   * Le sedi che hanno la timbratura web abilitata ed almeno uno degli ip 
-   * abilitato per timbrature.
+   * Le sedi che hanno la timbratura web abilitata e l'indirizzo ip passato
+   * tra quelli abilitati per le timbrature.
    *
-   * @param ipAddresses indirizzi ip da verificare
-   * @return Set di uffici abilitati dagli indirizzi ip passati come parametro
+   * @param ipAddress indirizzo ip del client da verificare (vedi ClientAddress)
+   * @return Set di uffici abilitati dall'indirizzo ip passato come parametro
    */
-  public Set<Office> getOfficesWithAllowedIp(final List<String> ipAddresses) {
+  public Set<Office> getOfficesWithAllowedIp(final Optional<String> ipAddress) {
 
-    Preconditions.checkNotNull(ipAddresses);
-    Preconditions.checkState(!ipAddresses.isEmpty());
+    Preconditions.checkNotNull(ipAddress);
 
     if ("true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
       log.debug("Skipped IP check");
       return new HashSet<>(officeDao.getAllOffices());
+    }
+
+    if (!ipAddress.isPresent()) {
+      log.debug("Remote address not present, web stamping not permitted");
+      return Sets.newHashSet();
     }
 
     List<Office> officesWebStampingEnabled = officeDao.getOfficesWebStampingEnabled();
@@ -114,11 +118,9 @@ public class OfficeManager {
     for (Configuration configuration : configurationWithType) {
       IpList ipList = (IpList) EpasParamValueType.parseValue(EpasParamValueType.IP_LIST,
           (String) configuration.getValue());
-      for (String ip : ipAddresses) {
-        if (ipList != null && ipList.ipList.contains(ip) 
-            && officesWebStampingEnabled.contains(configuration.getOffice())) {
-          offices.add(configuration.getOffice());
-        }
+      if (ipList != null && ipList.ipList.contains(ipAddress.get()) 
+          && officesWebStampingEnabled.contains(configuration.getOffice())) {
+        offices.add(configuration.getOffice());
       }
     }
     return offices;
