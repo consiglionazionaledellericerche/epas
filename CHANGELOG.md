@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+  - Corretto il salvataggio delle richieste di assenza e di competenza: lo stato di approvazione
+    e il valore approvato non possono più essere impostati da chi effettua la richiesta.
+
 ## [2.34.1] - 2026-10-08
 ### Changed
   - Migliorata la determinazione dell'indirizzo ip del client quando ePAS è dietro uno o più

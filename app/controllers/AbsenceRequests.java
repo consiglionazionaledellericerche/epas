@@ -288,8 +288,11 @@ public class AbsenceRequests extends Controller {
 
     Person person;
     if (personId.isPresent()) {
-      rules.check("AbsenceRequests.blank4OtherPerson");
       person = personDao.getPersonById(personId.get());
+      notFoundIfNull(person);
+      if (!rules.check("AbsenceRequests.blank4OtherPerson", person)) {
+        forbidden();
+      }
     } else {
       if (Security.getUser().isPresent() && Security.getUser().get().getPerson() != null) {
         person = Security.getUser().get().getPerson();
@@ -629,13 +632,22 @@ public class AbsenceRequests extends Controller {
     log.debug("AbsenceRequest.startAt = {}, AbsenceRequest.endTo = {}", 
         absenceRequest.getStartAt(), absenceRequest.getEndTo());
 
-    if (!Security.getUser().get().getPerson().equals(absenceRequest.getPerson())) {
-      rules.check("AbsenceRequests.blank4OtherPerson");
-    } else {
-      absenceRequest.setPerson(Security.getUser().get().getPerson());
+    // Tramite il salvataggio si possono solo inserire nuove richieste.
+    if (absenceRequest.isPersistent()) {
+      forbidden();
     }
 
     notFoundIfNull(absenceRequest.getPerson());
+    val currentPerson = Security.getUser().get().getPerson();
+    if (currentPerson == null || !currentPerson.equals(absenceRequest.getPerson())) {
+      if (!rules.check("AbsenceRequests.blank4OtherPerson", absenceRequest.getPerson())) {
+        forbidden();
+      }
+    } else {
+      absenceRequest.setPerson(currentPerson);
+    }
+
+    absenceRequestManager.initNewRequest(absenceRequest);
     absenceRequestManager.configure(absenceRequest);
 
     if (absenceRequest.getEndTo() == null) {
