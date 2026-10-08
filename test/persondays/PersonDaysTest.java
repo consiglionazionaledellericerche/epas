@@ -30,8 +30,10 @@ import models.Person;
 import models.PersonDay;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.enumerate.StampTypes;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
@@ -430,13 +432,24 @@ public class PersonDaysTest extends UnitTest {
    * @return WorkingTimeTypeDay di default (quelle Normale).
    */
   public WorkingTimeTypeDay normalDay() {
-    WorkingTimeTypeDay wttd = new WorkingTimeTypeDay();
-    wttd.setBreakTicketTime(30);
-    wttd.setMealTicketTime(360);
-    wttd.setWorkingTime(432);
-    wttd.setTicketAfternoonThreshold(null);
-    wttd.setHoliday(false);
-    return wttd;
+    WorkingTimeType wtt = new WorkingTimeType();
+    WorkingTimeTypeDay normalDay = null;
+    for (int dayOfWeek = DateTimeConstants.MONDAY; dayOfWeek <= DateTimeConstants.SUNDAY;
+        dayOfWeek++) {
+      WorkingTimeTypeDay wttd = new WorkingTimeTypeDay();
+      wttd.setWorkingTimeType(wtt);
+      wttd.setDayOfWeek(dayOfWeek);
+      wttd.setBreakTicketTime(30);
+      wttd.setMealTicketTime(360);
+      wttd.setWorkingTime(432);
+      wttd.setTicketAfternoonThreshold(0);
+      wttd.setHoliday(dayOfWeek >= DateTimeConstants.SATURDAY);
+      wtt.getWorkingTimeTypeDays().add(wttd);
+      if (dayOfWeek == DateTimeConstants.MONDAY) {
+        normalDay = wttd;
+      }
+    }
+    return normalDay;
   }
 
   /**
