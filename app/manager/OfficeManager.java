@@ -19,12 +19,17 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import dao.OfficeDao;
 import dao.UsersRolesOfficesDao;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.configurations.ConfigurationManager;
@@ -45,6 +50,10 @@ import play.Play;
 public class OfficeManager {
 
   public static final String SKIP_IP_CHECK = "skip.ip.check";
+
+  // Evita di ripetere nel log lo stesso avviso ad ogni richiesta.
+  private static final Cache<String, Boolean> COMPATIBILITY_WARNINGS = CacheBuilder.newBuilder()
+      .expireAfterWrite(1, TimeUnit.HOURS).maximumSize(1000).build();
 
   private final UsersRolesOfficesDao usersRolesOfficesDao;
   private final ConfigurationManager configurationManager;
@@ -88,15 +97,23 @@ public class OfficeManager {
 
 
   /**
-   * Le sedi che hanno la timbratura web abilitata e l'indirizzo ip passato
-   * tra quelli abilitati per le timbrature.
+   * Le sedi che hanno la timbratura web abilitata e l'indirizzo ip passato, oppure
+   * uno degli indirizzi accettati per compatibilità, tra quelli abilitati per le timbrature.
+   *
+   * <p>Le sedi abilitate solo grazie agli indirizzi di compatibilità (falsificabili tramite
+   * l'header X-Forwarded-For) vengono segnalate nel log, per individuare le installazioni
+   * in cui è necessario configurare XForwardedSupport con gli ip dei reverse proxy.</p>
    *
    * @param ipAddress indirizzo ip del client da verificare (vedi ClientAddress)
-   * @return Set di uffici abilitati dall'indirizzo ip passato come parametro
+   * @param compatibilityAddresses gli altri indirizzi della catena X-Forwarded-For accettati
+   *     per compatibilità (vedi ClientAddress#compatibilityAddresses)
+   * @return Set di uffici abilitati dagli indirizzi ip passati come parametro
    */
-  public Set<Office> getOfficesWithAllowedIp(final Optional<String> ipAddress) {
+  public Set<Office> getOfficesWithAllowedIp(final Optional<String> ipAddress,
+      final List<String> compatibilityAddresses) {
 
     Preconditions.checkNotNull(ipAddress);
+    Preconditions.checkNotNull(compatibilityAddresses);
 
     if ("true".equals(Play.configuration.getProperty(SKIP_IP_CHECK))) {
       log.debug("Skipped IP check");
@@ -112,18 +129,42 @@ public class OfficeManager {
     log.debug("officesWebStampingEnabled= {}", officesWebStampingEnabled);
     
     Set<Office> offices = Sets.newHashSet();
+    Set<Office> compatibilityOffices = Sets.newHashSet();
     List<Configuration> configurationWithType = configurationManager
         .configurationWithType(EpasParam.ADDRESSES_ALLOWED);
 
     for (Configuration configuration : configurationWithType) {
       IpList ipList = (IpList) EpasParamValueType.parseValue(EpasParamValueType.IP_LIST,
           (String) configuration.getValue());
-      if (ipList != null && ipList.ipList.contains(ipAddress.get()) 
-          && officesWebStampingEnabled.contains(configuration.getOffice())) {
+      if (ipList == null || !officesWebStampingEnabled.contains(configuration.getOffice())) {
+        continue;
+      }
+      if (ipList.ipList.contains(ipAddress.get())) {
         offices.add(configuration.getOffice());
+      } else if (compatibilityAddresses.stream().anyMatch(ipList.ipList::contains)) {
+        compatibilityOffices.add(configuration.getOffice());
       }
     }
+    compatibilityOffices.removeAll(offices);
+    if (!compatibilityOffices.isEmpty()) {
+      warnCompatibilityAccess(ipAddress.get(), compatibilityAddresses, compatibilityOffices);
+      offices.addAll(compatibilityOffices);
+    }
     return offices;
+  }
+
+  private static void warnCompatibilityAccess(String ipAddress,
+      List<String> compatibilityAddresses, Set<Office> offices) {
+    final String key = ipAddress + "|" + compatibilityAddresses;
+    if (COMPATIBILITY_WARNINGS.asMap().putIfAbsent(key, Boolean.TRUE) != null) {
+      return;
+    }
+    log.warn("Timbratura web abilitata per le sedi {} solo per compatibilità tramite gli "
+        + "indirizzi {} dell'header X-Forwarded-For (ip attendibile {}). Questi indirizzi sono "
+        + "falsificabili dal client: impostare in XForwardedSupport (X_FORWARDED_SUPPORT nel "
+        + "docker) gli ip dei reverse proxy. In una prossima versione non saranno più accettati.",
+        offices.stream().map(Office::getName).collect(Collectors.toList()),
+        compatibilityAddresses, ipAddress);
   }
 
 }

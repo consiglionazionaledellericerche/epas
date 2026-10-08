@@ -88,7 +88,8 @@ public class Clocks extends Controller {
 
     final Optional<String> address = ClientAddress.current();
 
-    Set<Office> offices = officeManager.getOfficesWithAllowedIp(address);
+    Set<Office> offices = officeManager.getOfficesWithAllowedIp(address,
+        ClientAddress.compatibilityAddresses());
 
     if (offices.isEmpty()) {
       flash.error("Le timbrature web non sono permesse da questo terminale! "
@@ -177,7 +178,8 @@ public class Clocks extends Controller {
   private static void checkIpEnabled(Person person) {
     final Optional<String> address = ClientAddress.current();
 
-    if (!officeManager.getOfficesWithAllowedIp(address).contains(person.getOffice())) {
+    if (!officeManager.getOfficesWithAllowedIp(address,
+        ClientAddress.compatibilityAddresses()).contains(person.getOffice())) {
 
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -196,7 +198,8 @@ public class Clocks extends Controller {
     User user = Security.getUser().orNull();
     final Optional<String> address = ClientAddress.current();
 
-    if (!officeManager.getOfficesWithAllowedIp(address).contains(user.getPerson().getOffice())) {
+    if (!officeManager.getOfficesWithAllowedIp(address,
+        ClientAddress.compatibilityAddresses()).contains(user.getPerson().getOffice())) {
 
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
@@ -250,7 +253,8 @@ public class Clocks extends Controller {
         
     final Optional<String> address = ClientAddress.current();
 
-    if (!officeManager.getOfficesWithAllowedIp(address).contains(user.getPerson().getOffice())) {
+    if (!officeManager.getOfficesWithAllowedIp(address,
+        ClientAddress.compatibilityAddresses()).contains(user.getPerson().getOffice())) {
 
       flash.error("Le timbrature web per la persona indicata non sono abilitate da questo"
           + "terminale! Inserire l'indirizzo ip nella configurazione della propria sede per"
