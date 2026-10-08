@@ -18,6 +18,7 @@
 package common.security;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 import play.test.UnitTest;
@@ -66,5 +67,17 @@ public class ClientAddressTest extends UnitTest {
   public void chainOfOnlyTrustedProxies() {
     assertEquals(Optional.of("10.0.0.2"),
         ClientAddress.of("10.0.0.2, 172.17.0.1", ImmutableSet.of("10.0.0.2", "172.17.0.1")));
+  }
+
+  @Test
+  public void compatibilityAddressesOnlyWithoutTrustedProxies() {
+    assertEquals(ImmutableList.of("192.168.1.10", "1.1.1.1"),
+        ClientAddress.compatibilityAddresses("192.168.1.10, 1.1.1.1, 203.0.113.5",
+            ImmutableSet.of()));
+    assertTrue(ClientAddress.compatibilityAddresses("10.0.0.1", ImmutableSet.of()).isEmpty());
+    assertTrue(ClientAddress.compatibilityAddresses(null, ImmutableSet.of()).isEmpty());
+    // Con i proxy fidati configurati gli indirizzi a sinistra non sono mai accettati.
+    assertTrue(ClientAddress.compatibilityAddresses("192.168.1.10, 203.0.113.5, 10.0.0.2",
+        ImmutableSet.of("10.0.0.2")).isEmpty());
   }
 }

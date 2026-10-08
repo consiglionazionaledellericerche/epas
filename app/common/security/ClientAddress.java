@@ -20,6 +20,7 @@ package common.security;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.util.List;
@@ -38,6 +39,11 @@ import play.mvc.Http;
  * (quelli indicati in XForwardedSupport) e il primo indirizzo non fidato è quello del
  * client. Con XForwardedSupport=all non ci sono proxy fidati noti e si considera
  * l'ultimo indirizzo della catena.</p>
+ *
+ * <p>Per compatibilità con le installazioni precedenti, con XForwardedSupport=all anche gli
+ * altri indirizzi della catena sono accettati per la whitelist delle timbrature web (vedi
+ * {@link #compatibilityAddresses()}). Questi indirizzi sono falsificabili: per non usarli è
+ * necessario impostare in XForwardedSupport gli ip dei reverse proxy.</p>
  */
 public final class ClientAddress {
 
@@ -81,6 +87,27 @@ public final class ClientAddress {
   }
 
   /**
+   * Gli altri indirizzi della catena, accettati solo per compatibilità quando non sono
+   * configurati proxy fidati (XForwardedSupport=all).
+   *
+   * @param remoteAddress il remoteAddress della richiesta (eventualmente una catena XFF)
+   * @param trustedProxies gli indirizzi dei reverse proxy fidati
+   * @return gli indirizzi della catena diversi da quello restituito da
+   *     {@link #of(String, Set)}, vuoto se sono configurati proxy fidati.
+   */
+  public static List<String> compatibilityAddresses(
+      String remoteAddress, Set<String> trustedProxies) {
+    final Optional<String> address = of(remoteAddress, trustedProxies);
+    if (!trustedProxies.isEmpty() || !address.isPresent()) {
+      return ImmutableList.of();
+    }
+    return COMMA_SPLITTER.splitToList(remoteAddress).stream()
+        .filter(a -> !a.equals(address.get()))
+        .distinct()
+        .collect(ImmutableList.toImmutableList());
+  }
+
+  /**
    * I reverse proxy fidati configurati in XForwardedSupport (vuoto se non impostato o "all").
    */
   public static Set<String> trustedProxies() {
@@ -99,5 +126,15 @@ public final class ClientAddress {
   public static Optional<String> current() {
     final Http.Request request = Http.Request.current();
     return request == null ? Optional.absent() : of(request.remoteAddress, trustedProxies());
+  }
+
+  /**
+   * Gli indirizzi accettati solo per compatibilità della richiesta HTTP corrente
+   * (vedi {@link #compatibilityAddresses(String, Set)}).
+   */
+  public static List<String> compatibilityAddresses() {
+    final Http.Request request = Http.Request.current();
+    return request == null ? ImmutableList.of()
+        : compatibilityAddresses(request.remoteAddress, trustedProxies());
   }
 }

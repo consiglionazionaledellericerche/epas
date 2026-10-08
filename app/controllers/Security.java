@@ -134,7 +134,8 @@ public class Security extends Secure.Security {
   public static boolean checkForWebstamping() {
     final Optional<String> address = ClientAddress.current();
     log.debug("Remote address = {}", address);
-    return !officeManager.getOfficesWithAllowedIp(address).isEmpty();
+    return !officeManager.getOfficesWithAllowedIp(address,
+        ClientAddress.compatibilityAddresses()).isEmpty();
   }
 
   /**
