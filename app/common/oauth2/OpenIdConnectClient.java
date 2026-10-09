@@ -59,6 +59,8 @@ public final class OpenIdConnectClient {
   private final ProviderConfig config;
   private final OAuth2 instance;
   private final Supplier<String> callBackUrl;
+  // Il client id di ePAS, da verificare nel claim azp degli access token
+  private final String clientId;
   private final String base64Auth;
   private final JwksResolver jwksResolver;
   // Il campo da considerare per il match dell'utente (default: email)
@@ -81,6 +83,7 @@ public final class OpenIdConnectClient {
         throws IOException {
 
     this.callBackUrl = callBackUrl;
+    this.clientId = clientId;
     this.jwtField = Objects.requireNonNullElse(jwtField, DEFAULT_FIELD);
 
     ObjectMapper mapper = new ObjectMapper()

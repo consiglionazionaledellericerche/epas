@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import common.oauth2.OpenIdConnectClient;
+import common.security.JwtValidator;
 import controllers.Resecure.NoCheck;
 import dao.JwtTokenDao;
 import io.jsonwebtoken.Claims;
@@ -29,7 +30,6 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.MacProvider;
-import io.jsonwebtoken.security.SecurityException;
 import java.security.Key;
 import java.time.ZonedDateTime;
 import java.util.Base64;
@@ -45,8 +45,6 @@ import play.Play;
 import play.cache.Cache;
 import play.libs.OAuth2;
 import play.mvc.Controller;
-import play.mvc.Http;
-import play.mvc.Http.Header;
 import play.mvc.Router;
 import play.mvc.Scope;
 import play.mvc.Scope.Session;
@@ -108,10 +106,9 @@ public class SecurityTokens extends Controller {
   @NoCheck
   public static void check(String token) {
     try {
-      Object body = Jwts.parserBuilder().setSigningKey(key()).build().parse(token).getBody();
-      String user = ((Claims) body).getSubject();
+      String user = JwtValidator.validateLocal(token, key(), Router.getBaseUrl()).getSubject();
       renderText("success " + user);
-    } catch (SecurityException e) {
+    } catch (JwtException | IllegalArgumentException e) {
       renderText("fail");
     }
   }
@@ -138,20 +135,21 @@ public class SecurityTokens extends Controller {
    */
   @Util
   public static java.util.Optional<String> retrieveAndValidateJwtUsername() throws InvalidUsername {
-    Header authorization = Http.Request.current.get().headers.get(AUTHORIZATION);
-    String token = null;
     val idToken = getCurrentIdToken();
     if (!idToken.isPresent()) {
       return java.util.Optional.empty();
     }
     val jwtToken = jwtTokenDao.byIdToken(idToken.get());
-    if (jwtToken.isPresent()) {
-      log.debug("Prelevato token oauth dal db utilizzando l'id token {}", idToken);
-      token = jwtToken.get().getAccessToken();
-    } else if (authorization != null && authorization.value().startsWith(BEARER)) {
-      log.debug("Prelevato token oauth dall'intestazione http");
-      token = authorization.value().substring(BEARER.length());
+    if (!jwtToken.isPresent()) {
+      // Il token non è più presente (es. rimosso perché scaduto): non si utilizza
+      // l'eventuale token inviato dal client nell'intestazione http.
+      log.debug("Token oauth non presente nel db per l'id token in sessione, "
+          + "rimosso il jwt dalla sessione");
+      clearJwtSession();
+      return java.util.Optional.empty();
     }
+    log.debug("Prelevato token oauth dal db utilizzando l'id token");
+    String token = jwtToken.get().getAccessToken();
     if (token == null) {
       return java.util.Optional.empty();
     }
@@ -249,20 +247,17 @@ public class SecurityTokens extends Controller {
 
   @Util
   private static String extractSubjectFromJwt(String jwt) {
-    // legge il jwt evitando la signature perché lo issuer non è noto a priori
-    int i = jwt.lastIndexOf('.');
-    String withoutSignature = jwt.substring(0, i + 1);
-    val untrusted = Jwts.parserBuilder().build().parseClaimsJwt(withoutSignature);
-    String issuer = untrusted.getBody().getIssuer();
-    Object jwtBody;
+    // legge l'issuer senza verificare la firma solo per scegliere la chiave con cui
+    // validare il token, l'issuer viene poi verificato insieme alla firma
+    String issuer = JwtValidator.untrustedIssuer(jwt);
+    Claims claims;
     if (issuer.equals(Router.getBaseUrl())) {
-      jwtBody = Jwts.parserBuilder().setSigningKey(key()).build().parse(jwt).getBody();
+      claims = JwtValidator.validateLocal(jwt, key(), Router.getBaseUrl());
     } else {
-      jwtBody = Jwts.parserBuilder()
-          .setSigningKeyResolver(openIdConnectClient.getJwksResolver()).build()
-          .parse(jwt).getBody();
+      claims = JwtValidator.validateOidc(jwt, openIdConnectClient.getJwksResolver(),
+          openIdConnectClient.getConfig().getIssuer(), openIdConnectClient.getClientId());
     }
-    return ((Claims) jwtBody).get(openIdConnectClient.getJwtField(), String.class);
+    return claims.get(openIdConnectClient.getJwtField(), String.class);
   }
   
   private static JwtToken byRefreshTokenResponse(OAuth2.Response response) {
