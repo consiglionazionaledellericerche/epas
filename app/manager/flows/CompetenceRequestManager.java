@@ -278,6 +278,21 @@ public class CompetenceRequestManager {
   }
 
   /**
+   * Prepara una nuova richiesta di competenza per l'avvio del flusso: lo stato del flusso, le
+   * approvazioni e il valore approvato sono gestiti esclusivamente dal sistema.
+   *
+   * @param competenceRequest la nuova richiesta di competenza
+   */
+  public void initNewRequest(CompetenceRequest competenceRequest) {
+    resetFlow(competenceRequest);
+    competenceRequest.setOfficeHeadApproved(null);
+    competenceRequest.setFirstApproved(null);
+    competenceRequest.setFlowEnded(false);
+    competenceRequest.setEvents(Lists.newArrayList());
+    competenceRequest.setValue(null);
+  }
+
+  /**
    * Metodo che verifica se la richiesta può essere approvata o se non è necessario.
    *
    * @param competenceRequest la richiesta di competenza

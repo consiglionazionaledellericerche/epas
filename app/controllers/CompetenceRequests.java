@@ -277,8 +277,11 @@ public class CompetenceRequests extends Controller {
     Verify.verifyNotNull(competenceType);
     Person person;
     if (personId.isPresent()) {
-      rules.check("CompetenceRequests.blank4OtherPerson");
       person = personDao.getPersonById(personId.get());
+      notFoundIfNull(person);
+      if (!rules.check("CompetenceRequests.blank4OtherPerson", person)) {
+        forbidden();
+      }
     } else {
       if (Security.getUser().isPresent() && Security.getUser().get().getPerson() != null) {
         person = Security.getUser().get().getPerson();
@@ -428,7 +431,13 @@ public class CompetenceRequests extends Controller {
       PersonReperibilityDay beginDayToGive, PersonReperibilityDay endDayToGive,
       PersonReperibilityDay endDayToAsk, PersonReperibilityType type) {
 
+    // Tramite il salvataggio si possono solo inserire nuove richieste per sé stessi.
+    if (competenceRequest.isPersistent()) {
+      forbidden();
+    }
+    competenceRequest.setPerson(Security.getUser().get().getPerson());
     notFoundIfNull(competenceRequest.getPerson());
+    competenceRequestManager.initNewRequest(competenceRequest);
 
     //rules.checkIfPermitted(type);
     if (competenceRequest.getType().equals(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)) {
@@ -500,8 +509,6 @@ public class CompetenceRequests extends Controller {
     competenceRequest.setYear(year);
     competenceRequest.setMonth(month);
     competenceRequest.setStartAt(LocalDateTime.now());
-
-    competenceRequest.setPerson(Security.getUser().get().getPerson());
 
     CompetenceRequest existing = competenceRequestManager
         .checkCompetenceRequest(competenceRequest);
