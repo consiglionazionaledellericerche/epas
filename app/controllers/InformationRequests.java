@@ -266,8 +266,11 @@ public class InformationRequests extends Controller {
 
     Person person;
     if (personId.isPresent()) {
-      rules.check("AbsenceRequests.blank4OtherPerson");
       person = personDao.getPersonById(personId.get());
+      notFoundIfNull(person);
+      if (!rules.check("InformationRequests.blank4OtherPerson", person)) {
+        forbidden();
+      }
     } else {
       if (Security.getUser().isPresent() && Security.getUser().get().getPerson() != null) {
         person = Security.getUser().get().getPerson();
@@ -319,6 +322,32 @@ public class InformationRequests extends Controller {
   }
 
   /**
+   * Verifica che si stia inserendo una nuova richiesta per sé stessi o, se per conto di un'altra
+   * persona, di averne il permesso. Prepara poi la richiesta per l'avvio del flusso.
+   *
+   * @param request la richiesta di flusso informativo da inserire
+   * @param type    la tipologia di flusso informativo
+   */
+  private static void prepareNewRequest(InformationRequest request, InformationType type) {
+    notFoundIfNull(request);
+    // Tramite il salvataggio si possono solo inserire nuove richieste.
+    if (request.isPersistent()) {
+      forbidden();
+    }
+    notFoundIfNull(request.getPerson());
+    val currentPerson = Security.getUser().get().getPerson();
+    if (currentPerson == null || !currentPerson.equals(request.getPerson())) {
+      if (!rules.check("InformationRequests.blank4OtherPerson", request.getPerson())) {
+        forbidden();
+      }
+    } else {
+      request.setPerson(currentPerson);
+    }
+    request.setInformationType(type);
+    informationRequestManager.initNewRequest(request);
+  }
+
+  /**
    * Persiste la richiesta di uscita di servizio e avvia il flusso approvativo.
    *
    * @param serviceRequest la richiesta di uscita di servizio
@@ -327,6 +356,7 @@ public class InformationRequests extends Controller {
    */
   public static void saveServiceRequest(ServiceRequest serviceRequest,
       @CheckWith(StringIsTime.class) String begin, @CheckWith(StringIsTime.class) String finish) {
+    prepareNewRequest(serviceRequest, InformationType.SERVICE_INFORMATION);
     InformationType type = serviceRequest.getInformationType();
     boolean insertable = true;
     if (Validation.hasErrors()) {
@@ -354,7 +384,6 @@ public class InformationRequests extends Controller {
     }
     informationRequestManager.configure(Optional.absent(),
         Optional.of(serviceRequest), Optional.absent(), Optional.absent());
-    serviceRequest.setStartAt(LocalDateTime.now());
     serviceRequest.save();
 
     boolean isNewRequest = !serviceRequest.isPersistent();
@@ -391,6 +420,7 @@ public class InformationRequests extends Controller {
    * @param illnessRequest la richiesta informativa di malattia
    */
   public static void saveIllnessRequest(IllnessRequest illnessRequest) {
+    prepareNewRequest(illnessRequest, InformationType.ILLNESS_INFORMATION);
     InformationType type = illnessRequest.getInformationType();
     if (illnessRequest.getBeginDate() == null || illnessRequest.getEndDate() == null) {
       Validation.addError("illnessRequest.beginDate",
@@ -409,7 +439,6 @@ public class InformationRequests extends Controller {
     }
     informationRequestManager.configure(Optional.of(illnessRequest),
         Optional.absent(), Optional.absent(), Optional.absent());
-    illnessRequest.setStartAt(LocalDateTime.now());
     illnessRequest.save();
     boolean isNewRequest = !illnessRequest.isPersistent();
     if (isNewRequest || !illnessRequest.isFlowStarted()) {
@@ -441,6 +470,7 @@ public class InformationRequests extends Controller {
    */
   public static void saveParentalLeaveRequest(ParentalLeaveRequest parentalLeaveRequest, 
       Blob bornCertificate, Blob expectedDateOfBirth) {
+    prepareNewRequest(parentalLeaveRequest, InformationType.PARENTAL_LEAVE_INFORMATION);
     InformationType type = parentalLeaveRequest.getInformationType();
     if (parentalLeaveRequest.getBeginDate() == null || parentalLeaveRequest.getEndDate() == null) {
       Validation.addError("parentalLeaveRequest.beginDate",
@@ -459,7 +489,6 @@ public class InformationRequests extends Controller {
     }
     informationRequestManager.configure(Optional.absent(),
         Optional.absent(), Optional.absent(), Optional.of(parentalLeaveRequest));
-    parentalLeaveRequest.setStartAt(LocalDateTime.now());
     parentalLeaveRequest.setBornCertificate(bornCertificate);
     parentalLeaveRequest.setExpectedDateOfBirth(expectedDateOfBirth);
     parentalLeaveRequest.save();
@@ -498,6 +527,10 @@ public class InformationRequests extends Controller {
   public static void saveTeleworkRequest(Long personId, int year, int month) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
+    if (!person.equals(Security.getUser().get().getPerson())
+        && !rules.check("InformationRequests.blank4OtherPerson", person)) {
+      forbidden();
+    }
 
     TeleworkRequest teleworkRequest;
 
@@ -854,6 +887,9 @@ public class InformationRequests extends Controller {
     if (!parentalLeaveRequest.isPresent()) {
       flash.error("Non esiste la richiesta associata a questo file! Verificare!");
       redirect("InformationRequests.list");
+    }
+    if (!rules.check("InformationRequests.show", parentalLeaveRequest.get())) {
+      forbidden();
     }
     if (parentalLeaveRequest.get().getBornCertificate().exists()) {
       response.setContentTypeIfNotSet(parentalLeaveRequest.get().getBornCertificate().type());
