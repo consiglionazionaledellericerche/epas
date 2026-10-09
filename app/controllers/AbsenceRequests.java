@@ -690,8 +690,7 @@ public class AbsenceRequests extends Controller {
       if (!generalSettingDao.generalSetting().isEnableAbsenceTopLevelAuthorization() 
           && absenceRequest.getPerson().isTopQualification() 
           && absenceRequest.getType().canBeInsertedByTopLevelWithoutApproval) {
-        absenceRequestManager.topLevelSelfApproval(absenceRequest, 
-            Security.getUser().get().getPerson());
+        absenceRequestManager.topLevelSelfApproval(absenceRequest, absenceRequest.getPerson());
         notificationManager.sendEmailAbsenceNotification(absenceRequest);
       } else if (absenceRequest.getPerson().isSeatSupervisor() 
           || (absenceRequest.getPerson().isGroupManager()
