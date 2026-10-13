@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.36.0] - Unreleased
 ### Changed
   - Modificato l'ordinamento dei codici nel caso di inserimento di lavoro agile
+### Fixed
+  - Corretto il salvataggio delle richieste di assenza e di competenza.
 
 ## [2.35.0] - 2026-10-09
 ### Fixed

@@ -41,6 +41,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import play.data.binding.NoBinding;
 import play.data.validation.Required;
 import play.db.jpa.Blob;
 
@@ -105,6 +106,7 @@ public class AbsenceRequest extends MutableModel {
    * Eventuale allegato alla richiesta.
    */
   @Column(name = "attachment", nullable = true)
+  @Setter(onMethod_ = @NoBinding)
   private Blob attachment;
 
 
@@ -112,56 +114,67 @@ public class AbsenceRequest extends MutableModel {
    * Data di approvazione del responsabile.
    */
   @Column(name = "manager_approved")
+  @Setter(onMethod_ = @NoBinding)
   private LocalDateTime managerApproved;
 
   /**
    * Data di approvazione dell'amministrativo.
    */
   @Column(name = "administrative_approved")
+  @Setter(onMethod_ = @NoBinding)
   private LocalDateTime administrativeApproved;
 
   /**
    * Data di approvazione del responsabili sede.
    */
   @Column(name = "office_head_approved")
+  @Setter(onMethod_ = @NoBinding)
   private LocalDateTime officeHeadApproved;
 
   /**
    * Indica se è richieta l'approvazione da parte del responsabile.
    */
   @Column(name = "manager_approval_required")
+  @Setter(onMethod_ = @NoBinding)
   private boolean managerApprovalRequired = true;
 
   /**
    * Indica se è richieta l'approvazione da parte dell'amministrativo.
    */
   @Column(name = "administrative_approval_required")
+  @Setter(onMethod_ = @NoBinding)
   private boolean administrativeApprovalRequired = true;
 
   /**
    * Indica se è richieta l'approvazione da parte del responsabile di sede.
    */
   @Column(name = "office_head_approval_required")
+  @Setter(onMethod_ = @NoBinding)
   private boolean officeHeadApprovalRequired = true;
   
   @Column(name = "office_head_approval_for_manager_required")
+  @Setter(onMethod_ = @NoBinding)
   private boolean officeHeadApprovalForManagerRequired = true;
 
   @NotAudited
   @OneToMany(mappedBy = "absenceRequest", cascade = CascadeType.REMOVE)
   @OrderBy("createdAt DESC")
+  @NoBinding
+  @Setter(onMethod_ = @NoBinding)
   private List<AbsenceRequestEvent> events = Lists.newArrayList();
 
   /**
    * Se il flusso è avviato.
    */
   @Column(name = "flow_started")
+  @Setter(onMethod_ = @NoBinding)
   private boolean flowStarted = false; 
 
   /**
    * Se il flusso è terminato.
    */
   @Column(name = "flow_ended")
+  @Setter(onMethod_ = @NoBinding)
   private boolean flowEnded = false;
 
   @Transient
