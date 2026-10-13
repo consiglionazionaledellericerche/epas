@@ -737,6 +737,8 @@ public class CompetenceRequests extends Controller {
    */
   public static void disapproval(long id, boolean disapproval, String reason) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    notFoundIfNull(competenceRequest);
+    rules.checkIfPermitted(competenceRequest);
     User user = Security.getUser().get();
     if (!disapproval) {
       disapproval = true;
@@ -757,13 +759,14 @@ public class CompetenceRequests extends Controller {
     }
     if (competenceRequest.isEmployeeApprovalRequired() 
         && competenceRequest.getEmployeeApproved() == null
-        && user.hasRoles(Role.EMPLOYEE)) {
+        && user.getPerson() != null
+        && user.getPerson().equals(competenceRequest.getTeamMate())) {
       //TODO: caso di disapprovazione da parte del dipendente reperibile
       competenceRequestManager.employeeDisapproval(id, reason);
     }
     if (competenceRequest.isOfficeHeadApprovalRequired() 
         && competenceRequest.getOfficeHeadApproved() == null 
-        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+        && competenceRequestManager.isSeatSupervisorFor(user, competenceRequest.getPerson())) {
       competenceRequestManager.officeHeadDisapproval(id, reason);
     }
     

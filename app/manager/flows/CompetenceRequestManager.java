@@ -628,7 +628,8 @@ public class CompetenceRequestManager {
 
     if (competenceRequest.isEmployeeApprovalRequired() 
         && competenceRequest.getEmployeeApproved() == null
-        && user.hasRoles(Role.EMPLOYEE)) {
+        && user.getPerson() != null
+        && user.getPerson().equals(competenceRequest.getTeamMate())) {
       employeeApproval(competenceRequest.id, user);
       if (competenceRequest.getPerson().getReperibility().stream()
           .anyMatch(pr -> pr.getPersonReperibilityType().getSupervisor().equals(user.getPerson()))
@@ -645,11 +646,10 @@ public class CompetenceRequestManager {
       //        return true;
       //      }
       if (competenceRequest.isManagerApprovalRequired() && competenceRequest.getManagerApproved() == null
-          && user.hasRoles(Role.GROUP_MANAGER)) {
+          && user.isGroupManagerOf(competenceRequest.getPerson())) {
         // caso di approvazione da parte del responsabile di gruppo.
         managerApproval(competenceRequest.id, user);
-        if (user.getUsersRolesOffices().stream()
-            .anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
+        if (isSeatSupervisorFor(user, competenceRequest.getPerson())
             && competenceRequest.isOfficeHeadApprovalRequired()) {
           // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
           officeHeadApproval(competenceRequest.id, user);
@@ -667,11 +667,26 @@ public class CompetenceRequestManager {
     }
 
     if (competenceRequest.isOfficeHeadApprovalRequired() 
-        && competenceRequest.getOfficeHeadApproved() == null) {
+        && competenceRequest.getOfficeHeadApproved() == null
+        && isSeatSupervisorFor(user, competenceRequest.getPerson())) {
       officeHeadApproval(competenceRequest.id, user);
       return true;
     }    
     return false;
+  }
+
+  /**
+   * Verifica se l'utente può agire come responsabile di sede sulle richieste della persona:
+   * deve essere responsabile della sede della persona, oppure deve trattarsi di una sua
+   * richiesta.
+   *
+   * @param user l'utente che vuole approvare o respingere
+   * @param requester la persona che ha effettuato la richiesta
+   * @return true se l'utente può agire come responsabile di sede, false altrimenti.
+   */
+  public boolean isSeatSupervisorFor(User user, Person requester) {
+    return user.hasRolesOnOffice(requester.getOffice(), Role.SEAT_SUPERVISOR)
+        || (requester.equals(user.getPerson()) && user.hasRoles(Role.SEAT_SUPERVISOR));
   }
 
 

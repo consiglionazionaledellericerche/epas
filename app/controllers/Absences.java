@@ -225,13 +225,19 @@ public class Absences extends Controller {
 
     Verify.verify(absence.isPersistent(), "Assenza specificata inesistente!");
 
+    Optional<User> currentUser = Security.getUser();
+    if (!currentUser.isPresent() || currentUser.get().hasRoles(Role.PERSONNEL_ADMIN)) {
+      rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
+    } else {
+      rules.checkIfPermitted(absence);
+    }
+
     absence.getAbsenceFile().getFile().delete();
 
     absence.save();
 
     flash.success("File allegato rimosso con successo.");
 
-    Optional<User> currentUser = Security.getUser();
     if (!currentUser.isPresent() || currentUser.get().hasRoles(Role.PERSONNEL_ADMIN)) {
       Stampings.personStamping(absence.getPersonDay().getPerson().id,
           absence.getPersonDay().getDate().getYear(), 
