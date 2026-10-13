@@ -38,6 +38,7 @@ import models.flows.enumerate.CompetenceRequestType;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import play.data.binding.NoBinding;
 import play.data.validation.Required;
 
 /**
@@ -79,6 +80,7 @@ public class CompetenceRequest extends MutableModel {
   /*
    * L'eventuale valore da salvare
    */
+  @Setter(onMethod_ = @NoBinding)
   private Integer value;
   
   /*
@@ -131,35 +133,47 @@ public class CompetenceRequest extends MutableModel {
   private LocalDateTime endTo;
   
   /*Nuovi campi per la doppia approvazione delle richieste di straordinario*/
+  @Setter(onMethod_ = @NoBinding)
   private LocalDateTime firstApproved;
+  @Setter(onMethod_ = @NoBinding)
   private boolean firstApprovalRequired = false;
   /*Fine*/  
   
+  @Setter(onMethod_ = @NoBinding)
   private LocalDateTime employeeApproved;
   
+  @Setter(onMethod_ = @NoBinding)
   private LocalDateTime managerApproved;
   
+  @Setter(onMethod_ = @NoBinding)
   private LocalDateTime officeHeadApproved;
   
+  @Setter(onMethod_ = @NoBinding)
   private boolean employeeApprovalRequired = true;
   
+  @Setter(onMethod_ = @NoBinding)
   private boolean managerApprovalRequired = true;
   
+  @Setter(onMethod_ = @NoBinding)
   private boolean officeHeadApprovalRequired = true;
   
   
   @OneToMany(mappedBy = "competenceRequest")
   @OrderBy("createdAt DESC")
+  @NoBinding
+  @Setter(onMethod_ = @NoBinding)
   private List<CompetenceRequestEvent> events = Lists.newArrayList();
   
   /**
    * Se il flusso è avviato.
    */
+  @Setter(onMethod_ = @NoBinding)
   private boolean flowStarted = false; 
 
   /**
    * Se il flusso è terminato.
    */
+  @Setter(onMethod_ = @NoBinding)
   private boolean flowEnded = false;
   
   @Transient

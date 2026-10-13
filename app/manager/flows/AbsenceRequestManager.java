@@ -313,6 +313,19 @@ public class AbsenceRequestManager {
   }
 
   /**
+   * Prepara una nuova richiesta di assenza per l'avvio del flusso: lo stato del flusso e le
+   * approvazioni sono gestiti esclusivamente dal sistema.
+   *
+   * @param absenceRequest la nuova richiesta di assenza
+   */
+  public void initNewRequest(AbsenceRequest absenceRequest) {
+    resetFlow(absenceRequest);
+    absenceRequest.setFlowEnded(false);
+    absenceRequest.setEvents(Lists.newArrayList());
+    absenceRequest.setAttachment(null);
+  }
+
+  /**
    * Verifica se il tipo di evento è eseguibile dall'utente indicato.
    *
    * @param absenceRequest la richiesta di assenza.
