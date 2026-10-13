@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
   - Corretto il salvataggio delle richieste dei flussi informativi.
   - Corretto il salvataggio delle richieste di assenza e di competenza.
+  - Rafforzati i controlli sui permessi in alcune azioni e nelle approvazioni dei flussi.
 
 
 ## [2.35.0] - 2026-10-09
