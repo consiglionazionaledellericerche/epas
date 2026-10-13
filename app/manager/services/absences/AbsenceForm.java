@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import dao.absences.AbsenceComponentDao;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -139,6 +140,18 @@ public class AbsenceForm {
     // i tipi assenza selezionabili
     GroupAbsenceType current = groupAbsenceType;
     SortedMap<String, AbsenceType> typeConsidered = Maps.newTreeMap();
+    Comparator<String> cmp = null;
+    if (current.getDescription().contains("AGILE")) {
+      List<String> priority = List.of("LAGILEBP", "LAGILE");
+      cmp = Comparator
+          .comparingInt((String c) -> {
+            int i = priority.indexOf(c);
+            return i < 0 ? Integer.MAX_VALUE : i;
+          })
+          .thenComparing(Comparator.naturalOrder());
+      typeConsidered = Maps.newTreeMap(cmp);
+    }
+        
     while (current != null) {
       if (current.getTakableAbsenceBehaviour() != null) {
         for (AbsenceType takable : current.getTakableAbsenceBehaviour().getTakableCodes()) {
