@@ -425,6 +425,23 @@ public class InformationRequestManager {
   }
 
   /**
+   * Prepara una nuova richiesta di flusso informativo per l'avvio del flusso: lo stato del flusso
+   * e le approvazioni sono gestiti esclusivamente dal sistema.
+   *
+   * @param request la nuova richiesta di flusso informativo
+   */
+  public void initNewRequest(InformationRequest request) {
+    request.setStartAt(LocalDateTime.now());
+    request.setEndTo(null);
+    request.setOfficeHeadApproved(null);
+    request.setAdministrativeApproved(null);
+    request.setManagerApproved(null);
+    request.setFlowStarted(false);
+    request.setFlowEnded(false);
+    request.setEvents(Lists.newArrayList());
+  }
+
+  /**
    * Rimuove tutte le eventuali approvazioni ed impostata il flusso come da avviare.
    *
    * @param serviceRequest l'eventuale richiesta di uscita di servizio

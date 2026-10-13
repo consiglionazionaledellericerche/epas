@@ -40,6 +40,7 @@ import models.enumerate.InformationType;
 import models.informationrequests.InformationRequestEvent;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import play.data.binding.NoBinding;
 import play.data.validation.Required;
 
 /**
@@ -73,9 +74,11 @@ public abstract class InformationRequest extends BaseModel {
   @Required
   @NotNull
   @Column(name = "start_at")
+  @Setter(onMethod_ = @NoBinding)
   private LocalDateTime startAt;
 
   @Column(name = "end_to")
+  @Setter(onMethod_ = @NoBinding)
   private LocalDateTime endTo;
   
   @Required
@@ -86,51 +89,61 @@ public abstract class InformationRequest extends BaseModel {
   /**
    * Data di approvazione del responsabili sede.
    */
+  @Setter(onMethod_ = @NoBinding)
   private LocalDateTime officeHeadApproved;
   
   /**
    * Data di approvazione dell'amministratore del personale.
    */
+  @Setter(onMethod_ = @NoBinding)
   private LocalDateTime administrativeApproved;
   
   /**
    * Data di approvazione del responsabile di gruppo.
    */
+  @Setter(onMethod_ = @NoBinding)
   private LocalDateTime managerApproved;
   
   
   /**
    * Indica se è richieta l'approvazione da parte del responsabile di sede.
    */
+  @Setter(onMethod_ = @NoBinding)
   private boolean officeHeadApprovalRequired = true;
   
   /**
    * Indica se è richieta l'approvazione da parte dell'amministrativo.
    */
   @Column(name = "administrative_approval_required")
+  @Setter(onMethod_ = @NoBinding)
   private boolean administrativeApprovalRequired = false;
   
   /**
    * Indica se è richiesta l'approvazione del responsabile di gruppo.
    */
   @Column(name = "manager_approval_required")
+  @Setter(onMethod_ = @NoBinding)
   private boolean managerApprovalRequired = false;
   
   /**
    * Se il flusso è avviato.
    */
   @Column(name = "flow_started")
+  @Setter(onMethod_ = @NoBinding)
   private boolean flowStarted = false; 
 
   /**
    * Se il flusso è terminato.
    */
   @Column(name = "flow_ended")
+  @Setter(onMethod_ = @NoBinding)
   private boolean flowEnded = false;
   
   @NotAudited
   @OneToMany(mappedBy = "informationRequest")
   @OrderBy("createdAt DESC")
+  @NoBinding
+  @Setter(onMethod_ = @NoBinding)
   private List<InformationRequestEvent> events = Lists.newArrayList();
   
   @Transient
