@@ -26,7 +26,10 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Map;
+import java.util.Set;
 import java.util.Optional;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -65,6 +68,15 @@ public class Resecure extends Controller {
   static final String ID_TOKEN = KEY + "id_token";
   static final String STATE = KEY + "oauth_state";
 
+  private static final String CSRF_MODE = "csrf.mode";
+  private static final String CSRF_PARAM = "authenticityToken";
+  // in play gli header della richiesta hanno il nome in minuscolo
+  private static final String CSRF_HEADER = "x-csrf-token";
+  private static final String AUTHORIZATION_HEADER = "authorization";
+  private static final String REFERER_HEADER = "referer";
+  private static final String USER_AGENT_HEADER = "user-agent";
+  private static final Set<String> CSRF_SAFE_METHODS = Set.of("GET", "HEAD", "OPTIONS");
+
   @Inject
   static SecurityRules rules;
   @Inject
@@ -102,6 +114,92 @@ public class Resecure extends Controller {
       }
       rules.checkIfPermitted();
     }
+  }
+
+  /**
+   * Verifica del token anti-CSRF sulle richieste che possono modificare dati.
+   *
+   * <p>Il comportamento dipende dal parametro di configurazione csrf.mode:
+   * <ul>
+   *   <li>off (default): nessuna verifica;</li>
+   *   <li>report: le richieste senza token valido sono solo segnalate nel log;</li>
+   *   <li>enforce: le richieste senza token valido sono rifiutate.</li>
+   * </ul>
+   * Il token è letto dal parametro authenticityToken (inserito automaticamente dal
+   * tag #{form}) oppure dall'header X-CSRF-Token (inviato dalle chiamate AJAX).
+   * Sono escluse le richieste con header Authorization (client REST autenticati
+   * ad ogni richiesta e non tramite il cookie di sessione) e le azioni annotate
+   * con NoCheck.</p>
+   */
+  @Before(priority = 2, unless = {"login", "authenticate", "logout", "oauthLogin",
+      "oauthLogout", "oauthCallback"})
+  static void checkCsrf() {
+    final CsrfMode mode = csrfMode();
+    if (mode == CsrfMode.OFF) {
+      return;
+    }
+    boolean valid;
+    try {
+      valid = !isCsrfCheckRequired() || isCsrfTokenValid();
+    } catch (Exception ex) {
+      // la verifica non deve mai bloccare le richieste per un errore inatteso
+      log.error("Errore durante la verifica del token CSRF per {} {}",
+          request.method, request.path, ex);
+      return;
+    }
+    if (valid) {
+      return;
+    }
+    log.warn("Token CSRF assente o non valido: method={}, path={}, action={}, user={}, "
+        + "referer={}, user-agent={}", request.method, request.path, request.action,
+        session.get(USERNAME), headerValue(REFERER_HEADER), headerValue(USER_AGENT_HEADER));
+    if (mode == CsrfMode.ENFORCE) {
+      forbidden("Richiesta non valida, ricaricare la pagina e riprovare.");
+    }
+  }
+
+  @Util
+  private static boolean isCsrfCheckRequired() {
+    return !CSRF_SAFE_METHODS.contains(request.method)
+        && getActionAnnotation(NoCheck.class) == null
+        && getControllerInheritedAnnotation(NoCheck.class) == null
+        && !request.headers.containsKey(AUTHORIZATION_HEADER);
+  }
+
+  @Util
+  private static boolean isCsrfTokenValid() {
+    String token = params.get(CSRF_PARAM);
+    if (token == null) {
+      token = headerValue(CSRF_HEADER);
+    }
+    return token != null && MessageDigest.isEqual(
+        token.getBytes(StandardCharsets.UTF_8),
+        session.getAuthenticityToken().getBytes(StandardCharsets.UTF_8));
+  }
+
+  @Util
+  private static String headerValue(String name) {
+    val header = request.headers.get(name);
+    return header != null ? header.value() : null;
+  }
+
+  @Util
+  private static CsrfMode csrfMode() {
+    val value = Play.configuration.getProperty(CSRF_MODE, "off").trim();
+    for (CsrfMode mode : CsrfMode.values()) {
+      if (mode.name().equalsIgnoreCase(value)) {
+        return mode;
+      }
+    }
+    log.warn("Valore '{}' non valido per {}, verifica CSRF disattivata", value, CSRF_MODE);
+    return CsrfMode.OFF;
+  }
+
+  /**
+   * Modalità di verifica del token anti-CSRF.
+   */
+  enum CsrfMode {
+    OFF, REPORT, ENFORCE
   }
 
 
