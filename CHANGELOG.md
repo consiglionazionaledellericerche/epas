@@ -5,10 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.36.1] - Unreleased
+### Added
+  - Smoke test dell'immagine docker (.github/scripts/docker-smoke-test.sh) eseguito dai workflow
+    di pubblicazione prima del push, con l'elenco dei pacchetti di sistema cambiati rispetto
+    all'immagine precedente.
+
 ### Changed
   - Aggiornata l'immagine docker di base a play 1.5.3 con eclipse-temurin 11 su Ubuntu 24.04
     (criluc/play1:1.5.3-temurin-11-patched), che riceve gli aggiornamenti di sicurezza del
     sistema operativo.
+
+### Fixed
+  - Corretto il backup del database dal container docker quando è impostata DB_PASS: pg_dump
+    riceveva utente e password come nome utente e il backup non veniva creato.
 
 ## [2.36.0] - 2026-10-13
 ### Changed
