@@ -440,6 +440,18 @@ public class Configurations extends Controller {
         configurationManager.parseValue(
             configuration.getEpasParam(), configuration.getFieldValue()));
 
+    if (configuration.getEpasParam().equals(EpasParam.AGILE_WORK_MONTHLY_LIMIT)) {
+      // Il periodo deve iniziare il primo giorno di un mese: si propone il mese corrente,
+      // o il primo mese intero dopo l'attivazione della persona
+      LocalDate begin = LocalDate.now().dayOfMonth().withMinimumValue();
+      LocalDate personBegin = configuration.getPerson().getBeginDate();
+      if (personBegin != null && begin.isBefore(personBegin)) {
+        begin = personBegin.getDayOfMonth() == 1
+            ? personBegin : personBegin.plusMonths(1).dayOfMonth().withMinimumValue();
+      }
+      configurationDto.validityBegin = begin;
+    }
+
     render(configuration, configurationDto);
   }
 
