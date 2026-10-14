@@ -34,6 +34,14 @@ else
 	DB_USER_PASS="$DB_USER:$DB_PASS"
 fi
 
+# Credenziali per il backup del database (backupdb.sh, eseguito da cron come root):
+# pg_dump legge la password da /root/.pgpass (PGPASSFILE in backupdb.sh), dove ':' e '\' vanno preceduti da '\'.
+if [ -n "${DB_PASS}" ]; then
+  printf '%s:%s:%s:%s:%s\n' "${DB_HOST}" "${DB_PORT}" "${DB_NAME}" "${DB_USER}" \
+    "$(printf '%s' "${DB_PASS}" | sed 's/[\\:]/\\&/g')" > /root/.pgpass
+  chmod 600 /root/.pgpass
+fi
+
 ######## LOGS Settings #########
 
 LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -55,7 +63,7 @@ cp ${APP_HOME}/docker_conf/backupdb.sh ${APP_HOME}/tools/backupdb.sh
 sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i ${APP_HOME}/tools/backupdb.sh
 sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i ${APP_HOME}/tools/backupdb.sh
 sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i ${APP_HOME}/tools/backupdb.sh
-sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i ${APP_HOME}/tools/backupdb.sh
+sed 's#{{DB_USER}}#'"${DB_USER}"'#' -i ${APP_HOME}/tools/backupdb.sh
 sed 's#{{EPAS_HOST}}#'"${VIRTUAL_HOST}"'#g' -i ${APP_HOME}/tools/backupdb.sh
 
 chmod +x ${APP_HOME}/tools/backupdb.sh
