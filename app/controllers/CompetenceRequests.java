@@ -641,6 +641,9 @@ public class CompetenceRequests extends Controller {
     notFoundIfNull(competenceRequest);
     User user = Security.getUser().get();
     rules.checkIfPermitted(competenceRequest);
+    if (!competenceRequestManager.isApprover(competenceRequest, user)) {
+      forbidden();
+    }
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
       
       boolean isSeatSupervisor = user.hasRoles(Role.SEAT_SUPERVISOR);
@@ -740,6 +743,9 @@ public class CompetenceRequests extends Controller {
     notFoundIfNull(competenceRequest);
     rules.checkIfPermitted(competenceRequest);
     User user = Security.getUser().get();
+    if (!competenceRequestManager.isApprover(competenceRequest, user)) {
+      forbidden();
+    }
     if (!disapproval) {
       disapproval = true;
       int month = competenceRequest.getMonth();

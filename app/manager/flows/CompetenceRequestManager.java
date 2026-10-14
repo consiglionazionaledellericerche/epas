@@ -626,53 +626,75 @@ public class CompetenceRequestManager {
    */
   public boolean approval(CompetenceRequest competenceRequest, User user) {
 
-    if (competenceRequest.isEmployeeApprovalRequired() 
-        && competenceRequest.getEmployeeApproved() == null
-        && user.getPerson() != null
-        && user.getPerson().equals(competenceRequest.getTeamMate())) {
+    if (canApproveAsEmployee(competenceRequest, user)) {
       employeeApproval(competenceRequest.id, user);
-      if (competenceRequest.getPerson().getReperibility().stream()
-          .anyMatch(pr -> pr.getPersonReperibilityType().getSupervisor().equals(user.getPerson()))
+      if (isReperibilitySupervisorFor(user, competenceRequest.getPerson())
           && competenceRequest.isManagerApprovalRequired()) {
 
         managerApproval(competenceRequest.id, user);
       }
       return true;      
     }
-    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
-      //      if (competenceRequest.isManagerApprovalRequired()
-      //          && competenceRequest.getManagerApproved() == null ) {
-      //        managerApproval(competenceRequest.id, user);
-      //        return true;
-      //      }
-      if (competenceRequest.isManagerApprovalRequired() && competenceRequest.getManagerApproved() == null
-          && user.isGroupManagerOf(competenceRequest.getPerson())) {
-        // caso di approvazione da parte del responsabile di gruppo.
-        managerApproval(competenceRequest.id, user);
-        if (isSeatSupervisorFor(user, competenceRequest.getPerson())
-            && competenceRequest.isOfficeHeadApprovalRequired()) {
-          // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
-          officeHeadApproval(competenceRequest.id, user);
-        }
-        return true;
+    if (canApproveAsManager(competenceRequest, user)) {
+      managerApproval(competenceRequest.id, user);
+      if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)
+          && isSeatSupervisorFor(user, competenceRequest.getPerson())
+          && competenceRequest.isOfficeHeadApprovalRequired()) {
+        // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
+        officeHeadApproval(competenceRequest.id, user);
       }
-    } else {
-      if (competenceRequest.isManagerApprovalRequired() 
-          && competenceRequest.getManagerApproved() == null
-          && competenceRequest.getPerson().getReperibility().stream()
-          .anyMatch(pr -> pr.getPersonReperibilityType().getSupervisor().equals(user.getPerson()))) {
-        managerApproval(competenceRequest.id, user);
-        return true;
-      }
+      return true;
     }
-
-    if (competenceRequest.isOfficeHeadApprovalRequired() 
-        && competenceRequest.getOfficeHeadApproved() == null
-        && isSeatSupervisorFor(user, competenceRequest.getPerson())) {
+    if (canApproveAsOfficeHead(competenceRequest, user)) {
       officeHeadApproval(competenceRequest.id, user);
       return true;
     }    
     return false;
+  }
+
+  /**
+   * Verifica se l'utente può approvare o respingere la richiesta nello stato in cui si trova:
+   * collega indicato nella richiesta di cambio reperibilità, responsabile di gruppo (per gli
+   * straordinari) o supervisore del servizio di reperibilità (per i cambi di reperibilità)
+   * della persona, oppure responsabile della sua sede.
+   *
+   * @param competenceRequest la richiesta di competenza
+   * @param user l'utente che vuole approvare o respingere
+   * @return true se l'utente può approvare o respingere la richiesta, false altrimenti.
+   */
+  public boolean isApprover(CompetenceRequest competenceRequest, User user) {
+    return canApproveAsEmployee(competenceRequest, user)
+        || canApproveAsManager(competenceRequest, user)
+        || canApproveAsOfficeHead(competenceRequest, user);
+  }
+
+  private boolean canApproveAsEmployee(CompetenceRequest competenceRequest, User user) {
+    return competenceRequest.isEmployeeApprovalRequired() 
+        && competenceRequest.getEmployeeApproved() == null
+        && user.getPerson() != null
+        && user.getPerson().equals(competenceRequest.getTeamMate());
+  }
+
+  private boolean canApproveAsManager(CompetenceRequest competenceRequest, User user) {
+    if (!competenceRequest.isManagerApprovalRequired()
+        || competenceRequest.getManagerApproved() != null) {
+      return false;
+    }
+    if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
+      return user.isGroupManagerOf(competenceRequest.getPerson());
+    }
+    return isReperibilitySupervisorFor(user, competenceRequest.getPerson());
+  }
+
+  private boolean canApproveAsOfficeHead(CompetenceRequest competenceRequest, User user) {
+    return competenceRequest.isOfficeHeadApprovalRequired() 
+        && competenceRequest.getOfficeHeadApproved() == null
+        && isSeatSupervisorFor(user, competenceRequest.getPerson());
+  }
+
+  private boolean isReperibilitySupervisorFor(User user, Person person) {
+    return user.getPerson() != null && person.getReperibility().stream()
+        .anyMatch(pr -> user.getPerson().equals(pr.getPersonReperibilityType().getSupervisor()));
   }
 
   /**

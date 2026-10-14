@@ -55,6 +55,7 @@ import models.TeleworkValidation;
 import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.CompetenceRequest;
+import models.flows.enumerate.CompetenceRequestType;
 
 import models.base.InformationRequest;
 import models.informationrequests.IllnessRequest;
@@ -626,7 +627,8 @@ when
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $rep: PersonReperibility() from $prt.personReperibilities
   $cr: CompetenceRequest(person == $rep.person && managerApprovalRequired == true 
-         && managerApproved == null, flowEnded == false)
+         && managerApproved == null, flowEnded == false,
+         type == CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)
   $c: PermissionCheck(action in (
           "CompetenceRequests.approval",
           "CompetenceRequests.disapproval",

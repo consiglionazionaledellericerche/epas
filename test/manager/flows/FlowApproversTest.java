@@ -21,6 +21,8 @@ import com.google.common.base.Optional;
 import java.time.LocalDate;
 import models.Office;
 import models.Person;
+import models.PersonReperibility;
+import models.PersonReperibilityType;
 import models.Role;
 import models.User;
 import models.UsersRolesOffices;
@@ -216,5 +218,59 @@ public class FlowApproversTest extends UnitTest {
     assertFalse("il ramo del responsabile di sede richiede il ruolo",
         competenceRequestManager.approval(request, userWithRole(officeA, Role.EMPLOYEE)));
     assertNull(request.getOfficeHeadApproved());
+  }
+
+  private CompetenceRequest overtimeRequestToApproveByManager() {
+    CompetenceRequest request = new CompetenceRequest();
+    request.setType(CompetenceRequestType.OVERTIME_REQUEST);
+    request.setPerson(requester);
+    request.setEmployeeApprovalRequired(false);
+    request.setManagerApprovalRequired(true);
+    request.setOfficeHeadApprovalRequired(true);
+    return request;
+  }
+
+  private User reperibilitySupervisorOf(Person person) {
+    User supervisor = userWithRole(officeA, Role.EMPLOYEE);
+    PersonReperibilityType reperibilityType = new PersonReperibilityType();
+    reperibilityType.setSupervisor(supervisor.getPerson());
+    PersonReperibility reperibility = new PersonReperibility();
+    reperibility.setPerson(person);
+    reperibility.setPersonReperibilityType(reperibilityType);
+    person.getReperibility().add(reperibility);
+    return supervisor;
+  }
+
+  @Test
+  public void overtimeApprovers() {
+    CompetenceRequest request = overtimeRequestToApproveByManager();
+    User manager = userWithRole(officeA, Role.GROUP_MANAGER);
+    addToGroupOf(manager, requester, null);
+
+    assertTrue(competenceRequestManager.isApprover(request, manager));
+    assertTrue(competenceRequestManager.isApprover(request,
+        userWithRole(officeA, Role.SEAT_SUPERVISOR)));
+    assertFalse(competenceRequestManager.isApprover(request,
+        userWithRole(officeB, Role.SEAT_SUPERVISOR)));
+    assertFalse(competenceRequestManager.isApprover(request,
+        userWithRole(officeA, Role.GROUP_MANAGER)));
+  }
+
+  @Test
+  public void reperibilitySupervisorDoesNotApproveOvertime() {
+    CompetenceRequest overtime = overtimeRequestToApproveByManager();
+    User supervisor = reperibilitySupervisorOf(requester);
+
+    assertFalse(competenceRequestManager.isApprover(overtime, supervisor));
+    assertFalse(competenceRequestManager.approval(overtime, supervisor));
+    assertNull(overtime.getManagerApproved());
+
+    CompetenceRequest change = new CompetenceRequest();
+    change.setType(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST);
+    change.setPerson(requester);
+    change.setEmployeeApprovalRequired(false);
+    change.setManagerApprovalRequired(true);
+    change.setOfficeHeadApprovalRequired(false);
+    assertTrue(competenceRequestManager.isApprover(change, supervisor));
   }
 }
