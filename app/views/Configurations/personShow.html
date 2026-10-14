@@ -61,7 +61,6 @@
 	</div>  
 -->
 
-*{
     <div id="editPeriodic">
 	  #{alert color:'info'}
 	   <p>Elenco dei parametri di configurazione a <em><strong>cadenza periodica </strong></em>, il loro valore attuale ed il periodo di riferimento.</p>
@@ -75,7 +74,8 @@
 	      <th>Al</th>
 	    </tr>
 	  #{list items:currentConfiguration, as:'conf'}
-	  	#{if conf.epasParam.periodic}
+	  	*{ Tra i parametri periodici è mostrato solo il limite personale di lavoro agile }*
+	  	#{if conf.epasParam.periodic && conf.epasParam.name.equals('agile_work_monthly_limit')}
 	  	<tr>
 	  	  <td>#{if templateUtility.isEditableByCurrentUser(conf)}
 	  	  #{secure.link @Configurations.personEdit(conf.id), 'data-async-modal':'#defaultModal'}
@@ -89,6 +89,5 @@
 	  #{/list}
 	  </table>
 	</div>
-}*
   
 </div>
