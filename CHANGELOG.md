@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.36.1] - Unreleased
+## [2.37.0] - Unreleased
 ### Added
   - Smoke test dell'immagine docker (.github/scripts/docker-smoke-test.sh) eseguito dai workflow
     di pubblicazione prima del push, con l'elenco dei pacchetti di sistema cambiati rispetto
@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Aggiornata l'immagine docker di base a play 1.5.3 con eclipse-temurin 11 su Ubuntu 24.04
     (criluc/play1:1.5.3-temurin-11-patched), che riceve gli aggiornamenti di sicurezza del
     sistema operativo.
+  - Nella build dell'immagine docker vengono aggiornati i pacchetti di sistema e rimossi la cache
+    ivy e i moduli di play non usati (testrunner, docviewer, grizzly, crud): l'immagine passa da
+    circa 1,6 GB a 1,04 GB.
 
 ### Fixed
   - Corretto il backup del database dal container docker quando è impostata DB_PASS: pg_dump
