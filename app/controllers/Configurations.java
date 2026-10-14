@@ -103,6 +103,20 @@ public class Configurations extends Controller {
     }
     if (epasParam.isPeriodic()) {
       //validazione periodo
+      if (epasParam.equals(EpasParam.AGILE_WORK_MONTHLY_LIMIT)) {
+        // Il limite è mensile: il periodo deve coprire mesi interi
+        if (configurationDto.validityBegin != null
+            && configurationDto.validityBegin.getDayOfMonth() != 1) {
+          Validation.addError("configurationDto.validityBegin",
+              "deve essere il primo giorno del mese.");
+        }
+        if (configurationDto.validityEnd != null
+            && !configurationDto.validityEnd.equals(
+                configurationDto.validityEnd.dayOfMonth().withMaximumValue())) {
+          Validation.addError("configurationDto.validityEnd",
+              "deve essere l'ultimo giorno del mese.");
+        }
+      }
     }
     if (Validation.hasErrors()) {
       return newConfiguration;
