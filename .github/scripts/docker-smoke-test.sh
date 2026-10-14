@@ -12,6 +12,8 @@
 #   SMOKE_TIMEOUT   secondi di attesa per l'avvio di ePAS (default 300)
 
 set -euo pipefail
+# Nelle pipeline si usa "grep ... >/dev/null" e non "grep -q": con pipefail,
+# grep -q esce alla prima corrispondenza e il comando a monte fallisce per SIGPIPE.
 
 IMAGE=${1:?Uso: $0 <immagine ePAS>}
 POSTGRES_IMAGE=${POSTGRES_IMAGE:-postgres:12}
@@ -67,7 +69,7 @@ for _ in $(seq 1 $((SMOKE_TIMEOUT / 5))); do
   [ "$(docker inspect -f '{{.State.Running}}' "$APP" 2>/dev/null)" = "true" ] \
     || fail "il container ePAS si e' fermato durante l'avvio"
   if docker exec "$APP" wget -q -S --max-redirect=0 -O /dev/null http://localhost:9000/login 2>&1 \
-      | grep -q 'HTTP/[0-9.]* 200'; then
+      | grep 'HTTP/[0-9.]* 200' >/dev/null; then
     started=true
     break
   fi
@@ -76,22 +78,22 @@ done
 $started || fail "/login non risponde 200 entro ${SMOKE_TIMEOUT}s"
 log "OK /login risponde 200"
 
-docker logs "$APP" 2>&1 | grep -q "Evolutions script successfully applied" \
+docker logs "$APP" 2>&1 | grep "Evolutions script successfully applied" >/dev/null \
   || fail "le evolutions non risultano applicate"
 log "OK evolutions applicate"
 
 docker exec "$APP" pgrep -x cron >/dev/null || fail "cron non e' attivo"
-docker exec "$APP" crontab -l | grep -q backupdb.sh || fail "il backup non e' nel crontab"
+docker exec "$APP" crontab -l | grep backupdb.sh >/dev/null || fail "il backup non e' nel crontab"
 log "OK cron attivo con il backup"
 
 docker exec "$APP" /home/epas/epas/tools/backupdb.sh \
   || fail "backupdb.sh fallito: $(docker exec "$APP" sh -c 'cat /home/epas/epas/backups/*-dump.log')"
-docker exec "$APP" sh -c 'zcat /home/epas/epas/backups/localhost-*.sql.gz | grep -q "CREATE TABLE"' \
+docker exec "$APP" sh -c 'zcat /home/epas/epas/backups/localhost-*.sql.gz | grep "CREATE TABLE" >/dev/null' \
   || fail "il backup del database e' vuoto o non valido"
 log "OK backup del database"
 
-docker exec "$APP" java -version 2>&1 | grep -q 'version "11\.' || fail "java 11 non trovato"
-docker exec "$APP" play version 2>/dev/null | grep -q '^1\.5\.3' || fail "play 1.5.3 non trovato"
+docker exec "$APP" java -version 2>&1 | grep 'version "11\.' >/dev/null || fail "java 11 non trovato"
+docker exec "$APP" play version 2>/dev/null | grep '^1\.5\.3' >/dev/null || fail "play 1.5.3 non trovato"
 log "OK java 11 e play 1.5.3"
 
 log "tutti i controlli sono passati"
