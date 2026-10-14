@@ -273,4 +273,17 @@ public class FlowApproversTest extends UnitTest {
     change.setOfficeHeadApprovalRequired(false);
     assertTrue(competenceRequestManager.isApprover(change, supervisor));
   }
+
+  @Test
+  public void onlyApproversDisapproveCompetences() {
+    CompetenceRequest overtime = overtimeRequestToApproveByManager();
+
+    assertFalse(competenceRequestManager.disapproval(overtime,
+        reperibilitySupervisorOf(requester), "motivo"));
+    assertFalse(competenceRequestManager.disapproval(overtime,
+        userWithRole(officeB, Role.SEAT_SUPERVISOR), "motivo"));
+    assertFalse(competenceRequestManager.disapproval(overtime,
+        userWithRole(officeA, Role.GROUP_MANAGER), "motivo"));
+    assertFalse(overtime.isFlowEnded());
+  }
 }

@@ -755,37 +755,27 @@ public class CompetenceRequests extends Controller {
       render(competenceRequest, disapproval, month, psDto);
     }
 
-    if (competenceRequest.isManagerApprovalRequired()
-        && competenceRequest.getManagerApproved() == null
-        && rules.check("CompetenceRequests.reperibilityManagerDisapproval", competenceRequest)) {
-      log.debug("Disapproval da parte del REPERIBILITY_MANAGER, richiesta {}",
-          competenceRequest);
-      //TODO: caso di disapprovazione da parte del supervisore del servizio.
-      competenceRequestManager.reperibilityManagerDisapproval(id, reason);
+    if (competenceRequestManager.disapproval(competenceRequest, user, reason)) {
+      notificationManager
+      .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
+          Optional.absent(), false);
+      flash.error("Richiesta respinta");
+    } else {
+      flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
-    if (competenceRequest.isEmployeeApprovalRequired() 
-        && competenceRequest.getEmployeeApproved() == null
-        && user.getPerson() != null
-        && user.getPerson().equals(competenceRequest.getTeamMate())) {
-      //TODO: caso di disapprovazione da parte del dipendente reperibile
-      competenceRequestManager.employeeDisapproval(id, reason);
-    }
-    if (competenceRequest.isOfficeHeadApprovalRequired() 
-        && competenceRequest.getOfficeHeadApproved() == null 
-        && competenceRequestManager.isSeatSupervisorFor(user, competenceRequest.getPerson())) {
-      competenceRequestManager.officeHeadDisapproval(id, reason);
-    }
-    
-    notificationManager
-    .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
-        Optional.absent(), false);
-    flash.error("Richiesta respinta");
     show(competenceRequest.getId(), competenceRequest.getType());
     
   }
   
   public static void updateNote(long id, boolean confirmed, String reason) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    notFoundIfNull(competenceRequest);
+    User user = Security.getUser().get();
+    // la nota può essere modificata dal richiedente e da chi deve approvare la richiesta
+    if (!competenceRequest.getPerson().equals(user.getPerson())
+        && !competenceRequestManager.isApprover(competenceRequest, user)) {
+      forbidden();
+    }
     if (!confirmed) {
       confirmed = true;      
       render("@updateNote", confirmed, competenceRequest);

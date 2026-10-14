@@ -784,18 +784,44 @@ public class CompetenceRequestManager {
   }
 
   /**
-   * Metodo che permette la disapprovazione della richiesta.
+   * Metodo di rifiuto delle richieste: segue lo stesso ordine dell'approvazione e registra un
+   * solo rifiuto, quello del ruolo con cui l'utente può agire sulla richiesta.
+   *
+   * @param competenceRequest la richiesta di competenza
+   * @param user              l'utente
+   * @param reason            la motivazione del rifiuto
+   * @return true se il rifiuto dell'utente è andato a buon fine, false altrimenti
+   */
+  public boolean disapproval(CompetenceRequest competenceRequest, User user, String reason) {
+    if (canApproveAsEmployee(competenceRequest, user)) {
+      employeeDisapproval(competenceRequest.id, reason);
+      return true;
+    }
+    if (canApproveAsManager(competenceRequest, user)) {
+      managerDisapproval(competenceRequest.id, reason);
+      return true;
+    }
+    if (canApproveAsOfficeHead(competenceRequest, user)) {
+      officeHeadDisapproval(competenceRequest.id, reason);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Rifiuto della richiesta da parte del responsabile di gruppo (straordinari) o del
+   * supervisore del servizio di reperibilità (cambi di reperibilità).
    *
    * @param id l'identificativo della richiesta di competenza
    */
-  public void reperibilityManagerDisapproval(long id, String reason) {
+  public void managerDisapproval(long id, String reason) {
 
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     val currentPerson = Security.getUser().get().getPerson();
     executeEvent(
         competenceRequest, currentPerson,
         CompetenceRequestEventType.MANAGER_REFUSAL, Optional.fromNullable(reason));
-    log.info("{} disapprovata dal responsabile di gruppo {}.",
+    log.info("{} disapprovata dal responsabile {}.",
         competenceRequest, currentPerson.getFullname());
 
   }
