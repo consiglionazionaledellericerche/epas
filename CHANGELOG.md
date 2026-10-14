@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+  - Aggiunto il parametro di configurazione personale periodico per il limite mensile di giorni
+    di lavoro agile (codici LAGILE e LAGILEBP), che sostituisce il limite standard di 10 giorni
+    al mese. Il parametro è modificabile solo da amministratori e gestori dell'anagrafica.
+### Changed
+  - I parametri di configurazione periodici della persona possono avere più periodi di
+    validità con valori diversi.
+
 ## [2.36.0] - 2026-10-13
 ### Changed
   - Modificato l'ordinamento dei codici nel caso di inserimento di lavoro agile
