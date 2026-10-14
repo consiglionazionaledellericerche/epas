@@ -70,6 +70,7 @@ import models.Institute;
 import models.Notification;
 import models.Office;
 import models.Person;
+import models.PersonConfiguration;
 import models.Qualification;
 import models.Role;
 import models.TimeSlot;
@@ -860,6 +861,13 @@ public class TemplateUtility {
 
   public Object getObjectInConfiguration(EpasParam epasParam, String fieldValue) {
     return configurationManager.parseValue(epasParam, fieldValue);
+  }
+
+  /**
+   * Verifica se l'utente corrente può modificare il parametro di configurazione della persona.
+   */
+  public boolean isEditableByCurrentUser(PersonConfiguration configuration) {
+    return configurationManager.isEditableBy(configuration, Security.getUser().get());
   }
 
   public MemoizedCollection<Notification> getNotifications() {

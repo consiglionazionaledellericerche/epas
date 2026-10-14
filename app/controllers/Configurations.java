@@ -133,7 +133,11 @@ public class Configurations extends Controller {
       }
     }
     if (epasParam.epasParamValueType.equals(EpasParamValueType.INTEGER)) {
-      if (configurationDto.integerNewValue == null) {
+      // Per il limite personale di lavoro agile il valore vuoto indica il limite standard
+      boolean emptyAllowed = epasParam.equals(EpasParam.AGILE_WORK_MONTHLY_LIMIT);
+      if ((configurationDto.integerNewValue == null && !emptyAllowed)
+          || (configurationDto.integerNewValue != null && emptyAllowed
+              && configurationDto.integerNewValue < 0)) {
         Validation.addError("configurationDto.integerNewValue", "valore non valido.");
       } else {
         newConfiguration = configurationManager.updateInteger(epasParam,
@@ -427,6 +431,9 @@ public class Configurations extends Controller {
     PersonConfiguration configuration = PersonConfiguration.findById(configurationId);
     notFoundIfNull(configuration);
     rules.checkIfPermitted(configuration.getPerson().getOffice());
+    if (!configurationManager.isEditableBy(configuration, Security.getUser().get())) {
+      forbidden();
+    }
 
     ConfigurationDto configurationDto = new ConfigurationDto(configuration.getEpasParam(),
         configuration.getBeginDate(), configuration.calculatedEnd(),
@@ -451,8 +458,13 @@ public class Configurations extends Controller {
     notFoundIfNull(configuration.getPerson().getOffice());
 
     rules.checkIfPermitted(configuration.getPerson().getOffice());
+    if (!configurationManager.isEditableBy(configuration, Security.getUser().get())) {
+      forbidden();
+    }
     
-    if (!configuration.getBeginDate().isEqual(configuration.getPerson().getBeginDate())) {
+    // Per i parametri periodici possono esistere più periodi con date di inizio diverse
+    if (!configuration.getEpasParam().isPeriodic()
+        && !configuration.getBeginDate().isEqual(configuration.getPerson().getBeginDate())) {
       flash.error("La data di inizio della configurazione (%s) e la data di attivazione della persona (%s) sono diverse. "
           + "Modificare la data di attivazione della persona nei dati anagrafici per procedere con la modifica di questo parametro.", 
           configuration.getBeginDate(), configuration.getPerson().getBeginDate());
