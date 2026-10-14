@@ -79,7 +79,7 @@
 	  	<tr>
 	  	  <td>#{secure.link @Configurations.personEdit(conf.id), 'data-async-modal':'#defaultModal'}
 	  	  &{conf.epasParam}#{/secure.link}</td>
-	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue)?.label() ?: "Limite standard"}</td>
 	  	  <td>${conf.beginDate.format()}</td>
 	  	  <td>${conf.calculatedEnd()?.format()}</td>
 	  	</tr>

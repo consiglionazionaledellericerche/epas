@@ -14,7 +14,7 @@
     
     <p>Questo parametro per la persona <strong>${configuration.person.fullname}</strong> 
     è attualmente impostato a 
-    <strong>${templateUtility.getObjectInConfiguration(configuration.epasParam, configuration.fieldValue).label()}</strong>.
+    <strong>${templateUtility.getObjectInConfiguration(configuration.epasParam, configuration.fieldValue)?.label() ?: "nessun valore (limite standard)"}</strong>.
     <p>
   #{/if}
   
