@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.36.1] - Unreleased
+### Changed
+  - Aggiornata l'immagine docker di base a play 1.5.3 con eclipse-temurin 11 su Ubuntu 24.04
+    (criluc/play1:1.5.3-temurin-11-patched), che riceve gli aggiornamenti di sicurezza del
+    sistema operativo.
+
 ## [2.36.0] - 2026-10-13
 ### Changed
   - Modificato l'ordinamento dei codici nel caso di inserimento di lavoro agile
