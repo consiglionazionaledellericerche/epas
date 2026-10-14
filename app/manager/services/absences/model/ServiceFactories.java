@@ -399,11 +399,14 @@ public class ServiceFactories {
             .configValue(person, EpasParam.AGILE_WORK_MONTHLY_LIMIT, absencePeriod.from);
         if (personalLimit != null) {
           absencePeriod.setFixedPeriodTakableAmount(personalLimit);
+          absencePeriod.personalAgileWorkLimit = true;
         }
       }
       if (absencePeriod.initialization != null 
           && absencePeriod.initialization.getTakableTotal() != null) {
         absencePeriod.setFixedPeriodTakableAmount(absencePeriod.initialization.getTakableTotal());
+        // L'inizializzazione ha la precedenza sul limite personale
+        absencePeriod.personalAgileWorkLimit = false;
       }
 
       absencePeriod.takableCountBehaviour = TakeCountBehaviour.period;

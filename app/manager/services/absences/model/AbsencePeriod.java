@@ -71,6 +71,8 @@ public class AbsencePeriod {
   public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
   public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
   public LocalDate limitExceedDate;
+  // Il tetto è il limite personale di lavoro agile (non si applicano le regole standard)
+  public boolean personalAgileWorkLimit = false;
 
   // Complation
   public AmountType complationAmountType;                      // Tipo di ammontare completamento
@@ -211,6 +213,9 @@ public class AbsencePeriod {
    */
   public int computePeriodTakableAmount(TakeCountBehaviour countBehaviour, LocalDate date) {
     if (countBehaviour.equals(TakeCountBehaviour.period)) {
+      if (this.personalAgileWorkLimit) {
+        return this.fixedPeriodTakableAmount;
+      }
       if (this.takableCodes.contains(absenceTypeDao
           .getAbsenceTypeByCode(DefaultAbsenceType.A_LAGILE.getCode()).get())) {
         /* Caso di febbraio: secondo la nota del DG i giorni di lavoro agile a febbraio
