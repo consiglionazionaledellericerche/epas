@@ -31,6 +31,8 @@ import java.util.Set;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.errors.ErrorsBox;
@@ -49,6 +51,7 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultGroup;
 import org.joda.time.LocalDate;
 
 /**
@@ -66,6 +69,7 @@ public class ServiceFactories {
   private final PersonShiftDayDao personShiftDayDao;
   private final VacationFactory vacationFactory;
   private final AbsenceTypeDao absenceTypeDao;
+  private final ConfigurationManager configurationManager;
 
   /**
    * Constructor.
@@ -79,7 +83,7 @@ public class ServiceFactories {
       AbsenceComponentDao absenceComponentDao, PersonDayManager personDayManager, 
       PersonReperibilityDayDao personReperibilityDayDao, 
       PersonShiftDayDao personShiftDayDao, VacationFactory vacationFactory, 
-      AbsenceTypeDao absenceTypeDao) {
+      AbsenceTypeDao absenceTypeDao, ConfigurationManager configurationManager) {
     this.absenceEngineUtility = absenceEngineUtility;
     this.absenceComponentDao = absenceComponentDao;
     this.personDayManager = personDayManager;
@@ -87,6 +91,7 @@ public class ServiceFactories {
     this.personShiftDayDao = personShiftDayDao;
     this.vacationFactory = vacationFactory;
     this.absenceTypeDao = absenceTypeDao;
+    this.configurationManager = configurationManager;
     
   }
   
@@ -386,6 +391,15 @@ public class ServiceFactories {
       
         absencePeriod.setFixedPeriodTakableAmount(adjustment);
 
+      }
+      // Limite mensile personale di lavoro agile (valido al primo giorno del mese):
+      // sostituisce il limite standard del gruppo
+      if (groupAbsenceType.getName().equals(DefaultGroup.G_LAGILE.name())) {
+        Integer personalLimit = (Integer) configurationManager
+            .configValue(person, EpasParam.AGILE_WORK_MONTHLY_LIMIT, absencePeriod.from);
+        if (personalLimit != null) {
+          absencePeriod.setFixedPeriodTakableAmount(personalLimit);
+        }
       }
       if (absencePeriod.initialization != null 
           && absencePeriod.initialization.getTakableTotal() != null) {
