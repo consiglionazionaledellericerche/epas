@@ -55,6 +55,8 @@ public class AgileWorkLimitTest extends UnitTest {
   public static final LocalDate MID_OCTOBER_2026 = new LocalDate(2026, 10, 15);
   //Marzo 2027: almeno 22 giorni lavorativi
   public static final LocalDate MID_MARCH_2027 = new LocalDate(2027, 3, 15);
+  //Attivazione a metà mese: il primo giorno del mese è fuori dal periodo della persona
+  public static final LocalDate BEGIN_MID_OCTOBER_2026 = new LocalDate(2026, 10, 15);
 
   @Inject
   private static H2Examples h2Examples;
@@ -134,6 +136,33 @@ public class AgileWorkLimitTest extends UnitTest {
   }
 
   /**
+   * Persona attivata a metà mese con il parametro non valorizzato: nel mese di attivazione
+   * il periodo L-AGILE inizia prima della data di attivazione e si applica il limite standard.
+   */
+  @Test
+  public void standardLimitInActivationMonthWithoutPersonalLimit() {
+    absenceService.enumInitializator();
+    Person person = employee(BEGIN_MID_OCTOBER_2026);
+
+    PeriodChain periodChain = periodChain(person, BEGIN_MID_OCTOBER_2026,
+        Lists.newArrayList());
+    assertFalse(periodChain.periods.get(0).personalAgileWorkLimit);
+  }
+
+  /**
+   * Persona attivata a metà mese con il limite personale valorizzato dalla data di
+   * attivazione: il limite personale vale anche nel mese di attivazione.
+   */
+  @Test
+  public void personalLimitInActivationMonth() {
+    absenceService.enumInitializator();
+    Person person = employee(BEGIN_MID_OCTOBER_2026);
+    setLimit(person, 6, BEGIN_MID_OCTOBER_2026, Optional.absent());
+
+    assertEquals(600, takableAmount(person, BEGIN_MID_OCTOBER_2026, Lists.newArrayList()));
+  }
+
+  /**
    * Il limite personale è modificabile solo da amministratori di sistema e gestori anagrafica.
    */
   @Test
@@ -163,11 +192,15 @@ public class AgileWorkLimitTest extends UnitTest {
    * dei parametri di configurazione) dal primo gennaio 2026.
    */
   private Person employee() {
-    Person person = h2Examples.normalEmployee(BEGIN_2026, Optional.absent());
-    person.setBeginDate(BEGIN_2026);
+    return employee(BEGIN_2026);
+  }
+
+  private Person employee(LocalDate begin) {
+    Person person = h2Examples.normalEmployee(begin, Optional.absent());
+    person.setBeginDate(begin);
     person.save();
     for (PersonConfiguration configuration : person.getPersonConfigurations()) {
-      configuration.setBeginDate(BEGIN_2026);
+      configuration.setBeginDate(begin);
       configuration.save();
     }
     return person;
@@ -189,6 +222,11 @@ public class AgileWorkLimitTest extends UnitTest {
 
   private int takableAmount(Person person, LocalDate date,
       List<InitializationGroup> initializations) {
+    return periodChain(person, date, initializations).periods.get(0).getPeriodTakableAmount();
+  }
+
+  private PeriodChain periodChain(Person person, LocalDate date,
+      List<InitializationGroup> initializations) {
     PeriodChain periodChain = serviceFactories.buildPeriodChainPhase1(person, groupLagile(),
         date,
         Lists.newArrayList(),
@@ -196,6 +234,6 @@ public class AgileWorkLimitTest extends UnitTest {
         initializations,
         Lists.newArrayList());
     assertFalse(periodChain.periods.isEmpty());
-    return periodChain.periods.get(0).getPeriodTakableAmount();
+    return periodChain;
   }
 }
