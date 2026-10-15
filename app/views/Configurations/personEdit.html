@@ -8,13 +8,17 @@
   <div class="row">
   <div class="col-md-10 col-md-offset-1">
   <h4><strong><em>&{configuration.epasParam}</em></strong></h4>
+  #{if configuration.epasParam.periodic}
+    <p>Periodo selezionato: dal <strong>${configuration.beginDate.format()}</strong>
+    al <strong>${configuration.calculatedEnd()?.format() ?: 'indeterminato'}</strong>.</p>
+  #{/if}
   <br>
   <!-- Visualizzazione stato attuale -->
   #{if configuration.epasParam.general }
     
     <p>Questo parametro per la persona <strong>${configuration.person.fullname}</strong> 
     è attualmente impostato a 
-    <strong>${templateUtility.getObjectInConfiguration(configuration.epasParam, configuration.fieldValue).label()}</strong>.
+    <strong>${templateUtility.getObjectInConfiguration(configuration.epasParam, configuration.fieldValue)?.label() ?: "nessun valore (limite standard)"}</strong>.
     <p>
   #{/if}
   
@@ -54,7 +58,7 @@
 		    class:'form form-horizontal', 'data-async':'#page_content',
 		    'data-async-error':'#configData', 'data-spinner':'#defaultSpinner'}
 		
-		#{f.hidden 'configuration.id', value:configuration.id /}
+		#{f.hidden 'configurationId', value:configuration.id /}
 		
 		#{f.hidden 'confirmed' /}
 		

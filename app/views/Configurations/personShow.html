@@ -61,10 +61,10 @@
 	</div>  
 -->
 
-*{
     <div id="editPeriodic">
 	  #{alert color:'info'}
-	   <p>Elenco dei parametri di configurazione a <em><strong>cadenza periodica </strong></em>, il loro valore attuale ed il periodo di riferimento.</p>
+	   <p>Elenco dei periodi di validità dei parametri di configurazione a <em><strong>cadenza periodica</strong></em>
+	   (passati, attuale e futuri). Il periodo valido oggi è evidenziato.</p>
 	  #{/alert}
 	
 	  <table class="table">
@@ -74,19 +74,19 @@
 	      <th>Dal</th>
 	      <th>Al</th>
 	    </tr>
-	  #{list items:currentConfiguration, as:'conf'}
-	  	#{if conf.epasParam.periodic}
-	  	<tr>
-	  	  <td>#{secure.link @Configurations.personEdit(conf.id), 'data-async-modal':'#defaultModal'}
-	  	  &{conf.epasParam}#{/secure.link}</td>
-	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
+	  *{ Tra i parametri periodici è mostrato solo il limite personale di lavoro agile }*
+	  #{list items:agileWorkLimitPeriods, as:'conf'}
+	  	<tr #{if currentConfiguration.contains(conf)}class="info"#{/if}>
+	  	  <td>#{if templateUtility.isEditableByCurrentUser(conf)}
+	  	  #{secure.link @Configurations.personEdit(conf.id), 'data-async-modal':'#defaultModal'}
+	  	  &{conf.epasParam}#{/secure.link}
+	  	  #{/if}#{else}&{conf.epasParam}#{/else}</td>
+	  	  <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue)?.label() ?: "Limite standard"}</td>
 	  	  <td>${conf.beginDate.format()}</td>
-	  	  <td>${conf.calculatedEnd()?.format()}</td>
+	  	  <td>${conf.calculatedEnd()?.format() ?: "Indeterminato"}</td>
 	  	</tr>
-	  	#{/if}
 	  #{/list}
 	  </table>
 	</div>
-}*
   
 </div>

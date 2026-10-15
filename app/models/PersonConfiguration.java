@@ -31,6 +31,7 @@ import manager.configurations.EpasParam;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.PropertyInPeriod;
 import org.hibernate.envers.Audited;
+import play.data.binding.NoBinding;
 
 
 /**
@@ -45,10 +46,16 @@ public class PersonConfiguration extends PropertyInPeriod {
 
   private static final long serialVersionUID = 6467506090648831715L;
 
+  // Non modificabili dai parametri della richiesta: per le relazioni Play verifica
+  // l'annotazione sul campo, per gli altri campi quella sul setter
+  @NoBinding
+  @Setter(onMethod_ = @NoBinding)
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "person_id")
   private Person person;
 
+  @NoBinding
+  @Setter(onMethod_ = @NoBinding)
   @Enumerated(EnumType.STRING)
   @Column(name = "epas_param")
   private EpasParam epasParam;
