@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+  - I periodi di associazione di una persona ad un'attività di turno non possono più
+    sovrapporsi: il controllo è fatto in inserimento, modifica e terminazione e tramite un vincolo
+    sulla base di dati. L'evoluzione elimina i periodi contenuti in altri e accorcia quelli
+    sovrapposti al successivo.
+  - Una persona con più periodi consecutivi su un'attività nello stesso mese non è più duplicata
+    nel calendario dei turni.
+  - Impedita la modifica tramite i parametri della richiesta della persona e dell'attività di
+    un'associazione tra persona e attività di turno.
+
 ## [2.36.0] - 2026-10-13
 ### Changed
   - Modificato l'ordinamento dei codici nel caso di inserimento di lavoro agile

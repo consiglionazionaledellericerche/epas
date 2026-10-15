@@ -118,6 +118,7 @@ public class Competences extends Controller {
   private static final String SHIFT_TYPE_SERVICE_STEP = "sts";
   private static final String TIME_TABLE_STEP = "time";
   private static final String EXTERNAL_TIME_TABLE_STEP = "externalTime";
+  private static final String DATE_FORMAT = "dd/MM/yyyy";
 
   @Inject
   private static CompetenceRecapFactory competenceRecapFactory;
@@ -1415,7 +1416,14 @@ public class Competences extends Controller {
    * @param psst l'oggetto associazione tra persona e turno.
    */
   public static void updatePersonShiftShiftType(PersonShiftShiftType psst) {
+    notFoundIfNull(psst);
     rules.checkIfPermitted(psst.getPersonShift().getPerson().getOffice());
+    validateShiftTypePeriod(psst.getPersonShift(), psst.getShiftType(), psst.getBeginDate(),
+        psst.getEndDate(), Optional.of(psst), "psst.beginDate", "psst.endDate");
+    if (Validation.hasErrors()) {
+      response.status = 400;
+      render("@handlePersonShiftShiftType", psst);
+    }
     psst.save();
     flash.success("Informazioni salvate correttamente");
     manageShiftType(psst.getShiftType().id);
@@ -1513,12 +1521,12 @@ public class Competences extends Controller {
       LocalDate beginDate, boolean jolly) {
     notFoundIfNull(person);
     rules.checkIfPermitted(person.getPerson().getOffice());
-    if (beginDate == null) {
-      Validation.addError("beginDate", "inserire una data di inizio!");
-    }
-
     if (!person.isPersistent()) {
       Validation.addError("person", "selezionare una persona!");
+    } else {
+      // Il nuovo periodo non ha data di fine
+      validateShiftTypePeriod(person, activity, beginDate, null,
+          Optional.<PersonShiftShiftType>absent(), "beginDate", "beginDate");
     }
     if (Validation.hasErrors()) {
       List<PersonShiftShiftType> psstList = shiftDao.getAssociatedPeopleToShift(activity, 
@@ -1555,6 +1563,12 @@ public class Competences extends Controller {
       confirmed = true;
       render("@deletePersonShiftShiftType", psst, confirmed);
     }
+    if (endDate == null) {
+      Validation.addError("endDate", "inserire una data di fine!");
+    } else if (psst.getBeginDate() != null && endDate.isBefore(psst.getBeginDate())) {
+      Validation.addError("endDate", "la data di fine non può precedere la data di inizio "
+          + psst.getBeginDate().toString(DATE_FORMAT));
+    }
     if (Validation.hasErrors()) {
       response.status = 400;
       render("@deletePersonShiftShiftType", psst, confirmed);
@@ -1566,6 +1580,42 @@ public class Competences extends Controller {
         psst.getPersonShift().getPerson().fullName(), 
         psst.getShiftType().getDescription(), psst.getEndDate());
     manageShiftType(psst.getShiftType().id);
+  }
+
+  /**
+   * Verifica che il periodo di associazione della persona all'attività sia valido e non si
+   * sovrapponga agli altri periodi della stessa persona sulla stessa attività. Le date di inizio
+   * e di fine sono comprese nel periodo, una data di fine nulla indica un periodo aperto.
+   *
+   * @param personShift la persona in turno
+   * @param shiftType l'attività di turno
+   * @param beginDate la data di inizio del periodo
+   * @param endDate la data di fine del periodo (null se aperto)
+   * @param excluded l'eventuale associazione in modifica, da non confrontare con se stessa
+   * @param beginKey la chiave dell'errore sulla data di inizio
+   * @param endKey la chiave dell'errore sulla data di fine
+   */
+  private static void validateShiftTypePeriod(PersonShift personShift, ShiftType shiftType,
+      LocalDate beginDate, LocalDate endDate, Optional<PersonShiftShiftType> excluded,
+      String beginKey, String endKey) {
+    if (beginDate == null) {
+      Validation.addError(beginKey, "inserire una data di inizio!");
+      return;
+    }
+    if (endDate != null && endDate.isBefore(beginDate)) {
+      Validation.addError(endKey, "la data di fine non può precedere la data di inizio");
+      return;
+    }
+    List<PersonShiftShiftType> overlapping = shiftDao.getOverlappingPeriods(personShift,
+        shiftType, beginDate, Optional.fromNullable(endDate), excluded);
+    if (!overlapping.isEmpty()) {
+      PersonShiftShiftType other = overlapping.get(0);
+      Validation.addError(beginKey, "il periodo si sovrappone a quello già presente "
+          + (other.getEndDate() == null
+              ? "senza data di fine a partire dal " + other.getBeginDate().toString(DATE_FORMAT)
+              : "dal " + other.getBeginDate().toString(DATE_FORMAT)
+                  + " al " + other.getEndDate().toString(DATE_FORMAT)));
+    }
   }
 
   /**

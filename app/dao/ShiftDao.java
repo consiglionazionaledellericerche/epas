@@ -366,7 +366,7 @@ public class ShiftDao extends DaoBase {
     if (date.isPresent()) {
       condition.and(psst.beginDate.loe(date.get())
           .andAnyOf(psst.endDate.isNull(),
-              psst.endDate.gt(date.get())));
+              psst.endDate.goe(date.get())));
 
     }
     return getQueryFactory().selectFrom(psst).where(psst.shiftType.eq(shiftType)
@@ -387,6 +387,35 @@ public class ShiftDao extends DaoBase {
         .where(psst.personShift.eq(personShift)
             .and(psst.shiftType.eq(shiftType))).fetchOne();
     return Optional.fromNullable(result);
+  }
+
+  /**
+   * Le associazioni della persona all'attività il cui periodo si sovrappone a quello indicato.
+   * Le date di inizio e di fine sono comprese nel periodo, una data nulla indica un periodo
+   * aperto.
+   *
+   * @param personShift la persona associata al turno
+   * @param shiftType l'attività di un servizio di turno
+   * @param beginDate la data di inizio del periodo
+   * @param endDate la data di fine del periodo, se presente
+   * @param excluded l'eventuale associazione da non considerare (quella in modifica)
+   * @return la lista delle associazioni il cui periodo si sovrappone a quello indicato.
+   */
+  public List<PersonShiftShiftType> getOverlappingPeriods(PersonShift personShift,
+      ShiftType shiftType, LocalDate beginDate, Optional<LocalDate> endDate,
+      Optional<PersonShiftShiftType> excluded) {
+    final QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
+    BooleanBuilder condition = new BooleanBuilder(psst.personShift.eq(personShift)
+        .and(psst.shiftType.eq(shiftType))
+        .and(psst.endDate.isNull().or(psst.endDate.goe(beginDate))));
+    if (endDate.isPresent()) {
+      condition.and(psst.beginDate.isNull().or(psst.beginDate.loe(endDate.get())));
+    }
+    if (excluded.isPresent()) {
+      condition.and(psst.id.ne(excluded.get().id));
+    }
+    return getQueryFactory().selectFrom(psst).where(condition)
+        .orderBy(psst.beginDate.asc()).fetch();
   }
 
   /**

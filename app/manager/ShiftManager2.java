@@ -41,9 +41,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -159,7 +162,8 @@ public class ShiftManager2 {
             .filter(ps -> !ps.getBeginDate().isAfter(LocalDate.now()) 
                 && (ps.getEndDate() == null || !ps.getEndDate().isBefore(LocalDate.now())))
             .flatMap(ps -> ps.getPersonShiftShiftTypes().stream())
-            .filter(psst -> psst.getEndDate() == null || psst.getEndDate().isAfter(LocalDate.now()))
+            .filter(psst -> psst.getEndDate() == null
+                || !psst.getEndDate().isBefore(LocalDate.now()))
             .map(psst -> psst.getShiftType()).filter(sc -> !sc.getShiftCategories().isDisabled())
             .sorted(Comparator.comparing(o -> o.getType()))
             .collect(Collectors.toList()));
@@ -1023,10 +1027,16 @@ public class ShiftManager2 {
   public List<PersonShiftShiftType> shiftWorkers(ShiftType activity, LocalDate start,
       LocalDate end) {
     if (activity.isPersistent() && start != null && end != null) {
-      return activity.getPersonShiftShiftTypes().stream()
+      // Una persona può avere più periodi consecutivi sull'attività nell'intervallo:
+      // si considera solo il più recente per non duplicarla
+      return new ArrayList<>(activity.getPersonShiftShiftTypes().stream()
           .filter(personShiftShiftType -> personShiftShiftType.dateRange().isConnected(
               Range.closed(start, end)))
-          .collect(Collectors.toList());
+          .collect(Collectors.toMap(PersonShiftShiftType::getPersonShift, Function.identity(),
+              BinaryOperator.maxBy(Comparator.comparing(PersonShiftShiftType::getBeginDate,
+                  Comparator.nullsFirst(Comparator.naturalOrder()))),
+              LinkedHashMap::new))
+          .values());
     } else {
       return new ArrayList<>();
     }

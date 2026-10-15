@@ -28,6 +28,7 @@ import lombok.Getter;
 import lombok.Setter;
 import models.base.BaseModel;
 import org.joda.time.LocalDate;
+import play.data.binding.NoBinding;
 import play.data.validation.Required;
 
 
@@ -45,11 +46,15 @@ public class PersonShiftShiftType extends BaseModel {
 
   private static final long serialVersionUID = -4476838239881674080L;
 
+  // Non modificabili dai parametri della richiesta: per le relazioni Play verifica
+  // l'annotazione sul campo
+  @NoBinding
   @Required
   @ManyToOne
   @JoinColumn(name = "personshifts_id")
   private PersonShift personShift;
 
+  @NoBinding
   @Required
   @ManyToOne
   @JoinColumn(name = "shifttypes_id")
