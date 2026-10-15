@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+  - Corretta la visualizzazione del riepilogo delle ore di turno nel calendario nel caso di
+    competenze di turno notturno/festivo abilitate senza data di fine.
 ### Added
   - Aggiunto il parametro di configurazione personale periodico per il limite mensile di giorni
     di lavoro agile (codici LAGILE e LAGILEBP), che sostituisce il limite standard di 10 giorni
