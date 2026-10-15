@@ -103,6 +103,20 @@ public class Configurations extends Controller {
     }
     if (epasParam.isPeriodic()) {
       //validazione periodo
+      if (epasParam.equals(EpasParam.AGILE_WORK_MONTHLY_LIMIT)) {
+        // Il limite è mensile: il periodo deve coprire mesi interi
+        if (configurationDto.validityBegin != null
+            && configurationDto.validityBegin.getDayOfMonth() != 1) {
+          Validation.addError("configurationDto.validityBegin",
+              "deve essere il primo giorno del mese.");
+        }
+        if (configurationDto.validityEnd != null
+            && !configurationDto.validityEnd.equals(
+                configurationDto.validityEnd.dayOfMonth().withMaximumValue())) {
+          Validation.addError("configurationDto.validityEnd",
+              "deve essere l'ultimo giorno del mese.");
+        }
+      }
     }
     if (Validation.hasErrors()) {
       return newConfiguration;
@@ -119,7 +133,11 @@ public class Configurations extends Controller {
       }
     }
     if (epasParam.epasParamValueType.equals(EpasParamValueType.INTEGER)) {
-      if (configurationDto.integerNewValue == null) {
+      // Per il limite personale di lavoro agile il valore vuoto indica il limite standard
+      boolean emptyAllowed = epasParam.equals(EpasParam.AGILE_WORK_MONTHLY_LIMIT);
+      if ((configurationDto.integerNewValue == null && !emptyAllowed)
+          || (configurationDto.integerNewValue != null && emptyAllowed
+              && configurationDto.integerNewValue < 0)) {
         Validation.addError("configurationDto.integerNewValue", "valore non valido.");
       } else {
         newConfiguration = configurationManager.updateInteger(epasParam,
@@ -400,7 +418,13 @@ public class Configurations extends Controller {
     List<PersonConfiguration> currentConfiguration = configurationManager
         .getPersonConfigurationsByDate(person, LocalDate.now());
 
-    render(person, currentConfiguration);
+    // Del limite personale di lavoro agile sono mostrati tutti i periodi (passati e futuri)
+    List<PersonConfiguration> agileWorkLimitPeriods = person.getPersonConfigurations().stream()
+        .filter(pc -> pc.getEpasParam() == EpasParam.AGILE_WORK_MONTHLY_LIMIT)
+        .sorted(Comparator.comparing(PersonConfiguration::getBeginDate))
+        .collect(Collectors.toList());
+
+    render(person, currentConfiguration, agileWorkLimitPeriods);
   }
 
   /**
@@ -413,11 +437,32 @@ public class Configurations extends Controller {
     PersonConfiguration configuration = PersonConfiguration.findById(configurationId);
     notFoundIfNull(configuration);
     rules.checkIfPermitted(configuration.getPerson().getOffice());
+    if (!configurationManager.isEditableBy(configuration, Security.getUser().get())) {
+      forbidden();
+    }
 
     ConfigurationDto configurationDto = new ConfigurationDto(configuration.getEpasParam(),
         configuration.getBeginDate(), configuration.calculatedEnd(),
         configurationManager.parseValue(
             configuration.getEpasParam(), configuration.getFieldValue()));
+
+    LocalDate currentMonthBegin = LocalDate.now().dayOfMonth().withMinimumValue();
+    LocalDate rowBegin = configuration.getBeginDate();
+    boolean futurePeriod = rowBegin != null && rowBegin.getDayOfMonth() == 1
+        && rowBegin.isAfter(currentMonthBegin);
+    if (configuration.getEpasParam().equals(EpasParam.AGILE_WORK_MONTHLY_LIMIT)
+        && !futurePeriod) {
+      // Il periodo deve iniziare il primo giorno di un mese: per un periodo già iniziato
+      // si propone il mese corrente, o il primo mese intero dopo l'attivazione della persona.
+      // Per un periodo futuro si mantiene il suo inizio.
+      LocalDate begin = currentMonthBegin;
+      LocalDate personBegin = configuration.getPerson().getBeginDate();
+      if (personBegin != null && begin.isBefore(personBegin)) {
+        begin = personBegin.getDayOfMonth() == 1
+            ? personBegin : personBegin.plusMonths(1).dayOfMonth().withMinimumValue();
+      }
+      configurationDto.validityBegin = begin;
+    }
 
     render(configuration, configurationDto);
   }
@@ -425,20 +470,28 @@ public class Configurations extends Controller {
   /**
    * Modifica la configurazione della persona.
    *
-   * @param configuration    la configurazione della persona da modificare.
+   * @param configurationId  l'id della configurazione della persona da modificare.
    * @param configurationDto l'oggetto contenente la configurazione nuova.
    * @param confirmed        se siamo nello stato di conferma delle operazioni.
    */
-  public static void personUpdate(PersonConfiguration configuration,
+  public static void personUpdate(Long configurationId,
       ConfigurationDto configurationDto, boolean confirmed) {
 
+    // La configurazione è ricaricata per id: i suoi campi (persona, parametro) non devono
+    // poter essere modificati dai parametri della richiesta
+    PersonConfiguration configuration = PersonConfiguration.findById(configurationId);
     notFoundIfNull(configuration);
     notFoundIfNull(configuration.getPerson());
     notFoundIfNull(configuration.getPerson().getOffice());
 
     rules.checkIfPermitted(configuration.getPerson().getOffice());
+    if (!configurationManager.isEditableBy(configuration, Security.getUser().get())) {
+      forbidden();
+    }
     
-    if (!configuration.getBeginDate().isEqual(configuration.getPerson().getBeginDate())) {
+    // Per i parametri periodici possono esistere più periodi con date di inizio diverse
+    if (!configuration.getEpasParam().isPeriodic()
+        && !configuration.getBeginDate().isEqual(configuration.getPerson().getBeginDate())) {
       flash.error("La data di inizio della configurazione (%s) e la data di attivazione della persona (%s) sono diverse. "
           + "Modificare la data di attivazione della persona nei dati anagrafici per procedere con la modifica di questo parametro.", 
           configuration.getBeginDate(), configuration.getPerson().getBeginDate());
