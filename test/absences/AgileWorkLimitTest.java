@@ -239,14 +239,7 @@ public class AgileWorkLimitTest extends UnitTest {
   }
 
   private Person employee(LocalDate begin) {
-    Person person = h2Examples.normalEmployee(begin, Optional.absent());
-    person.setBeginDate(begin);
-    person.save();
-    for (PersonConfiguration configuration : person.getPersonConfigurations()) {
-      configuration.setBeginDate(begin);
-      configuration.save();
-    }
-    return person;
+    return h2Examples.activeNormalEmployee(begin);
   }
 
   private void setLimit(Person person, Integer limit, LocalDate begin, Optional<LocalDate> end) {
