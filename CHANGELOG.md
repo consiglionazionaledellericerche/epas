@@ -7,9 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
   - I periodi di associazione di una persona ad un'attività di turno non possono più
-    sovrapporsi: il controllo è fatto in inserimento, modifica e terminazione e tramite un vincolo
-    sulla base di dati. L'evoluzione elimina i periodi contenuti in altri e accorcia quelli
-    sovrapposti al successivo.
+    sovrapporsi: il controllo è fatto in inserimento, modifica e terminazione. L'evoluzione
+    elimina i periodi contenuti in altri e accorcia quelli sovrapposti al successivo.
   - Una persona con più periodi consecutivi su un'attività nello stesso mese non è più duplicata
     nel calendario dei turni.
   - Impedita la modifica tramite i parametri della richiesta della persona e dell'attività di

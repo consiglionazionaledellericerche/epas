@@ -26,14 +26,7 @@ WHERE p.id = n.id AND n.next_begin_date IS NOT NULL
 
 ALTER TABLE person_shift_shift_type ALTER COLUMN begin_date SET NOT NULL;
 
-CREATE EXTENSION IF NOT EXISTS btree_gist;
-
-ALTER TABLE person_shift_shift_type ADD CONSTRAINT person_shift_shift_type_no_overlap
-EXCLUDE USING gist (personshifts_id WITH =, shifttypes_id WITH =,
-  daterange(begin_date, end_date, '[]') WITH &&);
-
 # --- !Downs
 
 -- I periodi eliminati o accorciati non vengono ripristinati
-ALTER TABLE person_shift_shift_type DROP CONSTRAINT person_shift_shift_type_no_overlap;
 ALTER TABLE person_shift_shift_type ALTER COLUMN begin_date DROP NOT NULL;
