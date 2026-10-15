@@ -418,7 +418,13 @@ public class Configurations extends Controller {
     List<PersonConfiguration> currentConfiguration = configurationManager
         .getPersonConfigurationsByDate(person, LocalDate.now());
 
-    render(person, currentConfiguration);
+    // Del limite personale di lavoro agile sono mostrati tutti i periodi (passati e futuri)
+    List<PersonConfiguration> agileWorkLimitPeriods = person.getPersonConfigurations().stream()
+        .filter(pc -> pc.getEpasParam() == EpasParam.AGILE_WORK_MONTHLY_LIMIT)
+        .sorted(Comparator.comparing(PersonConfiguration::getBeginDate))
+        .collect(Collectors.toList());
+
+    render(person, currentConfiguration, agileWorkLimitPeriods);
   }
 
   /**
@@ -440,10 +446,16 @@ public class Configurations extends Controller {
         configurationManager.parseValue(
             configuration.getEpasParam(), configuration.getFieldValue()));
 
-    if (configuration.getEpasParam().equals(EpasParam.AGILE_WORK_MONTHLY_LIMIT)) {
-      // Il periodo deve iniziare il primo giorno di un mese: si propone il mese corrente,
-      // o il primo mese intero dopo l'attivazione della persona
-      LocalDate begin = LocalDate.now().dayOfMonth().withMinimumValue();
+    LocalDate currentMonthBegin = LocalDate.now().dayOfMonth().withMinimumValue();
+    LocalDate rowBegin = configuration.getBeginDate();
+    boolean futurePeriod = rowBegin != null && rowBegin.getDayOfMonth() == 1
+        && rowBegin.isAfter(currentMonthBegin);
+    if (configuration.getEpasParam().equals(EpasParam.AGILE_WORK_MONTHLY_LIMIT)
+        && !futurePeriod) {
+      // Il periodo deve iniziare il primo giorno di un mese: per un periodo già iniziato
+      // si propone il mese corrente, o il primo mese intero dopo l'attivazione della persona.
+      // Per un periodo futuro si mantiene il suo inizio.
+      LocalDate begin = currentMonthBegin;
       LocalDate personBegin = configuration.getPerson().getBeginDate();
       if (personBegin != null && begin.isBefore(personBegin)) {
         begin = personBegin.getDayOfMonth() == 1
@@ -458,13 +470,16 @@ public class Configurations extends Controller {
   /**
    * Modifica la configurazione della persona.
    *
-   * @param configuration    la configurazione della persona da modificare.
+   * @param configurationId  l'id della configurazione della persona da modificare.
    * @param configurationDto l'oggetto contenente la configurazione nuova.
    * @param confirmed        se siamo nello stato di conferma delle operazioni.
    */
-  public static void personUpdate(PersonConfiguration configuration,
+  public static void personUpdate(Long configurationId,
       ConfigurationDto configurationDto, boolean confirmed) {
 
+    // La configurazione è ricaricata per id: i suoi campi (persona, parametro) non devono
+    // poter essere modificati dai parametri della richiesta
+    PersonConfiguration configuration = PersonConfiguration.findById(configurationId);
     notFoundIfNull(configuration);
     notFoundIfNull(configuration.getPerson());
     notFoundIfNull(configuration.getPerson().getOffice());

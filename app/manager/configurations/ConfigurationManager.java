@@ -615,8 +615,11 @@ public class ConfigurationManager {
       return nearestValue;
     } else {
       log.debug("Ritorno il valore non necessario default per {} {} {}: {}",
-          owner, epasParam, date, nearestValue);
-      return epasParam.defaultValue;
+          owner, epasParam, date, epasParam.defaultValue);
+      // Il defaultValue è memorizzato in formato stringa: lo si converte nel tipo del
+      // parametro come per i valori letti dalle configurazioni
+      return EpasParamValueType
+          .parseValue(epasParam.epasParamValueType, (String) epasParam.defaultValue);
     }
 
   }

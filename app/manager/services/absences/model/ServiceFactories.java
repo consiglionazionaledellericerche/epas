@@ -392,13 +392,18 @@ public class ServiceFactories {
         absencePeriod.setFixedPeriodTakableAmount(adjustment);
 
       }
-      // Limite mensile personale di lavoro agile (valido al primo giorno del mese):
-      // sostituisce il limite standard del gruppo
+      // Limite mensile personale di lavoro agile (valido al primo giorno del mese, o alla
+      // data di attivazione della persona se successiva): sostituisce il limite standard
+      // del gruppo
       if (groupAbsenceType.getName().equals(DefaultGroup.G_LAGILE.name())) {
-        Integer personalLimit = (Integer) configurationManager
-            .configValue(person, EpasParam.AGILE_WORK_MONTHLY_LIMIT, absencePeriod.from);
-        if (personalLimit != null) {
-          absencePeriod.setFixedPeriodTakableAmount(personalLimit);
+        LocalDate limitDate = absencePeriod.from;
+        if (person.getBeginDate() != null && person.getBeginDate().isAfter(limitDate)) {
+          limitDate = person.getBeginDate();
+        }
+        Object personalLimit = configurationManager
+            .configValue(person, EpasParam.AGILE_WORK_MONTHLY_LIMIT, limitDate);
+        if (personalLimit instanceof Integer) {
+          absencePeriod.setFixedPeriodTakableAmount((Integer) personalLimit);
           absencePeriod.personalAgileWorkLimit = true;
         }
       }

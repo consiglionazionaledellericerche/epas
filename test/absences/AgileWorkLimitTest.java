@@ -18,12 +18,14 @@
 package absences;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import common.injection.StaticInject;
 import dao.absences.AbsenceComponentDao;
 import db.h2support.H2Examples;
 import java.util.List;
+import java.util.Map;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.services.absences.AbsenceService;
@@ -38,6 +40,8 @@ import models.absences.definitions.DefaultGroup;
 import models.enumerate.AccountRole;
 import org.joda.time.LocalDate;
 import org.junit.Test;
+import play.data.binding.Binder;
+import play.data.binding.RootParamNode;
 import play.test.UnitTest;
 
 /**
@@ -160,6 +164,45 @@ public class AgileWorkLimitTest extends UnitTest {
     setLimit(person, 6, BEGIN_MID_OCTOBER_2026, Optional.absent());
 
     assertEquals(600, takableAmount(person, BEGIN_MID_OCTOBER_2026, Lists.newArrayList()));
+  }
+
+  /**
+   * Persona attivata a metà mese con il parametro non valorizzato: il valore letto al primo
+   * giorno del mese (fuori dal periodo della persona) è null e non il defaultValue in
+   * formato stringa, che causava una ClassCastException nel calcolo del periodo L-AGILE.
+   */
+  @Test
+  public void notNecessaryValueBeforeActivationIsNull() {
+    absenceService.enumInitializator();
+    Person person = employee(BEGIN_MID_OCTOBER_2026);
+
+    assertNull(configurationManager.configValue(person, EpasParam.AGILE_WORK_MONTHLY_LIMIT,
+        BEGIN_MID_OCTOBER_2026.dayOfMonth().withMinimumValue()));
+    assertFalse(periodChain(person, BEGIN_MID_OCTOBER_2026, Lists.newArrayList())
+        .periods.get(0).personalAgileWorkLimit);
+  }
+
+  /**
+   * Persona e parametro della configurazione non sono modificabili dai parametri della
+   * richiesta: altrimenti si potrebbe eludere il controllo dei permessi sul limite personale.
+   */
+  @Test
+  public void personAndParamAreNotBindable() {
+    absenceService.enumInitializator();
+    Person person = employee();
+    Person other = employee();
+    PersonConfiguration agileLimit = configuration(person, EpasParam.AGILE_WORK_MONTHLY_LIMIT);
+
+    Map<String, String[]> params = ImmutableMap.of(
+        "configuration.epasParam", new String[] {EpasParam.TELEWORK.name()},
+        "configuration.person.id", new String[] {other.id.toString()},
+        "configuration.fieldValue", new String[] {"7"});
+    Binder.bindBean(RootParamNode.convert(params), "configuration", agileLimit);
+
+    assertEquals(EpasParam.AGILE_WORK_MONTHLY_LIMIT, agileLimit.getEpasParam());
+    assertEquals(person, agileLimit.getPerson());
+    // Gli altri campi restano bindabili
+    assertEquals("7", agileLimit.getFieldValue());
   }
 
   /**
