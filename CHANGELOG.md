@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
   - Corretta la visualizzazione del riepilogo delle ore di turno nel calendario nel caso di
     competenze di turno notturno/festivo abilitate senza data di fine.
+### Added
+  - Aggiunto il parametro di configurazione personale periodico per il limite mensile di giorni
+    di lavoro agile (codici LAGILE e LAGILEBP), che sostituisce il limite standard di 10 giorni
+    al mese. Per i dipendenti con part time verticale non può superare la soglia inferiore alla
+    metà dei giorni lavorativi del mese. Il parametro è modificabile solo da amministratori e
+    gestori dell'anagrafica.
+### Changed
+  - I parametri di configurazione periodici della persona possono avere più periodi di
+    validità con valori diversi.
+  - Nei parametri di configurazione della persona sono mostrati tutti i periodi (passati, attuale
+    e futuri) del limite mensile di lavoro agile.
+### Fixed
+  - Corretto il valore di default restituito per i parametri di configurazione letti fuori dal
+    periodo del proprietario, che causava un errore nel calcolo del lavoro agile nel mese di
+    attivazione delle persone attivate a metà mese.
+  - Impedita la modifica tramite i parametri della richiesta della persona e del parametro di una
+    configurazione personale.
 
 ## [2.36.0] - 2026-10-13
 ### Changed

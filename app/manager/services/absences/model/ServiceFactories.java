@@ -31,6 +31,8 @@ import java.util.Set;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
+import manager.configurations.ConfigurationManager;
+import manager.configurations.EpasParam;
 import manager.services.absences.AbsenceEngineUtility;
 import manager.services.absences.errors.CriticalError.CriticalProblem;
 import manager.services.absences.errors.ErrorsBox;
@@ -49,6 +51,8 @@ import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultGroup;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
 /**
@@ -66,6 +70,7 @@ public class ServiceFactories {
   private final PersonShiftDayDao personShiftDayDao;
   private final VacationFactory vacationFactory;
   private final AbsenceTypeDao absenceTypeDao;
+  private final ConfigurationManager configurationManager;
 
   /**
    * Constructor.
@@ -79,7 +84,7 @@ public class ServiceFactories {
       AbsenceComponentDao absenceComponentDao, PersonDayManager personDayManager, 
       PersonReperibilityDayDao personReperibilityDayDao, 
       PersonShiftDayDao personShiftDayDao, VacationFactory vacationFactory, 
-      AbsenceTypeDao absenceTypeDao) {
+      AbsenceTypeDao absenceTypeDao, ConfigurationManager configurationManager) {
     this.absenceEngineUtility = absenceEngineUtility;
     this.absenceComponentDao = absenceComponentDao;
     this.personDayManager = personDayManager;
@@ -87,6 +92,7 @@ public class ServiceFactories {
     this.personShiftDayDao = personShiftDayDao;
     this.vacationFactory = vacationFactory;
     this.absenceTypeDao = absenceTypeDao;
+    this.configurationManager = configurationManager;
     
   }
   
@@ -387,9 +393,28 @@ public class ServiceFactories {
         absencePeriod.setFixedPeriodTakableAmount(adjustment);
 
       }
+      // Limite mensile personale di lavoro agile (valido al primo giorno del mese, o alla
+      // data di attivazione della persona se successiva): sostituisce il limite standard
+      // del gruppo
+      if (groupAbsenceType.getName().equals(DefaultGroup.G_LAGILE.name())) {
+        LocalDate limitDate = absencePeriod.from;
+        if (person.getBeginDate() != null && person.getBeginDate().isAfter(limitDate)) {
+          limitDate = person.getBeginDate();
+        }
+        Object personalLimit = configurationManager
+            .configValue(person, EpasParam.AGILE_WORK_MONTHLY_LIMIT, limitDate);
+        if (personalLimit instanceof Integer) {
+          absencePeriod.setFixedPeriodTakableAmount((Integer) personalLimit);
+          absencePeriod.personalAgileWorkLimit = true;
+          absencePeriod.verticalPartTime =
+              verticalPartTime(person, absencePeriod.from, absencePeriod.to);
+        }
+      }
       if (absencePeriod.initialization != null 
           && absencePeriod.initialization.getTakableTotal() != null) {
         absencePeriod.setFixedPeriodTakableAmount(absencePeriod.initialization.getTakableTotal());
+        // L'inizializzazione ha la precedenza sul limite personale
+        absencePeriod.personalAgileWorkLimit = false;
       }
 
       absencePeriod.takableCountBehaviour = TakeCountBehaviour.period;
@@ -724,5 +749,23 @@ public class ServiceFactories {
     
   }
 
-
+  /**
+   * Se la persona ha un orario di lavoro con part time verticale nell'intervallo, cioè un
+   * tipo orario con almeno un giorno dal lunedì al venerdì non lavorativo.
+   *
+   * @param person la persona
+   * @param from inizio dell'intervallo
+   * @param to fine dell'intervallo
+   * @return true se la persona ha un part time verticale nell'intervallo.
+   */
+  private boolean verticalPartTime(Person person, LocalDate from, LocalDate to) {
+    final DateInterval interval = new DateInterval(from, to);
+    return person.getContracts().stream()
+        .flatMap(contract -> contract.getContractWorkingTimeType().stream())
+        .filter(cwtt -> DateUtility.intervalIntersection(interval,
+            new DateInterval(cwtt.getBeginDate(), cwtt.getEndDate())) != null)
+        .anyMatch(cwtt -> cwtt.getWorkingTimeType().getWorkingTimeTypeDays().stream()
+            .anyMatch(wttd -> wttd.getDayOfWeek() <= DateTimeConstants.FRIDAY
+                && wttd.isHoliday()));
+  }
 }

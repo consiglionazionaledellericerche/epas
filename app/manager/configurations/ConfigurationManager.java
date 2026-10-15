@@ -46,8 +46,11 @@ import models.Configuration;
 import models.Office;
 import models.Person;
 import models.PersonConfiguration;
+import models.Role;
+import models.User;
 import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
+import models.enumerate.AccountRole;
 import models.enumerate.BlockType;
 import models.query.QConfiguration;
 import org.joda.time.LocalDate;
@@ -256,8 +259,31 @@ public class ConfigurationManager {
   public IPropertyInPeriod updateInteger(EpasParam epasParam, IPropertiesInPeriodOwner target,
       Integer value, Optional<LocalDate> begin, Optional<LocalDate> end, boolean persist) {
     Preconditions.checkState(epasParam.epasParamValueType == EpasParamValueType.INTEGER);
+    // Il valore non impostato è salvato come stringa vuota (field_value è NOT NULL)
     return build(epasParam, target,
-        EpasParamValueType.formatValue(value), begin, end, false, persist);
+        value == null ? "" : EpasParamValueType.formatValue(value), begin, end, false, persist);
+  }
+
+  /**
+   * Verifica se l'utente può modificare il parametro di configurazione della persona.
+   * Il limite personale di lavoro agile è modificabile solo dagli amministratori di sistema
+   * e dai gestori dell'anagrafica.
+   *
+   * @param configuration la configurazione della persona
+   * @param user l'utente
+   * @return true se l'utente può modificare il parametro, false altrimenti.
+   */
+  public boolean isEditableBy(PersonConfiguration configuration, User user) {
+    if (!configuration.getEpasParam().equals(EpasParam.AGILE_WORK_MONTHLY_LIMIT)) {
+      return true;
+    }
+    if (user.hasAccountRoles(AccountRole.DEVELOPER, AccountRole.ADMIN,
+        AccountRole.REGISTRY_MANAGER)) {
+      return true;
+    }
+    return user.getUsersRolesOffices().stream()
+        .anyMatch(uro -> uro.getRole().getName().equals(Role.REGISTRY_MANAGER)
+            && uro.getOffice().equals(configuration.getPerson().getOffice()));
   }
 
   /**
@@ -589,8 +615,11 @@ public class ConfigurationManager {
       return nearestValue;
     } else {
       log.debug("Ritorno il valore non necessario default per {} {} {}: {}",
-          owner, epasParam, date, nearestValue);
-      return epasParam.defaultValue;
+          owner, epasParam, date, epasParam.defaultValue);
+      // Il defaultValue è memorizzato in formato stringa: lo si converte nel tipo del
+      // parametro come per i valori letti dalle configurazioni
+      return EpasParamValueType
+          .parseValue(epasParam.epasParamValueType, (String) epasParam.defaultValue);
     }
 
   }
