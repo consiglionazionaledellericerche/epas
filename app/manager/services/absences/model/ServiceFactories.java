@@ -52,6 +52,7 @@ import models.absences.TakableAbsenceBehaviour;
 import models.absences.TakableAbsenceBehaviour.TakeCountBehaviour;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
 /**
@@ -405,6 +406,8 @@ public class ServiceFactories {
         if (personalLimit instanceof Integer) {
           absencePeriod.setFixedPeriodTakableAmount((Integer) personalLimit);
           absencePeriod.personalAgileWorkLimit = true;
+          absencePeriod.verticalPartTime =
+              verticalPartTime(person, absencePeriod.from, absencePeriod.to);
         }
       }
       if (absencePeriod.initialization != null 
@@ -746,5 +749,23 @@ public class ServiceFactories {
     
   }
 
-
+  /**
+   * Se la persona ha un orario di lavoro con part time verticale nell'intervallo, cioè un
+   * tipo orario con almeno un giorno dal lunedì al venerdì non lavorativo.
+   *
+   * @param person la persona
+   * @param from inizio dell'intervallo
+   * @param to fine dell'intervallo
+   * @return true se la persona ha un part time verticale nell'intervallo.
+   */
+  private boolean verticalPartTime(Person person, LocalDate from, LocalDate to) {
+    final DateInterval interval = new DateInterval(from, to);
+    return person.getContracts().stream()
+        .flatMap(contract -> contract.getContractWorkingTimeType().stream())
+        .filter(cwtt -> DateUtility.intervalIntersection(interval,
+            new DateInterval(cwtt.getBeginDate(), cwtt.getEndDate())) != null)
+        .anyMatch(cwtt -> cwtt.getWorkingTimeType().getWorkingTimeTypeDays().stream()
+            .anyMatch(wttd -> wttd.getDayOfWeek() <= DateTimeConstants.FRIDAY
+                && wttd.isHoliday()));
+  }
 }

@@ -223,5 +223,32 @@ public class H2Examples {
     return person;
   }
 
-  
+  /**
+   * Istanza di un dipendente con orario part time verticale (lavorativi lunedì, martedì e
+   * mercoledì) e data di attivazione pari all'inizio del contratto, da cui decorrono anche i
+   * suoi parametri di configurazione.
+   *
+   * @param beginContract inizio contratto e data di attivazione
+   * @return persisted entity
+   */
+  public Person activeVerticalPartTimeEmployee(LocalDate beginContract) {
+    final String name = "verticalPartTimeEmployee" + beginContract + UUID.randomUUID();
+    Office office = buildOffice(beginContract, name, name, name);
+    WorkingTimeType verticalPartTime = h2WorkingTimeTypeSupport
+        .getWorkingTimeType(WorkingDefinition.VerticalPartTime60);
+    Person person = createPerson(office, name);
+    Contract contract =
+        buildContract(person, beginContract, Optional.absent(), Optional.absent(),
+            verticalPartTime);
+    contract.refresh();
+    person.refresh();
+    person.setBeginDate(beginContract);
+    person.save();
+    for (PersonConfiguration configuration : person.getPersonConfigurations()) {
+      configuration.setBeginDate(beginContract);
+      configuration.save();
+    }
+    return person;
+  }
+
 }

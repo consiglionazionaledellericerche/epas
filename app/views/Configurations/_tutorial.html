@@ -316,7 +316,9 @@
 	#{if configuration.epasParam.equals(manager.configurations.EpasParam.AGILE_WORK_MONTHLY_LIMIT) }
 	  <p>Numero massimo di giorni di lavoro agile (codici LAGILE e LAGILEBP) che il dipendente <strong>${configuration.person.fullname}</strong>
 	  può utilizzare in ciascun mese del periodo di validità indicato. Il valore sostituisce il limite standard
-	  (10 giorni al mese, 8 a febbraio, non oltre circa la metà dei giorni lavorativi del mese).<br>
+	  (10 giorni al mese, 8 a febbraio, non oltre circa la metà dei giorni lavorativi del mese).
+	  Per i dipendenti con part time verticale il valore non può comunque superare la soglia inferiore alla metà
+	  dei giorni lavorativi del mese (es. con 12 giorni lavorativi al massimo 5 giorni).<br>
 	  Lasciando il campo vuoto si applica il limite standard. Il valore 0 indica che nel periodo non è possibile utilizzare il lavoro agile.<br>
 	  Il periodo di validità deve iniziare il primo giorno di un mese e terminare l'ultimo giorno di un mese.
 	  </p>

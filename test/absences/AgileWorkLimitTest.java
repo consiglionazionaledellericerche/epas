@@ -107,6 +107,25 @@ public class AgileWorkLimitTest extends UnitTest {
   }
 
   /**
+   * Con un part time verticale il limite personale non può superare la soglia inferiore alla
+   * metà dei giorni lavorativi del mese: lavorando lunedì, martedì e mercoledì a ottobre e a
+   * febbraio 2026 i giorni lavorativi sono 12, quindi al massimo 5 giorni di lavoro agile.
+   */
+  @Test
+  public void personalLimitWithVerticalPartTime() {
+    absenceService.enumInitializator();
+
+    Person person = h2Examples.activeVerticalPartTimeEmployee(BEGIN_2026);
+    setLimit(person, 10, BEGIN_2026, Optional.absent());
+    assertEquals(500, takableAmount(person, MID_OCTOBER_2026, Lists.newArrayList()));
+    assertEquals(500, takableAmount(person, MID_FEBRUARY_2026, Lists.newArrayList()));
+
+    person = h2Examples.activeVerticalPartTimeEmployee(BEGIN_2026);
+    setLimit(person, 3, BEGIN_2026, Optional.absent());
+    assertEquals(300, takableAmount(person, MID_OCTOBER_2026, Lists.newArrayList()));
+  }
+
+  /**
    * L'inizializzazione del gruppo nel mese ha la precedenza sul limite personale.
    */
   @Test

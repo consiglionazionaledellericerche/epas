@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Aggiunto il parametro di configurazione personale periodico per il limite mensile di giorni
     di lavoro agile (codici LAGILE e LAGILEBP), che sostituisce il limite standard di 10 giorni
-    al mese. Il parametro è modificabile solo da amministratori e gestori dell'anagrafica.
+    al mese. Per i dipendenti con part time verticale non può superare la soglia inferiore alla
+    metà dei giorni lavorativi del mese. Il parametro è modificabile solo da amministratori e
+    gestori dell'anagrafica.
 ### Changed
   - I parametri di configurazione periodici della persona possono avere più periodi di
     validità con valori diversi.
