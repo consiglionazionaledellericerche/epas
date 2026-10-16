@@ -28,6 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.OfficeManager;
 import models.User;
+import play.Play;
+import play.cache.Cache;
 import play.mvc.Http;
 import play.mvc.Util;
 import play.utils.Java;
@@ -43,6 +45,12 @@ public class Security extends Secure.Security {
 
   public static final String CACHE_DURATION = "30mn";
   public static final String CURRENT_USER = "current_user";
+
+  static final String LOGIN_MAX_FAILURES = "security.login.maxFailures";
+  static final String LOGIN_LOCK_MINUTES = "security.login.lockMinutes";
+  private static final int DEFAULT_LOGIN_MAX_FAILURES = 10;
+  private static final int DEFAULT_LOGIN_LOCK_MINUTES = 15;
+  private static final String LOGIN_FAILURES_KEY = "loginFailures.";
 
   //FIXME residuo dei vecchi residui, rimuoverlo e sostituirlo nei metodi che lo utilizzano
   @Inject
@@ -66,6 +74,12 @@ public class Security extends Secure.Security {
       return false;
     }
 
+    if (isLoginLocked(username)) {
+      log.warn("Login bloccato per {}: troppi tentativi falliti, ip {}", username,
+          Http.Request.current() != null ? Http.Request.current().remoteAddress : null);
+      return false;
+    }
+
     User user = 
         userDao.getUserByUsernameAndPassword(username, password);
 
@@ -77,12 +91,51 @@ public class Security extends Secure.Security {
         user.save();
         log.info("Inserita password sha512 per {}", user.getUsername());
       }
+      Cache.safeDelete(loginFailuresKey(username));
       return true;
     }
 
     // Oops
     log.info("Failed login for {}", username);
+    registerLoginFailure(username);
     return false;
+  }
+
+  /**
+   * Chiave della cache con il numero di tentativi di login falliti per lo username.
+   */
+  private static String loginFailuresKey(String username) {
+    return LOGIN_FAILURES_KEY + username.toLowerCase();
+  }
+
+  /**
+   * Verifica se il login per lo username è bloccato per i troppi tentativi falliti.
+   *
+   * @param username lo username che intende autenticarsi
+   * @return true se sono stati superati i tentativi falliti ammessi, false altrimenti.
+   */
+  static boolean isLoginLocked(String username) {
+    Integer failures = Cache.get(loginFailuresKey(username), Integer.class);
+    return failures != null && failures >= intProperty(LOGIN_MAX_FAILURES,
+        DEFAULT_LOGIN_MAX_FAILURES);
+  }
+
+  /**
+   * Registra un tentativo di login fallito: i tentativi sono contati per lo username in una
+   * finestra che si rinnova ad ogni tentativo fallito.
+   */
+  private static void registerLoginFailure(String username) {
+    Integer failures = Cache.get(loginFailuresKey(username), Integer.class);
+    int count = failures == null ? 1 : failures + 1;
+    Cache.safeSet(loginFailuresKey(username), count,
+        intProperty(LOGIN_LOCK_MINUTES, DEFAULT_LOGIN_LOCK_MINUTES) + "mn");
+    if (count == intProperty(LOGIN_MAX_FAILURES, DEFAULT_LOGIN_MAX_FAILURES)) {
+      log.warn("Raggiunto il numero massimo di tentativi di login falliti per {}", username);
+    }
+  }
+
+  private static int intProperty(String name, int defaultValue) {
+    return Integer.parseInt(Play.configuration.getProperty(name, String.valueOf(defaultValue)));
   }
 
   /**
