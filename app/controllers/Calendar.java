@@ -602,7 +602,8 @@ public class Calendar extends Controller {
       List<PersonCompetenceCodes> list = people.stream()
           .flatMap(p -> p.getPersonCompetenceCodes().stream()
               .filter(c -> c.getCompetenceCode().equals(holiday) 
-                  && !c.getBeginDate().isAfter(start) && !c.getEndDate().isBefore(end)))
+                  && !c.getBeginDate().isAfter(start)
+                  && (c.getEndDate() == null || !c.getEndDate().isBefore(end))))
           .collect(Collectors.toList());
       
       //Controllo se ci sono turni notturni assegnati...
@@ -610,7 +611,8 @@ public class Calendar extends Controller {
       List<PersonCompetenceCodes> nightList = people.stream()
           .flatMap(p -> p.getPersonCompetenceCodes().stream()
               .filter(c -> c.getCompetenceCode().equals(night) 
-                  && !c.getBeginDate().isAfter(start) && !c.getEndDate().isBefore(end)))
+                  && !c.getBeginDate().isAfter(start)
+                  && (c.getEndDate() == null || !c.getEndDate().isBefore(end))))
           .collect(Collectors.toList());
 
       if (!list.isEmpty()) {

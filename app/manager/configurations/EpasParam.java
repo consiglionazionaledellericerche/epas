@@ -466,6 +466,19 @@ public enum EpasParam {
           RecomputationType.RESIDUAL_MEALTICKETS),
       Person.class),
 
+  /* Limite mensile personale di giorni di lavoro agile (LAGILE/LAGILEBP) nel periodo.
+   * Se non valorizzato si applica il limite standard del gruppo. Con un part time verticale non
+   * può superare la soglia inferiore alla metà dei giorni lavorativi del mese.
+   * Il ricalcolo RESIDUAL_HOURS comprende la scansione degli errori sulle assenze.
+   */
+  AGILE_WORK_MONTHLY_LIMIT("agile_work_monthly_limit",
+      EpasParamCategory.PERIODIC,
+      EpasParamTimeType.PERIODIC,
+      EpasParamValueType.INTEGER,
+      EpasParamValueType.formatValue(""),
+      Lists.newArrayList(RecomputationType.RESIDUAL_HOURS),
+      Person.class),
+
   HOUR_MAX_TO_CALCULATE_WORKTIME("hour_max_to_calculate_worktime",
       EpasParamCategory.PERIODIC,
       EpasParamTimeType.PERIODIC,
