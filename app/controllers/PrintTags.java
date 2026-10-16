@@ -168,6 +168,8 @@ public class PrintTags extends Controller {
 
     LocalDate date = new LocalDate(year, month, 1);
     Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
     Set<Office> set = Sets.newHashSet();
     set.add(office);
     List<Person> personList = personDao.list(

@@ -174,6 +174,8 @@ public class MealTicketCards extends Controller {
   public static void deleteCard(Long mealTicketCardId) {
     java.util.Optional<MealTicketCard> mealTicketCard = mealTicketCardDao
         .getMealTicketCardById(mealTicketCardId);
+    notFoundIfNull(mealTicketCard.orElse(null));
+    rules.checkIfPermitted(mealTicketCard.get().getPerson().getOffice());
     if (mealTicketCard.isPresent()) {
       if (!mealTicketCard.get().getMealTickets().isEmpty()) {
         flash.error("La tessera presenta %s buoni elettronici associati. "
@@ -198,6 +200,8 @@ public class MealTicketCards extends Controller {
   public static void infoCard(Long mealTicketCardId) {
     java.util.Optional<MealTicketCard> card = mealTicketCardDao
         .getMealTicketCardById(mealTicketCardId);
+    notFoundIfNull(card.orElse(null));
+    rules.checkIfPermitted(card.get().getPerson().getOffice());
     if (card.isPresent()) {
       MealTicketCard mealTicketCard = card.get();
       render(mealTicketCard);
@@ -249,11 +253,14 @@ public class MealTicketCards extends Controller {
     
     if (!card.isPresent()) {
       Person person = personDao.getPersonById(personId);
+      notFoundIfNull(person);
+      rules.checkIfPermitted(person.getOffice());
       flash.error("Non sono presenti card associate al dipendente! "
           + "Assegnare una card e riprovare!");
       MealTickets.recapMealTickets(LocalDate.now().getYear(), 
           LocalDate.now().getMonthOfYear(), person.getOffice().id);
     } 
+    rules.checkIfPermitted(card.get().getPerson().getOffice());
     IWrapperPerson wrPerson = wrapperFactory.create(card.get().getPerson());
     Optional<Contract> actualContract = wrPerson.getCurrentContract();
     boolean result = mealTicketCardManager

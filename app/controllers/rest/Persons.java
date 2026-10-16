@@ -91,6 +91,7 @@ public class Persons extends Controller {
           + "mail cnr che serve per la ricerca. Assicurarsi di aver"
           + "lanciato il job per la sincronizzazione delle email dei dipendenti");
     }
+    rules.checkIfPermitted(person.get().getOffice());
     if (start == null || end == null || start.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
@@ -129,6 +130,7 @@ public class Persons extends Controller {
     Optional<Person> person = personDao.byEmail(email);
     List<DayRecap> personDays = Lists.newArrayList();
     if (person.isPresent()) {
+      rules.checkIfPermitted(person.get().getOffice());
 
       personDays = FluentIterable.from(absenceDao.getAbsencesInPeriod(
           person, start, Optional.fromNullable(end), forAttachment))
@@ -165,6 +167,7 @@ public class Persons extends Controller {
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto");
     }
+    rules.checkIfPermitted(person.getOffice());
     if (start == null || end == null || start.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
