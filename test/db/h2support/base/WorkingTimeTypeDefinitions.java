@@ -46,7 +46,16 @@ public class WorkingTimeTypeDefinitions {
     PartTime50_4(4, 216, false, 360, 30, null, null),
     PartTime50_5(5, 216, false, 360, 30, null, null),
     PartTime50_6(6, 0, true, 0, 0, null, null),
-    PartTime50_7(7, 0, true, 0, 0, null, null);
+    PartTime50_7(7, 0, true, 0, 0, null, null),
+
+    // Part time verticale: lavorativi solo lunedì, martedì e mercoledì
+    VerticalPartTime60_1(1, 432, false, 360, 30, null, null),
+    VerticalPartTime60_2(2, 432, false, 360, 30, null, null),
+    VerticalPartTime60_3(3, 432, false, 360, 30, null, null),
+    VerticalPartTime60_4(4, 0, true, 0, 0, null, null),
+    VerticalPartTime60_5(5, 0, true, 0, 0, null, null),
+    VerticalPartTime60_6(6, 0, true, 0, 0, null, null),
+    VerticalPartTime60_7(7, 0, true, 0, 0, null, null);
 
     public Integer dayOfWeek;
     public Integer workingTime;
@@ -82,7 +91,13 @@ public class WorkingTimeTypeDefinitions {
         ImmutableList.of(WorkingDayDefinition.PartTime50_1, WorkingDayDefinition.PartTime50_2, 
             WorkingDayDefinition.PartTime50_3, WorkingDayDefinition.PartTime50_4,
             WorkingDayDefinition.PartTime50_5, WorkingDayDefinition.PartTime50_6, 
-            WorkingDayDefinition.PartTime50_7));
+            WorkingDayDefinition.PartTime50_7)),
+
+    VerticalPartTime60(false,
+        ImmutableList.of(WorkingDayDefinition.VerticalPartTime60_1,
+            WorkingDayDefinition.VerticalPartTime60_2, WorkingDayDefinition.VerticalPartTime60_3,
+            WorkingDayDefinition.VerticalPartTime60_4, WorkingDayDefinition.VerticalPartTime60_5,
+            WorkingDayDefinition.VerticalPartTime60_6, WorkingDayDefinition.VerticalPartTime60_7));
 
     public boolean horizontal;
     public List<WorkingDayDefinition> orderedWorkingDayDefinition;

@@ -71,6 +71,10 @@ public class AbsencePeriod {
   public Set<AbsenceType> takableCodes;            // I tipi assenza prendibili del periodo
   public Set<AbsenceType> takenCodes;              // I tipi di assenza consumati del periodo
   public LocalDate limitExceedDate;
+  // Il tetto è il limite personale di lavoro agile (non si applicano le regole standard, salvo
+  // il limite inferiore alla metà dei giorni lavorativi per i part time verticali)
+  public boolean personalAgileWorkLimit = false;
+  public boolean verticalPartTime = false;          // Part time verticale nel periodo
 
   // Complation
   public AmountType complationAmountType;                      // Tipo di ammontare completamento
@@ -211,6 +215,14 @@ public class AbsencePeriod {
    */
   public int computePeriodTakableAmount(TakeCountBehaviour countBehaviour, LocalDate date) {
     if (countBehaviour.equals(TakeCountBehaviour.period)) {
+      if (this.personalAgileWorkLimit) {
+        // Con un part time verticale il limite personale non può superare la soglia inferiore
+        // alla metà dei giorni lavorativi del mese
+        if (this.verticalPartTime) {
+          return Math.min(this.fixedPeriodTakableAmount, lessThanHalfWorkingDays());
+        }
+        return this.fixedPeriodTakableAmount;
+      }
       if (this.takableCodes.contains(absenceTypeDao
           .getAbsenceTypeByCode(DefaultAbsenceType.A_LAGILE.getCode()).get())) {
         /* Caso di febbraio: secondo la nota del DG i giorni di lavoro agile a febbraio
@@ -218,17 +230,10 @@ public class AbsencePeriod {
          * prevista dall'algoritmo (2 * 100) al quantitativo di giorni previsto per il 
          * gruppo del codice LAGILE (this.fixexPeriodTakableAmount).
          */
-        int quantity = 0;
         if (from.monthOfYear().get() == DateTimeConstants.FEBRUARY) {
           return this.fixedPeriodTakableAmount - 2 * 100;
         }
-        List<PersonDay> workingDays = personDayManager.workingDaysInMonth(person, from, to);
-        int count = (workingDays.size() * 100 / 2);
-        if (count % 100 != 0) {
-          quantity = count - count % 100;
-        } else {
-          quantity = count - (1 * 100);
-        }
+        int quantity = lessThanHalfWorkingDays();
         if (quantity <= this.fixedPeriodTakableAmount) {
           return quantity;
         }
@@ -258,6 +263,21 @@ public class AbsencePeriod {
     return 0;
   }
   
+  /**
+   * Il numero di giorni (in centesimi) inferiore alla metà dei giorni lavorativi del mese:
+   * la metà arrotondata per difetto, meno un giorno se la metà è intera.
+   *
+   * @return il numero di giorni inferiore alla metà dei giorni lavorativi del mese.
+   */
+  private int lessThanHalfWorkingDays() {
+    List<PersonDay> workingDays = personDayManager.workingDaysInMonth(person, from, to);
+    int count = (workingDays.size() * 100 / 2);
+    if (count % 100 != 0) {
+      return count - count % 100;
+    }
+    return count - (1 * 100);
+  }
+
   /**
    * L'ammontare utilizzato nel periodo.
    *
