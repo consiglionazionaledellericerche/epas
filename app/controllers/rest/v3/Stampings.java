@@ -123,6 +123,9 @@ public class Stampings extends Controller {
     rules.checkIfPermitted(person.get().getOffice());
 
     val stampingFromClient = StampingFromClient.build(stampingCreateDto);
+    if (stampingManager.isInTheFuture(stampingFromClient.dateTime)) {
+      JsonResponse.badRequest("Timbratura con data nel futuro");
+    }
     stampingFromClient.person = person.get();    
     log.trace("stampingFromClient = {}", stampingFromClient);
 
