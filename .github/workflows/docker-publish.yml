@@ -12,6 +12,9 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
+        with:
+          # serve la storia dei tag per trovare la release precedente
+          fetch-depth: 0
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -31,6 +34,41 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      -
+        # Prima build caricata nel docker locale per i test: il push successivo
+        # riusa la cache del builder e pubblica gli stessi layer testati.
+        name: Build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          tags: epas:ci
+      -
+        name: Smoke test
+        run: .github/scripts/docker-smoke-test.sh epas:ci
+      -
+        name: Pacchetti cambiati rispetto alla release precedente
+        run: |
+          pkgs() { docker run --rm --entrypoint dpkg-query "$1" -W -f '${Package} ${Version}\n'; }
+          pkgs epas:ci > packages-new.txt
+          prev=$(git describe --tags --abbrev=0 --match 'v*.*.*' "${GITHUB_REF_NAME}^" 2>/dev/null || true)
+          echo "Release precedente: ${prev:-nessuna}"
+          if [ -n "$prev" ] && docker pull -q "consiglionazionalericerche/epas:$prev" >/dev/null 2>&1; then
+            pkgs "consiglionazionalericerche/epas:$prev" > packages-old.txt
+          else
+            : > packages-old.txt
+          fi
+          diff -u packages-old.txt packages-new.txt > packages.diff || true
+          cat packages.diff
+      -
+        name: Archivia la lista dei pacchetti
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: |
+            packages-new.txt
+            packages.diff
       -
         name: Build and push
         uses: docker/build-push-action@v4
