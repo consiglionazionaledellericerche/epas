@@ -86,7 +86,7 @@
       			#{/secure.check}
       			</td>
       			<td #{if item.note != null && !item.note.equals("")} 
-      				webui-popover-hover data-content="${item.note}">      			
+      				webui-popover-hover data-content="${item.note?.popoverText()}">      			
       				<i class="fa fa-exclamation-triangle fa-2x text-danger" aria-hidden="true" ></i>
       				#{/if}
       			</td>

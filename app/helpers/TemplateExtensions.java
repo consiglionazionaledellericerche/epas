@@ -23,6 +23,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
+import com.google.common.html.HtmlEscapers;
 import com.google.gson.Gson;
 import common.injection.StaticInject;
 import it.cnr.iit.epas.DateUtility;
@@ -340,6 +341,19 @@ public class TemplateExtensions extends JavaExtensions {
    */
   public static String asText(YearMonth month) {
     return WordUtils.capitalize(month.monthOfYear().getAsText()) + " " + month.getYear();
+  }
+
+  /**
+   * Testo da inserire nel data-content di un webui-popover, che lo mostra come HTML.
+   * Il testo viene codificato qui e poi di nuovo dal template, così che dopo la decodifica
+   * dell'attributo da parte del browser il popover mostri il testo e non lo interpreti
+   * come markup.
+   *
+   * @param text il testo, anche inserito dagli utenti
+   * @return il testo codificato per l'HTML
+   */
+  public static String popoverText(String text) {
+    return text == null ? null : HtmlEscapers.htmlEscaper().escape(text);
   }
 
 }
