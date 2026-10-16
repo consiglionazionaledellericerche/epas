@@ -51,6 +51,7 @@ import models.enumerate.AccountRole;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+import play.Play;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -68,6 +69,11 @@ public class User extends BaseModel {
 
   private static final long serialVersionUID = -6039180733038072891L;
 
+  /**
+   * Parametro di configurazione per mantenere l'hash MD5 delle password.
+   */
+  public static final String KEEP_MD5_PASSWORD = "security.password.keepMd5";
+
   @Unique
   @NotNull
   @Column(nullable = false)
@@ -75,9 +81,10 @@ public class User extends BaseModel {
   private String username;
 
   /**
-   * Hash MD5 non salato della password, non più valorizzato: resta per le password non ancora
-   * aggiornate a {@link #passwordHash}. Viene usato anche per ricevere la nuova password in
-   * chiaro dai form prima di {@link #updatePassword(String)}.
+   * Hash MD5 non salato della password: resta per le password non ancora aggiornate a
+   * {@link #passwordHash} ed è valorizzato solo se {@link #KEEP_MD5_PASSWORD} è attivo.
+   * Viene usato anche per ricevere la nuova password in chiaro dai form prima di
+   * {@link #updatePassword(String)}.
    */
   @Deprecated
   @MinSize(5)
@@ -208,13 +215,24 @@ public class User extends BaseModel {
 
   /**
    * Imposta la nuova password salvandone l'hash con salt, ed elimina gli hash non salati.
+   * L'hash MD5 viene mantenuto aggiornato se è attivo {@link #KEEP_MD5_PASSWORD}.
    *
    * @param newPassword la nuova password in chiaro
    */
   public void updatePassword(String newPassword) {
     passwordHash = PasswordHasher.hash(newPassword);
-    password = null;
+    password = keepMd5Password() ? cryptPasswordMd5(newPassword) : null;
     passwordSha512 = null;
+  }
+
+  /**
+   * Indica se mantenere anche l'hash MD5 delle password, per le istanze che lo forniscono
+   * ad altri sistemi (es. per popolare un LDAP). Non attivo per default.
+   *
+   * @return true se l'hash MD5 delle password va mantenuto, false altrimenti.
+   */
+  public static boolean keepMd5Password() {
+    return "true".equalsIgnoreCase(Play.configuration.getProperty(KEEP_MD5_PASSWORD, "false"));
   }
 
   /**
@@ -237,12 +255,13 @@ public class User extends BaseModel {
 
   /**
    * Indica se l'hash della password va ricalcolato: password salvata solo con hash non salati,
-   * oppure con parametri non più attuali.
+   * con parametri non più attuali, oppure senza l'hash MD5 quando è richiesto di mantenerlo.
    *
    * @return true se dopo una verifica riuscita la password va salvata di nuovo.
    */
   public boolean passwordNeedsRehash() {
-    return passwordHash == null || PasswordHasher.needsRehash(passwordHash);
+    return passwordHash == null || PasswordHasher.needsRehash(passwordHash)
+        || (keepMd5Password() && password == null);
   }
 
   public static String cryptPasswordMd5(String newPassword) {

@@ -28,6 +28,7 @@ import models.User;
 import models.UsersRolesOffices;
 import org.joda.time.LocalDate;
 import org.junit.Test;
+import play.Play;
 import play.db.jpa.JPA;
 import play.mvc.Router;
 import play.test.FunctionalTest;
@@ -85,6 +86,50 @@ public class PasswordMigrationTest extends FunctionalTest {
     assertNull(user.getPassword());
     assertNull(user.getPasswordSha512());
     assertTrue(Security.authenticate(user.getUsername(), PASSWORD));
+  }
+
+  /**
+   * Con security.password.keepMd5 attivo l'hash MD5 viene mantenuto aggiornato insieme al nuovo
+   * hash, anche per le password già aggiornate senza MD5.
+   */
+  @Test
+  public void md5IsKeptWhenConfigured() {
+    Play.configuration.setProperty(User.KEEP_MD5_PASSWORD, "true");
+    try {
+      User user = new User();
+      user.setUsername("md5." + UUID.randomUUID());
+      user.updatePassword(PASSWORD);
+      user.save();
+      assertEquals(User.cryptPasswordMd5(PASSWORD), user.getPassword());
+      assertNull(user.getPasswordSha512());
+      assertNotNull(user.getPasswordHash());
+      assertFalse(user.passwordNeedsRehash());
+
+      // utente legacy: al login l'MD5 resta e si aggiunge il nuovo hash
+      User legacy = new User();
+      legacy.setUsername("md5.legacy." + UUID.randomUUID());
+      legacy.setPassword(User.cryptPasswordMd5(PASSWORD));
+      legacy.save();
+      assertTrue(Security.authenticate(legacy.getUsername(), PASSWORD));
+      User reloaded = User.findById(legacy.id);
+      assertEquals(User.cryptPasswordMd5(PASSWORD), reloaded.getPassword());
+      assertNotNull(reloaded.getPasswordHash());
+
+      // password aggiornata quando l'opzione non era attiva: al login viene ricalcolato l'MD5
+      Play.configuration.setProperty(User.KEEP_MD5_PASSWORD, "false");
+      User withoutMd5 = new User();
+      withoutMd5.setUsername("md5.missing." + UUID.randomUUID());
+      withoutMd5.updatePassword(PASSWORD);
+      withoutMd5.save();
+      assertNull(withoutMd5.getPassword());
+      Play.configuration.setProperty(User.KEEP_MD5_PASSWORD, "true");
+      assertTrue(withoutMd5.passwordNeedsRehash());
+      assertTrue(Security.authenticate(withoutMd5.getUsername(), PASSWORD));
+      assertEquals(User.cryptPasswordMd5(PASSWORD),
+          ((User) User.findById(withoutMd5.id)).getPassword());
+    } finally {
+      Play.configuration.remove(User.KEEP_MD5_PASSWORD);
+    }
   }
 
   /**

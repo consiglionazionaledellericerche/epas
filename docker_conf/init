@@ -82,6 +82,7 @@ fi
 SKIP_IP_CHECK=${SKIP_IP_CHECK:-false}
 X_FORWARDED_SUPPORT=${X_FORWARDED_SUPPORT:-all}
 FLOWS_ACTIVE=${FLOWS_ACTIVE:-false}
+KEEP_MD5_PASSWORD=${KEEP_MD5_PASSWORD:-false}
 
 cp ${APP_HOME}/docker_conf/prod.conf ${APP_HOME}/conf/
 
@@ -365,6 +366,7 @@ fi
 sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{X_FORWARDED_SUPPORT}}#'"${X_FORWARDED_SUPPORT}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{FLOWS_ACTIVE}}#'"${FLOWS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{KEEP_MD5_PASSWORD}}#'"${KEEP_MD5_PASSWORD}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
 
 ### Impostazione autenticazione LDAP
