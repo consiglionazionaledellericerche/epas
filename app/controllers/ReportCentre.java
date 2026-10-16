@@ -39,6 +39,7 @@ import play.Play;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
+import play.mvc.With;
 
 /**
  * Classi di supporto per l'invio delle segnalazioni utente.
@@ -47,6 +48,7 @@ import play.mvc.Controller;
  *
  */
 @Slf4j
+@With(Resecure.class)
 public class ReportCentre extends Controller {
 
   @Inject
@@ -76,7 +78,9 @@ public class ReportCentre extends Controller {
 
   /**
    * Invia un report via email leggendo la segnalazione via post json.
+   * Disponibile anche senza autenticazione, per le segnalazioni dalla pagina di login.
    */
+  @NoCheck
   public static void sendReport() {
     final ReportData data = new GsonBuilder()
         .registerTypeHierarchyAdapter(byte[].class,
@@ -87,8 +91,8 @@ public class ReportCentre extends Controller {
     //Questo è il caso di invio delle segnalazioni tramite il servizio esterno.
     if (generalSettings.isEpasHelpdeskServiceEnabled() 
         && generalSettings.getEpasHelpdeskServiceUrl() != null) {
-      //Viene passata la sessione play corrente
-      data.setSession(session.all());
+      //Viene passata la sessione play corrente, senza token e segreti
+      data.setSession(ReportData.sessionForReport(session.all()));
       if (!helpdeskServiceManager.sendReport(data)) {
         log.warn("Errore nell'invio della segnalazione {}", data);
         error(String.format("Errore nell'invio della segnalazione %s", data));
@@ -100,15 +104,16 @@ public class ReportCentre extends Controller {
 
     if ("true".equals(Play.configuration.getProperty("oil.enabled")) && currentUser.isPresent()) {
       if (userDao.hasAdminRoles(currentUser.get())) {
-        OilMailer.sendFeedbackToOil(data, session, currentUser.get());
+        OilMailer.sendFeedbackToOil(data, ReportData.sessionForReport(session.all()),
+            currentUser.get());
         log.info("Inviata segnalazione ad OIL. Utente {}. Categoria: '{}'. Url: {}. Note: {}", 
             currentUser.get().getUsername(), OilConfig.categoryMap().get(data.getCategory()), 
             data.getUrl(), data.getNote());
       } else {
-        ReportMailer.feedback(data, session, currentUser);
+        ReportMailer.feedback(data, ReportData.sessionForReport(session.all()), currentUser);
       }
     } else {
-      ReportMailer.feedback(data, session, currentUser);
+      ReportMailer.feedback(data, ReportData.sessionForReport(session.all()), currentUser);
     }
   }
 

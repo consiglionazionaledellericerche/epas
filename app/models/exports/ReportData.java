@@ -21,6 +21,8 @@ import com.google.common.collect.Maps;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.ToString;
 
@@ -33,6 +35,8 @@ import lombok.ToString;
  */
 @Data
 public class ReportData implements Serializable {
+
+  private static final String SESSION_RESERVED_PREFIX = "___";
 
   /**
    * DTO che contiene i dati relativi al browser con cui viene
@@ -58,6 +62,20 @@ public class ReportData implements Serializable {
   private String url;
   private String category;
   private Map<String, String> session = Maps.newHashMap();
+
+  /**
+   * I dati della sessione da allegare alle segnalazioni: sono escluse le chiavi interne di
+   * Play e quelle dell'autenticazione OAuth (prefisso "___"), che contengono token e segreti.
+   *
+   * @param session i dati della sessione http corrente
+   * @return i dati della sessione senza token e segreti
+   */
+  public static Map<String, String> sessionForReport(Map<String, String> session) {
+    return session.entrySet().stream()
+        .filter(e -> !e.getKey().startsWith(SESSION_RESERVED_PREFIX))
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+            (a, b) -> a, TreeMap::new));
+  }
 
   @Override
   public String toString() {

@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 import javax.inject.Inject;
@@ -39,7 +40,6 @@ import models.exports.ReportData;
 import org.apache.commons.mail.EmailAttachment;
 import play.Play;
 import play.mvc.Mailer;
-import play.mvc.Scope;
 
 /**
  * Invio delle segnalazioni per email. Nella configurazione ci possono essere: <dl>
@@ -76,10 +76,11 @@ public class ReportMailer extends Mailer {
    * Costruisce e invia il report agli utenti indicati nella configurazione.
    *
    * @param data    i dati del feedback da inviare
-   * @param session la sessione http corrente
+   * @param reportSession i dati della sessione http corrente, senza token e segreti
    * @param user    l'eventuale utente loggato
    */
-  public static void feedback(ReportData data, Scope.Session session, Optional<User> user) {
+  public static void feedback(ReportData data, Map<String, String> reportSession,
+      Optional<User> user) {
 
     List<String> dests = Lists.newArrayList();
 
@@ -143,7 +144,7 @@ public class ReportMailer extends Mailer {
       img.setURL(imgUrl);
       img.setDisposition(EmailAttachment.ATTACHMENT);
       addAttachment(img);
-      send(user, data, session, toPersonnelAdmin);
+      send(user, data, reportSession, toPersonnelAdmin);
     } catch (MalformedURLException ex) {
       log.error("malformed url", ex);
     } catch (IOException ex) {
