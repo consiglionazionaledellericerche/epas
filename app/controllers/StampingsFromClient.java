@@ -73,6 +73,9 @@ public class StampingsFromClient extends Controller {
     if (stampingManager.isTooFarInPast(body.dateTime)) {
       JsonResponse.badRequest("Timbratura con data troppo nel passato");
     }
+    if (stampingManager.isInTheFuture(body.dateTime)) {
+      JsonResponse.badRequest("Timbratura con data nel futuro");
+    }
 
     // Stamping already present (409)
     if (!stampingManager.createStampingFromClient(body, true).isPresent()) {
@@ -98,6 +101,13 @@ public class StampingsFromClient extends Controller {
     // Badge number not present (404)
     if (!stampingManager.linkToPerson(body).isPresent()) {
       JsonResponse.badRequest();
+    }
+
+    if (stampingManager.isTooFarInPast(body.dateTime)) {
+      JsonResponse.badRequest("Timbratura con data troppo nel passato");
+    }
+    if (stampingManager.isInTheFuture(body.dateTime)) {
+      JsonResponse.badRequest("Timbratura con data nel futuro");
     }
 
     // Stamping already present (409)
