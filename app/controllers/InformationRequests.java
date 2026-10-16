@@ -786,6 +786,7 @@ public class InformationRequests extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
+    rules.checkIfPermitted(person.getOffice());
     IWrapperPerson wrperson = wrapperFactory.create(person);
 
     List<NewTeleworkDto> list = Lists.newArrayList();
@@ -862,6 +863,7 @@ public class InformationRequests extends Controller {
   public static void revokeValidation(Long validationId) {
     Optional<TeleworkValidation> validation = validationDao.getValidationById(validationId);
     if (validation.isPresent()) {
+      rules.checkIfPermitted(validation.get().getPerson().getOffice());
       validation.get().delete();
       flash.success("Validazione rimossa. Effettuare nuova richiesta di approvazione");
     } else {

@@ -3834,7 +3834,11 @@ when
         "manager.AbsenceManager.saveAbsences",
 
         "rest.Absences.checkAbsenceByPerseoId",
-        "rest.Absences.insertAbsenceByPerseoId"
+        "rest.Absences.insertAbsenceByPerseoId",
+
+        "rest.Persons.days",
+        "rest.Persons.missions",
+        "rest.Persons.competences"
 
        ), target == $o, granted == false)
 then

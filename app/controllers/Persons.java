@@ -442,6 +442,8 @@ public class Persons extends Controller {
   public static void children(Long personId) {
 
     Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person.getOffice());
     render(person);
   }
 
@@ -469,6 +471,7 @@ public class Persons extends Controller {
 
     PersonChildren child = personChildrenDao.getById(childId);
     notFoundIfNull(child);
+    rules.checkIfPermitted(child.getPerson().getOffice());
     render("@insertChild", child);
   }
 

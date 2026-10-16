@@ -18,6 +18,7 @@
 package controllers;
 
 import com.google.common.collect.Lists;
+import common.security.SecurityRules;
 import dao.history.ContractHistoryDao;
 import dao.history.HistoricalDao;
 import dao.history.HistoryValue;
@@ -44,6 +45,8 @@ public class Historicals extends Controller {
   static HistoricalDao historicalDao;
   @Inject
   static HistoricalManager historicalManager;
+  @Inject
+  static SecurityRules rules;
 
   /**
    * Ritorna lo storico sulle modifiche ad una competenza.
@@ -57,6 +60,7 @@ public class Historicals extends Controller {
 
       render(found);
     }
+    rules.checkIfPermitted(competence.getPerson().getOffice());
     found = true;
     List<HistoryValue<Competence>> historyCompetence = contractHistoryDao
         .competences(competenceId);
@@ -77,6 +81,7 @@ public class Historicals extends Controller {
       render(found);
       return;
     }
+    rules.checkIfPermitted(contract.getPerson().getOffice());
     found = true;
     List<HistoryValue<Contract>> historyContract = contractHistoryDao.contracts(contractId);
     List<HistoryValue<Contract>> contractModifications = Lists.newArrayList();
