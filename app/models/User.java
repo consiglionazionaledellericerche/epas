@@ -19,9 +19,11 @@ package models;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
+import common.security.PasswordHasher;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -72,11 +74,27 @@ public class User extends BaseModel {
   @Required
   private String username;
 
+  /**
+   * Hash MD5 non salato della password, non più valorizzato: resta per le password non ancora
+   * aggiornate a {@link #passwordHash}. Viene usato anche per ricevere la nuova password in
+   * chiaro dai form prima di {@link #updatePassword(String)}.
+   */
   @Deprecated
   @MinSize(5)
   private String password;
 
+  /**
+   * Hash SHA-512 non salato della password, non più valorizzato: resta per le password non
+   * ancora aggiornate a {@link #passwordHash}.
+   */
+  @Deprecated
   private String passwordSha512;
+
+  /**
+   * Hash della password calcolato con {@link PasswordHasher} (non salvato nello storico).
+   */
+  @NotAudited
+  private String passwordHash;
   
   /**
    * Corrisponde ad un identificato univoco nella propria 
@@ -188,9 +206,43 @@ public class User extends BaseModel {
         .anyMatch(role -> Arrays.asList(args).contains(role));
   }
 
+  /**
+   * Imposta la nuova password salvandone l'hash con salt, ed elimina gli hash non salati.
+   *
+   * @param newPassword la nuova password in chiaro
+   */
   public void updatePassword(String newPassword) {
-    password = cryptPasswordMd5(newPassword); 
-    passwordSha512 = cryptPasswordSha512(newPassword);
+    passwordHash = PasswordHasher.hash(newPassword);
+    password = null;
+    passwordSha512 = null;
+  }
+
+  /**
+   * Verifica la password, anche rispetto agli hash non salati delle password non ancora
+   * aggiornate.
+   *
+   * @param plain la password in chiaro
+   * @return true se la password corrisponde, false altrimenti.
+   */
+  public boolean checkPassword(String plain) {
+    if (Strings.isNullOrEmpty(plain)) {
+      return false;
+    }
+    if (passwordHash != null) {
+      return PasswordHasher.matches(plain, passwordHash);
+    }
+    return (password != null && password.equals(cryptPasswordMd5(plain)))
+        || (passwordSha512 != null && passwordSha512.equals(cryptPasswordSha512(plain)));
+  }
+
+  /**
+   * Indica se l'hash della password va ricalcolato: password salvata solo con hash non salati,
+   * oppure con parametri non più attuali.
+   *
+   * @return true se dopo una verifica riuscita la password va salvata di nuovo.
+   */
+  public boolean passwordNeedsRehash() {
+    return passwordHash == null || PasswordHasher.needsRehash(passwordHash);
   }
 
   public static String cryptPasswordMd5(String newPassword) {

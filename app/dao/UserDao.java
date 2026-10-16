@@ -119,15 +119,8 @@ public class UserDao extends DaoBase {
       return null;
     }
 
-    final BooleanBuilder passwordCondition = new BooleanBuilder()
-        .and(
-            user.password.eq(User.cryptPasswordMd5(password))
-            .or(user.passwordSha512.eq(User.cryptPasswordSha512(password)))
-            );
-
-    return getQueryFactory().selectFrom(user)
-        .where(condition.and(passwordCondition))
-        .fetchOne();
+    final User found = getQueryFactory().selectFrom(user).where(condition).fetchOne();
+    return found != null && found.checkPassword(password) ? found : null;
   }
 
   public User byUsername(String username) {
