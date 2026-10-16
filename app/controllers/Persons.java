@@ -67,7 +67,6 @@ import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.i18n.Messages;
-import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -418,10 +417,9 @@ public class Persons extends Controller {
       render("@changePassword", vecchiaPassword, nuovaPassword, confermaPassword, user);
     }
 
-    final User user = userDao.getUserByIdAndPassword(Security.getUser().get().id,
-        Optional.of(Codec.hexMD5(vecchiaPassword)));
+    final User user = Security.getUser().get();
 
-    if (user == null) {
+    if (!user.checkPassword(vecchiaPassword)) {
       flash.error("Nessuna corrispondenza trovata fra utente e vecchia password inserita.");
       changePassword();
     }

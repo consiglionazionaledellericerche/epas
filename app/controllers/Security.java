@@ -72,10 +72,10 @@ public class Security extends Secure.Security {
     if (user != null) {
       log.info("user {} successfully logged in from ip {}", user.getUsername(),
           Http.Request.current() != null ? Http.Request.current().remoteAddress : null);
-      if (user.getPasswordSha512() == null) {
-        user.setPasswordSha512(User.cryptPasswordSha512(password));
+      if (user.passwordNeedsRehash()) {
+        user.updatePassword(password);
         user.save();
-        log.info("Inserita password sha512 per {}", user.getUsername());
+        log.info("Aggiornato l'hash della password per {}", user.getUsername());
       }
       return true;
     }
