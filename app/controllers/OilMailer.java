@@ -25,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -32,7 +33,6 @@ import models.User;
 import models.exports.ReportData;
 import org.apache.commons.mail.EmailAttachment;
 import play.mvc.Mailer;
-import play.mvc.Scope;
 
 
 /**
@@ -63,10 +63,10 @@ public class OilMailer extends Mailer {
    * Costruisce e invia il report agli utenti indicati nella configurazione.
    *
    * @param data i dati del feedback da inviare
-   * @param session la sessione http corrente
+   * @param reportSession i dati della sessione http corrente, senza token e segreti
    * @param user l'eventuale utente loggato
    */
-  public static void sendFeedbackToOil(ReportData data, Scope.Session session,
+  public static void sendFeedbackToOil(ReportData data, Map<String, String> reportSession,
       User user) {
 
     Verify.verifyNotNull(user);
@@ -108,7 +108,7 @@ public class OilMailer extends Mailer {
       debugStream.write(
           String.format("User Agent: %s\n\n", data.getBrowser().getUserAgent()).getBytes());
 
-      for (val s : session.all().entrySet()) {
+      for (val s : reportSession.entrySet()) {
         debugStream.write(String.format("Session.%s: %s\n", s.getKey(), s.getValue()).getBytes());
       }
       
@@ -133,7 +133,7 @@ public class OilMailer extends Mailer {
       img.setDisposition(EmailAttachment.ATTACHMENT);
       addAttachment(img);
       log.info("Invio segnalazione ad OIL, suject: {}", subject);
-      send(user, data, session);
+      send(user, data, reportSession);
     } catch (MalformedURLException mue) {
       log.error("malformed url", mue);
     } catch (IOException ioe) {
