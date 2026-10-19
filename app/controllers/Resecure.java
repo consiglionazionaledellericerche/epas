@@ -48,7 +48,7 @@ import play.mvc.With;
  * @author Cristian Lucchesi
  */
 @Slf4j
-@With({RequestInit.class, LogEnhancer.class, Metrics.class})
+@With({RequestInit.class, LogEnhancer.class, Metrics.class, CsrfProtection.class})
 public class Resecure extends Controller {
 
   private static final String REALM = "E-PAS";
