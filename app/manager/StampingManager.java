@@ -17,6 +17,7 @@
 
 package manager;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Maps;
@@ -60,6 +61,15 @@ import play.i18n.Messages;
  */
 @Slf4j
 public class StampingManager {
+
+  /**
+   * Tolleranza in minuti per le timbrature nel futuro inviate dai client.
+   */
+  static final int MAX_MINUTES_IN_FUTURE_FOR_CLIENTS = 60;
+  /**
+   * Lunghezza massima dei campi di testo delle timbrature inviate dai client.
+   */
+  static final int MAX_CLIENT_TEXT_LENGTH = 255;
 
   private final PersonDayDao personDayDao;
   private final PersonDao personDao;
@@ -190,6 +200,68 @@ public class StampingManager {
     return dateTime.compareTo(
       LocalDateTime.now().minusDays(
         generalSettingDao.generalSetting().getMaxDaysInPastForRestStampings())) < 0;
+  }
+
+  /**
+   * Verifica se la data della timbratura inviata da un client è nel futuro, oltre la
+   * tolleranza ammessa per la differenza tra gli orologi dei lettori e del server.
+   *
+   * @param dateTime la data della timbratura
+   * @return true se la timbratura è nel futuro oltre la tolleranza, false altrimenti.
+   */
+  public boolean isInTheFuture(LocalDateTime dateTime) {
+    return dateTime.isAfter(LocalDateTime.now().plusMinutes(MAX_MINUTES_IN_FUTURE_FOR_CLIENTS));
+  }
+
+  /**
+   * Verifica la data di una timbratura inviata da un client (lettore badge o REST): non deve
+   * essere troppo nel passato né nel futuro oltre la tolleranza. Le timbrature rifiutate sono
+   * registrate nel log, perché i client non le ripresentano.
+   *
+   * @param dateTime la data della timbratura
+   * @param badgeNumber il numero di badge, per il log
+   * @return il motivo del rifiuto, absent se la data è accettabile.
+   */
+  public Optional<String> clientDateTimeError(LocalDateTime dateTime, String badgeNumber) {
+    Optional<String> error = Optional.absent();
+    if (isTooFarInPast(dateTime)) {
+      error = Optional.of("Timbratura con data troppo nel passato");
+    } else if (isInTheFuture(dateTime)) {
+      error = Optional.of("Timbratura con data nel futuro");
+    }
+    if (error.isPresent()) {
+      log.warn("{}: rifiutata la timbratura del {} per il badge {} inviata da {}", error.get(),
+          dateTime, badgeNumber, Security.getUser().transform(User::getUsername).orNull());
+    }
+    return error;
+  }
+
+  /**
+   * Testo inviato da un client (lettore badge): senza caratteri di controllo, senza spazi
+   * iniziali e finali e di lunghezza massima {@link #MAX_CLIENT_TEXT_LENGTH}.
+   *
+   * @param text il testo ricevuto
+   * @return il testo normalizzato, null se vuoto.
+   */
+  public static String clientText(String text) {
+    if (text == null) {
+      return null;
+    }
+    // i caratteri di controllo (es. a capo) diventano spazi, per non unire le parole
+    String cleaned = CharMatcher.javaIsoControl().or(CharMatcher.whitespace())
+        .trimAndCollapseFrom(text, ' ');
+    if (cleaned.isEmpty()) {
+      return null;
+    }
+    if (cleaned.length() <= MAX_CLIENT_TEXT_LENGTH) {
+      return cleaned;
+    }
+    // non si spezza un carattere rappresentato da una coppia surrogata
+    int end = MAX_CLIENT_TEXT_LENGTH;
+    if (Character.isHighSurrogate(cleaned.charAt(end - 1))) {
+      end--;
+    }
+    return cleaned.substring(0, end).trim();
   }
 
   /**
@@ -347,12 +419,10 @@ public class StampingManager {
     stamping.setMarkedByAdmin(stampingFromClient.markedByAdmin);
     stamping.setWay(way);
     stamping.setStampType(stampingFromClient.stampType);
-    stamping.setStampingZone(
-        (stampingFromClient.zona != null && !stampingFromClient.zona.equals("")) 
-        ? stampingFromClient.zona : null);
-    stamping.setNote(stampingFromClient.note);
-    stamping.setReason(stampingFromClient.reason);
-    stamping.setPlace(stampingFromClient.place);
+    stamping.setStampingZone(clientText(stampingFromClient.zona));
+    stamping.setNote(clientText(stampingFromClient.note));
+    stamping.setReason(clientText(stampingFromClient.reason));
+    stamping.setPlace(clientText(stampingFromClient.place));
     stamping.save();
 
     log.info("Inserita timbratura {} per {} (matricola = {}) ",

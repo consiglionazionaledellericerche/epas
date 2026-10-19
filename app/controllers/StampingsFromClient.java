@@ -25,6 +25,7 @@ import dao.PersonDao;
 import helpers.JsonResponse;
 import it.cnr.iit.epas.JsonStampingBinder;
 import javax.inject.Inject;
+import lombok.val;
 import manager.AbsenceManager;
 import manager.StampingManager;
 import manager.cache.AbsenceTypeManager;
@@ -33,6 +34,7 @@ import models.exports.AbsenceFromClient;
 import models.exports.StampingFromClient;
 import play.data.binding.As;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
 
 
@@ -69,10 +71,8 @@ public class StampingsFromClient extends Controller {
       JsonResponse.notFound();
     }
 
-    // Controllo timbratura con data troppo vecchia
-    if (stampingManager.isTooFarInPast(body.dateTime)) {
-      JsonResponse.badRequest("Timbratura con data troppo nel passato");
-    }
+    // Controllo timbratura con data troppo vecchia o nel futuro
+    checkDateTime(body);
 
     // Stamping already present (409)
     if (!stampingManager.createStampingFromClient(body, true).isPresent()) {
@@ -99,6 +99,8 @@ public class StampingsFromClient extends Controller {
     if (!stampingManager.linkToPerson(body).isPresent()) {
       JsonResponse.badRequest();
     }
+
+    checkDateTime(body);
 
     // Stamping already present (409)
     if (!stampingManager.createStampingFromClient(body, false).isPresent()) {
@@ -170,4 +172,15 @@ public class StampingsFromClient extends Controller {
     renderText("ok");
   }
 
+
+  /**
+   * Risponde 400 se la data della timbratura è troppo nel passato o nel futuro.
+   */
+  @Util
+  private static void checkDateTime(StampingFromClient body) {
+    val error = stampingManager.clientDateTimeError(body.dateTime, body.numeroBadge);
+    if (error.isPresent()) {
+      JsonResponse.badRequest(error.get());
+    }
+  }
 }
