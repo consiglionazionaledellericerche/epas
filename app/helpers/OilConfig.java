@@ -46,7 +46,6 @@ public class OilConfig {
   private static final String OIL_CATEGORIES = "oil.categories";
   
   private static final String OIL_SELECTED_CATEGORY = "oil.categories.selected";
-  private static final String OIL_DEFAULT_EMAIL_FROM_FOR_USER_REPLY = "mail.smtp.from";
   
   // default per parametri integrazione OIL
   private static final String OIL_DEFAULT_APP_NAME = "siper";
@@ -105,9 +104,5 @@ public class OilConfig {
   
   public static String selectedCategory() {
     return Play.configuration.getProperty(OIL_SELECTED_CATEGORY, OIL_DEFAULT_SELECTED_CATEGORY);
-  }
-  
-  public static String defaultEmailFromForUserReply() {
-    return Play.configuration.getProperty(OIL_DEFAULT_EMAIL_FROM_FOR_USER_REPLY, "epas@iit.cnr.it");
   }
 }

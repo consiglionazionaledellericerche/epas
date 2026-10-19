@@ -122,19 +122,22 @@ public class ReportMailer extends Mailer {
             Play.configuration.getProperty(EMAIL_SUBJECT, DEFAULT_SUBJECT),
             username));
     try {
-      ByteArrayOutputStream htmlGz = new ByteArrayOutputStream();
-      GZIPOutputStream gz = new GZIPOutputStream(htmlGz);
-      gz.write(data.getHtml().getBytes());
-      gz.close();
+      // l'HTML della pagina non è presente per le segnalazioni degli utenti non autenticati
+      if (data.getHtml() != null) {
+        ByteArrayOutputStream htmlGz = new ByteArrayOutputStream();
+        GZIPOutputStream gz = new GZIPOutputStream(htmlGz);
+        gz.write(data.getHtml().getBytes());
+        gz.close();
 
-      URL htmlUrl = new URL(null, "inline:///html",
-          new InlineStreamHandler(htmlGz.toByteArray(), "application/gzip"));
-      EmailAttachment html = new EmailAttachment();
-      html.setDescription("Original HTML");
-      html.setName("page.html.gz");
-      html.setURL(htmlUrl);
-      html.setDisposition(EmailAttachment.ATTACHMENT);
-      addAttachment(html);
+        URL htmlUrl = new URL(null, "inline:///html",
+            new InlineStreamHandler(htmlGz.toByteArray(), "application/gzip"));
+        EmailAttachment html = new EmailAttachment();
+        html.setDescription("Original HTML");
+        html.setName("page.html.gz");
+        html.setURL(htmlUrl);
+        html.setDisposition(EmailAttachment.ATTACHMENT);
+        addAttachment(html);
+      }
 
       URL imgUrl =
           new URL(null, "inline://image", new InlineStreamHandler(data.getImg(), "image/png"));

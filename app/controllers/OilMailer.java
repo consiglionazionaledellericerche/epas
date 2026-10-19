@@ -152,25 +152,20 @@ public class OilMailer extends Mailer {
    * Il destinatario è sempre oil.cert@cnr.it
    * La descrizione contiene la risposta dell’utente.
    *
-   * @param user utente a cui inviare la risposta.
+   * @param user utente autenticato che invia la risposta.
    * @param oilId id del sistema OIL.
    * @param action parametro necessario ad OIL.
    * @param description contiene la risposta dell'utente.
    */
   public static void sendUserReply(Optional<User> user, String oilId, 
       String action, String description) {
-    Verify.verifyNotNull(user);
+    Verify.verify(user.isPresent(), "Risposta OIL senza utente autenticato");
     Verify.verifyNotNull(oilId);
     Verify.verifyNotNull(action);
     Verify.verifyNotNull(description);
-    String email;
-    if (user.isPresent()) {
-      Verify.verifyNotNull(user.get().getPerson());
-      Verify.verifyNotNull(user.get().getPerson().getEmail());
-      email = user.get().getPerson().getEmail();
-    } else {
-      email =  OilConfig.defaultEmailFromForUserReply();
-    }
+    Verify.verifyNotNull(user.get().getPerson());
+    final String email = user.get().getPerson().getEmail();
+    Verify.verifyNotNull(email);
     addRecipient(OilConfig.emailTo());
     setFrom(email);
     

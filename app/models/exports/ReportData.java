@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.ToString;
@@ -37,6 +38,11 @@ import lombok.ToString;
 public class ReportData implements Serializable {
 
   private static final String SESSION_RESERVED_PREFIX = "___";
+  /**
+   * Chiavi della sessione che, dal nome, possono contenere credenziali.
+   */
+  private static final Pattern SESSION_SENSITIVE_KEY =
+      Pattern.compile("(?i).*(token|password|secret|jwt|credential).*");
 
   /**
    * DTO che contiene i dati relativi al browser con cui viene
@@ -65,14 +71,16 @@ public class ReportData implements Serializable {
 
   /**
    * I dati della sessione da allegare alle segnalazioni: sono escluse le chiavi interne di
-   * Play e quelle dell'autenticazione OAuth (prefisso "___"), che contengono token e segreti.
+   * Play e quelle dell'autenticazione OAuth (prefisso "___"), che contengono token e segreti,
+   * e quelle che dal nome possono contenere credenziali (token, password, ...).
    *
    * @param session i dati della sessione http corrente
    * @return i dati della sessione senza token e segreti
    */
   public static Map<String, String> sessionForReport(Map<String, String> session) {
     return session.entrySet().stream()
-        .filter(e -> !e.getKey().startsWith(SESSION_RESERVED_PREFIX))
+        .filter(e -> !e.getKey().startsWith(SESSION_RESERVED_PREFIX)
+            && !SESSION_SENSITIVE_KEY.matcher(e.getKey()).matches())
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
             (a, b) -> a, TreeMap::new));
   }
