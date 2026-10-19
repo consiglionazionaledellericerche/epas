@@ -215,13 +215,6 @@ else
   sed 's#{{JOBS_ACTIVE}}#'"${JOBS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.conf
 fi
 
-# Tolleranza in ore per le timbrature nel futuro inviate dai client
-if [ -z "${STAMPINGS_MAX_HOURS_IN_FUTURE}" ]; then
-  sed -n '/STAMPINGS_MAX_HOURS_IN_FUTURE/!p' -i ${APP_HOME}/conf/prod.conf
-else
-  sed 's#{{STAMPINGS_MAX_HOURS_IN_FUTURE}}#'"${STAMPINGS_MAX_HOURS_IN_FUTURE}"'#' -i ${APP_HOME}/conf/prod.conf
-fi
-
 # Abilitazione e configurazione dell'integrazione con OIL (solo per il CNR)
 if [ -z "${OIL_ENABLED}" ]; then
   sed -n '/OIL_ENABLED/!p' -i ${APP_HOME}/conf/prod.conf

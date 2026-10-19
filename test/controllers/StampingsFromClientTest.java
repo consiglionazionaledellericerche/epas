@@ -53,14 +53,14 @@ public class StampingsFromClientTest extends FunctionalTest {
   private static H2Examples h2Examples;
 
   /**
-   * Timbrature nel futuro entro la tolleranza (es. orologio del lettore avanti di qualche ora)
+   * Timbrature nel futuro entro la tolleranza (orologio del lettore leggermente avanti)
    * vengono accettate.
    */
   @Test
   public void stampingsSlightlyInTheFutureAreAccepted() {
     Fixture fixture = fixture();
     Response response = PUT(reader(fixture), "/stampingsfromclient/createnotrecompute",
-        "application/json", json(LocalDateTime.now().plusHours(3), null, null));
+        "application/json", json(LocalDateTime.now().plusMinutes(30), null, null));
     assertIsOk(response);
     assertEquals(1, stampings(fixture.person).size());
   }
@@ -71,7 +71,7 @@ public class StampingsFromClientTest extends FunctionalTest {
   @Test
   public void stampingsFarInTheFutureAreRejected() {
     Fixture fixture = fixture();
-    LocalDateTime future = LocalDateTime.now().plusDays(2);
+    LocalDateTime future = LocalDateTime.now().plusHours(3);
     assertStatus(400, PUT(reader(fixture), "/stampings/create", "application/json",
         json(future, null, null)));
     assertStatus(400, PUT(reader(fixture), "/stampingsfromclient/createnotrecompute",

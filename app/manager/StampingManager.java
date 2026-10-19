@@ -51,7 +51,6 @@ import models.exports.StampingFromClient;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.testng.util.Strings;
-import play.Play;
 import play.i18n.Messages;
 
 /**
@@ -64,15 +63,9 @@ import play.i18n.Messages;
 public class StampingManager {
 
   /**
-   * Parametro di configurazione con la tolleranza in ore per le timbrature nel futuro inviate
-   * dai client.
+   * Tolleranza in minuti per le timbrature nel futuro inviate dai client.
    */
-  public static final String MAX_HOURS_IN_FUTURE_FOR_CLIENTS = "stampings.client.maxHoursInFuture";
-  /**
-   * Tolleranza di default in ore per le timbrature nel futuro inviate dai client: assorbe
-   * orologi dei lettori sfasati o con l'ora legale non aggiornata.
-   */
-  static final int DEFAULT_MAX_HOURS_IN_FUTURE_FOR_CLIENTS = 24;
+  static final int MAX_MINUTES_IN_FUTURE_FOR_CLIENTS = 60;
   /**
    * Lunghezza massima dei campi di testo delle timbrature inviate dai client.
    */
@@ -211,32 +204,13 @@ public class StampingManager {
 
   /**
    * Verifica se la data della timbratura inviata da un client è nel futuro, oltre la
-   * tolleranza ammessa ({@link #MAX_HOURS_IN_FUTURE_FOR_CLIENTS}).
+   * tolleranza ammessa per la differenza tra gli orologi dei lettori e del server.
    *
    * @param dateTime la data della timbratura
    * @return true se la timbratura è nel futuro oltre la tolleranza, false altrimenti.
    */
   public boolean isInTheFuture(LocalDateTime dateTime) {
-    return dateTime.isAfter(LocalDateTime.now().plusHours(maxHoursInFutureForClients()));
-  }
-
-  /**
-   * La tolleranza in ore per le timbrature nel futuro, con il valore di default se il
-   * parametro è assente o non valido.
-   */
-  static int maxHoursInFutureForClients() {
-    final String value = Play.configuration.getProperty(MAX_HOURS_IN_FUTURE_FOR_CLIENTS);
-    if (value == null || value.trim().isEmpty()) {
-      return DEFAULT_MAX_HOURS_IN_FUTURE_FOR_CLIENTS;
-    }
-    try {
-      final int hours = Integer.parseInt(value.trim());
-      return hours >= 0 ? hours : DEFAULT_MAX_HOURS_IN_FUTURE_FOR_CLIENTS;
-    } catch (NumberFormatException e) {
-      log.warn("Valore non valido per {}: '{}', uso {}", MAX_HOURS_IN_FUTURE_FOR_CLIENTS, value,
-          DEFAULT_MAX_HOURS_IN_FUTURE_FOR_CLIENTS);
-      return DEFAULT_MAX_HOURS_IN_FUTURE_FOR_CLIENTS;
-    }
+    return dateTime.isAfter(LocalDateTime.now().plusMinutes(MAX_MINUTES_IN_FUTURE_FOR_CLIENTS));
   }
 
   /**
