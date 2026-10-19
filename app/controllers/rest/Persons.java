@@ -128,24 +128,26 @@ public class Persons extends Controller {
       JsonResponse.badRequest("Email obbligatoria");
     }
     Optional<Person> person = personDao.byEmail(email);
-    List<DayRecap> personDays = Lists.newArrayList();
-    if (person.isPresent()) {
-      rules.checkIfPermitted(person.get().getOffice());
-
-      personDays = FluentIterable.from(absenceDao.getAbsencesInPeriod(
-          person, start, Optional.fromNullable(end), forAttachment))
-          .transform(absence -> {
-            DayRecap dayRecap = new DayRecap();
-            dayRecap.workingMinutes = 0;
-            dayRecap.date = absence.getPersonDay().getDate().toString();
-            if (personDayManager.isOnMission(absence.getPersonDay())) {
-              dayRecap.mission = true;
-            } else {
-              dayRecap.mission = false;
-            }
-            return dayRecap;
-          }).toList();
+    // come days e competences: 404 se l'email non corrisponde a nessuna persona, così non si
+    // distingue una persona inesistente da una di un'altra sede
+    if (!person.isPresent()) {
+      JsonResponse.notFound("Indirizzo email incorretto");
     }
+    rules.checkIfPermitted(person.get().getOffice());
+
+    List<DayRecap> personDays = FluentIterable.from(absenceDao.getAbsencesInPeriod(
+        person, start, Optional.fromNullable(end), forAttachment))
+        .transform(absence -> {
+          DayRecap dayRecap = new DayRecap();
+          dayRecap.workingMinutes = 0;
+          dayRecap.date = absence.getPersonDay().getDate().toString();
+          if (personDayManager.isOnMission(absence.getPersonDay())) {
+            dayRecap.mission = true;
+          } else {
+            dayRecap.mission = false;
+          }
+          return dayRecap;
+        }).toList();
     renderJSON(personDays);
   }
 

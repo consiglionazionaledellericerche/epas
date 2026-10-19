@@ -562,6 +562,7 @@ public class AbsenceGroups extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     notFoundIfNull(from);
+    rules.checkIfPermitted(person);
 
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(person, from, null,
         null, null, null, true, null, null, null, null, false, false);

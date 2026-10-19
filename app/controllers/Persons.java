@@ -34,6 +34,7 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
+import helpers.jpa.PersistedValues;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -538,6 +539,14 @@ public class Persons extends Controller {
       render("@insertChild", child);
     }
 
+    if (child.isPersistent()) {
+      // il binder ha già applicato i parametri: si verifica la sede della persona a cui il
+      // figlio era associato prima della modifica
+      final Long savedOfficeId = PersistedValues.read(PersonChildren.class, child.id,
+          saved -> saved.getPerson().getOffice().id);
+      notFoundIfNull(savedOfficeId);
+      rules.checkIfPermitted(officeDao.getOfficeById(savedOfficeId));
+    }
     rules.checkIfPermitted(child.getPerson().getOffice());
     child.save();
 

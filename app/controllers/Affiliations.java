@@ -21,8 +21,10 @@ import com.google.common.base.Optional;
 import common.security.SecurityRules;
 import dao.AffiliationDao;
 import dao.GroupDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import helpers.Web;
+import helpers.jpa.PersistedValues;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -49,6 +51,8 @@ public class Affiliations extends Controller {
   static AffiliationDao affiliationDao;
   @Inject
   static GroupDao groupDao;
+  @Inject
+  static OfficeDao officeDao;
   @Inject
   static SecurityRules rules;  
 
@@ -93,6 +97,14 @@ public class Affiliations extends Controller {
       render("@blankByPerson", affiliation, activeGroups);
     }
 
+    if (affiliation.isPersistent()) {
+      // il binder ha già applicato i parametri: si verifica la sede della persona a cui
+      // l'affiliazione apparteneva prima della modifica
+      final Long savedOfficeId = PersistedValues.read(Affiliation.class, affiliation.id,
+          saved -> saved.getPerson().getOffice().id);
+      notFoundIfNull(savedOfficeId);
+      rules.checkIfPermitted(officeDao.getOfficeById(savedOfficeId));
+    }
     rules.checkIfPermitted(affiliation.getPerson().getOffice());
     rules.checkIfPermitted(affiliation.getGroup().getOffice());
     affiliation.save();
@@ -113,7 +125,8 @@ public class Affiliations extends Controller {
     notFoundIfNull(affiliation);
     val person = affiliation.getPerson();
     rules.checkIfPermitted(person.getOffice());
-    if (!confirmed) {      
+    // la cancellazione avviene solo dal form di conferma (POST), non da un link
+    if (!confirmed || !"POST".equals(request.method)) {
       render("@delete", affiliation, person);
     }
     affiliation.delete();

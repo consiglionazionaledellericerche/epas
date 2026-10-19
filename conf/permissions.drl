@@ -2083,6 +2083,9 @@ when
  	   "Persons.showCurrentVacation",
        "Persons.showCurrentContractWorkingTimeType",
 
+       /* Esportazione delle competenze per gruppo */
+       "Competences.getCompetenceGroupInYearMonth",
+
        /* Vecchio permesso viewPersonDay */
    	    "Absences.absenceInPeriod",
 	    "Absences.showPersonMonthlyAbsences",
