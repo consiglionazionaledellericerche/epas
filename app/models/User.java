@@ -84,17 +84,19 @@ public class User extends BaseModel {
    * Hash MD5 non salato della password: resta per le password non ancora aggiornate a
    * {@link #passwordHash} ed è valorizzato solo se {@link #KEEP_MD5_PASSWORD} è attivo.
    * Viene usato anche per ricevere la nuova password in chiaro dai form prima di
-   * {@link #updatePassword(String)}.
+   * {@link #updatePassword(String)}. Non salvato nello storico.
    */
   @Deprecated
   @MinSize(5)
+  @NotAudited
   private String password;
 
   /**
    * Hash SHA-512 non salato della password, non più valorizzato: resta per le password non
-   * ancora aggiornate a {@link #passwordHash}.
+   * ancora aggiornate a {@link #passwordHash}. Non salvato nello storico.
    */
   @Deprecated
+  @NotAudited
   private String passwordSha512;
 
   /**
@@ -249,19 +251,23 @@ public class User extends BaseModel {
     if (passwordHash != null) {
       return PasswordHasher.matches(plain, passwordHash);
     }
+    // stesso costo della verifica del nuovo hash, per non rivelare quali utenti non lo hanno
+    PasswordHasher.dummyCheck(plain);
     return (password != null && password.equals(cryptPasswordMd5(plain)))
         || (passwordSha512 != null && passwordSha512.equals(cryptPasswordSha512(plain)));
   }
 
   /**
    * Indica se l'hash della password va ricalcolato: password salvata solo con hash non salati,
-   * con parametri non più attuali, oppure senza l'hash MD5 quando è richiesto di mantenerlo.
+   * con parametri non più attuali, con l'hash SHA-512, oppure con l'hash MD5 presente quando
+   * non va mantenuto o assente quando va mantenuto.
    *
    * @return true se dopo una verifica riuscita la password va salvata di nuovo.
    */
   public boolean passwordNeedsRehash() {
     return passwordHash == null || PasswordHasher.needsRehash(passwordHash)
-        || (keepMd5Password() && password == null);
+        || passwordSha512 != null
+        || (keepMd5Password() ? password == null : password != null);
   }
 
   public static String cryptPasswordMd5(String newPassword) {

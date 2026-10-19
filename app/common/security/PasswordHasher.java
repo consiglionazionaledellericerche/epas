@@ -42,6 +42,11 @@ public final class PasswordHasher {
   private static final int HASH_BITS = 256;
   private static final String SEPARATOR = "$";
   private static final SecureRandom RANDOM = new SecureRandom();
+  /**
+   * Hash di una password casuale, usato per rendere confrontabili i tempi delle verifiche
+   * senza un hash da controllare (es. utente inesistente).
+   */
+  private static final String DUMMY_HASH = hash(Long.toHexString(RANDOM.nextLong()));
 
   private PasswordHasher() {
   }
@@ -83,6 +88,16 @@ public final class PasswordHasher {
     } catch (IllegalArgumentException e) {
       return false;
     }
+  }
+
+  /**
+   * Esegue una verifica su un hash fittizio, con lo stesso costo di {@link #matches}, per non
+   * rivelare dai tempi di risposta se esiste un hash da verificare (es. utente inesistente).
+   *
+   * @param password la password in chiaro
+   */
+  public static void dummyCheck(String password) {
+    matches(password == null || password.isEmpty() ? "-" : password, DUMMY_HASH);
   }
 
   /**

@@ -417,14 +417,13 @@ public class Persons extends Controller {
       render("@changePassword", vecchiaPassword, nuovaPassword, confermaPassword, user);
     }
 
-    final User user = Security.getUser().get();
+    final User user = Security.getUser().orNull();
+    notFoundIfNull(user);
 
     if (!user.checkPassword(vecchiaPassword)) {
       flash.error("Nessuna corrispondenza trovata fra utente e vecchia password inserita.");
       changePassword();
     }
-
-    notFoundIfNull(user);
 
     user.updatePassword(nuovaPassword);
     user.save();

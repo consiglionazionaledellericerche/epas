@@ -94,6 +94,7 @@ public class PasswordMigrationTest extends FunctionalTest {
    */
   @Test
   public void md5IsKeptWhenConfigured() {
+    String previous = Play.configuration.getProperty(User.KEEP_MD5_PASSWORD);
     Play.configuration.setProperty(User.KEEP_MD5_PASSWORD, "true");
     try {
       User user = new User();
@@ -128,7 +129,41 @@ public class PasswordMigrationTest extends FunctionalTest {
       assertEquals(User.cryptPasswordMd5(PASSWORD),
           ((User) User.findById(withoutMd5.id)).getPassword());
     } finally {
+      restoreKeepMd5(previous);
+    }
+  }
+
+  /**
+   * Se security.password.keepMd5 viene disattivato, l'hash MD5 rimasto viene eliminato al login
+   * successivo.
+   */
+  @Test
+  public void md5IsRemovedWhenNoLongerKept() {
+    String previous = Play.configuration.getProperty(User.KEEP_MD5_PASSWORD);
+    try {
+      Play.configuration.setProperty(User.KEEP_MD5_PASSWORD, "true");
+      User user = new User();
+      user.setUsername("md5.removed." + UUID.randomUUID());
+      user.updatePassword(PASSWORD);
+      user.save();
+      assertNotNull(user.getPassword());
+
+      Play.configuration.setProperty(User.KEEP_MD5_PASSWORD, "false");
+      assertTrue(user.passwordNeedsRehash());
+      assertTrue(Security.authenticate(user.getUsername(), PASSWORD));
+      User reloaded = User.findById(user.id);
+      assertNull(reloaded.getPassword());
+      assertFalse(reloaded.passwordNeedsRehash());
+    } finally {
+      restoreKeepMd5(previous);
+    }
+  }
+
+  private void restoreKeepMd5(String previous) {
+    if (previous == null) {
       Play.configuration.remove(User.KEEP_MD5_PASSWORD);
+    } else {
+      Play.configuration.setProperty(User.KEEP_MD5_PASSWORD, previous);
     }
   }
 

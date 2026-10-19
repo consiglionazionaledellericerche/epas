@@ -122,8 +122,8 @@ public class UserManager {
 
     user.setUsername(generateUserName(person.getName(), person.getSurname()));
 
-    SecureRandom random = new SecureRandom();
-    user.updatePassword(new BigInteger(130, random).toString(32));
+    // Nessuna password locale: l'utente accede tramite SSO oppure la imposta con il recupero
+    // password (prima veniva impostata una password casuale, non nota a nessuno).
 
     user.save();
 

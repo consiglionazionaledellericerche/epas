@@ -73,8 +73,7 @@ public class Security extends Secure.Security {
       log.info("user {} successfully logged in from ip {}", user.getUsername(),
           Http.Request.current() != null ? Http.Request.current().remoteAddress : null);
       if (user.passwordNeedsRehash()) {
-        user.updatePassword(password);
-        user.save();
+        userDao.rehashPassword(user, password);
         log.info("Aggiornato l'hash della password per {}", user.getUsername());
       }
       return true;
