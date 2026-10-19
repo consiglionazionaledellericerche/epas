@@ -13,6 +13,11 @@
   	<h2>Benvenuto in ePAS</h2>
   </div>
   
+  #{if flash.loginLocked}
+  <div class="row">
+    <div class="col-md-6 col-md-offset-3 alert alert-warning">&{'secure.loginLocked'}</div>
+  </div>
+  #{/if}
   <div class="row">
 	<div class="col-md-6 col-md-offset-3">
 	  <div class="panel panel-login">

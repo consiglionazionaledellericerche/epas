@@ -140,6 +140,7 @@ public class LostPassword extends Controller {
     }
 
     user.updatePassword(nuovaPassword);
+    Security.clearLoginAttempts(user.getUsername());
     user.setRecoveryToken(null);
     user.setExpireRecoveryToken(null);
     user.save();
