@@ -23,6 +23,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Provider;
+import common.security.PasswordHasher;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQueryFactory;
 import helpers.jpa.ModelQuery;
@@ -68,21 +69,23 @@ public class UserDao extends DaoBase {
   }
 
   /**
-   * L'user identificato dall'id passato come parametro.
+   * Salva la password dell'utente con l'hash attuale ({@link User#updatePassword(String)})
+   * tramite un update mirato, che non incrementa la versione dell'utente: più login
+   * contemporanei dello stesso utente (es. client in Basic Auth) non vanno in conflitto.
    *
-   * @param id l'identificativo dell'utente
-   * @param password (opzionale) la password dell'utente
-   * @return lo user  identificato dall'id passato come parametro.
+   * @param user l'utente, che viene ricaricato dopo l'aggiornamento
+   * @param plainPassword la password in chiaro appena verificata
    */
-  public User getUserByIdAndPassword(Long id, Optional<String> password) {
-    final QUser user = QUser.user;
-    final BooleanBuilder condition = new BooleanBuilder();
-
-    if (password.isPresent()) {
-      condition.and(user.password.eq(password.get()));
-    }
-    return getQueryFactory().selectFrom(user)
-        .where(condition.and(user.id.eq(id))).fetchOne();
+  public void rehashPassword(User user, String plainPassword) {
+    final QUser qUser = QUser.user;
+    final String md5 = User.keepMd5Password() ? User.cryptPasswordMd5(plainPassword) : null;
+    getQueryFactory().update(qUser)
+        .set(qUser.passwordHash, PasswordHasher.hash(plainPassword))
+        .set(qUser.password, md5)
+        .setNull(qUser.passwordSha512)
+        .where(qUser.id.eq(user.id))
+        .execute();
+    getEntityManager().refresh(user);
   }
 
   /**
@@ -119,15 +122,13 @@ public class UserDao extends DaoBase {
       return null;
     }
 
-    final BooleanBuilder passwordCondition = new BooleanBuilder()
-        .and(
-            user.password.eq(User.cryptPasswordMd5(password))
-            .or(user.passwordSha512.eq(User.cryptPasswordSha512(password)))
-            );
-
-    return getQueryFactory().selectFrom(user)
-        .where(condition.and(passwordCondition))
-        .fetchOne();
+    final User found = getQueryFactory().selectFrom(user).where(condition).fetchOne();
+    if (found == null) {
+      // stesso costo della verifica di una password, per non rivelare se l'utente esiste
+      PasswordHasher.dummyCheck(password);
+      return null;
+    }
+    return found.checkPassword(password) ? found : null;
   }
 
   public User byUsername(String username) {

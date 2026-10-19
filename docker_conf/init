@@ -34,6 +34,14 @@ else
 	DB_USER_PASS="$DB_USER:$DB_PASS"
 fi
 
+# Credenziali per il backup del database (backupdb.sh, eseguito da cron come root):
+# pg_dump legge la password da /root/.pgpass (PGPASSFILE in backupdb.sh), dove ':' e '\' vanno preceduti da '\'.
+if [ -n "${DB_PASS}" ]; then
+  printf '%s:%s:%s:%s:%s\n' "${DB_HOST}" "${DB_PORT}" "${DB_NAME}" "${DB_USER}" \
+    "$(printf '%s' "${DB_PASS}" | sed 's/[\\:]/\\&/g')" > /root/.pgpass
+  chmod 600 /root/.pgpass
+fi
+
 ######## LOGS Settings #########
 
 LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -55,7 +63,7 @@ cp ${APP_HOME}/docker_conf/backupdb.sh ${APP_HOME}/tools/backupdb.sh
 sed 's#{{DB_HOST}}#'"${DB_HOST}"'#' -i ${APP_HOME}/tools/backupdb.sh
 sed 's#{{DB_PORT}}#'"${DB_PORT}"'#' -i ${APP_HOME}/tools/backupdb.sh
 sed 's#{{DB_NAME}}#'"${DB_NAME}"'#' -i ${APP_HOME}/tools/backupdb.sh
-sed 's#{{DB_USER_PASS}}#'"${DB_USER_PASS}"'#' -i ${APP_HOME}/tools/backupdb.sh
+sed 's#{{DB_USER}}#'"${DB_USER}"'#' -i ${APP_HOME}/tools/backupdb.sh
 sed 's#{{EPAS_HOST}}#'"${VIRTUAL_HOST}"'#g' -i ${APP_HOME}/tools/backupdb.sh
 
 chmod +x ${APP_HOME}/tools/backupdb.sh
@@ -74,7 +82,10 @@ fi
 SKIP_IP_CHECK=${SKIP_IP_CHECK:-false}
 CSRF_MODE=${CSRF_MODE:-off}
 X_FORWARDED_SUPPORT=${X_FORWARDED_SUPPORT:-all}
+LOGIN_MAX_FAILURES=${LOGIN_MAX_FAILURES:-10}
+LOGIN_LOCK_MINUTES=${LOGIN_LOCK_MINUTES:-15}
 FLOWS_ACTIVE=${FLOWS_ACTIVE:-false}
+KEEP_MD5_PASSWORD=${KEEP_MD5_PASSWORD:-false}
 
 cp ${APP_HOME}/docker_conf/prod.conf ${APP_HOME}/conf/
 
@@ -358,7 +369,10 @@ fi
 sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{CSRF_MODE}}#'"${CSRF_MODE}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{X_FORWARDED_SUPPORT}}#'"${X_FORWARDED_SUPPORT}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{LOGIN_MAX_FAILURES}}#'"${LOGIN_MAX_FAILURES}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{LOGIN_LOCK_MINUTES}}#'"${LOGIN_LOCK_MINUTES}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{FLOWS_ACTIVE}}#'"${FLOWS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{KEEP_MD5_PASSWORD}}#'"${KEEP_MD5_PASSWORD}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
 
 ### Impostazione autenticazione LDAP

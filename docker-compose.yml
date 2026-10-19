@@ -45,7 +45,11 @@ services:
                                                 # l'header X-Forwarded-For. Fortemente consigliato impostarlo se si usa un proxy
                                                 # e non esporre la porta 9000: con "all" un client che raggiunge direttamente
                                                 # la 9000 può falsificare il proprio indirizzo ip.
+      #- LOGIN_MAX_FAILURES=                    # default: 10 -- tentativi di login ammessi per username e indirizzo
+      #- LOGIN_LOCK_MINUTES=                    # default: 15 -- durata in minuti della finestra dei tentativi
       - FLOWS_ACTIVE=true
+      #- KEEP_MD5_PASSWORD=                     # default: false -- (true,false) -- Mantiene anche l'hash MD5 delle password,
+                                                # solo per le istanze che lo forniscono ad altri sistemi (es. LDAP)
       #- URL_ATTESTATI=                         # default: https://attestativ2.rm.cnr.it
       #- URL_USER=
       #- URL_PASS=

@@ -32,6 +32,39 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       -
+        # Prima build caricata nel docker locale per i test: il push successivo
+        # riusa la cache del builder e pubblica gli stessi layer testati.
+        name: Build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          tags: epas:ci
+      -
+        name: Smoke test
+        run: .github/scripts/docker-smoke-test.sh epas:ci
+      -
+        name: Pacchetti cambiati rispetto a consiglionazionalericerche/epas:latest
+        run: |
+          pkgs() { docker run --rm --entrypoint dpkg-query "$1" -W -f '${Package} ${Version}\n'; }
+          pkgs epas:ci > packages-new.txt
+          if docker pull -q consiglionazionalericerche/epas:latest >/dev/null 2>&1; then
+            pkgs consiglionazionalericerche/epas:latest > packages-old.txt
+          else
+            : > packages-old.txt
+          fi
+          diff -u packages-old.txt packages-new.txt > packages.diff || true
+          cat packages.diff
+      -
+        name: Archivia la lista dei pacchetti
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: |
+            packages-new.txt
+            packages.diff
+      -
         name: Build and push
         uses: docker/build-push-action@v4
         with:

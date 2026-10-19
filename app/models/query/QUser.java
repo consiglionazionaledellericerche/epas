@@ -48,6 +48,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath password = createString("password");
 
+    public final StringPath passwordHash = createString("passwordHash");
+
     public final StringPath passwordSha512 = createString("passwordSha512");
 
     //inherited

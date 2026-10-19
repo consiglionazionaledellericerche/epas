@@ -4,11 +4,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.36.0] - Unreleased
+## [2.37.3] - Unreleased
 ### Added
   - Aggiunta la verifica del token anti-CSRF sulle richieste che modificano dati, attivabile
     con il parametro csrf.mode (CSRF_MODE nel docker): off (default), report, enforce.
 
+## [2.37.2] - 2026-10-19
+### Added
+  - Smoke test dell'immagine docker (.github/scripts/docker-smoke-test.sh) eseguito dai workflow
+    di pubblicazione prima del push, con l'elenco dei pacchetti di sistema cambiati rispetto
+    all'immagine precedente.  
+  - Aggiunto il parametro di configurazione personale periodico per il limite mensile di giorni
+    di lavoro agile (codici LAGILE e LAGILEBP), che sostituisce il limite standard di 10 giorni
+    al mese. Per i dipendenti con part time verticale non può superare la soglia inferiore alla
+    metà dei giorni lavorativi del mese. Il parametro è modificabile solo da amministratori e
+    gestori dell'anagrafica.
+
+### Changed
+  - Aggiornata l'immagine docker di base a play 1.5.3 con eclipse-temurin 11 su Ubuntu 24.04
+    (criluc/play1:1.5.3-temurin-11-patched), che riceve gli aggiornamenti di sicurezza del
+    sistema operativo.
+  - Nella build dell'immagine docker vengono aggiornati i pacchetti di sistema e rimossi la cache
+    ivy e i moduli di play non usati (testrunner, docviewer, grizzly, crud): l'immagine passa da
+    circa 1,6 GB a 1,04 GB.
+  - I parametri di configurazione periodici della persona possono avere più periodi di
+    validità con valori diversi.
+  - Nei parametri di configurazione della persona sono mostrati tutti i periodi (passati, attuale
+    e futuri) del limite mensile di lavoro agile.
+
+### Fixed
+  - Corretto il backup del database dal container docker quando è impostata DB_PASS: pg_dump
+    riceveva utente e password come nome utente e il backup non veniva creato.
+  - I periodi di associazione di una persona ad un'attività di turno non possono più
+    sovrapporsi: il controllo è fatto in inserimento, modifica e terminazione. L'evoluzione
+    elimina i periodi contenuti in altri e accorcia quelli sovrapposti al successivo.
+  - Una persona con più periodi consecutivi su un'attività nello stesso mese non è più duplicata
+    nel calendario dei turni.
+  - Impedita la modifica tramite i parametri della richiesta della persona e dell'attività di
+    un'associazione tra persona e attività di turno.
+  - Corretta la visualizzazione del riepilogo delle ore di turno nel calendario nel caso di
+    competenze di turno notturno/festivo abilitate senza data di fine.
+  - Corretto il valore di default restituito per i parametri di configurazione letti fuori dal
+    periodo del proprietario, che causava un errore nel calcolo del lavoro agile nel mese di
+    attivazione delle persone attivate a metà mese.
+  - Impedita la modifica tramite i parametri della richiesta della persona e del parametro di una
+    configurazione personale.
+
+
+## [2.36.0] - 2026-10-13
 ### Changed
   - Modificato l'ordinamento dei codici nel caso di inserimento di lavoro agile
 ### Fixed

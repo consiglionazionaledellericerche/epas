@@ -98,7 +98,10 @@ when
      	"Notifications.list",
      	"Notifications.readAndRedirect",
      	"Notifications.read",
-     	"Notifications.readAll") 
+     	"Notifications.readAll",
+     	"ReportCentre.oilUserReply",
+     	"ReportCentre.sendOilUserReplay",
+     	"ReportCentre.oilUserReplySent")
       || action.startsWith("SwitchTemplate."), 
       target == null, granted == false)
 then

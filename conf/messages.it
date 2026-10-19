@@ -804,6 +804,7 @@ reperibilityCalendar.allValidReperibility= Tutti le reperibilità risultano vali
 roleIds= Ruoli attribuibili
 
 secure.error=Oops! Username o password sconosciuti.
+secure.loginLocked=Troppi tentativi di accesso falliti: riprova tra qualche minuto o usa il recupero password.
 secure.logout=Utente correttamente disconnesso.
 secure.logoutShibboleth=Per completare il logout è necessario chiudere il browser.
 
@@ -1407,6 +1408,7 @@ PARENTAL_LEAVE_FOR_FATHERS =Inserimento codici di congedo parentale per il padre
 DISABLE_OVERTIME_LIMIT =Disabilitare limite 200 ore di straordinario annuale
 ENABLE_632_CODE =Abilita utilizzo 10 ore aggiuntive per visite ed esami per malattie invalidanti o rare 
 ENABLE_633_CODE =Abilita utilizzo 10 ore aggiuntive per visite ed esami per figlio minorenne con malattie invalidanti o rare
+AGILE_WORK_MONTHLY_LIMIT =Limite personale di giorni di lavoro agile al mese (lasciare vuoto per il limite standard)
 
 DAYS=Ricalcoli giornalieri.
 RESIDUAL_HOURS=Ricalcoli mensili sul residuo ore.
