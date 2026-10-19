@@ -604,7 +604,7 @@ public class Administration extends Controller {
    */
   public static void switchUserTo(long id) {
 
-    final User user = Administrators.userDao.getUserByIdAndPassword(id, Optional.<String>absent());
+    final User user = Administrators.userDao.byId(id);
 
     if (user == null || user.isDisabled()) {
       notFound();

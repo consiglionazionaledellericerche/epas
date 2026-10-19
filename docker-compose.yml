@@ -44,6 +44,8 @@ services:
                                                 # e non esporre la porta 9000: con "all" un client che raggiunge direttamente
                                                 # la 9000 può falsificare il proprio indirizzo ip.
       - FLOWS_ACTIVE=true
+      #- KEEP_MD5_PASSWORD=                     # default: false -- (true,false) -- Mantiene anche l'hash MD5 delle password,
+                                                # solo per le istanze che lo forniscono ad altri sistemi (es. LDAP)
       #- URL_ATTESTATI=                         # default: https://attestativ2.rm.cnr.it
       #- URL_USER=
       #- URL_PASS=
