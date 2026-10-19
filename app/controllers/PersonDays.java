@@ -333,6 +333,7 @@ public class PersonDays extends Controller {
 
       render(found);
     }
+    rules.checkIfPermitted(personDay.getPerson().getOffice());
     found = true;
     List<HistoryValue<Absence>> allAbsences = personDayHistoryDao
         .absences(personDayId);
@@ -427,8 +428,9 @@ public class PersonDays extends Controller {
    */
   public static void checkPositiveResidualForOvertime(int year, int month, Long personId) {
     Optional<Person> person = personDao.byId(personId);
-    Preconditions.checkNotNull(person.get());
+    notFoundIfNull(person.orNull());
     Person p = person.get();
+    rules.checkIfPermitted(p);
     YearMonth yearMonth = new YearMonth(year, month);
     LocalDate begin = new LocalDate(year, month, 1);
     List<PersonDay> pdList = personDayDao.getPersonDayInMonth(person.get(), yearMonth);

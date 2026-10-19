@@ -77,6 +77,9 @@ public class Users extends Controller {
       boolean onlyEnabled, Office office) {
 
     User user = Security.getUser().get();
+    if (office.isPersistent()) {
+      rules.checkIfPermitted(office);
+    }
 
     Set<Office> offices = office.isPersistent() ? ImmutableSet.of(office) :
         secureManager.officesTechnicalAdminAllowed(user);

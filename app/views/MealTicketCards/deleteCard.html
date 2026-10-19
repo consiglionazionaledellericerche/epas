@@ -1,0 +1,23 @@
+#{modalAsync id:'defaultModal', title:'Rimozione tessera elettronica' }
+
+#{alert color:'danger'}
+	<div class="text-center">
+	<p>Attenzione! <br>
+	 Stai per rimuovere da ePAS la tessera <strong>${mealTicketCard.number}</strong> di
+	 <strong>${mealTicketCard.person.fullname}</strong>.
+	</p>
+	<p>
+	 Questa operazione non potrà essere annullata.
+	</p>
+	#{form @MealTicketCards.deleteCard(), class:'form-horizontal' }
+		<input type="hidden" name="mealTicketCardId" value="${mealTicketCard.id}"/>
+		<input type="hidden" name="confirmed" value="true"/>
+
+	    #{b.buttons center:true}
+		<input class="btn btn-danger" type="submit" value="Conferma Eliminazione" />
+		#{/b.buttons}
+	#{/form}
+	</div>
+#{/alert}
+
+#{/modalAsync}
