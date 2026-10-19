@@ -804,6 +804,7 @@ reperibilityCalendar.allValidReperibility= Tutti le reperibilità risultano vali
 roleIds= Ruoli attribuibili
 
 secure.error=Oops! Username o password sconosciuti.
+secure.loginLocked=Troppi tentativi di accesso falliti: riprova tra qualche minuto o usa il recupero password.
 secure.logout=Utente correttamente disconnesso.
 secure.logoutShibboleth=Per completare il logout è necessario chiudere il browser.
 

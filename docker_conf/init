@@ -81,6 +81,8 @@ fi
 # configure ePAS
 SKIP_IP_CHECK=${SKIP_IP_CHECK:-false}
 X_FORWARDED_SUPPORT=${X_FORWARDED_SUPPORT:-all}
+LOGIN_MAX_FAILURES=${LOGIN_MAX_FAILURES:-10}
+LOGIN_LOCK_MINUTES=${LOGIN_LOCK_MINUTES:-15}
 FLOWS_ACTIVE=${FLOWS_ACTIVE:-false}
 
 cp ${APP_HOME}/docker_conf/prod.conf ${APP_HOME}/conf/
@@ -364,6 +366,8 @@ fi
 
 sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{X_FORWARDED_SUPPORT}}#'"${X_FORWARDED_SUPPORT}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{LOGIN_MAX_FAILURES}}#'"${LOGIN_MAX_FAILURES}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{LOGIN_LOCK_MINUTES}}#'"${LOGIN_LOCK_MINUTES}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{FLOWS_ACTIVE}}#'"${FLOWS_ACTIVE}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{EPAS_SHIB_LOGIN}}#'"${EPAS_SHIB_LOGIN}"'#' -i ${APP_HOME}/conf/prod.conf
 

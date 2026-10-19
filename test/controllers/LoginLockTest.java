@@ -17,21 +17,29 @@
 
 package controllers;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import models.User;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import play.cache.Cache;
-import play.test.UnitTest;
+import play.Play;
+import play.db.jpa.JPA;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
+import play.test.FunctionalTest;
 
 /**
- * Verifica del blocco del login dopo troppi tentativi falliti.
+ * Verifica del limite ai tentativi di login.
  */
-public class LoginLockTest extends UnitTest {
+public class LoginLockTest extends FunctionalTest {
 
   private static final String PASSWORD = "unaPasswordDiTest";
-  private static final int MAX_FAILURES = 10;
 
   private User user;
 
@@ -44,34 +52,127 @@ public class LoginLockTest extends UnitTest {
     user.setUsername("login.lock." + UUID.randomUUID());
     user.updatePassword(PASSWORD);
     user.save();
+    JPA.em().getTransaction().commit();
+    JPA.em().getTransaction().begin();
   }
 
   @After
-  public void deleteUser() {
-    Cache.safeDelete("loginFailures." + user.getUsername().toLowerCase());
-    user.delete();
+  public void clearAttempts() {
+    Security.clearLoginAttempts(user.getUsername());
   }
 
   @Test
   public void loginIsLockedAfterTooManyFailures() {
-    for (int i = 0; i < MAX_FAILURES; i++) {
+    for (int i = 0; i < Security.loginMaxFailures(); i++) {
       assertFalse(Security.authenticate(user.getUsername(), "sbagliata"));
     }
-    assertTrue(Security.isLoginLocked(user.getUsername()));
     // anche con la password corretta il login resta bloccato
     assertFalse(Security.authenticate(user.getUsername(), PASSWORD));
     // il blocco non dipende dalle maiuscole dello username
-    assertTrue(Security.isLoginLocked(user.getUsername().toUpperCase()));
+    assertFalse(Security.authenticate(user.getUsername().toUpperCase(), PASSWORD));
   }
 
   @Test
-  public void successfulLoginResetsFailures() {
-    for (int i = 0; i < MAX_FAILURES - 1; i++) {
+  public void successfulLoginResetsAttempts() {
+    for (int i = 0; i < Security.loginMaxFailures() - 1; i++) {
       assertFalse(Security.authenticate(user.getUsername(), "sbagliata"));
     }
     assertTrue(Security.authenticate(user.getUsername(), PASSWORD));
-    assertFalse(Security.authenticate(user.getUsername(), "sbagliata"));
-    assertFalse(Security.isLoginLocked(user.getUsername()));
+    for (int i = 0; i < Security.loginMaxFailures() - 1; i++) {
+      assertFalse(Security.authenticate(user.getUsername(), "sbagliata"));
+    }
     assertTrue(Security.authenticate(user.getUsername(), PASSWORD));
+  }
+
+  /**
+   * Tentativi in parallelo consumano ciascuno un tentativo: non si può aggirare il limite
+   * inviando molte richieste contemporaneamente.
+   */
+  @Test
+  public void parallelAttemptsCannotBypassTheLimit() throws Exception {
+    final String username = user.getUsername();
+    final int attempts = Security.loginMaxFailures() * 3;
+    ExecutorService executor = Executors.newFixedThreadPool(attempts);
+    try {
+      List<Callable<Boolean>> logins = Lists.newArrayList();
+      for (int i = 0; i < attempts; i++) {
+        logins.add(() -> {
+          try {
+            return JPA.withTransaction("default", true,
+                () -> Security.authenticate(username, "sbagliata"));
+          } catch (Throwable e) {
+            throw new Exception(e);
+          }
+        });
+      }
+      executor.invokeAll(logins);
+    } finally {
+      executor.shutdown();
+    }
+    assertFalse(Security.authenticate(username, PASSWORD));
+  }
+
+  /**
+   * Un valore non valido nella configurazione non impedisce i login: si usa il default.
+   */
+  @Test
+  public void invalidConfigurationFallsBackToDefault() {
+    String previous = Play.configuration.getProperty(Security.LOGIN_MAX_FAILURES);
+    Play.configuration.setProperty(Security.LOGIN_MAX_FAILURES, "10 # commento");
+    try {
+      assertEquals(10, Security.loginMaxFailures());
+      assertTrue(Security.authenticate(user.getUsername(), PASSWORD));
+    } finally {
+      if (previous == null) {
+        Play.configuration.remove(Security.LOGIN_MAX_FAILURES);
+      } else {
+        Play.configuration.setProperty(Security.LOGIN_MAX_FAILURES, previous);
+      }
+    }
+  }
+
+  /**
+   * Username con spazi o molto lunghi non causano errori.
+   */
+  @Test
+  public void unusualUsernamesDoNotFail() {
+    assertFalse(Security.authenticate("a b\nc", "sbagliata"));
+    assertFalse(Security.authenticate(Strings.repeat("x", 500), "sbagliata"));
+    Security.clearLoginAttempts("a b\nc");
+    Security.clearLoginAttempts(Strings.repeat("x", 500));
+  }
+
+  /**
+   * I tentativi da un indirizzo non bloccano il login dello stesso utente da un altro
+   * indirizzo; dall'indirizzo bloccato la pagina di login mostra il motivo.
+   */
+  @Test
+  public void lockIsPerClientAddress() {
+    final String attacker = "203.0.113.10";
+    for (int i = 0; i < Security.loginMaxFailures(); i++) {
+      login(attacker, "sbagliata");
+    }
+    Response locked = login(attacker, PASSWORD);
+    assertTrue(locked.getHeader("Location").contains("login"));
+    assertTrue(getContent(GET(newRequest(attacker), "/login"))
+        .contains("Troppi tentativi di accesso falliti"));
+
+    clearCookies();
+    Response ok = login("198.51.100.20", PASSWORD);
+    assertFalse(ok.getHeader("Location").contains("login"));
+
+    clearCookies();
+    login(attacker, PASSWORD);
+  }
+
+  private Response login(String address, String password) {
+    return POST(newRequest(address), "/login?username=" + user.getUsername()
+        + "&password=" + password, "application/x-www-form-urlencoded", "");
+  }
+
+  private Request newRequest(String address) {
+    Request request = newRequest();
+    request.remoteAddress = address;
+    return request;
   }
 }
