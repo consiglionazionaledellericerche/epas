@@ -22,6 +22,7 @@ import common.injection.StaticInject;
 import javax.inject.Inject;
 import lombok.Data;
 import lombok.val;
+import manager.StampingManager;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.enumerate.StampTypes;
@@ -94,10 +95,10 @@ public class StampingUpdateDto {
   public void update(Stamping stamping) {
     stamping.setMarkedByAdmin(isMarkedByAdmin());
     stamping.setMarkedByEmployee(isMarkedByEmployee());
-    stamping.setNote(getNote());
-    stamping.setPlace(getPlace());
-    stamping.setReason(getReason());
-    stamping.setStampingZone(getStampingZone());
+    stamping.setNote(StampingManager.clientText(getNote()));
+    stamping.setPlace(StampingManager.clientText(getPlace()));
+    stamping.setReason(StampingManager.clientText(getReason()));
+    stamping.setStampingZone(StampingManager.clientText(getStampingZone()));
     stamping.setWay(getWayType());
     if (getReasonType() != null) {
       stamping.setStampType(StampTypes.byCode(getReasonType().name()));

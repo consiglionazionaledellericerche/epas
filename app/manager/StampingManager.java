@@ -51,6 +51,7 @@ import models.exports.StampingFromClient;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.testng.util.Strings;
+import play.Play;
 import play.i18n.Messages;
 
 /**
@@ -63,9 +64,15 @@ import play.i18n.Messages;
 public class StampingManager {
 
   /**
-   * Tolleranza in minuti per le timbrature nel futuro inviate dai client.
+   * Parametro di configurazione con la tolleranza in ore per le timbrature nel futuro inviate
+   * dai client.
    */
-  static final int MAX_MINUTES_IN_FUTURE_FOR_CLIENTS = 60;
+  public static final String MAX_HOURS_IN_FUTURE_FOR_CLIENTS = "stampings.client.maxHoursInFuture";
+  /**
+   * Tolleranza di default in ore per le timbrature nel futuro inviate dai client: assorbe
+   * orologi dei lettori sfasati o con l'ora legale non aggiornata.
+   */
+  static final int DEFAULT_MAX_HOURS_IN_FUTURE_FOR_CLIENTS = 24;
   /**
    * Lunghezza massima dei campi di testo delle timbrature inviate dai client.
    */
@@ -204,13 +211,55 @@ public class StampingManager {
 
   /**
    * Verifica se la data della timbratura inviata da un client è nel futuro, oltre la
-   * tolleranza ammessa per la differenza tra gli orologi dei lettori e del server.
+   * tolleranza ammessa ({@link #MAX_HOURS_IN_FUTURE_FOR_CLIENTS}).
    *
    * @param dateTime la data della timbratura
    * @return true se la timbratura è nel futuro oltre la tolleranza, false altrimenti.
    */
   public boolean isInTheFuture(LocalDateTime dateTime) {
-    return dateTime.isAfter(LocalDateTime.now().plusMinutes(MAX_MINUTES_IN_FUTURE_FOR_CLIENTS));
+    return dateTime.isAfter(LocalDateTime.now().plusHours(maxHoursInFutureForClients()));
+  }
+
+  /**
+   * La tolleranza in ore per le timbrature nel futuro, con il valore di default se il
+   * parametro è assente o non valido.
+   */
+  static int maxHoursInFutureForClients() {
+    final String value = Play.configuration.getProperty(MAX_HOURS_IN_FUTURE_FOR_CLIENTS);
+    if (value == null || value.trim().isEmpty()) {
+      return DEFAULT_MAX_HOURS_IN_FUTURE_FOR_CLIENTS;
+    }
+    try {
+      final int hours = Integer.parseInt(value.trim());
+      return hours >= 0 ? hours : DEFAULT_MAX_HOURS_IN_FUTURE_FOR_CLIENTS;
+    } catch (NumberFormatException e) {
+      log.warn("Valore non valido per {}: '{}', uso {}", MAX_HOURS_IN_FUTURE_FOR_CLIENTS, value,
+          DEFAULT_MAX_HOURS_IN_FUTURE_FOR_CLIENTS);
+      return DEFAULT_MAX_HOURS_IN_FUTURE_FOR_CLIENTS;
+    }
+  }
+
+  /**
+   * Verifica la data di una timbratura inviata da un client (lettore badge o REST): non deve
+   * essere troppo nel passato né nel futuro oltre la tolleranza. Le timbrature rifiutate sono
+   * registrate nel log, perché i client non le ripresentano.
+   *
+   * @param dateTime la data della timbratura
+   * @param badgeNumber il numero di badge, per il log
+   * @return il motivo del rifiuto, absent se la data è accettabile.
+   */
+  public Optional<String> clientDateTimeError(LocalDateTime dateTime, String badgeNumber) {
+    Optional<String> error = Optional.absent();
+    if (isTooFarInPast(dateTime)) {
+      error = Optional.of("Timbratura con data troppo nel passato");
+    } else if (isInTheFuture(dateTime)) {
+      error = Optional.of("Timbratura con data nel futuro");
+    }
+    if (error.isPresent()) {
+      log.warn("{}: rifiutata la timbratura del {} per il badge {} inviata da {}", error.get(),
+          dateTime, badgeNumber, Security.getUser().transform(User::getUsername).orNull());
+    }
+    return error;
   }
 
   /**
@@ -220,16 +269,25 @@ public class StampingManager {
    * @param text il testo ricevuto
    * @return il testo normalizzato, null se vuoto.
    */
-  static String clientText(String text) {
+  public static String clientText(String text) {
     if (text == null) {
       return null;
     }
-    String cleaned = CharMatcher.javaIsoControl().removeFrom(text).trim();
+    // i caratteri di controllo (es. a capo) diventano spazi, per non unire le parole
+    String cleaned = CharMatcher.javaIsoControl().or(CharMatcher.whitespace())
+        .trimAndCollapseFrom(text, ' ');
     if (cleaned.isEmpty()) {
       return null;
     }
-    return cleaned.length() > MAX_CLIENT_TEXT_LENGTH
-        ? cleaned.substring(0, MAX_CLIENT_TEXT_LENGTH) : cleaned;
+    if (cleaned.length() <= MAX_CLIENT_TEXT_LENGTH) {
+      return cleaned;
+    }
+    // non si spezza un carattere rappresentato da una coppia surrogata
+    int end = MAX_CLIENT_TEXT_LENGTH;
+    if (Character.isHighSurrogate(cleaned.charAt(end - 1))) {
+      end--;
+    }
+    return cleaned.substring(0, end).trim();
   }
 
   /**

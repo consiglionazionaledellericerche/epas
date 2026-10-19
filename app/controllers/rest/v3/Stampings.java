@@ -25,13 +25,11 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
 import controllers.Resecure;
-import dao.GeneralSettingDao;
 import dao.StampingDao;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -61,8 +59,6 @@ public class Stampings extends Controller {
   static GsonBuilder gsonBuilder;
   @Inject 
   static SecurityRules rules;
-  @Inject
-  static GeneralSettingDao generalSettingDao;
 
   /**
    * Restituisce il JSON con la timbratura cercata per id. 
@@ -102,14 +98,6 @@ public class Stampings extends Controller {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
 
-    // Controlla che la timbratura da inserire non sia troppo nel passato.
-    val maxDaysInPastForRestStampings = generalSettingDao.generalSetting()
-        .getMaxDaysInPastForRestStampings();
-    if (stampingCreateDto.getDateTime()
-        .compareTo(LocalDateTime.now().minusDays(maxDaysInPastForRestStampings)) < 0) {
-      JsonResponse.badRequest("Timbratura con data troppo nel passato");
-    }
-
     // Badge number not present or invalid (404)
     val person = 
         stampingManager.getPersonFromBadgeAndCurrentBadgeReader(stampingCreateDto.getBadgeNumber());
@@ -123,8 +111,11 @@ public class Stampings extends Controller {
     rules.checkIfPermitted(person.get().getOffice());
 
     val stampingFromClient = StampingFromClient.build(stampingCreateDto);
-    if (stampingManager.isInTheFuture(stampingFromClient.dateTime)) {
-      JsonResponse.badRequest("Timbratura con data nel futuro");
+    // Controlla che la timbratura non sia troppo nel passato o nel futuro.
+    val dateTimeError = stampingManager.clientDateTimeError(stampingFromClient.dateTime,
+        stampingCreateDto.getBadgeNumber());
+    if (dateTimeError.isPresent()) {
+      JsonResponse.badRequest(dateTimeError.get());
     }
     stampingFromClient.person = person.get();    
     log.trace("stampingFromClient = {}", stampingFromClient);
