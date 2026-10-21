@@ -93,7 +93,8 @@ public class AbsenceRequests extends Controller {
 
   private static final String PERSONAL_PERMISSION_NOT_INSERTABLE = 
       "Non tutti i giorni richiesti possono essere inseriti: il residuo dei permessi personali "
-      + "non è sufficiente oppure alcuni giorni contengono già un'assenza. "
+      + "non è sufficiente, considerando anche le richieste in attesa di approvazione, oppure "
+      + "alcuni giorni contengono già un'assenza. "
       + "Modificare le date della richiesta.";
 
   @Inject
@@ -592,7 +593,8 @@ public class AbsenceRequests extends Controller {
         absenceService.insert(absenceRequest.getPerson(), 
             absenceForm.groupSelected, absenceForm.from,
             absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
-            absenceForm.hours, absenceForm.minutes, false, absenceManager);
+            absenceForm.hours, absenceForm.minutes, false, absenceManager, Optional.absent(),
+            absenceRequestManager.pendingPersonalPermissionAbsences(absenceRequest));
 
     absenceRequestManager.checkAbsenceRequestDates(absenceRequest, insertReport);
 
@@ -685,8 +687,8 @@ public class AbsenceRequests extends Controller {
     // il limite annuale non verrebbero inseriti all'approvazione della richiesta.
     if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
       AbsenceForm absenceForm = absenceRequestManager.buildAbsenceForm(absenceRequest);
-      InsertReport insertReport = 
-          absenceRequestManager.simulateInsert(absenceRequest, absenceForm);
+      InsertReport insertReport = absenceRequestManager.simulateInsert(absenceRequest,
+          absenceForm, absenceRequestManager.pendingPersonalPermissionAbsences(absenceRequest));
       if (absenceRequestManager.isPersonalPermissionNotFullyInsertable(
           absenceRequest, insertReport)) {
         Validation.addError("absenceRequest.endTo", PERSONAL_PERMISSION_NOT_INSERTABLE);

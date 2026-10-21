@@ -596,6 +596,20 @@ public class AbsenceRequestManager {
    * @return il report dell'inserimento simulato.
    */
   public InsertReport simulateInsert(AbsenceRequest absenceRequest, AbsenceForm absenceForm) {
+    return simulateInsert(absenceRequest, absenceForm, Lists.newArrayList());
+  }
+
+  /**
+   * Simula l'inserimento delle assenze della richiesta senza persisterle, considerando come
+   * già inserite le assenze passate in pendingInserts.
+   *
+   * @param absenceRequest la richiesta di assenza
+   * @param absenceForm il form di inserimento costruito dalla richiesta
+   * @param pendingInserts assenze non persistite da considerare come già inserite
+   * @return il report dell'inserimento simulato.
+   */
+  public InsertReport simulateInsert(AbsenceRequest absenceRequest, AbsenceForm absenceForm,
+      List<Absence> pendingInserts) {
     Integer hours = null;
     Integer minutes = null;
     if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
@@ -605,7 +619,32 @@ public class AbsenceRequestManager {
     return absenceService.insert(
         absenceRequest.getPerson(), absenceForm.groupSelected, absenceForm.from,
         absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
-        hours, minutes, false, absenceManager);
+        hours, minutes, false, absenceManager, Optional.absent(), pendingInserts);
+  }
+
+  /**
+   * Le assenze che verrebbero inserite dalle altre richieste di permesso personale della persona
+   * ancora in attesa di approvazione. Le richieste sono simulate in ordine di data di inizio,
+   * ognuna considerando le precedenti, così da rispettare il limite del gruppo 661.
+   *
+   * @param absenceRequest la richiesta di assenza da valutare (esclusa dal calcolo)
+   * @return le assenze delle richieste in attesa, vuota se la richiesta non è di permesso
+   *     personale.
+   */
+  public List<Absence> pendingPersonalPermissionAbsences(AbsenceRequest absenceRequest) {
+    List<Absence> pendingInserts = Lists.newArrayList();
+    if (!absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
+      return pendingInserts;
+    }
+    for (AbsenceRequest pending : absenceRequestDao.pendingRequests(
+        absenceRequest.getPerson(), AbsenceRequestType.PERSONAL_PERMISSION)) {
+      if (pending.equals(absenceRequest)) {
+        continue;
+      }
+      InsertReport report = simulateInsert(pending, buildAbsenceForm(pending), pendingInserts);
+      pendingInserts.addAll(report.absencesToPersist);
+    }
+    return pendingInserts;
   }
 
   /**
