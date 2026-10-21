@@ -44,6 +44,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.inject.Inject;
@@ -400,7 +402,10 @@ public class Absences extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    // Ogni sede vede solo i giorni di afferenza della persona
+    final LocalDate monthBegin = new LocalDate(year, month, 1);
+    final Set<LocalDate> visibleDays = rules.visibleDaysIfPermitted(person, monthBegin,
+        monthBegin.dayOfMonth().withMaximumValue());
 
     List<Absence> personAbsenceListWithFile = new ArrayList<Absence>();
     List<Absence> personAbsenceList = absenceDao
@@ -409,6 +414,9 @@ public class Absences extends Controller {
             false);
 
     for (Absence abs : personAbsenceList) {
+      if (!visibleDays.contains(abs.getPersonDay().getDate())) {
+        continue;
+      }
       if (abs.getAbsenceFile() != null && abs.getAbsenceFile().get() != null) {
         personAbsenceListWithFile.add(abs);
       }
@@ -427,8 +435,6 @@ public class Absences extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-
-    rules.checkIfPermitted(person.getOffice());
 
     //Se le date non sono specificate imposto il giorno corrente
     if (from == null || to == null) {
@@ -457,10 +463,13 @@ public class Absences extends Controller {
       render(personList, person, from, to, missioni, ferie, riposiCompensativi, altreAssenze);
     }
 
-    rules.checkIfPermitted(person.getOffice());
+    // Ogni sede vede solo i giorni di afferenza della persona
+    final Set<LocalDate> visibleDays = rules.visibleDaysIfPermitted(person, from, to);
 
     List<Absence> absenceList = absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), 
-        from, Optional.fromNullable(to), false);
+        from, Optional.fromNullable(to), false).stream()
+        .filter(a -> visibleDays.contains(a.getPersonDay().getDate()))
+        .collect(Collectors.toList());
 
     for (Absence abs : absenceList) {
       if (AbsenceTypeMapping.MISSIONE.is(abs.getAbsenceType())) {
@@ -493,9 +502,13 @@ public class Absences extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    // Ogni sede vede solo i giorni di afferenza della persona
+    final Set<LocalDate> visibleDays = rules.visibleDaysIfPermitted(person,
+        new LocalDate(year, 1, 1), new LocalDate(year, 12, 31));
     YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(
-        person, year, absenceDao.getYearlyAbsence(person, year));
+        person, year, absenceDao.getYearlyAbsence(person, year).stream()
+            .filter(a -> visibleDays.contains(a.getPersonDay().getDate()))
+            .collect(Collectors.toList()));
     render(yearlyAbsencesRecap, year, personId, person);
 
   }
@@ -528,7 +541,7 @@ public class Absences extends Controller {
     LocalDate begin = new LocalDate(year, month, 1);
     LocalDate end = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
     tableMonthlyAbsences = yearlyAbsencesManager
-        .populateMonthlyAbsencesTable(persons, abt, begin, end);
+        .populateMonthlyAbsencesTable(persons, abt, begin, end, Optional.of(office));
     int numberOfDifferentAbsenceType = tableMonthlyAbsences.columnKeySet().size();
 
     render(tableMonthlyAbsences, year, month, office, numberOfDifferentAbsenceType);
@@ -583,7 +596,9 @@ public class Absences extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    // Ogni sede vede solo i giorni di afferenza della persona
+    final Set<LocalDate> visibleDays =
+        rules.visibleDaysIfPermitted(person, monthBegin, monthEnd);
     List<Absence> absenceToRender = new ArrayList<Absence>();
 
     if (absenceTypeCode.equals("Totale")) {
@@ -595,6 +610,9 @@ public class Absences extends Controller {
           Optional.fromNullable(person), Optional.fromNullable(absenceTypeCode),
           monthBegin, monthEnd, Optional.<JustifiedTypeName>absent(), false, true);
     }
+    absenceToRender = absenceToRender.stream()
+        .filter(a -> visibleDays.contains(a.getPersonDay().getDate()))
+        .collect(Collectors.toList());
 
     render(person, absenceToRender);
   }

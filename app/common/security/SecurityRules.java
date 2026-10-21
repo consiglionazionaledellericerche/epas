@@ -198,6 +198,18 @@ public class SecurityRules {
   }
 
   /**
+   * Come {@link #permittedDaysByOffice(Person, LocalDate, LocalDate)}, riportando un accesso
+   * negato se nell'intervallo non c'è nessun giorno visibile.
+   */
+  public Set<LocalDate> visibleDaysIfPermitted(Person person, LocalDate begin, LocalDate end) {
+    final Set<LocalDate> days = permittedDaysByOffice(person, begin, end);
+    if (days.isEmpty()) {
+      throw new Forbidden("Access forbidden");
+    }
+    return days;
+  }
+
+  /**
    * Controlla se l'azione corrente è permessa.
    *
    * @return true se l'azione corrente è permessa, false altrimenti.

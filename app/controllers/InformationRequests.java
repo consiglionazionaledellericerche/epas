@@ -37,6 +37,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -786,7 +787,16 @@ public class InformationRequests extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+    // Il dipendente vede l'intero mese, ogni sede solo i giorni di afferenza della persona
+    final boolean ownReport = person.equals(Security.getUser().get().getPerson());
+    final org.joda.time.LocalDate monthBegin = new org.joda.time.LocalDate(year, month, 1);
+    Optional<Set<org.joda.time.LocalDate>> visibleDays = Optional.absent();
+    if (ownReport) {
+      rules.checkIfPermitted(person.getOffice());
+    } else {
+      visibleDays = Optional.of(rules.visibleDaysIfPermitted(person, monthBegin,
+          monthBegin.dayOfMonth().withMaximumValue()));
+    }
     IWrapperPerson wrperson = wrapperFactory.create(person);
 
     List<NewTeleworkDto> list = Lists.newArrayList();
@@ -799,7 +809,7 @@ public class InformationRequests extends Controller {
       Stampings.stampings(last.getYear(), last.getMonthOfYear());
     }
     PersonStampingRecap psDto = stampingsRecapFactory
-        .create(wrperson.getValue(), year, month, true);
+        .create(wrperson.getValue(), year, month, true, visibleDays);
 
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
 

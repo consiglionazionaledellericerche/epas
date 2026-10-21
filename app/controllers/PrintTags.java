@@ -124,8 +124,22 @@ public class PrintTags extends Controller {
       }
     }
 
+    final LocalDate monthEnd = date.dayOfMonth().withMaximumValue();
     for (Person p : personList) {
-      PersonStampingRecap psDto = stampingsRecapFactory.create(p, year, month, false);
+      // Se stampato da una sede, il cartellino contiene solo i giorni di afferenza a quella sede
+      Optional<Set<LocalDate>> visibleDays = Optional.absent();
+      if (office != null && !p.getPersonOffices().isEmpty()) {
+        final Set<LocalDate> officeDays = p.getDaysInOffice(office, date, monthEnd);
+        if (officeDays.isEmpty()) {
+          if (!forAll) {
+            forbidden();
+          }
+          continue;
+        }
+        visibleDays = Optional.of(officeDays);
+      }
+      PersonStampingRecap psDto =
+          stampingsRecapFactory.create(p, year, month, false, visibleDays);
       log.debug("Creato il person stamping recap per {}", psDto.person.fullName());
       List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
       if (includeStampingDetails) {

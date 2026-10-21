@@ -35,6 +35,7 @@ import helpers.Web;
 import helpers.validators.StringIsTime;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -200,7 +201,10 @@ public class TeleworkStampings extends Controller {
 
     Preconditions.checkNotNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
+    // Ogni sede vede solo i giorni di afferenza della persona
+    final LocalDate monthBegin = new LocalDate(year, month, 1);
+    final Set<LocalDate> visibleDays = rules.visibleDaysIfPermitted(person, monthBegin,
+        monthBegin.dayOfMonth().withMaximumValue());
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
 
@@ -216,7 +220,7 @@ public class TeleworkStampings extends Controller {
     List<TeleworkPersonDayDto> list = Lists.newArrayList();
 
     PersonStampingRecap psDto = stampingsRecapFactory
-        .create(wrPerson.getValue(), year, month, true);
+        .create(wrPerson.getValue(), year, month, true, Optional.of(visibleDays));
 
     log.debug("Chiedo la lista delle timbrature in telelavoro ad applicazione esterna.");
     list = manager.getMonthlyStampings(psDto);

@@ -23,8 +23,11 @@ import com.google.common.collect.TreeBasedTable;
 import dao.AbsenceDao;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import models.Office;
 import models.Person;
 import models.absences.Absence;
 import models.absences.AbsenceType;
@@ -80,6 +83,16 @@ public class YearlyAbsencesManager {
    */
   public Table<Person, AbsenceType, Integer> populateMonthlyAbsencesTable(
       List<Person> persons, AbsenceType abt, LocalDate begin, LocalDate end) {
+    return populateMonthlyAbsencesTable(persons, abt, begin, end, Optional.absent());
+  }
+
+  /**
+   * Come {@link #populateMonthlyAbsencesTable(List, AbsenceType, LocalDate, LocalDate)},
+   * considerando per ciascuna persona le sole assenze nei giorni di afferenza alla sede.
+   */
+  public Table<Person, AbsenceType, Integer> populateMonthlyAbsencesTable(
+      List<Person> persons, AbsenceType abt, LocalDate begin, LocalDate end,
+      Optional<Office> office) {
 
     Table<Person, AbsenceType, Integer> tableMonthlyAbsences =
         TreeBasedTable.create(personNameComparator, absenceCodeComparator);
@@ -88,6 +101,12 @@ public class YearlyAbsencesManager {
           absenceDao.getAbsenceByCodeInPeriod(
               Optional.fromNullable(p), Optional.<String>absent(), begin, end,
               Optional.<JustifiedTypeName>absent(), false, false);
+      if (office.isPresent() && !p.getPersonOffices().isEmpty()) {
+        final Set<LocalDate> officeDays = p.getDaysInOffice(office.get(), begin, end);
+        absenceInMonth = absenceInMonth.stream()
+            .filter(a -> officeDays.contains(a.getPersonDay().getDate()))
+            .collect(Collectors.toList());
+      }
 
       tableMonthlyAbsences.put(p, abt, absenceInMonth.size());
       for (Absence abs : absenceInMonth) {
