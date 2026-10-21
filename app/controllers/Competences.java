@@ -559,6 +559,7 @@ public class Competences extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     Office office = competenceOffice(person, year, month);
+    rules.checkIfPermitted(office);
     CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceId);
     notFoundIfNull(code);
     Competence competence = new Competence(person, code, year, month);
@@ -584,12 +585,7 @@ public class Competences extends Controller {
         return office;
       }
     }
-    if (offices.isEmpty()) {
-      rules.checkIfPermitted(person.getOffice());
-      return person.getOffice();
-    }
-    forbidden();
-    return null;
+    return offices.isEmpty() ? person.getOffice() : offices.get(0);
   }
 
   /**
@@ -605,6 +601,7 @@ public class Competences extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     Office office = competenceOffice(person, year, month);
+    rules.checkIfPermitted(office);
     CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
     notFoundIfNull(code);
     Optional<Competence> comp = competenceDao.getCompetence(person, year, month, code, office);

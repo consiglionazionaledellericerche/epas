@@ -279,6 +279,9 @@ public class Certifications extends Controller {
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     final Office office = certificationOffice(person, officeId, year, month);
+    if (!rules.check("Certifications.certifications", office)) {
+      forbidden();
+    }
     PersonCertData personCertData = null;
     try {
       // Costruisco lo status generale
@@ -307,7 +310,7 @@ public class Certifications extends Controller {
 
   /**
    * La sede per cui gestire gli attestati della persona nel mese: deve essere una sede a cui la
-   * persona ha afferito nel mese e su cui l'operatore ha i permessi.
+   * persona ha afferito nel mese (i permessi sulla sede sono verificati dal chiamante).
    */
   private static Office certificationOffice(Person person, Long officeId, int year, int month) {
     final LocalDate begin = new LocalDate(year, month, 1);
@@ -315,9 +318,6 @@ public class Certifications extends Controller {
         ? person.getOfficeAtOrCurrent(begin.dayOfMonth().withMaximumValue())
         : officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
-    if (!rules.check("Certifications.certifications", office)) {
-      forbidden();
-    }
     if (!person.getPersonOffices().isEmpty()
         && !person.isInOfficeInPeriod(office, begin, begin.dayOfMonth().withMaximumValue())) {
       forbidden();
@@ -351,6 +351,9 @@ public class Certifications extends Controller {
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     final Office office = certificationOffice(person, officeId, year, month);
+    if (!rules.check("Certifications.certifications", office)) {
+      forbidden();
+    }
 
     PersonCertData previousCertData = null;
     try {

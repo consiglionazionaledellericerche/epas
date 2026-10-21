@@ -351,4 +351,35 @@ public class PersonOfficeTest extends UnitTest {
     assertFalse("L'afferenza non deve contenere date successive alla fine",
         po.contains(endDate.plusDays(1)));
   }
+
+  /**
+   * Verifica i giorni di afferenza di ciascuna sede nel mese del trasferimento e la sede
+   * considerata dalle regole dei permessi alla data del giorno.
+   */
+  @Test
+  public void testDaysAndPermissionOfficeDuringTransferMonth() {
+    Office office1 = createOffice("Sede di Pisa");
+    Office office2 = createOffice("Sede di Roma");
+    Person person = buildPersonWithOffices(Lists.newArrayList(
+        createPersonOffice(null, office1, new LocalDate(2026, 1, 1), new LocalDate(2026, 3, 13)),
+        createPersonOffice(null, office2, new LocalDate(2026, 3, 14))));
+    LocalDate begin = new LocalDate(2026, 3, 1);
+    LocalDate end = new LocalDate(2026, 3, 31);
+
+    assertEquals(13, person.getDaysInOffice(office1, begin, end).size());
+    assertEquals(18, person.getDaysInOffice(office2, begin, end).size());
+    assertTrue(person.getDaysInOffice(office1, begin, end).contains(new LocalDate(2026, 3, 13)));
+    assertFalse(person.getDaysInOffice(office1, begin, end).contains(new LocalDate(2026, 3, 14)));
+
+    // ogni sede gestisce i giorni di propria afferenza
+    assertTrue(office1.isOfficeOf(person, new LocalDate(2026, 3, 5)));
+    assertFalse(office2.isOfficeOf(person, new LocalDate(2026, 3, 5)));
+    assertTrue(office2.isOfficeOf(person, new LocalDate(2026, 3, 20)));
+    // senza data vale la sede corrente
+    assertTrue(office2.isOfficeOf(person, null));
+    assertFalse(office1.isOfficeOf(person, null));
+
+    assertEquals(office1, person.getOfficeAtOrCurrent(new LocalDate(2026, 2, 1)));
+    assertEquals(office2, person.getOfficeAtOrCurrent(new LocalDate(2025, 1, 1)));
+  }
 }
