@@ -163,7 +163,10 @@ public class MissionManager {
       return false;
     }
 
-    Office office = body.person.getOffice();
+    Office office = body.person.getOfficeAt(body.dataInizio.toLocalDate());
+    if (office == null) {
+      office = body.person.getOffice();
+    }
 
     //verifico il parametro di ora inizio lavoro in sede
     LocalTimeInterval workInterval = (LocalTimeInterval) configurationManager.configValue(

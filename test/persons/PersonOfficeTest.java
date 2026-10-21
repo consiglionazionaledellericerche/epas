@@ -100,25 +100,80 @@ public class PersonOfficeTest extends UnitTest {
   }
 
   /**
-   * Verifica che getOffice() ritorni null quando non esiste nessuna afferenza attiva.
+   * Verifica che getOffice() ripieghi sull'ultima afferenza iniziata quando oggi non esiste
+   * nessuna afferenza attiva.
    */
   @Test
-  public void testGetOfficeReturnsNullWhenNoActiveOffice() {
+  public void testGetOfficeFallsBackToLastOfficeWhenNoActiveOffice() {
     Office office1 = createOffice("Sede di Pisa");
+    Office office2 = createOffice("Sede di Roma");
 
     LocalDate today = LocalDate.now();
-    LocalDate twoYearsAgo = today.minusYears(2);
-    LocalDate oneYearAgo = today.minusYears(1);
 
-    // Afferenza già terminata
+    // Afferenze già terminate
     List<PersonOffice> afferenze = Lists.newArrayList(
-        createPersonOffice(null, office1, twoYearsAgo, oneYearAgo)
+        createPersonOffice(null, office1, today.minusYears(3), today.minusYears(2)),
+        createPersonOffice(null, office2, today.minusYears(2).plusDays(1), today.minusYears(1))
     );
 
     Person person = buildPersonWithOffices(afferenze);
 
-    assertNull("L'ufficio corrente deve essere null per una persona senza afferenze attive",
-        person.getOffice());
+    assertEquals("Senza afferenze attive deve essere restituita l'ultima afferenza iniziata",
+        office2, person.getOffice());
+    assertNull("Alla data odierna la persona non afferisce a nessuna sede",
+        person.getOfficeAt(today));
+  }
+
+  /**
+   * Verifica che getOffice() restituisca la prima afferenza futura se non ci sono afferenze
+   * iniziate.
+   */
+  @Test
+  public void testGetOfficeReturnsFutureOfficeWhenOnlyFutureOffices() {
+    Office office1 = createOffice("Sede di Pisa");
+    LocalDate today = LocalDate.now();
+    Person person = buildPersonWithOffices(Lists.newArrayList(
+        createPersonOffice(null, office1, today.plusMonths(1))));
+    assertEquals(office1, person.getOffice());
+  }
+
+  /**
+   * Verifica le afferenze nel mese di un trasferimento: la persona compare in entrambe le sedi.
+   */
+  @Test
+  public void testOfficesInPeriodDuringTransferMonth() {
+    Office office1 = createOffice("Sede di Pisa");
+    Office office2 = createOffice("Sede di Roma");
+    Person person = buildPersonWithOffices(Lists.newArrayList(
+        createPersonOffice(null, office1, new LocalDate(2026, 1, 1), new LocalDate(2026, 3, 14)),
+        createPersonOffice(null, office2, new LocalDate(2026, 3, 15))));
+
+    LocalDate begin = new LocalDate(2026, 3, 1);
+    LocalDate end = new LocalDate(2026, 3, 31);
+    assertEquals(Lists.newArrayList(office1, office2), person.getOfficesInPeriod(begin, end));
+    assertTrue(person.isInOfficeInPeriod(office1, begin, end));
+    assertFalse(person.isInOfficeInPeriod(office1, new LocalDate(2026, 4, 1),
+        new LocalDate(2026, 4, 30)));
+    assertEquals(office1, person.getOfficeAt(new LocalDate(2026, 3, 14)));
+    assertEquals(office2, person.getOfficeAt(new LocalDate(2026, 3, 15)));
+  }
+
+  /**
+   * Verifica che changeOffice chiuda l'afferenza in corso il giorno precedente.
+   */
+  @Test
+  public void testChangeOfficeClosesCurrentOffice() {
+    Office office1 = createOffice("Sede di Pisa");
+    Office office2 = createOffice("Sede di Roma");
+    Person person = buildPersonWithOffices(Lists.newArrayList(
+        createPersonOffice(null, office1, new LocalDate(2026, 1, 1))));
+    person.getPersonOffices().forEach(po -> po.setPerson(person));
+
+    person.changeOffice(office2, new LocalDate(2026, 3, 15));
+
+    assertEquals(2, person.getPersonOffices().size());
+    assertEquals(new LocalDate(2026, 3, 14), person.getPersonOffices().get(0).getEndDate());
+    assertEquals(office2, person.getOfficeAt(new LocalDate(2026, 3, 15)));
   }
 
   /**

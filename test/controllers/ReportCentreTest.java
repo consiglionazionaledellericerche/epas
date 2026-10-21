@@ -140,9 +140,9 @@ public class ReportCentreTest extends FunctionalTest {
   public void reportOfAuthenticatedUserHasSessionWithoutReservedKeys() {
     Person person = employee();
     Person admin = h2Examples.activeNormalEmployee(new LocalDate(2026, 1, 1));
-    admin.setOffice(person.getOffice());
     admin.setEmail("admin." + admin.id + "@example.org");
     admin.save();
+    admin.changeOffice(person.getOffice(), new LocalDate(2026, 1, 1)).save();
     addRole(admin, Role.PERSONNEL_ADMIN);
     commit();
 
