@@ -26,6 +26,7 @@ import java.util.List;
 import models.Office;
 import models.Person;
 import models.PersonOffice;
+import models.enumerate.ContractType;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 import play.db.jpa.JPA;
@@ -62,6 +63,11 @@ public class PersonDaoOfficeTest extends UnitTest {
     destination.setCode("DEST-" + person.id);
     destination.save();
 
+    // il menu delle persone considera solo il personale strutturato
+    person.getContracts().forEach(c -> {
+      c.setContractType(ContractType.structured_public_administration);
+      c.save();
+    });
     person.changeOffice(destination, new LocalDate(2026, 6, 1));
     person.getPersonOffices().forEach(PersonOffice::save);
     JPA.em().flush();
@@ -83,5 +89,11 @@ public class PersonDaoOfficeTest extends UnitTest {
         .contains(person));
     assertFalse(list(destination, new LocalDate(2026, 5, 1), new LocalDate(2026, 5, 31))
         .contains(person));
+
+    // il menu delle persone delle viste annuali considera l'intero anno
+    assertTrue(personDao.liteList(ImmutableSet.of(source), begin2026, end2026, false).stream()
+        .anyMatch(p -> p.id.equals(person.id)));
+    assertFalse(personDao.liteList(ImmutableSet.of(source), 2026, 10, false).stream()
+        .anyMatch(p -> p.id.equals(person.id)));
   }
 }

@@ -61,6 +61,7 @@ import manager.recaps.YearlyAbsencesRecap;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.PersonOffice;
 import models.Role;
 import models.User;
 import models.absences.Absence;
@@ -509,7 +510,15 @@ public class Absences extends Controller {
         person, year, absenceDao.getYearlyAbsence(person, year).stream()
             .filter(a -> visibleDays.contains(a.getPersonDay().getDate()))
             .collect(Collectors.toList()));
-    render(yearlyAbsencesRecap, year, personId, person);
+    // Periodi di afferenza mostrati, se l'operatore vede solo una parte dell'anno
+    final List<PersonOffice> personOfficesInYear = person.getPersonOfficesInPeriod(
+        new LocalDate(year, 1, 1), new LocalDate(year, 12, 31));
+    final List<PersonOffice> visiblePersonOffices = personOfficesInYear.stream()
+        .filter(po -> visibleDays.contains(po.getBeginDate().isBefore(new LocalDate(year, 1, 1))
+            ? new LocalDate(year, 1, 1) : po.getBeginDate()))
+        .collect(Collectors.toList());
+    final boolean partial = visiblePersonOffices.size() < personOfficesInYear.size();
+    render(yearlyAbsencesRecap, year, personId, person, partial, visiblePersonOffices);
 
   }
 

@@ -992,12 +992,22 @@ public final class PersonDao extends DaoBase {
    */
   public List<PersonLite> liteList(
       Set<Office> offices, int year, int month, boolean onlyPeopleInTelework) {
+    final LocalDate begin = new LocalDate(year, month, 1);
+    return liteList(offices, begin, begin.dayOfMonth().withMaximumValue(),
+        onlyPeopleInTelework);
+  }
+
+  /**
+   * Come {@link #liteList(Set, int, int, boolean)} per un intervallo qualsiasi (es. l'anno):
+   * le persone che hanno afferito alle sedi e avevano un contratto attivo nell'intervallo.
+   */
+  public List<PersonLite> liteList(
+      Set<Office> offices, LocalDate begin, LocalDate end, boolean onlyPeopleInTelework) {
 
     final QPerson person = QPerson.person;
 
-    Optional<LocalDate> beginMonth = Optional.fromNullable(new LocalDate(year, month, 1));
-    Optional<LocalDate> endMonth =
-        Optional.fromNullable(beginMonth.get().dayOfMonth().withMaximumValue());
+    Optional<LocalDate> beginMonth = Optional.fromNullable(begin);
+    Optional<LocalDate> endMonth = Optional.fromNullable(end);
 
     JPQLQuery<?> lightQuery =
         getQueryFactory().from(person).leftJoin(person.contracts, QContract.contract)
