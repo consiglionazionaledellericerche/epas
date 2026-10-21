@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+  - Le richieste di permesso personale (gruppo 661) che contengono giorni non inseribili, ad
+    esempio oltre il limite annuale di 18 ore, non possono più essere inviate. Prima la richiesta
+    veniva salvata e approvata per l'intero periodo, ma all'approvazione venivano inseriti solo i
+    giorni entro il limite. Il controllo è ripetuto anche al salvataggio della richiesta.
+
 ## [2.37.3] - 2026-10-19
 ### Added
   - Aggiunta la verifica del token anti-CSRF sulle richieste che modificano dati, attivabile
