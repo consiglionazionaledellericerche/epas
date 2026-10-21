@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import dao.filter.QFilters;
 import java.util.List;
 import java.util.Set;
@@ -32,8 +33,6 @@ import models.Office;
 import models.query.QContract;
 import models.query.QContractMonthRecap;
 import models.query.QPerson;
-import models.query.QPersonOffice;
-import com.querydsl.jpa.JPAExpressions;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
@@ -78,12 +77,8 @@ public class ContractMonthRecapDao extends DaoBase {
         .where(recap.year.eq(yearMonth.getYear())
             .and(recap.month.eq(yearMonth.getMonthOfYear())
                 .and(person.id.in(
-                    JPAExpressions.selectFrom(QPersonOffice.personOffice)
-                        .where(QPersonOffice.personOffice.office.in(offices)
-                            .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
-                            .and(QPersonOffice.personOffice.endDate.isNull()
-                                .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
-                        .select(QPersonOffice.personOffice.person.id)))
+                    PersonOfficeFilter.personIdsInOffices(offices, yearMonth.toLocalDate(1),
+                        yearMonth.toLocalDate(1).dayOfMonth().withMaximumValue())))
                 .and(condition))).orderBy(recap.contract.person.surname.asc())
         .fetch();
   }

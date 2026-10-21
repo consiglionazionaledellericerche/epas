@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -31,8 +32,6 @@ import models.PersonDayInTrouble;
 import models.enumerate.Troubles;
 import models.query.QPersonDay;
 import models.query.QPersonDayInTrouble;
-import models.query.QPersonOffice;
-import com.querydsl.jpa.JPAExpressions;
 import org.joda.time.LocalDate;
 
 /**
@@ -109,12 +108,6 @@ public class PersonDayInTroubleDao extends DaoBase {
     conditions.and(pdit.personDay.date.loe(end));
     conditions.and(pdit.cause.eq(trouble));
     return getQueryFactory().selectFrom(pdit).leftJoin(pdit.personDay, pd)
-        .where(conditions.and(pd.person.id.in(
-            JPAExpressions.selectFrom(QPersonOffice.personOffice)
-                .where(QPersonOffice.personOffice.office.eq(office)
-                    .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
-                    .and(QPersonOffice.personOffice.endDate.isNull()
-                        .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
-                .select(QPersonOffice.personOffice.person.id)))).fetch();
+        .where(conditions.and(PersonOfficeFilter.inOfficeAt(pd.person, office, pd.date))).fetch();
   }
 }

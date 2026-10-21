@@ -19,6 +19,7 @@ package dao;
 
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -30,8 +31,6 @@ import models.Office;
 import models.Person;
 import models.query.QMealTicket;
 import models.query.QMealTicketCard;
-import models.query.QPersonOffice;
-import com.querydsl.jpa.JPAExpressions;
 
 /**
  * Dao per le info sulle tessere elettroniche.
@@ -86,14 +85,7 @@ public class MealTicketCardDao extends DaoBase {
         .selectFrom(mealTicketCard)
             .where(mealTicketCard.number.eq(number)
                 .and(mealTicketCard.person.id.in(
-                    JPAExpressions.selectFrom(QPersonOffice.personOffice)
-                        .where(QPersonOffice.personOffice.office.eq(office)
-                            .and(QPersonOffice.personOffice.beginDate
-                                .loe(org.joda.time.LocalDate.now()))
-                            .and(QPersonOffice.personOffice.endDate.isNull()
-                                .or(QPersonOffice.personOffice.endDate
-                                    .goe(org.joda.time.LocalDate.now()))))
-                        .select(QPersonOffice.personOffice.person.id)))
+                    PersonOfficeFilter.personIdsInOffices(office)))
                 .and(mealTicketCard.isActive.eq(true))).fetchFirst());
   }
   

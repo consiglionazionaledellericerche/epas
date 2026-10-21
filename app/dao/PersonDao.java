@@ -17,10 +17,12 @@
 
 package dao;
 
+import dao.filter.PersonOfficeFilter;
 import static com.querydsl.core.group.GroupBy.groupBy;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
@@ -211,18 +213,14 @@ public final class PersonDao extends DaoBase {
    */
   public List<Person> byInstitute(Institute institute) {
     final QPerson person = QPerson.person;
-    final QPersonOffice qPersonOffice = QPersonOffice.personOffice;
-    final QOffice office = QOffice.office;
-    final LocalDate today = LocalDate.now();
+    if (institute.getSeats().isEmpty()) {
+      return Lists.newArrayList();
+    }
 
     return getQueryFactory()
         .selectFrom(person)
-        .join(person.personOffices, qPersonOffice)
-        .join(qPersonOffice.office, office)
-        .where(office.institute.eq(institute)
-            .and(qPersonOffice.beginDate.loe(today))
-            .and(qPersonOffice.endDate.isNull().or(qPersonOffice.endDate.goe(today))))
-        .orderBy(person.surname.asc()).distinct().fetch();
+        .where(person.id.in(PersonOfficeFilter.personIdsInOffices(institute.getSeats())))
+        .orderBy(person.surname.asc()).fetch();
   }
 
 
@@ -338,7 +336,7 @@ public final class PersonDao extends DaoBase {
         .leftJoin(person.qualification).fetchJoin()
         .leftJoin(person.personCompetenceCodes, QPersonCompetenceCodes.personCompetenceCodes);
     
-    filterOffices(condition, offices);
+    filterOffices(condition, offices, Optional.fromNullable(start), Optional.fromNullable(end));
     filterOnlyTechnician(condition, onlyTechnician);
     filterContract(condition, Optional.fromNullable(start), Optional.fromNullable(end));
     if (temporary) {
@@ -507,14 +505,7 @@ public final class PersonDao extends DaoBase {
         new BooleanBuilder(person.number.isNotNull().and(person.number.isNotEmpty()));
 
     if (office.isPresent()) {
-      final QPersonOffice qPersonOffice = QPersonOffice.personOffice;
-      final LocalDate today = LocalDate.now();
-      condition.and(person.id.in(
-          JPAExpressions.selectFrom(qPersonOffice)
-              .where(qPersonOffice.office.eq(office.get())
-                  .and(qPersonOffice.beginDate.loe(today))
-                  .and(qPersonOffice.endDate.isNull().or(qPersonOffice.endDate.goe(today))))
-              .select(qPersonOffice.person.id)));
+      condition.and(person.id.in(PersonOfficeFilter.personIdsInOffices(office.get())));
     }
 
     return getQueryFactory().selectFrom(person)
@@ -715,7 +706,7 @@ public final class PersonDao extends DaoBase {
 
     final BooleanBuilder condition = new BooleanBuilder();
 
-    filterOffices(condition, offices);
+    filterOffices(condition, offices, start, end);
     filterOnlyTechnician(condition, onlyTechnician);
     condition.and(new QFilters().filterNameFromPerson(QPerson.person, name));
     filterOnlyOnCertificate(condition, onlyOnCertificate);
@@ -774,7 +765,7 @@ public final class PersonDao extends DaoBase {
 
     final BooleanBuilder condition = new BooleanBuilder();
 
-    filterOffices(condition, offices);
+    filterOffices(condition, offices, start, end);
     filterOnlyTechnician(condition, onlyTechnician);
     condition.and(new QFilters().filterNameFromPerson(QPerson.person, name));
     filterOnlyOnCertificate(condition, onlyOnCertificate);
@@ -789,19 +780,15 @@ public final class PersonDao extends DaoBase {
 
 
   /**
-   * Filtro sugli uffici.
+   * Filtro sugli uffici: le persone che hanno afferito ad almeno uno degli uffici in un giorno
+   * dell'intervallo [start, end]. Se l'intervallo non è specificato si considera la data odierna.
    */
-  private void filterOffices(BooleanBuilder condition, Set<Office> offices) {
+  private void filterOffices(BooleanBuilder condition, Set<Office> offices,
+      Optional<LocalDate> start, Optional<LocalDate> end) {
 
     if (offices != null && !offices.isEmpty()) {
-      final QPersonOffice qPersonOffice = QPersonOffice.personOffice;
-      final LocalDate today = LocalDate.now();
-      condition.and(QPerson.person.id.in(
-          JPAExpressions.selectFrom(qPersonOffice)
-              .where(qPersonOffice.office.in(offices)
-                  .and(qPersonOffice.beginDate.loe(today))
-                  .and(qPersonOffice.endDate.isNull().or(qPersonOffice.endDate.goe(today))))
-              .select(qPersonOffice.person.id)));
+      condition.and(QPerson.person.id.in(PersonOfficeFilter.personIdsInOffices(offices,
+          start.or(end.or(LocalDate.now())), end.or(start.or(LocalDate.now())))));
     }
   }
 

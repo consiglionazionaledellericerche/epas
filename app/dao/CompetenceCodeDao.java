@@ -22,6 +22,7 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -35,8 +36,6 @@ import models.enumerate.LimitType;
 import models.query.QCompetenceCode;
 import models.query.QCompetenceCodeGroup;
 import models.query.QPersonCompetenceCodes;
-import models.query.QPersonOffice;
-import com.querydsl.jpa.JPAExpressions;
 import org.joda.time.LocalDate;
 
 /**
@@ -281,12 +280,10 @@ public class CompetenceCodeDao extends DaoBase {
     return getQueryFactory().selectFrom(pcc)
         .where(pcc.competenceCode.eq(code)
             .and(pcc.person.id.in(
-                JPAExpressions.selectFrom(QPersonOffice.personOffice)
-                    .where(QPersonOffice.personOffice.office.eq(office)
-                        .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
-                        .and(QPersonOffice.personOffice.endDate.isNull()
-                            .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
-                    .select(QPersonOffice.personOffice.person.id))).and(condition))
+                PersonOfficeFilter.personIdsInOffices(office,
+                    date.isPresent() ? date.get().dayOfMonth().withMinimumValue() : LocalDate.now(),
+                    date.isPresent() ? date.get().dayOfMonth().withMaximumValue() : LocalDate.now())))
+            .and(condition))
         .fetch();
   }
 
@@ -332,12 +329,10 @@ public class CompetenceCodeDao extends DaoBase {
     return getQueryFactory().selectFrom(pcc)
         .where(pcc.competenceCode.in(codesList)
             .and(pcc.person.id.in(
-                JPAExpressions.selectFrom(QPersonOffice.personOffice)
-                    .where(QPersonOffice.personOffice.office.eq(office)
-                        .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
-                        .and(QPersonOffice.personOffice.endDate.isNull()
-                            .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
-                    .select(QPersonOffice.personOffice.person.id))).and(condition))
+                PersonOfficeFilter.personIdsInOffices(office,
+                    date.isPresent() ? date.get().dayOfMonth().withMinimumValue() : LocalDate.now(),
+                    date.isPresent() ? date.get().dayOfMonth().withMaximumValue() : LocalDate.now())))
+            .and(condition))
         .fetch();
   }
   

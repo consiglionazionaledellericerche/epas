@@ -22,11 +22,13 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import dao.wrapper.IWrapperFactory;
 import lombok.val;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Competence;
@@ -42,11 +44,9 @@ import models.query.QCompetenceCode;
 import models.query.QPerson;
 import models.query.QPersonCompetenceCodes;
 import models.query.QPersonHourForOvertime;
-import models.query.QPersonOffice;
 import models.query.QPersonReperibility;
 import models.query.QPersonReperibilityType;
 import models.query.QTotalOvertime;
-import com.querydsl.jpa.JPAExpressions;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
@@ -86,12 +86,7 @@ public class CompetenceDao extends DaoBase {
     return getQueryFactory().selectFrom(competenceCode)
         .leftJoin(competenceCode.personCompetenceCodes, pcc).fetchJoin()
         .where(pcc.person.id.in(
-                JPAExpressions.selectFrom(QPersonOffice.personOffice)
-                    .where(QPersonOffice.personOffice.office.eq(office)
-                        .and(QPersonOffice.personOffice.beginDate.loe(date))
-                        .and(QPersonOffice.personOffice.endDate.isNull()
-                            .or(QPersonOffice.personOffice.endDate.goe(date))))
-                    .select(QPersonOffice.personOffice.person.id))
+                PersonOfficeFilter.personIdsInOffices(office, date, date))
             .and(pcc.beginDate.loe(date)
                 .andAnyOf(pcc.endDate.isNull(), pcc.endDate.goe(date))))
         .orderBy(competenceCode.code.asc())
@@ -163,13 +158,9 @@ public class CompetenceDao extends DaoBase {
 
     condition.and(competence.year.eq(year))
         .and(competence.competenceCode.code.in(codes))
-        .and(competence.person.id.in(
-            JPAExpressions.selectFrom(QPersonOffice.personOffice)
-                .where(QPersonOffice.personOffice.office.eq(office)
-                    .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
-                    .and(QPersonOffice.personOffice.endDate.isNull()
-                        .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
-                .select(QPersonOffice.personOffice.person.id)));
+        .and(competence.person.id.in(PersonOfficeFilter.personIdsInOffices(office,
+            new LocalDate(year, untilThisMonth ? 1 : month, 1),
+            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())));
 
     if (untilThisMonth) {
       condition.and(competence.month.loe(month));
@@ -178,7 +169,10 @@ public class CompetenceDao extends DaoBase {
     }
 
     return getQueryFactory().selectFrom(competence)
-        .where(condition).fetch();
+        .where(condition).fetch().stream()
+        .filter(c -> c.getPerson().isInOfficeInPeriod(office, new LocalDate(year, c.getMonth(), 1),
+            new LocalDate(year, c.getMonth(), 1).dayOfMonth().withMaximumValue()))
+        .collect(Collectors.toList());
   }
 
   /**
@@ -193,18 +187,17 @@ public class CompetenceDao extends DaoBase {
     condition.and(competence.year.eq(year));
 
     if (office.isPresent()) {
-      condition.and(competence.person.id.in(
-          JPAExpressions.selectFrom(QPersonOffice.personOffice)
-              .where(QPersonOffice.personOffice.office.eq(office.get())
-                  .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
-                  .and(QPersonOffice.personOffice.endDate.isNull()
-                      .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
-              .select(QPersonOffice.personOffice.person.id)));
+      condition.and(competence.person.id.in(PersonOfficeFilter.personIdsInOffices(office.get(),
+          new LocalDate(year, 1, 1), new LocalDate(year, 12, 31))));
     }
 
     return getQueryFactory().selectFrom(competence)
         .where(condition).orderBy(competence.competenceCode.code.asc())
-        .fetch();
+        .fetch().stream()
+        .filter(c -> !office.isPresent() || c.getPerson().isInOfficeInPeriod(office.get(),
+            new LocalDate(year, c.getMonth(), 1),
+            new LocalDate(year, c.getMonth(), 1).dayOfMonth().withMaximumValue()))
+        .collect(Collectors.toList());
   }
 
   /**
@@ -228,13 +221,11 @@ public class CompetenceDao extends DaoBase {
       condition.and(competence.person.eq(person.get()));
     }
     if (office.isPresent()) {
+      final LocalDate begin = new LocalDate(year, month.or(1), 1);
+      final LocalDate end = month.isPresent()
+          ? begin.dayOfMonth().withMaximumValue() : new LocalDate(year, 12, 31);
       condition.and(competence.person.id.in(
-          JPAExpressions.selectFrom(QPersonOffice.personOffice)
-              .where(QPersonOffice.personOffice.office.eq(office.get())
-                  .and(QPersonOffice.personOffice.beginDate.loe(LocalDate.now()))
-                  .and(QPersonOffice.personOffice.endDate.isNull()
-                      .or(QPersonOffice.personOffice.endDate.goe(LocalDate.now()))))
-              .select(QPersonOffice.personOffice.person.id)));
+          PersonOfficeFilter.personIdsInOffices(office.get(), begin, end)));
     }
     final Integer result =
         getQueryFactory().select(competence.valueApproved.sum())

@@ -1723,3 +1723,8 @@ absenceType.toUpdate.popover= Seleziona Sì se il codice deve poter essere aggio
 ###########################################################################
 #	FINE COMPONENTE ASSENZE
 ###########################################################################
+# Afferenza periodicizzata persona/sede
+transferDate=Data di decorrenza
+personOffice.beginDate=Data inizio afferenza
+personOffice.endDate=Data fine afferenza
+personOffice.office=Sede

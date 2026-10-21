@@ -300,12 +300,62 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
 
   /**
    * Ritorna l'ufficio cui la persona afferisce alla data odierna.
+   * Se oggi la persona non ha un'afferenza attiva si considera l'ultima afferenza iniziata
+   * e, in mancanza anche di questa, la prima afferenza futura.
    *
-   * @return l'ufficio corrente della persona, null se non presente.
+   * @return l'ufficio corrente della persona, null se la persona non ha afferenze.
    */
   @Transient
   public Office getOffice() {
-    return getOfficeAt(LocalDate.now());
+    final LocalDate today = LocalDate.now();
+    Office current = getOfficeAt(today);
+    if (current != null) {
+      return current;
+    }
+    Optional<PersonOffice> last = personOffices.stream()
+        .filter(po -> !po.getBeginDate().isAfter(today))
+        .max(Comparator.comparing(PersonOffice::getBeginDate));
+    if (last.isPresent()) {
+      return last.get().getOffice();
+    }
+    return personOffices.stream()
+        .min(Comparator.comparing(PersonOffice::getBeginDate))
+        .map(PersonOffice::getOffice).orElse(null);
+  }
+
+  /**
+   * Le afferenze della persona che si sovrappongono all'intervallo indicato, ordinate per
+   * data di inizio.
+   *
+   * @param begin inizio dell'intervallo
+   * @param end fine dell'intervallo (null per intervallo aperto)
+   * @return le afferenze nell'intervallo.
+   */
+  @Transient
+  public List<PersonOffice> getPersonOfficesInPeriod(LocalDate begin, LocalDate end) {
+    return personOffices.stream()
+        .filter(po -> (end == null || !po.getBeginDate().isAfter(end))
+            && (po.getEndDate() == null || !po.getEndDate().isBefore(begin)))
+        .sorted(Comparator.comparing(PersonOffice::getBeginDate))
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Le sedi a cui la persona ha afferito nell'intervallo indicato.
+   */
+  @Transient
+  public List<Office> getOfficesInPeriod(LocalDate begin, LocalDate end) {
+    return getPersonOfficesInPeriod(begin, end).stream()
+        .map(PersonOffice::getOffice).distinct().collect(Collectors.toList());
+  }
+
+  /**
+   * Verifica se la persona ha afferito alla sede in almeno un giorno dell'intervallo.
+   */
+  @Transient
+  public boolean isInOfficeInPeriod(Office office, LocalDate begin, LocalDate end) {
+    return getPersonOfficesInPeriod(begin, end).stream()
+        .anyMatch(po -> po.getOffice().equals(office));
   }
 
   /**

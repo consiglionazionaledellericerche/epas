@@ -103,9 +103,9 @@ public class H2Examples {
     person.setName("Name " + username);
     person.setSurname("Surname " + username);
     person.setUser(user);
-    person.setOffice(office);
     person.setQualification(Qualification.findById(DEFAULT_PERSON_QUALIFICATION));
     person.save();
+    person.changeOffice(office, new LocalDate(2000, 1, 1)).save();
     configurationManager.updateConfigurations(person);
     return person;
   }

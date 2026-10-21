@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -34,9 +35,7 @@ import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.query.QPerson;
-import models.query.QPersonOffice;
 import models.query.QPersonShift;
-import com.querydsl.jpa.JPAExpressions;
 import models.query.QPersonShiftDay;
 import models.query.QPersonShiftShiftType;
 import models.query.QShiftCancelled;
@@ -247,12 +246,7 @@ public class ShiftDao extends DaoBase {
     return getQueryFactory().select(ps).from(person)
         .leftJoin(person.personShifts, ps).fetchAll()
         .where(person.id.in(
-                JPAExpressions.selectFrom(QPersonOffice.personOffice)
-                    .where(QPersonOffice.personOffice.office.eq(office)
-                        .and(QPersonOffice.personOffice.beginDate.loe(date))
-                        .and(QPersonOffice.personOffice.endDate.isNull()
-                            .or(QPersonOffice.personOffice.endDate.goe(date))))
-                    .select(QPersonOffice.personOffice.person.id))
+                PersonOfficeFilter.personIdsInOffices(office, date, date))
             .and(ps.beginDate.loe(date).andAnyOf(ps.endDate.isNull(), ps.endDate.goe(date)))
             .and(person.eq(ps.person).and(ps.disabled.eq(false)))).fetch();
   }

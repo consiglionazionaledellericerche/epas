@@ -44,6 +44,7 @@ import manager.configurations.ConfigurationManager;
 import models.Institute;
 import models.Office;
 import models.Person;
+import models.PersonOffice;
 import models.Role;
 import models.UsersRolesOffices;
 import org.joda.time.LocalDate;
@@ -206,20 +207,31 @@ public class Offices extends Controller {
   }
 
   /**
-   * Completa il trasferimento della persona da una sede ad un'altra.
+   * Completa il trasferimento delle persone da una sede ad un'altra.
+   * L'afferenza alla sede di provenienza viene chiusa il giorno precedente la data di decorrenza
+   * e ne viene aperta una nuova sulla sede di destinazione a partire dalla data di decorrenza.
+   *
    * @param sourceOffice la sede di provenienza
    * @param destinationOffice la sede di destinazione
+   * @param transferDate la data di decorrenza del trasferimento
    */
-  public static void executeTransfer(Office sourceOffice, Office destinationOffice) {
+  public static void executeTransfer(Office sourceOffice, Office destinationOffice,
+      LocalDate transferDate) {
     Preconditions.checkNotNull(sourceOffice);
     Preconditions.checkNotNull(destinationOffice);
 
     rules.checkIfPermitted(sourceOffice);
     rules.checkIfPermitted(destinationOffice);
 
+    if (transferDate == null) {
+      flash.error("Specificare la data di decorrenza del trasferimento");
+      massiveTransfer();
+    }
+
     List<Person> people = personDao.byOffice(sourceOffice);
     people.stream().forEach(p -> {
-      p.setOffice(destinationOffice);
+      p.changeOffice(destinationOffice, transferDate);
+      p.getPersonOffices().forEach(PersonOffice::save);
       p.save();
       List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(p.getUser());
 
