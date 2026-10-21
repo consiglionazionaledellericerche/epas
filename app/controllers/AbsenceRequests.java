@@ -91,6 +91,11 @@ import play.mvc.With;
 @With(Resecure.class)
 public class AbsenceRequests extends Controller {
 
+  private static final String PERSONAL_PERMISSION_NOT_INSERTABLE = 
+      "Non tutti i giorni richiesti possono essere inseriti: il residuo dei permessi personali "
+      + "non è sufficiente oppure alcuni giorni contengono già un'assenza. "
+      + "Modificare le date della richiesta.";
+
   @Inject
   static PersonDao personDao;
 
@@ -591,6 +596,12 @@ public class AbsenceRequests extends Controller {
 
     absenceRequestManager.checkAbsenceRequestDates(absenceRequest, insertReport);
 
+    if (absenceRequestManager.isPersonalPermissionNotFullyInsertable(
+        absenceRequest, insertReport)) {
+      Validation.addError("absenceRequest.endTo", PERSONAL_PERMISSION_NOT_INSERTABLE);
+      insertable = false;
+    }
+
     int compensatoryRestAvailable = 0;
     if (absenceRequest.getType().equals(AbsenceRequestType.COMPENSATORY_REST)
         && absenceRequest.getPerson().isTopQualification()) {
@@ -668,6 +679,24 @@ public class AbsenceRequests extends Controller {
     }
     if (!absenceCode.isBlank()) {
       absenceRequest.setAbsenceCode(absenceCode);
+    }
+
+    // Le richieste di permesso personale devono essere inseribili per intero: i giorni oltre
+    // il limite annuale non verrebbero inseriti all'approvazione della richiesta.
+    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
+      AbsenceForm absenceForm = absenceRequestManager.buildAbsenceForm(absenceRequest);
+      InsertReport insertReport = 
+          absenceRequestManager.simulateInsert(absenceRequest, absenceForm);
+      if (absenceRequestManager.isPersonalPermissionNotFullyInsertable(
+          absenceRequest, insertReport)) {
+        Validation.addError("absenceRequest.endTo", PERSONAL_PERMISSION_NOT_INSERTABLE);
+        response.status = 400;
+        boolean insertable = false;
+        PeriodChain periodChain = absenceService
+            .residual(absenceRequest.getPerson(), absenceForm.groupSelected, LocalDate.now());
+        render("@edit", absenceRequest, insertable, insertReport, absenceForm, periodChain,
+            allDay);
+      }
     }
 
     boolean isNewRequest = !absenceRequest.isPersistent();

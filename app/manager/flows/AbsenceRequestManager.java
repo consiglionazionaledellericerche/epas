@@ -520,31 +520,8 @@ public class AbsenceRequestManager {
     log.debug("Flusso relativo a {} terminato. Inserimento in corso delle assenze.",
         absenceRequest);
     GroupAbsenceType groupAbsenceType = getGroupAbsenceType(absenceRequest);
-    Integer hours = null;
-    Integer minutes = null;
-    AbsenceType absenceType = null;
-    JustifiedType type = null;
-    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
-      hours = absenceRequest.getHours();
-      minutes = absenceRequest.getMinutes();
-      if (hours != null && minutes != null) {
-        absenceType = absenceDao.absenceTypeByCode("661M").get();
-        type = absenceDao
-            .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-
-      }
-    }
-    if (absenceRequest.getAbsenceCode() != null) {
-      absenceType = absenceDao.absenceTypeByCode(absenceRequest.getAbsenceCode()).get();
-    }
-    AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.getPerson(),
-        absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
-        false, absenceType, type, hours, minutes, false, true);
-    InsertReport insertReport =
-        absenceService.insert(
-            absenceRequest.getPerson(), absenceForm.groupSelected, absenceForm.from,
-            absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
-            hours, minutes, false, absenceManager);
+    AbsenceForm absenceForm = buildAbsenceForm(absenceRequest);
+    InsertReport insertReport = simulateInsert(absenceRequest, absenceForm);
     if (insertReport.criticalErrors.isEmpty()) {
       for (Absence absence : insertReport.absencesToPersist) {
         PersonDay personDay = 
@@ -579,6 +556,70 @@ public class AbsenceRequestManager {
       consistencyManager.updatePersonSituation(absenceRequest.getPerson().id, absenceForm.from);    
     }
     return insertReport;
+  }
+
+  /**
+   * Costruisce il form di inserimento delle assenze corrispondente alla richiesta.
+   *
+   * @param absenceRequest la richiesta di assenza
+   * @return il form di inserimento delle assenze.
+   */
+  public AbsenceForm buildAbsenceForm(AbsenceRequest absenceRequest) {
+    GroupAbsenceType groupAbsenceType = getGroupAbsenceType(absenceRequest);
+    Integer hours = null;
+    Integer minutes = null;
+    AbsenceType absenceType = null;
+    JustifiedType type = null;
+    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
+      hours = absenceRequest.getHours();
+      minutes = absenceRequest.getMinutes();
+      if (hours != null && minutes != null) {
+        absenceType = absenceDao.absenceTypeByCode("661M").get();
+        type = absenceDao
+            .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+
+      }
+    }
+    if (absenceRequest.getAbsenceCode() != null) {
+      absenceType = absenceDao.absenceTypeByCode(absenceRequest.getAbsenceCode()).get();
+    }
+    return absenceService.buildAbsenceForm(absenceRequest.getPerson(),
+        absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
+        false, absenceType, type, hours, minutes, false, true);
+  }
+
+  /**
+   * Simula l'inserimento delle assenze della richiesta senza persisterle.
+   *
+   * @param absenceRequest la richiesta di assenza
+   * @param absenceForm il form di inserimento costruito dalla richiesta
+   * @return il report dell'inserimento simulato.
+   */
+  public InsertReport simulateInsert(AbsenceRequest absenceRequest, AbsenceForm absenceForm) {
+    Integer hours = null;
+    Integer minutes = null;
+    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
+      hours = absenceRequest.getHours();
+      minutes = absenceRequest.getMinutes();
+    }
+    return absenceService.insert(
+        absenceRequest.getPerson(), absenceForm.groupSelected, absenceForm.from,
+        absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
+        hours, minutes, false, absenceManager);
+  }
+
+  /**
+   * Verifica se una richiesta di permesso personale contiene giorni che non possono essere
+   * inseriti, ad esempio perché supera il limite annuale del gruppo 661.
+   *
+   * @param absenceRequest la richiesta di assenza
+   * @param insertReport il report dell'inserimento simulato della richiesta
+   * @return true se la richiesta è di permesso personale e non tutti i giorni sono inseribili.
+   */
+  public boolean isPersonalPermissionNotFullyInsertable(AbsenceRequest absenceRequest,
+      InsertReport insertReport) {
+    return absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)
+        && (insertReport.howManyError() > 0 || insertReport.howManySuccess() == 0);
   }
 
   /**
