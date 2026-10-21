@@ -19,13 +19,17 @@ package common.security;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import models.Person;
+import models.PersonOffice;
 import models.User;
 import org.drools.KnowledgeBase;
 import org.drools.command.Command;
@@ -33,6 +37,7 @@ import org.drools.command.CommandFactory;
 import org.drools.event.rule.AfterActivationFiredEvent;
 import org.drools.event.rule.DefaultAgendaEventListener;
 import org.drools.runtime.StatelessKnowledgeSession;
+import org.joda.time.LocalDate;
 import play.mvc.results.Forbidden;
 
 /**
@@ -105,6 +110,91 @@ public class SecurityRules {
   public boolean check(String action, Object instance) {
     final PermissionCheck check = new PermissionCheck(instance, action);
     return doCheck(check);
+  }
+
+  /**
+   * Controlla se l'azione fornita è ammessa sulla persona considerando la sede a cui la
+   * persona afferiva alla data indicata (ogni sede gestisce i giorni di propria afferenza).
+   */
+  public boolean check(String action, Person person, LocalDate date) {
+    return doCheck(new PermissionCheck(person, action, date));
+  }
+
+  /**
+   * Come {@link #check(String, Person, LocalDate)} per l'azione corrente, riportando un accesso
+   * negato se non permessa.
+   */
+  public void checkIfPermitted(Person person, LocalDate date) {
+    if (!check(currentAction.get(), person, date)) {
+      throw new Forbidden("Access forbidden");
+    }
+  }
+
+  /**
+   * Verifica che l'azione corrente sia ammessa sulla persona per tutti i giorni dell'intervallo
+   * [from, to], riportando un accesso negato altrimenti.
+   */
+  public void checkIfPermitted(Person person, LocalDate from, LocalDate to) {
+    final LocalDate end = to == null || to.isBefore(from) ? from : to;
+    final Set<LocalDate> days = permittedDays(currentAction.get(), person, from, end);
+    for (LocalDate day = from; !day.isAfter(end); day = day.plusDays(1)) {
+      if (!days.contains(day)) {
+        throw new Forbidden("Access forbidden");
+      }
+    }
+  }
+
+  /**
+   * I giorni dell'intervallo [begin, end] per cui l'azione fornita è ammessa sulla persona,
+   * valutando i permessi sulla sede di afferenza di ciascun periodo.
+   */
+  public Set<LocalDate> permittedDays(String action, Person person, LocalDate begin,
+      LocalDate end) {
+    final Set<LocalDate> days = Sets.newHashSet();
+    for (PersonOffice po : person.getPersonOfficesInPeriod(begin, end)) {
+      final LocalDate from = po.getBeginDate().isAfter(begin) ? po.getBeginDate() : begin;
+      final LocalDate to = po.getEndDate() != null && po.getEndDate().isBefore(end)
+          ? po.getEndDate() : end;
+      if (check(action, person, from)) {
+        for (LocalDate day = from; !day.isAfter(to); day = day.plusDays(1)) {
+          days.add(day);
+        }
+      }
+    }
+    if (days.isEmpty() && person.getPersonOfficesInPeriod(begin, end).isEmpty()
+        && check(action, person)) {
+      // persona senza afferenze nel periodo: vale il permesso sulla sede corrente
+      for (LocalDate day = begin; !day.isAfter(end); day = day.plusDays(1)) {
+        days.add(day);
+      }
+    }
+    return days;
+  }
+
+  /**
+   * I giorni dell'intervallo [begin, end] in cui la persona afferiva ad una sede su cui l'azione
+   * corrente è permessa (controllo con la sede come target).
+   */
+  public Set<LocalDate> permittedDaysByOffice(Person person, LocalDate begin, LocalDate end) {
+    final Set<LocalDate> days = Sets.newHashSet();
+    final List<PersonOffice> personOffices = person.getPersonOfficesInPeriod(begin, end);
+    if (personOffices.isEmpty() && check(person.getOffice())) {
+      for (LocalDate day = begin; !day.isAfter(end); day = day.plusDays(1)) {
+        days.add(day);
+      }
+    }
+    for (PersonOffice po : personOffices) {
+      if (!check(po.getOffice())) {
+        continue;
+      }
+      final LocalDate from = po.getBeginDate().isAfter(begin) ? po.getBeginDate() : begin;
+      final LocalDate to = po.getEndDate() != null && po.getEndDate().isBefore(end)
+          ? po.getEndDate() : end;
+      for (LocalDate day = from; !day.isAfter(to); day = day.plusDays(1)) {
+        days.add(day);
+      }
+    }
+    return days;
   }
 
   /**

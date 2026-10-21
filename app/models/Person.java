@@ -324,6 +324,16 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
+   * La sede di afferenza alla data indicata o, se in quella data la persona non afferisce a
+   * nessuna sede, la sede corrente.
+   */
+  @Transient
+  public Office getOfficeAtOrCurrent(LocalDate date) {
+    final Office office = date == null ? null : getOfficeAt(date);
+    return office != null ? office : getOffice();
+  }
+
+  /**
    * Le afferenze della persona che si sovrappongono all'intervallo indicato, ordinate per
    * data di inizio.
    *

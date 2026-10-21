@@ -1179,7 +1179,7 @@ rule AdminCanEditStamping
 when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $target: Stamping(markedByTelework == false)
- Office(isCurrentOfficeOf($target.getOwner())) from $uro.office
+ Office(this == $target.getOwnerOffice()) from $uro.office
  $c: PermissionCheck(action in (
     "Stampings.edit", "Stampings.save", "Stampings.saveOffSite", "Stampings.saveServiceReasons", "Stampings.delete"),
   target == $target, granted == false )
@@ -1194,7 +1194,7 @@ rule AdminCanEditAbsence
 when
  $uro: UsersRolesOffices(role.name == Role.PERSONNEL_ADMIN)
  $target: Absence()
- Office(isCurrentOfficeOf($target.getOwner())) from $uro.office
+ Office(this == $target.getOwnerOffice()) from $uro.office
  $c: PermissionCheck(action in ("AbsenceGroups.save", "AbsenceGroups.edit", "AbsenceGroups.delete"),
   target == $target, granted == false )
 then
@@ -1221,7 +1221,7 @@ rule PersonnelAdmin_onPerson
 when
   $uro: UsersRolesOffices(role.name in (Role.PERSONNEL_ADMIN, Role.SEAT_SUPERVISOR))
   $o: Office() from $uro.office
-  $c: PermissionCheck($o.isCurrentOfficeOf(target), granted == false, action not in ("Persons.updateEppn"))
+  $c: PermissionCheck($o.isOfficeOf(target, referenceDate), granted == false, action not in ("Persons.updateEppn"))
 then
  $c.grant();
 end
@@ -1235,7 +1235,7 @@ when
   $o: Office() from $uro.office
   $c: PermissionCheck(action not in (
     "Stampings.insert",
-    "AbsenceGroups.insert"), $o.isCurrentOfficeOf(target), granted == false)
+    "AbsenceGroups.insert"), $o.isOfficeOf(target, referenceDate), granted == false)
 then
  $c.grant();
 end

@@ -52,7 +52,7 @@
   
   #{if handleHolidayWork}
     <small><em>Questo giorno festivo contiene ore lavorate <br>che possono essere approvate dall'amministratore.</em></small><br>
-    #{secure.check 'PersonDays.workingHoliday', target: personDay.person.office}
+    #{secure.check 'PersonDays.workingHoliday', target: personDay.person.getOfficeAt(personDay.date)}
         <a hide-popover-on-click href="@{PersonDays.workingHoliday(personDay.id)}"  data-async-modal="#defaultModal">
           <i class="fa fa-pencil-square-o" aria-hidden="true"></i> <small>Gestisci lavoro festivo</small>
         </a><br>
@@ -62,7 +62,7 @@
   
   #{if handleOutOpeningWork}
     <small><em>Questo giorno contiene ore lavorate fuori fascia di apertura/chiusura sede <br>che possono essere approvate dall'amministratore.</em></small><br>
-    #{secure.check 'PersonDays.workingOutOpening', target: personDay.person.office}
+    #{secure.check 'PersonDays.workingOutOpening', target: personDay.person.getOfficeAt(personDay.date)}
         <a hide-popover-on-click href="@{PersonDays.workingOutOpening(personDay.id)}"  
            data-async-modal="#defaultModal">
           <i class="fa fa-pencil-square-o" aria-hidden="true"></i> <small>Gestisci lavoro fuori apertura</small>
@@ -73,7 +73,7 @@
   
   #{if handleOutPartTimeWork}
     <small><em>Questo giorno contiene ore lavorate fuori orario giornaliero in part time <br>che possono essere approvate dall'amministratore.</em></small><br>
-    #{secure.check 'PersonDays.workingOutPartTime', target: personDay.person.office}
+    #{secure.check 'PersonDays.workingOutPartTime', target: personDay.person.getOfficeAt(personDay.date)}
         <a hide-popover-on-click href="@{PersonDays.workingOutPartTime(personDay.id)}"  
            data-async-modal="#defaultModal">
           <i class="fa fa-pencil-square-o" aria-hidden="true"></i> <small>Gestisci lavoro fuori orario part time</small>

@@ -160,7 +160,8 @@ public class Absences extends Controller {
     
     Optional<User> currentUser = Security.getUser();
     if (!currentUser.isPresent() || currentUser.get().hasRoles(Role.PERSONNEL_ADMIN)) {
-      rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
+      rules.checkIfPermitted(absence.getPersonDay().getPerson()
+        .getOfficeAtOrCurrent(absence.getPersonDay().getDate()));
     } else {
       rules.checkIfPermitted(absence);
     }    
@@ -194,7 +195,8 @@ public class Absences extends Controller {
     //TODO: va completata la business logic di questo metodo!!!
     Absence absence = absenceDao.getAbsenceById(absenceId);
     Verify.verify(absence.isPersistent(), "Assenza specificata inesistente!");
-    rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
+    rules.checkIfPermitted(absence.getPersonDay().getPerson()
+        .getOfficeAtOrCurrent(absence.getPersonDay().getDate()));
     if (hours == null || minutes == null) {
       flash.error("Quantità non corrette di ore e minuti.");
       Stampings.personStamping(absence.getPersonDay().getPerson().id,
@@ -320,7 +322,8 @@ public class Absences extends Controller {
 
     Optional<User> currentUser = Security.getUser();
     if (!currentUser.isPresent() || currentUser.get().hasRoles(Role.PERSONNEL_ADMIN, Role.PERSONNEL_ADMIN_MINI)) {
-      rules.checkIfPermitted(absence.getPersonDay().getPerson().getOffice());
+      rules.checkIfPermitted(absence.getPersonDay().getPerson()
+        .getOfficeAtOrCurrent(absence.getPersonDay().getDate()));
     } else {
       rules.checkIfPermitted(absence);
     }

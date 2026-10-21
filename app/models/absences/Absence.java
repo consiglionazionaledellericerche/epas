@@ -36,6 +36,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.TimeVariation;
@@ -284,6 +285,15 @@ public class Absence extends BaseModel {
    */
   public Person getOwner() {
     return personDay.getPerson();
+  }
+
+  /**
+   * La sede a cui il proprietario afferiva alla data dell'assenza, usata dalle drools
+   * per consentire a ciascuna sede la gestione dei soli giorni di propria afferenza.
+   */
+  @Transient
+  public Office getOwnerOffice() {
+    return personDay.getPerson().getOfficeAt(getAbsenceDate());
   }
 
   /**

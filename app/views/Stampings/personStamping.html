@@ -8,6 +8,16 @@
 
 <div class="col-xs-12 col-lg-8">
 
+  #{if psDto.partial}
+    #{alert color:'info'}
+      Sono visualizzati solo i giorni del mese in cui ${person.fullname} afferisce alle sedi
+      di propria competenza:
+      #{list items:person.getPersonOfficesInPeriod(new org.joda.time.LocalDate(psDto.year, psDto.month, 1), new org.joda.time.LocalDate(psDto.year, psDto.month, 1).dayOfMonth().withMaximumValue()), as:'po'}
+        <strong>${po.office.name}</strong> dal ${po.beginDate.format()}#{if po.endDate} al ${po.endDate.format()}#{/if}${po_isLast ? '.' : ';'}
+      #{/list}
+    #{/alert}
+  #{/if}
+
   <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 	<caption class="sr-only">Riepilogo mensile &{'Month.'+ psDto.month} ${psDto.year}</caption>
     <tr>
@@ -22,11 +32,9 @@
       <th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
       #{/list}
 
-      #{secure.check 'Stampings.insert', target: person}
-        #{secure.check 'Stampings.insert', target: yearMonth }
+      #{if canInsertStampings}
         <th class="group-single">Inserisci<br>timbratura</th>
-        #{/secure.check}
-      #{/secure.check}
+      #{/if}
 
       <th class="invisible"></th>
 
@@ -81,7 +89,12 @@
     #{if psDto.absenceToRecoverYet}
     	#{include './personStampingComponents/_absencesRecap.html' /}
     #{/if}
-    #{include './personStampingComponents/_contractsRecap.html' /}
+    #{if psDto.partial}
+      #{include './personStampingComponents/_partialRecap.html' /}
+    #{/if}
+    #{else}
+      #{include './personStampingComponents/_contractsRecap.html' /}
+    #{/else}
   </div>
 
   <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 right">

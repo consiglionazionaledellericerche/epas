@@ -562,7 +562,7 @@ public class AbsenceGroups extends Controller {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
     notFoundIfNull(from);
-    rules.checkIfPermitted(person);
+    rules.checkIfPermitted(person, from);
 
     AbsenceForm absenceForm = absenceService.buildAbsenceForm(person, from, null,
         null, null, null, true, null, null, null, null, false, false);
@@ -609,7 +609,7 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(person);
     notFoundIfNull(from);
 
-    rules.checkIfPermitted(person);
+    rules.checkIfPermitted(person, from);
 
     AbsenceForm absenceForm =
         absenceService.buildAbsenceForm(person, from, categoryTab,
@@ -660,7 +660,7 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(from);
     notFoundIfNull(absenceType);
 
-    rules.checkIfPermitted(person);
+    rules.checkIfPermitted(person, from);
 
     GroupAbsenceType groupAbsenceType = absenceType.defaultTakableGroup();
     if (groupAbsenceType.firstOfChain() != null) {
@@ -711,6 +711,8 @@ public class AbsenceGroups extends Controller {
       absenceType = null;
     }
 
+    rules.checkIfPermitted(person, from, to);
+
     InsertReport insertReport = absenceService.insert(person, groupAbsenceType, from, to,
         absenceType, justifiedType, hours, minutes, forceInsert, absenceManager);
 
@@ -753,7 +755,7 @@ public class AbsenceGroups extends Controller {
     GroupAbsenceType groupAbsenceType = GroupAbsenceType.findById(groupAbsenceTypeId);
     notFoundIfNull(from);
 
-    rules.checkIfPermitted(person);
+    rules.checkIfPermitted(person, from);
 
     groupAbsenceType = groupAbsenceType.firstOfChain();
 

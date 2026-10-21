@@ -1,0 +1,29 @@
+<div class="panel panel-info">
+  <div class="panel-heading">
+    <h3 class="panel-title">Riepilogo dei giorni visualizzati</h3>
+  </div>
+  <table class="table table-condensed">
+    <tr>
+      <td>Giorni lavorativi</td>
+      <td class="col-xs-2 success">${psDto.basedWorkingDays}</td>
+    </tr>
+    <tr>
+      <td>Tempo a lavoro</td>
+      <td class="col-xs-2 success">${psDto.totalWorkingTime.printHourMinute()}</td>
+    </tr>
+    <tr>
+      <td>Buoni pasto maturati</td>
+      <td class="col-xs-2 success">${psDto.mealTicketsInVisibleDays}</td>
+    </tr>
+    #{list items:psDto.absenceCodeMap.entrySet(), as:'entry'}
+    <tr>
+      <td>Codice ${entry.key.code}</td>
+      <td class="col-xs-2 success">${entry.value}</td>
+    </tr>
+    #{/list}
+  </table>
+  <div class="panel-footer">
+    Residui orari, ferie e buoni pasto del contratto dipendono dall'intero mese e non sono
+    mostrati nella visualizzazione parziale.
+  </div>
+</div>

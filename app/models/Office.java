@@ -167,6 +167,18 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
+   * Verifica se questa è la sede della persona indicata alla data di riferimento, o la sede
+   * corrente se la data è nulla.
+   */
+  @Transient
+  public boolean isOfficeOf(Object target, LocalDate date) {
+    if (date == null) {
+      return isCurrentOfficeOf(target);
+    }
+    return target instanceof Person && this.equals(((Person) target).getOfficeAt(date));
+  }
+
+  /**
    * Le persone che hanno afferito alla sede in almeno un giorno dell'intervallo.
    */
   @Transient
