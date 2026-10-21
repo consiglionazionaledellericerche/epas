@@ -65,6 +65,8 @@ import models.absences.Absence;
 import models.base.IPropertyInPeriod;
 import models.enumerate.ContractType;
 import org.joda.time.LocalDate;
+import play.data.validation.Max;
+import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -154,9 +156,10 @@ public class Contracts extends Controller {
     boolean linkedToPreviousContract = contract.getPreviousContract() != null ? true : false;
     String perseoId = contract.getPerseoId();
     LocalDate sourceDateRecoveryDay = contract.getSourceDateRecoveryDay();
+    Integer sourceRecoveryDayUsed = contract.getSourceRecoveryDayUsed();
     render(person, contract, wrappedContract, beginDate, endDate, endContract,
         contractType, isTemporaryMissing, perseoId, sourceDateRecoveryDay, 
-        linkedToPreviousContract);
+        sourceRecoveryDayUsed, linkedToPreviousContract);
   }
 
   /**
@@ -369,7 +372,8 @@ public class Contracts extends Controller {
    */
   public static void update(@Valid Contract contract, 
       boolean confirmed, Boolean isTemporaryMissing,
-      LocalDate sourceDateRecoveryDay, boolean linkedToPreviousContract) { 
+      LocalDate sourceDateRecoveryDay, @Min(0) @Max(100) Integer sourceRecoveryDayUsed,
+      boolean linkedToPreviousContract) { 
 
     notFoundIfNull(contract);
     rules.checkIfPermitted(contract.getPerson().getOffice());
@@ -379,7 +383,7 @@ public class Contracts extends Controller {
     if (Validation.hasErrors()) {
       log.info("ValidationErrors = {}", validation.errorsMap());
       response.status = 400;
-      render("@edit", contract, wrappedContract, sourceDateRecoveryDay);
+      render("@edit", contract, wrappedContract, sourceDateRecoveryDay, sourceRecoveryDayUsed);
     }
 
     // Salvo la situazione precedente
@@ -387,6 +391,9 @@ public class Contracts extends Controller {
 
     // Attribuisco il nuovo stato al contratto per effettuare il controllo incrociato
     contract.setSourceDateRecoveryDay(sourceDateRecoveryDay);
+    if (sourceRecoveryDayUsed != null) {
+      contract.setSourceRecoveryDayUsed(sourceRecoveryDayUsed);
+    }
     if (isTemporaryMissing != null) {
       contract.setTemporaryMissing(isTemporaryMissing);  
     }
@@ -395,7 +402,7 @@ public class Contracts extends Controller {
       Validation.addError("linkedToPreviousContract", 
           "Non esiste alcun contratto precedente cui linkare il contratto attuale");
       render("@edit", contract, wrappedContract,
-          sourceDateRecoveryDay, linkedToPreviousContract);
+          sourceDateRecoveryDay, sourceRecoveryDayUsed, linkedToPreviousContract);
     }
     if (confirmed) {
       contractManager.applyPreviousContractLink(contract, linkedToPreviousContract);
@@ -411,6 +418,7 @@ public class Contracts extends Controller {
       response.status = 400;
       render("@edit", contract, wrappedContract, 
           confirmed, isTemporaryMissing, recomputeRecap, sourceDateRecoveryDay, 
+          sourceRecoveryDayUsed,
           linkedToPreviousContract);
     } else {
       // Controllo eventuali assenze future prima di chiudere il contratto.
