@@ -18,11 +18,8 @@
 package cnr.sync.dto.v2;
 
 import lombok.Builder;
-import lombok.val;
-import models.Office;
 import models.Person;
 import models.Qualification;
-import org.joda.time.LocalDate;
 
 /**
  * Dati per l'aggiornamento di una persona via REST.
@@ -56,13 +53,7 @@ public class PersonUpdateDto extends PersonCreateDto {
               .filter(q -> ((Qualification) q).getQualification() == getQualification().intValue())
               .findFirst().get()));        
     }
-    val office = getOfficeId() == null ? null : (Office) Office.findById(getOfficeId());
-    if (office != null) {
-      //La relazione con la sede è periodicizzata: il cambio di sede chiude l'afferenza in
-      //corso e ne apre una nuova con decorrenza odierna, così da renderlo immediatamente
-      //efficace e senza sovrapposizioni di periodi.
-      person.changeOffice(office, LocalDate.now());
-    }
-
+    //Il cambio di sede (officeId) non è applicato qui: è gestito dal controller tramite
+    //PersonOfficeManager ed è riservato agli amministratori di sistema.
   }
 }

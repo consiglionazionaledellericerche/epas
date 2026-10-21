@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.ContractManager;
 import manager.OfficeManager;
+import manager.PersonOfficeManager;
 import manager.RegistryNotificationManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
@@ -60,6 +61,7 @@ public class SynchronizationManager {
   private RoleDao roleDao;
   private OfficeManager officeManager;
   private RegistryNotificationManager registryNotificationManager;
+  private PersonOfficeManager personOfficeManager;
   private ConfigurationManager configurationManager;
 
   /**
@@ -70,7 +72,8 @@ public class SynchronizationManager {
       ContractPerseoConsumer contractPerseoConsumer,
       PersonDao personDao, UserManager userManager, 
       ContractManager contractManager, RoleDao roleDao,
-      OfficeManager officeManager, RegistryNotificationManager registryNotificationManager) {
+      OfficeManager officeManager, RegistryNotificationManager registryNotificationManager,
+      PersonOfficeManager personOfficeManager) {
     this.peoplePerseoConsumer = peoplePerseoConsumer;
     this.contractPerseoConsumer = contractPerseoConsumer;
     this.personDao = personDao;
@@ -79,6 +82,7 @@ public class SynchronizationManager {
     this.roleDao = roleDao;
     this.officeManager = officeManager;
     this.registryNotificationManager = registryNotificationManager;
+    this.personOfficeManager = personOfficeManager;
   }
 
   /**
@@ -161,13 +165,9 @@ public class SynchronizationManager {
           epasPerson.getOffice().getName(), office);
 
       Office oldOffice = epasPerson.getOffice();
-      //La relazione con la sede è periodicizzata: l'afferenza precedente viene chiusa
-      //e il trasferimento decorre dalla data odierna.
-      val personOffice = epasPerson.changeOffice(office, LocalDate.now());
-      epasPerson.save();
-      personOffice.save();
-
-      registryNotificationManager.notifyPersonHasChangedOffice(epasPerson, oldOffice);
+      //L'afferenza precedente viene chiusa e il trasferimento decorre dalla data odierna;
+      //il manager allinea il ruolo di dipendente e notifica il cambio di sede.
+      personOfficeManager.changeOffice(epasPerson, office, LocalDate.now());
       return syncResult.add(
           String.format(
               "Effettuato il campo di sede per %s. Vecchia sede %s, nuova sede %s.",

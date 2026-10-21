@@ -42,8 +42,10 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.PersonManager;
+import manager.PersonOfficeManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
+import models.Office;
 import models.Person;
 import play.mvc.Controller;
 import play.mvc.Util;
@@ -69,6 +71,8 @@ public class Persons extends Controller {
   static ConfigurationManager configurationManager;
   @Inject 
   static SecurityRules rules;
+  @Inject
+  static PersonOfficeManager personOfficeManager;
   @Inject
   static GsonBuilder gsonBuilder;
 
@@ -180,19 +184,23 @@ public class Persons extends Controller {
     }
 
     personDto.update(person);
-    
-    //Controlla anche che l'utente corrente abbia
-    //i diritti di gestione anagrafica sull'office indicato 
-    //nel DTO
-    rules.checkIfPermitted(person.getOffice());
+
+    //Il cambio di sede è riservato agli amministratori di sistema (ADMIN/DEVELOPER)
+    final Office newOffice = personDto.getOfficeId() == null
+        ? null : (Office) Office.findById(personDto.getOfficeId());
+    final boolean officeChanged = newOffice != null && !newOffice.equals(person.getOffice());
+    if (officeChanged && !rules.checkAction("PersonOffices.save")) {
+      JsonResponse.unauthorized(
+          "Il cambio di sede è riservato agli amministratori di sistema");
+    }
 
     if (!validation.valid(person).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
     person.save();
-    //Le afferenze alle sedi vanno salvate dopo la persona perché la relazione
-    //con PersonOffice non è in cascata sul salvataggio.
-    person.getPersonOffices().forEach(personOffice -> personOffice.save());
+    if (officeChanged) {
+      personOfficeManager.changeOffice(person, newOffice, org.joda.time.LocalDate.now());
+    }
 
     log.info("Updated person {} via REST", person);
     renderJSON(gson.toJson(PersonShowDto.build(person)));

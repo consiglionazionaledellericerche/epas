@@ -24,7 +24,7 @@
 				#{f.input 'person.user.username', disabled:true /}
 
 				#{f.selectModel 'person.qualification',items:templateUtility.allQualifications /}
-				#{f.selectModel 'person.office',items:templateUtility.officesAllowed() /}
+				#{f.simpleView 'person.office', value:person.office?.name /}
 			#{secure.check 'Persons.updateBeginDate'}
 				#{f.date 'person.beginDate' /}
 			#{/secure.check}
