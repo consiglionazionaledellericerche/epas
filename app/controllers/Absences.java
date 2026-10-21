@@ -404,7 +404,7 @@ public class Absences extends Controller {
 
     // Ogni sede vede solo i giorni di afferenza della persona
     final LocalDate monthBegin = new LocalDate(year, month, 1);
-    final Set<LocalDate> visibleDays = rules.visibleDaysIfPermitted(person, monthBegin,
+    final Set<LocalDate> visibleDays = rules.checkIfPermittedOnDays(person, monthBegin,
         monthBegin.dayOfMonth().withMaximumValue());
 
     List<Absence> personAbsenceListWithFile = new ArrayList<Absence>();
@@ -464,7 +464,7 @@ public class Absences extends Controller {
     }
 
     // Ogni sede vede solo i giorni di afferenza della persona
-    final Set<LocalDate> visibleDays = rules.visibleDaysIfPermitted(person, from, to);
+    final Set<LocalDate> visibleDays = rules.checkIfPermittedOnDays(person, from, to);
 
     List<Absence> absenceList = absenceDao.getAbsencesInPeriod(Optional.fromNullable(person), 
         from, Optional.fromNullable(to), false).stream()
@@ -503,7 +503,7 @@ public class Absences extends Controller {
     notFoundIfNull(person);
 
     // Ogni sede vede solo i giorni di afferenza della persona
-    final Set<LocalDate> visibleDays = rules.visibleDaysIfPermitted(person,
+    final Set<LocalDate> visibleDays = rules.checkIfPermittedOnDays(person,
         new LocalDate(year, 1, 1), new LocalDate(year, 12, 31));
     YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(
         person, year, absenceDao.getYearlyAbsence(person, year).stream()
@@ -598,7 +598,7 @@ public class Absences extends Controller {
 
     // Ogni sede vede solo i giorni di afferenza della persona
     final Set<LocalDate> visibleDays =
-        rules.visibleDaysIfPermitted(person, monthBegin, monthEnd);
+        rules.checkIfPermittedOnDays(person, monthBegin, monthEnd);
     List<Absence> absenceToRender = new ArrayList<Absence>();
 
     if (absenceTypeCode.equals("Totale")) {

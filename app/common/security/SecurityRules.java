@@ -201,7 +201,7 @@ public class SecurityRules {
    * Come {@link #permittedDaysByOffice(Person, LocalDate, LocalDate)}, riportando un accesso
    * negato se nell'intervallo non c'è nessun giorno visibile.
    */
-  public Set<LocalDate> visibleDaysIfPermitted(Person person, LocalDate begin, LocalDate end) {
+  public Set<LocalDate> checkIfPermittedOnDays(Person person, LocalDate begin, LocalDate end) {
     final Set<LocalDate> days = permittedDaysByOffice(person, begin, end);
     if (days.isEmpty()) {
       throw new Forbidden("Access forbidden");

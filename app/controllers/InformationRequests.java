@@ -794,7 +794,7 @@ public class InformationRequests extends Controller {
     if (ownReport) {
       rules.checkIfPermitted(person.getOffice());
     } else {
-      visibleDays = Optional.of(rules.visibleDaysIfPermitted(person, monthBegin,
+      visibleDays = Optional.of(rules.checkIfPermittedOnDays(person, monthBegin,
           monthBegin.dayOfMonth().withMaximumValue()));
     }
     IWrapperPerson wrperson = wrapperFactory.create(person);

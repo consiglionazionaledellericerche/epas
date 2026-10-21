@@ -203,7 +203,7 @@ public class TeleworkStampings extends Controller {
 
     // Ogni sede vede solo i giorni di afferenza della persona
     final LocalDate monthBegin = new LocalDate(year, month, 1);
-    final Set<LocalDate> visibleDays = rules.visibleDaysIfPermitted(person, monthBegin,
+    final Set<LocalDate> visibleDays = rules.checkIfPermittedOnDays(person, monthBegin,
         monthBegin.dayOfMonth().withMaximumValue());
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
