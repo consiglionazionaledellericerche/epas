@@ -39,12 +39,12 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import manager.OfficeManager;
+import manager.PersonOfficeManager;
 import manager.PeriodManager;
 import manager.configurations.ConfigurationManager;
 import models.Institute;
 import models.Office;
 import models.Person;
-import models.PersonOffice;
 import models.Role;
 import models.UsersRolesOffices;
 import org.joda.time.LocalDate;
@@ -76,6 +76,8 @@ public class Offices extends Controller {
   static PeriodManager periodManager;
   @Inject
   static PersonDao personDao;
+  @Inject
+  static PersonOfficeManager personOfficeManager;
   @Inject
   static UsersRolesOfficesDao uroDao;
   @Inject
@@ -229,9 +231,11 @@ public class Offices extends Controller {
     }
 
     List<Person> people = personDao.byOffice(sourceOffice);
+    final List<String> servicesMessages = Lists.newArrayList();
     people.stream().forEach(p -> {
-      p.changeOffice(destinationOffice, transferDate);
-      p.getPersonOffices().forEach(PersonOffice::save);
+      // termina anche la presenza nei servizi di reperibilità e turno della sede di provenienza
+      personOfficeManager.changeOffice(p, destinationOffice, transferDate).getMessages()
+          .forEach(m -> servicesMessages.add(p.getFullname() + ": " + m));
       p.save();
       List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(p.getUser());
 
@@ -241,7 +245,9 @@ public class Offices extends Controller {
       }
     });
 
-    flash.success("Spostate %s persone da %s a %s", people.size(), sourceOffice, destinationOffice);
+    flash.success("Spostate %s persone da %s a %s.%s", people.size(), sourceOffice,
+        destinationOffice, servicesMessages.isEmpty() ? ""
+            : " Servizi di reperibilità e turno aggiornati: " + String.join("; ", servicesMessages));
     Administration.utilities();
   }
 

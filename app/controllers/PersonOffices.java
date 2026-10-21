@@ -110,9 +110,11 @@ public class PersonOffices extends Controller {
     }
 
     if (personOffice == null) {
-      personOfficeManager.changeOffice(person, office, beginDate);
-      flash.success("Trasferimento di %s nella sede %s dal %s inserito", person.getFullname(),
-          office.getName(), beginDate.toString("dd/MM/yyyy"));
+      final List<String> messages =
+          personOfficeManager.changeOffice(person, office, beginDate).getMessages();
+      flash.success("Trasferimento di %s nella sede %s dal %s inserito.%s", person.getFullname(),
+          office.getName(), beginDate.toString("dd/MM/yyyy"),
+          messages.isEmpty() ? "" : " " + String.join(". ", messages) + ".");
     } else {
       final List<String> errors =
           personOfficeManager.update(personOffice, office, beginDate, endDate);

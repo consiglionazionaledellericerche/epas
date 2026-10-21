@@ -105,7 +105,8 @@ public class PersonOfficeSyncManager {
     final boolean alreadyPresent = person.getPersonOffices().stream()
         .anyMatch(po -> po.getOffice().equals(office) && po.getBeginDate().equals(beginDate));
     if (!alreadyPresent) {
-      personOfficeManager.changeOffice(person, office, beginDate);
+      personOfficeManager.changeOffice(person, office, beginDate).getMessages()
+          .forEach(m -> result.add(person.getFullname() + ": " + m));
       result.add(String.format("%s afferisce a %s dal %s", person.getFullname(),
           office.getName(), beginDate.toString("dd/MM/yyyy")));
     }

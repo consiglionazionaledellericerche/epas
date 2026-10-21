@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import models.Office;
 import models.Person;
@@ -47,6 +48,7 @@ public class PersonOfficeManager {
   private final OfficeManager officeManager;
   private final RegistryNotificationManager registryNotificationManager;
   private final PersonOfficeDao personOfficeDao;
+  private final PersonOfficeServicesManager servicesManager;
 
   /**
    * Default constructor.
@@ -54,12 +56,13 @@ public class PersonOfficeManager {
   @Inject
   public PersonOfficeManager(UsersRolesOfficesDao uroDao, RoleDao roleDao,
       OfficeManager officeManager, RegistryNotificationManager registryNotificationManager,
-      PersonOfficeDao personOfficeDao) {
+      PersonOfficeDao personOfficeDao, PersonOfficeServicesManager servicesManager) {
     this.uroDao = uroDao;
     this.roleDao = roleDao;
     this.officeManager = officeManager;
     this.registryNotificationManager = registryNotificationManager;
     this.personOfficeDao = personOfficeDao;
+    this.servicesManager = servicesManager;
   }
 
   /**
@@ -70,17 +73,25 @@ public class PersonOfficeManager {
    * @param person la persona da trasferire
    * @param office la sede di destinazione
    * @param date la data di decorrenza
-   * @return l'afferenza verso la sede di destinazione.
+   * @return l'afferenza verso la sede di destinazione e i messaggi sui servizi di reperibilità
+   *     e turno della sede di provenienza terminati per effetto del trasferimento.
    */
-  public PersonOffice changeOffice(Person person, Office office, LocalDate date) {
+  public TransferResult changeOffice(Person person, Office office, LocalDate date) {
     Verify.verifyNotNull(person);
     Verify.verifyNotNull(office);
     Verify.verifyNotNull(date);
 
     final Office oldOffice = person.getOffice();
+    final Office leavingOffice = person.getOfficeAt(date.minusDays(1));
     final PersonOffice personOffice = person.changeOffice(office, date);
     person.getPersonOffices().forEach(PersonOffice::save);
     log.info("Afferenza di {} alla sede {} dal {}", person.getFullname(), office.getName(), date);
+
+    // La presenza nei servizi di reperibilità e turno della sede lasciata termina il giorno
+    // precedente il trasferimento
+    final List<String> messages = leavingOffice != null && !leavingOffice.equals(office)
+        ? servicesManager.endServicesInOffice(person, leavingOffice, date)
+        : Lists.newArrayList();
 
     if (!date.isAfter(LocalDate.now())) {
       alignEmployeeRole(person);
@@ -88,7 +99,17 @@ public class PersonOfficeManager {
         registryNotificationManager.notifyPersonHasChangedOffice(person, oldOffice);
       }
     }
-    return personOffice;
+    return new TransferResult(personOffice, messages);
+  }
+
+  /**
+   * Esito di un trasferimento di sede.
+   */
+  @Value
+  public static class TransferResult {
+    PersonOffice personOffice;
+    /** Le operazioni effettuate sui servizi di reperibilità e turno della sede lasciata. */
+    List<String> messages;
   }
 
   /**

@@ -167,7 +167,8 @@ public class SynchronizationManager {
       Office oldOffice = epasPerson.getOffice();
       //L'afferenza precedente viene chiusa e il trasferimento decorre dalla data odierna;
       //il manager allinea il ruolo di dipendente e notifica il cambio di sede.
-      personOfficeManager.changeOffice(epasPerson, office, LocalDate.now());
+      personOfficeManager.changeOffice(epasPerson, office, LocalDate.now()).getMessages()
+          .forEach(syncResult::add);
       return syncResult.add(
           String.format(
               "Effettuato il campo di sede per %s. Vecchia sede %s, nuova sede %s.",
