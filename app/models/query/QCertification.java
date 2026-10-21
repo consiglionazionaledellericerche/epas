@@ -43,6 +43,8 @@ public class QCertification extends EntityPathBase<Certification> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    public final QOffice office;
+
     public final QPerson person;
 
     public final StringPath problems = createString("problems");
@@ -74,6 +76,7 @@ public class QCertification extends EntityPathBase<Certification> {
 
     public QCertification(Class<? extends Certification> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
     }
 

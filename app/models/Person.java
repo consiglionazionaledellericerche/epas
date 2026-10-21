@@ -360,6 +360,26 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
+   * I giorni dell'intervallo [begin, end] in cui la persona afferiva alla sede indicata.
+   */
+  @Transient
+  public Set<LocalDate> getDaysInOffice(Office office, LocalDate begin, LocalDate end) {
+    final Set<LocalDate> days = Sets.newHashSet();
+    for (PersonOffice po : getPersonOfficesInPeriod(begin, end)) {
+      if (!po.getOffice().equals(office)) {
+        continue;
+      }
+      LocalDate day = po.getBeginDate().isAfter(begin) ? po.getBeginDate() : begin;
+      final LocalDate to = po.getEndDate() != null && po.getEndDate().isBefore(end)
+          ? po.getEndDate() : end;
+      for (; !day.isAfter(to); day = day.plusDays(1)) {
+        days.add(day);
+      }
+    }
+    return days;
+  }
+
+  /**
    * Verifica se la persona ha afferito alla sede in almeno un giorno dell'intervallo.
    */
   @Transient

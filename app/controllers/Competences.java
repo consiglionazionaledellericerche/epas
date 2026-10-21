@@ -558,17 +558,38 @@ public class Competences extends Controller {
   public static void insertCompetence(Long personId, Long competenceId, int month, int year) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+    Office office = competenceOffice(person, year, month);
     CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceId);
     notFoundIfNull(code);
-    Office office = person.getOffice();
     Competence competence = new Competence(person, code, year, month);
+    competence.setOffice(office);
     if (competence.getCompetenceCode().getCode().equals("S1")) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(competence.getPerson(),
           competence.getYear(), competence.getMonth(), true);
       render("@editCompetence", competence, psDto, office, year, month, person);
     }
     render("@editCompetence", competence, office, year, month, person);
+  }
+
+  /**
+   * La sede a cui attribuire le competenze inserite dall'operatore per la persona nel mese:
+   * l'ultima sede di afferenza del mese su cui l'operatore ha i permessi.
+   */
+  private static Office competenceOffice(Person person, int year, int month) {
+    final LocalDate begin = new LocalDate(year, month, 1);
+    final List<Office> offices =
+        Lists.reverse(person.getOfficesInPeriod(begin, begin.dayOfMonth().withMaximumValue()));
+    for (Office office : offices) {
+      if (rules.check(office)) {
+        return office;
+      }
+    }
+    if (offices.isEmpty()) {
+      rules.checkIfPermitted(person.getOffice());
+      return person.getOffice();
+    }
+    forbidden();
+    return null;
   }
 
   /**
@@ -583,16 +604,16 @@ public class Competences extends Controller {
 
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person.getOffice());
+    Office office = competenceOffice(person, year, month);
     CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
     notFoundIfNull(code);
-    Optional<Competence> comp = competenceDao.getCompetence(person, year, month, code);
+    Optional<Competence> comp = competenceDao.getCompetence(person, year, month, code, office);
     Competence competence = new Competence();
+    competence.setOffice(office);
     if (comp.isPresent()) {
       competence = comp.get();
     }
 
-    Office office = person.getOffice();
     if (code.getCode().equals("S1") || code.getCode().equals("S2") || code.getCode().equals("S3")) {
       PersonStampingRecap psDto = null;
       boolean check = (Boolean) configurationManager
@@ -621,7 +642,9 @@ public class Competences extends Controller {
 
     notFoundIfNull(competence);
 
-    Office office = competence.getPerson().getOffice();
+    Office office = competence.getOffice() != null ? competence.getOffice()
+        : competence.getPerson().getOfficeAtOrCurrent(new LocalDate(competence.getYear(),
+            competence.getMonth(), 1).dayOfMonth().withMaximumValue());
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
 

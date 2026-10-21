@@ -171,6 +171,17 @@ public class CertificationService implements ICertificationService {
   @Override
   public PersonCertData buildPersonStaticStatus(Person person, int year, int month)
       throws ExecutionException {
+    return buildPersonStaticStatus(person, year, month, person.getOfficeAtOrCurrent(
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()));
+  }
+
+  /**
+   * Costruisce la situazione attestati della persona per la sede indicata: nel mese di un
+   * trasferimento ogni sede gestisce i dati dei giorni di propria afferenza.
+   */
+  @Override
+  public PersonCertData buildPersonStaticStatus(Person person, int year, int month,
+      Office office) throws ExecutionException {
 
     PersonCertData personCertData = new PersonCertData();
     personCertData.person = person;
@@ -181,11 +192,14 @@ public class CertificationService implements ICertificationService {
     Map<String, Certification> attestatiCertifications = Maps.newHashMap();
 
     Optional<SeatCertification> seatCertification = certificationsComunication
-        .getPersonSeatCertification(person, month, year);
+        .getPersonSeatCertification(person, office, month, year);
     if (seatCertification.isPresent()) {
       PersonCertification personCertification = seatCertification.get().dipendenti.get(0);
       attestatiCertifications =
           personAttestatiCertifications(person, year, month, personCertification);
+      if (attestatiCertifications != null) {
+        attestatiCertifications.values().forEach(c -> c.setOffice(office));
+      }
       if (attestatiCertifications == null) {
         log.info("Impossibile scaricare le informazioni da attestati per {}", person.getFullname());
         //attestatiCertifications = Maps.newHashMap(); TODO: da segnalare in qualche modo all'user 
@@ -195,14 +209,15 @@ public class CertificationService implements ICertificationService {
 
     // Le certificazioni in epas
     Map<String, Certification> epasCertifications = Maps.newHashMap();
-    for (Certification certification : certificationDao.personCertifications(person, year, month)) {
+    for (Certification certification
+        : certificationDao.personCertifications(person, year, month, office)) {
       epasCertifications.put(certification.aMapKey(), certification);
     }
 
     // Lo stato attuale epas
     // chiamare qui il manager che genera lo stato attuale di epas
     Map<String, Certification> actualCertifications = Maps.newHashMap();
-    actualCertifications = monthData.getCertification(person, year, month);
+    actualCertifications = monthData.getCertification(person, year, month, Optional.of(office));
 
     if (attestatiCertifications != null) {
       // Riesco a scaricare gli attestati della persona

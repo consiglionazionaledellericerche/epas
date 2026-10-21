@@ -54,6 +54,7 @@ import manager.services.PairStamping;
 import models.Competence;
 import models.CompetenceCode;
 import models.GeneralSetting;
+import models.Office;
 import models.Person;
 import models.PersonCompetenceCodes;
 import models.PersonDay;
@@ -1148,14 +1149,17 @@ public class ShiftManager2 {
       totalShiftMinutes = lastShiftCompetence;
     }
 
+    // le competenze sono attribuite alla sede del servizio di turno
+    final Office shiftOffice = shiftTypeMonth.getShiftType().getShiftCategories().getOffice();
     Optional<Competence> shiftCompetence = competenceDao
         .getCompetence(person, shiftTypeMonth.getYearMonth().getYear(), 
-            shiftTypeMonth.getYearMonth().getMonthOfYear(), shiftCode);
+            shiftTypeMonth.getYearMonth().getMonthOfYear(), shiftCode, shiftOffice);
 
     Competence newCompetence = 
         shiftCompetence.or(
             new Competence(person, shiftCode, shiftTypeMonth.getYearMonth().getYear(),
             shiftTypeMonth.getYearMonth().getMonthOfYear()));
+    newCompetence.setOffice(shiftOffice);
     newCompetence.setValueApproved(totalShiftMinutes / 60);
     newCompetence.setExceededMins(totalShiftMinutes % 60);
     // newCompetence.valueRequested = ; e qui cosa ci va?

@@ -28,7 +28,7 @@ public class InserimentoRigaCompetenza extends RichiestaInserimentoAttestati {
    * Constructor.
    */
   public InserimentoRigaCompetenza(Certification certification) {
-    codiceSede = certification.getPerson().getOffice().getCodeId();
+    codiceSede = certification.getSendingOffice().getCodeId();
     anno = certification.getYear();
     mese = certification.getMonth();
 

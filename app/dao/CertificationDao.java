@@ -20,9 +20,11 @@ package dao;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQueryFactory;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Certification;
+import models.Office;
 import models.Person;
 import models.enumerate.CertificationType;
 import models.query.QCertification;
@@ -57,6 +59,17 @@ public class CertificationDao extends DaoBase {
             .and(certification.year.eq(year))
             .and(certification.month.eq(month)))
         .fetch();
+  }
+
+  /**
+   * Le certificazioni della persona nell'anno/mese inviate dalla sede indicata (incluse quelle
+   * senza sede, precedenti alla periodicizzazione, se attribuibili alla sede).
+   */
+  public List<Certification> personCertifications(Person person, int year, int month,
+      Office office) {
+    return personCertifications(person, year, month).stream()
+        .filter(c -> office.equals(c.getSendingOffice()))
+        .collect(Collectors.toList());
   }
 
   /**

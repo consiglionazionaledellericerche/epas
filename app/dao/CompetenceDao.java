@@ -28,7 +28,6 @@ import lombok.val;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Competence;
@@ -126,6 +125,16 @@ public class CompetenceDao extends DaoBase {
    */
   public Optional<Competence> getCompetence(
       Person person, Integer year, Integer month, CompetenceCode code) {
+    return getCompetence(person, year, month, code, person.getOfficeAtOrCurrent(
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()));
+  }
+
+  /**
+   * La competenza della persona nel mese attribuita alla sede indicata: nel mese di un
+   * trasferimento la stessa competenza può essere presente per entrambe le sedi.
+   */
+  public Optional<Competence> getCompetence(
+      Person person, Integer year, Integer month, CompetenceCode code, Office office) {
 
     final QCompetence competence = QCompetence.competence;
 
@@ -133,7 +142,9 @@ public class CompetenceDao extends DaoBase {
         .where(competence.person.eq(person)
             .and(competence.year.eq(year)
                 .and(competence.month.eq(month)
-                    .and(competence.competenceCode.eq(code))))).fetchOne();
+                    .and(competence.competenceCode.eq(code))))
+            .and(competence.office.eq(office).or(competence.office.isNull())))
+        .orderBy(competence.office.id.desc().nullsLast()).fetchFirst();
 
     return Optional.fromNullable(result);
 
@@ -158,9 +169,7 @@ public class CompetenceDao extends DaoBase {
 
     condition.and(competence.year.eq(year))
         .and(competence.competenceCode.code.in(codes))
-        .and(competence.person.id.in(PersonOfficeFilter.personIdsInOffices(office,
-            new LocalDate(year, untilThisMonth ? 1 : month, 1),
-            new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())));
+        .and(competence.office.eq(office));
 
     if (untilThisMonth) {
       condition.and(competence.month.loe(month));
@@ -169,10 +178,7 @@ public class CompetenceDao extends DaoBase {
     }
 
     return getQueryFactory().selectFrom(competence)
-        .where(condition).fetch().stream()
-        .filter(c -> c.getPerson().isInOfficeInPeriod(office, new LocalDate(year, c.getMonth(), 1),
-            new LocalDate(year, c.getMonth(), 1).dayOfMonth().withMaximumValue()))
-        .collect(Collectors.toList());
+        .where(condition).fetch();
   }
 
   /**
@@ -187,17 +193,12 @@ public class CompetenceDao extends DaoBase {
     condition.and(competence.year.eq(year));
 
     if (office.isPresent()) {
-      condition.and(competence.person.id.in(PersonOfficeFilter.personIdsInOffices(office.get(),
-          new LocalDate(year, 1, 1), new LocalDate(year, 12, 31))));
+      condition.and(competence.office.eq(office.get()));
     }
 
     return getQueryFactory().selectFrom(competence)
         .where(condition).orderBy(competence.competenceCode.code.asc())
-        .fetch().stream()
-        .filter(c -> !office.isPresent() || c.getPerson().isInOfficeInPeriod(office.get(),
-            new LocalDate(year, c.getMonth(), 1),
-            new LocalDate(year, c.getMonth(), 1).dayOfMonth().withMaximumValue()))
-        .collect(Collectors.toList());
+        .fetch();
   }
 
   /**
@@ -221,11 +222,7 @@ public class CompetenceDao extends DaoBase {
       condition.and(competence.person.eq(person.get()));
     }
     if (office.isPresent()) {
-      final LocalDate begin = new LocalDate(year, month.or(1), 1);
-      final LocalDate end = month.isPresent()
-          ? begin.dayOfMonth().withMaximumValue() : new LocalDate(year, 12, 31);
-      condition.and(competence.person.id.in(
-          PersonOfficeFilter.personIdsInOffices(office.get(), begin, end)));
+      condition.and(competence.office.eq(office.get()));
     }
     final Integer result =
         getQueryFactory().select(competence.valueApproved.sum())

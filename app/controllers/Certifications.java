@@ -46,6 +46,7 @@ import manager.AbsenceManager;
 import manager.CertificationManager;
 import manager.attestati.service.ICertificationService;
 import manager.attestati.service.PersonCertData;
+import manager.attestati.service.PersonCertDataKey;
 import manager.configurations.EpasParam;
 import models.Office;
 import models.Person;
@@ -258,9 +259,8 @@ public class Certifications extends Controller {
 
     personDao.list(Optional.absent(), Sets.newHashSet(Lists.newArrayList(office)),
         false, monthBegin, monthEnd, true).list().forEach(person -> {
-          final Map.Entry<Person, YearMonth> personKey = new AbstractMap
-              .SimpleEntry<>(person, yearMonth);
-          cacheValues.personStatus.invalidate(personKey);
+          cacheValues.personStatus.invalidate(
+              new PersonCertDataKey(person, office, yearMonth));
         });
     log.info("Svuotati tutti i valori dalla cache: ufficio {} - mese {}/{}", office, month, year);
     certifications(officeId, year, month);
@@ -270,20 +270,20 @@ public class Certifications extends Controller {
    * PersonStatus.
    *
    * @param personId id della persona
+   * @param officeId sede che invia: nel mese di un trasferimento ogni sede invia i propri giorni
    * @param year anno
    * @param month mese
    */
-  public static void personStatus(Long personId, int year, int month) {
+  public static void personStatus(Long personId, Long officeId, int year, int month) {
 
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person);
+    final Office office = certificationOffice(person, officeId, year, month);
     PersonCertData personCertData = null;
     try {
       // Costruisco lo status generale
-      final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
-          .SimpleEntry<>(person, new YearMonth(year, month));
-      personCertData = cacheValues.personStatus.get(cacheKey);
+      personCertData = cacheValues.personStatus.get(
+          new PersonCertDataKey(person, office, new YearMonth(year, month)));
     } catch (Exception ex) {
       log.error("Errore nel recupero delle informazioni dal server di attestati per la persona {}: "
           + "{}", person, cleanMessage(ex).getMessage());
@@ -294,7 +294,7 @@ public class Certifications extends Controller {
     double stepSize;
     try {
       final Map.Entry<Office, YearMonth> key = new AbstractMap
-          .SimpleEntry<>(person.getOffice(), new YearMonth(year, month));
+          .SimpleEntry<>(office, new YearMonth(year, month));
       stepSize = cacheValues.elaborationStep.get(key);
     } catch (Exception ex) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
@@ -302,7 +302,27 @@ public class Certifications extends Controller {
       return;
     }
 
-    render(personCertData, stepSize, person);
+    render(personCertData, stepSize, person, office);
+  }
+
+  /**
+   * La sede per cui gestire gli attestati della persona nel mese: deve essere una sede a cui la
+   * persona ha afferito nel mese e su cui l'operatore ha i permessi.
+   */
+  private static Office certificationOffice(Person person, Long officeId, int year, int month) {
+    final LocalDate begin = new LocalDate(year, month, 1);
+    final Office office = officeId == null
+        ? person.getOfficeAtOrCurrent(begin.dayOfMonth().withMaximumValue())
+        : officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    if (!rules.check("Certifications.certifications", office)) {
+      forbidden();
+    }
+    if (!person.getPersonOffices().isEmpty()
+        && !person.isInOfficeInPeriod(office, begin, begin.dayOfMonth().withMaximumValue())) {
+      forbidden();
+    }
+    return office;
   }
 
   /**
@@ -325,18 +345,18 @@ public class Certifications extends Controller {
    * @param month mese.
    * @throws NoSuchFieldException gestisce eccezione di campo non presente
    */
-  public static void process(Long personId, int year, int month, boolean redirect) 
-      throws NoSuchFieldException {
+  public static void process(Long personId, Long officeId, int year, int month,
+      boolean redirect) throws NoSuchFieldException {
 
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
-    rules.checkIfPermitted(person);
+    final Office office = certificationOffice(person, officeId, year, month);
 
     PersonCertData previousCertData = null;
     try {
       // Costruisco lo status generale
       // Non uso la cache qui per evitare eventuali stati incongruenti durante l'invio
-      previousCertData = certService.buildPersonStaticStatus(person, year, month);
+      previousCertData = certService.buildPersonStaticStatus(person, year, month, office);
     } catch (Exception ex) {
       log.error("Errore nel recupero delle informazioni dal server di attestati"
           + " per la persona {}: {}", person, cleanMessage(ex).getMessage());
@@ -354,8 +374,8 @@ public class Certifications extends Controller {
       }
     }
 
-    final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
-        .SimpleEntry<>(person, new YearMonth(year, month));
+    final PersonCertDataKey cacheKey =
+        new PersonCertDataKey(person, office, new YearMonth(year, month));
 
     // Se riesco nell'invio ne aggiorno lo stato in cache
     if (personCertData != null) {
@@ -369,7 +389,7 @@ public class Certifications extends Controller {
     double stepSize;
     try {
       final Map.Entry<Office, YearMonth> key = new AbstractMap
-          .SimpleEntry<>(person.getOffice(), new YearMonth(year, month));
+          .SimpleEntry<>(office, new YearMonth(year, month));
       stepSize = cacheValues.elaborationStep.get(key);
     } catch (Exception ex) {
       log.error("Impossibile recuperare la percentuale di avanzamento per la persona {}: {}",
@@ -380,10 +400,10 @@ public class Certifications extends Controller {
     // permette di chiamare questo controller anche in maniera sincrona per il reinvio delle
     // informazioni per una sola persona tramite link (button sulla singola persona)
     if (redirect) {
-      certifications(person.getOffice().id, year, month);
+      certifications(office.id, year, month);
     }
 
-    render("@personStatus", personCertData, stepSize, person);
+    render("@personStatus", personCertData, stepSize, person, office);
     
   }
   

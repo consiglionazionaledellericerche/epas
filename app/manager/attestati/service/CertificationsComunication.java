@@ -356,6 +356,15 @@ public class CertificationsComunication {
    */
   public Optional<SeatCertification> getPersonSeatCertification(Person person,
       int month, int year) throws ExecutionException {
+    return getPersonSeatCertification(person, person.getOffice(), month, year);
+  }
+
+  /**
+   * La situazione in Attestati del dipendente sulla sede indicata: nel mese di un
+   * trasferimento il dipendente è presente su entrambe le sedi.
+   */
+  public Optional<SeatCertification> getPersonSeatCertification(Person person, Office office,
+      int month, int year) throws ExecutionException {
 
     final String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
     if (token == null) {
@@ -363,7 +372,7 @@ public class CertificationsComunication {
     }
 
     try {
-      String url = ATTESTATI_API_URL + "/" + person.getOffice().getCodeId()
+      String url = ATTESTATI_API_URL + "/" + office.getCodeId()
           + "/" + person.getNumber() + "/" + year + "/" + month;
 
       WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);

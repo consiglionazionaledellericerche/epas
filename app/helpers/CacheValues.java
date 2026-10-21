@@ -40,6 +40,7 @@ import manager.attestati.service.CertificationsComunication;
 import manager.attestati.service.ICertificationService;
 import manager.attestati.service.OauthToken;
 import manager.attestati.service.PersonCertData;
+import manager.attestati.service.PersonCertDataKey;
 import models.Office;
 import models.Person;
 import org.joda.time.DateTimeConstants;
@@ -104,19 +105,17 @@ public final class CacheValues {
    * E' ANCHE ALTAMENTE CONSIGLIATO INVALIDARE TUTTI I VALORI DI UN DETERMINATO UFFICIO
    * QUADO SI RIEFFETTUA IL REFRESH DELLA SCHERMATA DI ATTESTATI
    */
-  public LoadingCache<Map.Entry<Person, YearMonth>, PersonCertData> personStatus =
+  public LoadingCache<PersonCertDataKey, PersonCertData> personStatus =
       CacheBuilder.newBuilder()
           .expireAfterWrite(20, TimeUnit.MINUTES)
           .build(
-              new CacheLoader<Map.Entry<Person, YearMonth>, PersonCertData>() {
+              new CacheLoader<PersonCertDataKey, PersonCertData>() {
                 @Override
-                public PersonCertData load(Map.Entry<Person, YearMonth> key)
+                public PersonCertData load(PersonCertDataKey key)
                     throws ExecutionException {
-                  final Person person = key.getKey();
-                  int year = key.getValue().getYear();
-                  int month = key.getValue().getMonthOfYear();
-                  return certService
-                      .buildPersonStaticStatus(person, year, month);
+                  return certService.buildPersonStaticStatus(key.getPerson(),
+                      key.getYearMonth().getYear(), key.getYearMonth().getMonthOfYear(),
+                      key.getOffice());
                 }
               }
           );
