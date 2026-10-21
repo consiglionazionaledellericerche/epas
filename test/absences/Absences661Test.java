@@ -26,11 +26,14 @@ import db.h2support.H2Examples;
 import db.h2support.base.H2AbsenceSupport;
 import java.util.List;
 import manager.services.absences.AbsenceService;
+import manager.services.absences.AbsenceService.InsertReport;
 import manager.services.absences.model.PeriodChain;
 import manager.services.absences.model.ServiceFactories;
 import models.Person;
 import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
+import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultGroup;
@@ -57,6 +60,8 @@ public class Absences661Test extends UnitTest {
   
   public static final LocalDate BEGIN_2018 = new LocalDate(2018, 1, 1);
   public static final LocalDate FERIAL_1_2018 = new LocalDate(2018, 8, 6); //lun
+  public static final LocalDate FERIAL_3_2018 = new LocalDate(2018, 8, 8); //mer
+  public static final LocalDate FERIAL_4_2018 = new LocalDate(2018, 8, 9); //gio
   
   @Inject 
   private static H2Examples h2Examples;
@@ -207,4 +212,46 @@ public class Absences661Test extends UnitTest {
     
   }
   
+  /**
+   * Le assenze di richieste in attesa di approvazione, passate alla simulazione come già
+   * inserite, devono concorrere al limite delle 18 ore annue: dopo tre 661G in attesa non è
+   * possibile inserire un quarto 661G.
+   */
+  @Test
+  public void pendingInsertsCountTowardsLimit() {
+
+    absenceService.enumInitializator();
+
+    Person person = h2Examples.normalEmployee(BEGIN_2018, Optional.absent());
+    GroupAbsenceType group661 = absenceComponentDao
+        .groupAbsenceTypeByName(DefaultGroup.G_661.name()).get();
+    AbsenceType a661G = absenceComponentDao
+        .absenceTypeByCode(DefaultAbsenceType.A_661G.getCode()).get();
+    JustifiedType allDay = absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.all_day);
+
+    // senza richieste in attesa su quattro giorni se ne inseriscono solo tre (3 x 360 = 1080)
+    InsertReport fourDays = absenceService.insert(person, group661, FERIAL_1_2018,
+        FERIAL_4_2018, a661G, allDay, null, null, false, null);
+    assertEquals(3, fourDays.howManySuccess());
+    assertEquals(1, fourDays.howManyError());
+
+    // le tre assenze inseribili simulano una richiesta in attesa di approvazione
+    InsertReport pending = absenceService.insert(person, group661, FERIAL_1_2018,
+        FERIAL_3_2018, a661G, allDay, null, null, false, null);
+    assertEquals(3, pending.absencesToPersist.size());
+
+    // senza considerarle il quarto giorno risulta inseribile
+    InsertReport alone = absenceService.insert(person, group661, FERIAL_4_2018,
+        FERIAL_4_2018, a661G, allDay, null, null, false, null);
+    assertEquals(1, alone.howManySuccess());
+
+    // considerandole il quarto giorno supera il limite e non compaiono righe delle altre
+    InsertReport withPending = absenceService.insert(person, group661, FERIAL_4_2018,
+        FERIAL_4_2018, a661G, allDay, null, null, false, null, Optional.absent(),
+        pending.absencesToPersist);
+    assertEquals(0, withPending.howManySuccess());
+    assertEquals(1, withPending.howManyError());
+    assertEquals(1, withPending.insertTemplateRows.size());
+  }
+
 }

@@ -78,6 +78,24 @@ public class AbsenceRequestDao extends DaoBase {
   }
 
   /**
+   * Le richieste di assenza della persona e del tipo indicati il cui flusso non è ancora
+   * terminato, ordinate per data di inizio.
+   *
+   * @param person la persona
+   * @param type il tipo di richiesta di assenza
+   * @return la lista delle richieste di assenza in attesa.
+   */
+  public List<AbsenceRequest> pendingRequests(Person person, AbsenceRequestType type) {
+    final QAbsenceRequest absenceRequest = QAbsenceRequest.absenceRequest;
+    return getQueryFactory().selectFrom(absenceRequest)
+        .where(absenceRequest.person.eq(person)
+            .and(absenceRequest.type.eq(type))
+            .and(absenceRequest.flowEnded.isFalse()))
+        .orderBy(absenceRequest.startAt.asc())
+        .fetch();
+  }
+
+  /**
    * Lista delle richiesta di assenza per persona e data.
    *
    * @param person La persona della quale recuperare le richieste di assenza

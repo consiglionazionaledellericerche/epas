@@ -249,6 +249,32 @@ public class AbsenceService {
   public InsertReport insert(Person person, GroupAbsenceType groupAbsenceType, LocalDate from,
       LocalDate to, AbsenceType absenceType, JustifiedType justifiedType, Integer hours,
       Integer minutes, boolean forceInsert, AbsenceManager absenceManager, Optional<String> note) {
+    return insert(person, groupAbsenceType, from, to, absenceType, justifiedType, hours, minutes,
+        forceInsert, absenceManager, note, Lists.newArrayList());
+  }
+
+  /**
+   * Effettua la simulazione dell'inserimento considerando come già inserite le assenze passate
+   * in pendingInserts (ad esempio quelle di richieste di assenza in attesa di approvazione).
+   * Le assenze in pendingInserts concorrono ai limiti dei gruppi ma non compaiono nel report.
+   *
+   * @param person person
+   * @param groupAbsenceType gruppo
+   * @param from data inizio
+   * @param to data fine
+   * @param absenceType tipo assenza
+   * @param justifiedType giustificativo
+   * @param hours ore
+   * @param minutes minuti
+   * @param absenceManager absenceManager inject (circular dependency)
+   * @param note note dell'assenza (opzionale)
+   * @param pendingInserts assenze non persistite da considerare come già inserite
+   * @return insert report
+   */
+  public InsertReport insert(Person person, GroupAbsenceType groupAbsenceType, LocalDate from,
+      LocalDate to, AbsenceType absenceType, JustifiedType justifiedType, Integer hours,
+      Integer minutes, boolean forceInsert, AbsenceManager absenceManager, Optional<String> note,
+      List<Absence> pendingInserts) {
 
     if ((from != null && from.isBefore(from.minusMonths(6)))
         || (to != null && to.isAfter(from.plusMonths(6)))) {
@@ -271,7 +297,7 @@ public class AbsenceService {
     }
 
     List<PeriodChain> chains = Lists.newArrayList();
-    List<Absence> previousInserts = Lists.newArrayList();
+    List<Absence> previousInserts = Lists.newArrayList(pendingInserts);
     List<CriticalError> criticalErrors = Lists.newArrayList();
     LocalDate currentDate = from;
     Integer specifiedMinutes = absenceEngineUtility.getMinutes(hours, minutes);
