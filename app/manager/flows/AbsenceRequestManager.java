@@ -71,9 +71,11 @@ import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.db.jpa.JPA;
+import play.i18n.Messages;
 
 /**
  * Operazioni sulle richiesta di assenza.
@@ -323,6 +325,110 @@ public class AbsenceRequestManager {
     absenceRequest.setFlowEnded(false);
     absenceRequest.setEvents(Lists.newArrayList());
     absenceRequest.setAttachment(null);
+  }
+
+  /**
+   * Verifica che una nuova richiesta di assenza sia inseribile, con gli stessi controlli
+   * effettuati dalla form web (configurazione della sede, date, richieste già presenti, mesi
+   * già inviati ad Attestati, contratti e simulazione dell'inserimento delle assenze).
+   *
+   * <p>Se la richiesta termina dopo l'ultimo giorno inseribile la data di fine viene
+   * adeguata, come nella form web.</p>
+   *
+   * @param absenceRequest la nuova richiesta, con persona, tipo e date impostati
+   * @param hours le ore richieste (solo per i permessi personali orari)
+   * @param minutes i minuti richiesti (solo per i permessi personali orari)
+   * @return i problemi riscontrati, vuota se la richiesta è inseribile
+   */
+  public List<String> checkNewRequest(AbsenceRequest absenceRequest, Integer hours,
+      Integer minutes) {
+    Verify.verifyNotNull(absenceRequest.getType());
+    Verify.verifyNotNull(absenceRequest.getPerson());
+    val person = absenceRequest.getPerson();
+
+    List<String> problems = checkconfiguration(absenceRequest.getType(), person);
+    if (!problems.isEmpty()) {
+      return problems;
+    }
+    if (absenceRequest.getStartAt() == null) {
+      problems.add("La data di inizio è obbligatoria");
+      return problems;
+    }
+    if (absenceRequest.getEndTo() == null) {
+      absenceRequest.setEndTo(absenceRequest.getStartAt());
+    }
+    if (absenceRequest.getStartAt().isAfter(absenceRequest.getEndTo())) {
+      problems.add("La data di fine non può precedere quella di inizio");
+    }
+    if (absenceRequest.getEndTo().compareTo(absenceRequest.getStartAt().plusMonths(6)) > 0) {
+      problems.add("Le richieste di assenza non possono essere per periodi maggiori di sei mesi. "
+          + "Eventualmente effettuare più richieste di assenza.");
+    }
+    boolean hourly = hours != null || minutes != null;
+    if (hourly && !absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
+      problems.add("Ore e minuti sono ammessi solo per i permessi personali");
+    }
+    if (hourly && !absenceRequest.startAtAsDate().equals(absenceRequest.endToAsDate())) {
+      problems.add("Un permesso orario deve essere per un solo giorno");
+    }
+    if (!problems.isEmpty()) {
+      return problems;
+    }
+
+    if (checkAbsenceRequest(absenceRequest) != null) {
+      problems.add("Esiste già una richiesta in questa data");
+    }
+    if (!person.checkLastCertificationDate(new YearMonth(
+        absenceRequest.startAtAsDate().getYear(),
+        absenceRequest.startAtAsDate().getMonthOfYear()))) {
+      problems.add("Non è possibile fare una richiesta per una data di un mese già processato "
+          + "in Attestati");
+    }
+    boolean insideContracts = person.getContracts().stream()
+        .anyMatch(c -> c.getRange().contains(absenceRequest.startAtAsDate())
+            && c.getRange().contains(absenceRequest.endToAsDate()));
+    if (!insideContracts) {
+      problems.add("Non è possibile fare una richiesta in una data non "
+          + "coperta da nessun contratto del dipendente");
+    }
+    if (absenceRequest.startAtAsDate().isBefore(LocalDate.now())
+        && (absenceRequest.getNote() == null || absenceRequest.getNote().isBlank())) {
+      problems.add("Inserire una motivazione per l'assenza nel passato");
+    }
+    if (!problems.isEmpty()) {
+      return problems;
+    }
+
+    // simulazione dell'inserimento delle assenze, come nella form web
+    AbsenceType absenceType = null;
+    JustifiedType justifiedType = null;
+    if (hourly) {
+      absenceType = absenceDao.absenceTypeByCode("661M").get();
+      justifiedType = absenceDao.getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+    }
+    AbsenceForm absenceForm = absenceService.buildAbsenceForm(person,
+        absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null,
+        getGroupAbsenceType(absenceRequest), false, absenceType, justifiedType, hours, minutes,
+        false, true);
+    InsertReport insertReport = absenceService.insert(person, absenceForm.groupSelected,
+        absenceForm.from, absenceForm.to, absenceForm.absenceTypeSelected,
+        absenceForm.justifiedTypeSelected, absenceForm.hours, absenceForm.minutes, false,
+        absenceManager);
+    insertReport.criticalErrors.forEach(error -> problems.add(
+        String.format("%s: %s", error.date, Messages.get(error.criticalProblem))));
+    for (TemplateRow row : insertReport.insertTemplateRows) {
+      if (!row.absenceErrors.isEmpty() && !row.onlyNotOnHoliday()) {
+        row.absenceErrors.forEach(error -> problems.add(
+            String.format("%s: %s", row.date, Messages.get(error.absenceProblem))));
+      }
+    }
+    if (problems.isEmpty() && insertReport.howManySuccess() == 0) {
+      problems.add("Nel periodo richiesto non ci sono giorni in cui inserire l'assenza");
+    }
+    if (problems.isEmpty()) {
+      checkAbsenceRequestDates(absenceRequest, insertReport);
+    }
+    return problems;
   }
 
   /**

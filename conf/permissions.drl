@@ -900,6 +900,41 @@ then
   $c.grant();
 end
 
+/* API REST self-service: i dati sono sempre quelli della persona dell'utente autenticato */
+rule EmployeeSelfServiceRest
+when
+  $uro: UsersRolesOffices()
+  Role(name == Role.EMPLOYEE) from $uro.role
+  $c: PermissionCheck(action in ("rest.v4.Me.show", "rest.v4.Me.month", "rest.v4.Me.day",
+      "rest.v4.Me.vacations", "rest.v4.Me.mealTickets", "rest.v4.Me.absenceRequests",
+      "rest.v4.Me.absenceRequest", "rest.v4.Me.createAbsenceRequest",
+      "rest.v4.Me.deleteAbsenceRequest"), target == null, granted == false)
+then
+  $c.grant();
+end
+
+rule EmployeeSelfServiceRestShowOwnAbsenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $ar: AbsenceRequest(person == currentOperator.person)
+  $c: PermissionCheck(action == "rest.v4.Me.absenceRequest", target == $ar, granted == false)
+then
+  $c.grant();
+end
+
+/* Che la richiesta non abbia ancora approvazioni è verificato nel controller: in Drools
+   managerApproved, administrativeApproved e officeHeadApproved si risolvono nei metodi
+   booleani isXxxApproved() e non nelle date. */
+rule EmployeeSelfServiceRestDeleteOwnAbsenceRequest
+when
+  UsersRolesOffices(role.name == Role.EMPLOYEE)
+  $ar: AbsenceRequest(person == currentOperator.person, flowEnded == false)
+  $c: PermissionCheck(action == "rest.v4.Me.deleteAbsenceRequest", target == $ar,
+      granted == false)
+then
+  $c.grant();
+end
+
 rule EmployeeCanDeleteAbsenceRequest
 when 
   UsersRolesOffices(role.name == Role.EMPLOYEE)
