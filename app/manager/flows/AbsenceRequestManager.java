@@ -326,6 +326,104 @@ public class AbsenceRequestManager {
   }
 
   /**
+   * Esito dell'inserimento di una nuova richiesta di assenza.
+   */
+  public enum NewRequestOutcome {
+    /** Il flusso è avviato ed è stato notificato il primo approvatore. */
+    FLOW_STARTED,
+    /** Richiesta di un livello I-III che non necessita di autorizzazione. */
+    TOP_LEVEL_SELF_APPROVED,
+    /** Richiesta approvata direttamente da chi l'ha inserita (es. responsabile di sede). */
+    APPROVED,
+    /** Il flusso è avviato ma l'approvazione da parte di chi l'ha inserita non è riuscita. */
+    APPROVAL_FAILED
+  }
+
+  /**
+   * Salva una nuova richiesta di assenza e ne avvia il flusso, effettuando le eventuali
+   * approvazioni automatiche ed inviando le notifiche previste.
+   *
+   * <p>La verifica che l'utente possa inserire la richiesta per la persona indicata è a carico
+   * del chiamante.</p>
+   *
+   * @param absenceRequest la nuova richiesta di assenza, con persona e tipo impostati
+   * @param hours le ore richieste (per i permessi orari)
+   * @param minutes i minuti richiesti (per i permessi orari)
+   * @param absenceType il tipo di assenza scelto (per i permessi personali)
+   * @param absenceCode il codice di assenza scelto, se presente
+   * @param currentUser l'utente che inserisce la richiesta
+   * @return l'esito dell'inserimento
+   */
+  public NewRequestOutcome saveNewRequest(AbsenceRequest absenceRequest, Integer hours,
+      Integer minutes, AbsenceType absenceType, String absenceCode, User currentUser) {
+    Verify.verify(!absenceRequest.isPersistent(), "La richiesta di assenza deve essere nuova");
+
+    initNewRequest(absenceRequest);
+    configure(absenceRequest);
+
+    if (absenceRequest.getEndTo() == null) {
+      absenceRequest.setEndTo(absenceRequest.getStartAt());
+    }
+
+    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)
+        && absenceType.isAllDayPermitted()) {
+      absenceRequest.setHours(null);
+      absenceRequest.setMinutes(null);
+    } else {
+      absenceRequest.setHours(hours);
+      if (minutes != null) {
+        absenceRequest.setMinutes(minutes);
+      } else {
+        absenceRequest.setMinutes(0);
+      }
+    }
+    if (absenceCode != null && !absenceCode.isBlank()) {
+      absenceRequest.setAbsenceCode(absenceCode);
+    }
+
+    List<LocalDate> troubleDays = getTroubleDays(absenceRequest);
+    if (!troubleDays.isEmpty()) {
+      absenceRequest.setNote(generateNoteForShiftOrReperibility(troubleDays));
+    }
+
+    absenceRequest.save();
+
+    executeEvent(absenceRequest, absenceRequest.getPerson(),
+        AbsenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
+
+    //Nel caso si tratti di una "comunicazione" di assenza da parte di
+    //un livelli I-III e non sia necessaria nessuna autorizzazione, allora
+    //si invia solo una notifica al responsabile sede e/o responsabile gruppo
+    //(dipendente dalla configurazione)
+    if (!generalSettingDao.generalSetting().isEnableAbsenceTopLevelAuthorization()
+        && absenceRequest.getPerson().isTopQualification()
+        && absenceRequest.getType().canBeInsertedByTopLevelWithoutApproval) {
+      topLevelSelfApproval(absenceRequest, absenceRequest.getPerson());
+      notificationManager.sendEmailAbsenceNotification(absenceRequest);
+      return NewRequestOutcome.TOP_LEVEL_SELF_APPROVED;
+    }
+    if (absenceRequest.getPerson().isSeatSupervisor()
+        || (absenceRequest.getPerson().isGroupManager()
+        && !absenceRequest.isOfficeHeadApprovalForManagerRequired())) {
+      if (!approval(absenceRequest, currentUser)) {
+        log.error("Approvazione di {} da parte di {} non riuscita", absenceRequest,
+            currentUser.getLabel());
+        return NewRequestOutcome.APPROVAL_FAILED;
+      }
+      notificationManager.sendEmailToUser(Optional.fromNullable(absenceRequest),
+          Optional.absent(), Optional.absent(), true);
+      return NewRequestOutcome.APPROVED;
+    }
+    // invio la notifica al primo che deve validare la mia richiesta
+    notificationManager.notificationAbsenceRequestPolicy(absenceRequest.getPerson().getUser(),
+        absenceRequest, Crud.CREATE);
+    // invio anche la mail
+    notificationManager.sendEmailAbsenceRequestPolicy(absenceRequest.getPerson().getUser(),
+        absenceRequest, true);
+    return NewRequestOutcome.FLOW_STARTED;
+  }
+
+  /**
    * Verifica se il tipo di evento è eseguibile dall'utente indicato.
    *
    * @param absenceRequest la richiesta di assenza.

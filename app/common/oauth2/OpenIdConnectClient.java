@@ -6,6 +6,7 @@ import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.UrlJwkProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.hash.Hashing;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -22,12 +23,14 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.lang3.RandomStringUtils;
 import play.libs.OAuth2;
 import play.libs.WS;
@@ -61,6 +64,9 @@ public final class OpenIdConnectClient {
   private final Supplier<String> callBackUrl;
   // Il client id di ePAS, da verificare nel claim azp degli access token
   private final String clientId;
+  // I client ammessi nel claim azp: quello di ePAS più gli eventuali client aggiuntivi
+  // (es. l'app mobile) che chiamano le API REST con un access token dello stesso realm
+  private final Set<String> allowedClientIds;
   private final String base64Auth;
   private final JwksResolver jwksResolver;
   // Il campo da considerare per il match dell'utente (default: email)
@@ -73,17 +79,23 @@ public final class OpenIdConnectClient {
    * @param callBackUrl url di callback
    * @param clientId id del client
    * @param secret il secret
+   * @param additionalClientIds altri client i cui access token sono accettati dalle API
    * @param jwtField campo da analizzare
    * @param jwksCacheSize dimensione della cache
    * @param jwksCacheDuration durata della cache 
    * @throws IOException eccezione IO
    */
   public OpenIdConnectClient(String configUrl, Supplier<String> callBackUrl, String clientId,
-      String secret, String jwtField, long jwksCacheSize, long jwksCacheDuration) 
-        throws IOException {
+      String secret, Set<String> additionalClientIds, String jwtField, long jwksCacheSize,
+      long jwksCacheDuration) throws IOException {
 
     this.callBackUrl = callBackUrl;
     this.clientId = clientId;
+    val allowed = ImmutableSet.<String>builder().addAll(additionalClientIds);
+    if (clientId != null) {
+      allowed.add(clientId);
+    }
+    this.allowedClientIds = allowed.build();
     this.jwtField = Objects.requireNonNullElse(jwtField, DEFAULT_FIELD);
 
     ObjectMapper mapper = new ObjectMapper()

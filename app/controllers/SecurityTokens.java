@@ -255,7 +255,7 @@ public class SecurityTokens extends Controller {
       claims = JwtValidator.validateLocal(jwt, key(), Router.getBaseUrl());
     } else {
       claims = JwtValidator.validateOidc(jwt, openIdConnectClient.getJwksResolver(),
-          openIdConnectClient.getConfig().getIssuer(), openIdConnectClient.getClientId());
+          openIdConnectClient.getConfig().getIssuer(), openIdConnectClient.getAllowedClientIds());
     }
     return claims.get(openIdConnectClient.getJwtField(), String.class);
   }
