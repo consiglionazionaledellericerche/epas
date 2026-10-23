@@ -1,0 +1,1 @@
+${new com.google.gson.Gson().toJson([error: exception?.message ?: "Accesso negato"]).raw()}

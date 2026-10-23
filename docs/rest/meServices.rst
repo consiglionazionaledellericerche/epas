@@ -43,6 +43,30 @@ Nei token il dipendente viene riconosciuto con lo stesso campo utilizzato per il
 Negli esempi successivi per semplicità viene utilizzata l'autenticazione *Basic Auth* con
 l'utente *galileo.galilei*, cambiatelo con un dipendente della vostra sede.
 
+Errori
+------
+
+Tutte le risposte di errore sono in JSON con il messaggio nel campo *error*, per esempio:
+
+.. code-block:: json
+
+  {
+    "error": "Richiesta di assenza non trovata"
+  }
+
+L'unica eccezione è l'inserimento di una richiesta di assenza non inseribile, che riporta
+l'elenco dei problemi riscontrati nel campo *errors* (vedi sotto).
+
+I codici di stato utilizzati sono:
+
+* *400 Bad Request*: parametri o body della richiesta non validi
+* *401 Unauthorized*: autenticazione assente o non valida (con l'header *WWW-Authenticate*)
+* *403 Forbidden*: utente senza persona associata o senza il ruolo di *Dipendente*
+* *404 Not Found*: dato non presente, oppure richiesta di assenza inesistente o di un'altra
+  persona
+* *405 Method Not Allowed*: metodo HTTP non ammesso dal servizio (con l'header *Allow*)
+* *409 Conflict*: operazione non più possibile sulla richiesta di assenza
+
 Profilo del dipendente
 ----------------------
 
@@ -362,6 +386,7 @@ ancora approvata, tramite una HTTP DELETE all'indirizzo
 
   $ http -a galileo.galilei DELETE https://epas-demo.devel.iit.cnr.it/rest/v4/me/absenceRequests/4321
 
-Se la richiesta è già stata approvata, anche solo in parte, oppure il flusso è terminato la
-risposta è *409 Conflict*. I responsabili che dovevano approvare la richiesta ricevono una
-notifica del ritiro.
+Se il ritiro va a buon fine la risposta è *200 OK* con la richiesta aggiornata, nello stesso
+formato del dettaglio e con *status* uguale a *DELETED*. Se la richiesta è già stata approvata,
+anche solo in parte, oppure il flusso è terminato la risposta è *409 Conflict*. I responsabili
+che dovevano approvare la richiesta ricevono una notifica del ritiro.

@@ -41,9 +41,6 @@ import dao.PersonDayDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import helpers.JodaConverters;
-import helpers.JsonResponse;
-import helpers.rest.RestUtils;
-import helpers.rest.RestUtils.HttpMethod;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -67,7 +64,9 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
 import play.db.jpa.JPA;
+import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Finally;
 import play.mvc.With;
 
 /**
@@ -77,7 +76,9 @@ import play.mvc.With;
  * parametri della richiesta: un dipendente può vedere e modificare solo i propri dati.</p>
  *
  * <p>Le azioni sono annotate con BasicAuth: senza autenticazione rispondono 401 invece di
- * reindirizzare alla pagina di login.</p>
+ * reindirizzare alla pagina di login. Tutti gli errori sono in JSON nella forma
+ * {"error": "..."}, tranne quelli di validazione delle nuove richieste che riportano l'elenco
+ * dei problemi nel campo errors.</p>
  */
 @Slf4j
 @With(Resecure.class)
@@ -119,7 +120,7 @@ public class Me extends Controller {
    */
   @BasicAuth
   public static void show() {
-    RestUtils.checkMethod(request, HttpMethod.GET);
+    checkMethod("GET");
     val person = currentPerson();
     val currentContract = wrapperFactory.create(person).getCurrentContract();
     val requestTypes = SUPPORTED_REQUEST_TYPES.stream().map(type -> {
@@ -151,13 +152,13 @@ public class Me extends Controller {
    */
   @BasicAuth
   public static void month(Integer year, Integer month) {
-    RestUtils.checkMethod(request, HttpMethod.GET);
+    checkMethod("GET");
     val person = currentPerson();
     val today = LocalDate.now();
     int y = year != null ? year : today.getYear();
     int m = month != null ? month : today.getMonthValue();
     if (m < 1 || m > 12) {
-      JsonResponse.badRequest("Il parametro month deve essere compreso tra 1 e 12");
+      jsonError(400, "Il parametro month deve essere compreso tra 1 e 12");
     }
 
     val personDays = personDayDao.getPersonDayInMonth(person, new YearMonth(y, m));
@@ -185,13 +186,13 @@ public class Me extends Controller {
    */
   @BasicAuth
   public static void day(LocalDate date) {
-    RestUtils.checkMethod(request, HttpMethod.GET);
+    checkMethod("GET");
     val person = currentPerson();
     val day = date != null ? date : LocalDate.now();
     val personDay =
         personDayDao.getPersonDay(person, JodaConverters.javaToJodaLocalDate(day)).orNull();
     if (personDay == null) {
-      JsonResponse.notFound(String.format("Non sono presenti informazioni nel giorno %s", day));
+      jsonError(404, String.format("Non sono presenti informazioni nel giorno %s", day));
     }
     renderJSON(gsonBuilder.create().toJson(PersonDayShowTerseDto.build(personDay)));
   }
@@ -203,7 +204,7 @@ public class Me extends Controller {
    */
   @BasicAuth
   public static void vacations(Integer year) {
-    RestUtils.checkMethod(request, HttpMethod.GET);
+    checkMethod("GET");
     val person = currentPerson();
     int y = year != null ? year : LocalDate.now().getYear();
     val vacationGroup = absenceComponentDao
@@ -220,7 +221,7 @@ public class Me extends Controller {
    */
   @BasicAuth
   public static void mealTickets() {
-    RestUtils.checkMethod(request, HttpMethod.GET);
+    checkMethod("GET");
     val person = currentPerson();
     val today = LocalDate.now();
     val recap = stampingsRecapFactory.create(
@@ -238,7 +239,7 @@ public class Me extends Controller {
    */
   @BasicAuth
   public static void absenceRequests(AbsenceRequestType type, Boolean active, LocalDate from) {
-    RestUtils.checkMethod(request, HttpMethod.GET);
+    checkMethod("GET");
     val person = currentPerson();
     val fromDate = from != null
         ? startOfDay(from) : LocalDateTime.now().dayOfYear().withMinimumValue().minusMonths(1);
@@ -261,7 +262,7 @@ public class Me extends Controller {
    */
   @BasicAuth
   public static void absenceRequest(Long id) {
-    RestUtils.checkMethod(request, HttpMethod.GET);
+    checkMethod("GET");
     val absenceRequest = ownAbsenceRequest(id);
     rules.checkIfPermitted(absenceRequest);
     renderJSON(gsonBuilder.create().toJson(AbsenceRequestShowDto.build(absenceRequest)));
@@ -277,23 +278,24 @@ public class Me extends Controller {
    */
   @BasicAuth
   public static void createAbsenceRequest(String body) {
-    RestUtils.checkMethod(request, HttpMethod.POST);
+    checkMethod("POST");
     val person = currentPerson();
     if (body == null) {
-      JsonResponse.badRequest("Il body della richiesta è obbligatorio");
+      jsonError(400, "Il body della richiesta è obbligatorio");
     }
     val gson = gsonBuilder.create();
     AbsenceRequestCreateDto dto = null;
     try {
       dto = gson.fromJson(body, AbsenceRequestCreateDto.class);
     } catch (JsonParseException ex) {
-      JsonResponse.badRequest("JSON non valido: " + ex.getMessage());
+      log.debug("JSON non valido nella richiesta di assenza: {}", ex.getMessage());
+      jsonError(400, "Il body della richiesta non è un JSON valido");
     }
     if (dto == null || !validation.valid(dto).ok) {
-      JsonResponse.badRequest("I campi type e startAt sono obbligatori");
+      jsonError(400, "I campi type e startAt sono obbligatori");
     }
     if (!SUPPORTED_REQUEST_TYPES.contains(dto.getType())) {
-      JsonResponse.badRequest(
+      jsonError(400, 
           String.format("Il tipo di richiesta %s non è gestito", dto.getType()));
     }
 
@@ -330,28 +332,67 @@ public class Me extends Controller {
   }
 
   /**
-   * Ritira una richiesta di assenza non ancora approvata.
+   * Ritira una richiesta di assenza non ancora approvata e la restituisce aggiornata.
    *
    * @param id l'id della richiesta
    */
   @BasicAuth
   public static void deleteAbsenceRequest(Long id) {
-    RestUtils.checkMethod(request, HttpMethod.DELETE);
+    checkMethod("DELETE");
     val absenceRequest = ownAbsenceRequest(id);
     if (!AbsenceRequestShowDto.isDeletable(absenceRequest)) {
-      JsonResponse.conflict("La richiesta è già stata approvata o il flusso è terminato");
+      jsonError(409, "La richiesta è già stata approvata o il flusso è terminato");
     }
     rules.checkIfPermitted(absenceRequest);
     val problem = absenceRequestManager.executeEvent(absenceRequest, currentPerson(),
         AbsenceRequestEventType.DELETE, Optional.absent());
     if (problem.isPresent()) {
-      JsonResponse.conflict(problem.get());
+      jsonError(409, problem.get());
     }
     // invio la notifica a chi doveva validare la richiesta
     notificationManager.notificationAbsenceRequestPolicy(absenceRequest.getPerson().getUser(),
         absenceRequest, Crud.DELETE);
     log.info("Ritirata via REST {}", absenceRequest);
-    JsonResponse.ok();
+    JPA.em().flush();
+    absenceRequest.refresh();
+    renderJSON(gsonBuilder.create().toJson(AbsenceRequestShowDto.build(absenceRequest)));
+  }
+
+  /**
+   * Gli errori prodotti dai controlli di Resecure (es. 403 per i permessi) usano i template
+   * errors/*.json: il formato va impostato prima di quei controlli.
+   */
+  @Before(priority = 0)
+  static void jsonErrors() {
+    request.format = "json";
+  }
+
+  /**
+   * Il 401 di Resecure non ha corpo: si aggiunge il messaggio in JSON come per gli altri
+   * errori.
+   */
+  @Finally
+  static void jsonUnauthorized() {
+    if (response.status != null && response.status == 401 && response.out.size() == 0) {
+      response.contentType = "application/json; charset=utf-8";
+      response.print(gsonBuilder.create().toJson(
+          ImmutableMap.of("error", "Autenticazione richiesta")));
+    }
+  }
+
+  /**
+   * Risponde con lo stato indicato e il messaggio nel campo error del JSON.
+   */
+  private static void jsonError(int status, String message) {
+    response.status = status;
+    renderJSON(gsonBuilder.create().toJson(ImmutableMap.of("error", message)));
+  }
+
+  private static void checkMethod(String method) {
+    if (!method.equals(request.method)) {
+      response.setHeader("Allow", method);
+      jsonError(405, String.format("Questo servizio accetta solo il metodo %s", method));
+    }
   }
 
   private static LocalDateTime startOfDay(LocalDate date) {
@@ -368,9 +409,7 @@ public class Me extends Controller {
   private static Person currentPerson() {
     val person = currentUser().getPerson();
     if (person == null) {
-      response.status = 403;
-      renderJSON(gsonBuilder.create().toJson(ImmutableMap.of("error",
-          "L'utente corrente non ha associata una persona")));
+      jsonError(403, "L'utente corrente non ha associata una persona");
     }
     return person;
   }
@@ -383,7 +422,7 @@ public class Me extends Controller {
     val person = currentPerson();
     AbsenceRequest absenceRequest = id != null ? AbsenceRequest.findById(id) : null;
     if (absenceRequest == null || !absenceRequest.getPerson().equals(person)) {
-      JsonResponse.notFound();
+      jsonError(404, "Richiesta di assenza non trovata");
     }
     return absenceRequest;
   }

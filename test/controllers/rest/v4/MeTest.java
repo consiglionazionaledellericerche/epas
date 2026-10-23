@@ -45,6 +45,7 @@ public class MeTest extends FunctionalTest {
 
   @Inject
   private static H2Examples h2Examples;
+
   @Test
   public void employeeReadsOwnProfile() {
     Person employee = employee();
@@ -60,8 +61,10 @@ public class MeTest extends FunctionalTest {
 
   @Test
   public void anonymousRequestIsUnauthorized() {
-    assertStatus(401, GET("/rest/v4/me"));
-    assertStatus(401, GET(REQUESTS));
+    Response response = GET("/rest/v4/me");
+    assertJsonError(401, response);
+    assertNotNull(response.getHeader("WWW-Authenticate"));
+    assertJsonError(401, GET(REQUESTS));
   }
 
   @Test
@@ -70,8 +73,9 @@ public class MeTest extends FunctionalTest {
     commit();
 
     login(person);
-    assertStatus(403, GET("/rest/v4/me"));
-    assertStatus(403, GET(REQUESTS));
+    // negato dalle regole di sicurezza prima di arrivare al controller
+    assertJsonError(403, GET("/rest/v4/me"));
+    assertJsonError(403, GET(REQUESTS));
   }
 
   @Test
@@ -82,7 +86,8 @@ public class MeTest extends FunctionalTest {
     login(employee);
     assertIsOk(GET("/rest/v4/me/month?year=2026&month=9"));
     assertIsOk(GET("/rest/v4/me/mealTickets"));
-    assertStatus(400, GET("/rest/v4/me/month?year=2026&month=13"));
+    assertJsonError(400, GET("/rest/v4/me/month?year=2026&month=13"));
+    assertJsonError(404, GET("/rest/v4/me/day?date=2026-12-24"));
   }
 
   @Test
@@ -92,17 +97,18 @@ public class MeTest extends FunctionalTest {
 
     login(employee);
     // startAt obbligatorio
-    assertStatus(400, POST(REQUESTS, JSON, "{\"type\":\"VACATION_REQUEST\"}"));
+    assertJsonError(400, POST(REQUESTS, JSON, "{\"type\":\"VACATION_REQUEST\"}"));
     // tipo non gestito dalle API
-    assertStatus(400, POST(REQUESTS, JSON,
+    assertJsonError(400, POST(REQUESTS, JSON,
         "{\"type\":\"SHORT_TERM_PERMIT\",\"startAt\":\"2026-11-02\"}"));
     // JSON non valido
-    assertStatus(400, POST(REQUESTS, JSON, "{"));
+    assertJsonError(400, POST(REQUESTS, JSON, "{"));
     // fine precedente all'inizio
     Response response = POST(REQUESTS, JSON,
         "{\"type\":\"VACATION_REQUEST\",\"startAt\":\"2026-11-03\",\"endTo\":\"2026-11-02\"}");
     assertStatus(400, response);
-    assertContentMatch("errors", response);
+    assertContentType(JSON, response);
+    assertContentMatch("\"errors\":\\[", response);
     assertEquals(0, AbsenceRequest.count("person = ?1", employee));
   }
 
@@ -112,7 +118,9 @@ public class MeTest extends FunctionalTest {
     commit();
 
     login(employee);
-    assertStatus(400, GET("/rest/v4/me/createAbsenceRequest"));
+    Response response = GET("/rest/v4/me/createAbsenceRequest");
+    assertJsonError(405, response);
+    assertEquals("POST", response.getHeader("Allow"));
   }
 
   @Test
@@ -125,22 +133,24 @@ public class MeTest extends FunctionalTest {
 
     login(employee);
     assertIsOk(GET(REQUESTS + "/" + own.id));
-    assertStatus(404, GET(REQUESTS + "/" + other.id));
-    assertStatus(404, DELETE(REQUESTS + "/" + other.id));
+    assertJsonError(404, GET(REQUESTS + "/" + other.id));
+    assertJsonError(404, DELETE(REQUESTS + "/" + other.id));
     // la cancellazione è ammessa solo con DELETE
-    assertStatus(400, GET("/rest/v4/me/deleteAbsenceRequest/" + own.id));
+    assertJsonError(405, GET("/rest/v4/me/deleteAbsenceRequest/" + own.id));
 
     Response list = GET(REQUESTS + "?from=2026-01-01");
     assertIsOk(list);
     assertContentMatch("\"id\":" + own.id + ",", list);
     assertFalse(getContent(list).contains("\"id\":" + other.id + ","));
 
-    assertIsOk(DELETE(REQUESTS + "/" + own.id));
+    Response deleted = DELETE(REQUESTS + "/" + own.id);
+    assertIsOk(deleted);
+    assertContentMatch("\"status\":\"DELETED\"", deleted);
     JPA.em().clear();
     assertTrue(AbsenceRequest.<AbsenceRequest>findById(own.id).isFlowEnded());
     assertFalse(AbsenceRequest.<AbsenceRequest>findById(other.id).isFlowEnded());
     // una richiesta ritirata non si può ritirare di nuovo
-    assertStatus(409, DELETE(REQUESTS + "/" + own.id));
+    assertJsonError(409, DELETE(REQUESTS + "/" + own.id));
   }
 
   @Test
@@ -152,7 +162,16 @@ public class MeTest extends FunctionalTest {
     commit();
 
     login(employee);
-    assertStatus(409, DELETE(REQUESTS + "/" + approved.id));
+    assertJsonError(409, DELETE(REQUESTS + "/" + approved.id));
+  }
+
+  /**
+   * Tutti gli errori delle API sono in JSON nella forma {"error": "..."}.
+   */
+  private void assertJsonError(int status, Response response) {
+    assertStatus(status, response);
+    assertContentType(JSON, response);
+    assertContentMatch("^\\{\"error\":\".+\"\\}$", response);
   }
 
   private Person employee() {
