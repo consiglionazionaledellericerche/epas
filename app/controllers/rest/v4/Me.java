@@ -66,6 +66,7 @@ import models.flows.enumerate.AbsenceRequestType;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.YearMonth;
+import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -320,6 +321,9 @@ public class Me extends Controller {
     val outcome = absenceRequestManager.saveNewRequest(absenceRequest, dto.getHours(),
         dto.getMinutes(), absenceType, null, currentUser());
     log.info("Inserita via REST {} con esito {}", absenceRequest, outcome);
+    // gli eventi del flusso sono salvati a parte, si rilegge la richiesta per includerli
+    JPA.em().flush();
+    absenceRequest.refresh();
 
     response.status = 201;
     renderJSON(gson.toJson(AbsenceRequestShowDto.build(absenceRequest)));
