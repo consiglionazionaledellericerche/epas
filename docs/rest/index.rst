@@ -24,6 +24,10 @@ disponibile all'indirizzo `https://epas-demo.devel.iit.cnr.it <https://epas-demo
 Naturalmente gli stessi comandi che trovate di seguito possono essere eseguiti anche nella istanza
 di ePAS in produzione del vostro ente.
 
+I servizi self-service per il dipendente (*/rest/v4/me*) sono accessibili con il ruolo di
+*Dipendente* e possono essere chiamati anche con un *access token* OIDC, come descritto nella
+relativa sezione.
+
 .. toctree::
    :maxdepth: 2
    :caption: Indice dei contenuti
@@ -45,4 +49,5 @@ di ePAS in produzione del vostro ente.
    badgeServices
    absenceTypesServices
    mealTicketsServices
+   meServices
 

@@ -62,6 +62,17 @@ PUT		/stampings/create						StampingsFromClient.create
 
 GET     /rest/persons/{email}/{action}          rest.Persons.{action}
 
+# API self-service del dipendente autenticato
+GET     /rest/v4/me                                     rest.v4.Me.show
+GET     /rest/v4/me/month                               rest.v4.Me.month
+GET     /rest/v4/me/day                                 rest.v4.Me.day
+GET     /rest/v4/me/vacations                           rest.v4.Me.vacations
+GET     /rest/v4/me/mealTickets                         rest.v4.Me.mealTickets
+GET     /rest/v4/me/absenceRequests                     rest.v4.Me.absenceRequests
+POST    /rest/v4/me/absenceRequests                     rest.v4.Me.createAbsenceRequest
+GET     /rest/v4/me/absenceRequests/{<[0-9]+>id}        rest.v4.Me.absenceRequest
+DELETE  /rest/v4/me/absenceRequests/{<[0-9]+>id}        rest.v4.Me.deleteAbsenceRequest
+
 *       /rest/v{<[0-9]+>version}/{controller}/{action}/{<[a-z0-9]+>id} rest.v{version}.{controller}.{action}
 *       /rest/v{<[0-9]+>version}/{controller}/{action}             rest.v{version}.{controller}.{action}
 

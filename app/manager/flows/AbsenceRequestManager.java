@@ -71,9 +71,11 @@ import org.apache.commons.compress.utils.Lists;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.db.jpa.JPA;
+import play.i18n.Messages;
 
 /**
  * Operazioni sulle richiesta di assenza.
@@ -323,6 +325,208 @@ public class AbsenceRequestManager {
     absenceRequest.setFlowEnded(false);
     absenceRequest.setEvents(Lists.newArrayList());
     absenceRequest.setAttachment(null);
+  }
+
+  /**
+   * Verifica che una nuova richiesta di assenza sia inseribile, con gli stessi controlli
+   * effettuati dalla form web (configurazione della sede, date, richieste già presenti, mesi
+   * già inviati ad Attestati, contratti e simulazione dell'inserimento delle assenze).
+   *
+   * <p>Se la richiesta termina dopo l'ultimo giorno inseribile la data di fine viene
+   * adeguata, come nella form web.</p>
+   *
+   * @param absenceRequest la nuova richiesta, con persona, tipo e date impostati
+   * @param hours le ore richieste (solo per i permessi personali orari)
+   * @param minutes i minuti richiesti (solo per i permessi personali orari)
+   * @return i problemi riscontrati, vuota se la richiesta è inseribile
+   */
+  public List<String> checkNewRequest(AbsenceRequest absenceRequest, Integer hours,
+      Integer minutes) {
+    Verify.verifyNotNull(absenceRequest.getType());
+    Verify.verifyNotNull(absenceRequest.getPerson());
+    val person = absenceRequest.getPerson();
+
+    List<String> problems = checkconfiguration(absenceRequest.getType(), person);
+    if (!problems.isEmpty()) {
+      return problems;
+    }
+    if (absenceRequest.getStartAt() == null) {
+      problems.add("La data di inizio è obbligatoria");
+      return problems;
+    }
+    if (absenceRequest.getEndTo() == null) {
+      absenceRequest.setEndTo(absenceRequest.getStartAt());
+    }
+    if (absenceRequest.getStartAt().isAfter(absenceRequest.getEndTo())) {
+      problems.add("La data di fine non può precedere quella di inizio");
+    }
+    if (absenceRequest.getEndTo().compareTo(absenceRequest.getStartAt().plusMonths(6)) > 0) {
+      problems.add("Le richieste di assenza non possono essere per periodi maggiori di sei mesi. "
+          + "Eventualmente effettuare più richieste di assenza.");
+    }
+    boolean hourly = hours != null || minutes != null;
+    if (hourly && !absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
+      problems.add("Ore e minuti sono ammessi solo per i permessi personali");
+    }
+    if (hourly && !absenceRequest.startAtAsDate().equals(absenceRequest.endToAsDate())) {
+      problems.add("Un permesso orario deve essere per un solo giorno");
+    }
+    if (!problems.isEmpty()) {
+      return problems;
+    }
+
+    if (checkAbsenceRequest(absenceRequest) != null) {
+      problems.add("Esiste già una richiesta in questa data");
+    }
+    if (!person.checkLastCertificationDate(new YearMonth(
+        absenceRequest.startAtAsDate().getYear(),
+        absenceRequest.startAtAsDate().getMonthOfYear()))) {
+      problems.add("Non è possibile fare una richiesta per una data di un mese già processato "
+          + "in Attestati");
+    }
+    boolean insideContracts = person.getContracts().stream()
+        .anyMatch(c -> c.getRange().contains(absenceRequest.startAtAsDate())
+            && c.getRange().contains(absenceRequest.endToAsDate()));
+    if (!insideContracts) {
+      problems.add("Non è possibile fare una richiesta in una data non "
+          + "coperta da nessun contratto del dipendente");
+    }
+    if (absenceRequest.startAtAsDate().isBefore(LocalDate.now())
+        && (absenceRequest.getNote() == null || absenceRequest.getNote().isBlank())) {
+      problems.add("Inserire una motivazione per l'assenza nel passato");
+    }
+    if (!problems.isEmpty()) {
+      return problems;
+    }
+
+    // simulazione dell'inserimento delle assenze, come nella form web
+    AbsenceType absenceType = null;
+    JustifiedType justifiedType = null;
+    if (hourly) {
+      absenceType = absenceDao.absenceTypeByCode("661M").get();
+      justifiedType = absenceDao.getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+    }
+    AbsenceForm absenceForm = absenceService.buildAbsenceForm(person,
+        absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null,
+        getGroupAbsenceType(absenceRequest), false, absenceType, justifiedType, hours, minutes,
+        false, true);
+    InsertReport insertReport = absenceService.insert(person, absenceForm.groupSelected,
+        absenceForm.from, absenceForm.to, absenceForm.absenceTypeSelected,
+        absenceForm.justifiedTypeSelected, absenceForm.hours, absenceForm.minutes, false,
+        absenceManager);
+    insertReport.criticalErrors.forEach(error -> problems.add(
+        String.format("%s: %s", error.date, Messages.get(error.criticalProblem))));
+    for (TemplateRow row : insertReport.insertTemplateRows) {
+      if (!row.absenceErrors.isEmpty() && !row.onlyNotOnHoliday()) {
+        row.absenceErrors.forEach(error -> problems.add(
+            String.format("%s: %s", row.date, Messages.get(error.absenceProblem))));
+      }
+    }
+    if (problems.isEmpty() && insertReport.howManySuccess() == 0) {
+      problems.add("Nel periodo richiesto non ci sono giorni in cui inserire l'assenza");
+    }
+    if (problems.isEmpty()) {
+      checkAbsenceRequestDates(absenceRequest, insertReport);
+    }
+    return problems;
+  }
+
+  /**
+   * Esito dell'inserimento di una nuova richiesta di assenza.
+   */
+  public enum NewRequestOutcome {
+    /** Il flusso è avviato ed è stato notificato il primo approvatore. */
+    FLOW_STARTED,
+    /** Richiesta di un livello I-III che non necessita di autorizzazione. */
+    TOP_LEVEL_SELF_APPROVED,
+    /** Richiesta approvata direttamente da chi l'ha inserita (es. responsabile di sede). */
+    APPROVED,
+    /** Il flusso è avviato ma l'approvazione da parte di chi l'ha inserita non è riuscita. */
+    APPROVAL_FAILED
+  }
+
+  /**
+   * Salva una nuova richiesta di assenza e ne avvia il flusso, effettuando le eventuali
+   * approvazioni automatiche ed inviando le notifiche previste.
+   *
+   * <p>La verifica che l'utente possa inserire la richiesta per la persona indicata è a carico
+   * del chiamante.</p>
+   *
+   * @param absenceRequest la nuova richiesta di assenza, con persona e tipo impostati
+   * @param hours le ore richieste (per i permessi orari)
+   * @param minutes i minuti richiesti (per i permessi orari)
+   * @param absenceType il tipo di assenza scelto (per i permessi personali)
+   * @param absenceCode il codice di assenza scelto, se presente
+   * @param currentUser l'utente che inserisce la richiesta
+   * @return l'esito dell'inserimento
+   */
+  public NewRequestOutcome saveNewRequest(AbsenceRequest absenceRequest, Integer hours,
+      Integer minutes, AbsenceType absenceType, String absenceCode, User currentUser) {
+    Verify.verify(!absenceRequest.isPersistent(), "La richiesta di assenza deve essere nuova");
+
+    initNewRequest(absenceRequest);
+    configure(absenceRequest);
+
+    if (absenceRequest.getEndTo() == null) {
+      absenceRequest.setEndTo(absenceRequest.getStartAt());
+    }
+
+    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)
+        && absenceType.isAllDayPermitted()) {
+      absenceRequest.setHours(null);
+      absenceRequest.setMinutes(null);
+    } else {
+      absenceRequest.setHours(hours);
+      if (minutes != null) {
+        absenceRequest.setMinutes(minutes);
+      } else {
+        absenceRequest.setMinutes(0);
+      }
+    }
+    if (absenceCode != null && !absenceCode.isBlank()) {
+      absenceRequest.setAbsenceCode(absenceCode);
+    }
+
+    List<LocalDate> troubleDays = getTroubleDays(absenceRequest);
+    if (!troubleDays.isEmpty()) {
+      absenceRequest.setNote(generateNoteForShiftOrReperibility(troubleDays));
+    }
+
+    absenceRequest.save();
+
+    executeEvent(absenceRequest, absenceRequest.getPerson(),
+        AbsenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
+
+    //Nel caso si tratti di una "comunicazione" di assenza da parte di
+    //un livelli I-III e non sia necessaria nessuna autorizzazione, allora
+    //si invia solo una notifica al responsabile sede e/o responsabile gruppo
+    //(dipendente dalla configurazione)
+    if (!generalSettingDao.generalSetting().isEnableAbsenceTopLevelAuthorization()
+        && absenceRequest.getPerson().isTopQualification()
+        && absenceRequest.getType().canBeInsertedByTopLevelWithoutApproval) {
+      topLevelSelfApproval(absenceRequest, absenceRequest.getPerson());
+      notificationManager.sendEmailAbsenceNotification(absenceRequest);
+      return NewRequestOutcome.TOP_LEVEL_SELF_APPROVED;
+    }
+    if (absenceRequest.getPerson().isSeatSupervisor()
+        || (absenceRequest.getPerson().isGroupManager()
+        && !absenceRequest.isOfficeHeadApprovalForManagerRequired())) {
+      if (!approval(absenceRequest, currentUser)) {
+        log.error("Approvazione di {} da parte di {} non riuscita", absenceRequest,
+            currentUser.getLabel());
+        return NewRequestOutcome.APPROVAL_FAILED;
+      }
+      notificationManager.sendEmailToUser(Optional.fromNullable(absenceRequest),
+          Optional.absent(), Optional.absent(), true);
+      return NewRequestOutcome.APPROVED;
+    }
+    // invio la notifica al primo che deve validare la mia richiesta
+    notificationManager.notificationAbsenceRequestPolicy(absenceRequest.getPerson().getUser(),
+        absenceRequest, Crud.CREATE);
+    // invio anche la mail
+    notificationManager.sendEmailAbsenceRequestPolicy(absenceRequest.getPerson().getUser(),
+        absenceRequest, true);
+    return NewRequestOutcome.FLOW_STARTED;
   }
 
   /**
