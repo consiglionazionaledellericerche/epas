@@ -59,6 +59,12 @@ public class MeTest extends FunctionalTest {
   }
 
   @Test
+  public void anonymousRequestIsUnauthorized() {
+    assertStatus(401, GET("/rest/v4/me"));
+    assertStatus(401, GET(REQUESTS));
+  }
+
+  @Test
   public void userWithoutEmployeeRoleIsForbidden() {
     Person person = h2Examples.activeNormalEmployee(BEGIN_2026);
     commit();

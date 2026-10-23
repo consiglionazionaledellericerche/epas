@@ -34,6 +34,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import common.security.SecurityRules;
 import controllers.Resecure;
+import controllers.Resecure.BasicAuth;
 import controllers.Security;
 import dao.AbsenceRequestDao;
 import dao.PersonDayDao;
@@ -73,6 +74,9 @@ import play.mvc.With;
  *
  * <p>La persona è sempre quella associata all'utente autenticato e non viene mai letta dai
  * parametri della richiesta: un dipendente può vedere e modificare solo i propri dati.</p>
+ *
+ * <p>Le azioni sono annotate con BasicAuth: senza autenticazione rispondono 401 invece di
+ * reindirizzare alla pagina di login.</p>
  */
 @Slf4j
 @With(Resecure.class)
@@ -112,6 +116,7 @@ public class Me extends Controller {
    * Il profilo del dipendente: persona, sede, contratto attuale e tipi di richiesta di
    * assenza disponibili.
    */
+  @BasicAuth
   public static void show() {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = currentPerson();
@@ -143,6 +148,7 @@ public class Me extends Controller {
    * @param year l'anno, se assente quello corrente
    * @param month il mese, se assente quello corrente
    */
+  @BasicAuth
   public static void month(Integer year, Integer month) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = currentPerson();
@@ -176,6 +182,7 @@ public class Me extends Controller {
    *
    * @param date il giorno, se assente oggi
    */
+  @BasicAuth
   public static void day(LocalDate date) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = currentPerson();
@@ -193,6 +200,7 @@ public class Me extends Controller {
    *
    * @param year l'anno, se assente quello corrente
    */
+  @BasicAuth
   public static void vacations(Integer year) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = currentPerson();
@@ -209,6 +217,7 @@ public class Me extends Controller {
   /**
    * I buoni pasto residui ad oggi.
    */
+  @BasicAuth
   public static void mealTickets() {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = currentPerson();
@@ -226,6 +235,7 @@ public class Me extends Controller {
    *     terminate, se assente tutte
    * @param from la data da cui cercare, se assente un mese prima dell'inizio dell'anno
    */
+  @BasicAuth
   public static void absenceRequests(AbsenceRequestType type, Boolean active, LocalDate from) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val person = currentPerson();
@@ -248,6 +258,7 @@ public class Me extends Controller {
    *
    * @param id l'id della richiesta
    */
+  @BasicAuth
   public static void absenceRequest(Long id) {
     RestUtils.checkMethod(request, HttpMethod.GET);
     val absenceRequest = ownAbsenceRequest(id);
@@ -263,6 +274,7 @@ public class Me extends Controller {
    *
    * @param body il JSON della richiesta
    */
+  @BasicAuth
   public static void createAbsenceRequest(String body) {
     RestUtils.checkMethod(request, HttpMethod.POST);
     val person = currentPerson();
@@ -318,6 +330,7 @@ public class Me extends Controller {
    *
    * @param id l'id della richiesta
    */
+  @BasicAuth
   public static void deleteAbsenceRequest(Long id) {
     RestUtils.checkMethod(request, HttpMethod.DELETE);
     val absenceRequest = ownAbsenceRequest(id);

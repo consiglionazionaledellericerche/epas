@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.38.0] - Unreleased
+### Added
+  - API REST self-service per il dipendente autenticato (/rest/v4/me), pensate per l'app mobile:
+    profilo, situazione mensile e giornaliera, ferie e permessi, buoni pasto residui e gestione
+    delle proprie richieste di assenza (elenco, dettaglio, inserimento e ritiro). Documentate in
+    docs/rest/meServices.rst.
+  - Aggiunto il parametro keycloak.additional_client_ids (KEYCLOAK_ADDITIONAL_CLIENT_IDS nel
+    docker) con gli altri client OIDC dello stesso realm, per esempio l'app mobile, i cui access
+    token sono accettati dalle API REST.
+
+### Changed
+  - La logica di inserimento delle richieste di assenza è spostata in AbsenceRequestManager.
+    Le richieste dei responsabili di sede o di gruppo che si auto approvano sono ora approvate
+    direttamente al salvataggio, invece che tramite il passaggio dalla pagina di approvazione.
+
 ## [2.37.3] - 2026-10-19
 ### Added
   - Aggiunta la verifica del token anti-CSRF sulle richieste che modificano dati, attivabile
