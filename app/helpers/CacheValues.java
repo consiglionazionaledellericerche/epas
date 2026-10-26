@@ -136,18 +136,17 @@ public final class CacheValues {
       // Se non sta per scadere restituisco quello che ho già
       if (!LocalDateTime.now().isAfter(token.taken_at
           .plusSeconds(token.expires_in - ONE_MINUTE))) {
-        log.info("Token Oauth gia' presente in cache: token {}, expires_in {}", token.access_token,
-            token.expires_in);
+        log.info("Token Oauth gia' presente in cache: expires_in {}", token.expires_in);
         return Futures.immediateFuture(token);
       } else if (LocalDateTime.now().isAfter(token.taken_at.plusSeconds(token.expires_in))) {
         // Se è già scaduto lo richiedo in maniera sincrona
         log.info("Token Oauth presente in cache scaduto. Invio nuova richiesta per un " 
-            + "token: token attuale {}, expires_in {}", token.access_token, token.expires_in);
+            + "token: expires_in {}", token.expires_in);
         return Futures.immediateFuture(certification.refreshToken(token));
       } else {
         log.info("Token Oauth presente in cache in scadenza. Restituito valore attuale e invio " 
-            + "nuova richiesta (in modalita' asincrona) di un Token: token attuale {}, expires_in "
-            + "{}", token.access_token, token.expires_in);
+            + "nuova richiesta (in modalita' asincrona) di un Token: expires_in {}",
+            token.expires_in);
         // Faccio il refresh in maniera asincrona
         ListenableFutureTask<OauthToken> task = ListenableFutureTask
             .create(() -> certification.refreshToken(token));

@@ -158,7 +158,8 @@ public class CertificationsComunication {
 
     OauthToken accessToken = new Gson().fromJson(response.getJson(), OauthToken.class);
 
-    log.info("Ottenuto access-token dal server degli attestati: {}", response.getString());
+    log.info("Ottenuto access-token dal server degli attestati: expires_in {}",
+        accessToken.expires_in);
     return accessToken;
 
   }
@@ -188,7 +189,8 @@ public class CertificationsComunication {
 
     OauthToken accessToken = new Gson().fromJson(response.getJson(), OauthToken.class);
 
-    log.info("Ottenuto access-token dal server SSO {}: {}", url, response.getString());
+    log.info("Ottenuto access-token dal server SSO {}: expires_in {}", url,
+        accessToken.expires_in);
     return accessToken;
   }
 
@@ -220,8 +222,7 @@ public class CertificationsComunication {
         .setHeader("Authorization", "Basic " + OAUTH_AUTHORIZATION)
         .setParameters(parameters);
 
-    log.info("Invio richiesta Refresh-Token ad attestati. Token precedente: {}", token
-        .refresh_token);
+    log.info("Invio richiesta Refresh-Token ad attestati");
     HttpResponse response = req.post();
 
     if (response.getStatus() != Http.StatusCode.OK) {
@@ -236,7 +237,8 @@ public class CertificationsComunication {
 
     OauthToken accessToken = new Gson().fromJson(response.getJson(), OauthToken.class);
 
-    log.info("Ottenuto refresh-token oauth dal server degli attestati: {}", response.getString());
+    log.info("Ottenuto refresh-token oauth dal server degli attestati: expires_in {}",
+        accessToken.expires_in);
     return accessToken;
   }
 
@@ -267,8 +269,7 @@ public class CertificationsComunication {
         .setHeader("Content-Type", OAUTH_CONTENT_TYPE)
         .setParameters(parameters);
 
-    log.info("Invio richiesta Refresh-Token al server SSO. Token precedente: {}. Url = {}", token
-        .refresh_token, url);
+    log.info("Invio richiesta Refresh-Token al server SSO. Url = {}", url);
     HttpResponse response = req.post();
 
     if (response.getStatus() != Http.StatusCode.OK) {
@@ -280,7 +281,8 @@ public class CertificationsComunication {
 
     OauthToken accessToken = new Gson().fromJson(response.getJson(), OauthToken.class);
 
-    log.info("Ottenuto refresh-token oauth dal server SSO: {}. Url = {}", response.getString(), url);
+    log.info("Ottenuto refresh-token oauth dal server SSO: expires_in {}. Url = {}",
+        accessToken.expires_in, url);
     return accessToken;
   }
 
@@ -332,7 +334,7 @@ public class CertificationsComunication {
     // Caso di token non valido
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
       cacheValues.oauthToken.invalidateAll();
-      log.error("Token Oauth non valido: {}", token);
+      log.error("Token Oauth non valido");
       throw new ApiRequestException("Invalid token");
     }
 
@@ -381,7 +383,7 @@ public class CertificationsComunication {
       // Caso di token non valido
       if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
         cacheValues.oauthToken.invalidateAll();
-        log.error("Token Oauth non valido: {}", token);
+        log.error("Token Oauth non valido");
         throw new ApiRequestException("Invalid token");
       }
 
@@ -586,7 +588,7 @@ public class CertificationsComunication {
       // Caso di token non valido
       if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
         cacheValues.oauthToken.invalidateAll();
-        log.error("Token Oauth non valido: {}", token);
+        log.error("Token Oauth non valido");
         throw new ApiRequestException("Invalid token");
       }
 
@@ -624,7 +626,7 @@ public class CertificationsComunication {
     // Caso di token non valido
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
       cacheValues.oauthToken.invalidateAll();
-      log.error("Token Oauth non valido: {}", token);
+      log.error("Token Oauth non valido");
       throw new ApiRequestException("Invalid token");
     }
 
@@ -657,7 +659,7 @@ public class CertificationsComunication {
     // Caso di token non valido
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
       cacheValues.oauthToken.invalidateAll();
-      log.error("Token Oauth non valido: {}", token);
+      log.error("Token Oauth non valido");
       throw new ApiRequestException("Invalid token");
     }
 
@@ -688,7 +690,7 @@ public class CertificationsComunication {
     // Caso di token non valido
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
       cacheValues.oauthToken.invalidateAll();
-      log.error("Token Oauth non valido: {}", token);
+      log.error("Token Oauth non valido");
       throw new ApiRequestException("Invalid token");
     }
 
@@ -722,7 +724,7 @@ public class CertificationsComunication {
     // Caso di token non valido
     if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
       cacheValues.oauthToken.invalidateAll();
-      log.error("Token Oauth non valido: {}", token);
+      log.error("Token Oauth non valido");
       throw new ApiRequestException("Invalid token");
     }
     TipoBlocchettoSede tipoBlocchetto = new Gson()
