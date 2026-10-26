@@ -241,6 +241,7 @@ public class Contracts extends Controller {
 
     Contract newContract = contractService.createNewContract(wrappedPerson.getValue(),
         dateToSplit, wtt, previousInterval);
+    newContract.setContractType(contract.getContractType());
     contractManager.properContractCreate(newContract, wtt, true);
     log.info("Fine creazione nuovo contratto: {}", newContract.toString());
 

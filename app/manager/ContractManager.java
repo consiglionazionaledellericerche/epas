@@ -42,6 +42,7 @@ import models.ContractWorkingTimeType;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.base.IPropertyInPeriod;
+import models.enumerate.ContractType;
 import models.enumerate.VacationCode;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -168,6 +169,13 @@ public class ContractManager {
       log.debug("Impossibile creare il contratto, il contratto si sovrappone con altri contratti "
           + "preesistenti");
       return false;
+    }
+
+    //I contratti importati (Perseo, Anagrafica, REST, Attestati) non hanno l'inquadramento
+    //che però è obbligatorio: lo si deduce dalla presenza o meno in attestati.
+    if (contract.getContractType() == null) {
+      contract.setContractType(contract.isOnCertificate()
+          ? ContractType.structured_public_administration : ContractType.unstructured);
     }
 
     contract.save();
