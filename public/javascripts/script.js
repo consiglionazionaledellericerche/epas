@@ -1,5 +1,19 @@
 /* Author:
  */
+
+/*
+ * Invia il token anti-CSRF nell'header X-CSRF-Token in tutte le chiamate ajax
+ * verso ePAS che possono modificare dati.
+ */
+$.ajaxPrefilter(function(options, originalOptions, xhr) {
+  if (!options.crossDomain && !/^(GET|HEAD|OPTIONS)$/i.test(options.type)) {
+    var token = $('meta[name="csrf-token"]').attr('content');
+    if (token) {
+      xhr.setRequestHeader('X-CSRF-Token', token);
+    }
+  }
+});
+
 $(function($) {
 	/* Gestione tab di autenticazione */
     $('#login-idp-link').click(function(e) {

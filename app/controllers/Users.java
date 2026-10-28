@@ -77,6 +77,9 @@ public class Users extends Controller {
       boolean onlyEnabled, Office office) {
 
     User user = Security.getUser().get();
+    if (office.isPersistent()) {
+      rules.checkIfPermitted(office);
+    }
 
     Set<Office> offices = office.isPersistent() ? ImmutableSet.of(office) :
         secureManager.officesTechnicalAdminAllowed(user);
@@ -107,7 +110,7 @@ public class Users extends Controller {
    * @param userId l'id dell'user da editare
    */
   public static void editAccountRoles(Long userId) {
-    final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
+    final User user = userDao.byId(userId);
     notFoundIfNull(user);
     rules.checkIfPermitted(user);
     render(user);
@@ -121,7 +124,7 @@ public class Users extends Controller {
    */
   public static void saveAccountRoles(Long userId, List<AccountRole> roles) {
 
-    final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
+    final User user = userDao.byId(userId);
     notFoundIfNull(user);
 
     if (roles == null) {
@@ -141,7 +144,7 @@ public class Users extends Controller {
    * @param userId l'utente a cui aggiungere il ruolo
    */
   public static void addRole(Long userId) {
-    final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
+    final User user = userDao.byId(userId);
     notFoundIfNull(user);
     rules.checkIfPermitted(user);
     render(user);
@@ -197,7 +200,7 @@ public class Users extends Controller {
    * @param userId l'identificativo dell'utente da mostrare
    */
   public static void show(Long userId) {
-    final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
+    final User user = userDao.byId(userId);
     notFoundIfNull(user);
     rules.checkIfPermitted(user);
     render(user);
@@ -209,7 +212,7 @@ public class Users extends Controller {
    * @param userId l'identificativo dell'utente da editare
    */
   public static void edit(Long userId) {
-    final User user = userDao.getUserByIdAndPassword(userId, Optional.absent());
+    final User user = userDao.byId(userId);
     notFoundIfNull(user);
 
     rules.checkIfPermitted(user);

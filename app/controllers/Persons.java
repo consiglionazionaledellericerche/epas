@@ -34,6 +34,7 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
+import helpers.jpa.PersistedValues;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -67,7 +68,6 @@ import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.i18n.Messages;
-import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -418,15 +418,13 @@ public class Persons extends Controller {
       render("@changePassword", vecchiaPassword, nuovaPassword, confermaPassword, user);
     }
 
-    final User user = userDao.getUserByIdAndPassword(Security.getUser().get().id,
-        Optional.of(Codec.hexMD5(vecchiaPassword)));
+    final User user = Security.getUser().orNull();
+    notFoundIfNull(user);
 
-    if (user == null) {
+    if (!user.checkPassword(vecchiaPassword)) {
       flash.error("Nessuna corrispondenza trovata fra utente e vecchia password inserita.");
       changePassword();
     }
-
-    notFoundIfNull(user);
 
     user.updatePassword(nuovaPassword);
     user.save();
@@ -442,6 +440,8 @@ public class Persons extends Controller {
   public static void children(Long personId) {
 
     Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person.getOffice());
     render(person);
   }
 
@@ -469,6 +469,7 @@ public class Persons extends Controller {
 
     PersonChildren child = personChildrenDao.getById(childId);
     notFoundIfNull(child);
+    rules.checkIfPermitted(child.getPerson().getOffice());
     render("@insertChild", child);
   }
 
@@ -535,6 +536,14 @@ public class Persons extends Controller {
       render("@insertChild", child);
     }
 
+    if (child.isPersistent()) {
+      // il binder ha già applicato i parametri: si verifica la sede della persona a cui il
+      // figlio era associato prima della modifica
+      final Long savedOfficeId = PersistedValues.read(PersonChildren.class, child.id,
+          saved -> saved.getPerson().getOffice().id);
+      notFoundIfNull(savedOfficeId);
+      rules.checkIfPermitted(officeDao.getOfficeById(savedOfficeId));
+    }
     rules.checkIfPermitted(child.getPerson().getOffice());
     child.save();
 

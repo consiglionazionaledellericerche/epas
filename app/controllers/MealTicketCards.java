@@ -167,27 +167,29 @@ public class MealTicketCards extends Controller {
   }
 
   /**
-   * Metodo di rimozione di una tessera elettronica.
+   * Metodo di rimozione di una tessera elettronica: mostra la conferma e rimuove la tessera
+   * solo dal form di conferma (POST).
    *
    * @param mealTicketCardId l'identificativo della tessera da rimuovere
+   * @param confirmed true se la rimozione è confermata
    */
-  public static void deleteCard(Long mealTicketCardId) {
-    java.util.Optional<MealTicketCard> mealTicketCard = mealTicketCardDao
-        .getMealTicketCardById(mealTicketCardId);
-    if (mealTicketCard.isPresent()) {
-      if (!mealTicketCard.get().getMealTickets().isEmpty()) {
-        flash.error("La tessera presenta %s buoni elettronici associati. "
-            + "Rimuoverli prima di eliminarla!", 
-            mealTicketCard.get().getMealTickets().size());
-      } else {
-        mealTicketCard.get().delete();
-        flash.success("Tessera correttamente rimossa"); 
-      }      
-
-    } else {
-      flash.error("Nessuna tessera corrispondente all'id selezionato. Verificare.");
+  public static void deleteCard(Long mealTicketCardId, boolean confirmed) {
+    final MealTicketCard mealTicketCard = mealTicketCardDao
+        .getMealTicketCardById(mealTicketCardId).orElse(null);
+    notFoundIfNull(mealTicketCard);
+    rules.checkIfPermitted(mealTicketCard.getPerson().getOffice());
+    // la cancellazione avviene solo dal form di conferma (POST), non da un link
+    if (!confirmed || !"POST".equals(request.method)) {
+      render(mealTicketCard);
     }
-    MealTicketCards.mealTicketCards(mealTicketCard.get().getPerson().getOffice().id);
+    if (!mealTicketCard.getMealTickets().isEmpty()) {
+      flash.error("La tessera presenta %s buoni elettronici associati. "
+          + "Rimuoverli prima di eliminarla!", mealTicketCard.getMealTickets().size());
+    } else {
+      mealTicketCard.delete();
+      flash.success("Tessera correttamente rimossa");
+    }
+    MealTicketCards.mealTicketCards(mealTicketCard.getPerson().getOffice().id);
   }
 
   /**
@@ -196,12 +198,11 @@ public class MealTicketCards extends Controller {
    * @param mealTicketCardId l'identificativo della card
    */
   public static void infoCard(Long mealTicketCardId) {
-    java.util.Optional<MealTicketCard> card = mealTicketCardDao
-        .getMealTicketCardById(mealTicketCardId);
-    if (card.isPresent()) {
-      MealTicketCard mealTicketCard = card.get();
-      render(mealTicketCard);
-    }
+    final MealTicketCard mealTicketCard = mealTicketCardDao
+        .getMealTicketCardById(mealTicketCardId).orElse(null);
+    notFoundIfNull(mealTicketCard);
+    rules.checkIfPermitted(mealTicketCard.getPerson().getOffice());
+    render(mealTicketCard);
   }
 
   /**
@@ -249,11 +250,14 @@ public class MealTicketCards extends Controller {
     
     if (!card.isPresent()) {
       Person person = personDao.getPersonById(personId);
+      notFoundIfNull(person);
+      rules.checkIfPermitted(person.getOffice());
       flash.error("Non sono presenti card associate al dipendente! "
           + "Assegnare una card e riprovare!");
       MealTickets.recapMealTickets(LocalDate.now().getYear(), 
           LocalDate.now().getMonthOfYear(), person.getOffice().id);
     } 
+    rules.checkIfPermitted(card.get().getPerson().getOffice());
     IWrapperPerson wrPerson = wrapperFactory.create(card.get().getPerson());
     Optional<Contract> actualContract = wrPerson.getCurrentContract();
     boolean result = mealTicketCardManager

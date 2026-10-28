@@ -99,7 +99,10 @@ when
      	"Notifications.list",
      	"Notifications.readAndRedirect",
      	"Notifications.read",
-     	"Notifications.readAll") 
+     	"Notifications.readAll",
+     	"ReportCentre.oilUserReply",
+     	"ReportCentre.sendOilUserReplay",
+     	"ReportCentre.oilUserReplySent")
       || action.startsWith("SwitchTemplate."), 
       target == null, granted == false)
 then
@@ -2088,6 +2091,9 @@ when
  	   "Persons.showCurrentVacation",
        "Persons.showCurrentContractWorkingTimeType",
 
+       /* Esportazione delle competenze per gruppo */
+       "Competences.getCompetenceGroupInYearMonth",
+
        /* Vecchio permesso viewPersonDay */
    	    "Absences.absenceInPeriod",
 	    "Absences.showPersonMonthlyAbsences",
@@ -3839,7 +3845,11 @@ when
         "manager.AbsenceManager.saveAbsences",
 
         "rest.Absences.checkAbsenceByPerseoId",
-        "rest.Absences.insertAbsenceByPerseoId"
+        "rest.Absences.insertAbsenceByPerseoId",
+
+        "rest.Persons.days",
+        "rest.Persons.missions",
+        "rest.Persons.competences"
 
        ), target == $o, granted == false)
 then

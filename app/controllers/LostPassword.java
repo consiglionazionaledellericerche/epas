@@ -32,10 +32,12 @@ import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
+import play.mvc.With;
 
 /**
  * Controller per la gestione del recupero password.
  */
+@With(CsrfProtection.class)
 public class LostPassword extends Controller {
 
   @Inject
@@ -140,6 +142,7 @@ public class LostPassword extends Controller {
     }
 
     user.updatePassword(nuovaPassword);
+    Security.clearLoginAttempts(user.getUsername());
     user.setRecoveryToken(null);
     user.setExpireRecoveryToken(null);
     user.save();

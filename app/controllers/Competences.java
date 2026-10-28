@@ -45,6 +45,7 @@ import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 import helpers.Web;
 import helpers.jpa.ModelQuery.SimpleResults;
+import helpers.jpa.PersistedValues;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.io.FileInputStream;
@@ -557,6 +558,7 @@ public class Competences extends Controller {
   public static void insertCompetence(Long personId, Long competenceId, int month, int year) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
+    rules.checkIfPermitted(person.getOffice());
     CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceId);
     notFoundIfNull(code);
     Office office = person.getOffice();
@@ -580,15 +582,16 @@ public class Competences extends Controller {
   public static void editCompetence(long personId, long competenceCodeId, int year, int month) {
 
     Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person.getOffice());
     CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
+    notFoundIfNull(code);
     Optional<Competence> comp = competenceDao.getCompetence(person, year, month, code);
     Competence competence = new Competence();
     if (comp.isPresent()) {
       competence = comp.get();
     }
 
-    notFoundIfNull(code);
-    notFoundIfNull(person);
     Office office = person.getOffice();
     if (code.getCode().equals("S1") || code.getCode().equals("S2") || code.getCode().equals("S3")) {
       PersonStampingRecap psDto = null;
@@ -749,6 +752,7 @@ public class Competences extends Controller {
 
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
+    rules.checkIfPermitted(office);
 
     Set<Office> set = Sets.newHashSet();
     set.add(office);
@@ -1435,6 +1439,16 @@ public class Competences extends Controller {
    * @param type l'attività di cui si vogliono modificare i parametri
    */
   public static void editActivity(ShiftType type, boolean considerEverySlot) {
+    notFoundIfNull(type);
+    if (!type.isPersistent()) {
+      notFound();
+    }
+    // il binder ha già applicato i parametri: si verifica la sede dell'attività salvata
+    final Long savedOfficeId = PersistedValues.read(ShiftType.class, type.id,
+        saved -> saved.getShiftCategories().getOffice().id);
+    notFoundIfNull(savedOfficeId);
+    rules.checkIfPermitted(officeDao.getOfficeById(savedOfficeId));
+    rules.checkIfPermitted(type.getShiftCategories().getOffice());
     if (type.getOrganizaionShiftTimeTable() != null) {
       OrganizationShiftTimeTable ott = type.getOrganizaionShiftTimeTable();
       ott.setConsiderEverySlot(considerEverySlot);

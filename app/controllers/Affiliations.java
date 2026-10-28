@@ -21,8 +21,10 @@ import com.google.common.base.Optional;
 import common.security.SecurityRules;
 import dao.AffiliationDao;
 import dao.GroupDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import helpers.Web;
+import helpers.jpa.PersistedValues;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -50,6 +52,8 @@ public class Affiliations extends Controller {
   @Inject
   static GroupDao groupDao;
   @Inject
+  static OfficeDao officeDao;
+  @Inject
   static SecurityRules rules;  
 
   /**
@@ -61,6 +65,7 @@ public class Affiliations extends Controller {
   public static void personAffiliations(Long personId) {
     val person = personDao.getPersonById(personId);
     notFoundIfNull(person);
+    rules.checkIfPermitted(person.getOffice());
     render(person);
   }
 
@@ -71,6 +76,7 @@ public class Affiliations extends Controller {
   public static void blankByPerson(Long personId) {
     val person = personDao.getPersonById(personId);
     notFoundIfNull(person);
+    rules.checkIfPermitted(person.getOffice());
     val activeGroups = 
         groupDao.groupsByOffice(person.getOffice(), Optional.absent(), Optional.of(false));
     val affiliation = new Affiliation();
@@ -91,7 +97,16 @@ public class Affiliations extends Controller {
       render("@blankByPerson", affiliation, activeGroups);
     }
 
+    if (affiliation.isPersistent()) {
+      // il binder ha già applicato i parametri: si verifica la sede della persona a cui
+      // l'affiliazione apparteneva prima della modifica
+      final Long savedOfficeId = PersistedValues.read(Affiliation.class, affiliation.id,
+          saved -> saved.getPerson().getOffice().id);
+      notFoundIfNull(savedOfficeId);
+      rules.checkIfPermitted(officeDao.getOfficeById(savedOfficeId));
+    }
     rules.checkIfPermitted(affiliation.getPerson().getOffice());
+    rules.checkIfPermitted(affiliation.getGroup().getOffice());
     affiliation.save();
 
     log.info("Aggiunta/Modificata affiliazione di {} al gruppo {}", 
@@ -109,7 +124,9 @@ public class Affiliations extends Controller {
     val affiliation = affiliationDao.byId(id).orElse(null);
     notFoundIfNull(affiliation);
     val person = affiliation.getPerson();
-    if (!confirmed) {      
+    rules.checkIfPermitted(person.getOffice());
+    // la cancellazione avviene solo dal form di conferma (POST), non da un link
+    if (!confirmed || !"POST".equals(request.method)) {
       render("@delete", affiliation, person);
     }
     affiliation.delete();
@@ -126,6 +143,7 @@ public class Affiliations extends Controller {
     val affiliation = affiliationDao.byId(id).orElse(null);
     notFoundIfNull(affiliation);
     val person = affiliation.getPerson();
+    rules.checkIfPermitted(person.getOffice());
     val activeGroups = 
         groupDao.groupsByOffice(person.getOffice(), Optional.absent(), Optional.of(false));
     render("@blankByPerson", affiliation, activeGroups);

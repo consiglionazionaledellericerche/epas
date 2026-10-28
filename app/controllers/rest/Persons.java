@@ -91,6 +91,7 @@ public class Persons extends Controller {
           + "mail cnr che serve per la ricerca. Assicurarsi di aver"
           + "lanciato il job per la sincronizzazione delle email dei dipendenti");
     }
+    rules.checkIfPermitted(person.get().getOffice());
     if (start == null || end == null || start.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }
@@ -127,23 +128,26 @@ public class Persons extends Controller {
       JsonResponse.badRequest("Email obbligatoria");
     }
     Optional<Person> person = personDao.byEmail(email);
-    List<DayRecap> personDays = Lists.newArrayList();
-    if (person.isPresent()) {
-
-      personDays = FluentIterable.from(absenceDao.getAbsencesInPeriod(
-          person, start, Optional.fromNullable(end), forAttachment))
-          .transform(absence -> {
-            DayRecap dayRecap = new DayRecap();
-            dayRecap.workingMinutes = 0;
-            dayRecap.date = absence.getPersonDay().getDate().toString();
-            if (personDayManager.isOnMission(absence.getPersonDay())) {
-              dayRecap.mission = true;
-            } else {
-              dayRecap.mission = false;
-            }
-            return dayRecap;
-          }).toList();
+    // come days e competences: 404 se l'email non corrisponde a nessuna persona, così non si
+    // distingue una persona inesistente da una di un'altra sede
+    if (!person.isPresent()) {
+      JsonResponse.notFound("Indirizzo email incorretto");
     }
+    rules.checkIfPermitted(person.get().getOffice());
+
+    List<DayRecap> personDays = FluentIterable.from(absenceDao.getAbsencesInPeriod(
+        person, start, Optional.fromNullable(end), forAttachment))
+        .transform(absence -> {
+          DayRecap dayRecap = new DayRecap();
+          dayRecap.workingMinutes = 0;
+          dayRecap.date = absence.getPersonDay().getDate().toString();
+          if (personDayManager.isOnMission(absence.getPersonDay())) {
+            dayRecap.mission = true;
+          } else {
+            dayRecap.mission = false;
+          }
+          return dayRecap;
+        }).toList();
     renderJSON(personDays);
   }
 
@@ -165,6 +169,7 @@ public class Persons extends Controller {
     if (person == null) {
       JsonResponse.notFound("Indirizzo email incorretto");
     }
+    rules.checkIfPermitted(person.getOffice());
     if (start == null || end == null || start.isAfter(end)) {
       JsonResponse.badRequest("Date non valide");
     }

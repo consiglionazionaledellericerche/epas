@@ -49,6 +49,10 @@ public class JsonExport extends Controller {
   // TODO per il momento il ruolo developer è l'unico a poter utilizzare questo metodo
   /**
    * Ritorna il json contenente la lista delle persone attive.
+   *
+   * <p>Il campo password contiene l'hash MD5, valorizzato solo con il parametro
+   * security.password.keepMd5 attivo: senza, è nullo per gli utenti con la password già
+   * salvata con il nuovo hash.</p>
    */
   public static void activePersons() {
 
