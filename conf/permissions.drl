@@ -55,6 +55,7 @@ import models.TeleworkValidation;
 import models.flows.AbsenceRequest;
 import models.flows.Group;
 import models.flows.CompetenceRequest;
+import models.flows.enumerate.CompetenceRequestType;
 
 import models.base.InformationRequest;
 import models.informationrequests.IllnessRequest;
@@ -600,7 +601,7 @@ rule approveDisapproveTargetChangeForEmployee
 when
   UsersRolesOffices(role.name == Role.EMPLOYEE)
   $p: Person() from currentOperator.person
-  $cr: CompetenceRequest(person != $p && employeeApprovalRequired == true && toBeAEmployeeApproved(), flowEnded == false)
+  $cr: CompetenceRequest(person != $p && teamMate == $p && employeeApprovalRequired == true && toBeAEmployeeApproved(), flowEnded == false)
   $c: PermissionCheck( action in (
           "CompetenceRequests.approval",
           "CompetenceRequests.disapproval"),
@@ -629,7 +630,8 @@ when
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $rep: PersonReperibility() from $prt.personReperibilities
   $cr: CompetenceRequest(person == $rep.person && managerApprovalRequired == true 
-         && managerApproved == null, flowEnded == false)
+         && managerApproved == null, flowEnded == false,
+         type == CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)
   $c: PermissionCheck(action in (
           "CompetenceRequests.approval",
           "CompetenceRequests.disapproval",
@@ -1071,7 +1073,8 @@ end
 rule personInChargeForFlows
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
-  $ar: AbsenceRequest(managerApprovalRequired == true && !isManagerApproved())
+  $p: Person() from currentOperator.person
+  $ar: AbsenceRequest(managerApprovalRequired == true && !isManagerApproved(), $p.personsInCharge contains person)
   $c: PermissionCheck( action in (
     		"AbsenceRequests.blank",
 			"AbsenceRequests.edit",
@@ -1101,7 +1104,8 @@ end
 rule personInChargeForCompetenceRequestsFlows
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
-  $cr: CompetenceRequest(managerApprovalRequired == true && !isManagerApproved())
+  $p: Person() from currentOperator.person
+  $cr: CompetenceRequest(managerApprovalRequired == true && !isManagerApproved(), $p.personsInCharge contains person)
   $c: PermissionCheck( action in (
     		"CompetenceRequests.list",
 			"CompetenceRequests.listToApprove",
@@ -1120,7 +1124,8 @@ end
 rule personInChargeForInformationFlows
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
-  $ir: InformationRequest(managerApprovalRequired == true && !isManagerApproved())
+  $p: Person() from currentOperator.person
+  $ir: InformationRequest(managerApprovalRequired == true && !isManagerApproved(), $p.personsInCharge contains person)
   $c: PermissionCheck( action in (			
 			"InformationRequests.serviceExitToApprove",
 			"InformationRequests.listToApprove",
@@ -1137,7 +1142,7 @@ rule personInChargeApprovalDisapproval
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
   $p: Person() from currentOperator.person
-  $ar: AbsenceRequest(person != $p, managerApprovalRequired == true, !isManagerApproved(), flowEnded == false)
+  $ar: AbsenceRequest(person != $p, $p.personsInCharge contains person, managerApprovalRequired == true, !isManagerApproved(), flowEnded == false)
   $c: PermissionCheck( action in (
 			"AbsenceRequests.approval",
 			"AbsenceRequests.disapproval"
@@ -1150,7 +1155,7 @@ rule personInChargeCompetenceRequestsApprovalDisapprovalWithTarget
 when
   UsersRolesOffices(role.name == Role.GROUP_MANAGER)
   $p: Person() from currentOperator.person
-  $cr: CompetenceRequest(person != $p && managerApprovalRequired == true && !isManagerApproved(), flowEnded == false)
+  $cr: CompetenceRequest(person != $p && managerApprovalRequired == true && !isManagerApproved(), $p.personsInCharge contains person, flowEnded == false)
   $c: PermissionCheck( action in (
 			"CompetenceRequests.approval",
 			"CompetenceRequests.disapproval"
@@ -1832,7 +1837,7 @@ rule RoleSeatSuperVisor_editAndApprovalForFlows
 when
  $uro: UsersRolesOffices()
  Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
- $ar: AbsenceRequest(flowEnded == false)
+ $ar: AbsenceRequest(flowEnded == false, person.office == $uro.office)
  $c: PermissionCheck(action in (
 		"AbsenceRequests.edit",
 		"AbsenceRequests.save",
@@ -1848,7 +1853,7 @@ rule RoleSeatSuperVisor_forCompetenceFlows
 when
  $uro: UsersRolesOffices()
  Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
- $cr: CompetenceRequest(officeHeadApprovalRequired == true, !isOfficeHeadApproved(), flowEnded == false)
+ $cr: CompetenceRequest(officeHeadApprovalRequired == true, !isOfficeHeadApproved(), flowEnded == false, person.office == $uro.office)
  $c: PermissionCheck(action in (
 		"CompetenceRequests.show",
 		"CompetenceRequests.updateNote",
@@ -1863,7 +1868,7 @@ rule RoleSeatSuperVisor_showForInformationFlows
 when
  $uro: UsersRolesOffices()
  Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
- $ir: InformationRequest()
+ $ir: InformationRequest(person.office == $uro.office)
  $c: PermissionCheck(action in (
 		"InformationRequests.show"
 		), target == $ir, granted == false)
@@ -1875,7 +1880,7 @@ rule RoleSeatSuperVisor_editAndApprovalForInformationFlows
 when
  $uro: UsersRolesOffices()
  Role(name in (Role.SEAT_SUPERVISOR)) from $uro.role
- $ir: InformationRequest(flowEnded == false)
+ $ir: InformationRequest(flowEnded == false, person.office == $uro.office)
  $c: PermissionCheck(action in (
 		"InformationRequests.editIllnessRequest",
 		"InformationRequests.editServiceRequest",
@@ -1894,7 +1899,7 @@ rule PersonnelAdmin_editAndApprovalForIllnessFlows
 when
  $uro: UsersRolesOffices()
  Role(name in (Role.PERSONNEL_ADMIN)) from $uro.role
- $ir: IllnessRequest(flowEnded == false)
+ $ir: IllnessRequest(flowEnded == false, person.office == $uro.office)
  $c: PermissionCheck(action in (
 		"InformationRequests.editIllnessRequest",
 		"InformationRequests.saveIllnessRequest",
@@ -1911,7 +1916,7 @@ rule PersonnelAdmin_editAndApprovalForParentalLeavesFlows
 when
  $uro: UsersRolesOffices()
  Role(name in (Role.PERSONNEL_ADMIN)) from $uro.role
- $pr: ParentalLeaveRequest(flowEnded == false)
+ $pr: ParentalLeaveRequest(flowEnded == false, person.office == $uro.office)
  $c: PermissionCheck(action in (
 		"InformationRequests.editIllnessRequest",
 		"InformationRequests.saveIllnessRequest",

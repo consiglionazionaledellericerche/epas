@@ -4,12 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
 ### Added
   - Nella modifica del contratto è possibile impostare i giorni di riposo compensativo già
     effettuati alla data di inizializzazione (sourceRecoveryDayUsed), insieme alla data di
     inizializzazione dei riposi compensativi. Entrambi i campi sono modificabili da chi ha il
     permesso di modifica del contratto (amministratori, sviluppatori e gestori dell'anagrafica).
+
+## [2.38.0] - 2026-10-28
+### Fixed
+  - Rafforzati i controlli sui permessi in alcune azioni e nelle approvazioni dei flussi.
+  - Rafforzati i controlli sui permessi nell'inserimento delle assenze, negli allegati, nelle ore
+    di formazione, nelle timbrature in telelavoro e nell'esportazione della situazione personale.
+  - Il testo inserito dagli utenti nei popover è mostrato come testo.
 
 ## [2.37.3] - 2026-10-19
 ### Added

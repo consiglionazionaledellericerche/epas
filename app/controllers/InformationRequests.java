@@ -607,6 +607,9 @@ public class InformationRequests extends Controller {
     }
     notFoundIfNull(request);
     User user = Security.getUser().get();
+    if (!informationRequestManager.isApprover(request, user)) {
+      forbidden();
+    }
 
     boolean approved = informationRequestManager.approval(serviceRequest,
         illnessRequest, teleworkRequest, parentalLeaveRequest, user);
@@ -642,6 +645,10 @@ public class InformationRequests extends Controller {
     ParentalLeaveRequest parentalLeaveRequest = null;
     notFoundIfNull(informationRequest);
     User user = Security.getUser().get();
+    if (!informationRequestManager.isApprover(informationRequest, user)) {
+      forbidden();
+    }
+    final Person requester = informationRequest.getPerson();
     switch (informationRequest.getInformationType()) {
       case SERVICE_INFORMATION:
         serviceRequest = informationRequestDao.getServiceById(id).get();
@@ -677,7 +684,7 @@ public class InformationRequests extends Controller {
 
     if (informationRequest.isOfficeHeadApprovalRequired()
         && informationRequest.getOfficeHeadApproved() == null
-        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+        && informationRequestManager.isSeatSupervisorFor(user, requester)) {
       // caso di approvazione da parte del responsabile di sede
       informationRequestManager.officeHeadDisapproval(id, reason);
       flash.error("Richiesta respinta");
@@ -687,7 +694,7 @@ public class InformationRequests extends Controller {
     }
     if (informationRequest.isAdministrativeApprovalRequired()
         && informationRequest.getAdministrativeApproved() == null
-        && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+        && user.hasRolesOnOffice(requester.getOffice(), Role.PERSONNEL_ADMIN)) {
       informationRequestManager.personnelAdministratorDisapproval(id, reason);
       flash.error("Richiesta respinta");
       InformationType type = informationRequest.getInformationType();
