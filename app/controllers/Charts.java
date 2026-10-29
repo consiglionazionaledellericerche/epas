@@ -44,7 +44,6 @@ import models.Office;
 import models.Person;
 import models.User;
 import models.exports.PersonOvertime;
-import org.apache.commons.compress.archivers.ArchiveException;
 import org.joda.time.LocalDate;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -311,7 +310,7 @@ public class Charts extends Controller {
     try {
       file = chartsManager
           .buildFile(office, forAll, onlyMission, peopleIds, beginDate, endDate, exportFile);
-    } catch (ArchiveException | IOException ex) {
+    } catch (IOException ex) {
       flash.error("Errore durante l'esportazione del tempo al lavoro");
       listForExcelFile(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear(), officeId);
       log.error("Errore durante l'esportazione del tempo al lavoro", ex);
@@ -353,7 +352,7 @@ public class Charts extends Controller {
       file = chartsManager
           .buildFile(
               person.getOffice(), false, onlyMission, peopleIds, beginDate, endDate, exportFile);
-    } catch (ArchiveException | IOException ex) {
+    } catch (IOException ex) {
       flash.error("Errore durante l'esportazione del tempo al lavoro");
       excelFile(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
       log.error("Errore durante l'esportazione del tempo al lavoro", ex);

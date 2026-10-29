@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Security
+  - Aggiornate le librerie con vulnerabilità note: jsoup 1.23.2, postgresql 42.2.29,
+    commons-compress 1.28.0, xercesImpl 2.12.2, tika 1.28.5, jjwt 0.11.5, poi 3.16.
+  - Sostituite le librerie incluse in play 1.5.3 con versioni aggiornate: log4j 1.2.17 con
+    reload4j 1.2.27, commons-fileupload 1.6.0, xstream 1.4.21, snakeyaml 1.33, dom4j 2.1.4,
+    commons-io 2.20.0 e commons-codec 1.19.0. Le vecchie versioni e il driver mysql non usato
+    sono rimossi dall'immagine docker.
+
 ## [2.38.0] - 2026-10-28
 ### Fixed
   - Rafforzati i controlli sui permessi in alcune azioni e nelle approvazioni dei flussi.
