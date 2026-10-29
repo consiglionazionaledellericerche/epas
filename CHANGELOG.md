@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     esempio oltre il limite annuale di 18 ore, non possono più essere inviate. Prima la richiesta
     veniva salvata e approvata per l'intero periodo, ma all'approvazione venivano inseriti solo i
     giorni entro il limite. Il controllo è ripetuto anche al salvataggio della richiesta.
+  - Nella verifica delle richieste di permesso personale vengono considerate anche le altre
+    richieste di permesso personale in attesa di approvazione: non è più possibile superare il
+    limite annuale con più richieste inviate prima che le precedenti siano approvate.
 ### Added
   - Nella modifica del contratto è possibile impostare i giorni di riposo compensativo già
     effettuati alla data di inizializzazione (sourceRecoveryDayUsed), insieme alla data di
