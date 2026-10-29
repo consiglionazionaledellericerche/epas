@@ -34,9 +34,7 @@ import helpers.ImageUtils;
 import it.cnr.iit.epas.DateUtility;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -230,13 +228,20 @@ public class Absences extends Controller {
 
     Verify.verify(absence.isPersistent(), "Assenza specificata inesistente!");
 
+    Optional<User> currentUser = Security.getUser();
+    if (!currentUser.isPresent() || currentUser.get().hasRoles(Role.PERSONNEL_ADMIN)) {
+      rules.checkIfPermitted(absence.getPersonDay().getPerson()
+          .getOfficeAtOrCurrent(absence.getPersonDay().getDate()));
+    } else {
+      rules.checkIfPermitted(absence);
+    }
+
     absence.getAbsenceFile().getFile().delete();
 
     absence.save();
 
     flash.success("File allegato rimosso con successo.");
 
-    Optional<User> currentUser = Security.getUser();
     if (!currentUser.isPresent() || currentUser.get().hasRoles(Role.PERSONNEL_ADMIN)) {
       Stampings.personStamping(absence.getPersonDay().getPerson().id,
           absence.getPersonDay().getDate().getYear(), 
@@ -308,7 +313,7 @@ public class Absences extends Controller {
       attachmentRecapList.add(currentRecap);
     }
 
-    render(attachmentRecapList, year, month);
+    render(attachmentRecapList, year, month, office);
   }
 
   /**
@@ -350,13 +355,17 @@ public class Absences extends Controller {
    * @param code  il codice di assenza
    * @param year  l'anno
    * @param month il mese
+   * @param officeId la sede di cui comprimere gli allegati
    * @throws IOException eccezione di IO
    */
-  public static void zipAttachment(String code, Integer year, Integer month) throws IOException {
-    rules.checkIfPermitted(Security.getUser().get().getPerson().getOffice());
-    FileOutputStream fos = new FileOutputStream("attachment" + '-' + code + ".zip");
-    ZipOutputStream zos = new ZipOutputStream(fos);
+  public static void zipAttachment(String code, Integer year, Integer month, Long officeId)
+      throws IOException {
+    Office office = officeDao.getOfficeById(officeId);
+    notFoundIfNull(office);
+    rules.checkIfPermitted(office);
 
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    ZipOutputStream zos = new ZipOutputStream(out);
 
     List<Absence> absList = absenceDao.getAbsenceByCodeInPeriod(
         Optional.<Person>absent(), Optional.fromNullable(code),
@@ -366,6 +375,10 @@ public class Absences extends Controller {
     byte[] buffer = new byte[1024];
 
     for (Absence abs : absList) {
+      // solo gli allegati delle persone della sede
+      if (!abs.getPersonDay().getPerson().getOffice().equals(office)) {
+        continue;
+      }
       try {
 
         FileInputStream fis = new FileInputStream(abs.getAbsenceFile().getFile());
@@ -387,7 +400,8 @@ public class Absences extends Controller {
 
     zos.close();
 
-    renderBinary(new File("attachment" + '-' + code + ".zip"));
+    renderBinary(new ByteArrayInputStream(out.toByteArray()),
+        "attachment-" + code.replaceAll("[^A-Za-z0-9_-]", "_") + ".zip", false);
   }
 
   /**

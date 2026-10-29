@@ -707,6 +707,12 @@ public class AbsenceGroups extends Controller {
     notFoundIfNull(absenceType);
     notFoundIfNull(justifiedType);
 
+    rules.checkIfPermitted(person);
+    // stessi gruppi proposti dalla form di inserimento (insert) per l'utente corrente
+    if (!absenceService.groupsPermitted(person, false).contains(groupAbsenceType)) {
+      forbidden();
+    }
+
     if (!absenceType.isPersistent()) {
       absenceType = null;
     }

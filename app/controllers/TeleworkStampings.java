@@ -68,6 +68,7 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.Http;
+import play.mvc.Util;
 import play.mvc.With;
 
 /**
@@ -277,6 +278,7 @@ public class TeleworkStampings extends Controller {
       } catch (NoSuchFieldException ex) {
         ex.printStackTrace();
       }
+      checkIfPermitted(stamping);
       confirmed = true;
       render(stamping, confirmed);
     }      
@@ -284,6 +286,7 @@ public class TeleworkStampings extends Controller {
     log.debug("Comunico con il nuovo sistema per la cancellazione della "
         + "timbratura in telelavoro...");     
     stamping = comunication.get(teleworkStampingId);
+    checkIfPermitted(stamping);
     int result = 0;
     try {
       result = comunication.delete(teleworkStampingId);
@@ -339,6 +342,7 @@ public class TeleworkStampings extends Controller {
 
     final Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
+    rules.checkIfPermitted(person);
     if (Validation.hasErrors()) {
       response.status = 400;
       render("@insertStamping", stamping, person, date, time);
@@ -404,8 +408,23 @@ public class TeleworkStampings extends Controller {
       log.error("Problema durante la ricezione della timbratura per telelavoro {}",
           teleworkStampingId, ex);
     }
+    checkIfPermitted(stamping);
 
     render(stamping);
+  }
+
+  /**
+   * Verifica i permessi sulla persona a cui appartiene la timbratura in telelavoro.
+   *
+   * @param stamping la timbratura prelevata dall'applicazione esterna
+   */
+  @Util
+  private static void checkIfPermitted(TeleworkDto stamping) {
+    notFoundIfNull(stamping);
+    notFoundIfNull(stamping.getPersonDayId());
+    PersonDay pd = personDayDao.getPersonDayById(stamping.getPersonDayId());
+    notFoundIfNull(pd);
+    rules.checkIfPermitted(pd.getPerson());
   }
   
 

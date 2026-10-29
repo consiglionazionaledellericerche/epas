@@ -49,6 +49,7 @@ import org.joda.time.YearMonth;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
 
 /**
@@ -162,6 +163,7 @@ public class PersonMonths extends Controller {
     if (personMonthSituationId != null) {
 
       PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
+      checkOwner(pm);
 
       Verify.verify(pm.isEditable());
       checkErrorsInUpdate(value, pm);
@@ -204,6 +206,7 @@ public class PersonMonths extends Controller {
   public static void modifyTrainingHours(Long personMonthSituationId) {
 
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
+    checkOwner(pm);
 
     int year = pm.getYear();
     int month = pm.getMonth();
@@ -228,6 +231,8 @@ public class PersonMonths extends Controller {
   public static void modifyPeopleTrainingHours(Long personMonthSituationId) {
 
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
+    notFoundIfNull(pm);
+    rules.checkIfPermitted(officeOf(pm));
 
     int year = pm.getYear();
     int month = pm.getMonth();
@@ -257,6 +262,7 @@ public class PersonMonths extends Controller {
       flash.error("Ore di formazioni inesistenti. Operazione annullata.");
       PersonMonths.trainingHours(LocalDate.now().getYear());
     }
+    checkOwner(pm);
     render(pm);
   }
   
@@ -276,6 +282,7 @@ public class PersonMonths extends Controller {
       PersonMonths.visualizePeopleTrainingHours(LocalDate.now().getYear(), 
           LocalDate.now().getMonthOfYear(), office.id);
     }
+    checkOffice(pm, office);
     render(pm);
   }
 
@@ -292,6 +299,7 @@ public class PersonMonths extends Controller {
       flash.error("Ore di formazioni inesistenti. Operazione annullata.");
       Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
     }
+    checkOwner(pm);
 
     pm.delete();
     flash.error("Ore di formazione eliminate con successo.");
@@ -310,7 +318,9 @@ public class PersonMonths extends Controller {
     notFoundIfNull(office);
     rules.checkIfPermitted(office);
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthRecapId);
-    
+    notFoundIfNull(pm);
+    checkOffice(pm, office);
+
     pm.delete();
     flash.error("Ore di formazione eliminate con successo.");
     PersonMonths.visualizePeopleTrainingHours(pm.getYear(), pm.getMonth(), officeId);
@@ -376,6 +386,8 @@ public class PersonMonths extends Controller {
     checkErrors(begin, end, year, month, value);
     if (personMonthSituationId != null) {
       PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
+      notFoundIfNull(pm);
+      rules.checkIfPermitted(officeOf(pm));
 
       Verify.verify(pm.isEditable());
       checkErrorsInUpdate(value, pm);
@@ -390,7 +402,7 @@ public class PersonMonths extends Controller {
       pm.setTrainingHours(value);
       pm.save();
       flash.success("Ore di formazione aggiornate.", value);
-      visualizePeopleTrainingHours(year, month, pm.getPerson().getOffice().id);
+      visualizePeopleTrainingHours(year, month, officeOf(pm).id);
       
     } else {
       checkPerson(person);
@@ -407,6 +419,41 @@ public class PersonMonths extends Controller {
     personMonthsManager.saveTrainingHours(person, year, month, begin, end, false, value);
     flash.success("Salvate %d ore di formazione per %s", value, person.fullName());
     PersonMonths.visualizePeopleTrainingHours(year, month, person.getOffice().id);
+  }
+
+  /**
+   * Le ore di formazione devono essere dell'utente corrente.
+   *
+   * @param pm le ore di formazione
+   */
+  @Util
+  private static void checkOwner(PersonMonthRecap pm) {
+    notFoundIfNull(pm);
+    if (!pm.getPerson().equals(Security.getUser().get().getPerson())) {
+      forbidden();
+    }
+  }
+
+  /**
+   * La sede a cui appartengono le ore di formazione: nel mese di un trasferimento è quella del
+   * giorno di inizio delle ore, come nell'invio ad Attestati.
+   */
+  @Util
+  private static Office officeOf(PersonMonthRecap pm) {
+    return pm.getPerson().getOfficeAtOrCurrent(pm.getFromDate());
+  }
+
+  /**
+   * Le ore di formazione devono essere di una persona della sede.
+   *
+   * @param pm le ore di formazione
+   * @param office la sede su cui sono stati verificati i permessi
+   */
+  @Util
+  private static void checkOffice(PersonMonthRecap pm, Office office) {
+    if (!officeOf(pm).equals(office)) {
+      forbidden();
+    }
   }
 
   /**
