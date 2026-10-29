@@ -546,12 +546,14 @@ public class InformationRequestManager {
       Optional<IllnessRequest> illnessRequest, Optional<TeleworkRequest> teleworkRequest,
       Optional<ParentalLeaveRequest> parentalLeaveRequest, User user) {
     if (serviceRequest.isPresent()) {
-      if (!serviceRequest.get().isFullyApproved() && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+      if (!serviceRequest.get().isFullyApproved() 
+          && isSeatSupervisorFor(user, serviceRequest.get().getPerson())) {
         // caso di approvazione da parte del responsabile di sede
         officeHeadApproval(serviceRequest.get().id, user);
         return true;
       }
-      if (!serviceRequest.get().isFullyApproved() && user.hasRoles(Role.GROUP_MANAGER)) {
+      if (!serviceRequest.get().isFullyApproved() 
+          && user.isGroupManagerOf(serviceRequest.get().getPerson())) {
         managerApproval(serviceRequest.get().id, user);
         return true;
       }
@@ -560,21 +562,23 @@ public class InformationRequestManager {
     if (illnessRequest.isPresent()) {
       if (illnessRequest.get().isOfficeHeadApprovalRequired() 
           && illnessRequest.get().getOfficeHeadApproved() == null
-          && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+          && isSeatSupervisorFor(user, illnessRequest.get().getPerson())) {
         // caso di approvazione da parte del responsabile di sede
         officeHeadApproval(illnessRequest.get().id, user);
         return true;
       }
       if (illnessRequest.get().isAdministrativeApprovalRequired()
           && illnessRequest.get().getAdministrativeApproved() == null 
-          && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+          && user.hasRolesOnOffice(illnessRequest.get().getPerson().getOffice(), 
+              Role.PERSONNEL_ADMIN)) {
         // caso di approvazione da parte dell'amministratore del personale
         personnelAdministratorApproval(illnessRequest.get().id, user);
         return true;
       }
     }
     if (teleworkRequest.isPresent()) {
-      if (!teleworkRequest.get().isFullyApproved() && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+      if (!teleworkRequest.get().isFullyApproved() 
+          && isSeatSupervisorFor(user, teleworkRequest.get().getPerson())) {
         // caso di approvazione da parte del responsabile di sede
         officeHeadApproval(teleworkRequest.get().id, user);
         return true;
@@ -583,7 +587,8 @@ public class InformationRequestManager {
     if (parentalLeaveRequest.isPresent()) {
       if (parentalLeaveRequest.get().isAdministrativeApprovalRequired()
           && parentalLeaveRequest.get().getAdministrativeApproved() == null
-          && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+          && user.hasRolesOnOffice(parentalLeaveRequest.get().getPerson().getOffice(), 
+              Role.PERSONNEL_ADMIN)) {
         personnelAdministratorApproval(parentalLeaveRequest.get().id, user);
         return true;
       }
@@ -591,7 +596,36 @@ public class InformationRequestManager {
     
     return false;
   }
-  
+
+  /**
+   * Verifica se l'utente è tra quelli che possono approvare o respingere la richiesta:
+   * responsabile di gruppo della persona che ha fatto la richiesta, oppure responsabile di sede
+   * o amministratore del personale della sede della persona.
+   *
+   * @param request la richiesta informativa
+   * @param user l'utente che vuole approvare o respingere
+   * @return true se l'utente può approvare o respingere la richiesta, false altrimenti.
+   */
+  public boolean isApprover(InformationRequest request, User user) {
+    final Person requester = request.getPerson();
+    return user.isGroupManagerOf(requester)
+        || isSeatSupervisorFor(user, requester)
+        || user.hasRolesOnOffice(requester.getOffice(), Role.PERSONNEL_ADMIN);
+  }
+
+  /**
+   * Verifica se l'utente può agire come responsabile di sede sulle richieste della persona:
+   * deve essere responsabile della sede della persona, oppure deve trattarsi di una sua
+   * richiesta.
+   *
+   * @param user l'utente che vuole approvare o respingere
+   * @param requester la persona che ha effettuato la richiesta
+   * @return true se l'utente può agire come responsabile di sede, false altrimenti.
+   */
+  public boolean isSeatSupervisorFor(User user, Person requester) {
+    return user.hasRolesOnOffice(requester.getOffice(), Role.SEAT_SUPERVISOR)
+        || (requester.equals(user.getPerson()) && user.hasRoles(Role.SEAT_SUPERVISOR));
+  }
 
   /**
    * Approvazione richiesta informativa da parte del responsabile di sede. 

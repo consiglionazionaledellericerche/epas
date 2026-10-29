@@ -35,7 +35,7 @@
 		    
 		    </td>
 		    #{if recap != null}
-		    	<td><a href="@{Absences.zipAttachment(recap.getCode(),year, month)}" 
+		    	<td><a href="@{Absences.zipAttachment(recap.getCode(), year, month, office.id)}" 
 					   data-toggle="tooltip" 
 					   title="comprimi file">
 					<span class="glyphicon glyphicon-compressed"></span>

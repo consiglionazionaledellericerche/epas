@@ -10,6 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     esempio oltre il limite annuale di 18 ore, non possono più essere inviate. Prima la richiesta
     veniva salvata e approvata per l'intero periodo, ma all'approvazione venivano inseriti solo i
     giorni entro il limite. Il controllo è ripetuto anche al salvataggio della richiesta.
+### Added
+  - Nella modifica del contratto è possibile impostare i giorni di riposo compensativo già
+    effettuati alla data di inizializzazione (sourceRecoveryDayUsed), insieme alla data di
+    inizializzazione dei riposi compensativi. Entrambi i campi sono modificabili da chi ha il
+    permesso di modifica del contratto (amministratori, sviluppatori e gestori dell'anagrafica).
+
+## [2.38.0] - 2026-10-28
+### Fixed
+  - Rafforzati i controlli sui permessi in alcune azioni e nelle approvazioni dei flussi.
+  - Rafforzati i controlli sui permessi nell'inserimento delle assenze, negli allegati, nelle ore
+    di formazione, nelle timbrature in telelavoro e nell'esportazione della situazione personale.
+  - Il testo inserito dagli utenti nei popover è mostrato come testo.
 
 ## [2.37.3] - 2026-10-19
 ### Added

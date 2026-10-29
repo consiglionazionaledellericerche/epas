@@ -768,6 +768,9 @@ public class AbsenceRequests extends Controller {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     notFoundIfNull(absenceRequest);
     User user = Security.getUser().get();
+    if (!absenceRequestManager.isApprover(absenceRequest, user)) {
+      forbidden();
+    }
 
     boolean approved = absenceRequestManager.approval(absenceRequest, user);
 
@@ -793,19 +796,24 @@ public class AbsenceRequests extends Controller {
    */
   public static void disapproval(long id, boolean disapproval, String reason) {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    notFoundIfNull(absenceRequest);
     User user = Security.getUser().get();
+    if (!absenceRequestManager.isApprover(absenceRequest, user)) {
+      forbidden();
+    }
     if (!disapproval) {
       disapproval = true;
       render(absenceRequest, disapproval);
     }
+    final Person requester = absenceRequest.getPerson();
     if (absenceRequest.isManagerApprovalRequired() && absenceRequest.getManagerApproved() == null
-        && user.hasRoles(Role.GROUP_MANAGER)) {
+        && user.isGroupManagerOf(requester)) {
       // caso di approvazione da parte del responsabile di gruppo.
       absenceRequestManager.managerDisapproval(id, reason);
     }
     if (absenceRequest.isAdministrativeApprovalRequired()
         && absenceRequest.getAdministrativeApproved() == null 
-        && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+        && user.hasRolesOnOffice(requester.getOffice(), Role.PERSONNEL_ADMIN)) {
       // caso di approvazione da parte dell'amministratore del personale
       absenceRequestManager.personnelAdministratorDisapproval(id, reason);
     }
@@ -813,7 +821,7 @@ public class AbsenceRequests extends Controller {
     if ((absenceRequest.isOfficeHeadApprovalRequired() 
           || absenceRequest.isOfficeHeadApprovalForManagerRequired())
         && absenceRequest.getOfficeHeadApproved() == null
-        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+        && absenceRequestManager.isSeatSupervisorFor(user, requester)) {
       log.info("Rifiuto da parte del responsabile di sede {} per {}", 
           user.getLabel(), absenceRequest);
       // caso di approvazione da parte del responsabile di sede

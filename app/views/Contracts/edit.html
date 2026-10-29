@@ -63,8 +63,11 @@
 	    	#{secure.check 'Contracts.updatePersonId'}
 	    		#{f.input 'contract.perseoId', label:'contract.perseoId', value:contract.perseoId /}
 	    	#{/secure.check}
-	    	#{secure.check 'Contracts.updateSourceDateRecoveryDay'}
+	    	#{secure.check 'Contracts.update'}
 	    		#{f.date 'sourceDateRecoveryDay', value:sourceDateRecoveryDay?.format() /}
+	    	#{/secure.check}
+	    	#{secure.check 'Contracts.update'}
+	    		#{f.input 'sourceRecoveryDayUsed', value:sourceRecoveryDayUsed, type:'number', min:0, max:100 /}
 	    	#{/secure.check}
 	    	
 	    	#{ifError 'contract.crossValidationFailed'} 
@@ -94,8 +97,11 @@
 			#{secure.check 'Contracts.updatePersonId'}
 				#{f.simpleView 'contract.perseoId', label:'contract.perseoId', value:contract.perseoId, hidden:true /}
 			#{/secure.check}
-			#{secure.check 'Contracts.updateSourceDateRecoveryDay'}
+			#{secure.check 'Contracts.update'}
 	    		#{f.simpleView 'sourceDateRecoveryDay', value:sourceDateRecoveryDay?.format(), hidden:true /}
+	    	#{/secure.check}
+	    	#{secure.check 'Contracts.update'}
+	    		#{f.simpleView 'sourceRecoveryDayUsed', value:sourceRecoveryDayUsed, hidden:true /}
 	    	#{/secure.check}
 			<input type="hidden" name="confirmed" value="true" />
 			
