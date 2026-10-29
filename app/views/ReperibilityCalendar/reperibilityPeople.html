@@ -6,7 +6,7 @@
       data-event="${person.toJson()}" style="color: ${person.eventColor.textColor};
        	     background-color: ${person.eventColor.backgroundColor};
        	     border-color: ${person.eventColor.borderColor}"
-             webui-popover-hover data-content="Telefono: ${person.mobile} <br> email: ${person.email}">
+             webui-popover-hover data-content="Telefono: ${person.mobile?.popoverText()} <br> email: ${person.email?.popoverText()}">
     ${person.title}
     </li>
   <br>

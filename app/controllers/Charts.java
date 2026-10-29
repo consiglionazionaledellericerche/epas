@@ -335,6 +335,8 @@ public class Charts extends Controller {
       boolean onlyMission, @Required LocalDate beginDate, @Required LocalDate endDate, 
       Long personId) {
     Person person = personDao.getPersonById(personId);
+    notFoundIfNull(person);
+    rules.checkIfPermitted(person);
     if (beginDate != null && endDate != null && !beginDate.isBefore(endDate)) {
       Validation.addError("endDate", "La data di fine non può precedere la data di inizio!");      
     }

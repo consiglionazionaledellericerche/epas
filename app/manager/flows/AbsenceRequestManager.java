@@ -772,19 +772,20 @@ public class AbsenceRequestManager {
    */
   public boolean approval(AbsenceRequest absenceRequest, User user) {
 
+    final Person requester = absenceRequest.getPerson();
+
     // verifico se posso inserire l'assenza
     if (!absenceRequest.isOfficeHeadApprovalForManagerRequired() 
         && user.hasRoles(Role.GROUP_MANAGER)
-        && absenceRequest.getPerson().equals(user.getPerson())) {
+        && requester.equals(user.getPerson())) {
       managerSelfApproval(absenceRequest.id, user);
       return true;
     }
     if (absenceRequest.isManagerApprovalRequired() && absenceRequest.getManagerApproved() == null
-        && user.hasRoles(Role.GROUP_MANAGER)) {
+        && user.isGroupManagerOf(requester)) {
       // caso di approvazione da parte del responsabile di gruppo.
       managerApproval(absenceRequest.id, user);
-      if (user.getUsersRolesOffices().stream()
-          .anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
+      if (isSeatSupervisorFor(user, requester)
           && absenceRequest.isOfficeHeadApprovalRequired()) {
         // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
         officeHeadApproval(absenceRequest.id, user);
@@ -793,22 +794,55 @@ public class AbsenceRequestManager {
     }
     if (absenceRequest.isAdministrativeApprovalRequired()
         && absenceRequest.getAdministrativeApproved() == null 
-        && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+        && user.hasRolesOnOffice(requester.getOffice(), Role.PERSONNEL_ADMIN)) {
       // caso di approvazione da parte dell'amministratore del personale
       personnelAdministratorApproval(absenceRequest.id, user);
       return true;
     }
     if (absenceRequest.isOfficeHeadApprovalForManagerRequired()
-        && absenceRequest.getOfficeHeadApproved() == null && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+        && absenceRequest.getOfficeHeadApproved() == null
+        && isSeatSupervisorFor(user, requester)) {
       officeHeadApproval(absenceRequest.id, user);
       return true;
     }
-    if (!absenceRequest.isFullyApproved() && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+    if (!absenceRequest.isFullyApproved() && isSeatSupervisorFor(user, requester)) {
       // caso di approvazione da parte del responsabile di sede
       officeHeadApproval(absenceRequest.id, user);
       return true;
     }
     return false;
+  }
+
+  /**
+   * Verifica se l'utente è tra quelli che possono approvare o respingere la richiesta:
+   * responsabile di gruppo della persona che ha fatto la richiesta (o la persona stessa se
+   * responsabile di gruppo), oppure responsabile di sede o amministratore del personale della
+   * sede della persona.
+   *
+   * @param absenceRequest la richiesta di assenza
+   * @param user l'utente che vuole approvare o respingere
+   * @return true se l'utente può approvare o respingere la richiesta, false altrimenti.
+   */
+  public boolean isApprover(AbsenceRequest absenceRequest, User user) {
+    final Person requester = absenceRequest.getPerson();
+    return (user.hasRoles(Role.GROUP_MANAGER) && requester.equals(user.getPerson()))
+        || user.isGroupManagerOf(requester)
+        || isSeatSupervisorFor(user, requester)
+        || user.hasRolesOnOffice(requester.getOffice(), Role.PERSONNEL_ADMIN);
+  }
+
+  /**
+   * Verifica se l'utente può agire come responsabile di sede sulle richieste della persona:
+   * deve essere responsabile della sede della persona, oppure deve trattarsi di una sua
+   * richiesta.
+   *
+   * @param user l'utente che vuole approvare o respingere
+   * @param requester la persona che ha effettuato la richiesta
+   * @return true se l'utente può agire come responsabile di sede, false altrimenti.
+   */
+  public boolean isSeatSupervisorFor(User user, Person requester) {
+    return user.hasRolesOnOffice(requester.getOffice(), Role.SEAT_SUPERVISOR)
+        || (requester.equals(user.getPerson()) && user.hasRoles(Role.SEAT_SUPERVISOR));
   }
 
   /**
