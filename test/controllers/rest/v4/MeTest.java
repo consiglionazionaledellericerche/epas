@@ -176,18 +176,26 @@ public class MeTest extends FunctionalTest {
 
   private Person employee() {
     Person person = h2Examples.activeNormalEmployee(BEGIN_2026);
-    Role role = Role.find("byName", Role.EMPLOYEE).first();
-    if (role == null) {
-      role = new Role();
-      role.setName(Role.EMPLOYEE);
-      role.save();
-    }
     UsersRolesOffices uro = new UsersRolesOffices();
     uro.setUser(person.getUser());
     uro.setOffice(person.getOffice());
-    uro.setRole(role);
+    uro.setRole(role(Role.EMPLOYEE));
     uro.save();
+    // i controlli sulla configurazione dei flussi cercano i responsabili di sede e gli
+    // amministratori del personale: i ruoli esistono sempre, anche senza utenti assegnati
+    role(Role.SEAT_SUPERVISOR);
+    role(Role.PERSONNEL_ADMIN);
     return person;
+  }
+
+  private Role role(String name) {
+    Role role = Role.find("byName", name).first();
+    if (role == null) {
+      role = new Role();
+      role.setName(name);
+      role.save();
+    }
+    return role;
   }
 
   private AbsenceRequest request(Person person) {
