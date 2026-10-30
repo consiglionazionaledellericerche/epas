@@ -12,6 +12,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     reload4j 1.2.27, commons-fileupload 1.6.0, xstream 1.4.21, snakeyaml 1.33, dom4j 2.1.4,
     commons-io 2.20.0 e commons-codec 1.19.0. Le vecchie versioni e il driver mysql non usato
     sono rimossi dall'immagine docker.
+### Fixed
+  - Le richieste di permesso personale (gruppo 661) che contengono giorni non inseribili, ad
+    esempio oltre il limite annuale di 18 ore, non possono più essere inviate. Prima la richiesta
+    veniva salvata e approvata per l'intero periodo, ma all'approvazione venivano inseriti solo i
+    giorni entro il limite. Il controllo è ripetuto anche al salvataggio della richiesta.
+  - Dopo un login fallito la password non viene più salvata nel cookie del flash.
+  - Password, token, secret e parametri del callback OAuth sono oscurati nei log delle richieste
+    lente.
+  - I login LDAP e Shibboleth non accettano più redirect verso altri siti tramite il parametro
+    return.
+  - Il recupero password non rivela più se un indirizzo email è registrato: risposta, errori e
+    tempi non dipendono dall'indirizzo, perché la mail è preparata e inviata in un job.
+### Changed
+  - Le metriche su /metrics/prometheus richiedono un token, da impostare con metrics.token
+    (METRICS_TOKEN nel docker) e inviare nell'header Authorization: Bearer. Senza token
+    configurato rispondono 403: chi le raccoglie con Prometheus deve aggiornare la configurazione.
+### Added
+  - Nella modifica del contratto è possibile impostare i giorni di riposo compensativo già
+    effettuati alla data di inizializzazione (sourceRecoveryDayUsed), insieme alla data di
+    inizializzazione dei riposi compensativi. Entrambi i campi sono modificabili da chi ha il
+    permesso di modifica del contratto (amministratori, sviluppatori e gestori dell'anagrafica).
 
 ## [2.38.0] - 2026-10-28
 ### Fixed

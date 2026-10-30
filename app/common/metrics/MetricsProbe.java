@@ -20,6 +20,7 @@ package common.metrics;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import common.injection.StaticInject;
+import common.security.SensitiveParams;
 import controllers.Security;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -80,7 +81,8 @@ public class MetricsProbe extends Controller {
       if (minDurationCheck.test(t)) {
         val params = request.params.all().entrySet().stream()
             .filter(i -> !PARAMS_SKIP.contains(i.getKey()))
-            .map(e -> e.getKey() + "=" + Joiner.on(',').skipNulls().join((String[]) e.getValue()))
+            .map(e -> e.getKey() + "=" + SensitiveParams.loggable(e.getKey(),
+                Joiner.on(',').skipNulls().join((String[]) e.getValue())))
             .collect(Collectors.joining(","));
         log.info("duration: {} ms, request {}({}) as {}", t / NANOS_TO_MS, request.action,
             params, Security.getUser().transform(User::toString).or("-"));
