@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     esempio oltre il limite annuale di 18 ore, non possono più essere inviate. Prima la richiesta
     veniva salvata e approvata per l'intero periodo, ma all'approvazione venivano inseriti solo i
     giorni entro il limite. Il controllo è ripetuto anche al salvataggio della richiesta.
+  - Dopo un login fallito la password non viene più salvata nel cookie del flash.
+  - Password, token e secret sono oscurati nei log delle richieste lente.
+  - Il login LDAP non accetta più redirect verso altri siti tramite il parametro return.
+  - Il recupero password non rivela più se un indirizzo email è registrato.
+### Changed
+  - Le metriche su /metrics/prometheus richiedono un token, da impostare con metrics.token
+    (METRICS_TOKEN nel docker) e inviare nell'header Authorization: Bearer. Senza token
+    configurato rispondono 403: chi le raccoglie con Prometheus deve aggiornare la configurazione.
 ### Added
   - Nella modifica del contratto è possibile impostare i giorni di riposo compensativo già
     effettuati alla data di inizializzazione (sourceRecoveryDayUsed), insieme alla data di

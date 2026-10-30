@@ -62,18 +62,14 @@ public class LostPassword extends Controller {
     }
 
     Person person = personDao.byEmail(email).orNull();
-    if (person == null) {
-
-      flash.error("L'indirizzo email fornito è sconosciuto. Operazione annullata.");
-      LostPassword.lostPassword();
+    if (person != null) {
+      userManager.generateRecoveryToken(person);
+      emailManager.recoveryPasswordMail(person);
     }
 
-    userManager.generateRecoveryToken(person);
-    emailManager.recoveryPasswordMail(person);
-
-    flash.success("E' stata inviata una mail all'indirizzo %s. "
-            + "Completare la procedura di recovery password entro la data di oggi.",
-        person.getEmail());
+    // Il messaggio è lo stesso per ogni indirizzo, per non rivelare quali email sono registrate.
+    flash.success("Se l'indirizzo fornito è associato a un utente, è stata inviata una mail. "
+        + "Completare la procedura di recovery password entro la data di oggi.");
     Secure.login();
   }
 

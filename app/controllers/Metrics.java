@@ -17,10 +17,15 @@
 
 package controllers;
 
+import com.google.common.base.Strings;
 import common.metrics.MetricsProbe;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import javax.inject.Inject;
+import play.Play;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.With;
 
 /**
@@ -32,10 +37,31 @@ import play.mvc.With;
 @With(MetricsProbe.class)
 public class Metrics extends Controller {
 
+  static final String METRICS_TOKEN = "metrics.token";
+  private static final String BEARER = "Bearer ";
+
   @Inject
   static PrometheusMeterRegistry registry;
 
+  /**
+   * Metriche in formato Prometheus, accessibili solo con il token impostato in metrics.token.
+   * Il controllo è qui e non in un @Before perché Resecure include questa classe con @With.
+   */
   public static void prometheus() {
+    if (!isTokenValid()) {
+      forbidden();
+    }
     renderText(registry.scrape());
+  }
+
+  private static boolean isTokenValid() {
+    final String token = Play.configuration.getProperty(METRICS_TOKEN);
+    final Http.Header authorization = request.headers.get("authorization");
+    if (Strings.isNullOrEmpty(token) || authorization == null
+        || !authorization.value().startsWith(BEARER)) {
+      return false;
+    }
+    return MessageDigest.isEqual(token.getBytes(StandardCharsets.UTF_8),
+        authorization.value().substring(BEARER.length()).getBytes(StandardCharsets.UTF_8));
   }
 }
