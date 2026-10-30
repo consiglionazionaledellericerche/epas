@@ -11,9 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     veniva salvata e approvata per l'intero periodo, ma all'approvazione venivano inseriti solo i
     giorni entro il limite. Il controllo è ripetuto anche al salvataggio della richiesta.
   - Dopo un login fallito la password non viene più salvata nel cookie del flash.
-  - Password, token e secret sono oscurati nei log delle richieste lente.
-  - Il login LDAP non accetta più redirect verso altri siti tramite il parametro return.
-  - Il recupero password non rivela più se un indirizzo email è registrato.
+  - Password, token, secret e parametri del callback OAuth sono oscurati nei log delle richieste
+    lente.
+  - I login LDAP e Shibboleth non accettano più redirect verso altri siti tramite il parametro
+    return.
+  - Il recupero password non rivela più se un indirizzo email è registrato: risposta, errori e
+    tempi non dipendono dall'indirizzo, perché la mail è preparata e inviata in un job.
 ### Changed
   - Le metriche su /metrics/prometheus richiedono un token, da impostare con metrics.token
     (METRICS_TOKEN nel docker) e inviare nell'header Authorization: Bearer. Senza token

@@ -22,6 +22,8 @@ import common.metrics.MetricsProbe;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.inject.Inject;
 import play.Play;
 import play.mvc.Controller;
@@ -38,7 +40,9 @@ import play.mvc.With;
 public class Metrics extends Controller {
 
   static final String METRICS_TOKEN = "metrics.token";
-  private static final String BEARER = "Bearer ";
+  // Il nome dello schema non distingue maiuscole e minuscole (RFC 7235).
+  private static final Pattern BEARER =
+      Pattern.compile("\\s*bearer\\s+(\\S+)\\s*", Pattern.CASE_INSENSITIVE);
 
   @Inject
   static PrometheusMeterRegistry registry;
@@ -57,11 +61,11 @@ public class Metrics extends Controller {
   private static boolean isTokenValid() {
     final String token = Play.configuration.getProperty(METRICS_TOKEN);
     final Http.Header authorization = request.headers.get("authorization");
-    if (Strings.isNullOrEmpty(token) || authorization == null
-        || !authorization.value().startsWith(BEARER)) {
+    if (Strings.isNullOrEmpty(token) || authorization == null) {
       return false;
     }
-    return MessageDigest.isEqual(token.getBytes(StandardCharsets.UTF_8),
-        authorization.value().substring(BEARER.length()).getBytes(StandardCharsets.UTF_8));
+    final Matcher matcher = BEARER.matcher(authorization.value());
+    return matcher.matches() && MessageDigest.isEqual(token.getBytes(StandardCharsets.UTF_8),
+        matcher.group(1).getBytes(StandardCharsets.UTF_8));
   }
 }

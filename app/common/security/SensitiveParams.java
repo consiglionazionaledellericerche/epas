@@ -17,14 +17,19 @@
 
 package common.security;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.Locale;
+import java.util.Set;
 
 /**
- * Riconosce i parametri HTTP che contengono credenziali, da non scrivere nei log o nei cookie.
+ * Riconosce i parametri HTTP che contengono credenziali, da non scrivere nei log.
  */
 public final class SensitiveParams {
 
-  private static final String[] SENSITIVE_NAMES = {"password", "token", "secret"};
+  private static final String[] SENSITIVE_NAMES = {
+      "password", "passwd", "pwd", "token", "secret", "apikey", "api_key", "credential"};
+  // Nomi troppo generici per cercarli come sottostringa (es. pin in stamping).
+  private static final Set<String> SENSITIVE_EXACT_NAMES = ImmutableSet.of("code", "state", "pin");
   private static final String MASK = "***";
 
   private SensitiveParams() {
@@ -34,10 +39,13 @@ public final class SensitiveParams {
    * Verifica se il parametro contiene una credenziale.
    *
    * @param name il nome del parametro, anche composto (es. user.password)
-   * @return true se il nome indica una password, un token o un secret.
+   * @return true se il nome indica una credenziale o un parametro del callback OAuth.
    */
   public static boolean isSensitive(String name) {
     final String lowerCaseName = name.toLowerCase(Locale.ROOT);
+    if (SENSITIVE_EXACT_NAMES.contains(lowerCaseName)) {
+      return true;
+    }
     for (String sensitiveName : SENSITIVE_NAMES) {
       if (lowerCaseName.contains(sensitiveName)) {
         return true;

@@ -41,8 +41,8 @@ services:
       #- SKIP_IP_CHECK=                         # default: false -- (true,false) -- Disabilita il controllo sugli indirizzi ip delle richieste
       #- CSRF_MODE=                             # default: off -- (off,report,enforce) -- Verifica del token anti-CSRF: report segnala nel log
                                                 # le richieste senza token valido, enforce le rifiuta
-      #- METRICS_TOKEN=                         # default: vuoto -- Token (senza il carattere #) per leggere /metrics/prometheus con
-                                                # l'header Authorization: Bearer. Se vuoto le metriche non sono accessibili
+      #- METRICS_TOKEN=                         # default: vuoto -- Token per leggere /metrics/prometheus con l'header Authorization: Bearer.
+                                                # Se vuoto le metriche non sono accessibili. Può essere creato con $ openssl rand -hex 32
       #- X_FORWARDED_SUPPORT=                   # default: all -- ip del reverse proxy (separati da virgola) autorizzati a inviare
                                                 # l'header X-Forwarded-For. Fortemente consigliato impostarlo se si usa un proxy
                                                 # e non esporre la porta 9000: con "all" un client che raggiunge direttamente
