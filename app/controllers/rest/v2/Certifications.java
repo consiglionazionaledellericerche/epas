@@ -27,6 +27,7 @@ import cnr.sync.dto.v3.OfficeMonthValidationStatusDto;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
 import controllers.Resecure;
@@ -41,6 +42,7 @@ import helpers.JsonResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -105,15 +107,15 @@ public class Certifications extends Controller {
     final List<Person> people = personDao.list(Optional.absent(),
         Sets.newHashSet(office.get()), false, monthBegin, monthEnd, true).list();
     val validationStatus = new OfficeMonthValidationStatusDto();
-    people.stream().forEach(person -> {
-      val certData = 
-          certificationManager.getPersonCertData(person, year, month);
-      if (certData.validate) {
+    for (Person person : people) {
+      // Se Attestati non restituisce l'attestato la persona è considerata non validata,
+      // come nel comportamento precedente.
+      if (isMonthValidated(person, year, month).or(false)) {
         validationStatus.getValidatedPersons().add(PersonShowTerseDto.build(person));
       } else {
         validationStatus.getNotValidatedPersons().add(PersonShowTerseDto.build(person));
       }
-    });
+    }
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(validationStatus));  
   }
@@ -129,9 +131,25 @@ public class Certifications extends Controller {
       JsonResponse.badRequest("I parametri year e month sono entrambi obbligatori");
     }
     rules.checkIfPermitted(person.getOffice());
-    val certData = certificationManager.getPersonCertData(person, year, month);
+    val validated = isMonthValidated(person, year, month).or(false);
     val gson = gsonBuilder.create();
-    renderJSON(gson.toJson(certData.validate));
+    renderJSON(gson.toJson(validated));
+  }
+
+  /**
+   * Legge da Attestati lo stato di validazione mensile della persona. Se non è possibile
+   * ottenere il token OAuth per Attestati risponde con 503 invece che con un errore generico.
+   */
+  private static Optional<Boolean> isMonthValidated(Person person, int year, int month) {
+    try {
+      return certificationManager.getPersonMonthValidated(person, year, month);
+    } catch (ExecutionException | UncheckedExecutionException ex) {
+      log.error("Impossibile ottenere il token OAuth per Attestati verificando la validazione "
+          + "di {} {}/{}", person.getFullname(), month, year, ex);
+      JsonResponse.serviceUnavailable(
+          "Impossibile comunicare con Attestati per verificare lo stato di validazione");
+      return Optional.absent();
+    }
   }
 
   /**

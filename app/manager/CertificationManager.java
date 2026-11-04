@@ -17,6 +17,7 @@
 
 package manager;
 
+import com.google.common.base.Optional;
 import dao.PersonDayDao;
 import helpers.CacheValues;
 import it.cnr.iit.epas.DateUtility;
@@ -29,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import manager.attestati.service.CertificationsComunication;
 import manager.attestati.service.PersonCertData;
 import models.Person;
 import org.joda.time.YearMonth;
@@ -45,16 +47,44 @@ public class CertificationManager {
   private PersonDayManager personDayManager;
   private PersonDayDao personDayDao;
   private CacheValues cacheValues;
+  private CertificationsComunication certificationsComunication;
   
   /**
    * Construttore di default per l'injection.
    */
   @Inject
   public CertificationManager(PersonDayManager personDayManager, PersonDayDao personDayDao,
-      CacheValues cacheValues) {
+      CacheValues cacheValues, CertificationsComunication certificationsComunication) {
     this.personDayDao = personDayDao;
     this.personDayManager = personDayManager;
     this.cacheValues = cacheValues;
+    this.certificationsComunication = certificationsComunication;
+  }
+
+  /**
+   * Stato di validazione dell'attestato mensile della persona, letto direttamente
+   * da Attestati.
+   * <p>
+   * A differenza di {@link #getPersonCertData(Person, Integer, Integer)} non calcola
+   * la situazione mensile in ePAS, non confronta i dati e non scrive sul database:
+   * effettua solo la chiamata ad Attestati e legge il flag di validazione.
+   * </p>
+   *
+   * @param person la persona
+   * @param year l'anno
+   * @param month il mese
+   * @return true/false se Attestati ha risposto, absent se non è stato possibile
+   *     scaricare l'attestato della persona.
+   * @throws ExecutionException se non è possibile ottenere il token OAuth per Attestati.
+   */
+  public Optional<Boolean> getPersonMonthValidated(Person person, int year, int month)
+      throws ExecutionException {
+    val seatCertification =
+        certificationsComunication.getPersonSeatCertification(person, month, year);
+    if (!seatCertification.isPresent()) {
+      return Optional.absent();
+    }
+    return Optional.of(seatCertification.get().dipendenti.get(0).validato);
   }
   
   /**
