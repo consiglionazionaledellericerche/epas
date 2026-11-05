@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     return.
   - Il recupero password non rivela più se un indirizzo email è registrato: risposta, errori e
     tempi non dipendono dall'indirizzo, perché la mail è preparata e inviata in un job.
+  - Non è più possibile inserire una richiesta di straordinario per un mese con l'attestato già
+    validato. Il blocco non veniva mai applicato e il controllo poteva usare un dato vecchio
+    fino a 20 minuti: ora legge da Attestati solo il flag di validazione.
 ### Changed
   - Le metriche su /metrics/prometheus richiedono un token, da impostare con metrics.token
     (METRICS_TOKEN nel docker) e inviare nell'header Authorization: Bearer. Senza token
