@@ -20,18 +20,22 @@ package manager;
 import com.google.common.base.Optional;
 import dao.PersonDayDao;
 import helpers.CacheValues;
+import helpers.rest.ApiRequestException;
 import it.cnr.iit.epas.DateUtility;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.attestati.service.CertificationsComunication;
 import manager.attestati.service.PersonCertData;
+import models.Office;
 import models.Person;
 import org.joda.time.YearMonth;
 
@@ -85,6 +89,41 @@ public class CertificationManager {
       return Optional.absent();
     }
     return Optional.of(seatCertification.get().dipendenti.get(0).validato);
+  }
+
+  /**
+   * Matricole dei dipendenti della sede con l'attestato mensile validato, lette da Attestati
+   * con un'unica chiamata per tutta la sede.
+   *
+   * @param office la sede
+   * @param year l'anno
+   * @param month il mese
+   * @return le matricole (senza zeri iniziali) dei dipendenti con l'attestato validato.
+   * @throws ExecutionException se non è possibile ottenere il token OAuth per Attestati.
+   * @throws ApiRequestException se Attestati non risponde correttamente.
+   */
+  public Set<String> getOfficeMonthValidatedNumbers(Office office, int year, int month)
+      throws ExecutionException {
+    val statoValidazione =
+        certificationsComunication.getStatoValidazioneDipendenti(office, year, month);
+    if (statoValidazione == null || statoValidazione.dipendenti == null) {
+      throw new ApiRequestException("Risposta di attestati senza la lista dei dipendenti");
+    }
+    return statoValidazione.dipendenti.stream()
+        .filter(dipendente -> dipendente.validato && dipendente.matricola != null)
+        .map(dipendente -> normalizeNumber(dipendente.matricola))
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Normalizza la matricola togliendo gli zeri iniziali, perché Attestati la restituisce
+   * come numero.
+   *
+   * @param number la matricola
+   * @return la matricola senza zeri iniziali.
+   */
+  public static String normalizeNumber(String number) {
+    return number.trim().replaceFirst("^0+(?=.)", "");
   }
   
   /**

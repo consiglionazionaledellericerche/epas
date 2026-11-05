@@ -39,6 +39,7 @@ import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 import helpers.JsonResponse;
+import helpers.rest.ApiRequestException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -106,11 +107,13 @@ public class Certifications extends Controller {
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
     final List<Person> people = personDao.list(Optional.absent(),
         Sets.newHashSet(office.get()), false, monthBegin, monthEnd, true).list();
+    final Set<String> validatedNumbers = officeMonthValidatedNumbers(office.get(), year, month);
     val validationStatus = new OfficeMonthValidationStatusDto();
     for (Person person : people) {
-      // Se Attestati non restituisce l'attestato la persona è considerata non validata,
+      // Le persone che Attestati non restituisce sono considerate non validate,
       // come nel comportamento precedente.
-      if (isMonthValidated(person, year, month).or(false)) {
+      if (person.getNumber() != null && validatedNumbers.contains(
+          CertificationManager.normalizeNumber(person.getNumber()))) {
         validationStatus.getValidatedPersons().add(PersonShowTerseDto.build(person));
       } else {
         validationStatus.getNotValidatedPersons().add(PersonShowTerseDto.build(person));
@@ -149,6 +152,23 @@ public class Certifications extends Controller {
       JsonResponse.serviceUnavailable(
           "Impossibile comunicare con Attestati per verificare lo stato di validazione");
       return Optional.absent();
+    }
+  }
+
+  /**
+   * Legge da Attestati, con un'unica chiamata per la sede, le matricole dei dipendenti con
+   * l'attestato mensile validato. Se Attestati non è raggiungibile o non risponde
+   * correttamente risponde con 503, invece di considerare tutti non validati.
+   */
+  private static Set<String> officeMonthValidatedNumbers(Office office, int year, int month) {
+    try {
+      return certificationManager.getOfficeMonthValidatedNumbers(office, year, month);
+    } catch (ExecutionException | UncheckedExecutionException | ApiRequestException ex) {
+      log.error("Impossibile recuperare da Attestati lo stato di validazione dell'ufficio {} "
+          + "{}/{}", office, month, year, ex);
+      JsonResponse.serviceUnavailable(
+          "Impossibile comunicare con Attestati per verificare lo stato di validazione");
+      return Sets.newHashSet();
     }
   }
 

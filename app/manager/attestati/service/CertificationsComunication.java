@@ -52,6 +52,7 @@ import manager.attestati.dto.show.CodiceAssenza;
 import manager.attestati.dto.show.ListaDipendenti;
 import manager.attestati.dto.show.RispostaAttestati;
 import manager.attestati.dto.show.SeatCertification;
+import manager.attestati.dto.show.StatoValidazioneDipendenti;
 import models.Certification;
 import models.Office;
 import models.Person;
@@ -72,6 +73,7 @@ public class CertificationsComunication {
   private static final String ATTESTATI_API_URL = "/api/ext/attestato";
   private static final String API_URL = "/api/ext";
   private static final String API_URL_LISTA_DIPENDENTI = "/listaDipendenti";
+  private static final String API_URL_STATO_VALIDAZIONE_DIPENDENTI = "/dipendenti/statoValida";
   private static final String API_URL_ASSENZA = "/rigaAssenza";
   private static final String API_URL_BUONI_PASTO = "/rigaBuoniPasto";
   private static final String API_URL_FORMAZIONE = "/rigaFormazione";
@@ -344,6 +346,55 @@ public class CertificationsComunication {
 
     return listaDipendenti.dipendenti.stream().map(matricola -> matricola.matricola)
         .collect(Collectors.toSet());
+  }
+
+  /**
+   * Preleva da attestati lo stato di validazione degli attestati mensili dei dipendenti
+   * della sede con un'unica chiamata.
+   *
+   * @param office sede
+   * @param year anno
+   * @param month mese
+   * @return lo stato di validazione dei dipendenti della sede
+   * @throws ApiRequestException se attestati non risponde correttamente
+   */
+  public StatoValidazioneDipendenti getStatoValidazioneDipendenti(Office office, int year,
+      int month) throws ExecutionException {
+
+    String token = cacheValues.oauthToken.get(OAUTH_TOKEN).access_token;
+
+    final String url = API_URL + API_URL_STATO_VALIDAZIONE_DIPENDENTI + "/" + office.getCodeId()
+        + "/" + year + "/" + month;
+
+    HttpResponse httpResponse;
+    try {
+      WSRequest wsRequest = prepareOAuthRequest(token, url, JSON_CONTENT_TYPE);
+      httpResponse = wsRequest.get();
+    } catch (Exception ex) {
+      log.error("Errore di comunicazione col server degli Attestati {}", ex.getMessage());
+      throw new ApiRequestException("Errore di comunicazione col server degli Attestati");
+    }
+
+    // Caso di token non valido
+    if (httpResponse.getStatus() == Http.StatusCode.UNAUTHORIZED) {
+      cacheValues.oauthToken.invalidateAll();
+      log.error("Token Oauth non valido: {}", token);
+      throw new ApiRequestException("Invalid token");
+    }
+    if (httpResponse.getStatus() != Http.StatusCode.OK) {
+      log.error("Risposta inattesa da attestati per lo stato di validazione dell'ufficio {} - "
+          + "mese {}/{}: HTTP {}", office, month, year, httpResponse.getStatus());
+      throw new ApiRequestException(
+          String.format("Risposta inattesa da attestati: HTTP %d", httpResponse.getStatus()));
+    }
+
+    StatoValidazioneDipendenti statoValidazione = new Gson()
+        .fromJson(httpResponse.getJson(), StatoValidazioneDipendenti.class);
+
+    log.info("Recuperato lo stato di validazione da attestati per l'ufficio {} - mese {}/{}",
+        office, month, year);
+
+    return statoValidazione;
   }
 
   /**
