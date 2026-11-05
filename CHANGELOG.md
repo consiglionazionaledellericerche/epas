@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Le metriche su /metrics/prometheus richiedono un token, da impostare con metrics.token
     (METRICS_TOKEN nel docker) e inviare nell'header Authorization: Bearer. Senza token
     configurato rispondono 403: chi le raccoglie con Prometheus deve aggiornare la configurazione.
+  - Gli endpoint REST sullo stato di validazione degli attestati (per sede e per persona) leggono
+    da Attestati solo il flag di validazione, senza ricalcolare la situazione mensile né
+    aggiornare le certificazioni salvate in ePAS. L'endpoint per sede usa un'unica chiamata
+    ad Attestati (/api/ext/dipendenti/statoValida) con il codice della sede richiesta, invece di
+    una per dipendente. Se Attestati non è raggiungibile la risposta è 503 invece di 500.
 ### Added
   - Nella modifica del contratto è possibile impostare i giorni di riposo compensativo già
     effettuati alla data di inizializzazione (sourceRecoveryDayUsed), insieme alla data di
