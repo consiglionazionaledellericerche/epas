@@ -331,8 +331,8 @@ public enum DefaultTakable {
       -1, null),
 
   T_TELELAVORO(AmountType.units, 
-      ImmutableSet.of(DefaultAbsenceType.A_103), 
-      ImmutableSet.of(DefaultAbsenceType.A_103), 
+      ImmutableSet.of(DefaultAbsenceType.A_103BP, DefaultAbsenceType.A_103), 
+      ImmutableSet.of(DefaultAbsenceType.A_103BP, DefaultAbsenceType.A_103), 
       -1, null),
 
   T_TELELAVORO_RT(AmountType.units, 
@@ -663,7 +663,7 @@ public enum DefaultTakable {
   T_ALTRI(AmountType.units, 
       ImmutableSet.of(
           DefaultAbsenceType.A_102,
-          DefaultAbsenceType.A_103, /*DefaultAbsenceType.A_103BP,*/ 
+          DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP,
           DefaultAbsenceType.A_105BP, DefaultAbsenceType.A_105,
 
           DefaultAbsenceType.A_71, DefaultAbsenceType.A_72, DefaultAbsenceType.A_73,
@@ -713,7 +713,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_46,
           DefaultAbsenceType.A_46RA/*, DefaultAbsenceType.A_VAC19*/),
       ImmutableSet.of(DefaultAbsenceType.A_102,
-          DefaultAbsenceType.A_103, /*DefaultAbsenceType.A_103BP,*/ 
+          DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP,
           DefaultAbsenceType.A_105BP, DefaultAbsenceType.A_105,
           DefaultAbsenceType.A_71, DefaultAbsenceType.A_72, DefaultAbsenceType.A_73,
           DefaultAbsenceType.A_74, DefaultAbsenceType.A_75, DefaultAbsenceType.A_76,

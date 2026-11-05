@@ -34,6 +34,7 @@ import models.absences.CategoryTab;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultGroup;
 import org.joda.time.LocalDate;
 
 /**
@@ -140,12 +141,18 @@ public class AbsenceForm {
     // i tipi assenza selezionabili
     GroupAbsenceType current = groupAbsenceType;
     SortedMap<String, AbsenceType> typeConsidered = Maps.newTreeMap();
-    Comparator<String> cmp = null;
+    // Nel lavoro agile e nel telelavoro si propone per primo il codice con buono pasto.
+    List<String> priority = null;
     if (current.getDescription().contains("AGILE")) {
-      List<String> priority = List.of("LAGILEBP", "LAGILE");
-      cmp = Comparator
+      priority = List.of("LAGILEBP", "LAGILE");
+    } else if (DefaultGroup.TELELAVORO.name().equals(current.getName())) {
+      priority = List.of("103BP", "103");
+    }
+    if (priority != null) {
+      final List<String> codesPriority = priority;
+      Comparator<String> cmp = Comparator
           .comparingInt((String c) -> {
-            int i = priority.indexOf(c);
+            int i = codesPriority.indexOf(c);
             return i < 0 ? Integer.MAX_VALUE : i;
           })
           .thenComparing(Comparator.naturalOrder());

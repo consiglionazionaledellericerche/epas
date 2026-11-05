@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     (METRICS_TOKEN nel docker) e inviare nell'header Authorization: Bearer. Senza token
     configurato rispondono 403: chi le raccoglie con Prometheus deve aggiornare la configurazione.
 ### Added
+  - Riattivato il codice 103BP "Telelavoro con maturazione buono pasto", valido dal 1° luglio
+    2026 come da nota del DG sul buono pasto in telelavoro domiciliare. Il codice è nel gruppo
+    Telelavoro accanto al 103, è inviato ad Attestati come 103 e fa maturare il buono pasto.
+    Come per LAGILEBP, se lo inseriscono da soli i dipendenti abilitati al telelavoro e lo
+    inseriscono gli amministratori del personale; nella form è proposto per primo.
   - Nella modifica del contratto è possibile impostare i giorni di riposo compensativo già
     effettuati alla data di inizializzazione (sourceRecoveryDayUsed), insieme alla data di
     inizializzazione dei riposi compensativi. Entrambi i campi sono modificabili da chi ha il

@@ -28,9 +28,11 @@ import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.services.absences.AbsenceService;
 import models.Person;
+import models.PersonDay;
 import models.Role;
 import models.UsersRolesOffices;
 import models.absences.Absence;
+import models.absences.AbsenceType;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultGroup;
 import org.joda.time.DateTimeConstants;
@@ -124,6 +126,56 @@ public class AbsenceGroupsSaveTest extends FunctionalTest {
         "103", JustifiedTypeName.complete_day_and_add_overtime));
     assertStatus(302, response);
     assertEquals(1, absences(employee));
+  }
+
+  /**
+   * Un dipendente abilitato al telelavoro può inserirsi il codice di telelavoro con buono
+   * pasto, che gli fa maturare il buono pasto nella giornata.
+   */
+  @Test
+  public void employeeCanSaveTeleworkWithMealTicketForHimself() {
+    absenceService.enumInitializator();
+    Person employee = teleworkEmployee();
+    commit();
+
+    login(employee);
+    Response response = POST(saveUrl(), saveParams(employee, DefaultGroup.TELELAVORO,
+        "103BP", JustifiedTypeName.complete_day_and_add_overtime));
+    assertStatus(302, response);
+    assertEquals(1, absences(employee));
+    PersonDay personDay = PersonDay.find("person.id = ?1 and date = ?2",
+        employee.id, lastWorkingDay()).first();
+    assertTrue(personDay.isTicketAvailable());
+  }
+
+  /**
+   * Un amministratore del personale può inserire il codice di telelavoro con buono pasto
+   * sul cartellino di un dipendente della propria sede.
+   */
+  @Test
+  public void personnelAdminCanSaveTeleworkWithMealTicket() {
+    absenceService.enumInitializator();
+    Person employee = teleworkEmployee();
+    String username = h2Examples
+        .userWithOfficeRole(employee.getOffice(), Role.PERSONNEL_ADMIN).getUsername();
+    commit();
+
+    login(username);
+    assertStatus(302, POST(saveUrl(), saveParams(employee, DefaultGroup.TELELAVORO,
+        "103BP", JustifiedTypeName.complete_day_and_add_overtime)));
+    assertEquals(1, absences(employee));
+  }
+
+  /**
+   * Il codice di telelavoro con buono pasto vale dal 1° luglio 2026.
+   */
+  @Test
+  public void teleworkWithMealTicketIsValidFromJuly2026() {
+    absenceService.enumInitializator();
+    AbsenceType absenceType = absenceComponentDao.absenceTypeByCode("103BP").get();
+    assertTrue(absenceType.isExpired(new LocalDate(2026, 6, 30)));
+    assertFalse(absenceType.isExpired(new LocalDate(2026, 7, 1)));
+    assertEquals("103", absenceType.getCertificateCode());
   }
 
   private Person teleworkEmployee() {
