@@ -887,6 +887,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18,
           DefaultAbsenceType.A_C16, DefaultAbsenceType.A_35R,
           DefaultAbsenceType.A_54B, DefaultAbsenceType.A_54TD,
+          DefaultAbsenceType.A_58,
           DefaultAbsenceType.A_62S75V, DefaultAbsenceType.A_62, 
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D), 
       ImmutableSet.of(
@@ -911,6 +912,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_C17, DefaultAbsenceType.A_C18,
           DefaultAbsenceType.A_C16, DefaultAbsenceType.A_35R,
           DefaultAbsenceType.A_54B, DefaultAbsenceType.A_54TD,
+          DefaultAbsenceType.A_58,
           DefaultAbsenceType.A_62S75V, DefaultAbsenceType.A_62, 
           DefaultAbsenceType.A_62A, DefaultAbsenceType.A_62D), 
       -1, null),
