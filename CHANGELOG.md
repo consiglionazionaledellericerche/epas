@@ -25,6 +25,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Il recupero password non rivela più se un indirizzo email è registrato: risposta, errori e
     tempi non dipendono dall'indirizzo, perché la mail è preparata e inviata in un job.
 ### Changed
+  - L'application.secret è obbligatorio in produzione: l'applicazione non si avvia se non è
+    impostato, se è più corto di 32 caratteri o se è uno dei valori pubblicati nel repository.
+    Nel docker l'avvio si interrompe se manca APPLICATION_SECRET, invece di usare in silenzio il
+    secret di application.conf, che è pubblico e permetteva a chiunque di firmare un cookie di
+    sessione valido per qualunque utente. Il secret di application.conf è sostituito da un valore
+    solo per sviluppo e test. Chi non aveva impostato APPLICATION_SECRET deve impostarlo prima
+    dell'aggiornamento (le sessioni aperte andranno rifatte); chi lo aveva impostato non deve fare
+    nulla.
   - Le metriche su /metrics/prometheus richiedono un token, da impostare con metrics.token
     (METRICS_TOKEN nel docker) e inviare nell'header Authorization: Bearer. Senza token
     configurato rispondono 403: chi le raccoglie con Prometheus deve aggiornare la configurazione.
