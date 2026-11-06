@@ -99,6 +99,11 @@ curl -fsSL https://raw.githubusercontent.com/consiglionazionaledellericerche/epa
 
 Collegarsi a http://localhost:9000/ username: _admin_ password _cambialaosarailicenziato_ (da cambiare il prima possibile). 
 
+La porta 9000 è pubblicata solo sull'interfaccia locale del server: da un'altra macchina ci si
+può collegare con un tunnel ssh (`ssh -L 9000:localhost:9000 utente@server`). In produzione ePAS
+va servito tramite un reverse proxy https: requisiti ed esempi per Apache, nginx e Traefik sono
+in [docs/sysadmin/reverseProxy.rst](docs/sysadmin/reverseProxy.rst).
+
 #### _Avviare ePAS in alta affidabilità in un cluster docker swarm_
 
 Un esempio di installazione di ePAS tramite *Ansible* in un cluster *Docker Swarm*
