@@ -27,6 +27,7 @@ import cnr.sync.dto.v3.OfficeMonthValidationStatusDto;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
 import controllers.Resecure;
@@ -38,9 +39,11 @@ import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperContractMonthRecap;
 import dao.wrapper.IWrapperFactory;
 import helpers.JsonResponse;
+import helpers.rest.ApiRequestException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -104,16 +107,18 @@ public class Certifications extends Controller {
     LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
     final List<Person> people = personDao.list(Optional.absent(),
         Sets.newHashSet(office.get()), false, monthBegin, monthEnd, true).list();
+    final Set<String> validatedNumbers = officeMonthValidatedNumbers(office.get(), year, month);
     val validationStatus = new OfficeMonthValidationStatusDto();
-    people.stream().forEach(person -> {
-      val certData = 
-          certificationManager.getPersonCertData(person, year, month);
-      if (certData.validate) {
+    for (Person person : people) {
+      // Le persone che Attestati non restituisce sono considerate non validate,
+      // come nel comportamento precedente.
+      if (person.getNumber() != null && validatedNumbers.contains(
+          CertificationManager.normalizeNumber(person.getNumber()))) {
         validationStatus.getValidatedPersons().add(PersonShowTerseDto.build(person));
       } else {
         validationStatus.getNotValidatedPersons().add(PersonShowTerseDto.build(person));
       }
-    });
+    }
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(validationStatus));  
   }
@@ -129,9 +134,49 @@ public class Certifications extends Controller {
       JsonResponse.badRequest("I parametri year e month sono entrambi obbligatori");
     }
     rules.checkIfPermitted(person.getOffice());
-    val certData = certificationManager.getPersonCertData(person, year, month);
+    val validated = isMonthValidated(person, year, month);
     val gson = gsonBuilder.create();
-    renderJSON(gson.toJson(certData.validate));
+    renderJSON(gson.toJson(validated));
+  }
+
+  /**
+   * Legge da Attestati lo stato di validazione mensile della persona. Se non è possibile
+   * ottenere il token OAuth o scaricare l'attestato della persona (Attestati non raggiungibile,
+   * token non valido, risposta non valida) risponde con 503 invece di considerarla non validata.
+   */
+  private static boolean isMonthValidated(Person person, int year, int month) {
+    Optional<Boolean> validated;
+    try {
+      validated = certificationManager.getPersonMonthValidated(person, year, month);
+    } catch (ExecutionException | UncheckedExecutionException ex) {
+      log.error("Impossibile ottenere il token OAuth per Attestati verificando la validazione "
+          + "di {} {}/{}", person.getFullname(), month, year, ex);
+      validated = Optional.absent();
+    }
+    if (!validated.isPresent()) {
+      log.error("Stato di validazione di {} {}/{} non disponibile da Attestati",
+          person.getFullname(), month, year);
+      JsonResponse.serviceUnavailable(
+          "Impossibile comunicare con Attestati per verificare lo stato di validazione");
+    }
+    return validated.get();
+  }
+
+  /**
+   * Legge da Attestati, con un'unica chiamata per la sede, le matricole dei dipendenti con
+   * l'attestato mensile validato. Se Attestati non è raggiungibile o non risponde
+   * correttamente risponde con 503, invece di considerare tutti non validati.
+   */
+  private static Set<String> officeMonthValidatedNumbers(Office office, int year, int month) {
+    try {
+      return certificationManager.getOfficeMonthValidatedNumbers(office, year, month);
+    } catch (ExecutionException | UncheckedExecutionException | ApiRequestException ex) {
+      log.error("Impossibile recuperare da Attestati lo stato di validazione dell'ufficio {} "
+          + "{}/{}", office, month, year, ex);
+      JsonResponse.serviceUnavailable(
+          "Impossibile comunicare con Attestati per verificare lo stato di validazione");
+      return Sets.newHashSet();
+    }
   }
 
   /**

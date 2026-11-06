@@ -30,6 +30,7 @@ public final class JsonResponse {
   private static final String WITH_MSG = "HTTP %s - %s";
 
   public static final int CONFLICT = 409;
+  public static final int SERVICE_UNAVAILABLE = 503;
 
   private JsonResponse() {
   }
@@ -79,6 +80,11 @@ public final class JsonResponse {
     throw new RenderJson(String.format(WITH_MSG, Http.StatusCode.UNAUTHORIZED, message));    
   }
   
+  public static void serviceUnavailable(String message) {
+    Http.Response.current().status = SERVICE_UNAVAILABLE;
+    throw new RenderJson(String.format(WITH_MSG, SERVICE_UNAVAILABLE, message));
+  }
+
   public static void internalError(String message) {
     Http.Response.current().status = Http.StatusCode.INTERNAL_ERROR;
     throw new RenderJson(String.format(WITH_MSG, Http.StatusCode.INTERNAL_ERROR, message));    

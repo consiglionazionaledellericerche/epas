@@ -334,18 +334,22 @@ public class CompetenceRequests extends Controller {
            * Nel caso di prove in locale, occorre cambiare l'indirizzo di Attestati nei parametri 
            * di configurazione del Play altrimenti viene lanciata un'eccezione a questa chiamata
            */
+          boolean validated = false;
           try {
-            val certData = certificationManager.getPersonCertData(person, year, month);
-            if (certData.validate) {
-              flash.error("Attestato già validato per l'anno/mese richiesto. "
-                  + "Non si può procedere con una richiesta di straordinario.");
-              list(competenceType);
-              return;
-            }
+            validated = certificationManager.getPersonMonthValidated(person, year, month)
+                .or(false);
           } catch (Exception e) {
-            log.warn("Impossibile effettuare il controllo di validazione dell'attestato " + 
-                " del {}/{} per la richiesta di straordinari di {}", 
+            log.warn("Impossibile effettuare il controllo di validazione dell'attestato " +
+                " del {}/{} per la richiesta di straordinari di {}",
                 month, year, person.getFullname());
+          }
+          // Il redirect di list() è un'eccezione: va fatto fuori dal try per non essere
+          // intercettato dal catch.
+          if (validated) {
+            flash.error("Attestato già validato per l'anno/mese richiesto. "
+                + "Non si può procedere con una richiesta di straordinario.");
+            list(competenceType);
+            return;
           }
         }        
         isOvertime = true;

@@ -20,10 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Dopo un login fallito la password non viene più salvata nel cookie del flash.
   - Password, token, secret e parametri del callback OAuth sono oscurati nei log delle richieste
     lente.
+  - I token OAuth di Attestati (access token e refresh token) non vengono più scritti nei log.
   - I login LDAP e Shibboleth non accettano più redirect verso altri siti tramite il parametro
     return.
   - Il recupero password non rivela più se un indirizzo email è registrato: risposta, errori e
     tempi non dipendono dall'indirizzo, perché la mail è preparata e inviata in un job.
+  - Non è più possibile inserire una richiesta di straordinario per un mese con l'attestato già
+    validato. Il blocco non veniva mai applicato e il controllo poteva usare un dato vecchio
+    fino a 20 minuti: ora legge da Attestati solo il flag di validazione.
 ### Changed
   - L'application.secret è obbligatorio in produzione: l'applicazione non si avvia se non è
     impostato, se è più corto di 32 caratteri o se è uno dei valori pubblicati nel repository.
@@ -36,6 +40,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Le metriche su /metrics/prometheus richiedono un token, da impostare con metrics.token
     (METRICS_TOKEN nel docker) e inviare nell'header Authorization: Bearer. Senza token
     configurato rispondono 403: chi le raccoglie con Prometheus deve aggiornare la configurazione.
+  - Gli endpoint REST sullo stato di validazione degli attestati (per sede e per persona) leggono
+    da Attestati solo il flag di validazione, senza ricalcolare la situazione mensile né
+    aggiornare le certificazioni salvate in ePAS. L'endpoint per sede usa un'unica chiamata
+    ad Attestati (/api/ext/dipendenti/statoValida) con il codice della sede richiesta, invece di
+    una per dipendente. Se Attestati non è raggiungibile, non risponde correttamente o
+    restituisce una risposta in un formato diverso dal previsto, entrambi gli endpoint rispondono
+    503 invece di 500 o di considerare le persone non validate.
   - Il codice 58 (aspettativa per funzione pubblica non retribuita) riduce ferie e permessi
     come gli altri codici del gruppo RIDUCE_FERIE_CNR.
   - La descrizione del gruppo G_39LA diventa "Lavoro Agile per dipendenti fragili" e la scheda
