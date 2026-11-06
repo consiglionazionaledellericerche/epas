@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Security
+  - Aggiornate le librerie con vulnerabilità note: jsoup 1.23.2, postgresql 42.2.29,
+    commons-compress 1.28.0, xercesImpl 2.12.2, tika 1.28.5, jjwt 0.11.5, poi 3.16.
+  - Sostituite le librerie incluse in play 1.5.3 con versioni aggiornate: log4j 1.2.17 con
+    reload4j 1.2.27, commons-fileupload 1.6.0, xstream 1.4.21, snakeyaml 1.33, dom4j 2.1.4,
+    commons-io 2.20.0 e commons-codec 1.19.0. Le vecchie versioni e il driver mysql non usato
+    sono rimossi dall'immagine docker.
 ### Fixed
   - Le richieste di permesso personale (gruppo 661) che contengono giorni non inseribili, ad
     esempio oltre il limite annuale di 18 ore, non possono più essere inviate. Prima la richiesta
@@ -21,6 +28,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     validato. Il blocco non veniva mai applicato e il controllo poteva usare un dato vecchio
     fino a 20 minuti: ora legge da Attestati solo il flag di validazione.
 ### Changed
+  - L'application.secret è obbligatorio in produzione: l'applicazione non si avvia se non è
+    impostato, se è più corto di 32 caratteri o se è uno dei valori pubblicati nel repository.
+    Nel docker l'avvio si interrompe se manca APPLICATION_SECRET, invece di usare in silenzio il
+    secret di application.conf, che è pubblico e permetteva a chiunque di firmare un cookie di
+    sessione valido per qualunque utente. Il secret di application.conf è sostituito da un valore
+    solo per sviluppo e test. Chi non aveva impostato APPLICATION_SECRET deve impostarlo prima
+    dell'aggiornamento (le sessioni aperte andranno rifatte); chi lo aveva impostato non deve fare
+    nulla.
   - Le metriche su /metrics/prometheus richiedono un token, da impostare con metrics.token
     (METRICS_TOKEN nel docker) e inviare nell'header Authorization: Bearer. Senza token
     configurato rispondono 403: chi le raccoglie con Prometheus deve aggiornare la configurazione.
@@ -29,7 +44,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     aggiornare le certificazioni salvate in ePAS. L'endpoint per sede usa un'unica chiamata
     ad Attestati (/api/ext/dipendenti/statoValida) con il codice della sede richiesta, invece di
     una per dipendente. Se Attestati non è raggiungibile la risposta è 503 invece di 500.
+  - Il codice 58 (aspettativa per funzione pubblica non retribuita) riduce ferie e permessi
+    come gli altri codici del gruppo RIDUCE_FERIE_CNR.
 ### Added
+  - Riattivato il codice 103BP "Telelavoro con maturazione buono pasto", valido dal 1° luglio
+    2026 come da nota del DG sul buono pasto in telelavoro domiciliare. Il codice è nel gruppo
+    Telelavoro accanto al 103, è inviato ad Attestati come 103 e fa maturare il buono pasto.
+    Come per LAGILEBP, se lo inseriscono da soli i dipendenti abilitati al telelavoro e lo
+    inseriscono gli amministratori del personale; nella form è proposto per primo.
   - Nella modifica del contratto è possibile impostare i giorni di riposo compensativo già
     effettuati alla data di inizializzazione (sourceRecoveryDayUsed), insieme alla data di
     inizializzazione dei riposi compensativi. Entrambi i campi sono modificabili da chi ha il
