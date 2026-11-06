@@ -100,7 +100,8 @@ public class CertificationManager {
    * @param month il mese
    * @return le matricole (senza zeri iniziali) dei dipendenti con l'attestato validato.
    * @throws ExecutionException se non è possibile ottenere il token OAuth per Attestati.
-   * @throws ApiRequestException se Attestati non risponde correttamente.
+   * @throws ApiRequestException se Attestati non risponde correttamente o la risposta non
+   *     contiene la lista dei dipendenti con le matricole.
    */
   public Set<String> getOfficeMonthValidatedNumbers(Office office, int year, int month)
       throws ExecutionException {
@@ -109,8 +110,15 @@ public class CertificationManager {
     if (statoValidazione == null || statoValidazione.dipendenti == null) {
       throw new ApiRequestException("Risposta di attestati senza la lista dei dipendenti");
     }
+    // Una lista vuota è valida (es. stralcio non ancora fatto), ma se ci sono dipendenti
+    // e nessuno ha la matricola il formato della risposta non è quello atteso.
+    if (!statoValidazione.dipendenti.isEmpty() && statoValidazione.dipendenti.stream()
+        .allMatch(dipendente -> dipendente == null || dipendente.matricola == null)) {
+      throw new ApiRequestException("Risposta di attestati con dipendenti senza matricola");
+    }
     return statoValidazione.dipendenti.stream()
-        .filter(dipendente -> dipendente.validato && dipendente.matricola != null)
+        .filter(dipendente -> dipendente != null && dipendente.validato
+            && dipendente.matricola != null)
         .map(dipendente -> normalizeNumber(dipendente.matricola))
         .collect(Collectors.toSet());
   }

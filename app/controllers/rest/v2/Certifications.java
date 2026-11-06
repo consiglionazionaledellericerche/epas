@@ -134,25 +134,32 @@ public class Certifications extends Controller {
       JsonResponse.badRequest("I parametri year e month sono entrambi obbligatori");
     }
     rules.checkIfPermitted(person.getOffice());
-    val validated = isMonthValidated(person, year, month).or(false);
+    val validated = isMonthValidated(person, year, month);
     val gson = gsonBuilder.create();
     renderJSON(gson.toJson(validated));
   }
 
   /**
    * Legge da Attestati lo stato di validazione mensile della persona. Se non è possibile
-   * ottenere il token OAuth per Attestati risponde con 503 invece che con un errore generico.
+   * ottenere il token OAuth o scaricare l'attestato della persona (Attestati non raggiungibile,
+   * token non valido, risposta non valida) risponde con 503 invece di considerarla non validata.
    */
-  private static Optional<Boolean> isMonthValidated(Person person, int year, int month) {
+  private static boolean isMonthValidated(Person person, int year, int month) {
+    Optional<Boolean> validated;
     try {
-      return certificationManager.getPersonMonthValidated(person, year, month);
+      validated = certificationManager.getPersonMonthValidated(person, year, month);
     } catch (ExecutionException | UncheckedExecutionException ex) {
       log.error("Impossibile ottenere il token OAuth per Attestati verificando la validazione "
           + "di {} {}/{}", person.getFullname(), month, year, ex);
+      validated = Optional.absent();
+    }
+    if (!validated.isPresent()) {
+      log.error("Stato di validazione di {} {}/{} non disponibile da Attestati",
+          person.getFullname(), month, year);
       JsonResponse.serviceUnavailable(
           "Impossibile comunicare con Attestati per verificare lo stato di validazione");
-      return Optional.absent();
     }
+    return validated.get();
   }
 
   /**

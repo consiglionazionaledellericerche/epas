@@ -17,7 +17,6 @@
 
 package manager.attestati.dto.show;
 
-import com.google.common.collect.Lists;
 import java.util.List;
 
 /**
@@ -29,7 +28,9 @@ public class StatoValidazioneDipendenti {
   public String codiceSede;
   public int anno;
   public int mese;
-  public List<ValidazioneDipendente> dipendenti = Lists.newArrayList();
+  // Senza inizializzazione: se Attestati non restituisce il campo resta null e la
+  // risposta viene trattata come errore invece che come sede senza validazioni.
+  public List<ValidazioneDipendente> dipendenti;
 
   /**
    * Stato di validazione dell'attestato mensile di un dipendente.

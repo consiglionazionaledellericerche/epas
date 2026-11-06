@@ -43,7 +43,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     da Attestati solo il flag di validazione, senza ricalcolare la situazione mensile né
     aggiornare le certificazioni salvate in ePAS. L'endpoint per sede usa un'unica chiamata
     ad Attestati (/api/ext/dipendenti/statoValida) con il codice della sede richiesta, invece di
-    una per dipendente. Se Attestati non è raggiungibile la risposta è 503 invece di 500.
+    una per dipendente. Se Attestati non è raggiungibile, non risponde correttamente o
+    restituisce una risposta in un formato diverso dal previsto, entrambi gli endpoint rispondono
+    503 invece di 500 o di considerare le persone non validate.
   - Il codice 58 (aspettativa per funzione pubblica non retribuita) riduce ferie e permessi
     come gli altri codici del gruppo RIDUCE_FERIE_CNR.
 ### Added
