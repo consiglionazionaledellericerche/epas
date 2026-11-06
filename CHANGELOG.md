@@ -25,6 +25,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Il recupero password non rivela più se un indirizzo email è registrato: risposta, errori e
     tempi non dipendono dall'indirizzo, perché la mail è preparata e inviata in un job.
 ### Changed
+  - L'application.secret è obbligatorio in produzione: l'applicazione non si avvia se non è
+    impostato, se è più corto di 32 caratteri o se è uno dei valori pubblicati nel repository.
+    Nel docker l'avvio si interrompe se manca APPLICATION_SECRET, invece di usare in silenzio il
+    secret di application.conf, che è pubblico e permetteva a chiunque di firmare un cookie di
+    sessione valido per qualunque utente. Il secret di application.conf è sostituito da un valore
+    solo per sviluppo e test. Chi non aveva impostato APPLICATION_SECRET deve impostarlo prima
+    dell'aggiornamento (le sessioni aperte andranno rifatte); chi lo aveva impostato non deve fare
+    nulla.
   - Le metriche su /metrics/prometheus richiedono un token, da impostare con metrics.token
     (METRICS_TOKEN nel docker) e inviare nell'header Authorization: Bearer. Senza token
     configurato rispondono 403: chi le raccoglie con Prometheus deve aggiornare la configurazione.
@@ -36,6 +44,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Il codice 39LA non è più inseribile dal gruppo Altri codici, ma solo dal gruppo G_39LA.
   - Nella scheda "Lavoro agile per dipendenti fragili" il codice 39LABP è proposto prima del 39LA.
 ### Added
+  - Riattivato il codice 103BP "Telelavoro con maturazione buono pasto", valido dal 1° luglio
+    2026 come da nota del DG sul buono pasto in telelavoro domiciliare. Il codice è nel gruppo
+    Telelavoro accanto al 103, è inviato ad Attestati come 103 e fa maturare il buono pasto.
+    Come per LAGILEBP, se lo inseriscono da soli i dipendenti abilitati al telelavoro e lo
+    inseriscono gli amministratori del personale; nella form è proposto per primo.
   - Nella modifica del contratto è possibile impostare i giorni di riposo compensativo già
     effettuati alla data di inizializzazione (sourceRecoveryDayUsed), insieme alla data di
     inizializzazione dei riposi compensativi. Entrambi i campi sono modificabili da chi ha il

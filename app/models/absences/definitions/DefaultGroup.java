@@ -678,7 +678,7 @@ public enum DefaultGroup {
   }
 
   /**
-   * Codici telelavoro prendibili dal gruppo telelavoro per dipendenti. (103)
+   * Codici telelavoro prendibili dal gruppo telelavoro per dipendenti. (103, 103BP)
    *
    * @return list
    */

@@ -49,7 +49,8 @@ public class AbsenceForm {
    */
   private static final Map<String, List<String>> CODES_PRIORITY_BY_GROUP = Map.of(
       DefaultGroup.G_LAGILE.name(), List.of("LAGILEBP", "LAGILE"),
-      DefaultGroup.G_39LA.name(), List.of("39LABP", "39LA"));
+      DefaultGroup.G_39LA.name(), List.of("39LABP", "39LA"),
+      DefaultGroup.TELELAVORO.name(), List.of("103BP", "103"));
   
   public Person person;
   
@@ -149,12 +150,12 @@ public class AbsenceForm {
     // i tipi assenza selezionabili
     GroupAbsenceType current = groupAbsenceType;
     SortedMap<String, AbsenceType> typeConsidered = Maps.newTreeMap();
-    Comparator<String> cmp = null;
-    List<String> priority = CODES_PRIORITY_BY_GROUP.get(current.getName());
-    if (priority != null) {
-      cmp = Comparator
+    // Nel lavoro agile e nel telelavoro si propone per primo il codice con buono pasto.
+    final List<String> codesPriority = CODES_PRIORITY_BY_GROUP.get(current.getName());
+    if (codesPriority != null) {
+      Comparator<String> cmp = Comparator
           .comparingInt((String c) -> {
-            int i = priority.indexOf(c);
+            int i = codesPriority.indexOf(c);
             return i < 0 ? Integer.MAX_VALUE : i;
           })
           .thenComparing(Comparator.naturalOrder());
