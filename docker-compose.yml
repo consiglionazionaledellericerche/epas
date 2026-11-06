@@ -18,19 +18,24 @@ services:
       - ./epas/attachments:/home/epas/epas/data/attachments
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-    #Non è necessario esporre la porta 9000 se si utilizza un proxy per
-    #servire le richieste http/https. L'utilizzo del proxy https è fortemente
-    #consigliato in produzione, utilizzare per esempio traefik.
+    # In produzione ePAS va servito tramite un reverse proxy https (Apache, nginx, Traefik...)
+    # e la porta 9000 non deve essere raggiungibile dalla rete. Con "127.0.0.1:9000:9000"
+    # la porta è raggiungibile solo dall'host (proxy installato sullo stesso server o tunnel ssh).
+    # Se il proxy è un container nella stessa rete docker (es. Traefik) la sezione ports
+    # si può togliere. Evitare "9000:9000", che pubblica la porta su tutte le interfacce:
+    # le regole di ufw/firewalld non si applicano alle porte pubblicate da docker.
+    # Esempi di configurazione: docs/sysadmin/reverseProxy.rst
     ports:
-      - 9000:9000
-    #labels:
+      - 127.0.0.1:9000:9000
+    #labels:                                    # esempio per Traefik v2/v3
     #  - traefik.enable=true
-    #  - traefik.backend=epas
-    #  - traefik.frontend.rule=Host:${HOST_NAME}
-    #  - traefik.port=9000
+    #  - traefik.http.routers.epas.rule=Host(`${HOST_NAME}`)
+    #  - traefik.http.routers.epas.entrypoints=websecure
+    #  - traefik.http.routers.epas.tls=true
+    #  - traefik.http.services.epas.loadbalancer.server.port=9000
     environment:
       - VIRTUAL_HOST=${HOST_NAME}
-      #- PROTOCOL=https                         # default: http  -- (http,https)
+      #- PROTOCOL=https                         # default: http  -- (http,https) -- impostare https se il proxy serve ePAS in https
       #- HTTP_PATH=${HTTP_PATH}                 # default: / -- da utilizzare per non servire l'applicazione come root path ( / )
                                                 # se è specificata la variabile HTTP_PATH questa deve cominciare con uno slash ( / ), es.: HTTP_PATH=/epas
       #- EPAS_SHIB_LOGIN=                       # default: false  -- (true,false)
@@ -47,6 +52,9 @@ services:
                                                 # l'header X-Forwarded-For. Fortemente consigliato impostarlo se si usa un proxy
                                                 # e non esporre la porta 9000: con "all" un client che raggiunge direttamente
                                                 # la 9000 può falsificare il proprio indirizzo ip.
+                                                # Va indicato l'ip con cui il proxy arriva al container: con il proxy sull'host
+                                                # è il gateway della rete docker (non 127.0.0.1), vedi la sezione networks in
+                                                # fondo al file. Le richieste con X-Forwarded-For da altri ip vengono rifiutate.
       #- LOGIN_MAX_FAILURES=                    # default: 10 -- tentativi di login ammessi per username e indirizzo
       #- LOGIN_LOCK_MINUTES=                    # default: 15 -- durata in minuti della finestra dei tentativi
       - FLOWS_ACTIVE=true
@@ -137,3 +145,16 @@ services:
       - /etc/timezone:/etc/timezone:ro
 
     restart: unless-stopped
+
+# Con il reverse proxy installato sull'host le richieste arrivano a ePAS dal gateway della
+# rete docker, che va indicato in X_FORWARDED_SUPPORT. Il gateway attuale si legge con
+#   docker network inspect <progetto>_default -f '{{(index .IPAM.Config 0).Gateway}}'
+# ma può cambiare se la rete viene ricreata. Per renderlo stabile fissare la subnet
+# (scegliendone una libera, che non si sovrapponga alle reti locali) e impostare
+# X_FORWARDED_SUPPORT=172.30.0.1. Su un'installazione esistente la rete va ricreata
+# (docker compose down && docker compose up -d).
+#networks:
+#  default:
+#    ipam:
+#      config:
+#        - subnet: 172.30.0.0/24
