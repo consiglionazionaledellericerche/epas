@@ -49,7 +49,7 @@ public enum DefaultTab {
   STUDIO_DIPENDENTI("Diritto allo studio dipendenti", 13), 
   COVID19("Emergenza covid-19", 16), 
   LAVORO_AGILE("Lavoro agile", 20),
-  COD39LA("Assistenza parenti immunodepressi", 18),
+  COD39LA("Lavoro agile per dipendenti fragili", 18),
   SMART("Smartworking", 17),
   NUOVO_CODICE_632("Ore agg. visite mediche per invalidità = >74% o mal. oncologiche - 632", 21),
   NUOVO_CODICE_633("Ore agg. visite mediche figli con invalidità =>74% - 633", 22),

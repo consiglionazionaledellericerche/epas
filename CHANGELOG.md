@@ -30,6 +30,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     configurato rispondono 403: chi le raccoglie con Prometheus deve aggiornare la configurazione.
   - Il codice 58 (aspettativa per funzione pubblica non retribuita) riduce ferie e permessi
     come gli altri codici del gruppo RIDUCE_FERIE_CNR.
+  - La descrizione del gruppo G_39LA diventa "Lavoro Agile per dipendenti fragili" e la scheda
+    "Assistenza parenti immunodepressi" della form di inserimento assenze diventa "Lavoro agile
+    per dipendenti fragili".
+  - Il codice 39LA non è più inseribile dal gruppo Altri codici, ma solo dal gruppo G_39LA.
+  - Nella scheda "Lavoro agile per dipendenti fragili" il codice 39LABP è proposto prima del 39LA.
 ### Added
   - Nella modifica del contratto è possibile impostare i giorni di riposo compensativo già
     effettuati alla data di inizializzazione (sourceRecoveryDayUsed), insieme alla data di
