@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Dopo un login fallito la password non viene più salvata nel cookie del flash.
   - Password, token, secret e parametri del callback OAuth sono oscurati nei log delle richieste
     lente.
+  - I token OAuth di Attestati (access token e refresh token) non vengono più scritti nei log.
   - I login LDAP e Shibboleth non accettano più redirect verso altri siti tramite il parametro
     return.
   - Il recupero password non rivela più se un indirizzo email è registrato: risposta, errori e

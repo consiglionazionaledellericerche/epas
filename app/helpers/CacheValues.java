@@ -137,8 +137,7 @@ public final class CacheValues {
       // Se non sta per scadere restituisco quello che ho già
       if (!LocalDateTime.now().isAfter(token.taken_at
           .plusSeconds(token.expires_in - ONE_MINUTE))) {
-        log.info("Token Oauth gia' presente in cache: token {}, expires_in {}", token.access_token,
-            token.expires_in);
+        log.info("Token Oauth gia' presente in cache, expires_in {}", token.expires_in);
         return Futures.immediateFuture(token);
       } else if (LocalDateTime.now().isAfter(token.taken_at.plusSeconds(token.expires_in))) {
         // Se è già scaduto lo richiedo in maniera sincrona
