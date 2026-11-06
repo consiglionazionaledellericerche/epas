@@ -710,7 +710,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_98, DefaultAbsenceType.A_52, DefaultAbsenceType.A_100,
           DefaultAbsenceType.A_406, DefaultAbsenceType.A_405,DefaultAbsenceType.A_416,
           DefaultAbsenceType.A_62S40V, DefaultAbsenceType.A_98CV, 
-          DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_46,
+          DefaultAbsenceType.A_46,
           DefaultAbsenceType.A_46RA/*, DefaultAbsenceType.A_VAC19*/),
       ImmutableSet.of(DefaultAbsenceType.A_102,
           DefaultAbsenceType.A_103, DefaultAbsenceType.A_103BP,
@@ -752,7 +752,7 @@ public enum DefaultTakable {
           DefaultAbsenceType.A_98, DefaultAbsenceType.A_52, DefaultAbsenceType.A_100,
           DefaultAbsenceType.A_406, DefaultAbsenceType.A_405,DefaultAbsenceType.A_416,
           DefaultAbsenceType.A_62S40V, DefaultAbsenceType.A_98CV,
-          DefaultAbsenceType.A_39LA, DefaultAbsenceType.A_46,
+          DefaultAbsenceType.A_46,
           DefaultAbsenceType.A_46RA/*, DefaultAbsenceType.A_VAC19*/),
       -1, null),
 

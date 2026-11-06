@@ -42,6 +42,15 @@ import org.joda.time.LocalDate;
  * form di inserimento/modifica assenze.
  */
 public class AbsenceForm {
+
+  /**
+   * Codici da mostrare per primi nella form di inserimento, per nome del gruppo.
+   * Gli altri codici del gruppo seguono in ordine alfabetico.
+   */
+  private static final Map<String, List<String>> CODES_PRIORITY_BY_GROUP = Map.of(
+      DefaultGroup.G_LAGILE.name(), List.of("LAGILEBP", "LAGILE"),
+      DefaultGroup.G_39LA.name(), List.of("39LABP", "39LA"),
+      DefaultGroup.TELELAVORO.name(), List.of("103BP", "103"));
   
   public Person person;
   
@@ -142,14 +151,8 @@ public class AbsenceForm {
     GroupAbsenceType current = groupAbsenceType;
     SortedMap<String, AbsenceType> typeConsidered = Maps.newTreeMap();
     // Nel lavoro agile e nel telelavoro si propone per primo il codice con buono pasto.
-    List<String> priority = null;
-    if (current.getDescription().contains("AGILE")) {
-      priority = List.of("LAGILEBP", "LAGILE");
-    } else if (DefaultGroup.TELELAVORO.name().equals(current.getName())) {
-      priority = List.of("103BP", "103");
-    }
-    if (priority != null) {
-      final List<String> codesPriority = priority;
+    final List<String> codesPriority = CODES_PRIORITY_BY_GROUP.get(current.getName());
+    if (codesPriority != null) {
       Comparator<String> cmp = Comparator
           .comparingInt((String c) -> {
             int i = codesPriority.indexOf(c);
