@@ -1,7 +1,11 @@
 # Application dependencies
 
 require:
-    - play
+    - play:
+       # xstream e commons-fileupload sono dichiarate sotto in versione aggiornata
+       exclude:
+        - com.thoughtworks.xstream -> xstream
+        - commons-fileupload -> commons-fileupload
     - play -> secure
     - play -> shibboleth 1.2
     - play-codeborne -> fastergt 1.10
@@ -20,7 +24,7 @@ require:
        exclude:
         - jaxen -> jaxen *
     - org.mnode.ical4j -> ical4j 3.0.25
-    - org.jsoup -> jsoup 1.13.1
+    - org.jsoup -> jsoup 1.23.2
     - org.dbunit -> dbunit 2.5.1
     - org.mockito -> mockito-core 3.11.0
     - org.assertj -> assertj-core 3.19.0:
@@ -29,8 +33,14 @@ require:
     - org.assertj -> assertj-guava 3.4.0:
        exclude:
         - org.ow2.asm -> asm *
-    - org.drools -> drools-core 5.6.0.Final
-    - org.drools -> drools-compiler 5.6.0.Final
+    - org.drools -> drools-core 5.6.0.Final:
+       # xstream è dichiarata sotto in versione aggiornata
+       exclude:
+        - com.thoughtworks.xstream -> xstream
+    - org.drools -> drools-compiler 5.6.0.Final:
+       # xstream è dichiarata sotto in versione aggiornata
+       exclude:
+        - com.thoughtworks.xstream -> xstream
     - net.lingala.zip4j -> zip4j 2.8.0
     - com.querydsl -> querydsl-codegen 4.2.2:
         exclude:
@@ -75,22 +85,55 @@ require:
     - com.fasterxml.jackson.module -> jackson-module-afterburner 2.12.3
     - com.github.fge -> jackson-coreutils 1.8
     - org.testng -> testng 6.9.10
-    - org.apache.poi -> poi 3.14
+    - org.apache.poi -> poi 3.16
     - org.graylog2 -> gelfj 1.1.16
     - org.apache.commons -> commons-csv 1.8
-    - org.apache.commons -> commons-compress 1.20
+    - org.apache.commons -> commons-compress 1.28.0
     - io.micrometer -> micrometer-registry-prometheus 1.15.0
-    - org.postgresql ->  postgresql 42.2.20:
+    - org.postgresql ->  postgresql 42.2.29:
        force: true
        exclude:
         - org.osgi -> org.osgi.core
         - org.osgi -> org.osgi.enterprise
-    - xerces -> xercesImpl 2.12.1
+    - xerces -> xercesImpl 2.12.2
+    # Versioni aggiornate di librerie incluse in play 1.5.3 (framework/lib): le librerie
+    # dell'applicazione (lib/) precedono quelle del framework nel classpath. Le versioni
+    # sostituite sono rimosse dall'immagine docker (Dockerfile).
+    - ch.qos.reload4j -> reload4j 1.2.27:
+       exclude:
+        - javax.jms -> javax.jms-api
+    # senza dipendenze transitive: quelle opzionali (servlet, portlet, jdom, xom, ...) non
+    # servono e play le includerebbe
+    - commons-fileupload -> commons-fileupload 1.6.0:
+       force: true
+       transitive: false
+    - com.thoughtworks.xstream -> xstream 1.4.21:
+       force: true
+       transitive: false
+    - io.github.x-stream -> mxparser 1.2.2
+    - org.yaml -> snakeyaml 1.33:
+       force: true
+    - org.dom4j -> dom4j 2.1.4:
+       force: true
+       # dipendenze opzionali non usate
+       exclude:
+        - pull-parser -> *
+        - xpp3 -> *
+        - net.java.dev.msv -> *
+        - relaxngDatatype -> *
+        - javax.xml.stream -> *
+        - javax.xml.bind -> *
+        - jaxen -> *
+    # richieste da commons-compress e commons-fileupload
+    - commons-io -> commons-io 2.20.0:
+       force: true
+    - commons-codec -> commons-codec 1.19.0:
+       force: true
     - it.cnr.iit -> play-qmodel 1.5.3
     - org.modelmapper -> modelmapper 2.4.4
-    - org.apache.tika -> tika-langdetect 1.26
-    - io.jsonwebtoken -> jjwt-impl 0.11.2
-    - io.jsonwebtoken -> jjwt-jackson 0.11.2
+    - org.apache.tika -> tika-langdetect 1.28.5
+    - io.jsonwebtoken -> jjwt-impl 0.11.5
+    - io.jsonwebtoken -> jjwt-jackson 0.11.5
     - io.github.openfeign -> feign-core 12.4
     - io.github.openfeign -> feign-jackson 12.4
     - io.github.openfeign -> feign-gson 12.4
