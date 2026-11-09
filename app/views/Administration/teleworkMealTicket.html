@@ -1,0 +1,134 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Conversione telelavoro 103 in 103BP' /}
+
+<div class="container">
+
+  <h3><i class="fa fa-cutlery"></i> Conversione codici di telelavoro 103 in 103BP</h3>
+
+  #{alert color:'info'}
+  <p>
+    Sostituisce i codici <strong>103</strong> con il codice <strong>103BP</strong> (telelavoro con
+    maturazione del buono pasto) per i dipendenti che nel giorno dell'assenza hanno un orario
+    <strong>normale o part time orizzontale</strong> con almeno <strong>6 ore</strong> in tutti i
+    giorni lavorativi.
+  </p>
+  <p>
+    Sono esclusi i giorni in cui il 103 è insieme ad altri codici di assenza o è inserito più
+    volte: sono elencati sotto per la verifica manuale. La conversione è prevista dal
+    ${manager.TeleworkMealTicketManager.MEAL_TICKET_BEGIN.toString('dd/MM/yyyy')}
+    e la data di fine non può superare oggi.
+  </p>
+  #{/alert}
+
+  #{panel title:'Periodo e sede', dim:12 }
+  #{form @Administration.teleworkMealTicket(), class:'form-horizontal', method:'get'}
+    #{f.date 'from', label:'Dal', required:true, value:dateFrom?.toString('dd/MM/yyyy') /}
+    #{f.date 'to', label:'Al', required:true, value:dateTo?.toString('dd/MM/yyyy') /}
+    #{f.selectModel 'office', items:templateUtility.officesAllowed(), label:'Sede',
+        value:selectedOffice, placeholder:'Tutte le sedi' /}
+    #{b.buttons center:true}
+      <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Simula</button>
+    #{/b.buttons}
+  #{/form}
+  #{/panel}
+
+  #{if report}
+
+  #{panel title:'Codici 103 da convertire in 103BP', dim:12, color:'primary' }
+    #{if report.toConvert.isEmpty()}
+      <p>Nessun codice 103 da convertire nel periodo selezionato.</p>
+    #{/if}
+    #{else}
+      <p>
+        <strong>${report.daysToConvert}</strong> codici 103 da convertire per
+        <strong>${report.peopleToConvert}</strong> dipendenti, dal
+        ${report.from.toString('dd/MM/yyyy')} al ${report.to.toString('dd/MM/yyyy')}.
+      </p>
+
+      #{form @Administration.convertTeleworkMealTicket(), method:'post'}
+        <input type="hidden" name="from" value="${report.from.toString('dd/MM/yyyy')}">
+        <input type="hidden" name="to" value="${report.to.toString('dd/MM/yyyy')}">
+        #{if selectedOffice}<input type="hidden" name="office.id" value="${selectedOffice.id}">#{/if}
+        #{b.buttons center:true}
+          <button type="submit" class="btn btn-danger"
+              onclick="return confirm('Confermi la sostituzione di ${report.daysToConvert} codici 103 con 103BP? Verranno ricalcolate le situazioni dei dipendenti coinvolti.');">
+            <i class="fa fa-exchange"></i> Esegui la conversione
+          </button>
+        #{/b.buttons}
+      #{/form}
+
+      <table class="table table-condensed table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Dipendente</th>
+            <th>Matricola</th>
+            <th>Sede</th>
+            <th>Orario di lavoro</th>
+            <th class="text-right">Giorni</th>
+            <th>Dal</th>
+            <th>Al</th>
+          </tr>
+        </thead>
+        <tbody>
+        #{list items:report.toConvert, as:'row'}
+          <tr>
+            <td>${row.person.fullname}</td>
+            <td>${row.person.number}</td>
+            <td>${row.person.office?.name}</td>
+            <td>${row.workingTimeType}</td>
+            <td class="text-right">${row.days}</td>
+            <td>${row.firstDate.toString('dd/MM/yyyy')}</td>
+            <td>${row.lastDate.toString('dd/MM/yyyy')}</td>
+          </tr>
+        #{/list}
+        </tbody>
+      </table>
+    #{/else}
+  #{/panel}
+
+  #{panel title:'Codici 103 esclusi dalla conversione', dim:12 }
+    #{if report.excluded.isEmpty()}
+      <p>Nessun codice 103 escluso nel periodo selezionato.</p>
+    #{/if}
+    #{else}
+      <p><strong>${report.daysExcluded}</strong> codici 103 esclusi dalla conversione.</p>
+      <table class="table table-condensed table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Dipendente</th>
+            <th>Matricola</th>
+            <th>Sede</th>
+            <th>Orario di lavoro</th>
+            <th>Motivo</th>
+            <th class="text-right">Giorni</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+        #{list items:report.excluded, as:'row'}
+          <tr>
+            <td>${row.person.fullname}</td>
+            <td>${row.person.number}</td>
+            <td>${row.person.office?.name}</td>
+            <td>${row.workingTimeType}</td>
+            <td>${row.outcome.label}</td>
+            <td class="text-right">${row.days}</td>
+            <td>
+              #{if row.outcome.name() == 'OTHER_ABSENCES' || row.outcome.name() == 'DUPLICATED'}
+                ${row.details}
+              #{/if}
+              #{else}
+                dal ${row.firstDate.toString('dd/MM/yyyy')} al ${row.lastDate.toString('dd/MM/yyyy')}
+              #{/else}
+            </td>
+          </tr>
+        #{/list}
+        </tbody>
+      </table>
+    #{/else}
+  #{/panel}
+
+  #{/if}
+
+</div>
