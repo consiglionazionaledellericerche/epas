@@ -153,6 +153,22 @@
   #{/form}
   #{/panel}
   
+  <!-- Conversione telelavoro 103 in 103BP -->
+  #{panel title:'Conversione codici di telelavoro 103 in 103BP', dim:12 }
+  #{alert color:'info'}
+  <p>
+    Sostituisce i codici 103 con il 103BP (telelavoro con buono pasto) dal 2 luglio 2026 per
+    i dipendenti con orario normale o part time orizzontale di almeno 6 ore giornaliere.
+    Prima della conversione viene mostrata una simulazione.
+  </p>
+  #{/alert}
+  #{form @Administration.teleworkMealTicket(), class:'form-horizontal', method:'get'}
+  	#{b.buttons center:true}
+  		<button type="submit" class="btn btn-default">Apri</button>
+  	#{/b.buttons}
+  #{/form}
+  #{/panel}
+
   <!-- Consistency absence groups -->
   #{panel title:'Stato gruppi assenze e enumerato', dim:12 }
   #{alert color:'info'}
