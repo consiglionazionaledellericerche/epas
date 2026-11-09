@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.39.1] - 2026-11-09
+### Added
+  - Nuova utility in Amministrazione > Utility per convertire i codici di telelavoro 103 nel
+    codice 103BP (telelavoro con maturazione del buono pasto) dal 2 luglio 2026, per i dipendenti
+    con orario normale o part time orizzontale di almeno 6 ore in tutti i giorni lavorativi. Una
+    simulazione mostra prima i codici da convertire e quelli esclusi con il motivo (altri codici di
+    assenza nel giorno, 103 inserito più volte, orario non orizzontale o sotto le 6 ore). La
+    conversione gira in background, una per volta, con l'avanzamento mostrato nella pagina, e
+    ricalcola la situazione dei dipendenti coinvolti. Il filtro per sede usa la sede attuale del
+    dipendente.
+
+### Fixed
+  - Le pagine delle timbrature in telelavoro considerano giorni di telelavoro anche quelli con il
+    codice 103BP e non più solo quelli con il 103.
+
 ## [2.39.0] - 2026-11-06
 ### Security
   - Aggiornate le librerie con vulnerabilità note: jsoup 1.23.2, postgresql 42.2.29,

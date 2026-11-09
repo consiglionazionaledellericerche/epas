@@ -22,9 +22,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.Getter;
@@ -39,8 +41,10 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.definitions.DefaultAbsenceType;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
+import play.jobs.Job;
 
 /**
  * Conversione dei codici di telelavoro 103 nel codice 103BP (telelavoro con maturazione
@@ -50,6 +54,10 @@ import play.db.jpa.JPAPlugin;
  * <p>La conversione parte dal 2 luglio 2026: i codici 103 inseriti da quella data per i
  * dipendenti che avrebbero diritto al buono pasto vanno sostituiti. Sono esclusi i giorni
  * in cui il 103 è insieme ad altri codici di assenza, che vanno valutati manualmente.</p>
+ *
+ * <p>La conversione completa richiede diversi minuti (ricalcolo di tutti i dipendenti
+ * coinvolti), quindi viene eseguita in un {@link Job} asincrono. Una sola conversione per
+ * volta: lo stato è mantenuto in memoria e vale per la singola istanza dell'applicazione.</p>
  */
 @Slf4j
 public class TeleworkMealTicketManager {
@@ -63,6 +71,9 @@ public class TeleworkMealTicketManager {
    * Minuti di lavoro giornalieri minimi previsti dall'orario per la conversione.
    */
   public static final int MIN_DAILY_WORKING_MINUTES = 360;
+
+  private static final AtomicBoolean RUNNING = new AtomicBoolean(false);
+  private static volatile ConversionStatus status;
 
   private final AbsenceDao absenceDao;
   private final AbsenceTypeDao absenceTypeDao;
@@ -175,14 +186,90 @@ public class TeleworkMealTicketManager {
   }
 
   /**
-   * Riepilogo della conversione effettuata.
+   * Stato dell'ultima conversione avviata (in corso o terminata).
    */
   @Getter
-  @RequiredArgsConstructor
-  public static class ConversionResult {
-    private final int converted;
-    private final int people;
-    private final int excluded;
+  public static class ConversionStatus {
+    private final LocalDate from;
+    private final LocalDate to;
+    private final String office;
+    private final LocalDateTime startedAt = LocalDateTime.now();
+    private volatile LocalDateTime endedAt;
+    private volatile int totalPeople;
+    private volatile int processedPeople;
+    private volatile int converted;
+    private volatile int excluded;
+    private volatile String error;
+    private final List<String> failedPeople = Collections.synchronizedList(Lists.newArrayList());
+
+    ConversionStatus(LocalDate from, LocalDate to, String office) {
+      this.from = from;
+      this.to = to;
+      this.office = office;
+    }
+
+    public boolean isRunning() {
+      return endedAt == null;
+    }
+
+    /**
+     * Durata in minuti della conversione (fino ad ora se ancora in corso).
+     */
+    public long getMinutes() {
+      LocalDateTime end = endedAt == null ? LocalDateTime.now() : endedAt;
+      return (end.toDate().getTime() - startedAt.toDate().getTime()) / 60_000;
+    }
+  }
+
+  /**
+   * Lo stato dell'ultima conversione avviata dall'avvio dell'applicazione, se presente.
+   */
+  public static Optional<ConversionStatus> lastConversion() {
+    return Optional.fromNullable(status);
+  }
+
+  /**
+   * Avvia la conversione in un job asincrono.
+   *
+   * @param from data di inizio (non prima del 2 luglio 2026)
+   * @param to data di fine (non oltre oggi)
+   * @param office sede dei dipendenti da considerare, tutte se assente
+   * @return false se c'è già una conversione in corso e quindi non ne è stata avviata un'altra
+   */
+  public boolean startConversion(LocalDate from, LocalDate to, Optional<Office> office) {
+    if (!RUNNING.compareAndSet(false, true)) {
+      return false;
+    }
+    final ConversionStatus current = new ConversionStatus(from, to,
+        office.isPresent() ? office.get().getName() : null);
+    status = current;
+    final Long officeId = office.isPresent() ? office.get().id : null;
+    try {
+      new Job<Void>() {
+        @Override
+        public void doJob() {
+          try {
+            Optional<Office> jobOffice = officeId == null ? Optional.<Office>absent()
+                : Optional.fromNullable((Office) Office.findById(officeId));
+            convert(from, to, jobOffice, current);
+          } catch (RuntimeException ex) {
+            log.error("Errore nella conversione dei codici 103 in 103BP", ex);
+            current.error = ex.getMessage() == null ? ex.toString() : ex.getMessage();
+          } finally {
+            current.endedAt = LocalDateTime.now();
+            RUNNING.set(false);
+          }
+        }
+      }.now();
+    } catch (RuntimeException ex) {
+      current.error = ex.toString();
+      current.endedAt = LocalDateTime.now();
+      RUNNING.set(false);
+      throw ex;
+    }
+    log.info("Avviata in background la conversione dei codici 103 in 103BP dal {} al {} "
+        + "per la sede {}", from, to, current.getOffice() == null ? "tutte" : current.getOffice());
+    return true;
   }
 
   /**
@@ -229,22 +316,22 @@ public class TeleworkMealTicketManager {
 
   /**
    * Sostituisce con il 103BP i codici 103 convertibili nel periodo e ricalcola la situazione
-   * dei dipendenti coinvolti. Ogni dipendente viene salvato in una transazione separata.
-   *
-   * @param from data di inizio (non prima del 2 luglio 2026)
-   * @param to data di fine (non oltre oggi)
-   * @param office sede dei dipendenti da considerare, tutte se assente
-   * @return il riepilogo della conversione
+   * dei dipendenti coinvolti. Ogni dipendente viene salvato in una transazione separata: un
+   * errore su un dipendente annulla solo le sue modifiche e la conversione prosegue.
    */
-  public ConversionResult convert(LocalDate from, LocalDate to, Optional<Office> office) {
+  private void convert(LocalDate from, LocalDate to, Optional<Office> office,
+      ConversionStatus current) {
     Report report = analyze(from, to, office);
+    current.excluded = report.getDaysExcluded();
     AbsenceType mealTicketTelework = absenceTypeDao
         .getAbsenceTypeByCode(DefaultAbsenceType.A_103BP.getCode()).get();
 
     // Assenze da convertire raggruppate per dipendente.
     Map<Long, List<Long>> absencesByPerson = Maps.newLinkedHashMap();
     Map<Long, LocalDate> firstDateByPerson = Maps.newHashMap();
+    Map<Long, String> names = Maps.newHashMap();
     for (Row row : report.getToConvert()) {
+      names.put(row.getPerson().id, row.getPerson().getFullname());
       absencesByPerson.computeIfAbsent(row.getPerson().id, k -> Lists.newArrayList())
           .addAll(row.getAbsences().stream().map(a -> a.getAbsence().id)
               .collect(Collectors.toList()));
@@ -252,9 +339,9 @@ public class TeleworkMealTicketManager {
           (d1, d2) -> d1.isBefore(d2) ? d1 : d2);
     }
     final Long mealTicketTeleworkId = mealTicketTelework.id;
+    current.totalPeople = absencesByPerson.size();
 
     JPAPlugin.closeTx(false);
-    int converted = 0;
     for (Map.Entry<Long, List<Long>> entry : absencesByPerson.entrySet()) {
       JPAPlugin.startTx(false);
       try {
@@ -263,25 +350,31 @@ public class TeleworkMealTicketManager {
           Absence absence = Absence.findById(absenceId);
           absence.setAbsenceType(newType);
           absence.save();
-          converted++;
         }
         JPA.em().flush();
         consistencyManager.updatePersonSituation(entry.getKey(),
             firstDateByPerson.get(entry.getKey()));
-        log.info("Convertiti {} codici 103 in 103BP per la persona id={} dal {}",
-            entry.getValue().size(), entry.getKey(), firstDateByPerson.get(entry.getKey()));
         JPAPlugin.closeTx(false);
+        current.converted += entry.getValue().size();
+        log.info("Convertiti {} codici 103 in 103BP per {} dal {}",
+            entry.getValue().size(), names.get(entry.getKey()),
+            firstDateByPerson.get(entry.getKey()));
       } catch (RuntimeException ex) {
-        log.error("Errore nella conversione dei codici 103 per la persona id={}",
-            entry.getKey(), ex);
-        JPAPlugin.closeTx(true);
-        throw ex;
+        log.error("Errore nella conversione dei codici 103 per {} (id={})",
+            names.get(entry.getKey()), entry.getKey(), ex);
+        try {
+          JPAPlugin.closeTx(true);
+        } catch (RuntimeException rollbackEx) {
+          log.warn("Rollback non riuscito per la persona id={}", entry.getKey(), rollbackEx);
+        }
+        current.failedPeople.add(names.get(entry.getKey()));
       }
+      current.processedPeople++;
     }
     JPAPlugin.startTx(false);
-    log.info("Convertiti {} codici 103 in 103BP per {} dipendenti", converted,
-        absencesByPerson.size());
-    return new ConversionResult(converted, absencesByPerson.size(), report.getDaysExcluded());
+    log.info("Convertiti {} codici 103 in 103BP per {} dipendenti, {} dipendenti in errore",
+        current.converted, current.processedPeople - current.failedPeople.size(),
+        current.failedPeople.size());
   }
 
   private AnalyzedAbsence analyze(Absence absence,

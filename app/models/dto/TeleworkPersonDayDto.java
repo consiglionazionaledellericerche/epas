@@ -22,7 +22,7 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 import models.PersonDay;
-import models.absences.definitions.DefaultAbsenceType;
+import models.absences.definitions.DefaultGroup;
 import models.enumerate.TeleworkStampTypes;
 
 /**
@@ -62,9 +62,16 @@ public class TeleworkPersonDayDto {
     return !meal.isEmpty() && meal.size() % 2 == 0;
   }
 
+  /**
+   * Verifica se nel giorno è presente un codice di telelavoro del gruppo telelavoro per
+   * dipendenti (103 o 103BP).
+   *
+   * @return true se nel giorno c'è un codice di telelavoro, false altrimenti.
+   */
   public boolean isTeleworkInDay() {
+    List<String> teleworkCodes = DefaultGroup.employeeTeleworkCodes();
     return this.personDay.getAbsences().stream()
-        .anyMatch(abs -> abs.getAbsenceType().getCode().equals(DefaultAbsenceType.A_103.getCode()));
+        .anyMatch(abs -> teleworkCodes.contains(abs.getAbsenceType().getCode()));
   }
 
   /**
