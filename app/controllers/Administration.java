@@ -1461,17 +1461,21 @@ public class Administration extends Controller {
     final LocalDate dateTo = to == null ? LocalDate.now() : to;
     final Office selectedOffice = office != null && office.isPersistent() ? office : null;
     validateTeleworkMealTicketPeriod(dateFrom, dateTo);
+    final TeleworkMealTicketManager.ConversionStatus conversion =
+        TeleworkMealTicketManager.lastConversion().orNull();
     TeleworkMealTicketManager.Report report = null;
-    if (!Validation.hasErrors()) {
+    // Durante la conversione la pagina si aggiorna da sola: niente simulazione, che
+    // darebbe numeri parziali e appesantirebbe il server.
+    if (!Validation.hasErrors() && (conversion == null || !conversion.isRunning())) {
       report = teleworkMealTicketManager.analyze(dateFrom, dateTo,
           Optional.fromNullable(selectedOffice));
     }
-    render(dateFrom, dateTo, selectedOffice, report);
+    render(dateFrom, dateTo, selectedOffice, report, conversion);
   }
 
   /**
-   * Converte i codici 103 in 103BP per i dipendenti con orario normale o part time
-   * orizzontale con almeno 6 ore giornaliere.
+   * Avvia in background la conversione dei codici 103 in 103BP per i dipendenti con orario
+   * normale o part time orizzontale con almeno 6 ore giornaliere.
    *
    * @param from data di inizio
    * @param to data di fine
@@ -1485,11 +1489,12 @@ public class Administration extends Controller {
       flash.error("Correggere il periodo indicato");
       redirectToTeleworkMealTicket(from, to, selectedOffice);
     }
-    TeleworkMealTicketManager.ConversionResult result =
-        teleworkMealTicketManager.convert(from, to, Optional.fromNullable(selectedOffice));
-    flash.success("Convertiti %s codici 103 in 103BP per %s dipendenti. "
-        + "Restano %s codici 103 esclusi dalla conversione.",
-        result.getConverted(), result.getPeople(), result.getExcluded());
+    if (teleworkMealTicketManager.startConversion(from, to,
+        Optional.fromNullable(selectedOffice))) {
+      flash.success("Conversione avviata in background: l'avanzamento è mostrato nella pagina");
+    } else {
+      flash.error("C'è già una conversione in corso: attendere che termini");
+    }
     redirectToTeleworkMealTicket(from, to, selectedOffice);
   }
 

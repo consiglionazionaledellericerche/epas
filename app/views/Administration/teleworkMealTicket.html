@@ -19,7 +19,53 @@
     ${manager.TeleworkMealTicketManager.MEAL_TICKET_BEGIN.toString('dd/MM/yyyy')}
     e la data di fine non può superare oggi.
   </p>
+  <p>
+    Il filtro per sede considera la sede <strong>attuale</strong> del dipendente, non quella del
+    giorno dell'assenza: chi ha cambiato sede nel periodo compare sotto la nuova sede.
+  </p>
+  <p>
+    La conversione viene eseguita in background e può richiedere diversi minuti: l'avanzamento
+    è mostrato in questa pagina. Non è possibile avviarne un'altra finché è in corso.
+  </p>
   #{/alert}
+
+  #{if conversion}
+    #{if conversion.running}
+      <div class="alert alert-warning">
+        <p><i class="fa fa-spinner fa-spin"></i> <strong>Conversione in corso</strong> da
+          ${conversion.minutes} minuti (dal ${conversion.from.toString('dd/MM/yyyy')} al
+          ${conversion.to.toString('dd/MM/yyyy')}, ${conversion.office ?: 'tutte le sedi'}).</p>
+        #{if conversion.totalPeople > 0}
+          <p>Elaborati <strong>${conversion.processedPeople}</strong> dipendenti su
+            <strong>${conversion.totalPeople}</strong>, convertiti
+            <strong>${conversion.converted}</strong> codici 103 in 103BP.</p>
+        #{/if}
+        #{else}
+          <p>Analisi dei codici 103 in corso...</p>
+        #{/else}
+        <p><small>La pagina si aggiorna automaticamente ogni 15 secondi.</small></p>
+      </div>
+      <script>setTimeout(function () { window.location.reload(); }, 15000);</script>
+    #{/if}
+    #{else}
+      <div class="alert ${conversion.error || !conversion.failedPeople.isEmpty() ? 'alert-danger' : 'alert-success'}">
+        <p><strong>Ultima conversione terminata</strong> il
+          ${conversion.endedAt.toString('dd/MM/yyyy HH:mm')} in ${conversion.minutes} minuti
+          (dal ${conversion.from.toString('dd/MM/yyyy')} al ${conversion.to.toString('dd/MM/yyyy')},
+          ${conversion.office ?: 'tutte le sedi'}).</p>
+        <p>Convertiti <strong>${conversion.converted}</strong> codici 103 in 103BP per
+          <strong>${conversion.processedPeople - conversion.failedPeople.size()}</strong>
+          dipendenti; <strong>${conversion.excluded}</strong> codici 103 esclusi.</p>
+        #{if !conversion.failedPeople.isEmpty()}
+          <p>Dipendenti non convertiti per errore (vedere i log):
+            ${conversion.failedPeople.join(', ')}</p>
+        #{/if}
+        #{if conversion.error}
+          <p>Conversione interrotta per errore: ${conversion.error}</p>
+        #{/if}
+      </div>
+    #{/else}
+  #{/if}
 
   #{panel title:'Periodo e sede', dim:12 }
   #{form @Administration.teleworkMealTicket(), class:'form-horizontal', method:'get'}
@@ -52,7 +98,7 @@
         #{if selectedOffice}<input type="hidden" name="office.id" value="${selectedOffice.id}">#{/if}
         #{b.buttons center:true}
           <button type="submit" class="btn btn-danger"
-              onclick="return confirm('Confermi la sostituzione di ${report.daysToConvert} codici 103 con 103BP? Verranno ricalcolate le situazioni dei dipendenti coinvolti.');">
+              onclick="return confirm('Confermi la sostituzione di ${report.daysToConvert} codici 103 con 103BP? La conversione e il ricalcolo dei dipendenti coinvolti verranno eseguiti in background.');">
             <i class="fa fa-exchange"></i> Esegui la conversione
           </button>
         #{/b.buttons}
