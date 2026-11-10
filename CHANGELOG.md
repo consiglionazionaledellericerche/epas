@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.39.2] - 2026-11-10
 ### Added
   - Nuova utility in Amministrazione > Utility per ricalcolare dal 2 luglio 2026 il buono pasto
     nei giorni con il codice 103RT. Una simulazione mostra i giorni che maturano il buono, con
