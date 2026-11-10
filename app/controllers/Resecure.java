@@ -242,7 +242,7 @@ public class Resecure extends Controller {
    */
   @NoCheck
   public static void oauthCallback(String code, String state) throws Throwable {
-    log.debug("Callback received code = {}, state = {}", code, state);
+    log.debug("Callback OAuth ricevuta");
     OAuth2.Response oauthResponse = openIdConnectClient
         .retrieveAccessToken(code, state, session.get(STATE));
     if (oauthResponse == null) {

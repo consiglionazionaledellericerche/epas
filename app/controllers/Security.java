@@ -75,6 +75,11 @@ public class Security extends Secure.Security {
    */
   static boolean authenticate(String username, String password) {
     log.debug("Richiesta autenticazione di {}", username);
+    // Dopo un login fallito il modulo secure copia i parametri nel cookie del flash con
+    // params.flash(): la password va tolta prima.
+    if (Scope.Params.current() != null) {
+      Scope.Params.current().remove("password");
+    }
     if (Strings.isNullOrEmpty(password)) {
       return false;
     }

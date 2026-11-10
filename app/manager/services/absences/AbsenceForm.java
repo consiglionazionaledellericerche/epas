@@ -34,6 +34,7 @@ import models.absences.CategoryTab;
 import models.absences.GroupAbsenceType;
 import models.absences.JustifiedType;
 import models.absences.JustifiedType.JustifiedTypeName;
+import models.absences.definitions.DefaultGroup;
 import org.joda.time.LocalDate;
 
 /**
@@ -41,6 +42,15 @@ import org.joda.time.LocalDate;
  * form di inserimento/modifica assenze.
  */
 public class AbsenceForm {
+
+  /**
+   * Codici da mostrare per primi nella form di inserimento, per nome del gruppo.
+   * Gli altri codici del gruppo seguono in ordine alfabetico.
+   */
+  private static final Map<String, List<String>> CODES_PRIORITY_BY_GROUP = Map.of(
+      DefaultGroup.G_LAGILE.name(), List.of("LAGILEBP", "LAGILE"),
+      DefaultGroup.G_39LA.name(), List.of("39LABP", "39LA"),
+      DefaultGroup.TELELAVORO.name(), List.of("103BP", "103"));
   
   public Person person;
   
@@ -140,12 +150,12 @@ public class AbsenceForm {
     // i tipi assenza selezionabili
     GroupAbsenceType current = groupAbsenceType;
     SortedMap<String, AbsenceType> typeConsidered = Maps.newTreeMap();
-    Comparator<String> cmp = null;
-    if (current.getDescription().contains("AGILE")) {
-      List<String> priority = List.of("LAGILEBP", "LAGILE");
-      cmp = Comparator
+    // Nel lavoro agile e nel telelavoro si propone per primo il codice con buono pasto.
+    final List<String> codesPriority = CODES_PRIORITY_BY_GROUP.get(current.getName());
+    if (codesPriority != null) {
+      Comparator<String> cmp = Comparator
           .comparingInt((String c) -> {
-            int i = priority.indexOf(c);
+            int i = codesPriority.indexOf(c);
             return i < 0 ? Integer.MAX_VALUE : i;
           })
           .thenComparing(Comparator.naturalOrder());

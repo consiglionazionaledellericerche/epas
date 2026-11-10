@@ -177,7 +177,7 @@ public enum DefaultGroup {
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_SMART, null,
       null, false, true),
   
-  G_39LA("39LA - Lavoro agile dip. fragili o ass. disabile/immunodepresso", "", 
+  G_39LA("Lavoro Agile per dipendenti fragili", "", 
       DefaultCategoryType.COD39_LA, 1,
       GroupAbsenceTypePattern.simpleGrouping, PeriodType.always, DefaultTakable.T_39LA, null,
       null, false, true),
@@ -678,7 +678,7 @@ public enum DefaultGroup {
   }
 
   /**
-   * Codici telelavoro prendibili dal gruppo telelavoro per dipendenti. (103)
+   * Codici telelavoro prendibili dal gruppo telelavoro per dipendenti. (103, 103BP)
    *
    * @return list
    */

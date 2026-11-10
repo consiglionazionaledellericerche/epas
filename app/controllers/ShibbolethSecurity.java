@@ -18,6 +18,7 @@
 package controllers;
 
 import com.google.common.net.UrlEscapers;
+import common.security.LocalUrls;
 import dao.PersonDao;
 import java.util.HashMap;
 import javax.inject.Inject;
@@ -74,6 +75,7 @@ public class ShibbolethSecurity extends controllers.shib.Security {
       session.clear();
       badRequest("Autenticazione Shibboleth non abilitata.");
     }
+    keepOnlyLocalRedirects();
 
     String eppn = session.get("eppn");
     log.debug("Trasformazione dell'utente shibboleth in utente locale, email = {}", eppn);
@@ -98,6 +100,20 @@ public class ShibbolethSecurity extends controllers.shib.Security {
       log.warn("Person with email {} successfully logged in Shibboleth but unknonw to ePAS", eppn);
     }
 
+  }
+
+  /**
+   * Il redirect dopo il login è nel modulo shibboleth, in un metodo privato che usa il flash e il
+   * parametro return senza controlli: qui, prima del redirect, si tolgono gli indirizzi esterni.
+   */
+  private static void keepOnlyLocalRedirects() {
+    final String url = flash.get("url");
+    if (url != null && !LocalUrls.isLocal(url)) {
+      flash.put("url", Play.configuration.getProperty("shib.login.return", "/"));
+    }
+    if (!LocalUrls.isLocal(request.params.get("return"))) {
+      request.params.remove("return");
+    }
   }
 
   /**

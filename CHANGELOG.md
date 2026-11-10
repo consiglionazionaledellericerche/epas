@@ -4,13 +4,79 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.39.1] - 2026-11-09
+### Added
+  - Nuova utility in Amministrazione > Utility per convertire i codici di telelavoro 103 nel
+    codice 103BP (telelavoro con maturazione del buono pasto) dal 2 luglio 2026, per i dipendenti
+    con orario normale o part time orizzontale di almeno 6 ore in tutti i giorni lavorativi. Una
+    simulazione mostra prima i codici da convertire e quelli esclusi con il motivo (altri codici di
+    assenza nel giorno, 103 inserito più volte, orario non orizzontale o sotto le 6 ore). La
+    conversione gira in background, una per volta, con l'avanzamento mostrato nella pagina, e
+    ricalcola la situazione dei dipendenti coinvolti. Il filtro per sede usa la sede attuale del
+    dipendente.
+
+### Fixed
+  - Le pagine delle timbrature in telelavoro considerano giorni di telelavoro anche quelli con il
+    codice 103BP e non più solo quelli con il 103.
+
+## [2.39.0] - 2026-11-06
+### Security
+  - Aggiornate le librerie con vulnerabilità note: jsoup 1.23.2, postgresql 42.2.29,
+    commons-compress 1.28.0, xercesImpl 2.12.2, tika 1.28.5, jjwt 0.11.5, poi 3.16.
+  - Sostituite le librerie incluse in play 1.5.3 con versioni aggiornate: log4j 1.2.17 con
+    reload4j 1.2.27, commons-fileupload 1.6.0, xstream 1.4.21, snakeyaml 1.33, dom4j 2.1.4,
+    commons-io 2.20.0 e commons-codec 1.19.0. Le vecchie versioni e il driver mysql non usato
+    sono rimossi dall'immagine docker.
+    
 ### Fixed
   - Le richieste di permesso personale (gruppo 661) che contengono giorni non inseribili, ad
     esempio oltre il limite annuale di 18 ore, non possono più essere inviate. Prima la richiesta
     veniva salvata e approvata per l'intero periodo, ma all'approvazione venivano inseriti solo i
     giorni entro il limite. Il controllo è ripetuto anche al salvataggio della richiesta.
+  - Dopo un login fallito la password non viene più salvata nel cookie del flash.
+  - Password, token, secret e parametri del callback OAuth sono oscurati nei log delle richieste
+    lente.
+  - I token OAuth di Attestati (access token e refresh token) non vengono più scritti nei log.
+  - I login LDAP e Shibboleth non accettano più redirect verso altri siti tramite il parametro
+    return.
+  - Il recupero password non rivela più se un indirizzo email è registrato: risposta, errori e
+    tempi non dipendono dall'indirizzo, perché la mail è preparata e inviata in un job.
+  - Non è più possibile inserire una richiesta di straordinario per un mese con l'attestato già
+    validato. Il blocco non veniva mai applicato e il controllo poteva usare un dato vecchio
+    fino a 20 minuti: ora legge da Attestati solo il flag di validazione.
+    
+### Changed
+  - L'application.secret è obbligatorio in produzione: l'applicazione non si avvia se non è
+    impostato, se è più corto di 32 caratteri o se è uno dei valori pubblicati nel repository.
+    Nel docker l'avvio si interrompe se manca APPLICATION_SECRET, invece di usare in silenzio il
+    secret di application.conf, che è pubblico e permetteva a chiunque di firmare un cookie di
+    sessione valido per qualunque utente. Il secret di application.conf è sostituito da un valore
+    solo per sviluppo e test. Chi non aveva impostato APPLICATION_SECRET deve impostarlo prima
+    dell'aggiornamento (le sessioni aperte andranno rifatte); chi lo aveva impostato non deve fare
+    nulla.
+  - Le metriche su /metrics/prometheus richiedono un token, da impostare con metrics.token
+    (METRICS_TOKEN nel docker) e inviare nell'header Authorization: Bearer. Senza token
+    configurato rispondono 403: chi le raccoglie con Prometheus deve aggiornare la configurazione.
+  - Gli endpoint REST sullo stato di validazione degli attestati (per sede e per persona) leggono
+    da Attestati solo il flag di validazione, senza ricalcolare la situazione mensile né
+    aggiornare le certificazioni salvate in ePAS. L'endpoint per sede usa un'unica chiamata
+    ad Attestati (/api/ext/dipendenti/statoValida) con il codice della sede richiesta, invece di
+    una per dipendente. Se Attestati non è raggiungibile, non risponde correttamente o
+    restituisce una risposta in un formato diverso dal previsto, entrambi gli endpoint rispondono
+    503 invece di 500 o di considerare le persone non validate.
+  - Il codice 58 (aspettativa per funzione pubblica non retribuita) riduce ferie e permessi
+    come gli altri codici del gruppo RIDUCE_FERIE_CNR.
+  - La descrizione del gruppo G_39LA diventa "Lavoro Agile per dipendenti fragili" e la scheda
+    "Assistenza parenti immunodepressi" della form di inserimento assenze diventa "Lavoro agile
+    per dipendenti fragili".
+  - Il codice 39LA non è più inseribile dal gruppo Altri codici, ma solo dal gruppo G_39LA.
+  - Nella scheda "Lavoro agile per dipendenti fragili" il codice 39LABP è proposto prima del 39LA.
 ### Added
+  - Riattivato il codice 103BP "Telelavoro con maturazione buono pasto", valido dal 1° luglio
+    2026 come da nota del DG sul buono pasto in telelavoro domiciliare. Il codice è nel gruppo
+    Telelavoro accanto al 103, è inviato ad Attestati come 103 e fa maturare il buono pasto.
+    Come per LAGILEBP, se lo inseriscono da soli i dipendenti abilitati al telelavoro e lo
+    inseriscono gli amministratori del personale; nella form è proposto per primo.
   - Nella modifica del contratto è possibile impostare i giorni di riposo compensativo già
     effettuati alla data di inizializzazione (sourceRecoveryDayUsed), insieme alla data di
     inizializzazione dei riposi compensativi. Entrambi i campi sono modificabili da chi ha il

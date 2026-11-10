@@ -18,12 +18,9 @@
 package controllers;
 
 import com.google.common.base.Strings;
-import dao.PersonDao;
 import dao.UserDao;
 import javax.inject.Inject;
-import manager.EmailManager;
-import manager.UserManager;
-import models.Person;
+import jobs.PasswordRecoveryJob;
 import models.User;
 import org.joda.time.LocalDate;
 import play.data.validation.Email;
@@ -41,13 +38,7 @@ import play.mvc.With;
 public class LostPassword extends Controller {
 
   @Inject
-  static PersonDao personDao;
-  @Inject
   static UserDao userDao;
-  @Inject
-  static UserManager userManager;
-  @Inject
-  static EmailManager emailManager;
 
   /**
    * metodo che invia una mail al dipendente che richiede il recupero password.
@@ -61,19 +52,11 @@ public class LostPassword extends Controller {
       LostPassword.lostPassword();
     }
 
-    Person person = personDao.byEmail(email).orNull();
-    if (person == null) {
+    new PasswordRecoveryJob(email).now();
 
-      flash.error("L'indirizzo email fornito è sconosciuto. Operazione annullata.");
-      LostPassword.lostPassword();
-    }
-
-    userManager.generateRecoveryToken(person);
-    emailManager.recoveryPasswordMail(person);
-
-    flash.success("E' stata inviata una mail all'indirizzo %s. "
-            + "Completare la procedura di recovery password entro la data di oggi.",
-        person.getEmail());
+    // Il messaggio è lo stesso per ogni indirizzo, per non rivelare quali email sono registrate.
+    flash.success("Se l'indirizzo fornito è associato a un utente, è stata inviata una mail. "
+        + "Completare la procedura di recovery password entro la data di oggi.");
     Secure.login();
   }
 

@@ -83,6 +83,7 @@ import manager.PersonDayInTroubleManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.SecureManager;
+import manager.TeleworkMealTicketManager;
 import manager.UserManager;
 import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.service.CertificationService;
@@ -134,6 +135,7 @@ import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.jobs.Job;
 import play.mvc.Controller;
+import play.mvc.Router;
 import play.mvc.With;
 
 /**
@@ -211,6 +213,8 @@ public class Administration extends Controller {
   static WorkingTimeTypeDao wttDao;
   @Inject
   static PersonManager personManager;
+  @Inject
+  static TeleworkMealTicketManager teleworkMealTicketManager;
 
   /**
    * Utilizzabile solo da developer e admin permette di prelevare un token del client
@@ -1444,4 +1448,85 @@ public class Administration extends Controller {
     renderText("Aggiornati %s codici di lavoro agile senza buono pasto", counter);
   }
   
+  /**
+   * Simulazione della conversione dei codici 103 in 103BP: mostra i codici che verrebbero
+   * convertiti e quelli esclusi senza modificare nulla.
+   *
+   * @param from data di inizio, se assente il 2 luglio 2026
+   * @param to data di fine, se assente oggi
+   * @param office sede dei dipendenti, se assente tutte le sedi
+   */
+  public static void teleworkMealTicket(LocalDate from, LocalDate to, Office office) {
+    final LocalDate dateFrom = from == null ? TeleworkMealTicketManager.MEAL_TICKET_BEGIN : from;
+    final LocalDate dateTo = to == null ? LocalDate.now() : to;
+    final Office selectedOffice = office != null && office.isPersistent() ? office : null;
+    validateTeleworkMealTicketPeriod(dateFrom, dateTo);
+    final TeleworkMealTicketManager.ConversionStatus conversion =
+        TeleworkMealTicketManager.lastConversion().orNull();
+    TeleworkMealTicketManager.Report report = null;
+    // Durante la conversione la pagina si aggiorna da sola: niente simulazione, che
+    // darebbe numeri parziali e appesantirebbe il server.
+    if (!Validation.hasErrors() && (conversion == null || !conversion.isRunning())) {
+      report = teleworkMealTicketManager.analyze(dateFrom, dateTo,
+          Optional.fromNullable(selectedOffice));
+    }
+    render(dateFrom, dateTo, selectedOffice, report, conversion);
+  }
+
+  /**
+   * Avvia in background la conversione dei codici 103 in 103BP per i dipendenti con orario
+   * normale o part time orizzontale con almeno 6 ore giornaliere.
+   *
+   * @param from data di inizio
+   * @param to data di fine
+   * @param office sede dei dipendenti, se assente tutte le sedi
+   */
+  public static void convertTeleworkMealTicket(@Required LocalDate from, @Required LocalDate to,
+      Office office) {
+    final Office selectedOffice = office != null && office.isPersistent() ? office : null;
+    validateTeleworkMealTicketPeriod(from, to);
+    if (Validation.hasErrors()) {
+      flash.error("Correggere il periodo indicato");
+      redirectToTeleworkMealTicket(from, to, selectedOffice);
+    }
+    if (teleworkMealTicketManager.startConversion(from, to,
+        Optional.fromNullable(selectedOffice))) {
+      flash.success("Conversione avviata in background: l'avanzamento è mostrato nella pagina");
+    } else {
+      flash.error("C'è già una conversione in corso: attendere che termini");
+    }
+    redirectToTeleworkMealTicket(from, to, selectedOffice);
+  }
+
+  /**
+   * Redirect alla simulazione passando date e sede come semplici parametri (il redirect
+   * automatico di Play serializzerebbe i campi interni di LocalDate e Office).
+   */
+  private static void redirectToTeleworkMealTicket(LocalDate from, LocalDate to, Office office) {
+    Map<String, Object> args = Maps.newHashMap();
+    if (from != null) {
+      args.put("from", from.toString("dd/MM/yyyy"));
+    }
+    if (to != null) {
+      args.put("to", to.toString("dd/MM/yyyy"));
+    }
+    if (office != null) {
+      args.put("office.id", office.id);
+    }
+    redirect(Router.reverse("Administration.teleworkMealTicket", args).url);
+  }
+
+  private static void validateTeleworkMealTicketPeriod(LocalDate from, LocalDate to) {
+    if (from != null && from.isBefore(TeleworkMealTicketManager.MEAL_TICKET_BEGIN)) {
+      Validation.addError("from", "La conversione è prevista dal "
+          + TeleworkMealTicketManager.MEAL_TICKET_BEGIN.toString("dd/MM/yyyy"));
+    }
+    if (to != null && to.isAfter(LocalDate.now())) {
+      Validation.addError("to", "La data di fine non può essere successiva ad oggi");
+    }
+    if (from != null && to != null && to.isBefore(from)) {
+      Validation.addError("to", "La data di fine deve essere successiva a quella di inizio");
+    }
+  }
+
 }

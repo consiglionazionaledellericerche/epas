@@ -81,6 +81,7 @@ fi
 # configure ePAS
 SKIP_IP_CHECK=${SKIP_IP_CHECK:-false}
 CSRF_MODE=${CSRF_MODE:-off}
+METRICS_TOKEN=${METRICS_TOKEN:-}
 X_FORWARDED_SUPPORT=${X_FORWARDED_SUPPORT:-all}
 LOGIN_MAX_FAILURES=${LOGIN_MAX_FAILURES:-10}
 LOGIN_LOCK_MINUTES=${LOGIN_LOCK_MINUTES:-15}
@@ -144,12 +145,24 @@ sed 's#{{PROTOCOL}}#'"${PROTOCOL}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{EVOLUTIONS_ENABLED}}#'"${EVOLUTIONS_ENABLED}"'#' -i ${APP_HOME}/conf/prod.conf
 
 ### Creazione e configurazione dell'application secret
-APPLICATION_SECRET=${APPLICATION_SECRET}
+# Senza APPLICATION_SECRET si userebbe il secret pubblico di application.conf, con cui
+# chiunque può firmare un cookie di sessione valido: l'avvio viene interrotto.
 if [ -z "${APPLICATION_SECRET}" ]; then
-  sed -n '/APPLICATION_SECRET/!p' -i ${APP_HOME}/conf/prod.conf
-else
-  sed 's#{{APPLICATION_SECRET}}#'"${APPLICATION_SECRET}"'#' -i ${APP_HOME}/conf/prod.conf
+  echo "ERROR: "
+  echo "  APPLICATION_SECRET non impostato. È obbligatorio: firma il cookie di sessione e"
+  echo "  chi lo conosce può autenticarsi come qualunque utente."
+  echo "  Impostare un valore casuale di almeno 32 caratteri specifico di questa installazione,"
+  echo "  ad esempio generato con: tr -dc A-Za-z0-9 </dev/urandom | head -c 64 ; echo"
+  exit 1
 fi
+case "${APPLICATION_SECRET}" in
+  *'#'*)
+    echo "ERROR: "
+    echo "  APPLICATION_SECRET non può contenere il carattere #."
+    exit 1
+    ;;
+esac
+sed 's#{{APPLICATION_SECRET}}#'"${APPLICATION_SECRET}"'#' -i ${APP_HOME}/conf/prod.conf
 
 ### Impostazione server smtp
 
@@ -368,6 +381,8 @@ fi
 
 sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{CSRF_MODE}}#'"${CSRF_MODE}"'#' -i ${APP_HOME}/conf/prod.conf
+METRICS_TOKEN_ESCAPED=$(printf '%s' "${METRICS_TOKEN}" | sed 's/[\\&#]/\\&/g')
+sed 's#{{METRICS_TOKEN}}#'"${METRICS_TOKEN_ESCAPED}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{X_FORWARDED_SUPPORT}}#'"${X_FORWARDED_SUPPORT}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{LOGIN_MAX_FAILURES}}#'"${LOGIN_MAX_FAILURES}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{LOGIN_LOCK_MINUTES}}#'"${LOGIN_LOCK_MINUTES}"'#' -i ${APP_HOME}/conf/prod.conf
