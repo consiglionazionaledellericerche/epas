@@ -19,38 +19,49 @@ package manager;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import helpers.JodaConverters;
+import dao.GroupDao;
 import dao.ReperibilityTypeMonthDao;
 import dao.ShiftTypeMonthDao;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
+import models.PersonReperibilityType;
 import models.PersonShift;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
 import models.ReperibilityTypeMonth;
+import models.Role;
+import models.ShiftCategories;
 import models.ShiftTypeMonth;
+import models.UsersRolesOffices;
+import models.flows.Affiliation;
 import org.joda.time.LocalDate;
 
 /**
- * Chiude la presenza di una persona nei servizi di reperibilità e turno di una sede quando la
- * persona viene trasferita in un'altra sede.
+ * Gestisce gli effetti del trasferimento di una persona su ciò che la lega alla sede lasciata:
+ * servizi di reperibilità e turno, gruppi, ruoli e incarichi, oltre alle segnalazioni su badge,
+ * orari e tessera dei buoni pasto da rivedere.
  */
 @Slf4j
 public class PersonOfficeServicesManager {
 
   private final ReperibilityTypeMonthDao reperibilityTypeMonthDao;
   private final ShiftTypeMonthDao shiftTypeMonthDao;
+  private final GroupDao groupDao;
 
   @Inject
   PersonOfficeServicesManager(ReperibilityTypeMonthDao reperibilityTypeMonthDao,
-      ShiftTypeMonthDao shiftTypeMonthDao) {
+      ShiftTypeMonthDao shiftTypeMonthDao, GroupDao groupDao) {
     this.reperibilityTypeMonthDao = reperibilityTypeMonthDao;
     this.shiftTypeMonthDao = shiftTypeMonthDao;
+    this.groupDao = groupDao;
   }
 
   /**
@@ -67,8 +78,120 @@ public class PersonOfficeServicesManager {
     final List<String> messages = Lists.newArrayList();
     endReperibilities(person, office, date, messages);
     endShifts(person, office, date, messages);
+    endGroupAffiliations(person, office, date, messages);
+    warnings(person, office, date, messages);
     messages.forEach(m -> log.info("{}: {}", person.getFullname(), m));
     return messages;
+  }
+
+  /**
+   * Rimuove i ruoli della persona sulla sede lasciata (escluso quello di dipendente, allineato
+   * a parte) e la toglie dai gestori dei servizi di reperibilità e turno della sede. Gli incarichi
+   * di responsabile, obbligatori, vengono solo segnalati. Va chiamato quando il trasferimento
+   * diventa effettivo.
+   *
+   * @return i messaggi sulle operazioni effettuate.
+   */
+  public List<String> removeRolesInOffice(Person person, Office office) {
+    final List<String> messages = Lists.newArrayList();
+    if (person.getUser() != null) {
+      for (UsersRolesOffices uro : Lists.newArrayList(person.getUser().getUsersRolesOffices())) {
+        if (office.equals(uro.getOffice()) && !Role.EMPLOYEE.equals(uro.getRole().getName())) {
+          person.getUser().getUsersRolesOffices().remove(uro);
+          uro.delete();
+          messages.add(String.format("Rimosso il ruolo %s sulla sede %s",
+              uro.getRole().getName(), office.getName()));
+        }
+      }
+    }
+    for (PersonReperibilityType type : Lists.newArrayList(person.getReperibilities())) {
+      if (office.equals(type.getOffice())) {
+        type.getManagers().remove(person);
+        person.getReperibilities().remove(type);
+        type.save();
+        messages.add(String.format("Rimosso dai gestori del servizio di reperibilità %s",
+            type.getDescription()));
+      }
+    }
+    for (ShiftCategories category : Lists.newArrayList(person.getCategories())) {
+      if (office.equals(category.getOffice())) {
+        category.getManagers().remove(person);
+        person.getCategories().remove(category);
+        category.save();
+        messages.add(String.format("Rimosso dai gestori del servizio di turno %s",
+            category.getDescription()));
+      }
+    }
+    person.getReperibilityTypes().stream().filter(t -> office.equals(t.getOffice()))
+        .forEach(t -> messages.add(String.format("È ancora responsabile del servizio di "
+            + "reperibilità %s della sede %s: assegnare un nuovo responsabile",
+            t.getDescription(), office.getName())));
+    person.getShiftCategories().stream().filter(c -> office.equals(c.getOffice()))
+        .forEach(c -> messages.add(String.format("È ancora responsabile del servizio di turno "
+            + "%s della sede %s: assegnare un nuovo responsabile",
+            c.getDescription(), office.getName())));
+    groupDao.groupsByOffice(office, Optional.of(person), Optional.absent())
+        .forEach(g -> messages.add(String.format("È ancora responsabile del gruppo %s della "
+            + "sede %s: assegnare un nuovo responsabile", g.getName(), office.getName())));
+    messages.forEach(m -> log.info("{}: {}", person.getFullname(), m));
+    return messages;
+  }
+
+  private void endGroupAffiliations(Person person, Office office, LocalDate date,
+      List<String> messages) {
+    final LocalDate lastDay = date.minusDays(1);
+    for (Affiliation affiliation : Lists.newArrayList(person.getAffiliations())) {
+      if (affiliation.getGroup() == null || !office.equals(affiliation.getGroup().getOffice())) {
+        continue;
+      }
+      final String group = affiliation.getGroup().getName();
+      if (!affiliation.getBeginDate().isBefore(JodaConverters.jodaToJavaLocalDate(date))) {
+        person.getAffiliations().remove(affiliation);
+        affiliation.delete();
+        messages.add(String.format("Eliminata l'appartenenza al gruppo %s, che iniziava dopo "
+            + "il trasferimento", group));
+      } else if (affiliation.getEndDate() == null
+          || !affiliation.getEndDate().isBefore(JodaConverters.jodaToJavaLocalDate(date))) {
+        affiliation.setEndDate(JodaConverters.jodaToJavaLocalDate(lastDay));
+        affiliation.save();
+        messages.add(String.format("Terminata al %s l'appartenenza al gruppo %s",
+            lastDay.toString("dd/MM/yyyy"), group));
+      }
+    }
+  }
+
+  /**
+   * Segnala gli elementi legati alla sede lasciata che la nuova sede deve rivedere: badge sui
+   * rilevatori, orari di lavoro e fasce obbligatorie della sede nel contratto, tessera dei buoni
+   * pasto elettronici rilasciata dalla sede.
+   */
+  private void warnings(Person person, Office office, LocalDate date, List<String> messages) {
+    person.getBadges().stream()
+        .filter(b -> b.getBadgeSystem() != null && office.equals(b.getBadgeSystem().getOffice()))
+        .map(b -> b.getCode()).distinct()
+        .forEach(code -> messages.add(String.format("Il badge %s è ancora associato al sistema "
+            + "badge della sede %s", code, office.getName())));
+    for (Contract contract : person.getContracts()) {
+      if (contract.calculatedEnd() != null && contract.calculatedEnd().isBefore(date)) {
+        continue;
+      }
+      contract.getContractWorkingTimeType().stream()
+          .filter(cwtt -> (cwtt.getEndDate() == null || !cwtt.getEndDate().isBefore(date))
+              && office.equals(cwtt.getWorkingTimeType().getOffice()))
+          .forEach(cwtt -> messages.add(String.format("Il contratto usa l'orario di lavoro %s "
+              + "definito dalla sede %s: va rivisto dalla nuova sede",
+              cwtt.getWorkingTimeType().getDescription(), office.getName())));
+      contract.getContractMandatoryTimeSlots().stream()
+          .filter(cmts -> (cmts.getEndDate() == null || !cmts.getEndDate().isBefore(date))
+              && office.equals(cmts.getTimeSlot().getOffice()))
+          .forEach(cmts -> messages.add(String.format("Il contratto usa la fascia obbligatoria "
+              + "%s definita dalla sede %s: va rivista dalla nuova sede",
+              cmts.getTimeSlot().getLabel(), office.getName())));
+    }
+    person.getMealTicketCards().stream()
+        .filter(card -> card.isActive() && office.equals(card.getDeliveryOffice()))
+        .forEach(card -> messages.add(String.format("La tessera dei buoni pasto elettronici %s "
+            + "è stata rilasciata dalla sede %s", card.getNumber(), office.getName())));
   }
 
   private void endReperibilities(Person person, Office office, LocalDate date,

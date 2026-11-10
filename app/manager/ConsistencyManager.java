@@ -499,7 +499,8 @@ public class ConsistencyManager {
             pd.getValue().getPerson().getFullname(), pd.getValue().getDate()));
 
     LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
-        pd.getValue().getPerson().getOffice(), EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
+        pd.getValue().getPerson().getOfficeAtOrCurrent(pd.getValue().getDate()),
+        EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
 
     
     LocalTimeInterval workInterval = null;
@@ -509,7 +510,8 @@ public class ConsistencyManager {
           pwt.get().getTimeSlot().getEndSlot());
     } else {
       workInterval = (LocalTimeInterval) configurationManager.configValue(
-        pd.getValue().getPerson().getOffice(), EpasParam.WORK_INTERVAL, pd.getValue().getDate());
+        pd.getValue().getPerson().getOfficeAtOrCurrent(pd.getValue().getDate()),
+        EpasParam.WORK_INTERVAL, pd.getValue().getDate());
     }
     
     personDayManager.updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
@@ -557,7 +559,7 @@ public class ConsistencyManager {
 
       // TODO: controllare, qui esiste un caso limite. Considero pd.date o previous.date?
       LocalTime maxHour = (LocalTime) configurationManager
-          .configValue(pd.getValue().getPerson().getOffice(),
+          .configValue(pd.getValue().getPerson().getOfficeAtOrCurrent(pd.getValue().getDate()),
           EpasParam.HOUR_MAX_TO_CALCULATE_WORKTIME, pd.getValue().getDate());
 
       Collections.sort(pd.getValue().getStampings());

@@ -32,8 +32,12 @@ import models.PersonReperibilityType;
 import models.PersonShift;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
+import models.Role;
 import models.ShiftCategories;
 import models.ShiftType;
+import models.UsersRolesOffices;
+import models.flows.Affiliation;
+import models.flows.Group;
 import models.enumerate.LimitType;
 import org.joda.time.LocalDate;
 import org.junit.Test;
@@ -89,6 +93,30 @@ public class PersonOfficeServicesTest extends UnitTest {
     personShift.getPersonShiftShiftTypes().add(psst);
     final PersonShiftDay shiftBefore = shiftDay(personShift, shiftType, new LocalDate(2026, 3, 12));
     final PersonShiftDay shiftAfter = shiftDay(personShift, shiftType, new LocalDate(2026, 3, 16));
+
+    // gestore del servizio di reperibilità (ne è anche il responsabile)
+    reperibilityType.getManagers().add(person);
+    reperibilityType.save();
+    person.getReperibilities().add(reperibilityType);
+    person.getReperibilityTypes().add(reperibilityType);
+
+    // appartenenza ad un gruppo della sede di provenienza
+    final Person groupManager =
+        h2Examples.normalEmployee(new LocalDate(2026, 1, 1), Optional.absent());
+    final Group group = new Group();
+    group.setName("Gruppo di test " + person.id);
+    group.setOffice(source);
+    group.setManager(groupManager);
+    group.save();
+    final Affiliation affiliation = new Affiliation();
+    affiliation.setGroup(group);
+    affiliation.setPerson(person);
+    affiliation.setBeginDate(java.time.LocalDate.of(2026, 1, 1));
+    affiliation.save();
+    person.getAffiliations().add(affiliation);
+
+    // ruolo di amministratore del personale sulla sede di provenienza
+    final UsersRolesOffices adminRole = role(person, source, Role.PERSONNEL_ADMIN);
     JPA.em().flush();
 
     final List<String> messages =
@@ -104,7 +132,30 @@ public class PersonOfficeServicesTest extends UnitTest {
     assertTrue(personShift.getPersonShiftDays().contains(shiftBefore));
     assertNull(PersonShiftDay.findById(shiftAfter.id));
 
+    assertEquals(java.time.LocalDate.of(2026, 3, 14), affiliation.getEndDate());
+
+    // il trasferimento è nel passato, quindi già effettivo: ruoli e incarichi su A rimossi
+    assertNull(UsersRolesOffices.findById(adminRole.id));
+    assertFalse(reperibilityType.getManagers().contains(person));
+    assertTrue(messages.stream().anyMatch(m -> m.contains("ancora responsabile del servizio")));
+
     assertFalse(messages.isEmpty());
+  }
+
+  private UsersRolesOffices role(Person person, Office office, String roleName) {
+    Role role = Role.find("byName", roleName).first();
+    if (role == null) {
+      role = new Role();
+      role.setName(roleName);
+      role.save();
+    }
+    final UsersRolesOffices uro = new UsersRolesOffices();
+    uro.setUser(person.getUser());
+    uro.setOffice(office);
+    uro.setRole(role);
+    uro.save();
+    person.getUser().getUsersRolesOffices().add(uro);
+    return uro;
   }
 
   private Office office(Person person) {

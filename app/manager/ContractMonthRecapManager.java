@@ -198,7 +198,8 @@ public class ContractMonthRecapManager {
       EpasParam param = cmr.qualifica > 3 ? EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_49 :
         EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_13;
       Integer monthExpiryRecoveryDay = (Integer) configurationManager
-          .configValue(cmr.getPerson().getOffice(), param, cmr.getYear());
+          .configValue(cmr.getPerson().getOfficeAtOrCurrent(new LocalDate(cmr.getYear(),
+              cmr.getMonth(), 1).dayOfMonth().withMaximumValue()), param, cmr.getYear());
 
       if (monthExpiryRecoveryDay != 0 && cmr.getMonth() > monthExpiryRecoveryDay) {
         cmr.setPossibileUtilizzareResiduoAnnoPrecedente(false);

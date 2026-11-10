@@ -94,6 +94,9 @@ public class PersonOfficeManager {
         : Lists.newArrayList();
 
     if (!date.isAfter(LocalDate.now())) {
+      if (leavingOffice != null && !leavingOffice.equals(office)) {
+        messages.addAll(servicesManager.removeRolesInOffice(person, leavingOffice));
+      }
       alignEmployeeRole(person);
       if (oldOffice != null && !oldOffice.equals(person.getOffice())) {
         registryNotificationManager.notifyPersonHasChangedOffice(person, oldOffice);
@@ -206,8 +209,11 @@ public class PersonOfficeManager {
     final List<PersonOffice> starting = personOfficeDao.startingAt(date);
     for (PersonOffice po : starting) {
       final Person person = po.getPerson();
-      alignEmployeeRole(person);
       final Office oldOffice = person.getOfficeAt(date.minusDays(1));
+      if (oldOffice != null && !oldOffice.equals(po.getOffice())) {
+        servicesManager.removeRolesInOffice(person, oldOffice);
+      }
+      alignEmployeeRole(person);
       if (oldOffice != null && !oldOffice.equals(po.getOffice())) {
         registryNotificationManager.notifyPersonHasChangedOffice(person, oldOffice);
       }

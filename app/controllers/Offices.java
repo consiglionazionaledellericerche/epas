@@ -233,21 +233,24 @@ public class Offices extends Controller {
     List<Person> people = personDao.byOffice(sourceOffice);
     final List<String> servicesMessages = Lists.newArrayList();
     people.stream().forEach(p -> {
-      // termina anche la presenza nei servizi di reperibilità e turno della sede di provenienza
+      // i ruoli vanno letti prima del trasferimento, che rimuove quelli sulla sede di provenienza
+      List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(p.getUser());
+      // termina servizi, gruppi e ruoli sulla sede di provenienza
       personOfficeManager.changeOffice(p, destinationOffice, transferDate).getMessages()
           .forEach(m -> servicesMessages.add(p.getFullname() + ": " + m));
       p.save();
-      List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(p.getUser());
 
       for (UsersRolesOffices uro : uroList) {
         officeManager.setUro(p.getUser(), destinationOffice, uro.getRole());
-        uro.delete();
+        if (uro.isPersistent()) {
+          uro.delete();
+        }
       }
     });
 
     flash.success("Spostate %s persone da %s a %s.%s", people.size(), sourceOffice,
         destinationOffice, servicesMessages.isEmpty() ? ""
-            : " Servizi di reperibilità e turno aggiornati: " + String.join("; ", servicesMessages));
+            : " Effetti sulla sede di provenienza: " + String.join("; ", servicesMessages));
     Administration.utilities();
   }
 
