@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+  - Il codice 103RT (telelavoro ricercatori/tecnologi) non impedisce più il buono pasto: non
+    giustifica tempo e il buono matura solo se le timbrature in telelavoro del giorno
+    raggiungono la soglia prevista dall'orario di lavoro.
+
 ### Fixed
   - Cancellando l'ultima timbratura in telelavoro di un giorno viene rimosso anche il codice
     103RT inserito in automatico, e il giorno viene ricalcolato dopo la rimozione. Prima il
