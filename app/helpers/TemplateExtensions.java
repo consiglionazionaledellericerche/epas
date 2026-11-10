@@ -43,6 +43,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 import play.db.jpa.GenericModel;
+import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.Crypto;
 import play.libs.I18N;
@@ -256,17 +257,46 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   /**
-   * Traduce un oggetto.
+   * Traduce una chiave dei messaggi.
+   *
+   * <p>Il testo dei messaggi (conf/messages*) è dell'applicazione e può contenere HTML, quindi
+   * è restituito senza escape; gli argomenti di tipo testo sono codificati prima di essere
+   * inseriti nel messaggio. Se la label non è una chiave dei messaggi (ad esempio un testo
+   * inserito da un utente) è restituita come testo, che il template codifica.</p>
    *
    * @param label la label da tradurre
    * @param args la lista di argomenti
    * @return l'oggetto tradotto
    */
   public static Object label(String label, Object... args) {
-    if (label.contains("%")) {
+    if (label.contains("%") || !isMessageKey(label)) {
       return label;
     }
-    return raw(Messages.get(label, args));
+    final Object[] escapedArgs = new Object[args.length];
+    for (int i = 0; i < args.length; i++) {
+      escapedArgs[i] = args[i] instanceof CharSequence
+          ? HtmlEscapers.htmlEscaper().escape(args[i].toString()) : args[i];
+    }
+    return raw(Messages.get(label, escapedArgs));
+  }
+
+  /**
+   * Indica se la chiave è definita nei messaggi della lingua corrente o in quelli di default,
+   * con la stessa ricerca di {@link Messages#get(Object, Object...)}.
+   */
+  static boolean isMessageKey(String key) {
+    final String locale = Lang.get();
+    if (Messages.locales != null && locale != null) {
+      if (Messages.locales.containsKey(locale)
+          && Messages.locales.get(locale).getProperty(key) != null) {
+        return true;
+      }
+      if (locale.length() == 5 && Messages.locales.containsKey(locale.substring(0, 2))
+          && Messages.locales.get(locale.substring(0, 2)).getProperty(key) != null) {
+        return true;
+      }
+    }
+    return Messages.defaults != null && Messages.defaults.getProperty(key) != null;
   }
 
   public static Iterable<String> commaSplit(String value) {

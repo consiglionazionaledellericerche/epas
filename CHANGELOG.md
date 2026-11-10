@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Security
+  - Nei template label() restituisce come HTML solo il testo dei messaggi dell'applicazione:
+    i testi che non sono chiavi dei messaggi sono codificati, come gli argomenti di testo
+    inseriti nei messaggi.
+  - Le notifiche PNotify mostrano titolo e testo come testo e non come HTML, e i messaggi flash
+    sono codificati nella pagina.
+
 ## [2.39.2] - 2026-11-10
 ### Added
   - Nuova utility in Amministrazione > Utility per ricalcolare dal 2 luglio 2026 il buono pasto
