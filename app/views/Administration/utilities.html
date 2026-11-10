@@ -169,6 +169,22 @@
   #{/form}
   #{/panel}
 
+  <!-- Ricalcolo buono pasto nei giorni con 103RT -->
+  #{panel title:'Ricalcolo del buono pasto nei giorni con 103RT', dim:12 }
+  #{alert color:'info'}
+  <p>
+    Ricalcola dal 2 luglio 2026 i giorni con il 103RT (telelavoro ricercatori/tecnologi), che
+    ora consente il buono pasto se le timbrature raggiungono la soglia prevista dall'orario.
+    Prima del ricalcolo viene mostrata una simulazione.
+  </p>
+  #{/alert}
+  #{form @Administration.teleworkRtMealTicket(), class:'form-horizontal', method:'get'}
+  	#{b.buttons center:true}
+  		<button type="submit" class="btn btn-default">Apri</button>
+  	#{/b.buttons}
+  #{/form}
+  #{/panel}
+
   <!-- Consistency absence groups -->
   #{panel title:'Stato gruppi assenze e enumerato', dim:12 }
   #{alert color:'info'}

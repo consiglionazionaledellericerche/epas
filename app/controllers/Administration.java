@@ -84,6 +84,7 @@ import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.SecureManager;
 import manager.TeleworkMealTicketManager;
+import manager.TeleworkRtMealTicketManager;
 import manager.UserManager;
 import manager.attestati.dto.internal.clean.ContrattoAttestati;
 import manager.attestati.service.CertificationService;
@@ -215,6 +216,8 @@ public class Administration extends Controller {
   static PersonManager personManager;
   @Inject
   static TeleworkMealTicketManager teleworkMealTicketManager;
+  @Inject
+  static TeleworkRtMealTicketManager teleworkRtMealTicketManager;
 
   /**
    * Utilizzabile solo da developer e admin permette di prelevare un token del client
@@ -1514,6 +1517,71 @@ public class Administration extends Controller {
       args.put("office.id", office.id);
     }
     redirect(Router.reverse("Administration.teleworkMealTicket", args).url);
+  }
+
+  /**
+   * Simulazione del ricalcolo del buono pasto nei giorni con il 103RT: mostra i giorni che
+   * maturerebbero il buono pasto e quelli che restano invariati senza modificare nulla.
+   *
+   * @param from data di inizio, se assente il 2 luglio 2026
+   * @param to data di fine, se assente oggi
+   * @param office sede dei dipendenti, se assente tutte le sedi
+   */
+  public static void teleworkRtMealTicket(LocalDate from, LocalDate to, Office office) {
+    final LocalDate dateFrom =
+        from == null ? TeleworkRtMealTicketManager.MEAL_TICKET_BEGIN : from;
+    final LocalDate dateTo = to == null ? LocalDate.now() : to;
+    final Office selectedOffice = office != null && office.isPersistent() ? office : null;
+    validateTeleworkMealTicketPeriod(dateFrom, dateTo);
+    final TeleworkRtMealTicketManager.RecomputeStatus recompute =
+        TeleworkRtMealTicketManager.lastRecompute().orNull();
+    TeleworkRtMealTicketManager.Report report = null;
+    // Durante il ricalcolo la pagina si aggiorna da sola: niente simulazione.
+    if (!Validation.hasErrors() && (recompute == null || !recompute.isRunning())) {
+      report = teleworkRtMealTicketManager.analyze(dateFrom, dateTo,
+          Optional.fromNullable(selectedOffice));
+    }
+    render(dateFrom, dateTo, selectedOffice, report, recompute);
+  }
+
+  /**
+   * Avvia in background il ricalcolo dei dipendenti che maturano il buono pasto nei giorni
+   * con il 103RT.
+   *
+   * @param from data di inizio
+   * @param to data di fine
+   * @param office sede dei dipendenti, se assente tutte le sedi
+   */
+  public static void recomputeTeleworkRtMealTicket(@Required LocalDate from,
+      @Required LocalDate to, Office office) {
+    final Office selectedOffice = office != null && office.isPersistent() ? office : null;
+    validateTeleworkMealTicketPeriod(from, to);
+    if (Validation.hasErrors()) {
+      flash.error("Correggere il periodo indicato");
+      redirectToTeleworkRtMealTicket(from, to, selectedOffice);
+    }
+    if (teleworkRtMealTicketManager.startRecompute(from, to,
+        Optional.fromNullable(selectedOffice))) {
+      flash.success("Ricalcolo avviato in background: l'avanzamento è mostrato nella pagina");
+    } else {
+      flash.error("C'è già un ricalcolo in corso: attendere che termini");
+    }
+    redirectToTeleworkRtMealTicket(from, to, selectedOffice);
+  }
+
+  private static void redirectToTeleworkRtMealTicket(LocalDate from, LocalDate to,
+      Office office) {
+    Map<String, Object> args = Maps.newHashMap();
+    if (from != null) {
+      args.put("from", from.toString("dd/MM/yyyy"));
+    }
+    if (to != null) {
+      args.put("to", to.toString("dd/MM/yyyy"));
+    }
+    if (office != null) {
+      args.put("office.id", office.id);
+    }
+    redirect(Router.reverse("Administration.teleworkRtMealTicket", args).url);
   }
 
   private static void validateTeleworkMealTicketPeriod(LocalDate from, LocalDate to) {
