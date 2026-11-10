@@ -223,8 +223,10 @@ public class AbsencePeriod {
         }
         return this.fixedPeriodTakableAmount;
       }
-      if (this.takableCodes.contains(absenceTypeDao
-          .getAbsenceTypeByCode(DefaultAbsenceType.A_LAGILE.getCode()).get())) {
+      // Confronto in memoria sul codice: una query qui verrebbe eseguita per ogni assenza
+      // del periodo, con tempi molto lunghi per i gruppi con storico esteso.
+      if (this.takableCodes.stream().anyMatch(absenceType -> DefaultAbsenceType.A_LAGILE.getCode()
+          .equalsIgnoreCase(absenceType.getCode()))) {
         /* Caso di febbraio: secondo la nota del DG i giorni di lavoro agile a febbraio
          * non possono essere più di 8. Quindi sottraggo 2 giorni nella modalità 
          * prevista dall'algoritmo (2 * 100) al quantitativo di giorni previsto per il 
