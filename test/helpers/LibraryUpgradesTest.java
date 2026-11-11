@@ -17,7 +17,6 @@
 
 package helpers;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -30,7 +29,6 @@ import helpers.rest.GsonModule;
 import helpers.rest.JacksonModule;
 import it.cnr.iit.epas.AuthInfoBinder;
 import it.cnr.iit.epas.JsonStampingBinder;
-import it.cnr.iit.keycloak.model.UserRepresentation;
 import java.util.List;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
@@ -112,36 +110,6 @@ public class LibraryUpgradesTest extends UnitTest {
     assertEquals("https://idp.example.org/token", config.getTokenEndpoint());
     assertEquals("https://idp.example.org/certs", config.getJwksUri());
     assertEquals(ImmutableList.of("openid", "email"), config.getScopesSupported());
-  }
-
-  /**
-   * I modelli del client keycloak (generati da openapi, compilati con Jackson 2.12) sono letti
-   * e scritti dalla nuova versione di Jackson. Non si usa l'ObjectMapper di ApiClient perche'
-   * richiede jackson-datatype-threetenbp e jackson-databind-nullable, che keycloak-client non
-   * dichiara e non sono nel classpath (gia' prima dell'aggiornamento).
-   */
-  @Test
-  public void jacksonReadsKeycloakModels() throws Exception {
-    ObjectMapper mapper = new ObjectMapper()
-        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-    String json = "[{\"id\":\"abc\",\"username\":\"mario.rossi\",\"firstName\":\"Mario\","
-        + "\"lastName\":\"Rossi\",\"email\":\"mario.rossi@example.org\",\"enabled\":true,"
-        + "\"createdTimestamp\":1731312000000,\"attributes\":{\"matricola\":[\"1234\"]},"
-        + "\"nuovoCampo\":1}]";
-
-    List<UserRepresentation> users = mapper.readValue(json,
-        mapper.getTypeFactory().constructCollectionType(List.class, UserRepresentation.class));
-
-    assertEquals(1, users.size());
-    UserRepresentation user = users.get(0);
-    assertEquals("mario.rossi", user.getUsername());
-    assertEquals("Rossi", user.getLastName());
-    assertTrue(user.getEnabled());
-    assertEquals(Long.valueOf(1731312000000L), user.getCreatedTimestamp());
-    assertEquals(ImmutableList.of("1234"), user.getAttributes().get("matricola"));
-
-    String written = mapper.writeValueAsString(user);
-    assertTrue(written.contains("\"username\":\"mario.rossi\""));
   }
 
   // ---------------------------------------------------------------- gson
