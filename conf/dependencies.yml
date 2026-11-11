@@ -142,10 +142,16 @@ require:
     - org.apache.commons -> commons-email 1.6.0:
        force: true
        transitive: false
+    # JavaMail 1.6 richiesta da commons-email 1.6 (la mail-1.4.7 di play e' rimossa
+    # dall'immagine). Dichiarata esplicitamente per non dipendere da quella portata da
+    # ical4j; activation e' quella di play (framework/lib)
+    - com.sun.mail -> javax.mail 1.6.2:
+       force: true
+       transitive: false
     - com.google.code.gson -> gson 2.13.2:
        force: true
        transitive: false
-    # richieste da commons-compress e commons-fileupload
+    # richieste da commons-compress, commons-fileupload e tika-core (helpers.ImageUtils)
     - commons-io -> commons-io 2.20.0:
        force: true
     - commons-codec -> commons-codec 1.19.0:
