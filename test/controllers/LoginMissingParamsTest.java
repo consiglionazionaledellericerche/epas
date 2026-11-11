@@ -18,6 +18,8 @@
 package controllers;
 
 import com.google.common.collect.ImmutableMap;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import models.User;
@@ -25,7 +27,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import play.db.jpa.JPA;
+import play.mvc.CookieDataCodec;
 import play.mvc.Http.Cookie;
+import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.test.FunctionalTest;
 
@@ -53,9 +57,31 @@ public class LoginMissingParamsTest extends FunctionalTest {
     JPA.em().getTransaction().begin();
   }
 
+  /**
+   * Azzera i tentativi di login dell'utente e lo cancella.
+   *
+   * <p>La chiave dei tentativi dipende dall'indirizzo del client della richiesta corrente: per
+   * azzerare quelli registrati dalle richieste del test si usa una richiesta costruita come
+   * quelle di FunctionalTest.</p>
+   */
   @After
-  public void clearAttempts() {
-    Security.clearLoginAttempts(user.getUsername());
+  public void cleanUp() {
+    final Request previous = Request.current();
+    Request.current.set(newRequest());
+    try {
+      Security.clearLoginAttempts(user.getUsername());
+    } finally {
+      Request.current.set(previous);
+    }
+    if (!JPA.em().getTransaction().isActive()) {
+      JPA.em().getTransaction().begin();
+    }
+    final User saved = User.findById(user.getId());
+    if (saved != null) {
+      saved.delete();
+    }
+    JPA.em().getTransaction().commit();
+    JPA.em().getTransaction().begin();
   }
 
   @Test
@@ -78,17 +104,33 @@ public class LoginMissingParamsTest extends FunctionalTest {
     Response response = POST("/login",
         ImmutableMap.of("username", user.getUsername(), "password", PASSWORD));
     assertStatus(302, response);
-    assertTrue(sessionUsername(response.cookies).contains(user.getUsername()));
+    assertEquals(user.getUsername(), session(response).get("username"));
   }
 
   private void assertFailedLogin(Response response) {
     assertStatus(302, response);
     assertTrue(response.getHeader("Location").contains("/login"));
-    assertFalse(sessionUsername(response.cookies).contains("username"));
+    assertFalse(session(response).containsKey("username"));
   }
 
-  private static String sessionUsername(Map<String, Cookie> cookies) {
-    Cookie session = cookies.get("PLAY_SESSION");
-    return session == null || session.value == null ? "" : session.value;
+  /**
+   * I dati della sessione impostati dalla risposta, vuoti se la risposta non imposta il
+   * cookie di sessione. Il valore del cookie è "firma-dati", con i dati codificati da
+   * CookieDataCodec.
+   */
+  private static Map<String, String> session(Response response) {
+    final Map<String, String> data = new HashMap<>();
+    final Cookie cookie = response.cookies.get("PLAY_SESSION");
+    if (cookie == null || cookie.value == null || cookie.value.isEmpty()) {
+      return data;
+    }
+    final int dash = cookie.value.indexOf('-');
+    assertTrue("cookie di sessione non firmato: " + cookie.value, dash > 0);
+    try {
+      CookieDataCodec.decode(data, cookie.value.substring(dash + 1));
+    } catch (UnsupportedEncodingException ex) {
+      throw new IllegalStateException(ex);
+    }
+    return data;
   }
 }
