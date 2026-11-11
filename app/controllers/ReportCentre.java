@@ -23,6 +23,7 @@ import com.google.common.hash.Hashing;
 import com.google.common.net.MediaType;
 import com.google.gson.GsonBuilder;
 import common.security.ClientAddress;
+import common.security.PostOnly;
 import controllers.Resecure.NoCheck;
 import dao.GeneralSettingDao;
 import dao.UserDao;
@@ -190,6 +191,7 @@ public class ReportCentre extends Controller {
   /**
    * Invio ad OIL delle informazioni aggiuntive relative ad un ticket.
    */
+  @PostOnly
   public static void sendOilUserReplay(@Required @Match(OIL_PARAM_PATTERN) String id,
       @Required @Match(OIL_PARAM_PATTERN) String azione,
       @Required String description) {

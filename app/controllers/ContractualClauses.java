@@ -18,6 +18,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import common.security.PostOnly;
 import dao.ContractualClauseDao;
 import helpers.jpa.JpaReferenceBinder;
 import java.util.Collection;
@@ -91,6 +92,7 @@ public class ContractualClauses extends Controller {
    *
    * @param contractualClause istituto contrattuale
    */
+  @PostOnly
   public static void save(@Valid ContractualClause contractualClause, 
       @As(binder = JpaReferenceBinder.class)
       Collection<CategoryGroupAbsenceType> categoryGroupAbsenceTypes,

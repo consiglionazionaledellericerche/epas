@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.PersonDao;
@@ -263,6 +264,7 @@ public class TeleworkStampings extends Controller {
    * @throws ExecutionException eccezione in esecuzione
    * @throws NoSuchFieldException eccezione di mancanza di parametro
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void deleteTeleworkStamping(long teleworkStampingId, boolean confirmed) 
       throws NoSuchFieldException, ExecutionException {
 
@@ -331,6 +333,7 @@ public class TeleworkStampings extends Controller {
    * @throws ExecutionException eccezione in esecuzione
    * @throws NoSuchFieldException eccezione di mancanza di parametro
    */
+  @PostOnly
   public static void save(Long personId, @Required LocalDate date, 
       @Required @Valid TeleworkDto stamping, @Required @CheckWith(StringIsTime.class) String time) 
           throws NoSuchFieldException, ExecutionException {

@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Security
+  - Le azioni che modificano dati (cancellazioni, approvazioni, salvataggi, sincronizzazioni)
+    non sono più eseguibili con una richiesta GET, cioè con un semplice link anche da un altro
+    sito, ma solo in POST con il token anti-CSRF. I link dell'interfaccia che eseguivano
+    direttamente queste azioni inviano ora un form POST. La verifica segue il parametro
+    csrf.mode (CSRF_MODE in docker): con report le GET rifiutate sono solo segnalate nel log,
+    con enforce sono rifiutate con 403.
+
 ### Fixed
   - Un POST /login senza username o senza password non risponde più con un errore 500
     (NullPointerException nel modulo secure di Play), ma come un normale login fallito.

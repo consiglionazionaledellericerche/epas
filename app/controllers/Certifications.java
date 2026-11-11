@@ -22,6 +22,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import controllers.RequestInit.CurrentData;
 import dao.AbsenceDao;
@@ -89,6 +90,7 @@ public class Certifications extends Controller {
 
   private static final String PROCESS_COMMAND_KEY = "id-%s-year-%s-month-%s";
 
+  @PostOnly
   public static void invalidateOauthTokenCache() {
     certService.invalidateOauthTokenCache();
     flash.success("Invalidata cache OAuth Token");

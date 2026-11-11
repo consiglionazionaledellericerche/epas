@@ -63,10 +63,10 @@
 
 	#{b.buttons center:true}
 		#{secure.check 'InformationRequests.delete', target:informationRequest}
-			#{b.link @delete(informationRequest.id), color:'danger', title:'Revoca' /}
+			#{b.link @delete(informationRequest.id), 'data-method':'post', color:'danger', title:'Revoca' /}
 		#{/secure.check}
 		#{secure.check 'InformationRequests.approval', target:informationRequest}
-			#{b.link @approval(informationRequest.id), color:'success', title:'Approva'/}
+			#{b.link @approval(informationRequest.id), 'data-method':'post', color:'success', title:'Approva'/}
 		#{/secure.check}
 		#{secure.check 'InformationRequests.disapproval', target:informationRequest}
 			#{b.link @disapproval(informationRequest.id, disapproval), 'data-async-modal': '#defaultModal', color:'warning', title:'Rifiuta'/}			

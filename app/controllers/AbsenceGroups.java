@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.OfficeDao;
@@ -170,6 +171,7 @@ public class AbsenceGroups extends Controller {
    *
    * @param categoryTab tab
    */
+  @PostOnly
   public static void saveCategoryTab(@Valid CategoryTab categoryTab) {
 
     if (Validation.hasErrors()) {
@@ -186,6 +188,7 @@ public class AbsenceGroups extends Controller {
    *
    * @param categoryTabId tab
    */
+  @PostOnly
   public static void deleteCategoryTab(Long categoryTabId) {
     CategoryTab categoryTab = CategoryTab.findById(categoryTabId);
     notFoundIfNull(categoryTab);
@@ -225,6 +228,7 @@ public class AbsenceGroups extends Controller {
    *
    * @param categoryGroupAbsenceType tab
    */
+  @PostOnly
   public static void saveCategoryGroupAbsenceType(
       @Valid CategoryGroupAbsenceType categoryGroupAbsenceType) {
 
@@ -243,6 +247,7 @@ public class AbsenceGroups extends Controller {
    *
    * @param categoryGroupAbsenceTypeId tab
    */
+  @PostOnly
   public static void deleteCategoryGroupAbsenceType(Long categoryGroupAbsenceTypeId) {
     CategoryGroupAbsenceType categoryGroupAbsenceType =
         CategoryGroupAbsenceType.findById(categoryGroupAbsenceTypeId);
@@ -350,6 +355,7 @@ public class AbsenceGroups extends Controller {
    *
    * @param groupAbsenceType gruppo
    */
+  @PostOnly
   public static void saveGroup(@Valid GroupAbsenceType groupAbsenceType,
       List<Long> takableCodesIds,
       @Required AmountType takeAmountType,
@@ -508,6 +514,7 @@ public class AbsenceGroups extends Controller {
    * @param tecnologi se il codice di assenza è valido per i tecnologi
    * @param tecnici se il codice di assenza è valido per i tecnici
    */
+  @PostOnly
   public static void saveAbsenceType(@Valid AbsenceType absenceType,
       boolean tecnologi, boolean tecnici, boolean altri) {
 
@@ -696,6 +703,7 @@ public class AbsenceGroups extends Controller {
    * @param minutes minuti
    * @param forceInsert forza inserimento
    */
+  @PostOnly
   public static void save(Long personId, LocalDate from, LocalDate to, LocalDate recoveryDate,
       GroupAbsenceType groupAbsenceType, AbsenceType absenceType,
       JustifiedType justifiedType, Integer hours, Integer minutes, boolean forceInsert) {
@@ -895,6 +903,7 @@ public class AbsenceGroups extends Controller {
    *
    * @param initializationGroup initializationGroup
    */
+  @PostOnly
   public static void saveInitialization(@Valid InitializationGroup initializationGroup,
       boolean redirectToStatus) {
 
@@ -958,6 +967,7 @@ public class AbsenceGroups extends Controller {
    *
    * @param initializationGroup inizializzazione
    */
+  @PostOnly
   public static void deleteInitialization(InitializationGroup initializationGroup,
       boolean redirectToStatus) {
 
@@ -1010,6 +1020,7 @@ public class AbsenceGroups extends Controller {
    * @param absenceId id dell'assenza
    * @param dateTo la data di fine periodo
    */
+  @PostOnly
   public static void delete(final long absenceId, @Valid LocalDate dateTo) {
 
     final Absence absence = Absence.findById(absenceId);
@@ -1119,6 +1130,7 @@ public class AbsenceGroups extends Controller {
    * @param justifiedType tipo giustificativo
    * @param justifiedMinutes minuti specificati
    */
+  @PostOnly
   public static void saveAbsenceCriticalValue(Long absenceId,
       JustifiedType justifiedType, Integer justifiedMinutes) {
 

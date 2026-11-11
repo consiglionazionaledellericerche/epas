@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.gdata.util.common.base.Preconditions;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.GeneralSettingDao;
 import dao.OfficeDao;
@@ -166,6 +167,7 @@ public class Persons extends Controller {
    * @param person la persona da inserire
    * @param contract il contratto associato alla persona
    */
+  @PostOnly
   public static void save(@Valid @Required Person person, @Valid Contract contract) {
 
     if (contract.getEndDate() != null && !contract.getEndDate().isAfter(contract.getBeginDate())) {
@@ -243,6 +245,7 @@ public class Persons extends Controller {
    *
    * @param person la persona da modificare
    */
+  @PostOnly
   public static void update(@Valid Person person) {
 
     notFoundIfNull(person);
@@ -303,6 +306,7 @@ public class Persons extends Controller {
    * @param personId l'id della persona da cancellare
    */
   @SuppressWarnings("deprecation")
+  @PostOnly
   public static void deletePersonConfirmed(Long personId) {
 
     Person person = personDao.getPersonById(personId);
@@ -408,6 +412,7 @@ public class Persons extends Controller {
    * @param nuovaPassword nuova password
    * @param confermaPassword ripeti
    */
+  @PostOnly
   public static void savePassword(@Required String vecchiaPassword,
       @MinSize(5) @Required String nuovaPassword, @Required @Equals(value = "nuovaPassword",
           message = "Le password non corrispondono") String confermaPassword) {
@@ -478,6 +483,7 @@ public class Persons extends Controller {
    *
    * @param childId childId.
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void deleteChild(Long childId, boolean confirmed) {
 
     PersonChildren child = personChildrenDao.getById(childId);
@@ -514,6 +520,7 @@ public class Persons extends Controller {
    *
    * @param child child
    */
+  @PostOnly
   public static void saveChild(@Valid PersonChildren child) {
 
     if (!Validation.hasErrors()) {

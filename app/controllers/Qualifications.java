@@ -17,6 +17,7 @@
 
 package controllers;
 
+import common.security.PostOnly;
 import dao.QualificationDao;
 import java.util.List;
 import javax.inject.Inject;
@@ -67,6 +68,7 @@ public class Qualifications extends Controller {
   /**
    * Inserimento o modifica di una qualifica.
    */
+  @PostOnly
   public static void save(@Valid Qualification qualification) {
     if (Validation.hasErrors()) {
       flash.error("Correggere gli errori indicati");
@@ -85,6 +87,7 @@ public class Qualifications extends Controller {
    *
    * <p>Possibile solo se la qualifica non è associata a persone e tipi di assenza.</p>
    */
+  @PostOnly
   public static void delete(Long id) {
     notFoundIfNull(id);
     val qualification = qualificationDao.byId(id).orNull();

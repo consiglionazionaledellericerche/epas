@@ -17,6 +17,7 @@
 
 package controllers;
 
+import common.security.PostOnly;
 import dao.CompetenceCodeDao;
 import helpers.Web;
 import java.util.List;
@@ -52,6 +53,7 @@ public class MonthlyCompetenceTypes extends Controller {
    *
    * @param monthlyCompetencetype l'oggetto da persistere
    */
+  @PostOnly
   public static void saveType(MonthlyCompetenceType monthlyCompetencetype) {
     
     if (Validation.hasErrors()) {

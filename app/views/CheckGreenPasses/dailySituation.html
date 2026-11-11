@@ -33,8 +33,8 @@
   		<tr>
   		<td>${item.person.fullName()}</td>
   		<td>#{if item.checked}SI #{/if} #{else}NO #{/else}</td>
-  		<td><a class="btn btn-info btn-xs" href="@{CheckGreenPasses.checkPerson(item.id)}" color="info" title="Aggiorna stato">Aggiorna</a></td>
-  		<td><a class="btn btn-danger btn-xs" href="@{CheckGreenPasses.deletePerson(item.id)}" color="danger" title="Rimuovi"></a></a></td>
+  		<td><a data-method="post" class="btn btn-info btn-xs" href="@{CheckGreenPasses.checkPerson(item.id)}" color="info" title="Aggiorna stato">Aggiorna</a></td>
+  		<td><a data-method="post" class="btn btn-danger btn-xs" href="@{CheckGreenPasses.deletePerson(item.id)}" color="danger" title="Rimuovi"></a></a></td>
   		</tr>
   		#{/list}
   	</table>

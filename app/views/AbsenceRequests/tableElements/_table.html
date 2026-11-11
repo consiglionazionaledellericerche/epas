@@ -75,7 +75,7 @@
 				</td>
 				<td>
 				#{secure.check 'AbsenceRequests.approval', target: item }
-				<a class="btn btn-success btn-xs" href="@{AbsenceRequests.approval(item.id)}">
+				<a data-method="post" class="btn btn-success btn-xs" href="@{AbsenceRequests.approval(item.id)}">
         		Approva 
       			</a>
       			#{/secure.check}

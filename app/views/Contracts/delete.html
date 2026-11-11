@@ -16,7 +16,7 @@
     dal software ePAS.</p>
 	<p>Attenzione!!! Questa operazione non potrà essere annullata.</p>
 	<p>
-	<a href="@{Contracts.delete(contract.id, true)}">
+	<a data-method="post" href="@{Contracts.delete(contract.id, true)}">
       <input value="Conferma Elimina" class="btn btn-danger" type="button">
     </a>
     </p>

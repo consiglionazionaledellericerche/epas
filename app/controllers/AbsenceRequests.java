@@ -22,6 +22,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.AbsenceRequestDao;
@@ -79,6 +80,7 @@ import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
 
 
@@ -637,6 +639,7 @@ public class AbsenceRequests extends Controller {
   /**
    * Salvataggio di una richiesta di assenza.
    */
+  @PostOnly
   public static void save(@Required @Valid AbsenceRequest absenceRequest, 
       Integer hours, Integer minutes, boolean allDay, AbsenceType absenceType, String absenceCode) {
 
@@ -724,7 +727,7 @@ public class AbsenceRequests extends Controller {
       } else if (absenceRequest.getPerson().isSeatSupervisor() 
           || (absenceRequest.getPerson().isGroupManager()
           && !absenceRequest.isOfficeHeadApprovalForManagerRequired())) {
-        approval(absenceRequest.id);
+        approve(absenceRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
         notificationManager.notificationAbsenceRequestPolicy(absenceRequest.getPerson().getUser(),
@@ -763,7 +766,20 @@ public class AbsenceRequests extends Controller {
    *
    * @param id l'id della richiesta da approvare
    */
+  @PostOnly
   public static void approval(long id) {
+    approve(id);
+  }
+
+  /**
+   * Approva la richiesta. Non è un'azione: è chiamata anche dopo il salvataggio di una
+   * richiesta che non richiede altre approvazioni, senza il redirect in GET che passerebbe
+   * da approval.
+   *
+   * @param id l'id della richiesta da approvare
+   */
+  @Util
+  static void approve(long id) {
 
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     notFoundIfNull(absenceRequest);
@@ -794,6 +810,7 @@ public class AbsenceRequests extends Controller {
    *
    * @param id l'id della richiesta di assenza
    */
+  @PostOnly(confirmParam = "disapproval")
   public static void disapproval(long id, boolean disapproval, String reason) {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     notFoundIfNull(absenceRequest);
@@ -839,6 +856,7 @@ public class AbsenceRequests extends Controller {
    *
    * @param id id della richiesta di assenza da modificare.
    */
+  @PostOnly
   public static void delete(long id) {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     notFoundIfNull(absenceRequest);

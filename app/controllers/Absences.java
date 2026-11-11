@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
@@ -152,6 +153,7 @@ public class Absences extends Controller {
    * @param absence     l'assenza
    * @param absenceFile il file associato a quella assenza
    */
+  @PostOnly
   public static void addAttach(@Required Absence absence, Blob absenceFile) {
 
     Verify.verify(absence.isPersistent(), "Assenza specificata inesistente!");
@@ -188,6 +190,7 @@ public class Absences extends Controller {
    * @param hours le ore da salvare
    * @param minutes i minuti da salvare
    */
+  @PostOnly
   public static void overtimeAbsence(Long absenceId, Integer hours, Integer minutes) {
     //TODO: va completata la business logic di questo metodo!!!
     Absence absence = absenceDao.getAbsenceById(absenceId);
@@ -217,6 +220,7 @@ public class Absences extends Controller {
    *
    * @param absenceId l'id della assenza
    */
+  @PostOnly
   public static void removeAttach(@Required Long absenceId) {
 
     Absence absence = absenceDao.getAbsenceById(absenceId);

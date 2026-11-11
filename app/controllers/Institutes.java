@@ -19,6 +19,7 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.querydsl.core.QueryResults;
+import common.security.PostOnly;
 import dao.OfficeDao;
 import dao.RoleDao;
 import helpers.Web;
@@ -86,6 +87,7 @@ public class Institutes extends Controller {
    *
    * @param institute l'oggetto da persistere
    */
+  @PostOnly
   public static void save(@Valid Institute institute) {
 
     if (Validation.hasErrors()) {

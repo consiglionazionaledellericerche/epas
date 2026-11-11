@@ -19,6 +19,7 @@ package controllers;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.TimeSlotDao;
@@ -114,6 +115,7 @@ public class TimeSlots extends Controller {
    *
    * @param timeSlot la fascia oraria da salvare
    */
+  @PostOnly
   public static void save(@Valid TimeSlot timeSlot) {
     notFoundIfNull(timeSlot);
 
@@ -192,6 +194,7 @@ public class TimeSlots extends Controller {
    *
    * @param id l'identificativo della fascia oraria da cancellare
    */
+  @PostOnly
   public static void delete(Long id) {
     notFoundIfNull(id);
     val timeSlot = timeSlotDao.byId(id).orNull();
@@ -223,6 +226,7 @@ public class TimeSlots extends Controller {
    *
    * @param id l'identificativo della fascia oraria da abilitare/disabilitare
    */
+  @PostOnly
   public static void toogle(Long id) {
     notFoundIfNull(id);
     val timeSlot = timeSlotDao.byId(id).orNull();

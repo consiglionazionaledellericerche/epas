@@ -18,6 +18,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.wrapper.IWrapperFactory;
@@ -88,6 +89,7 @@ public class UploadSituation extends Controller {
    * @param month  mese
    * @throws IOException sollevata in caso non sia possibile chiudere il file.
    */
+  @PostOnly
   public static void computeCreateFile(@Valid Office office,
       @Required Integer year, @Required Integer month) throws IOException {
 

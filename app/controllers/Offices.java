@@ -23,6 +23,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gdata.util.common.base.Preconditions;
 import com.querydsl.core.QueryResults;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -149,6 +150,7 @@ public class Offices extends Controller {
    *
    * @param office la sede da salvare
    */
+  @PostOnly
   public static void save(@Valid Office office) {
 
     Preconditions.checkNotNull(office.getInstitute());
@@ -185,6 +187,7 @@ public class Offices extends Controller {
    *
    * @param id della sede da cancellare
    */
+  @PostOnly
   public static void delete(Long id) {
 
     final Office office = Office.findById(id);
@@ -199,6 +202,7 @@ public class Offices extends Controller {
   /**
    * Metodo che renderizza la pagina di trasferimento massivo di personale.
    */
+  @PostOnly
   public static void massiveTransfer() {
     List<Office> activeOffices = officeDao.allEnabledOffices();
     List<Office> destinationOffices = activeOffices;
@@ -210,6 +214,7 @@ public class Offices extends Controller {
    * @param sourceOffice la sede di provenienza
    * @param destinationOffice la sede di destinazione
    */
+  @PostOnly
   public static void executeTransfer(Office sourceOffice, Office destinationOffice) {
     Preconditions.checkNotNull(sourceOffice);
     Preconditions.checkNotNull(destinationOffice);
@@ -236,6 +241,7 @@ public class Offices extends Controller {
   /**
    * Metodo che renderizza la pagina di trasferimento delle configurazioni della sede.
    */
+  @PostOnly
   public static void copyConfiguration() {
     List<Office> activeOffices = officeDao.allEnabledOffices();
     List<Office> destinationOffices = activeOffices;

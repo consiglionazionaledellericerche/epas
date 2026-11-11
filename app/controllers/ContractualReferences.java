@@ -18,6 +18,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import common.security.PostOnly;
 import dao.ContractualReferenceDao;
 import java.io.File;
 import java.io.FileInputStream;
@@ -78,6 +79,7 @@ public class ContractualReferences extends Controller {
    * @param contractualReference riferimento contrattuale
    * @throws FileNotFoundException sollevata in caso di problemi con il file caricato
    */
+  @PostOnly
   public static void save(@Valid ContractualReference contractualReference, File file) 
       throws FileNotFoundException {
 

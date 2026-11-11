@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
@@ -196,6 +197,7 @@ public class Calendar extends Controller {
    *
    * @param psd Turno da eliminare
    */
+  @PostOnly
   public static void deleteShift(PersonShiftDay psd) {
     final PNotifyObject message;
     if (psd == null) {
@@ -440,6 +442,7 @@ public class Calendar extends Controller {
    * @param newDate giorno nel quale salvare il turno error 409 con messaggio di
    *        ShiftTroubles.PERSON_IS_ABSENT, CalendarShiftTroubles.SHIFT_SLOT_ASSIGNED
    */
+  @PostOnly
   public static void changeShift(long personShiftDayId, LocalDate newDate) {
 
     final PNotifyObject message;
@@ -503,6 +506,7 @@ public class Calendar extends Controller {
    * @param shiftSlot lo slot di turno (mattina/pomeriggio)
    * @param activityId l'id dell'attività su cui inserire il turnista
    */
+  @PostOnly
   public static void newShift(long personId, LocalDate date, ShiftSlot shiftSlot, 
       OrganizationShiftSlot organizationShiftslot, long activityId) {
 
@@ -737,6 +741,7 @@ public class Calendar extends Controller {
    * @param version la versione da verificare
    * @param shiftTypeMonthId l'id dello shiftTypeMonth da controllare
    */
+  @PostOnly
   public static void approveShiftsInMonth(long version, long shiftTypeMonthId) {
 
     ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byId(shiftTypeMonthId).orNull();
@@ -774,6 +779,7 @@ public class Calendar extends Controller {
    *
    * @param shiftTypeMonthId l'id dello shiftTypeMonth contenente le info su approvazione turno
    */
+  @PostOnly
   public static void removeApprovation(long shiftTypeMonthId) {
 
     ShiftTypeMonth shiftTypeMonth = shiftTypeMonthDao.byId(shiftTypeMonthId).orNull();
