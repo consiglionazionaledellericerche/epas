@@ -1850,20 +1850,22 @@ public class PersonDayManager {
     Verify.verifyNotNull(currentPersonDay);
     Verify.verifyNotNull(currentPersonDay.getPerson());
 
-    // Il job gira con un'altra transazione: il person day viene ricaricato per id dopo il
-    // salvataggio della transazione corrente, invece di usare l'oggetto di questa sessione.
+    if (currentPersonDay.getId() == null) {
+      log.debug("Controllo della fascia obbligatoria ignorato: person day del {} non salvato",
+          currentPersonDay.getDate());
+      return;
+    }
+    // Il job gira con un'altra transazione: cattura solo l'id e ricarica il person day dopo il
+    // salvataggio della transazione corrente. Catturare l'entità la terrebbe in memoria fino
+    // al commit (anche dopo un em.clear() nei ricalcoli di molte persone).
+    final Long personDayId = currentPersonDay.getId();
     AfterCommitJobs.schedule(new Job<Void>() {
       @Override
       public void doJob() {
-        if (currentPersonDay.getId() == null) {
-          log.debug("Controllo della fascia obbligatoria ignorato: person day del {} di {} "
-              + "non salvato", currentPersonDay.getDate(), currentPersonDay.getPerson());
-          return;
-        }
-        final PersonDay personDay = PersonDay.findById(currentPersonDay.getId());
+        final PersonDay personDay = PersonDay.findById(personDayId);
         if (personDay == null) {
           log.debug("Controllo della fascia obbligatoria ignorato: person day id={} non trovato",
-              currentPersonDay.getId());
+              personDayId);
           return;
         }
         if (personDay.isIgnoreShortLeave()) {
