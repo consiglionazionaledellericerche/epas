@@ -305,14 +305,14 @@ public class TeleworkStampings extends Controller {
             stamping.getDate().getSecond());
         Optional<Stamping> stampingToDelete = 
             stampingDao.getStamping(dateTime, pd.getPerson(), way);
+        // Rimuove anche il codice 103RT se non ci sono più timbrature nel giorno
         if (stampingToDelete.isPresent()) {
-          stampingToDelete.get().delete();
-          consistencyManager.updatePersonSituation(pd.getPerson().id, pd.getDate());
-        }        
-        // Rimuovere il codice 103RT se non ci sono più timbrature nel giorno
-        if (pd.getStampings().isEmpty()) {
+          manager.deleteStampingAndTeleworkAbsenceCode(pd, stampingToDelete.get());
+        } else if (pd.getStampings().isEmpty()) {
           manager.deleteTeleworkAbsenceCode(pd);
         }
+        // Ricalcolo dopo la rimozione del 103RT, che altrimenti non verrebbe considerata
+        consistencyManager.updatePersonSituation(pd.getPerson().id, pd.getDate());
       }
       flash.success("Orario eliminato correttamente");        
     } else {
