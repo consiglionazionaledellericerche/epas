@@ -40,6 +40,7 @@ import manager.services.telework.errors.TeleworkStampingError;
 import manager.telework.service.TeleworkComunication;
 import models.Person;
 import models.PersonDay;
+import models.Stamping;
 import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.GroupAbsenceType;
@@ -407,6 +408,25 @@ public class TeleworkStampingManager {
     
   }
   
+  /**
+   * Cancella dal cartellino la timbratura copiata da quella in telelavoro e, se nel giorno non
+   * restano altre timbrature, anche il codice 103RT. Il ricalcolo del giorno è a carico del
+   * chiamante.
+   *
+   * <p>La timbratura viene tolta anche dalla lista del personDay: la sola cancellazione non
+   * aggiorna la collezione già caricata e il giorno risulterebbe ancora con timbrature.</p>
+   *
+   * @param pd il personDay della timbratura
+   * @param stamping la timbratura del cartellino da cancellare
+   */
+  public void deleteStampingAndTeleworkAbsenceCode(PersonDay pd, Stamping stamping) {
+    stamping.delete();
+    pd.getStampings().remove(stamping);
+    if (pd.getStampings().isEmpty()) {
+      deleteTeleworkAbsenceCode(pd);
+    }
+  }
+
   /**
    * Cancella l'assenza 103RT dal cartellino del dipendente.
    *

@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Un POST /login senza username o senza password non risponde più con un errore 500
     (NullPointerException nel modulo secure di Play), ma come un normale login fallito.
 
+## [2.39.2] - 2026-11-10
+### Added
+  - Nuova utility in Amministrazione > Utility per ricalcolare dal 2 luglio 2026 il buono pasto
+    nei giorni con il codice 103RT. Una simulazione mostra i giorni che maturano il buono, con
+    tipologia di orario e ore previste, evidenziando quelli con meno di 6 ore previste
+    dall'orario; il ricalcolo viene eseguito in background.
+
+### Changed
+  - Il codice 103RT (telelavoro ricercatori/tecnologi) non impedisce più il buono pasto: non
+    giustifica tempo e il buono matura solo se le timbrature in telelavoro del giorno
+    raggiungono la soglia prevista dall'orario di lavoro.
+
+### Fixed
+  - Cancellando l'ultima timbratura in telelavoro di un giorno viene rimosso anche il codice
+    103RT inserito in automatico, e il giorno viene ricalcolato dopo la rimozione. Prima il
+    codice restava nel cartellino senza timbrature.
+
 ## [2.39.1] - 2026-11-09
 ### Added
   - Nuova utility in Amministrazione > Utility per convertire i codici di telelavoro 103 nel
