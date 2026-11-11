@@ -34,6 +34,7 @@ import dao.WorkingTimeTypeDao;
 import dao.ZoneDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperPersonDay;
+import helpers.jpa.AfterCommitJobs;
 import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1843,15 +1844,28 @@ public class PersonDayManager {
    * Verifica e gestisce eventuali Permessi brevi legati a fascie orarie obbligatorie
    * per il dipendente.
    *
-   * @param personDay il personday da verificare per l'eventuale permesso breve
+   * @param currentPersonDay il personday da verificare per l'eventuale permesso breve
    */
-  public void checkAndManageMandatoryTimeSlot(PersonDay personDay) {
-    Verify.verifyNotNull(personDay);
-    Verify.verifyNotNull(personDay.getPerson());
+  public void checkAndManageMandatoryTimeSlot(PersonDay currentPersonDay) {
+    Verify.verifyNotNull(currentPersonDay);
+    Verify.verifyNotNull(currentPersonDay.getPerson());
 
-    new Job<Void>() {
+    // Il job gira con un'altra transazione: il person day viene ricaricato per id dopo il
+    // salvataggio della transazione corrente, invece di usare l'oggetto di questa sessione.
+    AfterCommitJobs.schedule(new Job<Void>() {
       @Override
       public void doJob() {
+        if (currentPersonDay.getId() == null) {
+          log.debug("Controllo della fascia obbligatoria ignorato: person day del {} di {} "
+              + "non salvato", currentPersonDay.getDate(), currentPersonDay.getPerson());
+          return;
+        }
+        final PersonDay personDay = PersonDay.findById(currentPersonDay.getId());
+        if (personDay == null) {
+          log.debug("Controllo della fascia obbligatoria ignorato: person day id={} non trovato",
+              currentPersonDay.getId());
+          return;
+        }
         if (personDay.isIgnoreShortLeave()) {
           log.info("Calcolo del permesso per breve per il giorno {} di {} ignorato come "
               + "da configurazione del person day id={}", 
@@ -1884,8 +1898,7 @@ public class PersonDayManager {
 
         if (inShift || isAllDayAbsencePresent || personDay.isHoliday()) {
           if (previousShortPermission.isPresent()) {
-            //Viene fatta prima la merge perché l'assenza è detached
-            previousShortPermission.get().merge()._delete();
+            removeShortPermission(personDay, previousShortPermission.get());
             log.info("Rimosso permesso breve di {} minuti nel giorno {} per {} poiché sono presenti"
                 + " assenze giornaliere oppure il dipendente è in turno, "
                 + "oppure è un giorno festivo.",
@@ -1917,8 +1930,7 @@ public class PersonDayManager {
         }
 
         if (!shortPermission.isPresent() && previousShortPermission.isPresent()) {
-          //Viene fatta prima la merge perché l'assenza è detached
-          previousShortPermission.get().merge()._delete();
+          removeShortPermission(personDay, previousShortPermission.get());
           log.info("Rimosso permesso breve di {} minuti nel giorno {} per {}",
               previousShortPermission.get().getJustifiedMinutes(), personDay.getDate(), 
               personDay.getPerson().getFullname());          
@@ -1929,17 +1941,26 @@ public class PersonDayManager {
         //il precedente permesso breve
         if (!previousShortPermission.get().getJustifiedMinutes()
             .equals(shortPermission.get().getJustifiedMinutes())) {
-          val newShortPermission = previousShortPermission.get().<Absence>merge();
-          newShortPermission.setJustifiedMinutes(shortPermission.get().getJustifiedMinutes());
-          newShortPermission.save();
+          val previousMinutes = previousShortPermission.get().getJustifiedMinutes();
+          previousShortPermission.get()
+              .setJustifiedMinutes(shortPermission.get().getJustifiedMinutes());
+          previousShortPermission.get().save();
           log.debug("Permesso breve esistente nel giorno {} per {}, aggiornato da {} a {} minuti", 
               personDay.getDate(), personDay.getPerson().getFullname(),
-              previousShortPermission.get().getJustifiedMinutes(), 
-              shortPermission.get().getJustifiedMinutes());
+              previousMinutes, shortPermission.get().getJustifiedMinutes());
         }
 
       }
-    }.afterRequest();
+    });
+  }
+
+  /**
+   * Cancella il permesso breve togliendolo anche dalle assenze del person day, altrimenti al
+   * flush il cascade PERSIST della collezione lo salverebbe di nuovo.
+   */
+  private static void removeShortPermission(PersonDay personDay, Absence shortPermission) {
+    personDay.getAbsences().remove(shortPermission);
+    shortPermission._delete();
   }
 
 }

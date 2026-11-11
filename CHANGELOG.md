@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     parentali). Durante la simulazione dell'inserimento alcune query venivano ripetute per ogni
     assenza del periodo: l'inserimento del codice 26 su un mese passa da oltre 10 minuti a
     pochi secondi.
+  - Il controllo della fascia obbligatoria (permesso breve) e il ricalcolo delle ferie lanciati
+    fuori da una richiesta web, ad esempio dai job schedulati, partono solo dopo il salvataggio
+    dei dati e li rileggono dal database, invece di girare in parallelo su dati non ancora
+    salvati.
 
 ## [2.39.2] - 2026-11-10
 ### Added
