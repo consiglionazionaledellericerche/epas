@@ -8,10 +8,11 @@ on:
 permissions:
   contents: read
 
-# Su una PR una nuova push annulla l'esecuzione precedente ancora in corso.
+# Su una PR una nuova push annulla l'esecuzione precedente ancora in corso; su main
+# no, così ogni commit mergiato ha il proprio esito.
 concurrency:
   group: test-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   autotest:
@@ -22,19 +23,20 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       -
-        # Le dipendenze di conf/dependencies.yml sono scaricate da ivy: la cache evita
-        # di riscaricarle a ogni esecuzione.
+        # Le dipendenze di conf/dependencies.yml (e i jar locali in jars/) sono gestite
+        # da ivy: la cache evita di riscaricarle a ogni esecuzione. Niente restore-keys,
+        # altrimenti la cache accumulerebbe all'infinito le versioni vecchie.
         name: Cache delle dipendenze
         uses: actions/cache@v4
         with:
           path: ~/.ivy2
-          key: ivy-${{ hashFiles('conf/dependencies.yml') }}
-          restore-keys: ivy-
+          key: ivy-${{ hashFiles('conf/dependencies.yml', 'jars/**') }}
       -
         # Stessa immagine del Dockerfile (Play 1.5.3, JDK 11, python2). play autotest
         # esegue unit test, functional test e selenium su H2 in memoria. Esce con 1 se
         # trova test-result/result.failed, ma con 0 se non trova nessun risultato: per
-        # questo si controlla anche che esista result.passed.
+        # questo si controlla anche che esista result.passed. Anche play deps esce con 0
+        # quando non riesce a risolvere qualche dipendenza: si cerca il messaggio nel log.
         name: play autotest
         run: |
           mkdir -p ~/.ivy2
@@ -42,7 +44,9 @@ jobs:
             -v "$PWD:/app" -v "$HOME/.ivy2:/root/.ivy2" -w /app \
             -e HOST_IDS="$(id -u):$(id -g)" \
             criluc/play1:1.5.3-temurin-11-patched \
-            sh -c 'play deps --sync && play autotest && test -f test-result/result.passed;
+            sh -c 'play deps --sync > deps.log 2>&1; deps_status=$?; cat deps.log;
+                   test $deps_status -eq 0 && ! grep -q "still missing" deps.log &&
+                   play autotest && test -f test-result/result.passed;
                    status=$?; chown -R "$HOST_IDS" /app /root/.ivy2; exit $status'
       -
         name: Archivia i risultati dei test
@@ -50,5 +54,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-result
-          path: test-result/
+          path: |
+            test-result/
+            logs/
+            deps.log
           if-no-files-found: ignore
