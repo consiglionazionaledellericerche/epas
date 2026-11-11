@@ -23,6 +23,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import play.i18n.Messages;
+import play.mvc.Scope;
 import play.templates.BaseTemplate;
 import play.modules.gtengineplugin.TemplateLoader;
 import play.test.UnitTest;
@@ -132,8 +133,30 @@ public class LabelEscapeTest extends UnitTest {
   }
 
   @Test
+  public void flashTextIsEscaped() {
+    final Scope.Flash flash = new Scope.Flash();
+    flash.error("Eliminato controllo per %s", PAYLOAD);
+    final String html = renderFlash(flash);
+    assertTrue(html, html.contains("Eliminato controllo per " + ESCAPED_PAYLOAD));
+    assertFalse(html, html.contains(PAYLOAD));
+  }
+
+  @Test
+  public void flashMessageKeyIsTranslated() {
+    final Scope.Flash flash = new Scope.Flash();
+    flash.success("secure.logout");
+    assertTrue(renderFlash(flash).contains(Messages.get("secure.logout")));
+  }
+
+  @Test
   public void textWithPercentIsEscaped() {
     assertEquals("<p>100% &lt;b&gt;</p>", render("<p>${text.label()}</p>", "100% <b>"));
+  }
+
+  private String renderFlash(Scope.Flash flash) {
+    Map<String, Object> args = new HashMap<>();
+    args.put("flash", flash);
+    return TemplateLoader.load("LabelEscapeTestFlash.html", "#{pnotify /}").render(args);
   }
 
   /**
