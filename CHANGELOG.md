@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
+  - Un POST /login senza username o senza password non risponde più con un errore 500
+    (NullPointerException nel modulo secure di Play), ma come un normale login fallito.
   - Velocizzato l'inserimento delle assenze per i dipendenti con molte assenze negli anni,
     in particolare per i gruppi senza scadenza (es. codice 26) o con periodi lunghi (congedi
     parentali). Durante la simulazione dell'inserimento alcune query venivano ripetute per ogni
