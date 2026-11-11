@@ -37,6 +37,9 @@ jobs:
         # trova test-result/result.failed, ma con 0 se non trova nessun risultato: per
         # questo si controlla anche che esista result.passed. Anche play deps esce con 0
         # quando non riesce a risolvere qualche dipendenza: si cerca il messaggio nel log.
+        # Se la JVM termina con exit 0 prima di "Server is up and running", autotest resta
+        # in attesa all'infinito: timeout lo interrompe prima del timeout del job, così
+        # chown e l'archiviazione dei risultati vengono comunque eseguiti.
         name: play autotest
         run: |
           mkdir -p ~/.ivy2
@@ -46,7 +49,7 @@ jobs:
             criluc/play1:1.5.3-temurin-11-patched \
             sh -c 'play deps --sync > deps.log 2>&1; deps_status=$?; cat deps.log;
                    test $deps_status -eq 0 && ! grep -q "still missing" deps.log &&
-                   play autotest && test -f test-result/result.passed;
+                   timeout -k 30s 25m play autotest && test -f test-result/result.passed;
                    status=$?; chown -R "$HOST_IDS" /app /root/.ivy2; exit $status'
       -
         name: Archivia i risultati dei test
