@@ -13,9 +13,9 @@ configurazione.
 Requisiti
 ---------
 
-#. **La porta 9000 non deve essere raggiungibile dalla rete**, altrimenti il proxy può
-   essere aggirato. Nel *docker-compose.yml* la porta è pubblicata solo sull'interfaccia
-   locale:
+#. **La porta 9000 deve essere raggiungibile solo dai proxy autorizzati**, altrimenti
+   questi possono essere aggirati. Nel *docker-compose.yml* di esempio, per un proxy
+   installato sullo stesso server, la porta è pubblicata solo sull'interfaccia locale:
 
    .. code-block:: yaml
 
@@ -30,15 +30,17 @@ Requisiti
    un'altra macchina (es. durante la prima installazione) si può usare un tunnel ssh:
    ``ssh -L 9000:localhost:9000 utente@server`` e poi aprire http://localhost:9000/.
 
-#. **Il proxy deve impostare l'header X-Forwarded-For** con l'indirizzo reale del client,
-   scartando quello eventualmente inviato dal client. ePAS lo usa per i controlli sugli
-   indirizzi ip, ad esempio la whitelist della timbratura web.
+#. **Il proxy deve impostare l'header X-Forwarded-For** con l'indirizzo reale del client.
+   Il proxy esposto ai client deve scartare l'eventuale valore inviato dal client; se ci
+   sono più proxy, quelli interni devono accettare l'header solo da proxy a monte fidati.
+   ePAS lo usa per i controlli sugli indirizzi ip, ad esempio la whitelist della
+   timbratura web.
 
 #. **X_FORWARDED_SUPPORT** deve contenere l'indirizzo ip da cui il proxy raggiunge ePAS.
    Le richieste con l'header X-Forwarded-For che arrivano da altri indirizzi vengono
    rifiutate con un errore. Il valore di default ``all`` accetta l'header da chiunque ed è
-   sicuro solo se la porta 9000 non è raggiungibile e il proxy riscrive sempre l'header;
-   all'avvio ePAS lo segnala nel log con un WARN.
+   accettabile solo se nessun client può raggiungere direttamente ePAS e il proxy riscrive
+   sempre l'header; all'avvio ePAS lo segnala nel log con un WARN.
 
    L'indirizzo da indicare dipende da dove si trova il proxy:
 
@@ -72,7 +74,8 @@ Requisiti
    * **ePAS non in docker**: l'indirizzo del proxy, ad esempio ``127.0.0.1`` se è sullo
      stesso server.
 
-   Con più proxy in catena vanno elencati tutti, separati da virgola.
+   Con più proxy in catena vanno elencati, separati da virgola, gli indirizzi dei proxy
+   presenti nella catena ``X-Forwarded-For`` e quello del proxy che raggiunge ePAS.
 
 #. **PROTOCOL=https** se il proxy serve ePAS in https, così gli indirizzi generati
    dall'applicazione usano lo schema corretto.
@@ -158,8 +161,6 @@ porta pubblicata su ``127.0.0.1:9000``. File ``/etc/apache2/sites-available/epas
        RequestHeader unset X-Forwarded-Host early
        RequestHeader set   X-Forwarded-Proto "https"
 
-       # Non toglie l'header Server di Apache (per quello vedi ServerTokens)
-       Header unset Server
        Header always unset X-Powered-By
 
        # disablereuse=On: una connessione verso ePAS per ogni richiesta, senza riuso
@@ -167,9 +168,14 @@ porta pubblicata su ``127.0.0.1:9000``. File ``/etc/apache2/sites-available/epas
        ProxyPassReverse / http://127.0.0.1:9000/
    </VirtualHost>
 
-``disablereuse=On`` evita che più richieste di client diversi condividano la stessa
-connessione verso ePAS; con il traffico tipico di ePAS l'impatto sulle prestazioni è
-trascurabile.
+``disablereuse=On`` chiude la connessione verso ePAS dopo ogni richiesta. È una misura
+prudenziale nell'esempio; comporta una nuova connessione per ogni richiesta e il suo
+impatto va valutato in base al carico dell'installazione.
+
+Questo VirtualHost assume che Apache riceva direttamente le richieste dei client. Se
+c'è un altro proxy davanti, rimuovere sempre l'header ricevuto farebbe perdere l'IP
+originale: accettare ``X-Forwarded-For`` solo dal proxy a monte fidato e adattare la
+configurazione degli header alla catena effettiva.
 
 Opzionalmente si può mostrare una pagina dedicata quando ePAS non è raggiungibile, ad
 esempio durante un aggiornamento, copiando il file in ``/var/www`` e aggiungendo prima del
@@ -273,13 +279,16 @@ valori.
        }
    }
 
-Se davanti a nginx c'è un altro proxy, usare ``$proxy_add_x_forwarded_for`` e indicare
-in ``X_FORWARDED_SUPPORT`` gli indirizzi di tutti i proxy.
+Se davanti a nginx c'è un altro proxy, consentire l'accesso solo da quel proxy e
+configurare ``set_real_ip_from`` con il suo indirizzo e ``real_ip_header X-Forwarded-For``.
+Il proxy a monte deve scartare i valori ``X-Forwarded-For`` inviati dai client. Si può
+quindi mantenere ``$remote_addr`` nell'esempio: nginx inoltra a ePAS l'indirizzo del
+client riconosciuto tramite il proxy fidato, senza propagare valori non verificati.
 
 Traefik
 -------
 
-Con Traefik (v2 o v3) in un container nella stessa rete di ePAS la porta 9000 non va
+Con Traefik 3.7 in un container nella stessa rete di ePAS la porta 9000 non va
 pubblicata. Traefik scarta gli header X-Forwarded-* inviati dai client non fidati e li
 riscrive.
 
@@ -290,14 +299,14 @@ container di Traefik:
 
    services:
      traefik:
-       image: traefik:v3.1
+       image: traefik:v3.7
        command:
          - --providers.docker=true
          - --providers.docker.exposedbydefault=false
          - --entrypoints.web.address=:80
          - --entrypoints.web.http.redirections.entrypoint.to=websecure
          - --entrypoints.websecure.address=:443
-         # nessun riuso delle connessioni verso i backend
+         # chiude la connessione verso il backend dopo ogni richiesta
          - --serverstransport.maxidleconnsperhost=-1
        ports:
          - 80:80
@@ -332,8 +341,8 @@ riportata.
 Verifica della configurazione
 -----------------------------
 
-Da una macchina esterna alla rete del server, la porta 9000 non deve rispondere
-(timeout o connessione rifiutata):
+Da una macchina non autorizzata a raggiungere direttamente ePAS, la porta 9000 non deve
+rispondere (timeout o connessione rifiutata):
 
 .. code-block:: bash
 

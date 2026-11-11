@@ -19,7 +19,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     # In produzione ePAS va servito tramite un reverse proxy https (Apache, nginx, Traefik...)
-    # e la porta 9000 non deve essere raggiungibile dalla rete. Con "127.0.0.1:9000:9000"
+    # e la porta 9000 deve essere raggiungibile solo dal proxy. Con "127.0.0.1:9000:9000"
     # la porta è raggiungibile solo dall'host (proxy installato sullo stesso server o tunnel ssh).
     # Se il proxy è un container nella stessa rete docker (es. Traefik) la sezione ports
     # si può togliere. Evitare "9000:9000", che pubblica la porta su tutte le interfacce:
