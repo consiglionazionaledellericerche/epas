@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+  - Workflow GitHub Actions che esegue play autotest su ogni pull request e su ogni push su
+    main, con la stessa immagine Docker di Play usata per il build.
+
+### Fixed
+  - Un POST /login senza username o senza password non risponde più con un errore 500
+    (NullPointerException nel modulo secure di Play), ma come un normale login fallito.
+  - Velocizzato l'inserimento delle assenze per i dipendenti con molte assenze negli anni,
+    in particolare per i gruppi senza scadenza (es. codice 26) o con periodi lunghi (congedi
+    parentali). Durante la simulazione dell'inserimento alcune query venivano ripetute per ogni
+    assenza del periodo: l'inserimento del codice 26 su un mese passa da oltre 10 minuti a
+    pochi secondi.
+
 ### Security
   - Nei template label() restituisce come HTML solo il testo dei messaggi dell'applicazione:
     i testi che non sono chiavi dei messaggi sono codificati, come gli argomenti inseriti nei
@@ -75,6 +88,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     fino a 20 minuti: ora legge da Attestati solo il flag di validazione.
     
 ### Changed
+  - Nel docker-compose.yml di esempio la porta 9000 è pubblicata solo su 127.0.0.1: resta
+    raggiungibile dal reverse proxy installato sullo stesso server ma non dalla rete. Chi si
+    collega direttamente alla 9000 da un'altra macchina deve passare dal proxy o da un tunnel ssh.
   - L'application.secret è obbligatorio in produzione: l'applicazione non si avvia se non è
     impostato, se è più corto di 32 caratteri o se è uno dei valori pubblicati nel repository.
     Nel docker l'avvio si interrompe se manca APPLICATION_SECRET, invece di usare in silenzio il
@@ -101,6 +117,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Il codice 39LA non è più inseribile dal gruppo Altri codici, ma solo dal gruppo G_39LA.
   - Nella scheda "Lavoro agile per dipendenti fragili" il codice 39LABP è proposto prima del 39LA.
 ### Added
+  - Documentazione della configurazione del reverse proxy (docs/sysadmin/reverseProxy.rst):
+    porta 9000 non esposta, X_FORWARDED_SUPPORT e PROTOCOL, esempi per Apache con una sola
+    istanza e con bilanciamento, nginx e Traefik, verifica della configurazione.
   - Riattivato il codice 103BP "Telelavoro con maturazione buono pasto", valido dal 1° luglio
     2026 come da nota del DG sul buono pasto in telelavoro domiciliare. Il codice è nel gruppo
     Telelavoro accanto al 103, è inviato ad Attestati come 103 e fa maturare il buono pasto.

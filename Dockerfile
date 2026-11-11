@@ -1,4 +1,4 @@
-FROM criluc/play1:1.5.3-temurin-11-patched
+FROM criluc/play1:1.5.3-temurin-11-patched@sha256:d5484cc61982c71c0f9d0fa4b1c81cd4649a88e08d87efbc568f7a6c5642c92f
 
 ENV user=epas
 ENV APP=ePas

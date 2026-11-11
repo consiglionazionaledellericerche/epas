@@ -1,0 +1,8 @@
+version: 2
+updates:
+  # Aggiorna il digest dell'immagine base nel Dockerfile quando il tag viene
+  # ripubblicato; la PR generata viene verificata dal workflow Test.
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
