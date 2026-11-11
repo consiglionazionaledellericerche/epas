@@ -18,6 +18,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     assenza del periodo: l'inserimento del codice 26 su un mese passa da oltre 10 minuti a
     pochi secondi.
 
+### Security
+  - Nei template label() restituisce come HTML solo il testo dei messaggi dell'applicazione:
+    i testi che non sono chiavi dei messaggi sono codificati, come gli argomenti inseriti nei
+    messaggi (tranne numeri, booleani e date).
+  - I tag che ricevono testi dai chiamanti (titolo di modalAsync e tabItem, label di b.cancel,
+    b.li, secure.li, f.simpleView, f.searchInput e ff.fedit, testo di b.submit e popover di
+    bb.b_link) li mostrano con label() invece che con &{}, che non applica l'escape: ad esempio
+    il nome della persona nel titolo delle finestre modali era inserito come HTML.
+  - Le notifiche PNotify mostrano titolo e testo come testo e non come HTML, e i messaggi flash
+    sono codificati nella pagina.
+
 ## [2.39.2] - 2026-11-10
 ### Added
   - Nuova utility in Amministrazione > Utility per ricalcolare dal 2 luglio 2026 il buono pasto
