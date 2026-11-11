@@ -28,6 +28,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     il nome della persona nel titolo delle finestre modali era inserito come HTML.
   - Le notifiche PNotify mostrano titolo e testo come testo e non come HTML, e i messaggi flash
     sono codificati nella pagina.
+  - Ridotte le vulnerabilità note nelle dipendenze (issue #628): tika-langdetect sostituita
+    da tika-core 3.3.3 (eliminate cxf e spring-core), escluse le dipendenze transitive non usate
+    di gelfj (amqp-client), dbunit (commons-collections 3.2.1, poi-ooxml, xmlbeans) e
+    usertype.core (spring-core). Aggiornate jackson 2.21.8, micrometer 1.15.12, guava 33.7.2,
+    commons-beanutils 1.11.0, commons-email 1.6.0 e gson 2.13.2. Dall'immagine docker sono
+    rimossi i jar sostituiti di play, h2, c3p0 (non usato: il pool è HikariCP), ehcache 2.10.6
+    (contiene versioni vulnerabili di jackson e jetty; la cache di play usa ehcache-core
+    2.6.11) e il log4j 1.2.16 del modulo pdf.
 
 ## [2.39.2] - 2026-11-10
 ### Added
