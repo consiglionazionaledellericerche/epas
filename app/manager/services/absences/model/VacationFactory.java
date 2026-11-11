@@ -20,7 +20,6 @@ package manager.services.absences.model;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
-import dao.AbsenceTypeDao;
 import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
@@ -56,7 +55,6 @@ public class VacationFactory {
   
   private final ConfigurationManager configurationManager;
   private final AbsenceComponentDao absenceComponentDao;
-  private final AbsenceTypeDao absenceTypeDao;
   private final PersonDayManager personDayManager;
 
   /**
@@ -64,11 +62,9 @@ public class VacationFactory {
    */
   @Inject
   public VacationFactory(ConfigurationManager configurationManager, 
-      AbsenceComponentDao absenceComponentDao, AbsenceTypeDao absenceTypeDao,
-      PersonDayManager personDayManager) {
+      AbsenceComponentDao absenceComponentDao, PersonDayManager personDayManager) {
     this.configurationManager = configurationManager;
     this.absenceComponentDao = absenceComponentDao;
-    this.absenceTypeDao = absenceTypeDao;
     this.personDayManager = personDayManager;
   }
   
@@ -435,7 +431,7 @@ public class VacationFactory {
         
         // creo il period aggiuntivo con amount 0 (default)
         AbsencePeriod splitted = new AbsencePeriod(contract.getPerson(), group, 
-            personDayManager, absenceTypeDao);
+            personDayManager);
         splitted.from = secondYearStart;
         splitted.to = period.to;
 
@@ -603,7 +599,7 @@ public class VacationFactory {
     }
     
     AbsencePeriod absencePeriod = new AbsencePeriod(person, group, 
-        personDayManager, absenceTypeDao);
+        personDayManager);
     absencePeriod.takeAmountType = AmountType.units;
     absencePeriod.takableCountBehaviour = TakeCountBehaviour.sumAllPeriod;
     absencePeriod.takenCountBehaviour = TakeCountBehaviour.sumAllPeriod;
