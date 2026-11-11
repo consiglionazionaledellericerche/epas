@@ -28,13 +28,15 @@ RUN touch conf/dev.conf && \
     rm -rf /root/.ivy2 && \
     (cd /opt/play/play-${PLAY_VERSION}/modules && rm -rf testrunner docviewer grizzly crud) && \
     # librerie di play sostituite da versioni aggiornate in lib/ (conf/dependencies.yml)
-    # e librerie non usate a runtime: driver mysql e h2 (solo test e console /@db
-    # in dev). ivy invece resta: play la usa all'avvio per caricare i moduli
+    # e librerie non usate a runtime: driver mysql, h2 (solo test e console /@db
+    # in dev) e c3p0 (il pool di connessioni di play e' HikariCP, db.factory non e'
+    # impostato). ivy invece resta: play la usa all'avvio per caricare i moduli
     (cd /opt/play/play-${PLAY_VERSION}/framework/lib && \
       rm -f log4j-1.2.17.jar commons-fileupload-1.3.2.jar xstream-1.4.9.jar snakeyaml-1.17.jar \
         dom4j-1.6.1.jar commons-io-2.5.jar commons-codec-1.10.jar postgresql-42.2.4.jar \
         commons-beanutils-1.9.2.jar commons-email-1.4.jar gson-2.8.5.jar \
-        c3p0-0.9.5.2.jar mchange-commons-java-0.2.12.jar \
+        c3p0-0.9.5.2.jar c3p0-oracle-thin-extras-0.9.5.jar mchange-commons-java-0.2.12.jar \
+        hibernate-c3p0-5.4.1.Final.jar \
         mysql-connector-java-5.1.46.jar h2-1.4.196.jar) && \
     # log4j del modulo pdf: c'e' gia' reload4j in lib/
     rm -f modules/pdf-0.9/lib/log4j-1.2.16.jar && \

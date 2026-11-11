@@ -32,8 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     da tika-core 3.3.3 (eliminate cxf e spring-core), escluse le dipendenze transitive non usate
     di gelfj (amqp-client), dbunit (commons-collections 3.2.1, poi-ooxml, xmlbeans) e
     usertype.core (spring-core). Aggiornate jackson 2.21.8, micrometer 1.15.12, guava 33.7.2,
-    commons-beanutils 1.11.0, commons-email 1.6.0, gson 2.13.2 e c3p0 0.9.5.5. Dall'immagine
-    docker sono rimossi i jar sostituiti di play, h2 e il log4j 1.2.16 del modulo pdf.
+    commons-beanutils 1.11.0, commons-email 1.6.0 e gson 2.13.2. Dall'immagine docker sono
+    rimossi i jar sostituiti di play, h2, c3p0 (non usato: il pool è HikariCP) e il log4j
+    1.2.16 del modulo pdf.
 
 ## [2.39.2] - 2026-11-10
 ### Added

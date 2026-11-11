@@ -145,11 +145,6 @@ require:
     - com.google.code.gson -> gson 2.13.2:
        force: true
        transitive: false
-    - com.mchange -> c3p0 0.9.5.5:
-       force: true
-       transitive: false
-    - com.mchange -> mchange-commons-java 0.2.20:
-       force: true
     # richieste da commons-compress e commons-fileupload
     - commons-io -> commons-io 2.20.0:
        force: true
