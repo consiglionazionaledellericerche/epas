@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import play.i18n.Messages;
 import play.templates.BaseTemplate;
-import play.templates.TemplateLoader;
+import play.modules.gtengineplugin.TemplateLoader;
 import play.test.UnitTest;
 
 /**
@@ -75,12 +75,70 @@ public class LabelEscapeTest extends UnitTest {
   }
 
   @Test
+  public void nonTextArgumentsOfAMessageAreEscaped() {
+    final Object person = new Object() {
+      @Override
+      public String toString() {
+        return PAYLOAD;
+      }
+    };
+    assertEquals("<b>Ciao</b> " + ESCAPED_PAYLOAD + ", hai 3 richieste",
+        ((BaseTemplate.RawData) TemplateExtensions.label(ARGS_KEY, person, 3)).data);
+  }
+
+  @Test
+  public void argumentsCannotReferenceOtherMessages() {
+    final Object reference = new Object() {
+      @Override
+      public String toString() {
+        return "&{" + HTML_KEY + "}";
+      }
+    };
+    for (Object arg : new Object[] {reference, reference.toString()}) {
+      final String data = ((BaseTemplate.RawData) TemplateExtensions.label(ARGS_KEY, arg, 3)).data;
+      assertEquals("<b>Ciao</b> &amp;{" + HTML_KEY + "}, hai 3 richieste", data);
+    }
+  }
+
+  @Test
+  public void gstringLabelIsTranslated() {
+    assertEquals("<p><b>Messaggio</b></p>",
+        render("<p>${\"${text}\".label()}</p>", HTML_KEY));
+  }
+
+  @Test
+  public void modalTitleIsEscaped() {
+    assertTrue(render("#{modalAsync title:text}#{/modalAsync}", PAYLOAD)
+        .contains("<h3>" + ESCAPED_PAYLOAD + "</h3>"));
+  }
+
+  @Test
+  public void modalTitleKeyIsTranslated() {
+    assertTrue(render("#{modalAsync title:text}#{/modalAsync}", HTML_KEY)
+        .contains("<h3><b>Messaggio</b></h3>"));
+  }
+
+  @Test
+  public void modalWithoutTitleIsRendered() {
+    assertTrue(render("#{modalAsync}#{/modalAsync}", null).contains("<h3></h3>"));
+  }
+
+  @Test
+  public void submitAndLinkLabelsAreEscaped() {
+    assertTrue(render("#{b.submit text/}", PAYLOAD).contains(ESCAPED_PAYLOAD));
+    assertFalse(render("#{b.submit text/}", PAYLOAD).contains(PAYLOAD));
+    assertTrue(render("#{b.cancel '#', label:text/}", PAYLOAD).contains(ESCAPED_PAYLOAD));
+    assertTrue(render("#{tabItem id:'t', title:text/}", PAYLOAD).contains(ESCAPED_PAYLOAD));
+  }
+
+  @Test
   public void textWithPercentIsEscaped() {
     assertEquals("<p>100% &lt;b&gt;</p>", render("<p>${text.label()}</p>", "100% <b>"));
   }
 
   /**
-   * Il nome .html attiva la codifica automatica di ${} come nelle viste.
+   * Usa fastergt, il motore dei template delle viste, per poter usare anche i tag. Il nome
+   * .html attiva la codifica automatica di ${} come nelle viste.
    */
   private String render(String template, String text) {
     Map<String, Object> args = new HashMap<>();

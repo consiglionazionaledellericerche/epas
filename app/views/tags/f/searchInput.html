@@ -3,7 +3,7 @@
   label = _label == null ? messages.get(field.name) : _label  
 }%
 <div class="col-sm-4">
-  <label for="${field.id}" class="control-label">#{if _label}&{_label}#{/if} #{else}&{field.name}#{/else}</label>
+  <label for="${field.id}" class="control-label">#{if _label}${_label.label()}#{/if} #{else}&{field.name}#{/else}</label>
   <div class="input-group">
     <input type="text" id="${field.id}" name="${field.name}" class="form-control" placeholder="&{'search'}"
            title="${label}" aria-label="${label}">
