@@ -20,7 +20,6 @@ package manager.services.absences.model;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import dao.AbsenceTypeDao;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Collections;
@@ -106,18 +105,16 @@ public class AbsencePeriod {
   // Se il period è stato splittato perchè a cavallo del primo anno contratto
   public AbsencePeriod splittedWith;
   
-  public AbsenceTypeDao absenceTypeDao;
   public PersonDayManager personDayManager;  
 
   
   /**
    * Costruttore.
    */
-  AbsencePeriod(Person person, GroupAbsenceType groupAbsenceType, PersonDayManager personDayManager,
-      AbsenceTypeDao absenceTypeDao) {
+  AbsencePeriod(Person person, GroupAbsenceType groupAbsenceType,
+      PersonDayManager personDayManager) {
     this.person = person;
     this.groupAbsenceType = groupAbsenceType;
-    this.absenceTypeDao = absenceTypeDao;
     this.personDayManager = personDayManager;
   }
 
