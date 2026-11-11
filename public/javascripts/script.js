@@ -232,6 +232,10 @@ $(function($) {
     $form.attr('action', url).submit();
   });
   PNotify.prototype.options.styling = "fontawesome";
+  // Titolo e testo delle notifiche sono mostrati come testo e non interpretati come HTML:
+  // contengono messaggi dei flash e delle risposte del server con dati inseriti dagli utenti.
+  PNotify.prototype.options.title_escape = true;
+  PNotify.prototype.options.text_escape = true;
   /**
    * Author: Marco
    */

@@ -17,7 +17,7 @@
 	#{/if}
 	<div class="form-group">
 	    <label class="#{if _biglabel}col-sm-5#{/if}#{else}col-sm-3#{/else} control-label">
-	    #{if _label}&{_label} #{/if}#{else}&{field.name}#{/else}
+	    #{if _label}${_label.label()} #{/if}#{else}&{field.name}#{/else}
 	    </label>
 	
 	    <div class="#{if _biglabel}col-sm-6#{/if}#{else}col-sm-6#{/else}">

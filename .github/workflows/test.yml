@@ -1,0 +1,66 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+# Su una PR una nuova push annulla l'esecuzione precedente ancora in corso; su main
+# no, così ogni commit mergiato ha il proprio esito.
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  autotest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        # Le dipendenze di conf/dependencies.yml (e i jar locali in jars/) sono gestite
+        # da ivy: la cache evita di riscaricarle a ogni esecuzione. Niente restore-keys,
+        # altrimenti la cache accumulerebbe all'infinito le versioni vecchie.
+        name: Cache delle dipendenze
+        uses: actions/cache@v4
+        with:
+          path: ~/.ivy2
+          key: ivy-${{ hashFiles('conf/dependencies.yml', 'jars/**') }}
+      -
+        # Stessa immagine del Dockerfile (Play 1.5.3, JDK 11, python2), letta dalla sua
+        # riga FROM: il digest è scritto in un solo posto. play autotest
+        # esegue unit test, functional test e selenium su H2 in memoria. Esce con 1 se
+        # trova test-result/result.failed, ma con 0 se non trova nessun risultato: per
+        # questo si controlla anche che esista result.passed. Anche play deps esce con 0
+        # quando non riesce a risolvere qualche dipendenza: si cerca il messaggio nel log.
+        # Se la JVM termina con exit 0 prima di "Server is up and running", autotest resta
+        # in attesa all'infinito: timeout lo interrompe prima del timeout del job, così
+        # chown e l'archiviazione dei risultati vengono comunque eseguiti.
+        name: play autotest
+        run: |
+          mkdir -p ~/.ivy2
+          IMAGE=$(sed -n 's/^FROM //p' Dockerfile | head -1)
+          docker run --rm -u root \
+            -v "$PWD:/app" -v "$HOME/.ivy2:/root/.ivy2" -w /app \
+            -e HOST_IDS="$(id -u):$(id -g)" \
+            "$IMAGE" \
+            sh -c 'play deps --sync > deps.log 2>&1; deps_status=$?; cat deps.log;
+                   test $deps_status -eq 0 && ! grep -q "still missing" deps.log &&
+                   timeout -k 30s 25m play autotest && test -f test-result/result.passed;
+                   status=$?; chown -R "$HOST_IDS" /app /root/.ivy2; exit $status'
+      -
+        name: Archivia i risultati dei test
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-result
+          path: |
+            test-result/
+            logs/
+            deps.log
+          if-no-files-found: ignore

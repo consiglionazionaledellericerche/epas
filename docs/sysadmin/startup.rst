@@ -16,6 +16,11 @@ esegui il comando successivo per un setup di esempio.
 
 Collegarsi a http://localhost:9000/ username: *admin* password *cambialaosarailicenziato* (da cambiare il prima possibile). 
 
+La porta 9000 è pubblicata solo sull'interfaccia locale del server: da un'altra macchina
+ci si può collegare tramite un tunnel ssh (``ssh -L 9000:localhost:9000 utente@server``).
+In produzione ePAS va servito tramite un reverse proxy https, come descritto in
+:doc:`reverseProxy`.
+
 Avviare ePAS in alta affidabilità
 ------------------------------------------------------------
 
@@ -23,7 +28,8 @@ ePAS è un'applicazione in cui lo stato risiede principalmente nel database, in 
 la sessione http è mantenuta all'interno del client (tramite un cookie).
 Questa caratteristica permette di avere più instanze di ePAS e di poterle bilanciare 
 tramite un proxy http (tipo Traefik, HAProxy, Ngnix, Apache, etc), senza bisogno di usare 
-meccanismo tipo sticky bit.
+meccanismo tipo sticky bit. Un esempio di configurazione di Apache con bilanciamento è
+riportato in :doc:`reverseProxy`.
 
 Ci sono però tre aspetti da tenere da considerazione:
 
