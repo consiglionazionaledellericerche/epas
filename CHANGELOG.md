@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+  - Velocizzato l'inserimento delle assenze per i dipendenti con molte assenze negli anni,
+    in particolare per i gruppi senza scadenza (es. codice 26) o con periodi lunghi (congedi
+    parentali). Durante la simulazione dell'inserimento alcune query venivano ripetute per ogni
+    assenza del periodo: l'inserimento del codice 26 su un mese passa da oltre 10 minuti a
+    pochi secondi.
+
 ## [2.39.2] - 2026-11-10
 ### Added
   - Nuova utility in Amministrazione > Utility per ricalcolare dal 2 luglio 2026 il buono pasto
