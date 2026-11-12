@@ -74,8 +74,19 @@ Requisiti
    * **ePAS non in docker**: l'indirizzo del proxy, ad esempio ``127.0.0.1`` se è sullo
      stesso server.
 
-   Con più proxy in catena vanno elencati, separati da virgola, gli indirizzi dei proxy
-   presenti nella catena ``X-Forwarded-For`` e quello del proxy che raggiunge ePAS.
+   Con più proxy vanno elencati tutti gli indirizzi, separati da virgola e senza spazi:
+
+   * **proxy in catena** (es. un bilanciatore davanti ad Apache): gli indirizzi dei proxy
+     presenti nella catena ``X-Forwarded-For`` e quello del proxy che raggiunge ePAS;
+   * **proxy in parallelo** (es. due Apache che servono lo stesso ePAS): gli indirizzi di
+     tutti i proxy che possono raggiungere ePAS.
+
+   .. code-block:: yaml
+
+      - X_FORWARDED_SUPPORT=10.0.0.11,10.0.0.12
+
+   Vanno indicati indirizzi ip esatti: subnet (es. ``10.0.0.0/24``) e nomi host non sono
+   riconosciuti e le richieste di quei proxy vengono rifiutate. L'ordine non conta.
 
 #. **PROTOCOL=https** se il proxy serve ePAS in https, così gli indirizzi generati
    dall'applicazione usano lo schema corretto.
@@ -162,6 +173,8 @@ porta pubblicata su ``127.0.0.1:9000``. File ``/etc/apache2/sites-available/epas
        RequestHeader set   X-Forwarded-Proto "https"
 
        Header always unset X-Powered-By
+       # Non mostra l'header Server di ePAS (Play e versione): resta quello di Apache
+       Header unset Server
 
        # disablereuse=On: una connessione verso ePAS per ogni richiesta, senza riuso
        ProxyPass        / http://127.0.0.1:9000/ disablereuse=On
@@ -229,7 +242,8 @@ Per le istanze su altri server:
   sull'interfaccia della rete privata (es. ``10.0.0.12:9000:9000``) oppure filtrarla nella
   catena ``DOCKER-USER`` di iptables;
 * ``X_FORWARDED_SUPPORT`` deve contenere l'indirizzo con cui Apache si presenta a quel
-  server.
+  server. Se ci sono più Apache che bilanciano sulle stesse istanze, su ogni istanza vanno
+  indicati gli indirizzi di tutti, separati da virgola (es. ``10.0.0.11,10.0.0.12``).
 
 Se si usa la pagina ``balancer-manager`` per abilitare o disabilitare i membri, va esclusa
 dal proxy (prima del ``ProxyPass /``) e limitata agli indirizzi degli amministratori:
@@ -325,6 +339,9 @@ container di Traefik:
          - traefik.http.routers.epas.entrypoints=websecure
          - traefik.http.routers.epas.tls=true
          - traefik.http.services.epas.loadbalancer.server.port=9000
+         # Traefik inoltra l'header Server di ePAS (Play e versione): un valore vuoto lo rimuove
+         - traefik.http.routers.epas.middlewares=epas-headers
+         - traefik.http.middlewares.epas-headers.headers.customresponseheaders.Server=
        environment:
          - PROTOCOL=https
          - X_FORWARDED_SUPPORT=172.30.0.10
@@ -355,6 +372,14 @@ Le richieste con header non validi devono essere rifiutate dal proxy con
 
    printf 'GET / HTTP/1.1\r\nHost: epas.example.it\r\nFoo : bar\r\nConnection: close\r\n\r\n' \
      | openssl s_client -quiet -connect epas.example.it:443 -servername epas.example.it 2>/dev/null | head -1
+
+Le risposte non devono riportare l'header ``Server`` di ePAS (``Play! Framework`` e la
+versione); nginx lo rimuove di default, con Apache e Traefik va configurato come negli
+esempi:
+
+.. code-block:: bash
+
+   curl -sI https://epas.example.it/login | grep -i '^server'
 
 Infine, nel log di ePAS all'avvio non deve comparire il WARN su ``XForwardedSupport=all``
 e, se si usa la timbratura web con la whitelist degli indirizzi ip, le timbrature devono

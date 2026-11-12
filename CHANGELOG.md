@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - Workflow GitHub Actions che esegue play autotest su ogni pull request e su ogni push su
     main, con la stessa immagine Docker di Play usata per il build.
+  - Documentazione del reverse proxy: formato di X_FORWARDED_SUPPORT con più proxy (in catena
+    o in parallelo, solo ip esatti separati da virgola) e rimozione dell'header Server di ePAS
+    con Apache e Traefik.
 
 ### Fixed
   - Un POST /login senza username o senza password non risponde più con un errore 500

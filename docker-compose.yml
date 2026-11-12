@@ -55,6 +55,9 @@ services:
                                                 # Va indicato l'ip con cui il proxy arriva al container: con il proxy sull'host
                                                 # è il gateway della rete docker (non 127.0.0.1), vedi la sezione networks in
                                                 # fondo al file. Le richieste con X-Forwarded-For da altri ip vengono rifiutate.
+                                                # Con più proxy (in catena o in parallelo) elencarli tutti, separati da virgola
+                                                # e senza spazi, es. X_FORWARDED_SUPPORT=10.0.0.11,10.0.0.12. Solo ip esatti:
+                                                # subnet (10.0.0.0/24) e nomi host non sono riconosciuti.
       #- LOGIN_MAX_FAILURES=                    # default: 10 -- tentativi di login ammessi per username e indirizzo
       #- LOGIN_LOCK_MINUTES=                    # default: 15 -- durata in minuti della finestra dei tentativi
       - FLOWS_ACTIVE=true
