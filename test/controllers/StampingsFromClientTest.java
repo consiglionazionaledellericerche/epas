@@ -20,7 +20,9 @@ package controllers;
 import com.google.common.base.Strings;
 import common.injection.StaticInject;
 import db.h2support.H2Examples;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import javax.inject.Inject;
 import models.Badge;
@@ -30,6 +32,7 @@ import models.Person;
 import models.Role;
 import models.Stamping;
 import models.User;
+import models.absences.Absence;
 import models.UsersRolesOffices;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -37,11 +40,12 @@ import org.junit.Test;
 import play.db.jpa.JPA;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import play.mvc.results.NotFound;
 import play.test.FunctionalTest;
 
 /**
  * Test funzionali sulle timbrature inviate dai client (lettori badge e REST v3): date troppo
- * nel passato o nel futuro rifiutate, testo normalizzato.
+ * nel passato o nel futuro rifiutate, testo normalizzato, niente assenze dai lettori.
  */
 @StaticInject
 public class StampingsFromClientTest extends FunctionalTest {
@@ -167,6 +171,30 @@ public class StampingsFromClientTest extends FunctionalTest {
     stamping = stampings(fixture.person).get(0);
     assertFalse(stamping.isMarkedByAdmin());
     assertFalse(stamping.isMarkedByEmployee());
+  }
+
+  /**
+   * I vecchi metodi per l'inserimento delle assenze dai client non esistono più: le assenze
+   * si inseriscono con rest.Absences.insertAbsence, riservato ai client REST.
+   */
+  @Test
+  public void badgeReaderCannotInsertAbsences() {
+    Fixture fixture = fixture();
+    Map<String, String> params = new HashMap<>();
+    params.put("body.person.id", fixture.person.id.toString());
+    params.put("body.date", LocalDate.now().minusDays(1).toString());
+    params.put("body.code", "31");
+    for (String action : new String[] {"absence", "absencenotrecompute"}) {
+      try {
+        Response response = POST(reader(fixture), "/stampingsfromclient/" + action, params,
+            new HashMap<>());
+        assertStatus(404, response);
+      } catch (NotFound expected) {
+        // in FunctionalTest l'azione inesistente arriva come eccezione invece che come 404
+      }
+    }
+    JPA.em().clear();
+    assertEquals(0L, Absence.count("personDay.person.id = ?1", fixture.person.id));
   }
 
   private static String withAdminFlag(String json) {

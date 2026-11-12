@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Security
+  - Rimossi i metodi deprecati /stampingsfromclient/absence e
+    /stampingsfromclient/absencenotrecompute, non più usati dai client ufficiali: le assenze
+    via REST si inseriscono con /rest/absences/insertAbsence.
   - Le timbrature inviate dai lettori badge (/stampings/create, /stampingsfromclient/* e REST
     v3) non possono più risultare inserite da un amministratore o dal dipendente: il flag admin
     e i campi markedByAdmin e markedByEmployee inviati dal client sono ignorati (con un WARN
