@@ -30,6 +30,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     nel log se valgono true), e una timbratura aggiornata via REST da un lettore non risulta più
     inserita da un amministratore o dal dipendente. I client ufficiali (epas-client,
     epas-client-sql) non impostano questi flag.
+  - I cookie di Play (PLAY_SESSION, PLAY_FLASH, PLAY_ERRORS) hanno l'attributo HttpOnly e non
+    sono più leggibili da JavaScript. Nel Docker con PROTOCOL=https hanno anche l'attributo
+    Secure e il browser li invia solo in https: se ePAS deve essere raggiunto anche in http
+    (es. direttamente sulla porta 9000) impostare SESSION_SECURE=false, altrimenti il login in
+    http non funziona.
 
 ## [2.40.0] - 2026-11-12
 ### Added

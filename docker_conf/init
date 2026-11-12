@@ -142,6 +142,22 @@ fi
 
 sed 's#{{PROTOCOL}}#'"${PROTOCOL}"'#' -i ${APP_HOME}/conf/prod.conf
 
+### Attributo Secure sui cookie di Play: con true il browser li invia solo in https
+if [ "${PROTOCOL}" = "https" ]; then
+  SESSION_SECURE=${SESSION_SECURE:-true}
+else
+  SESSION_SECURE=${SESSION_SECURE:-false}
+fi
+case "${SESSION_SECURE}" in
+  "true"|"false") echo "Cookie di sessione con Secure=${SESSION_SECURE}" ;;
+  *)
+    echo "ERROR: "
+    echo "  SESSION_SECURE accetta solo i valori \"true\" o \"false\"."
+    exit 1
+    ;;
+esac
+sed 's#{{SESSION_SECURE}}#'"${SESSION_SECURE}"'#' -i ${APP_HOME}/conf/prod.conf
+
 sed 's#{{EVOLUTIONS_ENABLED}}#'"${EVOLUTIONS_ENABLED}"'#' -i ${APP_HOME}/conf/prod.conf
 
 ### Creazione e configurazione dell'application secret
