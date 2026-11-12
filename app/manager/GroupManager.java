@@ -18,12 +18,15 @@
 package manager;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import dao.GroupDao;
 import dao.RoleDao;
 import dao.UsersRolesOfficesDao;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +41,6 @@ import models.User;
 import models.UsersRolesOffices;
 import models.flows.Affiliation;
 import models.flows.Group;
-import org.assertj.core.util.Lists;
 
 
 /**
@@ -50,6 +52,8 @@ import org.assertj.core.util.Lists;
  */
 @Slf4j
 public class GroupManager {
+
+  private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
   private final RoleDao roleDao;
   private final UsersRolesOfficesDao uroDao;
@@ -109,8 +113,7 @@ public class GroupManager {
       return true;
     }
     Optional<UsersRolesOffices> uro = 
-        uroDao.getUsersRolesOffices(
-            group.getManager().getUser(), role, group.getManager().getOffice());
+        uroDao.getUsersRolesOffices(group.getManager().getUser(), role, group.getOffice());
     if (uro.isPresent()) {
       uro.get().delete();
       log.debug("Eliminato ruolo {} per l'utente {}", 
@@ -121,36 +124,182 @@ public class GroupManager {
   }
 
   /**
-   * Inserisce ed elimina le affiliazioni ad un gruppo con data 
-   * corrente in funzione della lista delle persone passate.
+   * Inserisce e termina le affiliazioni ad un gruppo con data corrente in funzione della lista
+   * delle persone passate. Alle nuove affiliazioni viene assegnata la percentuale ancora libera
+   * della persona (100% meno le afferenze già attive): chi ha già il 100% non viene inserito.
+   *
+   * @return le segnalazioni sulle persone non inserite.
    */
-  public void updatePeople(Group group, Set<Person> people) {
+  public List<String> updatePeople(Group group, Set<Person> people) {
     log.info("current people = {}, new people = {}", group.getPeople(), people);
+    final List<String> messages = Lists.newArrayList();
     if (people == null) {
       people = Sets.newHashSet();
     }
+    final LocalDate today = LocalDate.now();
     val toDisable = Sets.difference(Sets.newHashSet(group.getPeople()), people);
     log.info("Person toDisable = {}", toDisable);
     val currentAffiliationsToDisable = 
         group.getAffiliations().stream()
-        .filter(a -> !a.isActive() && toDisable.contains(a.getPerson()))
+        .filter(a -> a.contains(today) && toDisable.contains(a.getPerson()))
         .collect(Collectors.toSet());
-    currentAffiliationsToDisable.stream().forEach(a ->  {      
-      a.setEndDate(LocalDate.now());
-      a.save();
-      log.info("Disabilita associazione di {} al gruppo {}", 
-          a.getPerson().getFullname(), a.getGroup().getName());
-    });
+    currentAffiliationsToDisable.forEach(a -> endAffiliation(a, today));
     val toInsert = Sets.difference(people, Sets.newHashSet(group.getPeople()));
     toInsert.forEach(person -> {
+      final BigDecimal free = freePercentage(person, today);
+      if (free.signum() <= 0) {
+        messages.add(String.format("%s non è stato inserito nel gruppo %s: le sue afferenze "
+            + "ai gruppi raggiungono già il 100%%", person.getFullname(), group.getName()));
+        return;
+      }
       val affiliation = new Affiliation();
       affiliation.setPerson(person);
       affiliation.setGroup(group);
-      affiliation.setBeginDate(LocalDate.now());
+      affiliation.setBeginDate(today);
+      affiliation.setPercentage(free);
       affiliation.save();
-      log.info("Inserita nuova associazione tra {} al gruppo {}", 
-          person.getFullname(), group.getName());
+      log.info("Inserita nuova associazione tra {} al gruppo {} al {}%", 
+          person.getFullname(), group.getName(), free);
     });
+    return messages;
+  }
+
+  /**
+   * La percentuale di afferenza ancora libera della persona alla data.
+   */
+  private BigDecimal freePercentage(Person person, LocalDate date) {
+    return person.getAffiliations().stream()
+        .filter(a -> a.isActiveAt(date))
+        .map(Affiliation::getEffectivePercentage)
+        .reduce(Affiliation.FULL_PERCENTAGE, BigDecimal::subtract);
+  }
+
+  /**
+   * Termina l'affiliazione il giorno precedente la data indicata; se l'affiliazione inizia
+   * dalla data indicata in poi viene eliminata. Non fa nulla se è già terminata prima.
+   *
+   * @return la descrizione dell'operazione effettuata, vuoto se non è stato fatto nulla.
+   */
+  public java.util.Optional<String> endAffiliation(Affiliation affiliation, LocalDate date) {
+    final String group = affiliation.getGroup().getName();
+    final String person = affiliation.getPerson().getFullname();
+    if (!affiliation.getBeginDate().isBefore(date)) {
+      affiliation.getPerson().getAffiliations().remove(affiliation);
+      affiliation.getGroup().getAffiliations().remove(affiliation);
+      affiliation.delete();
+      log.info("Eliminata l'appartenenza di {} al gruppo {}", person, group);
+      return java.util.Optional.of(String.format(
+          "Eliminata l'appartenenza di %s al gruppo %s, che iniziava dal %s",
+          person, group, date.format(DATE_FORMAT)));
+    }
+    if (affiliation.getEndDate() == null || !affiliation.getEndDate().isBefore(date)) {
+      final LocalDate lastDay = date.minusDays(1);
+      affiliation.setEndDate(lastDay);
+      affiliation.save();
+      log.info("Terminata al {} l'appartenenza di {} al gruppo {}", lastDay, person, group);
+      return java.util.Optional.of(String.format(
+          "Terminata al %s l'appartenenza di %s al gruppo %s",
+          lastDay.format(DATE_FORMAT), person, group));
+    }
+    return java.util.Optional.empty();
+  }
+
+  /**
+   * Chiude il gruppo alla data indicata (il gruppo non è più attivo da quella data), termina le
+   * affiliazioni dei suoi membri il giorno precedente e toglie al responsabile il ruolo di
+   * responsabile di gruppo se non gestisce altri gruppi attivi sulla sede.
+   *
+   * @return le descrizioni delle operazioni effettuate.
+   */
+  public List<String> closeGroup(Group group, LocalDate date) {
+    final List<String> messages = Lists.newArrayList();
+    if (group.getEndDate() == null || group.getEndDate().isAfter(date)) {
+      group.setEndDate(date);
+      group.save();
+      messages.add(String.format("Chiuso il gruppo %s dal %s",
+          group.getName(), date.format(DATE_FORMAT)));
+    }
+    for (Affiliation affiliation : Lists.newArrayList(group.getAffiliations())) {
+      endAffiliation(affiliation, date).ifPresent(messages::add);
+    }
+    removeManagerRoleIfUnused(group.getManager(), group.getOffice()).ifPresent(messages::add);
+    messages.forEach(m -> log.info("{}", m));
+    return messages;
+  }
+
+  /**
+   * Chiude, alla data di chiusura della sede, i gruppi della sede ancora aperti a quella data.
+   *
+   * @return le descrizioni delle operazioni effettuate.
+   */
+  public List<String> closeOfficeGroups(Office office, LocalDate date) {
+    return groupDao.groupsByOffice(office, Optional.absent(), Optional.of(true)).stream()
+        .filter(g -> g.getEndDate() == null || g.getEndDate().isAfter(date))
+        .flatMap(g -> closeGroup(g, date).stream())
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Passa al responsabile della sede i gruppi attivi della sede gestiti dalla persona, che
+   * lascia la sede. Il responsabile di gruppo è obbligatorio: il responsabile di sede subentra
+   * temporaneamente, in attesa che la sede ne nomini uno nuovo. Se la sede non ha un
+   * responsabile il gruppo resta invariato e viene solo segnalato.
+   *
+   * @param manager la persona trasferita
+   * @param office la sede lasciata
+   * @return le descrizioni delle operazioni effettuate e gli avvisi.
+   */
+  public List<String> handOverGroups(Person manager, Office office) {
+    final List<String> messages = Lists.newArrayList();
+    final List<Group> groups = 
+        groupDao.groupsByOffice(office, Optional.of(manager), Optional.absent());
+    if (groups.isEmpty()) {
+      return messages;
+    }
+    final java.util.Optional<Person> supervisor = uroDao
+        .getUsersWithRoleOnOffice(roleDao.getRoleByName(Role.SEAT_SUPERVISOR), office).stream()
+        .map(User::getPerson)
+        .filter(p -> p != null && !p.equals(manager))
+        .findFirst();
+    for (Group group : groups) {
+      if (!supervisor.isPresent()) {
+        messages.add(String.format("È ancora responsabile del gruppo %s della sede %s, che non "
+            + "ha un responsabile di sede: assegnare un nuovo responsabile",
+            group.getName(), office.getName()));
+        continue;
+      }
+      group.setManager(supervisor.get());
+      group.save();
+      createManager(office, group, new UsersRolesOffices());
+      messages.add(String.format("Il gruppo %s della sede %s è passato temporaneamente al "
+          + "responsabile di sede %s: assegnare un nuovo responsabile", group.getName(),
+          office.getName(), supervisor.get().getFullname()));
+    }
+    removeManagerRoleIfUnused(manager, office).ifPresent(messages::add);
+    messages.forEach(m -> log.info("{}", m));
+    return messages;
+  }
+
+  /**
+   * Toglie alla persona il ruolo di responsabile di gruppo sulla sede se non gestisce più
+   * gruppi attivi della sede.
+   */
+  private java.util.Optional<String> removeManagerRoleIfUnused(Person manager, Office office) {
+    if (manager == null || manager.getUser() == null
+        || !groupDao.groupsByOffice(office, Optional.of(manager), Optional.absent()).isEmpty()) {
+      return java.util.Optional.empty();
+    }
+    final Role role = roleDao.getRoleByName(Role.GROUP_MANAGER);
+    final Optional<UsersRolesOffices> uro = 
+        uroDao.getUsersRolesOffices(manager.getUser(), role, office);
+    if (!uro.isPresent()) {
+      return java.util.Optional.empty();
+    }
+    manager.getUser().getUsersRolesOffices().remove(uro.get());
+    uro.get().delete();
+    return java.util.Optional.of(String.format(
+        "Rimosso a %s il ruolo di responsabile di gruppo sulla sede %s",
+        manager.getFullname(), office.getName()));
   }
 
   /**
@@ -166,11 +315,11 @@ public class GroupManager {
     Map<Role, List<User>> map = Maps.newHashMap();
 
     if (role.getName().equals(Role.GROUP_MANAGER)) {
-      if (!groupDao.myGroups(person).isEmpty()) {
-        map.put(role, groupDao.myGroups(person).stream()
+      if (!groupDao.approvalGroups(person).isEmpty()) {
+        map.put(role, groupDao.approvalGroups(person).stream()
             .map(g -> g.getManager().getUser()).collect(Collectors.toList()));
       } else {
-        map.put(role, Lists.emptyList());
+        map.put(role, Lists.newArrayList());
       }
     }
     if (role.getName().equals(Role.MEAL_TICKET_MANAGER)) {

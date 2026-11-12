@@ -88,6 +88,22 @@ public class Affiliations extends Controller {
    * Inserimento/Modifica di un'affiliazione.
    */
   public static void save(@Valid @Required Affiliation affiliation) {
+    // i permessi si verificano prima della validazione, per non esporre dati di altre sedi
+    if (affiliation.isPersistent()) {
+      // il binder ha già applicato i parametri: si verifica la sede della persona a cui
+      // l'affiliazione apparteneva prima della modifica
+      final Long savedOfficeId = PersistedValues.read(Affiliation.class, affiliation.id,
+          saved -> saved.getPerson().getOffice().id);
+      notFoundIfNull(savedOfficeId);
+      rules.checkIfPermitted(officeDao.getOfficeById(savedOfficeId));
+    }
+    if (affiliation.getPerson() != null) {
+      rules.checkIfPermitted(affiliation.getPerson().getOffice());
+    }
+    if (affiliation.getGroup() != null) {
+      rules.checkIfPermitted(affiliation.getGroup().getOffice());
+    }
+
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors: {}", validation.errorsMap());
@@ -97,16 +113,6 @@ public class Affiliations extends Controller {
       render("@blankByPerson", affiliation, activeGroups);
     }
 
-    if (affiliation.isPersistent()) {
-      // il binder ha già applicato i parametri: si verifica la sede della persona a cui
-      // l'affiliazione apparteneva prima della modifica
-      final Long savedOfficeId = PersistedValues.read(Affiliation.class, affiliation.id,
-          saved -> saved.getPerson().getOffice().id);
-      notFoundIfNull(savedOfficeId);
-      rules.checkIfPermitted(officeDao.getOfficeById(savedOfficeId));
-    }
-    rules.checkIfPermitted(affiliation.getPerson().getOffice());
-    rules.checkIfPermitted(affiliation.getGroup().getOffice());
     affiliation.save();
 
     log.info("Aggiunta/Modificata affiliazione di {} al gruppo {}", 

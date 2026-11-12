@@ -610,8 +610,60 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return user.hasRoles(Role.SEAT_SUPERVISOR);
   }
 
+  /**
+   * I gruppi di riferimento della persona alla data indicata, cioè quelli i cui responsabili
+   * approvano i suoi flussi: tra le afferenze attive conta quella con la percentuale più alta;
+   * a parità di percentuale sono di riferimento tutti i gruppi a pari merito.
+   *
+   * @param date la data a cui valutare le afferenze
+   * @return i gruppi di riferimento, vuota se la persona non appartiene a nessun gruppo attivo.
+   */
+  @Transient
+  public List<Group> getApprovalGroups(java.time.LocalDate date) {
+    final List<Affiliation> active = affiliations.stream()
+        .filter(a -> a.isActiveAt(date)).collect(Collectors.toList());
+    final java.util.Optional<java.math.BigDecimal> max = active.stream()
+        .map(Affiliation::getEffectivePercentage).max(Comparator.naturalOrder());
+    if (!max.isPresent()) {
+      return Lists.newArrayList();
+    }
+    return active.stream()
+        .filter(a -> a.getEffectivePercentage().compareTo(max.get()) == 0)
+        .map(Affiliation::getGroup).distinct().collect(Collectors.toList());
+  }
+
+  /**
+   * I gruppi di riferimento della persona alla data odierna.
+   *
+   * @see #getApprovalGroups(java.time.LocalDate)
+   */
+  @Transient
+  public List<Group> getApprovalGroups() {
+    return getApprovalGroups(java.time.LocalDate.now());
+  }
+
+  /**
+   * Le persone di cui questa persona è oggi responsabile di gruppo ai fini dei flussi: quelle che
+   * appartengono ad un gruppo attivo da lei gestito e per cui quel gruppo è di riferimento.
+   */
+  @Transient
   public List<Person> getPersonsInCharge() {
-    return groupsPeople.stream().flatMap(g -> g.getPeople().stream()).collect(Collectors.toList());
+    final java.time.LocalDate today = java.time.LocalDate.now();
+    return groupsPeople.stream().filter(g -> g.isActiveAt(today))
+        .flatMap(g -> g.getAffiliations().stream()
+            .filter(a -> a.isActiveAt(today))
+            .map(Affiliation::getPerson)
+            .filter(p -> p.getApprovalGroups(today).contains(g)))
+        .distinct().collect(Collectors.toList());
+  }
+
+  /**
+   * Verifica se questa persona è responsabile di uno dei gruppi di riferimento dell'altra.
+   */
+  @Transient
+  public boolean isApprovalManagerOf(Person other) {
+    return other != null && other.getApprovalGroups().stream()
+        .anyMatch(g -> this.equals(g.getManager()));
   }
   
   /**

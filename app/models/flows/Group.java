@@ -92,7 +92,16 @@ public class Group extends MutableModel {
    * @return true se il gruppo non ha una data di fine passata.
    */
   public boolean isActive() {
-    return endDate == null || endDate.isAfter(LocalDate.now());
+    return isActiveAt(LocalDate.now());
+  }
+
+  /**
+   * Verifica se il gruppo è attivo alla data indicata.
+   *
+   * @return true se il gruppo non ha una data di fine o se questa è successiva alla data.
+   */
+  public boolean isActiveAt(LocalDate date) {
+    return endDate == null || endDate.isAfter(date);
   }
 
   /**

@@ -20,7 +20,6 @@ package manager;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import helpers.JodaConverters;
-import dao.GroupDao;
 import dao.ReperibilityTypeMonthDao;
 import dao.ShiftTypeMonthDao;
 import java.util.List;
@@ -54,14 +53,14 @@ public class PersonOfficeServicesManager {
 
   private final ReperibilityTypeMonthDao reperibilityTypeMonthDao;
   private final ShiftTypeMonthDao shiftTypeMonthDao;
-  private final GroupDao groupDao;
+  private final GroupManager groupManager;
 
   @Inject
   PersonOfficeServicesManager(ReperibilityTypeMonthDao reperibilityTypeMonthDao,
-      ShiftTypeMonthDao shiftTypeMonthDao, GroupDao groupDao) {
+      ShiftTypeMonthDao shiftTypeMonthDao, GroupManager groupManager) {
     this.reperibilityTypeMonthDao = reperibilityTypeMonthDao;
     this.shiftTypeMonthDao = shiftTypeMonthDao;
-    this.groupDao = groupDao;
+    this.groupManager = groupManager;
   }
 
   /**
@@ -86,9 +85,10 @@ public class PersonOfficeServicesManager {
 
   /**
    * Rimuove i ruoli della persona sulla sede lasciata (escluso quello di dipendente, allineato
-   * a parte) e la toglie dai gestori dei servizi di reperibilità e turno della sede. Gli incarichi
-   * di responsabile, obbligatori, vengono solo segnalati. Va chiamato quando il trasferimento
-   * diventa effettivo.
+   * a parte) e la toglie dai gestori dei servizi di reperibilità e turno della sede. I gruppi della
+   * sede di cui è responsabile passano temporaneamente al responsabile di sede; gli incarichi di
+   * responsabile dei servizi, obbligatori, vengono solo segnalati. Va chiamato quando il
+   * trasferimento diventa effettivo.
    *
    * @return i messaggi sulle operazioni effettuate.
    */
@@ -130,9 +130,8 @@ public class PersonOfficeServicesManager {
         .forEach(c -> messages.add(String.format("È ancora responsabile del servizio di turno "
             + "%s della sede %s: assegnare un nuovo responsabile",
             c.getDescription(), office.getName())));
-    groupDao.groupsByOffice(office, Optional.of(person), Optional.absent())
-        .forEach(g -> messages.add(String.format("È ancora responsabile del gruppo %s della "
-            + "sede %s: assegnare un nuovo responsabile", g.getName(), office.getName())));
+    // il responsabile di gruppo è obbligatorio: i gruppi passano al responsabile di sede
+    messages.addAll(groupManager.handOverGroups(person, office));
     messages.forEach(m -> log.info("{}: {}", person.getFullname(), m));
     return messages;
   }

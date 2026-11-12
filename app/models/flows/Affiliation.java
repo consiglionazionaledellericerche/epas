@@ -26,6 +26,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -50,6 +51,11 @@ import play.data.validation.Unique;
 public class Affiliation extends BaseModel {
 
   private static final long serialVersionUID = -8101378323853245726L;
+
+  /**
+   * Percentuale di afferenza usata quando non è specificata.
+   */
+  public static final BigDecimal FULL_PERCENTAGE = BigDecimal.valueOf(100);
 
   @Required
   @CheckWith(AffiliationCheck.class)
@@ -120,6 +126,23 @@ public class Affiliation extends BaseModel {
     return overlap(otherAffiliation.getRange()) && group.equals(otherAffiliation.getGroup());
   }
   
+  /**
+   * La percentuale di afferenza, considerando il 100% quando non è valorizzata.
+   */
+  @Transient
+  public BigDecimal getEffectivePercentage() {
+    return percentage == null ? FULL_PERCENTAGE : percentage;
+  }
+
+  /**
+   * Verifica se l'affiliazione conta alla data indicata: la data è compresa nel periodo
+   * dell'affiliazione (estremi inclusi) e il gruppo è attivo.
+   */
+  @Transient
+  public boolean isActiveAt(LocalDate date) {
+    return contains(date) && group != null && group.isActiveAt(date);
+  }
+
   /**
    * Verificare se l'affiliazione è attiva nella data corrente.
    *

@@ -20,10 +20,12 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import dao.PersonDao;
+import helpers.JodaConverters;
 import java.util.HashSet;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import manager.GroupManager;
 import models.Office;
 import models.Person;
 import org.joda.time.LocalDate;
@@ -40,6 +42,8 @@ public class SyncOfficeClosed extends Job<Void> {
 
   @Inject
   static PersonDao personDao;
+  @Inject
+  static GroupManager groupManager;
   
   @Override
   public void doJob() {
@@ -58,6 +62,9 @@ public class SyncOfficeClosed extends Job<Void> {
     }
     for (Office office : list) {
       if (office.getEndDate() != null) {
+        // chiude anche i gruppi rimasti aperti delle sedi già chiuse
+        groupManager.closeOfficeGroups(office,
+            JodaConverters.jodaToJavaLocalDate(office.getEndDate()));
         continue;
       }
       log.debug("Analizzo la sede: {}", office.getName());
@@ -68,6 +75,7 @@ public class SyncOfficeClosed extends Job<Void> {
             + "Inserisco la data di chiusura sede.", office.getName());
         office.setEndDate(LocalDate.now());
         office.save();
+        groupManager.closeOfficeGroups(office, java.time.LocalDate.now());
         count++;
       }
     }

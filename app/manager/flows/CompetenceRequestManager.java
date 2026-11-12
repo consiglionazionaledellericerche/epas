@@ -995,8 +995,11 @@ public class CompetenceRequestManager {
    * @return la quantità di ore di straordinario residue del gruppo cui appartiene la persona nell'anno.
    */
   public int groupOvertimeResidual(Person person, int year) {
-    Group group = groupDao
-        .myGroups(person, java.time.LocalDate.now()).get(0);
+    final List<Group> groups = groupDao.approvalGroups(person);
+    if (groups.isEmpty()) {
+      return 0;
+    }
+    Group group = groups.get(0);
     Map<Integer, List<PersonOvertimeInMonth>> map = groupOvertimeManager
         .groupOvertimeSituationInYear(group.getPeople(), year);
     int overtimeHoursAlreadyAssigned = groupOvertimeManager.groupOvertimeAssignedInYear(map); 

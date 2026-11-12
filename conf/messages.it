@@ -1010,6 +1010,7 @@ seatSupervisor.action =Può vedere le presenze in sede,\n\r può vedere la situa
 ###########################
 
 validation.affiliation.membershipAlreadyPresent =Associazione a questo gruppo già presente nelle date specificate
+validation.affiliation.percentageExceeded =La somma delle percentuali di afferenza ai gruppi della persona supera il 100%% nelle date specificate
 
 validation.contract.contractOverlaping =Il contratto non può intersecarsi con altri contratti del dipendente
 validation.contract.sourceDateResidualBeforeBeginDate =La data di inizio non può essere successiva alla data di inizializzazione
