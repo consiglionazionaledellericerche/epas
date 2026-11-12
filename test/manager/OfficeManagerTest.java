@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import common.injection.StaticInject;
+import java.util.Set;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Configuration;
@@ -46,6 +47,7 @@ public class OfficeManagerTest extends UnitTest {
   private static ConfigurationManager configurationManager;
 
   private Office office;
+  private Office otherOffice;
   private Object skipIpCheck;
 
   /**
@@ -54,23 +56,28 @@ public class OfficeManagerTest extends UnitTest {
   @Before
   public void createOffice() {
     skipIpCheck = Play.configuration.remove(OfficeManager.SKIP_IP_CHECK);
-    office = new Office();
-    office.setName("Sede test timbrature web");
-    office.setBeginDate(new LocalDate(2020, 1, 1));
-    office.setCodeId("990099");
-    office.setCode("990099");
-    office.save();
-    configurationManager.updateConfigurations(office);
-    setConfiguration(EpasParam.WEB_STAMPING_ALLOWED, "true");
-    setConfiguration(EpasParam.ADDRESSES_ALLOWED, "192.168.1.10, 192.168.1.11");
+    office = createOffice("990099", "true", "192.168.1.10, 192.168.1.11");
     JPA.em().flush();
     JPA.em().clear();
     office = Office.findById(office.id);
   }
 
-  private void setConfiguration(EpasParam epasParam, String value) {
+  private Office createOffice(String code, String webStamping, String addresses) {
+    Office newOffice = new Office();
+    newOffice.setName("Sede test timbrature web " + code);
+    newOffice.setBeginDate(new LocalDate(2020, 1, 1));
+    newOffice.setCodeId(code);
+    newOffice.setCode(code);
+    newOffice.save();
+    configurationManager.updateConfigurations(newOffice);
+    setConfiguration(newOffice, EpasParam.WEB_STAMPING_ALLOWED, webStamping);
+    setConfiguration(newOffice, EpasParam.ADDRESSES_ALLOWED, addresses);
+    return newOffice;
+  }
+
+  private void setConfiguration(Office target, EpasParam epasParam, String value) {
     Configuration configuration = Configuration
-        .find("office = ?1 and epasParam = ?2", office, epasParam).first();
+        .find("office = ?1 and epasParam = ?2", target, epasParam).first();
     configuration.setValue(value);
     configuration.save();
   }
@@ -83,8 +90,11 @@ public class OfficeManagerTest extends UnitTest {
     if (skipIpCheck != null) {
       Play.configuration.put(OfficeManager.SKIP_IP_CHECK, skipIpCheck);
     }
+    if (otherOffice != null) {
+      Office.<Office>findById(otherOffice.id).delete();
+    }
     if (office != null) {
-      office.delete();
+      Office.<Office>findById(office.id).delete();
     }
   }
 
@@ -107,5 +117,40 @@ public class OfficeManagerTest extends UnitTest {
     // Catena "192.168.1.11, 10.0.0.2" con XForwardedSupport=all.
     assertTrue(officeManager.getOfficesWithAllowedIp(
         Optional.of("10.0.0.2"), ImmutableList.of("192.168.1.11")).contains(office));
+  }
+
+  @Test
+  public void webStampingDisabled() {
+    // Stesso indirizzo di una sede abilitata, ma timbratura web non abilitata.
+    otherOffice = createOffice("990098", "false", "192.168.1.10");
+    JPA.em().flush();
+    JPA.em().clear();
+    final Set<Office> offices = officeManager.getOfficesWithAllowedIp(
+        Optional.of("192.168.1.10"), ImmutableList.of());
+    assertTrue(offices.contains(office));
+    assertFalse(offices.contains(Office.findById(otherOffice.id)));
+  }
+
+  @Test
+  public void closedOffice() {
+    otherOffice = createOffice("990097", "true", "192.168.1.20");
+    otherOffice.setEndDate(new LocalDate(2021, 1, 1));
+    otherOffice.save();
+    JPA.em().flush();
+    JPA.em().clear();
+    assertTrue(officeManager.getOfficesWithAllowedIp(
+        Optional.of("192.168.1.20"), ImmutableList.of()).isEmpty());
+  }
+
+  @Test
+  public void moreOfficesWithSameAddress() {
+    otherOffice = createOffice("990096", "true", "192.168.1.11,192.168.1.30");
+    JPA.em().flush();
+    JPA.em().clear();
+    final Set<Office> offices = officeManager.getOfficesWithAllowedIp(
+        Optional.of("192.168.1.11"), ImmutableList.of());
+    assertEquals(2, offices.size());
+    assertTrue(offices.contains(office));
+    assertTrue(offices.contains(Office.findById(otherOffice.id)));
   }
 }
