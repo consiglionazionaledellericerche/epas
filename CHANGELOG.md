@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Security
+  - Le timbrature inviate dai lettori badge (/stampings/create, /stampingsfromclient/* e REST
+    v3) non possono più risultare inserite da un amministratore o dal dipendente: il flag admin
+    e i campi markedByAdmin e markedByEmployee inviati dal client sono ignorati (con un WARN
+    nel log se valgono true), e una timbratura aggiornata via REST da un lettore non risulta più
+    inserita da un amministratore o dal dipendente. I client ufficiali (epas-client,
+    epas-client-sql) non impostano questi flag.
+
 ## [2.40.0] - 2026-11-12
 ### Added
   - Workflow GitHub Actions che esegue play autotest su ogni pull request e su ogni push su

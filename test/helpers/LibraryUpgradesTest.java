@@ -130,11 +130,26 @@ public class LibraryUpgradesTest extends UnitTest {
     assertNotNull(stamping);
     assertEquals(Integer.valueOf(1), stamping.inOut);
     assertEquals(StampTypes.MOTIVI_DI_SERVIZIO, stamping.stampType);
-    assertTrue(stamping.markedByAdmin);
     assertEquals("T1", stamping.zona);
     assertEquals(new LocalDateTime(2026, 11, 11, 8, 30, 0), stamping.dateTime);
     assertEquals("nota", stamping.note);
     assertEquals("4711", stamping.numeroBadge);
+  }
+
+  /**
+   * Il terminale inviato dal lettore non può inserire nuove righe nel WARN del binder.
+   */
+  @Test
+  public void gsonNormalizesTerminalBeforeLogging() throws Exception {
+    String json = "{\"operazione\":1,\"admin\":true,\"terminale\":\"T1\\n[WARN] falso\","
+        + "\"anno\":2026,\"mese\":11,\"giorno\":11,\"ora\":8,\"minuti\":30,"
+        + "\"matricolaFirma\":\"4711\"}";
+
+    StampingFromClient stamping = (StampingFromClient) new JsonStampingBinder()
+        .bind("body", null, json, StampingFromClient.class, StampingFromClient.class);
+
+    assertNotNull(stamping);
+    assertEquals("T1 [WARN] falso", stamping.zona);
   }
 
   /**

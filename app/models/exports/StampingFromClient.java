@@ -43,8 +43,6 @@ public class StampingFromClient {
   public Integer inOut;
   public StampTypes stampType;
   public Person person;
-  public boolean markedByAdmin;
-  public boolean markedByEmployee;
   public LocalDateTime dateTime;
   public String zona;
   public String note;
@@ -61,8 +59,6 @@ public class StampingFromClient {
       .inOut(dto.getWayType().equals(WayType.in) ? 0 : 1)
       .stampType(
           dto.getReasonType() != null ? StampTypes.byCode(dto.getReasonType().name()) : null)
-      .markedByAdmin(dto.isMarkedByAdmin())
-      .markedByEmployee(dto.isMarkedByEmployee())
       .dateTime(JodaConverters.javaToJodaLocalDateTime(dto.getDateTime()))
       .zona(dto.getStampingZone())
       .note(dto.getNote())
