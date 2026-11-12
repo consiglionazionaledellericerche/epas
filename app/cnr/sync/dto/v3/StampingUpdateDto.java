@@ -27,6 +27,7 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.enumerate.StampTypes;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 
 /**
  * Dati per l'aggiornamento via REST di una timbratura di una persona.
@@ -51,14 +52,15 @@ public class StampingUpdateDto {
   private String reason;
 
   /**
-   * Ignorato: le timbrature inviate via REST dai lettori badge non sono mai inserite da un
-   * amministratore. Il campo è mantenuto per compatibilità con i client esistenti.
+   * Ignorato: le timbrature create o aggiornate via REST dai lettori badge non risultano mai
+   * inserite da un amministratore. Il campo è mantenuto per compatibilità con i client
+   * esistenti.
    */
   private boolean markedByAdmin;
 
   /**
-   * Ignorato: le timbrature inviate via REST dai lettori badge non sono mai inserite dal
-   * dipendente. Il campo è mantenuto per compatibilità con i client esistenti.
+   * Ignorato: le timbrature create o aggiornate via REST dai lettori badge non risultano mai
+   * inserite dal dipendente. Il campo è mantenuto per compatibilità con i client esistenti.
    */
   private boolean markedByEmployee;
 
@@ -79,7 +81,7 @@ public class StampingUpdateDto {
    * valori presenti nel rispettivo DTO.
    */
   public static Stamping build(StampingUpdateDto stampingDto) {
-    val stamping = modelMapper.map(stampingDto, Stamping.class);
+    val stamping = toStamping(stampingDto);
 
     if (stampingDto.reasonType != null) {
       stamping.setStampType(StampTypes.byCode(stampingDto.reasonType.name()));
@@ -89,11 +91,33 @@ public class StampingUpdateDto {
   }
 
   /**
+   * Nuova istanza di Stamping con i valori del DTO, esclusi markedByAdmin e markedByEmployee:
+   * chi ha inserito la timbratura non è deciso dal client.
+   */
+  @SuppressWarnings("unchecked")
+  static synchronized Stamping toStamping(StampingUpdateDto stampingDto) {
+    val sourceType = (Class<StampingUpdateDto>) stampingDto.getClass();
+    TypeMap<StampingUpdateDto, Stamping> typeMap =
+        modelMapper.getTypeMap(sourceType, Stamping.class);
+    if (typeMap == null) {
+      typeMap = modelMapper.createTypeMap(sourceType, Stamping.class)
+          .addMappings(mapper -> {
+            mapper.skip(Stamping::setMarkedByAdmin);
+            mapper.skip(Stamping::setMarkedByEmployee);
+          });
+    }
+    return typeMap.map(stampingDto);
+  }
+
+  /**
    * Aggiorna i dati dell'oggetto Stamping passato con quelli
-   * presenti nell'instanza di questo DTO. Chi ha inserito la timbratura (markedByAdmin e
-   * markedByEmployee) non è modificabile dal client.
+   * presenti nell'instanza di questo DTO. La timbratura modificata dal lettore badge non
+   * risulta più inserita da un amministratore né dal dipendente: markedByAdmin e
+   * markedByEmployee sono azzerati, qualunque valore invii il client.
    */
   public void update(Stamping stamping) {
+    stamping.setMarkedByAdmin(false);
+    stamping.setMarkedByEmployee(false);
     stamping.setNote(StampingManager.clientText(getNote()));
     stamping.setPlace(StampingManager.clientText(getPlace()));
     stamping.setReason(StampingManager.clientText(getReason()));

@@ -131,7 +131,8 @@ public class StampingsFromClientTest extends FunctionalTest {
 
   /**
    * Via REST v3 i flag markedByAdmin e markedByEmployee sono ignorati sia nella creazione sia
-   * nell'aggiornamento, che non cambia chi ha inserito la timbratura.
+   * nell'aggiornamento, che li azzera: la timbratura modificata dal lettore non risulta più
+   * inserita da un amministratore o dal dipendente.
    */
   @Test
   public void provenanceFlagsFromRestClientAreIgnored() {
@@ -154,14 +155,18 @@ public class StampingsFromClientTest extends FunctionalTest {
     assertFalse(stamping.isMarkedByAdmin());
     assertFalse(stamping.isMarkedByEmployee());
 
-    // una timbratura inserita da un amministratore resta tale anche se il client invia false
+    // una timbratura inserita da un amministratore e poi modificata dal lettore non risulta
+    // più inserita dall'amministratore
     stamping.setMarkedByAdmin(true);
+    stamping.setMarkedByEmployee(true);
     stamping.save();
     JPA.em().getTransaction().commit();
     JPA.em().getTransaction().begin();
     assertIsOk(PUT(reader(fixture), update, "application/json",
-        "{\"wayType\": \"in\", \"markedByAdmin\": false}"));
-    assertTrue(stampings(fixture.person).get(0).isMarkedByAdmin());
+        "{\"wayType\": \"out\", \"markedByAdmin\": true}"));
+    stamping = stampings(fixture.person).get(0);
+    assertFalse(stamping.isMarkedByAdmin());
+    assertFalse(stamping.isMarkedByEmployee());
   }
 
   private static String withAdminFlag(String json) {

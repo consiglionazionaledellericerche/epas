@@ -25,9 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
   - Le timbrature inviate dai lettori badge (/stampings/create, /stampingsfromclient/* e REST
     v3) non possono più risultare inserite da un amministratore o dal dipendente: il flag admin
-    e i campi markedByAdmin e markedByEmployee inviati dal client sono ignorati e segnalati con
-    un WARN nel log, e l'aggiornamento via REST non cambia più chi ha inserito la timbratura. I
-    client ufficiali (epas-client, epas-client-sql) non impostano questi flag.
+    e i campi markedByAdmin e markedByEmployee inviati dal client sono ignorati (con un WARN
+    nel log se valgono true), e una timbratura aggiornata via REST da un lettore non risulta più
+    inserita da un amministratore o dal dipendente. I client ufficiali (epas-client,
+    epas-client-sql) non impostano questi flag.
   - Nei template label() restituisce come HTML solo il testo dei messaggi dell'applicazione:
     i testi che non sono chiavi dei messaggi sono codificati, come gli argomenti inseriti nei
     messaggi (tranne numeri, booleani e date).

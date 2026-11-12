@@ -75,11 +75,8 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
       // Il flag admin inviato dal client non è attendibile: una timbratura del lettore badge
       // non è mai inserita da un amministratore. Viene ignorato e solo segnalato nel log.
-      if (jsonObject.has("admin") && !jsonObject.get("admin").isJsonNull()
-          && "true".equals(jsonObject.get("admin").getAsString())) {
-        log.warn("Ignorato il flag admin=true nella timbratura inviata dal client: {}",
-            jsonObject);
-      }
+      final boolean adminFlag = jsonObject.has("admin") && !jsonObject.get("admin").isJsonNull()
+          && "true".equals(jsonObject.get("admin").getAsString());
       String terminal = "";
       if (jsonObject.has("terminale")) {
         terminal = jsonObject.get("terminale").getAsString();
@@ -92,6 +89,10 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
         stamping.zona = terminal;
       } else {
         stamping.zona = null;
+      }
+      if (adminFlag) {
+        log.warn("Ignorato il flag admin=true nella timbratura inviata dal terminale {}",
+            stamping.zona);
       }
       
       Integer anno = jsonObject.get("anno").getAsInt();
