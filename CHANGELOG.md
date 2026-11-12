@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     absenceCode, il periodo con begin ed end, l'eventuale durata con hours e minutes al posto di
     inizio e fine.
 
+### Fixed
+  - La pagina di login e le pagine della timbratura web non impiegano più circa un secondo e
+    mezzo per verificare le sedi abilitate dall'indirizzo ip: il controllo confrontava ogni
+    configurazione con tutte le sedi e il tempo cresceva con il quadrato del numero di sedi
+    (#658).
+
 ### Security
   - I lettori badge non possono più inserire assenze tramite i metodi
     /stampingsfromclient/absence e /stampingsfromclient/absencenotrecompute, rimossi (vedi

@@ -98,16 +98,17 @@ public class OfficeDao extends DaoBase {
   }
 
   /**
-   * Uffici che hanno abilitato il parametro per effettuare le timbrature
-   * via web.
+   * Gli id degli uffici attivi (senza data di chiusura) con la timbratura web abilitata.
+   *
+   * @return gli id degli uffici con la timbratura web abilitata.
    */
-  public List<Office> getOfficesWebStampingEnabled() {
+  public List<Long> getOfficeIdsWebStampingEnabled() {
     final QOffice office = QOffice.office;
     final QConfiguration configuration = QConfiguration.configuration;
-    return getQueryFactory().selectFrom(office)
+    return getQueryFactory().select(office.id).from(office)
         .join(office.configurations, configuration)
         .where(
-            office.endDate.isNull(), 
+            office.endDate.isNull(),
             configuration.epasParam.eq(EpasParam.WEB_STAMPING_ALLOWED),
             configuration.fieldValue.equalsIgnoreCase("true"))
         .distinct().fetch();
