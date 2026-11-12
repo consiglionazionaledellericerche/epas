@@ -137,6 +137,22 @@ public class LibraryUpgradesTest extends UnitTest {
   }
 
   /**
+   * Il terminale inviato dal lettore non può inserire nuove righe nel WARN del binder.
+   */
+  @Test
+  public void gsonNormalizesTerminalBeforeLogging() throws Exception {
+    String json = "{\"operazione\":1,\"admin\":true,\"terminale\":\"T1\\n[WARN] falso\","
+        + "\"anno\":2026,\"mese\":11,\"giorno\":11,\"ora\":8,\"minuti\":30,"
+        + "\"matricolaFirma\":\"4711\"}";
+
+    StampingFromClient stamping = (StampingFromClient) new JsonStampingBinder()
+        .bind("body", null, json, StampingFromClient.class, StampingFromClient.class);
+
+    assertNotNull(stamping);
+    assertEquals("T1 [WARN] falso", stamping.zona);
+  }
+
+  /**
    * Il binder delle credenziali JSON funziona come prima.
    */
   @Test

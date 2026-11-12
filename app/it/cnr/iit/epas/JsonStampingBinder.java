@@ -24,6 +24,7 @@ import common.injection.StaticInject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import lombok.extern.slf4j.Slf4j;
+import manager.StampingManager;
 import models.enumerate.StampTypes;
 import models.exports.StampingFromClient;
 import org.joda.time.LocalDateTime;
@@ -85,11 +86,8 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
       } else {
         terminal = "";
       }
-      if (!Strings.isNullOrEmpty(terminal)) {
-        stamping.zona = terminal;
-      } else {
-        stamping.zona = null;
-      }
+      // Il terminale compare anche nel WARN: normalizzarlo prima di scriverlo nel log.
+      stamping.zona = StampingManager.clientText(terminal);
       if (adminFlag) {
         log.warn("Ignorato il flag admin=true nella timbratura inviata dal terminale {}",
             stamping.zona);
