@@ -91,11 +91,61 @@ Requisiti
 #. **PROTOCOL=https** se il proxy serve ePAS in https, così gli indirizzi generati
    dall'applicazione usano lo schema corretto.
 
+Header di sicurezza
+-------------------
+
+ePAS non imposta questi header da solo: li aggiunge il proxy (vedi gli esempi di Apache,
+nginx e Traefik).
+
+* **Strict-Transport-Security** (HSTS): il browser usa solo https per il dominio. Ha senso
+  solo se il sito è servito interamente in https. Una volta ricevuto, il browser lo
+  ricorda per tutto il ``max-age``: alla prima attivazione conviene un valore basso (es.
+  ``max-age=300``), da portare a un anno dopo qualche giorno senza problemi. Non aggiungere
+  ``includeSubDomains`` se il dominio ha sottodomini non serviti in https.
+* **X-Content-Type-Options: nosniff**: il browser non interpreta i file con un tipo
+  diverso da quello dichiarato.
+* **X-Frame-Options: SAMEORIGIN**: le pagine di ePAS non possono essere incluse in un
+  iframe di altri siti (protezione dal clickjacking). ePAS non usa iframe di altri domini.
+* **Referrer-Policy**: agli altri siti (es. le CDN) viene inviata solo l'origine, non
+  l'indirizzo completo della pagina con i parametri.
+* **Secure e HttpOnly sui cookie**: i cookie di Play (``PLAY_SESSION``, ``PLAY_FLASH``,
+  ``PLAY_ERRORS``) escono senza questi attributi. *Secure* impedisce l'invio del cookie
+  su http, *HttpOnly* la lettura da JavaScript; il JavaScript di ePAS non legge questi
+  cookie.
+
+Una *Content-Security-Policy* per ora non è indicata: le pagine usano script inline e
+diverse CDN, e la policy va preparata insieme all'applicazione.
+
 Apache
 ------
 
-Gli esempi sono per Ubuntu/Debian. Su RHEL e derivate i file di configurazione vanno in
-``/etc/httpd/conf.d/`` e il servizio si chiama *httpd*.
+Gli esempi sono per Ubuntu/Debian. Su RHEL e derivate (AlmaLinux, Rocky Linux) i percorsi e
+i comandi cambiano così:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 50 50
+
+   * - Ubuntu/Debian (negli esempi)
+     - RHEL, AlmaLinux, Rocky Linux
+   * - ``a2enmod proxy proxy_http headers ssl reqtimeout``
+     - Non esiste: i moduli sono già caricati da ``/etc/httpd/conf.modules.d/``. *mod_ssl*
+       va installato con ``dnf install mod_ssl``.
+   * - ``/etc/apache2/conf-available/epas-hardening.conf`` e ``a2enconf epas-hardening``
+     - ``/etc/httpd/conf.d/epas-hardening.conf``, caricato automaticamente.
+   * - ``ServerTokens`` e ``ServerSignature`` in
+       ``/etc/apache2/conf-available/security.conf``
+     - ``security.conf`` non esiste e il default è ``ServerTokens OS``, che mostra la
+       distribuzione nell'header ``Server``: impostarli in ``epas-hardening.conf``.
+   * - *reqtimeout* configurato in ``/etc/apache2/mods-available/reqtimeout.conf``
+     - Modulo caricato ma senza configurazione esplicita: aggiungere ``RequestReadTimeout``
+       in ``epas-hardening.conf``.
+   * - ``/etc/apache2/sites-available/epas.conf`` e ``a2ensite epas``
+     - ``/etc/httpd/conf.d/epas.conf``.
+   * - ``${APACHE_LOG_DIR}/epas_error.log``
+     - La variabile non è definita: usare ``logs/epas_error.log`` (``/var/log/httpd/``).
+   * - ``apache2ctl configtest && systemctl reload apache2``
+     - ``apachectl configtest && systemctl reload httpd``
 
 Moduli necessari:
 
@@ -175,6 +225,15 @@ porta pubblicata su ``127.0.0.1:9000``. File ``/etc/apache2/sites-available/epas
        Header always unset X-Powered-By
        # Non mostra l'header Server di ePAS (Play e versione): resta quello di Apache
        Header unset Server
+
+       # Header di sicurezza (vedi la sezione "Header di sicurezza")
+       Header always set Strict-Transport-Security "max-age=31536000"
+       Header always set X-Content-Type-Options    "nosniff"
+       Header always set X-Frame-Options           "SAMEORIGIN"
+       Header always set Referrer-Policy           "strict-origin-when-cross-origin"
+       # Secure e HttpOnly sui cookie di ePAS che non li hanno già. Senza "always":
+       # con "always" la regola non si applica ai cookie della risposta del backend
+       Header edit Set-Cookie "^((?!.*;\s*[Ss]ecure).*)$" "$1; Secure; HttpOnly"
 
        # disablereuse=On: una connessione verso ePAS per ogni richiesta, senza riuso
        ProxyPass        / http://127.0.0.1:9000/ disablereuse=On
@@ -282,6 +341,12 @@ valori.
        # dimensione massima delle richieste, da adeguare agli allegati caricati (default 1m)
        client_max_body_size 20m;
 
+       # Header di sicurezza (vedi la sezione "Header di sicurezza")
+       add_header Strict-Transport-Security "max-age=31536000" always;
+       add_header X-Content-Type-Options    "nosniff" always;
+       add_header X-Frame-Options           "SAMEORIGIN" always;
+       add_header Referrer-Policy           "strict-origin-when-cross-origin" always;
+
        location / {
            proxy_pass http://127.0.0.1:9000;
            proxy_set_header Host              $host;
@@ -290,6 +355,8 @@ valori.
            proxy_set_header X-Forwarded-For   $remote_addr;
            proxy_set_header X-Forwarded-Host  $host;
            proxy_set_header X-Forwarded-Proto $scheme;
+           # Secure e HttpOnly sui cookie di ePAS (nginx 1.19.3 o successivo)
+           proxy_cookie_flags ~ secure httponly;
        }
    }
 
@@ -342,6 +409,11 @@ container di Traefik:
          # Traefik inoltra l'header Server di ePAS (Play e versione): un valore vuoto lo rimuove
          - traefik.http.routers.epas.middlewares=epas-headers
          - traefik.http.middlewares.epas-headers.headers.customresponseheaders.Server=
+         # Header di sicurezza (vedi la sezione "Header di sicurezza")
+         - traefik.http.middlewares.epas-headers.headers.stsSeconds=31536000
+         - traefik.http.middlewares.epas-headers.headers.contentTypeNosniff=true
+         - traefik.http.middlewares.epas-headers.headers.customFrameOptionsValue=SAMEORIGIN
+         - traefik.http.middlewares.epas-headers.headers.referrerPolicy=strict-origin-when-cross-origin
        environment:
          - PROTOCOL=https
          - X_FORWARDED_SUPPORT=172.30.0.10
@@ -351,6 +423,9 @@ container di Traefik:
        ipam:
          config:
            - subnet: 172.30.0.0/24
+
+Traefik aggiunge l'header HSTS solo alle risposte in https. Non può aggiungere *Secure* e
+*HttpOnly* ai cookie della risposta del backend.
 
 La configurazione dei certificati (es. Let's Encrypt) dipende dall'installazione e non è
 riportata.
@@ -380,6 +455,14 @@ esempi:
 .. code-block:: bash
 
    curl -sI https://epas.example.it/login | grep -i '^server'
+
+Le risposte devono avere gli header di sicurezza e i cookie di ePAS gli attributi
+*Secure* e *HttpOnly*:
+
+.. code-block:: bash
+
+   curl -s -D - -o /dev/null https://epas.example.it/login \
+     | grep -i -E '^(strict-transport|x-content-type|x-frame|referrer-policy|set-cookie)'
 
 Infine, nel log di ePAS all'avvio non deve comparire il WARN su ``XForwardedSupport=all``
 e, se si usa la timbratura web con la whitelist degli indirizzi ip, le timbrature devono
