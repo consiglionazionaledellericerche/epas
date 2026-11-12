@@ -33,6 +33,7 @@ import dao.wrapper.IWrapperContract;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperPersonDay;
+import helpers.jpa.AfterCommitJobs;
 import it.cnr.iit.epas.DateInterval;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -391,19 +392,21 @@ public class ConsistencyManager {
     final Optional<Contract> contract = wrPerson.getCurrentContract();
  
     if (contract.isPresent()) {
-      new Job<Void>() {
+      // Il job cattura solo l'id: il contratto viene ricaricato dopo il commit.
+      final Long contractId = contract.get().id;
+      AfterCommitJobs.schedule(new Job<Void>() {
         @Override
         public void doJob() {
-          Verify.verifyNotNull(contract.get().id);          
-          Contract currentContract = Contract.findById(contract.get().id);
+          Verify.verifyNotNull(contractId);
+          Contract currentContract = Contract.findById(contractId);
           Verify.verifyNotNull(currentContract, 
-              String.format("currentcontract is null, contract.id = %s", contract.get().id));
+              String.format("currentcontract is null, contract.id = %s", contractId));
           GroupAbsenceType vacationGroup = absenceComponentDao
               .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();
           absenceService.buildVacationSituation(currentContract, LocalDate.now().getYear(),
               vacationGroup, Optional.absent(), true);
         }
-      }.afterRequest();
+      });
     }
     // (6) Controllo se per quel giorno person ha anche un turno associato ed effettuo, i ricalcoli
     
