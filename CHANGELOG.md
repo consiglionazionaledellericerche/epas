@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Removed
+  - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e
+    /stampingsfromclient/absencenotrecompute (ora rispondono 404), non più usati dai client
+    ufficiali (epas-client, epas-client-sql). Eventuali client non ufficiali che li usano
+    ancora devono passare a /rest/absences/insertAbsence, che accetta parametri diversi: la
+    persona si indica con id, eppn, email, perseoId, codice fiscale o matricola, il codice con
+    absenceCode, il periodo con begin ed end, l'eventuale durata con hours e minutes al posto di
+    inizio e fine.
+
 ### Fixed
   - La pagina di login e le pagine della timbratura web non impiegano più circa un secondo e
     mezzo per verificare le sedi abilitate dall'indirizzo ip: il controllo confrontava ogni
@@ -12,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     (#658).
 
 ### Security
+  - I lettori badge non possono più inserire assenze tramite i metodi
+    /stampingsfromclient/absence e /stampingsfromclient/absencenotrecompute, rimossi (vedi
+    Removed).
   - Le timbrature inviate dai lettori badge (/stampings/create, /stampingsfromclient/* e REST
     v3) non possono più risultare inserite da un amministratore o dal dipendente: il flag admin
     e i campi markedByAdmin e markedByEmployee inviati dal client sono ignorati (con un WARN

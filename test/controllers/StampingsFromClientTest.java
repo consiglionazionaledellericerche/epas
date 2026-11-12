@@ -20,6 +20,8 @@ package controllers;
 import com.google.common.base.Strings;
 import common.injection.StaticInject;
 import db.h2support.H2Examples;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import javax.inject.Inject;
@@ -37,11 +39,12 @@ import org.junit.Test;
 import play.db.jpa.JPA;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import play.mvc.results.NotFound;
 import play.test.FunctionalTest;
 
 /**
  * Test funzionali sulle timbrature inviate dai client (lettori badge e REST v3): date troppo
- * nel passato o nel futuro rifiutate, testo normalizzato.
+ * nel passato o nel futuro rifiutate, testo normalizzato, niente assenze dai lettori.
  */
 @StaticInject
 public class StampingsFromClientTest extends FunctionalTest {
@@ -167,6 +170,34 @@ public class StampingsFromClientTest extends FunctionalTest {
     stamping = stampings(fixture.person).get(0);
     assertFalse(stamping.isMarkedByAdmin());
     assertFalse(stamping.isMarkedByEmployee());
+  }
+
+  /**
+   * I vecchi metodi per l'inserimento delle assenze dai client non esistono più: le assenze
+   * si inseriscono con rest.Absences.insertAbsence, riservato ai client REST.
+   */
+  @Test
+  public void badgeReaderCannotInsertAbsences() {
+    for (String action : new String[] {"absence", "absenceNotRecompute"}) {
+      for (Method method : StampingsFromClient.class.getMethods()) {
+        assertFalse("StampingsFromClient." + action + " non deve esistere",
+            method.getName().equalsIgnoreCase(action));
+      }
+    }
+
+    Fixture fixture = fixture();
+    for (String action : new String[] {"absence", "absencenotrecompute"}) {
+      String url = "/stampingsfromclient/" + action;
+      boolean notFound;
+      try {
+        Response response = POST(reader(fixture), url, new HashMap<>(), new HashMap<>());
+        notFound = response.status == 404;
+      } catch (NotFound e) {
+        // in FunctionalTest l'azione inesistente arriva come eccezione invece che come 404
+        notFound = e.getMessage().toLowerCase().contains(action + " action not found");
+      }
+      assertTrue(url + " deve rispondere 404 perché l'azione non esiste", notFound);
+    }
   }
 
   private static String withAdminFlag(String json) {
