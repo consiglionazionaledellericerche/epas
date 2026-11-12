@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+  - La pagina di login e le pagine della timbratura web non impiegano più circa un secondo e
+    mezzo per verificare le sedi abilitate dall'indirizzo ip: il controllo confrontava ogni
+    configurazione con tutte le sedi e il tempo cresceva con il quadrato del numero di sedi
+    (#658).
+
 ### Security
   - Le timbrature inviate dai lettori badge (/stampings/create, /stampingsfromclient/* e REST
     v3) non possono più risultare inserite da un amministratore o dal dipendente: il flag admin
