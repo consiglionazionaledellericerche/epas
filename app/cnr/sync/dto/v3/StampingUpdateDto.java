@@ -51,14 +51,14 @@ public class StampingUpdateDto {
   private String reason;
 
   /**
-   * questo campo booleano consente di determinare se la timbratura è stata effettuata dall'utente
-   * all'apposito lettore badge (valore = false) o se è stato l'amministratore a settare l'orario di
-   * timbratura.
+   * Ignorato: le timbrature inviate via REST dai lettori badge non sono mai inserite da un
+   * amministratore. Il campo è mantenuto per compatibilità con i client esistenti.
    */
   private boolean markedByAdmin;
 
   /**
-   * Da impostare a true quando è il dipendente a modificare la propria timbratura.
+   * Ignorato: le timbrature inviate via REST dai lettori badge non sono mai inserite dal
+   * dipendente. Il campo è mantenuto per compatibilità con i client esistenti.
    */
   private boolean markedByEmployee;
 
@@ -90,11 +90,10 @@ public class StampingUpdateDto {
 
   /**
    * Aggiorna i dati dell'oggetto Stamping passato con quelli
-   * presenti nell'instanza di questo DTO.
+   * presenti nell'instanza di questo DTO. Chi ha inserito la timbratura (markedByAdmin e
+   * markedByEmployee) non è modificabile dal client.
    */
   public void update(Stamping stamping) {
-    stamping.setMarkedByAdmin(isMarkedByAdmin());
-    stamping.setMarkedByEmployee(isMarkedByEmployee());
     stamping.setNote(StampingManager.clientText(getNote()));
     stamping.setPlace(StampingManager.clientText(getPlace()));
     stamping.setReason(StampingManager.clientText(getReason()));

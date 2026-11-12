@@ -130,7 +130,6 @@ public class LibraryUpgradesTest extends UnitTest {
     assertNotNull(stamping);
     assertEquals(Integer.valueOf(1), stamping.inOut);
     assertEquals(StampTypes.MOTIVI_DI_SERVIZIO, stamping.stampType);
-    assertTrue(stamping.markedByAdmin);
     assertEquals("T1", stamping.zona);
     assertEquals(new LocalDateTime(2026, 11, 11, 8, 30, 0), stamping.dateTime);
     assertEquals("nota", stamping.note);

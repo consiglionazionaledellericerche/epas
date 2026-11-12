@@ -109,6 +109,65 @@ public class StampingsFromClientTest extends FunctionalTest {
     assertEquals(255, stampings.get(0).getPlace().length());
   }
 
+  /**
+   * Il flag admin inviato dal lettore badge è ignorato: la timbratura non risulta inserita da
+   * un amministratore.
+   */
+  @Test
+  public void adminFlagFromBadgeReaderIsIgnored() {
+    Fixture fixture = fixture();
+    LocalDateTime dateTime = LocalDateTime.now().minusHours(2);
+    assertIsOk(PUT(reader(fixture), "/stampings/create", "application/json",
+        withAdminFlag(json(dateTime, null, null))));
+    assertIsOk(PUT(reader(fixture), "/stampingsfromclient/createnotrecompute",
+        "application/json", withAdminFlag(json(dateTime.plusMinutes(5), null, null))));
+    List<Stamping> stampings = stampings(fixture.person);
+    assertEquals(2, stampings.size());
+    for (Stamping stamping : stampings) {
+      assertFalse(stamping.isMarkedByAdmin());
+      assertFalse(stamping.isMarkedByEmployee());
+    }
+  }
+
+  /**
+   * Via REST v3 i flag markedByAdmin e markedByEmployee sono ignorati sia nella creazione sia
+   * nell'aggiornamento, che non cambia chi ha inserito la timbratura.
+   */
+  @Test
+  public void provenanceFlagsFromRestClientAreIgnored() {
+    Fixture fixture = fixture();
+    LocalDateTime dateTime = LocalDateTime.now().minusHours(1);
+    assertIsOk(POST(reader(fixture), "/rest/v3/stampings/create", "application/json",
+        "{\"badgeNumber\": \"" + BADGE + "\", \"wayType\": \"in\", \"dateTime\": \""
+        + dateTime.toString("yyyy-MM-dd'T'HH:mm")
+        + "\", \"markedByAdmin\": true, \"markedByEmployee\": true}"));
+    List<Stamping> stampings = stampings(fixture.person);
+    assertEquals(1, stampings.size());
+    Stamping stamping = stampings.get(0);
+    assertFalse(stamping.isMarkedByAdmin());
+    assertFalse(stamping.isMarkedByEmployee());
+
+    String update = "/rest/v3/stampings/update/" + stamping.id;
+    assertIsOk(PUT(reader(fixture), update, "application/json",
+        "{\"wayType\": \"in\", \"markedByAdmin\": true, \"markedByEmployee\": true}"));
+    stamping = stampings(fixture.person).get(0);
+    assertFalse(stamping.isMarkedByAdmin());
+    assertFalse(stamping.isMarkedByEmployee());
+
+    // una timbratura inserita da un amministratore resta tale anche se il client invia false
+    stamping.setMarkedByAdmin(true);
+    stamping.save();
+    JPA.em().getTransaction().commit();
+    JPA.em().getTransaction().begin();
+    assertIsOk(PUT(reader(fixture), update, "application/json",
+        "{\"wayType\": \"in\", \"markedByAdmin\": false}"));
+    assertTrue(stampings(fixture.person).get(0).isMarkedByAdmin());
+  }
+
+  private static String withAdminFlag(String json) {
+    return json.substring(0, json.length() - 1) + ", \"admin\": \"true\"}";
+  }
+
   private static final class Fixture {
     Person person;
     String readerUsername;
