@@ -8,6 +8,8 @@ export const AUTH_DIR = path.join(__dirname, '..', '.auth');
 export const ADMIN_STATE = path.join(AUTH_DIR, 'admin.json');
 /** Sessione del dipendente di prova creato da global-setup.ts. */
 export const EMPLOYEE_STATE = path.join(AUTH_DIR, 'employee.json');
+/** Sessione del dipendente di prova con il ruolo di amministratore del personale. */
+export const PERSONNEL_ADMIN_STATE = path.join(AUTH_DIR, 'personnel-admin.json');
 /** Dati del dipendente di prova (id della persona). */
 export const EMPLOYEE_DATA = path.join(AUTH_DIR, 'employee-data.json');
 
@@ -37,6 +39,24 @@ export const EMPLOYEE = {
   number: 'E2E-0001',
   qualification: 4,
 };
+
+/**
+ * Amministratore del personale della sede di prova. Alcune pagine, come lo storico del
+ * giorno nel cartellino, richiedono un ruolo sulla sede: l'utente admin di bootstrap ha
+ * solo il ruolo di sistema DEVELOPER.
+ */
+export const PERSONNEL_ADMIN = {
+  name: 'Anna',
+  surname: 'Bianchi',
+  email: 'anna.bianchi@example.com',
+  number: 'E2E-0002',
+  qualification: 4,
+};
+
+/** Ruolo assegnato a PERSONNEL_ADMIN, con l'etichetta mostrata nel form. */
+export const PERSONNEL_ADMIN_ROLE = 'Amministratore Personale';
+/** Titolo della sezione con gli utenti di PERSONNEL_ADMIN_ROLE nella pagina della sede. */
+export const PERSONNEL_ADMIN_ROLE_SECTION = 'Amministratore del personale';
 
 export function employeeData(): { personId: number } {
   return JSON.parse(fs.readFileSync(EMPLOYEE_DATA, 'utf8'));

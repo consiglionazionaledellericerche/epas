@@ -2,16 +2,18 @@ import fs from 'node:fs';
 import { request, type APIRequestContext } from '@playwright/test';
 import {
   ADMIN_STATE, ADMIN_USERNAME, AUTH_DIR, BASE_URL, EMPLOYEE, EMPLOYEE_DATA, EMPLOYEE_STATE,
+  PERSONNEL_ADMIN, PERSONNEL_ADMIN_ROLE, PERSONNEL_ADMIN_ROLE_SECTION, PERSONNEL_ADMIN_STATE,
   adminPassword,
 } from './support/env';
 
 /**
  * Prepara i dati usati dai test su un ePAS appena avviato con un database vuoto:
  * con l'utente admin di bootstrap crea un dipendente con un contratto nella sede
- * iniziale, poi salva le sessioni dell'admin e del dipendente. I test partono già
- * autenticati come il dipendente (storageState in playwright.config.ts).
+ * iniziale e un amministratore del personale della sede, poi salva le sessioni
+ * dell'admin e dei due dipendenti. I test partono già autenticati come il dipendente
+ * (storageState in playwright.config.ts).
  *
- * È ripetibile: se il dipendente esiste già viene riusato.
+ * È ripetibile: i dipendenti e il ruolo già presenti vengono riusati.
  */
 export default async function globalSetup() {
   fs.mkdirSync(AUTH_DIR, { recursive: true });
@@ -36,26 +38,49 @@ async function prepare(rest: APIRequestContext, web: APIRequestContext, password
   await web.storageState({ path: ADMIN_STATE });
 
   const office = await firstOffice(rest);
-  let person = await findEmployee(rest);
-  if (!person) {
-    person = await createEmployee(rest, office.id);
-  }
-  if (!(await hasContract(rest, person.id))) {
-    await createContract(web, person.id);
-    if (!(await hasContract(rest, person.id))) {
-      throw new Error(`Contratto non creato per il dipendente ${person.id}`);
+  const employee = await findEmployee(rest, EMPLOYEE.number)
+    ?? await createEmployee(rest, EMPLOYEE, office.id);
+  await ensureContract(rest, web, employee.id);
+  fs.writeFileSync(EMPLOYEE_DATA, JSON.stringify({ personId: employee.id }));
+
+  const personnelAdmin = await findEmployee(rest, PERSONNEL_ADMIN.number)
+    ?? await createEmployee(rest, PERSONNEL_ADMIN, office.id);
+  // il form di assegnazione dei ruoli elenca solo le persone con un contratto attivo
+  await ensureContract(rest, web, personnelAdmin.id);
+  await assignRole(web, office.id, PERSONNEL_ADMIN, PERSONNEL_ADMIN_ROLE, PERSONNEL_ADMIN_ROLE_SECTION);
+
+  await saveSessionAs(personnelAdmin.id, password, PERSONNEL_ADMIN_STATE);
+  await saveSessionAs(employee.id, password, EMPLOYEE_STATE);
+}
+
+async function ensureContract(rest: APIRequestContext, web: APIRequestContext, personId: number) {
+  if (!(await hasContract(rest, personId))) {
+    await createContract(web, personId);
+    if (!(await hasContract(rest, personId))) {
+      throw new Error(`Contratto non creato per il dipendente ${personId}`);
     }
   }
-  fs.writeFileSync(EMPLOYEE_DATA, JSON.stringify({ personId: person.id }));
+}
 
-  // L'admin passa all'utente del dipendente, che non ha una password locale.
-  const switched = await web.get('/administration/switchUserToPersonUser', {
-    params: { id: person.id },
-  });
-  if (!switched.ok()) {
-    throw new Error(`Cambio utente fallito: HTTP ${switched.status()}`);
+/**
+ * L'admin passa all'utente del dipendente, che non ha una password locale, e salva la
+ * sessione. Ogni cambio parte da un nuovo login dell'admin: dopo il cambio la sessione
+ * è quella del dipendente.
+ */
+async function saveSessionAs(personId: number, password: string, statePath: string) {
+  const web = await request.newContext({ baseURL: BASE_URL });
+  try {
+    await login(web, ADMIN_USERNAME, password);
+    const switched = await web.get('/administration/switchUserToPersonUser', {
+      params: { id: personId },
+    });
+    if (!switched.ok()) {
+      throw new Error(`Cambio utente fallito: HTTP ${switched.status()}`);
+    }
+    await web.storageState({ path: statePath });
+  } finally {
+    await web.dispose();
   }
-  await web.storageState({ path: EMPLOYEE_STATE });
 }
 
 async function login(web: APIRequestContext, username: string, password: string) {
@@ -79,16 +104,18 @@ async function firstOffice(rest: APIRequestContext): Promise<{ id: number; codeI
  * con un contratto attivo e non troverebbe un dipendente rimasto senza contratto da
  * un'esecuzione precedente interrotta.
  */
-async function findEmployee(rest: APIRequestContext): Promise<{ id: number } | undefined> {
-  const response = await rest.get('/rest/v2/persons/show', { params: { number: EMPLOYEE.number } });
+async function findEmployee(rest: APIRequestContext, number: string): Promise<{ id: number } | undefined> {
+  const response = await rest.get('/rest/v2/persons/show', { params: { number } });
   if (response.status() === 404) {
     return undefined;
   }
   return jsonOrThrow(response, 'ricerca del dipendente');
 }
 
-async function createEmployee(rest: APIRequestContext, officeId: number): Promise<{ id: number }> {
-  const response = await rest.post('/rest/v2/persons/create', { data: { ...EMPLOYEE, officeId } });
+async function createEmployee(
+  rest: APIRequestContext, person: typeof EMPLOYEE, officeId: number,
+): Promise<{ id: number }> {
+  const response = await rest.post('/rest/v2/persons/create', { data: { ...person, officeId } });
   return jsonOrThrow(response, 'creazione del dipendente');
 }
 
@@ -123,6 +150,65 @@ async function createContract(web: APIRequestContext, personId: number) {
   if (!response.ok() || response.url().includes('/login')) {
     throw new Error(`Inserimento del contratto fallito: HTTP ${response.status()}, ${response.url()}`);
   }
+}
+
+/**
+ * Assegna al dipendente un ruolo sulla sede con il form dell'amministrazione, che elenca
+ * utenti e ruoli con le loro etichette. Se il ruolo è già assegnato non fa nulla.
+ *
+ * L'esito è letto dalla pagina della sede e non dalla risposta del form:
+ * Administrators.save risponde 400 con "Esiste già quel ruolo" a qualsiasi errore di
+ * validazione, e l'errore di @Unique è sul campo nascosto della sede, non mostrato.
+ */
+async function assignRole(
+  web: APIRequestContext, officeId: number, person: typeof EMPLOYEE, roleLabel: string,
+  roleSection: string,
+) {
+  if (await hasRole(web, officeId, person, roleSection)) {
+    return;
+  }
+  const form = await web.get('/administrators/blank', { params: { officeId } });
+  const html = await form.text();
+  const token = html.match(/name="authenticityToken" value="([^"]+)"/)?.[1];
+  const user = optionValue(html, `${person.surname} ${person.name}`);
+  const role = optionValue(html, roleLabel);
+  if (!form.ok() || !token || !user || !role) {
+    throw new Error(`Form di assegnazione del ruolo non valido (HTTP ${form.status()})`);
+  }
+  const response = await web.post('/administrators/save', {
+    form: {
+      authenticityToken: token,
+      'uro.office.id': String(officeId),
+      'uro.user.id': user,
+      'uro.role.id': role,
+    },
+  });
+  if (!response.ok() || response.url().includes('/login')
+      || !(await hasRole(web, officeId, person, roleSection))) {
+    throw new Error(`Assegnazione del ruolo fallita: HTTP ${response.status()}, ${response.url()}`);
+  }
+}
+
+/** Indica se la pagina della sede elenca il dipendente nella sezione del ruolo. */
+async function hasRole(
+  web: APIRequestContext, officeId: number, person: typeof EMPLOYEE, roleSection: string,
+): Promise<boolean> {
+  const page = await web.get('/offices/edit', { params: { id: officeId } });
+  if (!page.ok() || page.url().includes('/login')) {
+    throw new Error(`Pagina della sede non disponibile: HTTP ${page.status()}, ${page.url()}`);
+  }
+  const sections = (await page.text()).split(/<h4>/);
+  const section = sections.find((s) => new RegExp(`^\\s*${roleSection}\\s*</h4>`).test(s));
+  if (section === undefined) {
+    throw new Error(`Sezione "${roleSection}" non trovata nella pagina della sede ${officeId}`);
+  }
+  return section.includes(`${person.surname} ${person.name}`);
+}
+
+/** Valore della option con l'etichetta indicata, eventualmente seguita da " - sede". */
+function optionValue(html: string, label: string): string | undefined {
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return html.match(new RegExp(`<option value="(\\d+)"[^>]*>\\s*${escaped}\\s*(?:<|-)`))?.[1];
 }
 
 async function jsonOrThrow(response: Awaited<ReturnType<APIRequestContext['get']>>, what: string) {
