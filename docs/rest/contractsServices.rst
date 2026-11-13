@@ -52,7 +52,6 @@ La persona può essere individuata passando i soliti parametri identificativi de
         "id": 4284,
         "onCertificate": true,
         "contractType": "structured_public_administration",
-     "contractType": "structured_public_administration",
         "person": {
            "email": "galileo.galilei@cnr.it",
            "eppn": "galileo.galilei@cnr.it",
@@ -255,10 +254,16 @@ La tipologia del contratto si indica con il campo *contractType*, che può valer
 Se il campo *contractType* non viene passato il contratto è creato come
 *structured_public_administration*. Per compatibilità con i client che usano ancora il campo
 *onCertificate*, se *contractType* manca e *onCertificate* è *false* il contratto è creato come
-*unstructured*. Un valore di *contractType* diverso da quelli elencati è rifiutato con un errore
-400.
+*unstructured*.
 
-Nell'aggiornamento la tipologia cambia solo se il campo *contractType* è passato.
+Sono rifiutati con un errore 400 un valore di *contractType* diverso da quelli elencati e una
+richiesta in cui *contractType* e *onCertificate* sono entrambi presenti ma in contraddizione
+(per esempio *contractType=interim* con *onCertificate=true*).
+
+Nell'aggiornamento la tipologia cambia solo se è passato il campo *contractType*, oppure se è
+passato il solo campo *onCertificate* con un valore diverso da quello attuale del contratto: in
+questo caso il contratto diventa *structured_public_administration* (*true*) o *unstructured*
+(*false*).
 
 Il campo *onCertificate* delle risposte è ricavato dalla tipologia: è *true* solo per
 *structured_public_administration*.

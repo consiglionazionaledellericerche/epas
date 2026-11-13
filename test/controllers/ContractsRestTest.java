@@ -112,6 +112,75 @@ public class ContractsRestTest extends FunctionalTest {
   }
 
   /**
+   * Tipologia e onCertificate in contraddizione sono rifiutati, coerenti sono accettati.
+   */
+  @Test
+  public void createWithContractTypeAndOnCertificate() {
+    Fixture fixture = fixture();
+    Response response = POST(manager(fixture), CREATE_URL, "application/json",
+        "{\"personId\": " + fixture.person.id + ", \"beginDate\": \"" + BEGIN_DATE
+        + "\", \"contractType\": \"interim\", \"onCertificate\": true}");
+    assertStatus(400, response);
+    assertTrue(getContent(response).contains("onCertificate"));
+    assertStatus(400, POST(manager(fixture), CREATE_URL, "application/json",
+        "{\"personId\": " + fixture.person.id + ", \"beginDate\": \"" + BEGIN_DATE
+        + "\", \"contractType\": \"structured_public_administration\", "
+        + "\"onCertificate\": false}"));
+    assertTrue(contracts(fixture.person).isEmpty());
+
+    assertIsOk(POST(manager(fixture), CREATE_URL, "application/json",
+        "{\"personId\": " + fixture.person.id + ", \"beginDate\": \"" + BEGIN_DATE
+        + "\", \"contractType\": \"interim\", \"onCertificate\": false}"));
+    assertEquals(ContractType.interim, onlyContract(fixture.person).getContractType());
+  }
+
+  /**
+   * Un body che non è un oggetto JSON è rifiutato con 400.
+   */
+  @Test
+  public void createWithMalformedBodyIsRejected() {
+    Fixture fixture = fixture();
+    assertStatus(400, POST(manager(fixture), CREATE_URL, "application/json", "[1, 2]"));
+    assertStatus(400, POST(manager(fixture), CREATE_URL, "application/json", "{\"personId\": "));
+    assertTrue(contracts(fixture.person).isEmpty());
+  }
+
+  /**
+   * Nella modifica il solo onCertificate cambia la tipologia quando è diverso da quello
+   * attuale del contratto; se è uguale la tipologia resta (un interinale resta interinale).
+   */
+  @Test
+  public void updateWithOnlyOnCertificate() {
+    Fixture fixture = fixture();
+    assertIsOk(POST(manager(fixture), CREATE_URL, "application/json",
+        "{\"personId\": " + fixture.person.id + ", \"beginDate\": \"" + BEGIN_DATE
+        + "\", \"contractType\": \"interim\"}"));
+    String updateUrl = "/rest/v2/contracts/update?id=" + onlyContract(fixture.person).id;
+    String common = "{\"personId\": " + fixture.person.id + ", \"beginDate\": \""
+        + BEGIN_DATE + "\", ";
+
+    assertIsOk(PUT(manager(fixture), updateUrl, "application/json",
+        common + "\"onCertificate\": false}"));
+    assertEquals(ContractType.interim, onlyContract(fixture.person).getContractType());
+
+    assertIsOk(PUT(manager(fixture), updateUrl, "application/json",
+        common + "\"onCertificate\": true}"));
+    Contract contract = onlyContract(fixture.person);
+    assertEquals(ContractType.structured_public_administration, contract.getContractType());
+    assertTrue(contract.isOnCertificate());
+
+    assertIsOk(PUT(manager(fixture), updateUrl, "application/json",
+        common + "\"onCertificate\": false}"));
+    contract = onlyContract(fixture.person);
+    assertEquals(ContractType.unstructured, contract.getContractType());
+    assertFalse(contract.isOnCertificate());
+
+    assertStatus(400, PUT(manager(fixture), updateUrl, "application/json",
+        common + "\"contractType\": \"interim\", \"onCertificate\": true}"));
+    assertEquals(ContractType.unstructured, onlyContract(fixture.person).getContractType());
+  }
+
+  /**
    * La modifica cambia la tipologia solo quando è indicata.
    */
   @Test

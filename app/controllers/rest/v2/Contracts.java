@@ -124,12 +124,7 @@ public class Contracts extends Controller {
       JsonResponse.badRequest();
     }
     val gson = gsonBuilder.create();
-    val contractDto = gson.fromJson(body, ContractCreateDto.class); 
-    val validationResult = validation.valid(contractDto); 
-    if (!validationResult.ok) {
-      JsonResponse.badRequest(validation.errorsMap().toString());
-    }
-    checkContractType(body, contractDto);
+    val contractDto = contractDtoFromBody(body, ContractCreateDto.class);
 
     val contract = ContractCreateDto.build(contractDto);
     if (!validation.valid(contract).ok) {
@@ -169,12 +164,7 @@ public class Contracts extends Controller {
     }
 
     val gson = gsonBuilder.create();
-    val contractDto = gson.fromJson(body, ContractUpdateDto.class); 
-    val validationResult = validation.valid(contractDto); 
-    if (!validationResult.ok) {
-      JsonResponse.badRequest(validation.errorsMap().toString());
-    }
-    checkContractType(body, contractDto);
+    val contractDto = contractDtoFromBody(body, ContractUpdateDto.class);
 
     // Salvo la situazione precedente per capire da dove riaggiornare i riepiloghi
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
@@ -203,19 +193,42 @@ public class Contracts extends Controller {
   }
 
   /**
-   * Risponde 400 se il JSON contiene una tipologia di contratto non valida: gson
-   * converte in null i valori sconosciuti di un enumerato e senza questo controllo
-   * verrebbe applicata la tipologia predefinita al posto di quella richiesta.
+   * Legge dal body JSON i dati di un contratto e risponde 400 se non sono validi: JSON
+   * malformato, campi obbligatori assenti, tipologia di contratto sconosciuta o in
+   * contraddizione con onCertificate.
    */
   @Util
-  private static void checkContractType(String body, ContractCreateDto contractDto) {
-    JsonElement contractType =
-        gsonBuilder.create().fromJson(body, JsonObject.class).get("contractType");
+  private static <T extends ContractCreateDto> T contractDtoFromBody(
+      String body, Class<T> dtoClass) {
+    val gson = gsonBuilder.create();
+    JsonObject json = null;
+    T contractDto = null;
+    try {
+      json = gson.fromJson(body, JsonObject.class);
+      contractDto = gson.fromJson(json, dtoClass);
+    } catch (com.google.gson.JsonParseException e) {
+      JsonResponse.badRequest("JSON non valido");
+    }
+    if (contractDto == null) {
+      JsonResponse.badRequest();
+    }
+    if (!validation.valid(contractDto).ok) {
+      JsonResponse.badRequest(validation.errorsMap().toString());
+    }
+    // gson converte in null i valori sconosciuti di un enumerato: senza questo controllo
+    // verrebbe applicata la tipologia predefinita al posto di quella richiesta.
+    JsonElement contractType = json.get("contractType");
     if (contractType != null && !contractType.isJsonNull()
         && contractDto.getContractType() == null) {
       JsonResponse.badRequest(String.format("contractType non valido, valori ammessi: %s",
           Lists.newArrayList(ContractType.values())));
     }
+    if (!contractDto.hasConsistentContractType()) {
+      JsonResponse.badRequest(
+          "contractType e onCertificate sono in contraddizione: onCertificate è true solo per "
+          + ContractType.structured_public_administration);
+    }
+    return contractDto;
   }
 
   /**

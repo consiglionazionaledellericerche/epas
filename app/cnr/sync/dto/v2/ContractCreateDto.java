@@ -46,7 +46,9 @@ public class ContractCreateDto {
   private LocalDate endContract;
   private String perseoId;
   private String externalId;
-  private Boolean onCertificate = Boolean.TRUE;
+  //Campo mantenuto per i client che non conoscono la tipologia del contratto.
+  //Nessun valore predefinito, per distinguere quando il client non lo passa.
+  private Boolean onCertificate;
 
   //Tipologia del contratto, ha sostituito onCertificate. Se non è passata viene
   //ricavata da onCertificate (vedi contractTypeOrDefault).
@@ -76,7 +78,7 @@ public class ContractCreateDto {
   /**
    * La tipologia del contratto indicata nel DTO oppure, se assente, quella
    * corrispondente al campo onCertificate usato dai client che non conoscono
-   * la tipologia: dipendente strutturato se onCertificate è true (il default),
+   * la tipologia: dipendente strutturato se onCertificate è true oppure assente,
    * non strutturato se è false. È la stessa corrispondenza applicata ai
    * contratti esistenti quando è stata introdotta la tipologia.
    */
@@ -86,5 +88,16 @@ public class ContractCreateDto {
     }
     return Boolean.FALSE.equals(onCertificate)
         ? ContractType.unstructured : ContractType.structured_public_administration;
+  }
+
+  /**
+   * Falso se tipologia e onCertificate sono entrambi indicati ma in contraddizione:
+   * solo i dipendenti strutturati sono presenti negli attestati.
+   */
+  public boolean hasConsistentContractType() {
+    if (contractType == null || onCertificate == null) {
+      return true;
+    }
+    return onCertificate.equals(contractType == ContractType.structured_public_administration);
   }
 }

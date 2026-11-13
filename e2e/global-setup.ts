@@ -102,7 +102,10 @@ async function createContract(rest: APIRequestContext, personId: number) {
       contractType: 'structured_public_administration',
     },
   });
-  await jsonOrThrow(response, 'creazione del contratto');
+  const contract = await jsonOrThrow(response, 'creazione del contratto');
+  if (!contract.id) {
+    throw new Error(`Contratto non creato per il dipendente ${personId}`);
+  }
 }
 
 async function jsonOrThrow(response: Awaited<ReturnType<APIRequestContext['get']>>, what: string) {
