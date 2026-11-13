@@ -51,6 +51,8 @@ La persona può essere individuata passando i soliti parametri identificativi de
         "externalId": null,
         "id": 4284,
         "onCertificate": true,
+        "contractType": "structured_public_administration",
+     "contractType": "structured_public_administration",
         "person": {
            "email": "galileo.galilei@cnr.it",
            "eppn": "galileo.galilei@cnr.it",
@@ -88,6 +90,7 @@ Per individuare il contratto è possibile utilizzare solo il campo *id*.
      "externalId": null,
      "id": 4284,
      "onCertificate": true,
+     "contractType": "structured_public_administration",
      "person": {
          "email": "galileo.galilei@cnr.it",
          "eppn": "galileo.galilei@cnr.it",
@@ -149,6 +152,7 @@ La risposta sarà del tipo:
      "externalId": null,
      "id": 4284,
      "onCertificate": true,
+     "contractType": "structured_public_administration",
      "person": {
          "email": "galileo.galilei@cnr.it",
          "eppn": "galileo.galilei@cnr.it",
@@ -200,6 +204,7 @@ La risposta sarà del tipo:
      "externalId": null,
      "id": 4678,
      "onCertificate": true,
+     "contractType": "structured_public_administration",
      "person": {
          "email": "galileo.galilei@cnr.it",
          "eppn": "galileo.galilei@cnr.it",
@@ -233,6 +238,30 @@ di orario di lavoro del dipendente da associare a questo contratto.
 La lista dei tipi di orario di lavoro è ancora disponibile con un apposito servizio REST.
 Se il campo workingTimeTypeId non viene passato il contratto viene creato con tipo orario di
 lavoro "*Normale*", quello con 7:12 giornalieri.
+
+La tipologia del contratto si indica con il campo *contractType*, che può valere:
+
+- *structured_public_administration*: dipendente strutturato a tempo determinato o indeterminato,
+  presente negli attestati di presenza;
+- *interim*: interinale;
+- *unstructured*: non strutturato.
+
+.. code-block:: bash
+
+  $ http -a istituto_xxx_registry_manager
+      POST https://epas-demo.devel.iit.cnr.it/rest/v2/contracts/create
+      beginDate=2020-10-21 personId=1234 contractType=interim
+
+Se il campo *contractType* non viene passato il contratto è creato come
+*structured_public_administration*. Per compatibilità con i client che usano ancora il campo
+*onCertificate*, se *contractType* manca e *onCertificate* è *false* il contratto è creato come
+*unstructured*. Un valore di *contractType* diverso da quelli elencati è rifiutato con un errore
+400.
+
+Nell'aggiornamento la tipologia cambia solo se il campo *contractType* è passato.
+
+Il campo *onCertificate* delle risposte è ricavato dalla tipologia: è *true* solo per
+*structured_public_administration*.
 
 Sia nella creazione che nell'aggiornamento sono presenti i controlli che le date del contratto non
 si intersechino con quelle di altri contratti già esistenti.

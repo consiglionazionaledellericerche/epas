@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import lombok.Data;
 import lombok.val;
 import models.Contract;
+import models.enumerate.ContractType;
 import org.modelmapper.ModelMapper;
 import play.data.validation.Required;
 
@@ -47,6 +48,10 @@ public class ContractCreateDto {
   private String externalId;
   private Boolean onCertificate = Boolean.TRUE;
 
+  //Tipologia del contratto, ha sostituito onCertificate. Se non è passata viene
+  //ricavata da onCertificate (vedi contractTypeOrDefault).
+  private ContractType contractType;
+
   //utilizzato per indicare alla classe ContractManager il tipo di
   //orario di lavoro da associare alla creazione del contratto.
   //Se il campo non è passato il contractManager associarà
@@ -63,6 +68,23 @@ public class ContractCreateDto {
    */
   public static Contract build(ContractCreateDto contractDto) {
     val contract = modelMapper.map(contractDto, Contract.class);
+    //imposta anche onCertificate in modo coerente con la tipologia
+    contract.setContractType(contractDto.contractTypeOrDefault());
     return contract;
+  }
+
+  /**
+   * La tipologia del contratto indicata nel DTO oppure, se assente, quella
+   * corrispondente al campo onCertificate usato dai client che non conoscono
+   * la tipologia: dipendente strutturato se onCertificate è true (il default),
+   * non strutturato se è false. È la stessa corrispondenza applicata ai
+   * contratti esistenti quando è stata introdotta la tipologia.
+   */
+  public ContractType contractTypeOrDefault() {
+    if (contractType != null) {
+      return contractType;
+    }
+    return Boolean.FALSE.equals(onCertificate)
+        ? ContractType.unstructured : ContractType.structured_public_administration;
   }
 }

@@ -47,7 +47,10 @@ public class ContractUpdateDto extends ContractCreateDto {
     contract.setEndDate(JodaConverters.javaToJodaLocalDate(getEndDate()));
     contract.setEndContract(JodaConverters.javaToJodaLocalDate(getEndContract()));
     contract.setPerseoId(getPerseoId());
-    //contract.setOnCertificate(getOnCertificate());
+    //La tipologia (e con lei onCertificate) cambia solo se è passata esplicitamente
+    if (getContractType() != null) {
+      contract.setContractType(getContractType());
+    }
     contract.setExternalId(getExternalId());
   }
 }

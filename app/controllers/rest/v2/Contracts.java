@@ -29,6 +29,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.ContractDao;
@@ -50,6 +52,7 @@ import manager.PeriodManager;
 import manager.recaps.recomputation.RecomputeRecap;
 import models.Contract;
 import models.WorkingTimeType;
+import models.enumerate.ContractType;
 import models.enumerate.VacationCode;
 
 import org.joda.time.LocalDate;
@@ -126,6 +129,7 @@ public class Contracts extends Controller {
     if (!validationResult.ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
+    checkContractType(body, contractDto);
 
     val contract = ContractCreateDto.build(contractDto);
     if (!validation.valid(contract).ok) {
@@ -170,6 +174,7 @@ public class Contracts extends Controller {
     if (!validationResult.ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
+    checkContractType(body, contractDto);
 
     // Salvo la situazione precedente per capire da dove riaggiornare i riepiloghi
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
@@ -195,6 +200,22 @@ public class Contracts extends Controller {
 
     log.info("Updated contract {} via REST", contract);
     renderJSON(gson.toJson(ContractShowDto.build(contract)));
+  }
+
+  /**
+   * Risponde 400 se il JSON contiene una tipologia di contratto non valida: gson
+   * converte in null i valori sconosciuti di un enumerato e senza questo controllo
+   * verrebbe applicata la tipologia predefinita al posto di quella richiesta.
+   */
+  @Util
+  private static void checkContractType(String body, ContractCreateDto contractDto) {
+    JsonElement contractType =
+        gsonBuilder.create().fromJson(body, JsonObject.class).get("contractType");
+    if (contractType != null && !contractType.isJsonNull()
+        && contractDto.getContractType() == null) {
+      JsonResponse.badRequest(String.format("contractType non valido, valori ammessi: %s",
+          Lists.newArrayList(ContractType.values())));
+    }
   }
 
   /**

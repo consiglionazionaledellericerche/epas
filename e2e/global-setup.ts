@@ -41,10 +41,7 @@ async function prepare(rest: APIRequestContext, web: APIRequestContext, password
     person = await createEmployee(rest, office.id);
   }
   if (!(await hasContract(rest, person.id))) {
-    await createContract(web, person.id);
-    if (!(await hasContract(rest, person.id))) {
-      throw new Error(`Contratto non creato per il dipendente ${person.id}`);
-    }
+    await createContract(rest, person.id);
   }
   fs.writeFileSync(EMPLOYEE_DATA, JSON.stringify({ personId: person.id }));
 
@@ -97,32 +94,15 @@ async function hasContract(rest: APIRequestContext, personId: number): Promise<b
   return (await jsonOrThrow(response, 'contratti del dipendente')).length > 0;
 }
 
-/**
- * Il contratto è inserito con il form web: l'API REST di creazione non permette di
- * indicare il tipo di contratto, che è obbligatorio (#672).
- */
-async function createContract(web: APIRequestContext, personId: number) {
-  const form = await web.get('/contracts/insert', { params: { 'person.id': personId } });
-  const html = await form.text();
-  const token = html.match(/name="authenticityToken" value="([^"]+)"/)?.[1];
-  // orario di lavoro "Normale", presente nei dati iniziali
-  const wtt = html.match(/<option value="(\d+)"[^>]*>\s*Normale\s*</)?.[1];
-  if (!form.ok() || !token || !wtt) {
-    throw new Error(`Form di inserimento del contratto non valido (HTTP ${form.status()})`);
-  }
-  const response = await web.post('/contracts/save', {
-    form: {
-      authenticityToken: token,
-      'contract.person.id': String(personId),
-      'contract.beginDate': `01/01/${new Date().getFullYear() - 1}`,
-      'contract.contractType': 'structured_public_administration',
-      'wtt.id': wtt,
+async function createContract(rest: APIRequestContext, personId: number) {
+  const response = await rest.post('/rest/v2/contracts/create', {
+    data: {
+      personId,
+      beginDate: `${new Date().getFullYear() - 1}-01-01`,
+      contractType: 'structured_public_administration',
     },
   });
-  // i redirect sono seguiti: un rinvio al login risponde comunque 200
-  if (!response.ok() || response.url().includes('/login')) {
-    throw new Error(`Inserimento del contratto fallito: HTTP ${response.status()}, ${response.url()}`);
-  }
+  await jsonOrThrow(response, 'creazione del contratto');
 }
 
 async function jsonOrThrow(response: Awaited<ReturnType<APIRequestContext['get']>>, what: string) {

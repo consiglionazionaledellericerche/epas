@@ -28,6 +28,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     giorno: quando restavano altre timbrature, la lista modificata e non salvata faceva fallire
     il salvataggio della transazione (ClassCastException nell'HibernateInterceptor di Play
     durante la scrittura dello storico) (#666).
+  - La creazione di un contratto via REST (/rest/v2/contracts/create) non risponde più sempre
+    400: la tipologia del contratto, obbligatoria, non si poteva indicare. Ora si passa con il
+    nuovo campo contractType (interim, structured_public_administration, unstructured), che
+    si può usare anche nella modifica ed è presente nelle risposte. Se manca, il contratto è
+    creato come dipendente strutturato, oppure come non strutturato se onCertificate è false
+    (#672).
 
 ### Security
   - I lettori badge non possono più inserire assenze tramite i metodi
