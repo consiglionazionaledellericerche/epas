@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.inject.Provider;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -98,6 +99,21 @@ public class ConfigurationManager {
     final JPQLQuery<Configuration> query = queryFactory.selectFrom(configuration)
         .where(configuration.epasParam.eq(epasParam));
     return query.fetch();
+  }
+
+  /**
+   * I valori delle configurazioni di un tipo per ufficio, senza caricare le entità.
+   *
+   * @param epasParam il parametro di configurazione
+   * @return le coppie (id dell'ufficio, valore) delle configurazioni del tipo epasParam.
+   */
+  public List<Tuple> configurationValuesWithType(EpasParam epasParam) {
+    final QConfiguration configuration = QConfiguration.configuration;
+    return queryFactory
+        .select(configuration.office.id, configuration.fieldValue)
+        .from(configuration)
+        .where(configuration.epasParam.eq(epasParam))
+        .fetch();
   }
 
   /**

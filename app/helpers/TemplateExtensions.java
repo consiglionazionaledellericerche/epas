@@ -29,6 +29,9 @@ import common.injection.StaticInject;
 import it.cnr.iit.epas.DateUtility;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.time.temporal.TemporalAccessor;
+import java.util.Calendar;
+import java.util.Date;
 import models.absences.JustifiedType;
 import models.base.BaseModel;
 import org.apache.commons.lang.WordUtils;
@@ -43,9 +46,11 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 import play.db.jpa.GenericModel;
+import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.Crypto;
 import play.libs.I18N;
+import play.templates.BaseTemplate.RawData;
 import play.templates.JavaExtensions;
 
 /**
@@ -256,17 +261,71 @@ public class TemplateExtensions extends JavaExtensions {
   }
 
   /**
-   * Traduce un oggetto.
+   * Traduce una chiave dei messaggi.
+   *
+   * <p>Il testo dei messaggi (conf/messages*) è dell'applicazione e può contenere HTML, quindi
+   * è restituito senza escape; gli argomenti di tipo testo sono codificati prima di essere
+   * inseriti nel messaggio. Se la label non è una chiave dei messaggi (ad esempio un testo
+   * inserito da un utente) è restituita come testo, che il template codifica.</p>
    *
    * @param label la label da tradurre
    * @param args la lista di argomenti
    * @return l'oggetto tradotto
    */
   public static Object label(String label, Object... args) {
-    if (label.contains("%")) {
+    if (label.contains("%") || !isMessageKey(label)) {
       return label;
     }
-    return raw(Messages.get(label, args));
+    final Object[] escapedArgs = new Object[args.length];
+    for (int i = 0; i < args.length; i++) {
+      escapedArgs[i] = escapeMessageArg(args[i]);
+    }
+    return raw(Messages.get(label, escapedArgs));
+  }
+
+  /**
+   * Traduce un testo che non è una String (ad esempio una GString dei template) come
+   * {@link #label(String, Object...)}.
+   */
+  public static Object label(CharSequence label) {
+    return label(label.toString());
+  }
+
+  /**
+   * Codifica un argomento da inserire in un messaggio restituito senza escape.
+   *
+   * <p>Restano invariati solo i tipi la cui rappresentazione non può contenere HTML e che
+   * servono a String.format così come sono (%d, %f, %b, %t); ogni altro oggetto è convertito
+   * in testo e codificato, perché il suo toString() può contenere dati inseriti dagli utenti.
+   * La codifica trasforma anche "&amp;{chiave}" in "&amp;amp;{chiave}", che
+   * {@link Messages#formatString} non risolve più come riferimento a un altro messaggio.</p>
+   */
+  static Object escapeMessageArg(Object arg) {
+    if (arg == null || arg instanceof Number || arg instanceof Boolean
+        || arg instanceof Date || arg instanceof Calendar || arg instanceof TemporalAccessor
+        || arg instanceof RawData) {
+      return arg;
+    }
+    return HtmlEscapers.htmlEscaper().escape(String.valueOf(arg));
+  }
+
+  /**
+   * Indica se la chiave è definita nei messaggi della lingua corrente o in quelli di default,
+   * con la stessa ricerca di {@link Messages#get(Object, Object...)}.
+   */
+  static boolean isMessageKey(String key) {
+    final String locale = Lang.get();
+    if (Messages.locales != null && locale != null) {
+      if (Messages.locales.containsKey(locale)
+          && Messages.locales.get(locale).getProperty(key) != null) {
+        return true;
+      }
+      if (locale.length() == 5 && Messages.locales.containsKey(locale.substring(0, 2))
+          && Messages.locales.get(locale.substring(0, 2)).getProperty(key) != null) {
+        return true;
+      }
+    }
+    return Messages.defaults != null && Messages.defaults.getProperty(key) != null;
   }
 
   public static Iterable<String> commaSplit(String value) {
