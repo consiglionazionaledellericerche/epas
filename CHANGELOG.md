@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     inizio e fine.
 
 ### Fixed
+  - Il responsabile di gruppo può di nuovo respingere le richieste di uscita di servizio: il
+    rifiuto non veniva registrato e la pagina rispondeva con un errore inaspettato (#668).
   - La pagina di login e le pagine della timbratura web non impiegano più circa un secondo e
     mezzo per verificare le sedi abilitate dall'indirizzo ip: il controllo confrontava ogni
     configurazione con tutte le sedi e il tempo cresceva con il quadrato del numero di sedi

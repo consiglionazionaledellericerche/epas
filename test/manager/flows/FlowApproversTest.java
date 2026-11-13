@@ -31,7 +31,9 @@ import models.flows.Affiliation;
 import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.CompetenceRequestType;
+import models.flows.enumerate.InformationRequestEventType;
 import models.informationrequests.IllnessRequest;
+import models.informationrequests.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
 import play.test.UnitTest;
@@ -187,6 +189,28 @@ public class FlowApproversTest extends UnitTest {
         Optional.of(request), Optional.absent(),
         Optional.absent(), userWithRole(officeB, Role.SEAT_SUPERVISOR)));
     assertNull(request.getOfficeHeadApproved());
+  }
+
+  @Test
+  public void groupManagerCanRefuseAServiceRequest() {
+    ServiceRequest request = new ServiceRequest();
+    request.setPerson(requester);
+    request.setOfficeHeadApprovalRequired(true);
+    request.setManagerApprovalRequired(true);
+    User manager = userWithRole(officeB, Role.GROUP_MANAGER);
+    addToGroupOf(manager, requester, null);
+
+    assertEquals(Optional.of(InformationRequestEventType.MANAGER_REFUSAL),
+        informationRequestManager.refusalFor(request, manager));
+    assertEquals(Optional.of(InformationRequestEventType.OFFICE_HEAD_REFUSAL),
+        informationRequestManager.refusalFor(request,
+            userWithRole(officeA, Role.SEAT_SUPERVISOR)));
+    assertFalse(informationRequestManager.refusalFor(request,
+        userWithRole(officeB, Role.SEAT_SUPERVISOR)).isPresent());
+
+    request.setManagerApproved(java.time.LocalDateTime.now());
+    assertFalse("il responsabile di gruppo ha già approvato",
+        informationRequestManager.refusalFor(request, manager).isPresent());
   }
 
   @Test
