@@ -141,7 +141,7 @@ public class Groups extends Controller {
     group.save();
     log.debug("Salvato gruppo di lavoro: {} per la sede {}", group.getName(), group.getOffice());
 
-    groupManager.updatePeople(group, people);
+    final List<String> notInserted = groupManager.updatePeople(group, people);
 
     UsersRolesOffices uro = new UsersRolesOffices();
     groupManager.createManager(office, group, uro);
@@ -149,6 +149,9 @@ public class Groups extends Controller {
         ? "Nuovo gruppo di lavoro %s salvato correttamente." 
             : "Gruppo  di lavoro %s salvato correttamente.";
     flash.success(message, group.getName());
+    if (!notInserted.isEmpty()) {
+      flash.error("%s", String.join(". ", notInserted));
+    }
     showGroups(office.id);
   }
 

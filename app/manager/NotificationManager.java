@@ -240,9 +240,9 @@ public class NotificationManager {
       val sendManagerNotification = configurationManager.configValue(person.getOffice(),
           EpasParam.SEND_MANAGER_NOTIFICATION_FOR_661, LocalDate.now());
       if (sendManagerNotification.equals(Boolean.TRUE)
-          && !groupDao.myGroups(absence.getPersonDay().getPerson()).isEmpty()) {
+          && !groupDao.approvalGroups(absence.getPersonDay().getPerson()).isEmpty()) {
         log.debug("Invio la notifica anche al responsabile di gruppo...");
-        groupDao.myGroups(absence.getPersonDay().getPerson()).stream()
+        groupDao.approvalGroups(absence.getPersonDay().getPerson()).stream()
         .map(p -> p.getManager()).forEach(m -> {
           //Mandare una mail solo nel caso del codice giornaliero o ad ore e minuti 
           //(non l'assenza oraria)
@@ -324,12 +324,12 @@ public class NotificationManager {
         .map(uro -> uro.getUser()).collect(Collectors.toList());
     if (roleDestination.getName().equals(Role.GROUP_MANAGER)) {
       log.info("Notifica al responsabile di gruppo per {}", absenceRequest);
-      List<Group> groups =
-          groupDao.groupsByOffice(person.getOffice(), Optional.absent(), Optional.of(false));
+      // solo i responsabili dei gruppi di riferimento della persona
+      List<Group> groups = groupDao.approvalGroups(person);
       log.debug("Gruppi da controllare {}", groups);
       for (User user : users) {
         for (Group group : groups) {
-          if (group.getManager().equals(user.getPerson()) && group.getPeople().contains(person)) {
+          if (group.getManager().equals(user.getPerson())) {
             Notification.builder().destination(user).message(message)
             .subject(NotificationSubject.ABSENCE_REQUEST, absenceRequest.id).create();
           }
@@ -897,7 +897,7 @@ public class NotificationManager {
     if (configurationManager.configValue(absenceRequest.getPerson().getOffice(),
         EpasParam.ABSENCE_TOP_LEVEL_GROUP_MANAGER_NOTIFICATION, 
         LocalDate.now()).equals(Boolean.TRUE)) {
-      recipients.addAll(groupDao.myGroups(absenceRequest.getPerson()).stream()
+      recipients.addAll(groupDao.approvalGroups(absenceRequest.getPerson()).stream()
           .filter(group -> group.isSendFlowsEmail())
           .map(group -> group.getManager())
           .collect(Collectors.toSet()));
@@ -1575,12 +1575,12 @@ public class NotificationManager {
         .map(uro -> uro.getUser()).collect(Collectors.toList());
     if (roleDestination.getName().equals(Role.GROUP_MANAGER)) {
       log.info("Notifica al responsabile di gruppo per {}", competenceRequest);
-      List<Group> groups =
-          groupDao.groupsByOffice(person.getOffice(), Optional.absent(), Optional.of(false));
+      // solo i responsabili dei gruppi di riferimento della persona
+      List<Group> groups = groupDao.approvalGroups(person);
       log.debug("Gruppi da controllare {}", groups);
       for (User user : users) {
         for (Group group : groups) {
-          if (group.getManager().equals(user.getPerson()) && group.getPeople().contains(person)) {
+          if (group.getManager().equals(user.getPerson())) {
             Notification.builder().destination(user).message(message)
             .subject(NotificationSubject.COMPETENCE_REQUEST, competenceRequest.id).create();
           }
@@ -1864,7 +1864,7 @@ public class NotificationManager {
     }
     List<User> users = Lists.newArrayList();
     if (roleDestination.equals(roleDao.getRoleByName(Role.GROUP_MANAGER))) {
-      users = person.getAffiliations().stream().map(gp -> gp.getGroup().getManager().getUser())
+      users = groupDao.approvalGroups(person).stream().map(g -> g.getManager().getUser())
           .collect(Collectors.toList());
     } else {
       users =
@@ -1977,7 +1977,7 @@ public class NotificationManager {
       return;
     }
     if (roleDestination.equals(roleDao.getRoleByName(Role.GROUP_MANAGER))) {
-      person.getAffiliations().stream().map(gp -> gp.getGroup().getManager().getUser())
+      groupDao.approvalGroups(person).stream().map(g -> g.getManager().getUser())
       .forEach(user -> {
         SimpleEmail simpleEmail = new SimpleEmail();
         // Per i responsabili di gruppo l'invio o meno dell'email è parametrizzato.

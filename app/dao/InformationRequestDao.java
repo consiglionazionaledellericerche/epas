@@ -16,6 +16,7 @@
  */
 package dao;
 
+import dao.filter.AffiliationFilter;
 import dao.filter.PersonOfficeFilter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -113,15 +114,12 @@ public class InformationRequestDao extends DaoBase {
         && uroList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.GROUP_MANAGER))) {
       List<Office> officeList = 
           uroList.stream().map(u -> u.getOffice()).collect(Collectors.toList());
-      final QAffiliation affiliation = QAffiliation.affiliation;
+      // solo le persone per cui il firmatario è responsabile di un gruppo di riferimento
       List<InformationRequest> queryResults = getQueryFactory().selectFrom(informationRequest)
           .join(informationRequest.person, person).fetchJoin()
-          .join(person.affiliations, affiliation)
-            .on(affiliation.beginDate.before(LocalDate.now())
-                .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
-          .join(affiliation.group, group)
-          .where(group.manager.eq(signer).and(groupManagerQuery(officeList, conditions, signer)))
-          .distinct()
+          .where(person.id.in(
+                  AffiliationFilter.personIdsInChargeOf(signer, LocalDate.now()))
+              .and(groupManagerQuery(officeList, conditions, signer)))
           .fetch();
       results.addAll(queryResults);
     } 

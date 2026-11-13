@@ -225,15 +225,15 @@ public class User extends BaseModel {
   }
 
   /**
-   * True se l'utente è responsabile di un gruppo di cui fa attualmente parte la persona
-   * passata come parametro, false altrimenti.
+   * True se l'utente è responsabile di uno dei gruppi di riferimento della persona passata come
+   * parametro (quelli con la percentuale di afferenza più alta), false altrimenti.
    *
    * @param other la persona da verificare
    * @return true se la persona è tra quelle in carico all'utente come responsabile di gruppo.
    */
   public boolean isGroupManagerOf(Person other) {
     return person != null && other != null && hasRoles(Role.GROUP_MANAGER)
-        && person.getPersonsInCharge().contains(other);
+        && person.isApprovalManagerOf(other);
   }
 
   public boolean hasAccountRoles(AccountRole... args) {

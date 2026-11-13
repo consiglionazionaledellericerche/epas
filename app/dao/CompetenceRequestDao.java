@@ -24,6 +24,7 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.AffiliationFilter;
 import dao.filter.PersonOfficeFilter;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -208,16 +209,13 @@ public class CompetenceRequestDao extends DaoBase {
         List<Office> officeList = 
             roleList.stream().map(u -> u.getOffice()).distinct().collect(Collectors.toList());
         if (roleList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.GROUP_MANAGER))) {     
-          final QAffiliation affiliation = QAffiliation.affiliation;
           conditions.and(managerQuery(officeList, conditions, signer));
+          // solo le persone per cui il firmatario è responsabile di un gruppo di riferimento
           List<CompetenceRequest> queryResults = getQueryFactory().selectFrom(competenceRequest)
               .join(competenceRequest.person, person).fetchJoin()
-              .join(person.affiliations, affiliation)
-              .on(affiliation.beginDate.before(LocalDate.now())
-                  .and(affiliation.endDate.isNull().or(affiliation.endDate.after(LocalDate.now()))))
-              .join(affiliation.group, group)
-              .where(group.manager.eq(signer).and(conditions))
-              .distinct()
+              .where(person.id.in(
+                      AffiliationFilter.personIdsInChargeOf(signer, LocalDate.now()))
+                  .and(conditions))
               .fetch();
           results.addAll(queryResults);
           //return results;

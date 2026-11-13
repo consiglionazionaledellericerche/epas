@@ -32,12 +32,14 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.function.WrapperModelFunctionFactory;
+import helpers.JodaConverters;
 import helpers.Web;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
+import manager.GroupManager;
 import manager.OfficeManager;
 import manager.PersonOfficeManager;
 import manager.PeriodManager;
@@ -82,6 +84,8 @@ public class Offices extends Controller {
   static UsersRolesOfficesDao uroDao;
   @Inject
   static OfficeManager officeManager;
+  @Inject
+  static GroupManager groupManager;
   @Inject
   static WrapperModelFunctionFactory wrapperFunctionFactory;
 
@@ -178,6 +182,12 @@ public class Offices extends Controller {
       configurationManager.updateConfigurations(office);
 
       periodManager.updatePropertiesInPeriodOwner(office);
+
+      // con la chiusura della sede si chiudono anche i suoi gruppi
+      if (office.getEndDate() != null) {
+        groupManager.closeOfficeGroups(office,
+            JodaConverters.jodaToJavaLocalDate(office.getEndDate()));
+      }
       flash.success(Web.msgSaved(Office.class));
       Institutes.index();
     }

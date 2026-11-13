@@ -18,6 +18,9 @@
 package manager.flows;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import helpers.validators.AffiliationCheck;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import models.Office;
 import models.Person;
@@ -93,6 +96,11 @@ public class FlowApproversTest extends UnitTest {
   }
 
   private void addToGroupOf(User manager, Person person, LocalDate endDate) {
+    addToGroupOf(manager, person, endDate, null);
+  }
+
+  private Group addToGroupOf(User manager, Person person, LocalDate endDate,
+      BigDecimal percentage) {
     Group group = new Group();
     group.setManager(manager.getPerson());
     Affiliation affiliation = new Affiliation();
@@ -100,8 +108,11 @@ public class FlowApproversTest extends UnitTest {
     affiliation.setPerson(person);
     affiliation.setBeginDate(LocalDate.now().minusYears(1));
     affiliation.setEndDate(endDate);
+    affiliation.setPercentage(percentage);
     group.getAffiliations().add(affiliation);
+    person.getAffiliations().add(affiliation);
     manager.getPerson().getGroupsPeople().add(group);
+    return group;
   }
 
   private AbsenceRequest absenceRequest() {
@@ -138,6 +149,82 @@ public class FlowApproversTest extends UnitTest {
     addToGroupOf(employee, member, null);
     assertFalse("serve anche il ruolo di responsabile di gruppo",
         employee.isGroupManagerOf(member));
+  }
+
+  @Test
+  public void onlyTheManagerOfThePrevailingGroupApproves() {
+    User main = userWithRole(officeA, Role.GROUP_MANAGER);
+    User minor = userWithRole(officeA, Role.GROUP_MANAGER);
+    Person member = new Person();
+    Group mainGroup = addToGroupOf(main, member, null, BigDecimal.valueOf(70));
+    addToGroupOf(minor, member, null, BigDecimal.valueOf(30));
+
+    assertEquals(ImmutableList.of(mainGroup), member.getApprovalGroups());
+    assertTrue(main.isGroupManagerOf(member));
+    assertFalse("il gruppo con la percentuale minore non conta", minor.isGroupManagerOf(member));
+    assertTrue(main.getPerson().getPersonsInCharge().contains(member));
+    assertFalse(minor.getPerson().getPersonsInCharge().contains(member));
+  }
+
+  @Test
+  public void managersOfGroupsWithTheSamePercentageAllApprove() {
+    User first = userWithRole(officeA, Role.GROUP_MANAGER);
+    User second = userWithRole(officeA, Role.GROUP_MANAGER);
+    Person member = new Person();
+    addToGroupOf(first, member, null, BigDecimal.valueOf(50));
+    addToGroupOf(second, member, null, null);
+    // la percentuale mancante vale 100%
+    assertFalse(first.isGroupManagerOf(member));
+    assertTrue(second.isGroupManagerOf(member));
+
+    Person tied = new Person();
+    addToGroupOf(first, tied, null, BigDecimal.valueOf(50));
+    addToGroupOf(second, tied, null, new BigDecimal("50.00"));
+    assertTrue(first.isGroupManagerOf(tied));
+    assertTrue(second.isGroupManagerOf(tied));
+  }
+
+  @Test
+  public void endedAffiliationsAndClosedGroupsDoNotCount() {
+    User main = userWithRole(officeA, Role.GROUP_MANAGER);
+    User other = userWithRole(officeA, Role.GROUP_MANAGER);
+    Person member = new Person();
+    addToGroupOf(main, member, LocalDate.now().minusDays(1), BigDecimal.valueOf(80));
+    Group closed = addToGroupOf(other, member, null, BigDecimal.valueOf(60));
+    User last = userWithRole(officeA, Role.GROUP_MANAGER);
+    addToGroupOf(last, member, null, BigDecimal.valueOf(20));
+
+    assertFalse(main.isGroupManagerOf(member));
+    assertTrue(other.isGroupManagerOf(member));
+    closed.setEndDate(LocalDate.now());
+    assertFalse(other.isGroupManagerOf(member));
+    assertTrue(last.isGroupManagerOf(member));
+  }
+
+  @Test
+  public void affiliationPercentagesCannotExceedOneHundred() {
+    User first = userWithRole(officeA, Role.GROUP_MANAGER);
+    User second = userWithRole(officeA, Role.GROUP_MANAGER);
+    Person member = new Person();
+    addToGroupOf(first, member, null, BigDecimal.valueOf(60));
+    Group group = new Group();
+    group.setManager(second.getPerson());
+    Affiliation affiliation = new Affiliation();
+    affiliation.setGroup(group);
+    affiliation.setPerson(member);
+    affiliation.setBeginDate(LocalDate.now());
+    affiliation.setPercentage(BigDecimal.valueOf(50));
+
+    assertEquals(0, BigDecimal.valueOf(110)
+        .compareTo(AffiliationCheck.maxTotalPercentage(affiliation)));
+    affiliation.setPercentage(BigDecimal.valueOf(40));
+    assertEquals(0, BigDecimal.valueOf(100)
+        .compareTo(AffiliationCheck.maxTotalPercentage(affiliation)));
+    // dopo la fine dell'altra afferenza la percentuale torna disponibile
+    member.getAffiliations().get(0).setEndDate(LocalDate.now().minusDays(1));
+    affiliation.setPercentage(BigDecimal.valueOf(100));
+    assertEquals(0, BigDecimal.valueOf(100)
+        .compareTo(AffiliationCheck.maxTotalPercentage(affiliation)));
   }
 
   @Test

@@ -135,24 +135,28 @@ public class GroupDao extends DaoBase {
   
   
   /**
-   * Metodo che ritorna il gruppo, se esiste, con manager manager e come appartenente person.
+   * Il gruppo, se esiste, gestito da manager tra i gruppi di riferimento di person alla data
+   * odierna (quelli con la percentuale di afferenza più alta).
    *
    * @param manager il manager del gruppo
    * @param person la persona appartenente al gruppo
-   * @return il gruppo, se esiste, che ha come manager manager e come appartenente person.
+   * @return il gruppo di riferimento di person gestito da manager, se esiste.
    */
   public Optional<Group> checkManagerPerson(Person manager, Person person) {
-    final QGroup group = QGroup.group;
-    final QAffiliation affiliation = QAffiliation.affiliation;
-    final Group result = getQueryFactory().selectFrom(group)
-        .join(group.affiliations, affiliation)
-        .where(
-            personAffiliationCondition(
-                affiliation, person, LocalDate.now()), group.manager.eq(manager))
-        .fetchFirst();
-    return Optional.fromNullable(result);
+    return Optional.fromJavaUtil(approvalGroups(person).stream()
+        .filter(g -> g.getManager().equals(manager)).findFirst());
   }
-  
+
+  /**
+   * I gruppi di riferimento della persona alla data odierna, i cui responsabili ne approvano
+   * i flussi e ricevono le notifiche.
+   *
+   * @see Person#getApprovalGroups(LocalDate)
+   */
+  public List<Group> approvalGroups(Person person) {
+    return person.getApprovalGroups(LocalDate.now());
+  }
+
   public Optional<Group> checkGroupByOfficeAndName(Office office, String name) {
     final QGroup group = QGroup.group;
     return Optional.fromNullable(getQueryFactory().selectFrom(group)
