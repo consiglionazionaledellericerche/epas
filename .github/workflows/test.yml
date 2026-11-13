@@ -76,8 +76,19 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       -
+        # La stessa cache ivy del job autotest (stessa chiave), passata alla build:
+        # play deps non riscarica le dipendenze. Con la cache vuota la build le scarica
+        # come in locale.
+        name: Cache delle dipendenze
+        uses: actions/cache@v4
+        with:
+          path: ~/.ivy2
+          key: ivy-${{ hashFiles('conf/dependencies.yml', 'jars/**') }}
+      -
         name: Build dell'immagine docker
-        run: docker build -t epas:e2e .
+        run: |
+          mkdir -p ~/.ivy2
+          docker build --build-context ivy="$HOME/.ivy2" -t epas:e2e .
       -
         name: Avvio di ePAS
         run: e2e/stack.sh up epas:e2e
@@ -89,11 +100,26 @@ jobs:
           cache: npm
           cache-dependency-path: e2e/package-lock.json
       -
-        name: Installazione di Playwright
+        name: Installazione delle dipendenze npm
+        working-directory: e2e
+        run: npm ci
+      -
+        # Il browser dipende dalla versione di Playwright, fissata in package-lock.json.
+        # Le librerie di sistema (install-deps) non sono in cache e si installano sempre.
+        name: Cache del browser di Playwright
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+      -
+        name: Installazione del browser di Playwright
         working-directory: e2e
         run: |
-          npm ci
-          npx playwright install --with-deps chromium
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" != "true" ]; then
+            npx playwright install chromium
+          fi
+          npx playwright install-deps chromium
       -
         name: Test end-to-end
         working-directory: e2e

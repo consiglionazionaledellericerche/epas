@@ -1,3 +1,8 @@
+# Cache ivy usata da play deps, vuota per default. In CI si passa quella del job
+# autotest con --build-context ivy=$HOME/.ivy2: e' montata solo durante la build e
+# non finisce nell'immagine.
+FROM scratch AS ivy
+
 FROM criluc/play1:1.5.3-temurin-11-patched@sha256:d5484cc61982c71c0f9d0fa4b1c81cd4649a88e08d87efbc568f7a6c5642c92f
 
 ENV user=epas
@@ -18,14 +23,15 @@ ADD / ${APP_HOME}
 
 WORKDIR ${APP_HOME}
 
-RUN touch conf/dev.conf && \
+RUN --mount=type=bind,from=ivy,target=/root/.ivy2,rw \
+    touch conf/dev.conf && \
     play clean && \
     play deps --sync --forProd && \
     play precompile && \
     # con --forProd le dipendenze sono copiate in lib/ e modules/: la cache ivy
-    # non serve a runtime. I moduli di play non usati (testrunner serve solo per
-    # play test) sono rimossi perche' includono librerie non aggiornate.
-    rm -rf /root/.ivy2 && \
+    # (montata sopra, le scritture sono scartate) non serve a runtime. I moduli di
+    # play non usati (testrunner serve solo per play test) sono rimossi perche'
+    # includono librerie non aggiornate.
     (cd /opt/play/play-${PLAY_VERSION}/modules && rm -rf testrunner docviewer grizzly crud) && \
     # librerie di play sostituite da versioni aggiornate in lib/ (conf/dependencies.yml)
     # e librerie non usate a runtime: driver mysql, h2 (solo test e console /@db
