@@ -6,7 +6,7 @@
 Attenzione!!! Questa operazione non potrà essere annullata.
 
 
-<a href="@{PersonMonths.deletePeopleTrainingHoursConfirmed(pm.id, session.get("officeSelected"))}">
+<a data-method="post" href="@{PersonMonths.deletePeopleTrainingHoursConfirmed(pm.id, session.get("officeSelected"))}">
   <input value="Conferma Elimina" class="btn btn-danger btn-sm" type="button">
 </a>
 

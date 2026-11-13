@@ -22,6 +22,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.querydsl.core.QueryResults;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.UserDao;
@@ -122,6 +123,7 @@ public class Users extends Controller {
    * @param userId l'utente cui associare i nuovi ruoli
    * @param roles i ruoli da associare
    */
+  @PostOnly
   public static void saveAccountRoles(Long userId, List<AccountRole> roles) {
 
     final User user = userDao.byId(userId);
@@ -155,6 +157,7 @@ public class Users extends Controller {
    *
    * @param userRoleOffice l'oggetto userRoleOffice da salvare
    */
+  @PostOnly
   public static void saveRole(@Valid UsersRolesOffices userRoleOffice) {
 
     if (Validation.hasErrors()) {
@@ -230,6 +233,7 @@ public class Users extends Controller {
    * @param password la password da salvare
    * @param confirmPassword la password da confermare
    */
+  @PostOnly
   public static void save(@Required @Valid User user, String password,
       @Equals("password") String confirmPassword) {
 

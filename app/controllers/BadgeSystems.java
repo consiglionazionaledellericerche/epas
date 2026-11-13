@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.querydsl.core.QueryResults;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.BadgeDao;
 import dao.BadgeReaderDao;
@@ -132,6 +133,7 @@ public class BadgeSystems extends Controller {
    *
    * @param badgeSystem l'oggetto per cui si vogliono cambiare le impostazioni.
    */
+  @PostOnly
   public static void updateInfo(@Valid BadgeSystem badgeSystem) {
 
     if (Validation.hasErrors()) {
@@ -154,6 +156,7 @@ public class BadgeSystems extends Controller {
    *
    * @param badgeSystem badgeSystem da salvare.
    */
+  @PostOnly
   public static void save(@Valid BadgeSystem badgeSystem) {
 
     if (Validation.hasErrors()) {
@@ -175,6 +178,7 @@ public class BadgeSystems extends Controller {
    *
    * @param id identificativo del badge reader da eliminare.
    */
+  @PostOnly
   public static void delete(Long id) {
     final BadgeSystem badgeSystem = badgeSystemDao.byId(id);
     notFoundIfNull(badgeSystem);
@@ -246,6 +250,7 @@ public class BadgeSystems extends Controller {
    * @param person la persona cui salvare il badge
    * @param personFixed se è fixata la persona
    */
+  @PostOnly
   public static void saveBadges(
       @Valid BadgeSystem badgeSystem, @Required String code, @Required Person person,
       boolean personFixed) {
@@ -403,6 +408,7 @@ public class BadgeSystems extends Controller {
    * @param confirmed se è confermata la cancellazione
    * @param personFixed se la persona è fixata
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void deleteBadge(Long badgeId, boolean confirmed, boolean personFixed) {
 
     final Badge badge = badgeDao.byId(badgeId);

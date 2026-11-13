@@ -17,6 +17,7 @@
 
 package controllers;
 
+import common.security.PostOnly;
 import controllers.Resecure.NoCheck;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -44,7 +45,9 @@ import play.mvc.Util;
  *     (inserito automaticamente dal tag #{form});</li>
  *   <li>tutte le richieste che il browser dichiara provenienti da un altro sito e che non
  *     sono navigazioni (header Fetch Metadata), per esempio un'immagine in una pagina
- *     esterna che punta ad un'azione di ePAS.</li>
+ *     esterna che punta ad un'azione di ePAS;</li>
+ *   <li>le richieste GET/HEAD alle azioni annotate con PostOnly, che modificano dati e
+ *     quindi devono arrivare in POST con il token (altrimenti basterebbe un link).</li>
  * </ul>
  * Sono escluse le azioni annotate con NoCheck e le richieste dei client REST, cioè quelle con
  * header Authorization che il browser non dichiara provenienti da un altro sito (header
@@ -65,6 +68,7 @@ public class CsrfProtection extends Controller {
   private static final String USER_AGENT_HEADER = "user-agent";
   private static final String USERNAME = "username";
   private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD", "OPTIONS");
+  private static final Set<String> TRUE_VALUES = Set.of("true", "on", "yes", "1");
   private static final Set<String> FORM_CONTENT_TYPES =
       Set.of("application/x-www-form-urlencoded", "multipart/form-data");
 
@@ -87,6 +91,25 @@ public class CsrfProtection extends Controller {
     if (problem == null) {
       return;
     }
+    reject(mode, problem);
+  }
+
+  /**
+   * Per le azioni che modificano dati solo in alcuni casi non esprimibili con PostOnly: va
+   * chiamato nel ramo che modifica i dati e applica la stessa verifica di PostOnly.
+   */
+  @Util
+  public static void checkPostOnly() {
+    final CsrfMode mode = csrfMode();
+    if (mode == CsrfMode.OFF || !"GET".equals(request.method) && !"HEAD".equals(request.method)
+        || isRestClient()) {
+      return;
+    }
+    reject(mode, "azione che modifica dati richiesta in " + request.method);
+  }
+
+  @Util
+  private static void reject(CsrfMode mode, String problem) {
     log.warn("Richiesta CSRF non valida ({}): method={}, path={}, action={}, user={}, "
         + "referer={}, user-agent={}", problem, request.method, request.path, request.action,
         session.get(USERNAME), headerValue(REFERER_HEADER), headerValue(USER_AGENT_HEADER));
@@ -110,9 +133,31 @@ public class CsrfProtection extends Controller {
       return "richiesta da un altro sito";
     }
     if (SAFE_METHODS.contains(request.method)) {
-      return null;
+      return isPostOnlyRequest() ? "azione che modifica dati richiesta in " + request.method
+          : null;
     }
     return isTokenValid() ? null : "token assente o non valido";
+  }
+
+  /**
+   * Richiesta in GET/HEAD ad un'azione PostOnly che modificherebbe i dati. Le OPTIONS non
+   * arrivano ad eseguire l'azione.
+   */
+  @Util
+  private static boolean isPostOnlyRequest() {
+    if ("OPTIONS".equals(request.method)) {
+      return false;
+    }
+    final PostOnly postOnly = getActionAnnotation(PostOnly.class);
+    if (postOnly == null) {
+      return false;
+    }
+    if (postOnly.confirmParam().isEmpty()) {
+      return true;
+    }
+    final String value = params.get(postOnly.confirmParam());
+    // stessi valori che il binder di play converte in true
+    return value != null && TRUE_VALUES.contains(value.trim().toLowerCase());
   }
 
   /**

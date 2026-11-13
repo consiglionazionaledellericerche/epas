@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
+import common.security.PostOnly;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.CompetenceCodeDao;
@@ -283,6 +284,7 @@ public class Administration extends Controller {
    * @param year   l'anno dal quale far partire il fix
    * @param month  il mese dal quale far partire il fix
    */
+  @PostOnly
   public static void fixPersonSituation(Person person, Office office, 
       @Required Integer year, @Required Integer month, boolean onlyRecap) {
 
@@ -396,6 +398,7 @@ public class Administration extends Controller {
    * @param end      la data in cui finire
    * @param forAll   se il controllo deve essere fatto per tutti
    */
+  @PostOnly
   public static void deleteUncoupledStampings(
       List<Long> peopleId, @Required LocalDate begin, LocalDate end, boolean forAll) {
 
@@ -456,6 +459,7 @@ public class Administration extends Controller {
    * sono precedenti la sua inizializzazione.
    */
   @SuppressWarnings("deprecation")
+  @PostOnly
   public static void fixDaysInTrouble() {
 
     List<Person> people = Person.findAll();
@@ -476,6 +480,7 @@ public class Administration extends Controller {
    * Riformatta nome e cognome di tutte le persone in minuscolo con la prima lettera maiuscola
    * (Es. Mario Rossi).
    */
+  @PostOnly
   public static void capitalizePeople() {
 
     List<Person> people = Person.findAll();
@@ -506,6 +511,7 @@ public class Administration extends Controller {
    *
    * @param generalSetting impostazioni generali da salvare.
    */
+  @PostOnly
   public static void saveGeneralSetting(@Required @Valid GeneralSetting generalSetting) {
     if (Validation.hasErrors()) {
       render("@data", generalSetting);
@@ -588,6 +594,7 @@ public class Administration extends Controller {
    * @param value    Valore del parametro
    * @param newParam booleano che discrimina un nuovo inserimento da una modifica.
    */
+  @PostOnly
   public static void saveConfiguration(@Required String name, @Required String value,
       boolean newParam) {
     if (Validation.hasErrors()) {
@@ -656,6 +663,7 @@ public class Administration extends Controller {
    * @param domain   nuovo dominio
    * @param sendMail booleano per effettuare l'invio email d'avviso di creazione delle persone.
    */
+  @PostOnly
   public static void changePeopleEmailDomain(@Required Office office, @Required String domain,
       boolean sendMail) {
 
@@ -815,6 +823,7 @@ public class Administration extends Controller {
    * @param year l'anno
    * @param month il mese
    */
+  @PostOnly
   public static void applyBonus(Office office, CompetenceCode code, int year, int month) {
 
     Optional<Office> optOffice = Optional.<Office>absent();
@@ -840,6 +849,7 @@ public class Administration extends Controller {
    * @param office sede
    */
   @SuppressWarnings("deprecation")
+  @PostOnly
   public static void importCertificationContracts(Office office) {
 
     notFoundIfNull(office);
@@ -1124,6 +1134,7 @@ public class Administration extends Controller {
    * Da usare solo nella versione con Docker che effettua il 
    * riavvio del servizio.
    */
+  @PostOnly(confirmParam = "confirm")
   public static void shutdown(Boolean confirm) {
     if (confirm == null || !confirm) {
       flash.success("Conferma lo shutdown selezionando la casella di conferma");
@@ -1484,6 +1495,7 @@ public class Administration extends Controller {
    * @param to data di fine
    * @param office sede dei dipendenti, se assente tutte le sedi
    */
+  @PostOnly
   public static void convertTeleworkMealTicket(@Required LocalDate from, @Required LocalDate to,
       Office office) {
     final Office selectedOffice = office != null && office.isPersistent() ? office : null;
@@ -1552,6 +1564,7 @@ public class Administration extends Controller {
    * @param to data di fine
    * @param office sede dei dipendenti, se assente tutte le sedi
    */
+  @PostOnly
   public static void recomputeTeleworkRtMealTicket(@Required LocalDate from,
       @Required LocalDate to, Office office) {
     final Office selectedOffice = office != null && office.isPersistent() ? office : null;

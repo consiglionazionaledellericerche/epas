@@ -276,7 +276,30 @@ $(function($) {
       e.stopPropagation()
     }
   });
-  
+
+  /**
+   * I link con data-method="post" (o "delete", usato dal tag b.delete) eseguono l'azione con
+   * un form POST con il token anti-CSRF: le azioni che modificano dati non accettano GET.
+   * Deve restare dopo il gestore di data-confirm, che annulla il primo click finché l'utente
+   * non conferma.
+   */
+  $(document.body).on('click', 'a[data-method]', function (e) {
+    var $a = $(this);
+    if (e.isDefaultPrevented() || String($a.data('method')).toUpperCase() === 'GET') {
+      return;
+    }
+    e.preventDefault();
+    var $form = $('<form method="post" class="hidden"></form>').attr('action', $a.attr('href'));
+    var token = $('meta[name="csrf-token"]').attr('content');
+    if (token) {
+      $('<input type="hidden" name="authenticityToken">').val(token).appendTo($form);
+    }
+    if ($a.attr('target')) {
+      $form.attr('target', $a.attr('target'));
+    }
+    $form.appendTo(document.body).submit();
+  });
+
   function toggleChevron(e) {
     var $fa = $(e.target).prev('.panel-heading').find('i.fa');
     if (e.type == "hide") {

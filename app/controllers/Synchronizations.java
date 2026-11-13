@@ -24,6 +24,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import common.security.PostOnly;
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -180,6 +181,7 @@ public class Synchronizations extends Controller {
    * @param epasInstituteId id Istituto
    * @param perseoId Perseo id dell'istituto.
    */
+  @PostOnly
   public static void joinInstitute(Long epasInstituteId, Long perseoId) {
     Optional<Institute> institute = officeDao.instituteById(epasInstituteId);
     Verify.verify(institute.isPresent());
@@ -212,6 +214,7 @@ public class Synchronizations extends Controller {
   /**
    * Lega la sede epas al perseoId. Da utilizzare manualmente con cautela!!!
    */
+  @PostOnly
   public static void joinOffice(Long epasOfficeId, Long perseoId) {
     Office office = officeDao.getOfficeById(epasOfficeId);
     Verify.verifyNotNull(office);
@@ -248,6 +251,7 @@ public class Synchronizations extends Controller {
    *
    * @param seatPerseoId Perseo ID della sede.
    */
+  @PostOnly
   public static void importOffice(Long seatPerseoId) {
 
     //Prendere da perseo quella sede.
@@ -414,6 +418,7 @@ public class Synchronizations extends Controller {
    * @param epasPersonId id della Persona
    * @param perseoId Perseo id da legare alla persona specificata.
    */
+  @PostOnly
   public static void joinPerson(Long epasPersonId, Long perseoId) {
 
     Person person = personDao.getPersonById(epasPersonId);
@@ -471,6 +476,7 @@ public class Synchronizations extends Controller {
    *
    * @param epasOfficeId id dell'ufficio.
    */
+  @PostOnly
   public static void joinAllPersonInOffice(Long epasOfficeId) {
 
     Office office = officeDao.getOfficeById(epasOfficeId);
@@ -514,6 +520,7 @@ public class Synchronizations extends Controller {
    * Posso importare una persona da perseo.. purchè non esista già una persona con quella
    * matricola.
    */
+  @PostOnly
   public static void importPerson(Long perseoId) {
 
     //Prendere da perseo quella persona.
@@ -631,6 +638,7 @@ public class Synchronizations extends Controller {
    *
    * @param epasOfficeId id dell'ufficio.
    */
+  @PostOnly
   public static void importAllPersonInOffice(Long epasOfficeId) {
 
     Office office = officeDao.getOfficeById(epasOfficeId);
@@ -686,6 +694,7 @@ public class Synchronizations extends Controller {
    * @param epasContractId id del Contratto su ePas
    * @param perseoId id del Contratto su Perseo.
    */
+  @PostOnly
   public static void joinContract(Long epasContractId, String perseoId) {
 
     Contract contract = contractDao.getContractById(epasContractId);
@@ -712,6 +721,7 @@ public class Synchronizations extends Controller {
    *
    * @param officeId officeId
    */
+  @PostOnly
   public static void joinAllActiveContractsInOffice(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -786,6 +796,7 @@ public class Synchronizations extends Controller {
    * Posso importare un contratto da perseo... purchè la sua persona sia sincronizzata e non
    * conflitti con le date dei contratti epas.
    */
+  @PostOnly
   public static void importContract(String perseoId, Long epasPersonId) {
 
     Person person = personDao.getPersonById(epasPersonId);
@@ -844,6 +855,7 @@ public class Synchronizations extends Controller {
    * Posso importare un contratto da perseo... purchè la sua persona sia sincronizzata e non
    * conflitti con le date dei contratti epas.
    */
+  @PostOnly
   public static void importAllContractsInOffice(Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -864,6 +876,7 @@ public class Synchronizations extends Controller {
    *
    * @param instituteId istituto
    */
+  @PostOnly
   public static void unjoinInstitute(Long instituteId) {
 
     Optional<Institute> instituteOpt = officeDao.instituteById(instituteId);
@@ -911,6 +924,7 @@ public class Synchronizations extends Controller {
    * Importa tutti i badge non ancora presenti su ePAS e sincronizza
    * quelli già esistenti.
    */
+  @PostOnly
   public static void importBadges(Long officeId) {
 
     if (officeId == null) {
@@ -953,6 +967,7 @@ public class Synchronizations extends Controller {
    *
    * @param officeId l'identificativo della sede
    */
+  @PostOnly
   public static void syncEppn(Long officeId) {
 
     if (officeId == null) {
@@ -1019,6 +1034,7 @@ public class Synchronizations extends Controller {
    *
    * @param id id in ePAS della persona da sincronizzare.
    */
+  @PostOnly
   public static void syncPerson(Long id) {
     Verify.verifyNotNull(id);
     Person person = Person.findById(id);

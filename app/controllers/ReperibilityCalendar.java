@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
@@ -212,6 +213,7 @@ public class ReperibilityCalendar extends Controller {
    * @param personReperibilityDayId id del persnShiftDay da controllare
    * @param newDate giorno nel quale salvare il turno error 409 con messaggio di
    */
+  @PostOnly
   public static void changeReperibility(long personReperibilityDayId, LocalDate newDate) {
 
     final PNotifyObject message;
@@ -270,6 +272,7 @@ public class ReperibilityCalendar extends Controller {
    * @param date la data in cui inserire il turno
    * @param reperibilityId l'id dell'attività su cui inserire il reperibilie
    */
+  @PostOnly
   public static void newReperibility(long personId, LocalDate date, long reperibilityId) {
 
     final PNotifyObject message;
@@ -346,6 +349,7 @@ public class ReperibilityCalendar extends Controller {
    *
    * @param prd Reperibilità da eliminare
    */
+  @PostOnly
   public static void deleteReperibility(PersonReperibilityDay prd) {
     final PNotifyObject message;
     if (prd == null) {
@@ -602,6 +606,7 @@ public class ReperibilityCalendar extends Controller {
    * @param version la versione da verificare
    * @param reperibilityTypeMonthId l'id del reperibilityTypeMonth da controllare
    */
+  @PostOnly
   public static void approveReperibilityInMonth(long version, long reperibilityTypeMonthId) {
 
     ReperibilityTypeMonth reperibilityTypeMonth = 
@@ -634,6 +639,7 @@ public class ReperibilityCalendar extends Controller {
    * @param reperibilityTypeMonthId l'id del reperibilityTypeMonth contenente le info 
    *     su approvazione della reperibilità
    */
+  @PostOnly
   public static void removeApprovation(long reperibilityTypeMonthId) {
 
     ReperibilityTypeMonth reperibilityTypeMonth = 

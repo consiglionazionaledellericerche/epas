@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.ContractDao;
 import dao.GeneralSettingDao;
@@ -111,6 +112,7 @@ public class WorkingTimes extends Controller {
   /**
    * Aggiornamento della descrizione di una tipologia di orario di lavoro.
    */
+  @PostOnly
   public static void updateDescription(Long wttId, @Required String description) {
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
     notFoundIfNull(wtt);
@@ -359,6 +361,7 @@ public class WorkingTimes extends Controller {
    * @param submit  booleano per completare la procedura
    * @param vwt Orario di lavoro verticale.
    */
+  @PostOnly(confirmParam = "submit")
   public static void insertVerticalWorkingTime(Long officeId, @Required String name, 
       String externalId, int step, boolean reproportionEnabled,
       boolean switchDay, boolean submit, @Valid VerticalWorkingTime vwt) {
@@ -428,6 +431,7 @@ public class WorkingTimes extends Controller {
    * @param horizontalPattern il dto contenente le informazioni da persistere
    * @param office            l'ufficio a cui associare l'orario di lavoro
    */
+  @PostOnly
   public static void saveHorizontal(@Valid HorizontalWorkingTime horizontalPattern,
       @Required Office office) {
 
@@ -531,6 +535,7 @@ public class WorkingTimes extends Controller {
    *
    * @param wttId tipo orario
    */
+  @PostOnly
   public static void delete(Long wttId) {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
@@ -562,6 +567,7 @@ public class WorkingTimes extends Controller {
    *
    * @param wttId tipo orario
    */
+  @PostOnly
   public static void toggleWorkingTimeTypeEnabled(Long wttId) {
 
     WorkingTimeType wtt = workingTimeTypeDao.getWorkingTimeTypeById(wttId);
@@ -643,6 +649,7 @@ public class WorkingTimes extends Controller {
    * @param dateFrom data inizio
    * @param dateTo data fine
    */
+  @PostOnly
   public static void executeChangeWorkingTimeTypeToAll(
       WorkingTimeType wtt, WorkingTimeType wttNew, Long officeId, LocalDate dateFrom,
       LocalDate dateTo) {
@@ -740,6 +747,7 @@ public class WorkingTimes extends Controller {
    * @param wtt l'orario di lavoro
    * @param officeId l'identificativo della sede
    */
+  @PostOnly
   public static void executeChangeEnableAdjustment(WorkingTimeType wtt, Long officeId) {
     notFoundIfNull(wtt);
     Office office = officeDao.getOfficeById(officeId);

@@ -48,13 +48,13 @@
               <span class="label label-default">${suggested.cds}</span>
 	          <span class="label label-default" popover-hover-2 data-content="${suggested.name}">${suggested.code}</span>
 	          <span class="label label-success">${suggested.perseoId}</span>
-	          <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinInstitute(institute.id, suggested.perseoId)}">Associa</a>
+	          <a data-method="post" class="btn btn btn-info btn-xs" href="@{Synchronizations.joinInstitute(institute.id, suggested.perseoId)}">Associa</a>
 	        #{/if}
 
         #{/if}
         #{else}
            <span class="label label-success">${institute.perseoId}</span>
-           <a class="btn btn btn-warning btn-xs"
+           <a data-method="post" class="btn btn btn-warning btn-xs"
               popover-hover-2 data-content="Unjoin PerseoId Istituto-Sede-Persone-Contratti"
               href="@{Synchronizations.unjoinInstitute(institute.id)}"><i class="fa fa-times" aria-hidden="true"></i></a>
         #{/else}
@@ -99,7 +99,7 @@
 	          <span class="label label-default">${suggested.name}</span>
 	          <span class="label label-default">${suggested.address}</span>
 	          <span class="label label-success">${suggested.perseoId}</span>
-	          <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinOffice(seat.id, suggested.perseoId)}">Associa</a>
+	          <a data-method="post" class="btn btn btn-info btn-xs" href="@{Synchronizations.joinOffice(seat.id, suggested.perseoId)}">Associa</a>
 	        #{/if}
           #{/if}
           #{else}

@@ -26,6 +26,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.CertificationDao;
 import dao.CompetenceCodeDao;
@@ -189,6 +190,7 @@ public class Competences extends Controller {
    * @param competenceCodeId l'id della competenza da abilitare/disabilitare
    * @param confirmed        se siamo in fase di conferma o meno
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void evaluateCompetenceCode(Long competenceCodeId, boolean confirmed) {
     CompetenceCode comp = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
     notFoundIfNull(comp);
@@ -222,6 +224,7 @@ public class Competences extends Controller {
    *
    * @param group il gruppo a cui aggiungere competenze
    */
+  @PostOnly
   public static void addCompetences(CompetenceCodeGroup group, CompetenceCode code) {
     notFoundIfNull(group);
     if (!code.getLimitUnit().name().equals(group.getLimitUnit().name())) {
@@ -282,6 +285,7 @@ public class Competences extends Controller {
    *
    * @param competenceCode codice
    */
+  @PostOnly
   public static void save(@Valid final CompetenceCode competenceCode) {
 
     if (Validation.hasErrors()) {
@@ -308,6 +312,7 @@ public class Competences extends Controller {
    *
    * @param group il gruppo di codici competenza
    */
+  @PostOnly
   public static void saveGroup(@Valid final CompetenceCodeGroup group) {
 
     if (Validation.hasErrors()) {
@@ -331,6 +336,7 @@ public class Competences extends Controller {
    *
    * @param competenceCodeId l'id del codice di competenza da cancellare
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void deleteCompetenceFromGroup(Long competenceCodeId, boolean confirmed) {
     CompetenceCode code = competenceCodeDao.getCompetenceCodeById(competenceCodeId);
     notFoundIfNull(code);
@@ -419,6 +425,7 @@ public class Competences extends Controller {
    * @param year        l'anno di riferimento
    * @param month       il mese di riferimento
    */
+  @PostOnly
   public static void saveNewCompetenceConfiguration(List<Long> codeListIds,
       Long personId, int year, int month) {
     Person person = personDao.getPersonById(personId);
@@ -617,6 +624,7 @@ public class Competences extends Controller {
    *
    * @param competence la competenza relativa alla persona
    */
+  @PostOnly
   public static void saveCompetence(@Required Integer valueApproved, @Required Competence competence) {
 
     notFoundIfNull(competence);
@@ -714,6 +722,7 @@ public class Competences extends Controller {
    * @param numeroOre valore
    * @param officeId  sede
    */
+  @PostOnly
   public static void saveOvertime(Integer year, String numeroOre, Long officeId) {
 
     Office office = officeDao.getOfficeById(officeId);
@@ -902,6 +911,7 @@ public class Competences extends Controller {
    * @param year l'anno di riferimento
    * @param month il mese di riferimento
    */
+  @PostOnly
   public static void recalculateBonus(Long officeId, Long codeId, int year, int month) {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -986,6 +996,7 @@ public class Competences extends Controller {
    * @param type   il servizio da persistere
    * @param office la sede di appartenenza del servizio
    */
+  @PostOnly
   public static void saveReperibility(@Valid PersonReperibilityType type, @Valid Office office) {
 
     rules.checkIfPermitted(office);
@@ -1010,6 +1021,7 @@ public class Competences extends Controller {
    * @param office la sede a cui si vuole collegare il servizio
    *     metodo che persiste il servizio associandolo alla sede.
    */
+  @PostOnly
   public static void saveShift(@Valid ShiftCategories cat, @Valid Office office) {
 
     rules.checkIfPermitted(office);
@@ -1043,6 +1055,7 @@ public class Competences extends Controller {
    * @param reperibilityTypeId l'id del servizio da disabilitare/abilitare
    * @param confirmed          il booleano per consentire la persistenza di una modifica
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void evaluateReperibility(Long reperibilityTypeId, boolean confirmed) {
     PersonReperibilityType type = reperibilityDao.getPersonReperibilityTypeById(reperibilityTypeId);
     notFoundIfNull(type);
@@ -1114,6 +1127,7 @@ public class Competences extends Controller {
    * @param shiftCategoryId l'id del servizio da disabilitare/abilitare
    * @param confirmed il booleano per consentire la persistenza di una modifica
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void evaluateShift(Long shiftCategoryId, boolean confirmed) {
     ShiftCategories cat = shiftDao.getShiftCategoryById(shiftCategoryId);
     notFoundIfNull(cat);
@@ -1419,6 +1433,7 @@ public class Competences extends Controller {
    *
    * @param psst l'oggetto associazione tra persona e turno.
    */
+  @PostOnly
   public static void updatePersonShiftShiftType(PersonShiftShiftType psst) {
     notFoundIfNull(psst);
     rules.checkIfPermitted(psst.getPersonShift().getPerson().getOffice());
@@ -1438,6 +1453,7 @@ public class Competences extends Controller {
    *
    * @param type l'attività di cui si vogliono modificare i parametri
    */
+  @PostOnly
   public static void editActivity(ShiftType type, boolean considerEverySlot) {
     notFoundIfNull(type);
     if (!type.isPersistent()) {
@@ -1464,6 +1480,7 @@ public class Competences extends Controller {
    *
    * @param type l'attovità di turno
    */
+  @PostOnly
   public static void deleteActivity(ShiftType type) {
 
     rules.checkIfPermitted(type.getShiftCategories().getOffice());
@@ -1531,6 +1548,7 @@ public class Competences extends Controller {
    * @param jolly true se la persona può partecipare ai diversi turni in attività 
    *     (mattina e pomeriggio di solito), false altrimenti
    */
+  @PostOnly
   public static void saveActivityConfiguration(PersonShift person, ShiftType activity, 
       LocalDate beginDate, boolean jolly) {
     notFoundIfNull(person);
@@ -1568,6 +1586,7 @@ public class Competences extends Controller {
    * @param confirmed booleano che determina se siamo alla prima chiamata del metodo o 
    *     alla conferma della rimozione
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void deletePersonShiftShiftType(Long personShiftShiftTypeId, 
       @Valid LocalDate endDate, boolean confirmed) {
     final PersonShiftShiftType psst = shiftDao.getById(personShiftShiftTypeId);
@@ -1728,6 +1747,7 @@ public class Competences extends Controller {
    * @param endDate data di fine esperienza
    * @param confirmed true se confermato, false se siamo alla prima fase di accesso al metodo
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void deletePersonReperibility(Long personReperibilityId,
       @Valid LocalDate endDate, boolean confirmed) {
     final Optional<PersonReperibility> personReperibility = 
@@ -1759,6 +1779,7 @@ public class Competences extends Controller {
    * @param person la persona da associare all'attività in reperibilità
    * @param beginDate la data di inizio appartenenza all'attività
    */
+  @PostOnly
   public static void saveReperibilityConfiguration(PersonReperibilityType type, 
       Person person, LocalDate beginDate) {
     notFoundIfNull(person);

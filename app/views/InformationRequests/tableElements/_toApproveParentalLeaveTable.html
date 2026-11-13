@@ -81,7 +81,7 @@
 				</td>
 				<td>
 				#{secure.check 'InformationRequests.approval', target: item }
-				<a class="btn btn-success btn-xs" href="@{InformationRequests.approval(item.id)}">
+				<a data-method="post" class="btn btn-success btn-xs" href="@{InformationRequests.approval(item.id)}">
         		Approva 
       			</a>
       			#{/secure.check}

@@ -18,6 +18,7 @@
 package controllers;
 
 import com.google.common.base.Strings;
+import common.security.PostOnly;
 import dao.UserDao;
 import javax.inject.Inject;
 import jobs.PasswordRecoveryJob;
@@ -46,6 +47,7 @@ public class LostPassword extends Controller {
    * @param email la mail della persona
    * @throws Throwable eccezione
    */
+  @PostOnly
   public static void sendTokenRecoveryPassword(@Required @Email String email) throws Throwable {
     if (Validation.hasErrors()) {
       flash.error("Fornire un indirizzo email valido, operazione annullata.");
@@ -97,6 +99,7 @@ public class LostPassword extends Controller {
    * @param confermaPassword confermaPassword
    * @throws Throwable boh.
    */
+  @PostOnly
   public static void resetUserPassword(String token, @MinSize(5) @Required String nuovaPassword,
       @Required @Equals(value = "nuovaPassword", message = "Le password non corrispondono")
           String confermaPassword) throws Throwable {

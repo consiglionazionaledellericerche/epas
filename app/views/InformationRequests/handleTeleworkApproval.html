@@ -50,7 +50,7 @@
 			#{secure.check 'InformationRequests.revokeValidation'}
 				<td>
 					#{if item.teleworkValidation != null}
-						<a class="btn btn-danger btn-xs" href="@{InformationRequests.revokeValidation(item.teleworkValidation.id)}">
+						<a data-method="post" class="btn btn-danger btn-xs" href="@{InformationRequests.revokeValidation(item.teleworkValidation.id)}">
 								Revoca validazione
 						</a>
 					#{/if}

@@ -17,6 +17,7 @@
 
 package controllers;
 
+import common.security.PostOnly;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -430,6 +431,7 @@ public class CompetenceRequests extends Controller {
    * @param endDayToAsk       il giorno finale da chiedere
    * @param type              il servizio su cui chiedere il cambio
    */
+  @PostOnly
   public static void save(@Required CompetenceRequest competenceRequest, int year,
       int month, Person teamMate, PersonReperibilityDay beginDayToAsk,
       PersonReperibilityDay beginDayToGive, PersonReperibilityDay endDayToGive,
@@ -592,6 +594,7 @@ public class CompetenceRequests extends Controller {
    *
    * @param id l'identificativo della richiesta d competenza da eliminare
    */
+  @PostOnly
   public static void delete(long id) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     notFoundIfNull(competenceRequest);
@@ -640,6 +643,7 @@ public class CompetenceRequests extends Controller {
    *
    * @param id l'identificativo della richiesta
    */
+  @PostOnly(confirmParam = "approval")
   public static void approval(long id, boolean approval, Integer value) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     notFoundIfNull(competenceRequest);
@@ -686,6 +690,9 @@ public class CompetenceRequests extends Controller {
       }
     }    
 
+    // qui la richiesta viene approvata anche con approval false (richieste non di
+    // straordinario): la GET va rifiutata come per PostOnly
+    CsrfProtection.checkPostOnly();
     log.debug("Approving competence request {}", competenceRequest);
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
       int hoursAvailable = competenceRequestManager.hoursAvailable(user, competenceRequest);
@@ -742,6 +749,7 @@ public class CompetenceRequests extends Controller {
    * @param disapproval true se si rifiuta, false altrimenti
    * @param reason      la motivazione al rifiuto
    */
+  @PostOnly(confirmParam = "disapproval")
   public static void disapproval(long id, boolean disapproval, String reason) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     notFoundIfNull(competenceRequest);
@@ -771,6 +779,7 @@ public class CompetenceRequests extends Controller {
     
   }
   
+  @PostOnly(confirmParam = "confirmed")
   public static void updateNote(long id, boolean confirmed, String reason) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
     notFoundIfNull(competenceRequest);

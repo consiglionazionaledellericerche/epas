@@ -166,6 +166,41 @@ public class CsrfProtectionTest extends FunctionalTest {
   }
 
   /**
+   * Le azioni PostOnly non sono accettate in GET, anche dallo stesso sito: un link non porta
+   * il token.
+   */
+  @Test
+  public void getToPostOnlyActionIsRejected() {
+    login();
+    assertStatus(403, GET(newRequest(), savePasswordUrl() + "?" + query(passwordParams())));
+  }
+
+  @Test
+  public void getToPostOnlyActionInReportModeOnlyLogs() {
+    Play.configuration.setProperty(CsrfProtection.CSRF_MODE, "report");
+    login();
+    assertNotForbidden(GET(newRequest(), savePasswordUrl() + "?" + query(passwordParams())));
+  }
+
+  /**
+   * Con confirmParam la GET è ammessa per la pagina di conferma (parametro false) e rifiutata
+   * quando modificherebbe i dati (parametro true). La richiesta non esiste: superata la
+   * verifica l'azione risponde 404.
+   */
+  @Test
+  public void getToPostOnlyActionWithConfirmParam() {
+    login();
+    String url = Router.reverse("CompetenceRequests.updateNote").url;
+    assertStatus(404, GET(newRequest(), url + "?id=0&confirmed=false"));
+    assertStatus(403, GET(newRequest(), url + "?id=0&confirmed=true"));
+    Map<String, String> params = new HashMap<>();
+    params.put("id", "0");
+    params.put("confirmed", "true");
+    params.put("authenticityToken", token());
+    assertStatus(404, POST(newRequest(), url, params, noFiles()));
+  }
+
+  /**
    * Anche il recupero della password richiede il token.
    */
   @Test
@@ -217,6 +252,13 @@ public class CsrfProtectionTest extends FunctionalTest {
     params.put("nuovaPassword", "nuovaPassword1");
     params.put("confermaPassword", "nuovaPassword1");
     return params;
+  }
+
+  private String query(Map<String, String> params) {
+    StringBuilder query = new StringBuilder();
+    params.forEach((name, value) -> query.append(query.length() > 0 ? "&" : "")
+        .append(name).append('=').append(value));
+    return query.toString();
   }
 
   private Map<String, File> noFiles() {

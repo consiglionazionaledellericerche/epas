@@ -17,6 +17,7 @@
 
 package controllers;
 
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.BadgeReaderDao;
 import dao.ZoneDao;
@@ -68,6 +69,7 @@ public class Zones extends Controller {
    *
    * @param zone la zona che si intende persistere.
    */
+  @PostOnly
   public static void save(Zone zone, long readerId) {
     BadgeReader reader = badgeReaderDao.byId(readerId);
     notFoundIfNull(reader);
@@ -102,6 +104,7 @@ public class Zones extends Controller {
    *
    * @param link il collegamento tra zone da salvare.
    */
+  @PostOnly
   public static void saveLinks(@Valid ZoneToZones link) {
     notFoundIfNull(link);
     rules.checkIfPermitted(link.getZoneBase().getBadgeReader().getUser().getOwner());
@@ -144,6 +147,7 @@ public class Zones extends Controller {
    * @param linkId l'id del collegamento da eliminare
    * @param confirmed il booleano che mi identifica se devo confermare o meno la cancellazione
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void deleteLink(long linkId, boolean confirmed) {
     ZoneToZones link = zoneDao.getLinkById(linkId);
     notFoundIfNull(link);

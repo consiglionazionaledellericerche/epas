@@ -22,6 +22,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.InformationRequestDao;
 import dao.PersonDao;
@@ -67,6 +68,7 @@ import play.data.validation.CheckWith;
 import play.data.validation.Validation;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
 
 /**
@@ -354,6 +356,7 @@ public class InformationRequests extends Controller {
    * @param begin          l'orario di inizio
    * @param finish         l'orario di fine
    */
+  @PostOnly
   public static void saveServiceRequest(ServiceRequest serviceRequest,
       @CheckWith(StringIsTime.class) String begin, @CheckWith(StringIsTime.class) String finish) {
     prepareNewRequest(serviceRequest, InformationType.SERVICE_INFORMATION);
@@ -397,7 +400,7 @@ public class InformationRequests extends Controller {
             InformationRequestEventType.COMPLETE, Optional.absent());
       }
       if (serviceRequest.getPerson().isSeatSupervisor()) {
-        approval(serviceRequest.id);
+        approve(serviceRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
         notificationManager
@@ -419,6 +422,7 @@ public class InformationRequests extends Controller {
    *
    * @param illnessRequest la richiesta informativa di malattia
    */
+  @PostOnly
   public static void saveIllnessRequest(IllnessRequest illnessRequest) {
     prepareNewRequest(illnessRequest, InformationType.ILLNESS_INFORMATION);
     InformationType type = illnessRequest.getInformationType();
@@ -447,7 +451,7 @@ public class InformationRequests extends Controller {
           illnessRequest.getPerson(),
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
       if (illnessRequest.getPerson().isSeatSupervisor()) {
-        approval(illnessRequest.id);
+        approve(illnessRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
         notificationManager
@@ -468,6 +472,7 @@ public class InformationRequests extends Controller {
    *
    * @param parentalLeaveRequest la richiesta di flusso per congedo parentale per il padre
    */
+  @PostOnly
   public static void saveParentalLeaveRequest(ParentalLeaveRequest parentalLeaveRequest, 
       Blob bornCertificate, Blob expectedDateOfBirth) {
     prepareNewRequest(parentalLeaveRequest, InformationType.PARENTAL_LEAVE_INFORMATION);
@@ -500,7 +505,7 @@ public class InformationRequests extends Controller {
           parentalLeaveRequest.getPerson(),
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
       if (parentalLeaveRequest.getPerson().isSeatSupervisor()) {
-        approval(parentalLeaveRequest.id);
+        approve(parentalLeaveRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
         notificationManager
@@ -524,6 +529,7 @@ public class InformationRequests extends Controller {
    * @param year     l'anno di riferimento
    * @param month    il mese di riferimento
    */
+  @PostOnly
   public static void saveTeleworkRequest(Long personId, int year, int month) {
     Person person = personDao.getPersonById(personId);
     notFoundIfNull(person);
@@ -556,7 +562,7 @@ public class InformationRequests extends Controller {
           Optional.fromNullable(teleworkRequest), Optional.absent(), teleworkRequest.getPerson(),
           InformationRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
       if (teleworkRequest.getPerson().isSeatSupervisor()) {
-        approval(teleworkRequest.id);
+        approve(teleworkRequest.id);
       } else {
         // invio la notifica al primo che deve validare la mia richiesta
         notificationManager
@@ -583,7 +589,20 @@ public class InformationRequests extends Controller {
    *
    * @param id l'id della richiesta da approvare
    */
+  @PostOnly
   public static void approval(long id) {
+    approve(id);
+  }
+
+  /**
+   * Approva la richiesta. Non è un'azione: è chiamata anche dopo il salvataggio di una
+   * richiesta che non richiede altre approvazioni, senza il redirect in GET che passerebbe
+   * da approval.
+   *
+   * @param id l'id della richiesta da approvare
+   */
+  @Util
+  static void approve(long id) {
     InformationRequest request = informationRequestDao.getById(id);
     Optional<ServiceRequest> serviceRequest = Optional.absent();
     Optional<IllnessRequest> illnessRequest = Optional.absent();
@@ -637,6 +656,7 @@ public class InformationRequests extends Controller {
    *
    * @param id l'id della richiesta di assenza
    */
+  @PostOnly(confirmParam = "disapproval")
   public static void disapproval(long id, boolean disapproval, String reason) {
     InformationRequest informationRequest = informationRequestDao.getById(id);
     ServiceRequest serviceRequest = null;
@@ -747,6 +767,7 @@ public class InformationRequests extends Controller {
    *
    * @param id del flusso da cancellare.
    */
+  @PostOnly
   public static void delete(long id) {
     InformationRequest informationRequest = informationRequestDao.getById(id);
     notFoundIfNull(informationRequest);
@@ -867,6 +888,7 @@ public class InformationRequests extends Controller {
    *
    * @param validationId l'identificativo della validazione
    */
+  @PostOnly
   public static void revokeValidation(Long validationId) {
     Optional<TeleworkValidation> validation = validationDao.getValidationById(validationId);
     if (validation.isPresent()) {

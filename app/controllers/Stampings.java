@@ -25,6 +25,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.GroupDao;
 import dao.OfficeDao;
@@ -365,6 +366,7 @@ public class Stampings extends Controller {
    * @param stamping timbratura
    * @param time     orario
    */
+  @PostOnly
   public static void save(Long personId, @Required LocalDate date, @Required Stamping stamping,
       @Required @CheckWith(StringIsTime.class) String time, Zone zone) {
 
@@ -428,6 +430,7 @@ public class Stampings extends Controller {
    * @param stamping la timbratura da salvare
    * @param time l'orario della timbratura
    */
+  @PostOnly
   public static void saveOffSite(Long personId, @Required LocalDate date, 
       @Required Stamping stamping, @Required @CheckWith(StringIsTime.class) String time) {
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
@@ -491,6 +494,7 @@ public class Stampings extends Controller {
    * Effettua il salvataggio dei soli campi reason, place e note di una
    * timbratura per motivi di servizio.
    */
+  @PostOnly
   public static void saveServiceReasons(Long stampingId, Stamping stamping) {
     log.info("Inside saveServiceReasons");
     notFoundIfNull(stampingId);

@@ -165,7 +165,7 @@
     <p>E' possibile eliminare il &{'badgeSystem'} <strong>${badgeSystem.name}</strong> poichè non è
       associato ad
       alcuna &{'badgeReader'}.</p>
-    <a class="btn btn-danger" href=@{BadgeSystems.delete(badgeSystem.id)}>Elimina</a>
+    <a data-method="post" class="btn btn-danger" href=@{BadgeSystems.delete(badgeSystem.id)}>Elimina</a>
     #{/alert}
   </div>
   #{/if}

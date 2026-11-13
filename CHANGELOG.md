@@ -45,6 +45,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     Referrer-Policy) e attributi Secure e HttpOnly sui cookie negli esempi di Apache, nginx e
     Traefik, differenze di percorsi e comandi di Apache su RHEL/AlmaLinux.
 
+### Security
+  - Le azioni che modificano dati (cancellazioni, approvazioni, salvataggi, sincronizzazioni)
+    non sono più eseguibili con una richiesta GET, cioè con un semplice link anche da un altro
+    sito, ma solo in POST con il token anti-CSRF. I link dell'interfaccia che eseguivano
+    direttamente queste azioni inviano ora un form POST. La verifica segue il parametro
+    csrf.mode (CSRF_MODE in docker): con report le GET rifiutate sono solo segnalate nel log,
+    con enforce sono rifiutate con 403.
+
 ### Fixed
   - Un POST /login senza username o senza password non risponde più con un errore 500
     (NullPointerException nel modulo secure di Play), ma come un normale login fallito.

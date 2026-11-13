@@ -23,6 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
@@ -116,6 +117,7 @@ public class Groups extends Controller {
    * @param group il gruppo da creare
    * @param office la sede su cui crearlo
    */
+  @PostOnly
   public static void createGroup(
       Group group, Office office,
       @As(binder = JpaReferenceBinder.class)
@@ -157,6 +159,7 @@ public class Groups extends Controller {
    *
    * @param groupId id del gruppo da cancellare
    */
+  @PostOnly
   public static void deleteGroup(long groupId) {
     final Group group = Group.findById(groupId);
     notFoundIfNull(group);
@@ -355,6 +358,7 @@ public class Groups extends Controller {
     render(personOvertimes, person, year, personOvertime);
   }
   
+  @PostOnly
   public static void saveHours(PersonOvertime personOvertime, 
       int year, Long personId) {
     Person person = personDao.getPersonById(personId);

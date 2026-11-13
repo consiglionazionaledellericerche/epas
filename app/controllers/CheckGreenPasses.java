@@ -17,6 +17,7 @@
 
 package controllers;
 
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.CheckGreenPassDao;
 import dao.OfficeDao;
@@ -116,6 +117,7 @@ public class CheckGreenPasses extends Controller {
    *
    * @param checkGreenPassId l'identificativo di green pass da eliminare
    */
+  @PostOnly
   public static void deletePerson(long checkGreenPassId) {
     CheckGreenPass greenPass = passDao.getById(checkGreenPassId);
     notFoundIfNull(greenPass);
@@ -133,6 +135,7 @@ public class CheckGreenPasses extends Controller {
    *
    * @param checkGreenPassId l'identificativo del checkGreenPass da aggiornare
    */
+  @PostOnly
   public static void checkPerson(long checkGreenPassId) {
     
     CheckGreenPass greenPass = passDao.getById(checkGreenPassId);
