@@ -32,17 +32,25 @@ Variabili opzionali:
   preparare i dati. Il default è l'utente `admin` creato dal job di bootstrap su un
   database vuoto.
 
-Non lanciare i test contro un ePAS con dati reali: `global-setup.ts` crea una persona.
+I test sul token anti-CSRF si aspettano ePAS con `CSRF_MODE=enforce`, il default di
+`stack.sh`: con `off` o `report` le richieste senza token non sono rifiutate e quei test
+falliscono.
+
+Non lanciare i test contro un ePAS con dati reali: `global-setup.ts` crea due persone e i
+test modificano la nota di un giorno del suo cartellino (poi la svuotano).
 
 ## Struttura
 
 - `stack.sh` avvia e ferma i container.
 - `global-setup.ts` gira una volta prima dei test: con l'utente admin crea il dipendente
-  di prova con un contratto e salva in `.auth/` le sessioni dell'admin e del dipendente.
+  di prova e un amministratore del personale della sede, entrambi con un contratto, e salva
+  in `.auth/` le sessioni dell'admin e dei due dipendenti.
 - `support/fixtures.ts` è il `test` da importare nei test: fa fallire il test se la
   pagina solleva un errore javascript.
 - `tests/` contiene i test. Partono autenticati come il dipendente; per usare l'admin:
-  `test.use({ storageState: ADMIN_STATE })`.
+  `test.use({ storageState: ADMIN_STATE })`. L'admin di bootstrap ha solo il ruolo di
+  sistema DEVELOPER: per le pagine che richiedono un ruolo sulla sede (es. lo storico del
+  giorno) si usa `PERSONNEL_ADMIN_STATE`.
 
 I test condividono lo stesso database e sono eseguiti in sequenza: un test non deve
 dipendere dai dati lasciati da un altro e, se inserisce dei dati, li deve rimuovere.

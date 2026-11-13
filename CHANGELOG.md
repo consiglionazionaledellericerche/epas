@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Test end-to-end con Playwright (cartella e2e/), eseguiti in un browser contro l'immagine
     docker: coprono template e javascript, a partire dagli attributi del cookie di sessione e
     dalla finestra di inserimento delle assenze. Sono eseguiti a ogni pull request (#671).
+  - Test end-to-end per le schede caricate con data-async, le notifiche, l'escape dei dati
+    nella finestra di gestione del giorno e il token anti-CSRF nelle chiamate ajax. Lo stack
+    dei test avvia ePAS con CSRF_MODE=enforce (#677).
 
 ### Removed
   - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e
