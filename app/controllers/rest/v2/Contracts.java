@@ -52,6 +52,7 @@ import manager.ContractManager;
 import manager.PeriodManager;
 import manager.recaps.recomputation.RecomputeRecap;
 import models.Contract;
+import models.Person;
 import models.WorkingTimeType;
 import models.enumerate.ContractType;
 import models.enumerate.VacationCode;
@@ -127,22 +128,22 @@ public class Contracts extends Controller {
     val gson = gsonBuilder.create();
     val contractDto = contractDtoFromBody(body, ContractCreateDto.class);
 
+    //Controlla che l'utente corrente abbia i diritti di gestione anagrafica
+    //sull'office della persona indicata nel DTO
+    val person = personFromDto(contractDto);
+    rules.checkIfPermitted(person.getOffice());
+
     val contract = ContractCreateDto.build(contractDto);
+    contract.setPerson(person);
     if (!validation.valid(contract).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
-
-    //Controlla anche che l'utente corrente abbia
-    //i diritti di gestione anagrafica sull'office associato alla
-    //persona indicata nel DTO
-    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     Optional<WorkingTimeType> workingTimeType =  
         contractDto.getWorkingTimeTypeId() == null 
           ? Optional.absent()
             : Optional.fromNullable(WorkingTimeType.findById(contractDto.getWorkingTimeTypeId()));
 
-    contract.setPerson(personDao.getPersonById(contractDto.getPersonId()));
     if (!contractManager.properContractCreate(contract, workingTimeType, true)) {
       JsonResponse.badRequest("Problemi nella creazione del contratto, verificare le date");
     }
@@ -167,16 +168,15 @@ public class Contracts extends Controller {
     val gson = gsonBuilder.create();
     val contractDto = contractDtoFromBody(body, ContractUpdateDto.class);
 
+    //Controlla che l'utente corrente abbia i diritti di gestione anagrafica anche
+    //sull'office della persona indicata nel DTO, prima di modificare il contratto
+    rules.checkIfPermitted(personFromDto(contractDto).getOffice());
+
     // Salvo la situazione precedente per capire da dove riaggiornare i riepiloghi
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
     final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
 
     contractDto.update(contract);
-
-    //Controlla anche che l'utente corrente abbia
-    //i diritti di gestione anagrafica sull'office associato alla
-    //persona indicata nel DTO
-    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     if (!validation.valid(contract).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
@@ -233,6 +233,19 @@ public class Contracts extends Controller {
           + ContractType.structured_public_administration);
     }
     return contractDto;
+  }
+
+  /**
+   * La persona indicata nel DTO, letta dal database. Risponde 400 se non esiste.
+   */
+  @Util
+  private static Person personFromDto(ContractCreateDto contractDto) {
+    val person = personDao.getPersonById(contractDto.getPersonId());
+    if (person == null) {
+      JsonResponse.badRequest(
+          String.format("Persona con id %s non trovata", contractDto.getPersonId()));
+    }
+    return person;
   }
 
   /**

@@ -217,6 +217,54 @@ public class ContractsRestTest extends FunctionalTest {
         onlyContract(fixture.person).getContractType());
   }
 
+  /**
+   * Un gestore dell'anagrafica non può creare contratti per le persone di un'altra sede.
+   */
+  @Test
+  public void createForPersonOfAnotherOfficeIsForbidden() {
+    Fixture fixture = fixture();
+    Person other = personOfAnotherOffice();
+    assertStatus(403, POST(manager(fixture), CREATE_URL, "application/json",
+        "{\"personId\": " + other.id + ", \"beginDate\": \"" + BEGIN_DATE + "\"}"));
+    assertTrue(contracts(other).isEmpty());
+  }
+
+  /**
+   * Una persona inesistente è rifiutata con 400, sia nella creazione sia nella modifica.
+   */
+  @Test
+  public void unknownPersonIsRejected() {
+    Fixture fixture = fixture();
+    Response response = POST(manager(fixture), CREATE_URL, "application/json",
+        "{\"personId\": 999999, \"beginDate\": \"" + BEGIN_DATE + "\"}");
+    assertStatus(400, response);
+    assertTrue(getContent(response).contains("999999"));
+
+    assertIsOk(POST(manager(fixture), CREATE_URL, "application/json",
+        "{\"personId\": " + fixture.person.id + ", \"beginDate\": \"" + BEGIN_DATE + "\"}"));
+    Contract contract = onlyContract(fixture.person);
+    assertStatus(400, PUT(manager(fixture), "/rest/v2/contracts/update?id=" + contract.id,
+        "application/json", "{\"personId\": 999999, \"beginDate\": \"" + BEGIN_DATE + "\"}"));
+    assertEquals(fixture.person.id, onlyContract(fixture.person).getPerson().id);
+  }
+
+  /**
+   * Un contratto non può essere spostato su una persona di un'altra sede.
+   */
+  @Test
+  public void updateToPersonOfAnotherOfficeIsForbidden() {
+    Fixture fixture = fixture();
+    Person other = personOfAnotherOffice();
+    assertIsOk(POST(manager(fixture), CREATE_URL, "application/json",
+        "{\"personId\": " + fixture.person.id + ", \"beginDate\": \"" + BEGIN_DATE + "\"}"));
+    Contract contract = onlyContract(fixture.person);
+    assertStatus(403, PUT(manager(fixture), "/rest/v2/contracts/update?id=" + contract.id,
+        "application/json",
+        "{\"personId\": " + other.id + ", \"beginDate\": \"" + BEGIN_DATE + "\"}"));
+    assertEquals(fixture.person.id, onlyContract(fixture.person).getPerson().id);
+    assertTrue(contracts(other).isEmpty());
+  }
+
   private static class Fixture {
     Person person;
     String managerUsername;
@@ -235,6 +283,17 @@ public class ContractsRestTest extends FunctionalTest {
     fixture.person = Person.find("user.id = ?1", employee.id).first();
     fixture.managerUsername = manager.getUsername();
     return fixture;
+  }
+
+  /**
+   * Una persona senza contratti in una sede diversa da quella del gestore della fixture.
+   */
+  private Person personOfAnotherOffice() {
+    Office office = h2Examples.activeNormalEmployee(new LocalDate(2020, 1, 1)).getOffice();
+    User employee = h2Examples.userWithOfficeRole(office, Role.EMPLOYEE);
+    JPA.em().getTransaction().commit();
+    JPA.em().getTransaction().begin();
+    return Person.find("user.id = ?1", employee.id).first();
   }
 
   private Request manager(Fixture fixture) {

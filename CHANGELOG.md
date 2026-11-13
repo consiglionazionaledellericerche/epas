@@ -40,7 +40,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     nuovo campo contractType (interim, structured_public_administration, unstructured), che
     si può usare anche nella modifica ed è presente nelle risposte. Se manca, il contratto è
     creato come dipendente strutturato, oppure come non strutturato se onCertificate è false.
-    Un body con JSON malformato o date non valide risponde 400 invece di 500 (#672).
+    Un body con JSON malformato o date non valide risponde 400 invece di 500. La creazione e
+    la modifica verificano i permessi sulla persona indicata prima di ogni altra operazione, e
+    una persona inesistente risponde 400 invece di 500 (#672).
 
 ### Security
   - I lettori badge non possono più inserire assenze tramite i metodi
