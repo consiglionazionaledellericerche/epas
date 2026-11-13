@@ -1,0 +1,25 @@
+#{modalAsync id:'defaultModal', title:'Rimozione afferenza' }
+
+#{alert color:'danger'}
+	<div class="text-center">
+	<p>Attenzione! <br>
+	 Stai per rimuovere l'afferenza di <strong>${person.fullname}</strong> alla sede
+	 <strong>${personOffice.office.name}</strong> dal ${personOffice.beginDate.format()}
+	 #{if personOffice.endDate} al ${personOffice.endDate.format()}#{/if}.
+	</p>
+	<p>
+	 Questa operazione non potrà essere annullata e non riapre automaticamente
+	 l'afferenza precedente.
+	</p>
+	#{form @PersonOffices.delete(), class:'form-horizontal' }
+		<input type="hidden" name="id" value="${personOffice.id}"/>
+		<input type="hidden" name="confirmed" value="true"/>
+
+	    #{b.buttons center:true}
+		<input class="btn btn-danger" type="submit" value="Conferma Eliminazione" />
+		#{/b.buttons}
+	#{/form}
+	</div>
+#{/alert}
+
+#{/modalAsync}

@@ -63,13 +63,20 @@ public class FlowApproversTest extends UnitTest {
     officeA = new Office();
     officeB = new Office();
     requester = new Person();
-    requester.setOffice(officeA);
+    assignOffice(requester, officeA);
+  }
+
+  /**
+   * Afferenza della persona alla sede, in corso alla data odierna.
+   */
+  private void assignOffice(Person person, Office office) {
+    person.changeOffice(office, org.joda.time.LocalDate.now().minusYears(1));
   }
 
   private User userWithRole(Office office, String roleName) {
     User user = new User();
     Person person = new Person();
-    person.setOffice(office);
+    assignOffice(person, office);
     user.setPerson(person);
     addRole(user, office, roleName);
     return user;

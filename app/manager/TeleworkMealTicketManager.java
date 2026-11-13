@@ -289,7 +289,8 @@ public class TeleworkMealTicketManager {
     Map<Long, List<ContractWorkingTimeType>> cwttByPerson = Maps.newHashMap();
     List<AnalyzedAbsence> analyzed = absences.stream()
         .filter(a -> !office.isPresent()
-            || office.get().equals(a.getPersonDay().getPerson().getOffice()))
+            || office.get().equals(a.getPersonDay().getPerson()
+                .getOfficeAtOrCurrent(a.getPersonDay().getDate())))
         .map(a -> analyze(a, cwttByPerson))
         .collect(Collectors.toList());
 

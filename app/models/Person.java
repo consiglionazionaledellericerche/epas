@@ -17,6 +17,7 @@
 
 package models;
 
+import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import helpers.validators.CodiceFiscaleCheck;
@@ -214,10 +215,9 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @Required
   private Qualification qualification;
 
-  @ManyToOne
-  @Required
-  private Office office;
-  
+  @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})
+  private List<PersonOffice> personOffices = Lists.newArrayList();
+
   @OneToMany(mappedBy = "person")
   private Set<MealTicketCard> mealTicketCards = Sets.newHashSet();
   
@@ -298,9 +298,155 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
     return getFullname();
   }
 
+  /**
+   * Ritorna l'ufficio cui la persona afferisce alla data odierna.
+   * Se oggi la persona non ha un'afferenza attiva si considera l'ultima afferenza iniziata
+   * e, in mancanza anche di questa, la prima afferenza futura.
+   *
+   * @return l'ufficio corrente della persona, null se la persona non ha afferenze.
+   */
+  @Transient
+  public Office getOffice() {
+    final LocalDate today = LocalDate.now();
+    Office current = getOfficeAt(today);
+    if (current != null) {
+      return current;
+    }
+    Optional<PersonOffice> last = personOffices.stream()
+        .filter(po -> !po.getBeginDate().isAfter(today))
+        .max(Comparator.comparing(PersonOffice::getBeginDate));
+    if (last.isPresent()) {
+      return last.get().getOffice();
+    }
+    return personOffices.stream()
+        .min(Comparator.comparing(PersonOffice::getBeginDate))
+        .map(PersonOffice::getOffice).orElse(null);
+  }
+
+  /**
+   * La sede di afferenza alla data indicata o, se in quella data la persona non afferisce a
+   * nessuna sede, la sede corrente.
+   */
+  @Transient
+  public Office getOfficeAtOrCurrent(LocalDate date) {
+    final Office office = date == null ? null : getOfficeAt(date);
+    return office != null ? office : getOffice();
+  }
+
+  /**
+   * Le afferenze della persona che si sovrappongono all'intervallo indicato, ordinate per
+   * data di inizio.
+   *
+   * @param begin inizio dell'intervallo
+   * @param end fine dell'intervallo (null per intervallo aperto)
+   * @return le afferenze nell'intervallo.
+   */
+  @Transient
+  public List<PersonOffice> getPersonOfficesInPeriod(LocalDate begin, LocalDate end) {
+    return personOffices.stream()
+        .filter(po -> (end == null || !po.getBeginDate().isAfter(end))
+            && (po.getEndDate() == null || !po.getEndDate().isBefore(begin)))
+        .sorted(Comparator.comparing(PersonOffice::getBeginDate))
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Le sedi a cui la persona ha afferito nell'intervallo indicato.
+   */
+  @Transient
+  public List<Office> getOfficesInPeriod(LocalDate begin, LocalDate end) {
+    return getPersonOfficesInPeriod(begin, end).stream()
+        .map(PersonOffice::getOffice).distinct().collect(Collectors.toList());
+  }
+
+  /**
+   * I giorni dell'intervallo [begin, end] in cui la persona afferiva alla sede indicata.
+   */
+  @Transient
+  public Set<LocalDate> getDaysInOffice(Office office, LocalDate begin, LocalDate end) {
+    final Set<LocalDate> days = Sets.newHashSet();
+    for (PersonOffice po : getPersonOfficesInPeriod(begin, end)) {
+      if (!po.getOffice().equals(office)) {
+        continue;
+      }
+      LocalDate day = po.getBeginDate().isAfter(begin) ? po.getBeginDate() : begin;
+      final LocalDate to = po.getEndDate() != null && po.getEndDate().isBefore(end)
+          ? po.getEndDate() : end;
+      for (; !day.isAfter(to); day = day.plusDays(1)) {
+        days.add(day);
+      }
+    }
+    return days;
+  }
+
+  /**
+   * Verifica se la persona ha afferito alla sede in almeno un giorno dell'intervallo.
+   */
+  @Transient
+  public boolean isInOfficeInPeriod(Office office, LocalDate begin, LocalDate end) {
+    return getPersonOfficesInPeriod(begin, end).stream()
+        .anyMatch(po -> po.getOffice().equals(office));
+  }
+
+  /**
+   * Ritorna l'ufficio cui la persona afferisce alla data passata come parametro.
+   *
+   * @param date la data di riferimento
+   * @return l'ufficio della persona alla data indicata, null se non presente.
+   */
+  @Transient
+  public Office getOfficeAt(LocalDate date) {
+    return personOffices.stream()
+        .filter(po -> po.contains(date))
+        .map(po -> po.getOffice())
+        .findFirst()
+        .orElse(null);
+  }
+
+  /**
+   * Assegna alla persona la sede indicata a partire dalla data specificata.
+   * L'eventuale afferenza in corso a quella data viene chiusa il giorno precedente, in modo
+   * che non ci siano periodi sovrapposti; se invece esiste già un'afferenza che inizia
+   * esattamente a quella data ne viene solo aggiornata la sede.
+   * L'afferenza restituita non viene salvata: è compito del chiamante persisterla dopo aver
+   * salvato la persona, perché la relazione non è in cascata sul salvataggio.
+   *
+   * @param office la sede in cui trasferire la persona
+   * @param date la data di decorrenza dell'assegnazione
+   * @return l'afferenza, creata o aggiornata, verso la sede indicata.
+   */
+  @Transient
+  public PersonOffice changeOffice(Office office, LocalDate date) {
+    Verify.verifyNotNull(office);
+    Verify.verifyNotNull(date);
+    for (PersonOffice personOffice : personOffices) {
+      if (!personOffice.contains(date)) {
+        continue;
+      }
+      if (office.equals(personOffice.getOffice())) {
+        //La persona afferisce già a quella sede: non si spezza il periodo esistente.
+        return personOffice;
+      }
+      if (personOffice.getBeginDate().isBefore(date)) {
+        personOffice.setEndDate(date.minusDays(1));
+      } else {
+        //L'afferenza inizia alla data indicata: si corregge la sede.
+        personOffice.setOffice(office);
+        return personOffice;
+      }
+    }
+    PersonOffice personOffice = new PersonOffice();
+    personOffice.setPerson(this);
+    personOffice.setOffice(office);
+    personOffice.setBeginDate(date);
+    personOffices.add(personOffice);
+    return personOffice;
+  }
+
   @Transient
   public Institute getInstitute() {
-    return office == null ? null : office.getInstitute();    
+    Office currentOffice = getOffice();
+    return currentOffice == null ? null : currentOffice.getInstitute();
   }
   
   /**

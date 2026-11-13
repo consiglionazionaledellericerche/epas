@@ -22,6 +22,7 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -359,7 +360,8 @@ public class PersonDayDao extends DaoBase {
     
     return getQueryFactory().selectFrom(personDay)
         .leftJoin(personDay.person, person)
-        .where(person.office.eq(office).and(personDay.date.between(begin, end)))
+        .where(PersonOfficeFilter.inOfficeAt(person, office, personDay.date)
+            .and(personDay.date.between(begin, end)))
         .orderBy(personDay.date.asc()).fetch();
   }
 
@@ -391,7 +393,7 @@ public class PersonDayDao extends DaoBase {
     QStamping stamping = QStamping.stamping;
     return getQueryFactory().selectFrom(personDay)
         .leftJoin(personDay.stampings, stamping)
-        .where(personDay.person.office.eq(office),
+        .where(PersonOfficeFilter.inOfficeAt(personDay.person, office, personDay.date),
             personDay.date.between(begin, end),
             stamping.stampType.eq(StampTypes.LAVORO_FUORI_SEDE)
               .or(
@@ -411,7 +413,7 @@ public class PersonDayDao extends DaoBase {
     QStamping stamping = QStamping.stamping;
     return getQueryFactory().selectFrom(personDay)
         .leftJoin(personDay.stampings, stamping)
-        .where(personDay.person.office.eq(office),
+        .where(PersonOfficeFilter.inOfficeAt(personDay.person, office, personDay.date),
             personDay.date.between(begin, end),
             stamping.stampType.eq(stampType))
         .distinct()
@@ -448,7 +450,7 @@ public class PersonDayDao extends DaoBase {
     
     BooleanBuilder condition = new BooleanBuilder();
     if (office.isPresent()) {
-      condition.and(personDay.person.office.eq(office.get()));
+      condition.and(PersonOfficeFilter.inOfficeAt(personDay.person, office.get(), personDay.date));
     }
     return getQueryFactory().selectFrom(person)
         .leftJoin(person.personDays, personDay)

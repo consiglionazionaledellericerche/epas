@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -58,7 +59,8 @@ public class CheckGreenPassDao extends DaoBase {
     final JPQLQuery<CheckGreenPass> query = getQueryFactory()
         .selectFrom(checkGreenPass).leftJoin(checkGreenPass.person, person)
         .where(checkGreenPass.checkDate.eq(date)
-            .and(person.office.eq(office)))
+            .and(person.id.in(
+                PersonOfficeFilter.personIdsInOffices(office, date, date))))
         .orderBy(person.surname.asc());
     
     return query.fetch();

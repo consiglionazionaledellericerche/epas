@@ -9,7 +9,7 @@
       <br><em>matricola:</em> ${personCertData.person.number}
       <br>
       #{ifnot personCertData.validate}
-      #{b.link @Certifications.process(personCertData.person.id, personCertData.year, personCertData.month, true),
+      #{b.link @Certifications.process(personCertData.person.id, office?.id, personCertData.year, personCertData.month, true),
       class: 'btn-xs', fa: 'cloud-upload', 'rel':'nofollow' }
         Invia ad attestati
       #{/b.link}

@@ -22,6 +22,7 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import dao.wrapper.IWrapperFactory;
 import lombok.val;
 
@@ -83,7 +84,8 @@ public class CompetenceDao extends DaoBase {
 
     return getQueryFactory().selectFrom(competenceCode)
         .leftJoin(competenceCode.personCompetenceCodes, pcc).fetchJoin()
-        .where(pcc.person.office.eq(office)
+        .where(pcc.person.id.in(
+                PersonOfficeFilter.personIdsInOffices(office, date, date))
             .and(pcc.beginDate.loe(date)
                 .andAnyOf(pcc.endDate.isNull(), pcc.endDate.goe(date))))
         .orderBy(competenceCode.code.asc())
@@ -123,6 +125,16 @@ public class CompetenceDao extends DaoBase {
    */
   public Optional<Competence> getCompetence(
       Person person, Integer year, Integer month, CompetenceCode code) {
+    return getCompetence(person, year, month, code, person.getOfficeAtOrCurrent(
+        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()));
+  }
+
+  /**
+   * La competenza della persona nel mese attribuita alla sede indicata: nel mese di un
+   * trasferimento la stessa competenza può essere presente per entrambe le sedi.
+   */
+  public Optional<Competence> getCompetence(
+      Person person, Integer year, Integer month, CompetenceCode code, Office office) {
 
     final QCompetence competence = QCompetence.competence;
 
@@ -130,7 +142,9 @@ public class CompetenceDao extends DaoBase {
         .where(competence.person.eq(person)
             .and(competence.year.eq(year)
                 .and(competence.month.eq(month)
-                    .and(competence.competenceCode.eq(code))))).fetchOne();
+                    .and(competence.competenceCode.eq(code))))
+            .and(competence.office.eq(office).or(competence.office.isNull())))
+        .orderBy(competence.office.id.desc().nullsLast()).fetchFirst();
 
     return Optional.fromNullable(result);
 
@@ -155,7 +169,7 @@ public class CompetenceDao extends DaoBase {
 
     condition.and(competence.year.eq(year))
         .and(competence.competenceCode.code.in(codes))
-        .and(competence.person.office.eq(office));
+        .and(competence.office.eq(office));
 
     if (untilThisMonth) {
       condition.and(competence.month.loe(month));
@@ -179,7 +193,7 @@ public class CompetenceDao extends DaoBase {
     condition.and(competence.year.eq(year));
 
     if (office.isPresent()) {
-      condition.and(competence.person.office.eq(office.get()));
+      condition.and(competence.office.eq(office.get()));
     }
 
     return getQueryFactory().selectFrom(competence)
@@ -208,7 +222,7 @@ public class CompetenceDao extends DaoBase {
       condition.and(competence.person.eq(person.get()));
     }
     if (office.isPresent()) {
-    	condition.and(competence.person.office.eq(office.get()));
+      condition.and(competence.office.eq(office.get()));
     }
     final Integer result =
         getQueryFactory().select(competence.valueApproved.sum())

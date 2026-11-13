@@ -23,6 +23,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import it.cnr.iit.epas.DateInterval;
 import java.util.HashMap;
 import java.util.List;
@@ -112,7 +113,8 @@ public class MealTicketDao extends DaoBase {
         .from(qmt)
         .leftJoin(qmt.contract, qc)
         .leftJoin(qc.person, qp)
-        .where(qp.office.id.eq(office.id))
+        .where(qp.id.in(
+            PersonOfficeFilter.personIdsInOffices(office)))
         .groupBy(qmt.expireDate)
         .orderBy(qmt.expireDate.desc()).fetchFirst();
   }
@@ -166,7 +168,9 @@ public class MealTicketDao extends DaoBase {
 
     query.where(mealTicket.block.like("%" + code + "%"));
     if (office.isPresent()) {
-      query.where(person.office.eq(office.get()).and(mealTicket.returned.eq(false)));
+      query.where(person.id.in(
+          PersonOfficeFilter.personIdsInOffices(office.get()))
+          .and(mealTicket.returned.eq(false)));
     }
 
     return query.orderBy(mealTicket.block.asc()).orderBy(mealTicket.number.asc()).fetch();

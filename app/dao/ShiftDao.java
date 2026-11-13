@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -244,7 +245,8 @@ public class ShiftDao extends DaoBase {
     final QPerson person = QPerson.person;
     return getQueryFactory().select(ps).from(person)
         .leftJoin(person.personShifts, ps).fetchAll()
-        .where(person.office.eq(office)
+        .where(person.id.in(
+                PersonOfficeFilter.personIdsInOffices(office, date, date))
             .and(ps.beginDate.loe(date).andAnyOf(ps.endDate.isNull(), ps.endDate.goe(date)))
             .and(person.eq(ps.person).and(ps.disabled.eq(false)))).fetch();
   }

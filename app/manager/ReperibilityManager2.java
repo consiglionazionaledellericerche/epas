@@ -39,6 +39,7 @@ import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import models.Competence;
 import models.CompetenceCode;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonReperibility;
@@ -466,6 +467,10 @@ public class ReperibilityManager2 {
     CompetenceCode reperibilityWorkdays = reperibilityTypeMonth.getPersonReperibilityType()
         .getMonthlyCompetenceType().getWorkdaysCode();
 
+    // le competenze sono attribuite alla sede del servizio di reperibilità
+    final Office reperibilityOffice =
+        reperibilityTypeMonth.getPersonReperibilityType().getOffice();
+
     //per ogni persona approvo le reperibilità feriali e festive 
     involvedReperibilityPeople.forEach(person ->  {
       WorkDaysReperibilityDto dto = new WorkDaysReperibilityDto();
@@ -485,10 +490,10 @@ public class ReperibilityManager2 {
           reperibilityTypeMonth.getPersonReperibilityType(), true);
 
       Optional<Competence> reperibilityHolidayCompetence = competenceDao
-          .getCompetence(person, year, month, reperibilityHoliday);
+          .getCompetence(person, year, month, reperibilityHoliday, reperibilityOffice);
 
       Competence holidayCompetence = reperibilityHolidayCompetence
-          .or(new Competence(person, reperibilityHoliday, year, month));
+          .or(newCompetence(person, reperibilityHoliday, year, month, reperibilityOffice));
       if (toRemove) {
         holidayCompetence.setValueApproved(holidayCompetence.getValueApproved() 
             - dto2.holidaysReperibility);
@@ -505,10 +510,10 @@ public class ReperibilityManager2 {
       log.info("Salvata {}", holidayCompetence);
 
       Optional<Competence> reperibilityWorkdaysCompetence = competenceDao
-          .getCompetence(person, year, month, reperibilityWorkdays);
+          .getCompetence(person, year, month, reperibilityWorkdays, reperibilityOffice);
 
       Competence workdayCompetence = reperibilityWorkdaysCompetence
-          .or(new Competence(person, reperibilityWorkdays, year, month));
+          .or(newCompetence(person, reperibilityWorkdays, year, month, reperibilityOffice));
       if (toRemove) {
         workdayCompetence.setValueApproved(workdayCompetence.getValueApproved() 
             - dto.workdaysReperibility);
@@ -593,4 +598,11 @@ public class ReperibilityManager2 {
     return str;
   }
 
+
+  private static Competence newCompetence(Person person, CompetenceCode code, int year,
+      int month, Office office) {
+    final Competence competence = new Competence(person, code, year, month);
+    competence.setOffice(office);
+    return competence;
+  }
 }

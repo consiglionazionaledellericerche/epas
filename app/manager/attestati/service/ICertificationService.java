@@ -59,6 +59,12 @@ public interface ICertificationService {
       throws ExecutionException;
 
   /**
+   * Costruisce la situazione attestati di una persona per la sede indicata.
+   */
+  PersonCertData buildPersonStaticStatus(Person person, int year, int month, Office office)
+      throws ExecutionException;
+
+  /**
    * Se le due mappe contententi certificazioni sono equivalenti e non contengono errori.
    *
    * @param map1 map1

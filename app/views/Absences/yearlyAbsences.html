@@ -9,6 +9,16 @@
 <div class="container">
 
   #{title title:'Assenze Annuali ' + person.fullname + ' '+ year, administration:true /}
+
+  #{if partial}
+    #{alert color:'info'}
+      Sono visualizzate solo le assenze dei periodi in cui ${person.fullname} afferisce alle
+      sedi di propria competenza:
+      #{list items:visiblePersonOffices, as:'po'}
+        <strong>${po.office.name}</strong> dal ${po.beginDate.format()}#{if po.endDate} al ${po.endDate.format()}#{/if}${po_isLast ? '.' : ';'}
+      #{/list}
+    #{/alert}
+  #{/if}
   
 	  <table class="table table-bordered table-hover table-condensed">
 	

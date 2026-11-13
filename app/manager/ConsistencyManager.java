@@ -53,6 +53,7 @@ import models.ContractMonthRecap;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.PersonOffice;
 import models.PersonShiftDay;
 import models.PersonalWorkingTime;
 import models.StampModificationType;
@@ -293,7 +294,15 @@ public class ConsistencyManager {
     List<Person> personToRecompute = Lists.newArrayList();
 
     if (target instanceof Office) {
-      personToRecompute = ((Office) target).getPersons();
+      //La relazione con le persone è periodicizzata: vanno ricalcolate tutte le persone
+      //che afferiscono alla sede in un qualsiasi momento a partire da recomputeFrom,
+      //comprese quindi quelle che nel frattempo sono state trasferite altrove.
+      personToRecompute = ((Office) target).getPersonOffices().stream()
+          .filter(personOffice -> personOffice.getEndDate() == null
+              || !personOffice.getEndDate().isBefore(recomputeFrom))
+          .map(PersonOffice::getPerson)
+          .distinct()
+          .collect(Collectors.toList());
     } else if (target instanceof Person) {
       personToRecompute.add((Person) target);
     }
@@ -493,7 +502,8 @@ public class ConsistencyManager {
             pd.getValue().getPerson().getFullname(), pd.getValue().getDate()));
 
     LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
-        pd.getValue().getPerson().getOffice(), EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
+        pd.getValue().getPerson().getOfficeAtOrCurrent(pd.getValue().getDate()),
+        EpasParam.LUNCH_INTERVAL, pd.getValue().getDate());
 
     
     LocalTimeInterval workInterval = null;
@@ -503,7 +513,8 @@ public class ConsistencyManager {
           pwt.get().getTimeSlot().getEndSlot());
     } else {
       workInterval = (LocalTimeInterval) configurationManager.configValue(
-        pd.getValue().getPerson().getOffice(), EpasParam.WORK_INTERVAL, pd.getValue().getDate());
+        pd.getValue().getPerson().getOfficeAtOrCurrent(pd.getValue().getDate()),
+        EpasParam.WORK_INTERVAL, pd.getValue().getDate());
     }
     
     personDayManager.updateTimeAtWork(pd.getValue(), pd.getWorkingTimeTypeDay().get(),
@@ -551,7 +562,7 @@ public class ConsistencyManager {
 
       // TODO: controllare, qui esiste un caso limite. Considero pd.date o previous.date?
       LocalTime maxHour = (LocalTime) configurationManager
-          .configValue(pd.getValue().getPerson().getOffice(),
+          .configValue(pd.getValue().getPerson().getOfficeAtOrCurrent(pd.getValue().getDate()),
           EpasParam.HOUR_MAX_TO_CALCULATE_WORKTIME, pd.getValue().getDate());
 
       Collections.sort(pd.getValue().getStampings());

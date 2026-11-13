@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import manager.OfficeManager;
+import manager.PersonOfficeManager;
 import manager.PeriodManager;
 import manager.configurations.ConfigurationManager;
 import models.Institute;
@@ -75,6 +76,8 @@ public class Offices extends Controller {
   static PeriodManager periodManager;
   @Inject
   static PersonDao personDao;
+  @Inject
+  static PersonOfficeManager personOfficeManager;
   @Inject
   static UsersRolesOfficesDao uroDao;
   @Inject
@@ -206,30 +209,48 @@ public class Offices extends Controller {
   }
 
   /**
-   * Completa il trasferimento della persona da una sede ad un'altra.
+   * Completa il trasferimento delle persone da una sede ad un'altra.
+   * L'afferenza alla sede di provenienza viene chiusa il giorno precedente la data di decorrenza
+   * e ne viene aperta una nuova sulla sede di destinazione a partire dalla data di decorrenza.
+   *
    * @param sourceOffice la sede di provenienza
    * @param destinationOffice la sede di destinazione
+   * @param transferDate la data di decorrenza del trasferimento
    */
-  public static void executeTransfer(Office sourceOffice, Office destinationOffice) {
+  public static void executeTransfer(Office sourceOffice, Office destinationOffice,
+      LocalDate transferDate) {
     Preconditions.checkNotNull(sourceOffice);
     Preconditions.checkNotNull(destinationOffice);
 
     rules.checkIfPermitted(sourceOffice);
     rules.checkIfPermitted(destinationOffice);
 
+    if (transferDate == null) {
+      flash.error("Specificare la data di decorrenza del trasferimento");
+      massiveTransfer();
+    }
+
     List<Person> people = personDao.byOffice(sourceOffice);
+    final List<String> servicesMessages = Lists.newArrayList();
     people.stream().forEach(p -> {
-      p.setOffice(destinationOffice);
-      p.save();
+      // i ruoli vanno letti prima del trasferimento, che rimuove quelli sulla sede di provenienza
       List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(p.getUser());
+      // termina servizi, gruppi e ruoli sulla sede di provenienza
+      personOfficeManager.changeOffice(p, destinationOffice, transferDate).getMessages()
+          .forEach(m -> servicesMessages.add(p.getFullname() + ": " + m));
+      p.save();
 
       for (UsersRolesOffices uro : uroList) {
         officeManager.setUro(p.getUser(), destinationOffice, uro.getRole());
-        uro.delete();
+        if (uro.isPersistent()) {
+          uro.delete();
+        }
       }
     });
 
-    flash.success("Spostate %s persone da %s a %s", people.size(), sourceOffice, destinationOffice);
+    flash.success("Spostate %s persone da %s a %s.%s", people.size(), sourceOffice,
+        destinationOffice, servicesMessages.isEmpty() ? ""
+            : " Effetti sulla sede di provenienza: " + String.join("; ", servicesMessages));
     Administration.utilities();
   }
 

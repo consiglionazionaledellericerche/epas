@@ -19,6 +19,7 @@ package common.security;
 
 import com.google.common.base.MoreObjects;
 import lombok.Getter;
+import org.joda.time.LocalDate;
 
 /**
  * Seam like check.
@@ -32,7 +33,15 @@ public class PermissionCheck {
   private boolean granted = false;
 
   public PermissionCheck(Object target, String action) {
-    key = new PermissionCheckKey(target, action);
+    this(target, action, null);
+  }
+
+  public PermissionCheck(Object target, String action, LocalDate referenceDate) {
+    key = new PermissionCheckKey(target, action, referenceDate);
+  }
+
+  public LocalDate getReferenceDate() {
+    return key.getReferenceDate();
   }
 
   public String getAction() {
@@ -56,6 +65,7 @@ public class PermissionCheck {
     return MoreObjects.toStringHelper(this).omitNullValues()
         .add("action", getAction())
         .add("target", getTarget())
+        .add("referenceDate", getReferenceDate())
         .addValue(granted ? "GRANTED" : "DENIED").toString();
   }
 }

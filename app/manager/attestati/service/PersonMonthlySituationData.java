@@ -31,6 +31,8 @@ import it.cnr.iit.epas.DateInterval;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -47,7 +49,9 @@ import models.Configuration;
 import models.Contract;
 import models.ContractMonthRecap;
 import models.MealTicket;
+import models.Office;
 import models.Person;
+import models.PersonDay;
 import models.PersonMonthRecap;
 import models.absences.Absence;
 import models.dto.MealTicketComposition;
@@ -69,6 +73,7 @@ public class PersonMonthlySituationData {
   private final ContractDao contractDao;
   private final ContractMonthRecapDao contractMonthRecapDao;
   private final MealTicketDao mealTicketDao;
+  private final PersonDayDao personDayDao;
   
   /**
    * Injector.
@@ -94,6 +99,7 @@ public class PersonMonthlySituationData {
     this.contractDao = contractDao;
     this.contractMonthRecapDao = contractMonthRecapDao;
     this.mealTicketDao = mealTicketDao;
+    this.personDayDao = personDayDao;
   }
 
   /**
@@ -106,12 +112,30 @@ public class PersonMonthlySituationData {
    *     del dipendente person nell'anno year e nel mese month.
    */
   public Map<String, Certification> getCertification(Person person, int year, int month) {
-        
+    return getCertification(person, year, month, Optional.absent());
+  }
+
+  /**
+   * Crea la mappa con le info mensili del dipendente da inviare dalla sede indicata: nel mese
+   * di un trasferimento ogni sede invia assenze, formazione e buoni pasto dei giorni di propria
+   * afferenza e le competenze ad essa attribuite. Se la sede non è indicata si considera
+   * l'intero mese.
+   */
+  public Map<String, Certification> getCertification(Person person, int year, int month,
+      Optional<Office> office) {
+
+    final LocalDate begin = new LocalDate(year, month, 1);
+    final LocalDate end = begin.dayOfMonth().withMaximumValue();
+    final Optional<Set<LocalDate>> officeDays = office.isPresent()
+        && person.getOfficesInPeriod(begin, end).size() > 1
+        ? Optional.of(person.getDaysInOffice(office.get(), begin, end)) : Optional.absent();
+
     Map<String, Certification> actualCertifications = Maps.newHashMap();
-    actualCertifications = trainingHours(person, year, month, actualCertifications);
-    actualCertifications = absences(person, year, month, actualCertifications);
-    actualCertifications = competences(person, year, month, actualCertifications);
-    actualCertifications = mealTicket(person, year, month, actualCertifications);
+    actualCertifications = trainingHours(person, year, month, actualCertifications, officeDays);
+    actualCertifications = absences(person, year, month, actualCertifications, officeDays);
+    actualCertifications = competences(person, year, month, actualCertifications, office);
+    actualCertifications = mealTicket(person, year, month, actualCertifications, officeDays);
+    actualCertifications.values().forEach(c -> c.setOffice(office.orNull()));
 
     return actualCertifications;
   }
@@ -158,11 +182,14 @@ public class PersonMonthlySituationData {
    * @return certificazioni (sotto forma di mappa)
    */
   private Map<String, Certification> trainingHours(Person person, int year, int month,
-      Map<String, Certification> certifications) {
+      Map<String, Certification> certifications, Optional<Set<LocalDate>> officeDays) {
     List<PersonMonthRecap> trainingHoursList = personMonthRecapDao
         .getPersonMonthRecapInYearOrWithMoreDetails(person, year,
             Optional.fromNullable(month), Optional.absent());
     for (PersonMonthRecap personMonthRecap : trainingHoursList) {
+      if (officeDays.isPresent() && !officeDays.get().contains(personMonthRecap.getFromDate())) {
+        continue;
+      }
       // Nuova certificazione
       Certification certification = certificationByPersonMonthRecap(personMonthRecap);
       certifications.put(certification.aMapKey(), certification);
@@ -222,10 +249,15 @@ public class PersonMonthlySituationData {
    * @return certificazioni (sotto forma di mappa)
    */
   private Map<String, Certification> absences(Person person, int year, int month,
-      Map<String, Certification> certifications) {
+      Map<String, Certification> certifications, Optional<Set<LocalDate>> officeDays) {
 
     List<Absence> absences = absenceDao
         .getAbsencesNotInternalUseInMonth(person, year, month);
+    if (officeDays.isPresent()) {
+      absences = absences.stream()
+          .filter(a -> officeDays.get().contains(a.getPersonDay().getDate()))
+          .collect(Collectors.toList());
+    }
     if (absences.isEmpty()) {
       return certifications;
     }
@@ -310,13 +342,19 @@ public class PersonMonthlySituationData {
    * @return certificazione (sotto forma di mappa).
    */
   private Map<String, Certification> competences(Person person, int year, int month,
-      Map<String, Certification> certifications) {
+      Map<String, Certification> certifications, Optional<Office> office) {
 
     List<Competence> competences = competenceDao
         .getCompetenceInMonthForUploadSituation(person, year, month, 
             Optional.<CompetenceCodeGroup>absent());
 
+    final LocalDate end = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
     for (Competence competence : competences) {
+      if (office.isPresent()
+          && !office.get().equals(competence.getOffice() != null ? competence.getOffice()
+              : person.getOfficeAtOrCurrent(end))) {
+        continue;
+      }
       Certification certification = byCompetence(competence);
       certifications.put(certification.aMapKey(), certification);
     }
@@ -360,7 +398,7 @@ public class PersonMonthlySituationData {
    * @return certification (sotto forma di mappa)
    */
   private Map<String, Certification> mealTicket(Person person, int year, int month,
-      Map<String, Certification> certifications) {
+      Map<String, Certification> certifications, Optional<Set<LocalDate>> officeDays) {
 
     Certification certification = new Certification();
     certification.setPerson(person);
@@ -388,6 +426,23 @@ public class PersonMonthlySituationData {
         buoniCartacei = buoniCartacei + composition.paperyMealTicket;
         buoniElettronici = buoniElettronici + composition.electronicMealTicket;
       }
+    }
+    if (officeDays.isPresent()) {
+      // Nel mese del trasferimento la sede invia i buoni maturati nei giorni di sua afferenza:
+      // la ripartizione tra cartacei ed elettronici segue quella dell'intero mese.
+      final List<PersonDay> personDays =
+          personDayDao.getPersonDayInPeriod(person, begin, Optional.of(end));
+      final long monthTickets = personDays.stream().filter(PersonDay::isTicketAvailable).count();
+      final long officeTickets = personDays.stream()
+          .filter(pd -> pd.isTicketAvailable() && officeDays.get().contains(pd.getDate()))
+          .count();
+      final int total = buoniCartacei + buoniElettronici;
+      final int officeTotal = monthTickets == 0 ? 0
+          : (int) Math.round((double) total * officeTickets / monthTickets);
+      final int officeElectronic = total == 0 ? 0
+          : (int) Math.round((double) buoniElettronici * officeTotal / total);
+      buoniElettronici = officeElectronic;
+      buoniCartacei = officeTotal - officeElectronic;
     }
     certification.setContent(
         String.valueOf(buoniCartacei) + ";" + String.valueOf(buoniElettronici));

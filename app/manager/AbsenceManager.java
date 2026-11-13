@@ -595,10 +595,12 @@ public class AbsenceManager {
     Integer maxRecoveryDays;
     if (person.getQualification().getQualification() <= 3) {
       maxRecoveryDays = (Integer) configurationManager
-          .configValue(person.getOffice(), EpasParam.MAX_RECOVERY_DAYS_13, date.getYear());
+          .configValue(person.getOfficeAtOrCurrent(date), EpasParam.MAX_RECOVERY_DAYS_13,
+              date.getYear());
     } else {
       maxRecoveryDays = (Integer) configurationManager
-          .configValue(person.getOffice(), EpasParam.MAX_RECOVERY_DAYS_49, date.getYear());
+          .configValue(person.getOfficeAtOrCurrent(date), EpasParam.MAX_RECOVERY_DAYS_49,
+              date.getYear());
     }
 
     // Raggiunto il limite dei riposi compensativi utilizzabili

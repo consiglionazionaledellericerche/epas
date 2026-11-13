@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -311,7 +312,8 @@ public class PersonReperibilityDayDao extends DaoBase {
   public List<PersonReperibility> byOffice(Office office, LocalDate date) {
     QPersonReperibility pr = QPersonReperibility.personReperibility;
     return getQueryFactory().selectFrom(pr)
-        .where(pr.person.office.eq(office)
+        .where(pr.person.id.in(
+                PersonOfficeFilter.personIdsInOffices(office, date, date))
             .and(pr.startDate.isNotNull().andAnyOf(pr.endDate.isNull(), pr.endDate.goe(date))))
         .fetch();
   }

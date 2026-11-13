@@ -57,6 +57,14 @@ public class Certification extends BaseModel {
   @JoinColumn(name = "person_id", nullable = false)
   private Person person;
 
+  /**
+   * La sede che invia la certificazione: nel mese di un trasferimento ogni sede invia i dati
+   * dei giorni di propria afferenza.
+   */
+  @ManyToOne
+  @JoinColumn(name = "office_id")
+  private Office office;
+
   private int year;
 
   private int month;
@@ -75,6 +83,20 @@ public class Certification extends BaseModel {
 
   @Column(name = "attestati_id")
   private Integer attestatiId;
+
+  /**
+   * La sede che invia la certificazione ad Attestati: quella associata alla certificazione o,
+   * per le certificazioni precedenti alla periodicizzazione, la sede della persona alla fine
+   * del mese.
+   */
+  @Transient
+  public Office getSendingOffice() {
+    if (office != null) {
+      return office;
+    }
+    return person.getOfficeAtOrCurrent(
+        new org.joda.time.LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+  }
 
   @Transient
   public boolean containProblems() {

@@ -1,0 +1,42 @@
+%{
+  if(personOffice?.persistent)
+    modaltitle = 'Modifica afferenza di ' + person.fullname;
+  else
+    modaltitle = 'Trasferimento di ' + person.fullname;
+}%
+
+#{modalAsync id:'defaultModal', title:modaltitle }
+
+  <div id="personOfficeForm">
+	#{if !personOffice?.persistent}
+	#{alert color:'info'}
+	  L'afferenza in corso alla data di decorrenza verrà chiusa il giorno precedente.
+	#{/alert}
+	#{/if}
+
+	#{form @save(), class:'form-horizontal', method:'POST', autocomplete:false,
+		        'data-async':'#page_content', 'data-async-error':'#personOfficeForm'}
+
+	  #{if personOffice?.persistent }
+	    <input type="hidden" name="id" value="${personOffice.id}"/>
+	  #{/if}
+	  <input type="hidden" name="personId" value="${person.id}"/>
+
+	  #{f.selectModel 'office', items:offices, value:office ?: personOffice?.office, required:true,
+	      label:messages.get('personOffice.office') /}
+	  #{f.date 'beginDate', value:(beginDate ?: personOffice?.beginDate)?.format(), required:true,
+	      label:messages.get(personOffice?.persistent ? 'personOffice.beginDate' : 'transferDate') /}
+	  #{if personOffice?.persistent }
+	    #{f.date 'endDate', value:(endDate ?: personOffice?.endDate)?.format(),
+	        label:messages.get('personOffice.endDate') /}
+	  #{/if}
+
+	  #{b.buttons center:true}
+	   #{if personOffice?.persistent }<input class="text-center btn btn-primary" type="submit" value="Modifica" />#{/if}
+	   #{else}<input class="text-center btn btn-primary" type="submit" value="Trasferisci" />#{/else}
+	  #{/b.buttons}
+
+	#{/form}
+  </div>
+
+#{/modalAsync}

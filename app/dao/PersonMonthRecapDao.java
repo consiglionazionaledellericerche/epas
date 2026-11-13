@@ -22,6 +22,7 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
@@ -137,7 +138,9 @@ public class PersonMonthRecapDao extends DaoBase {
     return getQueryFactory().selectFrom(personMonthRecap)
         .where(personMonthRecap.month.eq(month)
             .and(personMonthRecap.year.eq(year)
-                .and(personMonthRecap.person.office.eq(office))))
+                .and(personMonthRecap.person.id.in(
+                    PersonOfficeFilter.personIdsInOffices(office, new LocalDate(year, month, 1),
+                        new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())))))
         .fetch();
   }
 

@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import manager.PersonDayManager;
 import manager.PersonManager;
@@ -92,6 +93,10 @@ public class PersonStampingRecap {
   // Template
   public int numberOfInOut = 0;
 
+  // Cartellino parziale: la sede che lo consulta vede solo i giorni di propria afferenza
+  public boolean partial = false;
+  public int mealTicketsInVisibleDays = 0;
+
   public int getNumberOfMealTicketToUse() {
     return contractMonths.stream().map(cm -> cm.getValue().getBuoniPastoUsatiNelMese())
         .reduce(Integer::sum).orElse(0);
@@ -114,7 +119,7 @@ public class PersonStampingRecap {
   public PersonStampingRecap(PersonDayManager personDayManager, PersonDayDao personDayDao,
       PersonManager personManager, PersonStampingDayRecapFactory stampingDayRecapFactory,
       IWrapperFactory wrapperFactory, int year, int month, Person person,
-      boolean considerExitingNow) {
+      boolean considerExitingNow, Optional<Set<LocalDate>> visibleDays) {
 
     // DATI DELLA PERSONA
     if (Session.current() != null && Security.getUser() != null && Security.getUser().isPresent()) {
@@ -137,6 +142,18 @@ public class PersonStampingRecap {
 
     List<PersonDay> personDays =
         personDayDao.getPersonDayInPeriod(person, begin, Optional.fromNullable(end));
+    if (visibleDays.isPresent()) {
+      for (LocalDate day = begin; !day.isAfter(end); day = day.plusDays(1)) {
+        if (!visibleDays.get().contains(day)) {
+          this.partial = true;
+          break;
+        }
+      }
+    }
+    if (this.partial) {
+      personDays = personDays.stream().filter(pd -> visibleDays.get().contains(pd.getDate()))
+          .collect(Collectors.toList());
+    }
 
 
     this.numberOfInOut =
@@ -165,6 +182,10 @@ public class PersonStampingRecap {
     // Lista person day contente tutti i giorni fisici del mese
     List<PersonDay> totalPersonDays =
         personDayManager.getTotalPersonDayInMonth(personDays, person, year, month);
+    if (this.partial) {
+      totalPersonDays = totalPersonDays.stream()
+          .filter(pd -> visibleDays.get().contains(pd.getDate())).collect(Collectors.toList());
+    }
 
     LocalDate today = LocalDate.now();
 
@@ -177,6 +198,9 @@ public class PersonStampingRecap {
       this.daysRecap.add(dayRecap);
 
       this.totalWorkingTime += pd.getTimeAtWork();
+      if (pd.isTicketAvailable()) {
+        this.mealTicketsInVisibleDays++;
+      }
 
       if (pd.getStampModificationType() != null && !pd.getDate().isAfter(today)) {
 
@@ -223,6 +247,10 @@ public class PersonStampingRecap {
     this.basedWorkingDays = personManager.basedWorkingDays(personDays, monthContracts, end);
     this.absenceCodeMap = personManager.countAbsenceCodes(totalPersonDays);
     this.absenceList = personManager.listAbsenceCodes(totalPersonDays);
+    if (this.partial) {
+      // residui, ferie e buoni del contratto dipendono dall'intero mese: non sono mostrati
+      this.contractMonths.clear();
+    }
     LocalDate from = person.getOffice().getBeginDate();
     List<Absence> list = personManager.absencesToRecover(person, from, LocalDate.now(),
         JustifiedTypeName.recover_time);

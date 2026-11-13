@@ -69,10 +69,14 @@ public class PersonCreateDto {
                 ((Qualification) q).getQualification() == personDto.getQualification().intValue())
               .findFirst().get()));
     }
-    if (personDto.getOfficeId() != null) {
-      person.setOffice(Office.findById(personDto.getOfficeId()));  
-    }
     person.setBeginDate(LocalDate.now());
+    val office = personDto.getOfficeId() == null
+        ? null : (Office) Office.findById(personDto.getOfficeId());
+    if (office != null) {
+      //La relazione con la sede è periodicizzata: si crea l'afferenza che parte
+      //dalla data di creazione della persona e che non ha ancora una data di fine.
+      person.changeOffice(office, person.getBeginDate());
+    }
     return person;
   }
 }

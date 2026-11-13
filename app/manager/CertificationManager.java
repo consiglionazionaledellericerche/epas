@@ -24,9 +24,7 @@ import helpers.rest.ApiRequestException;
 import it.cnr.iit.epas.DateUtility;
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.AbstractMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -35,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.attestati.service.CertificationsComunication;
 import manager.attestati.service.PersonCertData;
+import manager.attestati.service.PersonCertDataKey;
 import models.Office;
 import models.Person;
 import org.joda.time.YearMonth;
@@ -139,8 +138,7 @@ public class CertificationManager {
    * da attestati stesso.
    */
   public PersonCertData getPersonCertData(Person person, Integer year, Integer month) {
-    final Map.Entry<Person, YearMonth> cacheKey = new AbstractMap
-        .SimpleEntry<>(person, new YearMonth(year, month));
+    final PersonCertDataKey cacheKey = PersonCertDataKey.of(person, new YearMonth(year, month));
     try {
       return cacheValues.personStatus.get(cacheKey);
     } catch (ExecutionException ex) {

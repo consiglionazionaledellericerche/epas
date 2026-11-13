@@ -22,6 +22,7 @@ import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -278,7 +279,11 @@ public class CompetenceCodeDao extends DaoBase {
     }
     return getQueryFactory().selectFrom(pcc)
         .where(pcc.competenceCode.eq(code)
-            .and(pcc.person.office.eq(office)).and(condition))
+            .and(pcc.person.id.in(
+                PersonOfficeFilter.personIdsInOffices(office,
+                    date.isPresent() ? date.get().dayOfMonth().withMinimumValue() : LocalDate.now(),
+                    date.isPresent() ? date.get().dayOfMonth().withMaximumValue() : LocalDate.now())))
+            .and(condition))
         .fetch();
   }
 
@@ -322,7 +327,12 @@ public class CompetenceCodeDao extends DaoBase {
               pcc.endDate.goe(date.get().dayOfMonth().withMaximumValue())));
     }
     return getQueryFactory().selectFrom(pcc)
-        .where(pcc.competenceCode.in(codesList).and(pcc.person.office.eq(office)).and(condition))
+        .where(pcc.competenceCode.in(codesList)
+            .and(pcc.person.id.in(
+                PersonOfficeFilter.personIdsInOffices(office,
+                    date.isPresent() ? date.get().dayOfMonth().withMinimumValue() : LocalDate.now(),
+                    date.isPresent() ? date.get().dayOfMonth().withMaximumValue() : LocalDate.now())))
+            .and(condition))
         .fetch();
   }
   

@@ -247,6 +247,15 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
   }
 
   /**
+   * La sede a cui il proprietario afferiva alla data della timbratura, usata dalle drools
+   * per consentire a ciascuna sede la gestione dei soli giorni di propria afferenza.
+   */
+  @Transient
+  public Office getOwnerOffice() {
+    return personDay.getPerson().getOfficeAt(personDay.getDate());
+  }
+
+  /**
    * Utile per effettuare i controlli temporali sulle drools.
    *
    * @return il mese relativo alla data della timbratura.

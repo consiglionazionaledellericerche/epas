@@ -18,6 +18,7 @@
 package common.security;
 
 import lombok.Data;
+import org.joda.time.LocalDate;
 
 /**
  * DTO per i dati necessari per il controllo di un permesso.
@@ -29,4 +30,9 @@ import lombok.Data;
 public class PermissionCheckKey {
   private final Object target;
   private final String action;
+  /**
+   * Data di riferimento per i controlli sulle persone: se valorizzata le regole considerano la
+   * sede a cui la persona afferiva a quella data, altrimenti la sede corrente.
+   */
+  private final LocalDate referenceDate;
 }

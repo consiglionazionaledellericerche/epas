@@ -20,12 +20,15 @@ package models;
 import java.math.BigDecimal;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import models.base.BaseModel;
 import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
 
@@ -48,6 +51,13 @@ public class Competence extends BaseModel {
 
   @ManyToOne
   private Person person;
+
+  /**
+   * La sede a cui è attribuita la competenza e che la invia ad Attestati. Nel mese di un
+   * trasferimento la stessa competenza può essere presente per entrambe le sedi.
+   */
+  @ManyToOne
+  private Office office;
 
   @NotNull
   @Required
@@ -116,4 +126,16 @@ public class Competence extends BaseModel {
         person, valueApproved);
   }
 
+
+  /**
+   * Se non indicata, la competenza è attribuita alla sede di afferenza alla fine del mese.
+   */
+  @PrePersist
+  @PreUpdate
+  private void defaultOffice() {
+    if (office == null && person != null) {
+      office = person.getOfficeAtOrCurrent(
+          new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+    }
+  }
 }
