@@ -1,0 +1,15 @@
+{
+  "name": "epas-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Test end-to-end di ePAS con Playwright",
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "test": "playwright test",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "@types/node": "^22.0.0"
+  }
+}
