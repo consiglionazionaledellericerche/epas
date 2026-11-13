@@ -42,6 +42,7 @@ import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
 import it.cnr.iit.epas.DateInterval;
 import java.io.IOException;
+import java.time.DateTimeException;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -194,8 +195,8 @@ public class Contracts extends Controller {
 
   /**
    * Legge dal body JSON i dati di un contratto e risponde 400 se non sono validi: JSON
-   * malformato, campi obbligatori assenti, tipologia di contratto sconosciuta o in
-   * contraddizione con onCertificate.
+   * malformato, date non valide, campi obbligatori assenti, tipologia di contratto sconosciuta
+   * o in contraddizione con onCertificate.
    */
   @Util
   private static <T extends ContractCreateDto> T contractDtoFromBody(
@@ -208,6 +209,9 @@ public class Contracts extends Controller {
       contractDto = gson.fromJson(json, dtoClass);
     } catch (com.google.gson.JsonParseException e) {
       JsonResponse.badRequest("JSON non valido");
+    } catch (DateTimeException e) {
+      // i convertitori delle date java.time non trasformano gli errori in JsonParseException
+      JsonResponse.badRequest(String.format("Data non valida: %s", e.getMessage()));
     }
     if (contractDto == null) {
       JsonResponse.badRequest();

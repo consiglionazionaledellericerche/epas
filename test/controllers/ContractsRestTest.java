@@ -135,13 +135,17 @@ public class ContractsRestTest extends FunctionalTest {
   }
 
   /**
-   * Un body che non è un oggetto JSON è rifiutato con 400.
+   * Un body che non è un oggetto JSON o con date non valide è rifiutato con 400.
    */
   @Test
   public void createWithMalformedBodyIsRejected() {
     Fixture fixture = fixture();
     assertStatus(400, POST(manager(fixture), CREATE_URL, "application/json", "[1, 2]"));
     assertStatus(400, POST(manager(fixture), CREATE_URL, "application/json", "{\"personId\": "));
+    assertStatus(400, POST(manager(fixture), CREATE_URL, "application/json",
+        "{\"personId\": " + fixture.person.id + ", \"beginDate\": \"2026-13-01\"}"));
+    assertStatus(400, POST(manager(fixture), CREATE_URL, "application/json",
+        "{\"personId\": " + fixture.person.id + ", \"beginDate\": \"2026-02-30\"}"));
     assertTrue(contracts(fixture.person).isEmpty());
   }
 

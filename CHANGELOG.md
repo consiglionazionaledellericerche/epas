@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     docker: coprono template e javascript, a partire dagli attributi del cookie di sessione e
     dalla finestra di inserimento delle assenze. Sono eseguiti a ogni pull request (#671).
 
+### Changed
+  - Nella modifica di un contratto via REST (/rest/v2/contracts/update) il campo onCertificate
+    non è più ignorato: se è passato senza contractType e ha un valore diverso da quello
+    attuale, il contratto diventa dipendente strutturato (true) o non strutturato (false). I
+    client che inviano sempre onCertificate con un valore fisso devono inviare quello attuale
+    del contratto, oppure contractType (#672).
+
 ### Removed
   - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e
     /stampingsfromclient/absencenotrecompute (ora rispondono 404), non più usati dai client
@@ -32,8 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     400: la tipologia del contratto, obbligatoria, non si poteva indicare. Ora si passa con il
     nuovo campo contractType (interim, structured_public_administration, unstructured), che
     si può usare anche nella modifica ed è presente nelle risposte. Se manca, il contratto è
-    creato come dipendente strutturato, oppure come non strutturato se onCertificate è false
-    (#672).
+    creato come dipendente strutturato, oppure come non strutturato se onCertificate è false.
+    Un body con JSON malformato o date non valide risponde 400 invece di 500 (#672).
 
 ### Security
   - I lettori badge non possono più inserire assenze tramite i metodi
