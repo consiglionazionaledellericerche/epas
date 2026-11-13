@@ -36,6 +36,8 @@ services:
     environment:
       - VIRTUAL_HOST=${HOST_NAME}
       #- PROTOCOL=https                         # default: http  -- (http,https) -- impostare https se il proxy serve ePAS in https
+      #- SESSION_SECURE=false                   # default: true con PROTOCOL=https, altrimenti false -- (true,false) -- con true i cookie
+                                                # di sessione sono inviati solo in https: impostare false solo se ePAS è raggiunto anche in http
       #- HTTP_PATH=${HTTP_PATH}                 # default: / -- da utilizzare per non servire l'applicazione come root path ( / )
                                                 # se è specificata la variabile HTTP_PATH questa deve cominciare con uno slash ( / ), es.: HTTP_PATH=/epas
       #- EPAS_SHIB_LOGIN=                       # default: false  -- (true,false)

@@ -89,7 +89,10 @@ Requisiti
    riconosciuti e le richieste di quei proxy vengono rifiutate. L'ordine non conta.
 
 #. **PROTOCOL=https** se il proxy serve ePAS in https, così gli indirizzi generati
-   dall'applicazione usano lo schema corretto.
+   dall'applicazione usano lo schema corretto e i cookie di sessione hanno l'attributo
+   *Secure*. Se ePAS deve essere raggiunto anche in http (es. direttamente sulla porta
+   9000), impostare ``SESSION_SECURE=false``: altrimenti il browser non invia il cookie di
+   sessione in http e il login non funziona.
 
 Header di sicurezza
 -------------------
@@ -108,10 +111,11 @@ nginx e Traefik).
   iframe di altri siti (protezione dal clickjacking). ePAS non usa iframe di altri domini.
 * **Referrer-Policy**: agli altri siti (es. le CDN) viene inviata solo l'origine, non
   l'indirizzo completo della pagina con i parametri.
-* **Secure e HttpOnly sui cookie**: i cookie di Play (``PLAY_SESSION``, ``PLAY_FLASH``,
-  ``PLAY_ERRORS``) escono senza questi attributi. *Secure* impedisce l'invio del cookie
-  su http, *HttpOnly* la lettura da JavaScript; il JavaScript di ePAS non legge questi
-  cookie.
+* **Secure e HttpOnly sui cookie**: *Secure* impedisce l'invio del cookie su http,
+  *HttpOnly* la lettura da JavaScript. ePAS imposta *HttpOnly* sui suoi cookie
+  (``PLAY_SESSION``, ``PLAY_FLASH``, ``PLAY_ERRORS``) e, con ``PROTOCOL=https``, anche
+  *Secure*. Le regole sul proxy degli esempi servono per le versioni precedenti o con
+  ``SESSION_SECURE=false``; se i cookie hanno già *Secure* non li modificano.
 
 Una *Content-Security-Policy* per ora non è indicata: le pagine usano script inline e
 diverse CDN, e la policy va preparata insieme all'applicazione.
@@ -425,7 +429,8 @@ container di Traefik:
            - subnet: 172.30.0.0/24
 
 Traefik aggiunge l'header HSTS solo alle risposte in https. Non può aggiungere *Secure* e
-*HttpOnly* ai cookie della risposta del backend.
+*HttpOnly* ai cookie della risposta del backend: con Traefik impostare ``PROTOCOL=https``,
+così li aggiunge ePAS.
 
 La configurazione dei certificati (es. Let's Encrypt) dipende dall'installazione e non è
 riportata.
