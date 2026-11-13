@@ -149,7 +149,12 @@ else
   SESSION_SECURE=${SESSION_SECURE:-false}
 fi
 case "${SESSION_SECURE}" in
-  "true"|"false") echo "Cookie di sessione con Secure=${SESSION_SECURE}" ;;
+  "true")
+    echo "Cookie di sessione con Secure=true: il browser li invia solo in https."
+    echo "  WARNING: il login non funziona se ePAS è raggiunto in http (es. direttamente"
+    echo "  sulla porta 9000): in quel caso impostare SESSION_SECURE=false."
+    ;;
+  "false") echo "Cookie di sessione con Secure=false" ;;
   *)
     echo "ERROR: "
     echo "  SESSION_SECURE accetta solo i valori \"true\" o \"false\"."

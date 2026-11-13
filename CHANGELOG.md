@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+  - Test end-to-end con Playwright (cartella e2e/), eseguiti in un browser contro l'immagine
+    docker: coprono template e javascript, a partire dagli attributi del cookie di sessione e
+    dalla finestra di inserimento delle assenze. Sono eseguiti a ogni pull request (#671).
+
 ### Removed
   - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e
     /stampingsfromclient/absencenotrecompute (ora rispondono 404), non più usati dai client
@@ -38,7 +43,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     sono più leggibili da JavaScript. Nel Docker con PROTOCOL=https hanno anche l'attributo
     Secure e il browser li invia solo in https: se ePAS deve essere raggiunto anche in http
     (es. direttamente sulla porta 9000) impostare SESSION_SECURE=false, altrimenti il login in
-    http non funziona.
+    http non funziona. Attenzione all'aggiornamento: le installazioni con PROTOCOL=https
+    ricevono questo comportamento senza modificare la configurazione; all'avvio il container
+    lo segnala nel log con un WARNING.
 
 ## [2.40.0] - 2026-11-12
 ### Added

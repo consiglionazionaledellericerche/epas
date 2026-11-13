@@ -96,6 +96,9 @@ Per lanciare tutti i test presente utilizzare il comando
 play autotest
 ```
 
+I test end-to-end con Playwright (template e javascript in un browser vero) sono nella
+cartella `e2e/`: vedi [e2e/README.md](e2e/README.md).
+
 QueryDSL
 --------
 Per ricompilare i Q<model>:

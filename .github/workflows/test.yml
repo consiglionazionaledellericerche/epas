@@ -64,3 +64,51 @@ jobs:
             logs/
             deps.log
           if-no-files-found: ignore
+
+  # Test end-to-end con Playwright (cartella e2e/): un browser vero contro l'immagine
+  # docker costruita dal commit, con un postgres vuoto. Coprono template e javascript,
+  # che play autotest non esegue.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Build dell'immagine docker
+        run: docker build -t epas:e2e .
+      -
+        name: Avvio di ePAS
+        run: e2e/stack.sh up epas:e2e
+      -
+        name: Setup di Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+      -
+        name: Installazione di Playwright
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      -
+        name: Test end-to-end
+        working-directory: e2e
+        run: npx playwright test
+      -
+        name: Log di ePAS
+        if: failure()
+        run: e2e/stack.sh logs 2>&1 | tail -n 500
+      -
+        name: Archivia il report di Playwright
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/
+          if-no-files-found: ignore
