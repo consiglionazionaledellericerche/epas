@@ -25,6 +25,7 @@ import javax.inject.Inject;
 import lombok.Data;
 import lombok.val;
 import models.Contract;
+import models.enumerate.ContractType;
 import org.modelmapper.ModelMapper;
 
 /**
@@ -45,6 +46,7 @@ public class ContractShowTerseDto {
   private String externalId;
 
   private Boolean onCertificate;
+  private ContractType contractType;
   private ContractShowTerseDto previousContract;
   private LocalDateTime updatedAt;
 

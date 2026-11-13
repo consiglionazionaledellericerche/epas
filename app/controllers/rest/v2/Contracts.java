@@ -29,6 +29,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import common.security.SecurityRules;
 import controllers.Resecure;
 import dao.ContractDao;
@@ -40,6 +42,7 @@ import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
 import it.cnr.iit.epas.DateInterval;
 import java.io.IOException;
+import java.time.DateTimeException;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -49,7 +52,9 @@ import manager.ContractManager;
 import manager.PeriodManager;
 import manager.recaps.recomputation.RecomputeRecap;
 import models.Contract;
+import models.Person;
 import models.WorkingTimeType;
+import models.enumerate.ContractType;
 import models.enumerate.VacationCode;
 
 import org.joda.time.LocalDate;
@@ -121,28 +126,24 @@ public class Contracts extends Controller {
       JsonResponse.badRequest();
     }
     val gson = gsonBuilder.create();
-    val contractDto = gson.fromJson(body, ContractCreateDto.class); 
-    val validationResult = validation.valid(contractDto); 
-    if (!validationResult.ok) {
-      JsonResponse.badRequest(validation.errorsMap().toString());
-    }
+    val contractDto = contractDtoFromBody(body, ContractCreateDto.class);
+
+    //Controlla che l'utente corrente abbia i diritti di gestione anagrafica
+    //sull'office della persona indicata nel DTO
+    val person = personFromDto(contractDto);
+    rules.checkIfPermitted(person.getOffice());
 
     val contract = ContractCreateDto.build(contractDto);
+    contract.setPerson(person);
     if (!validation.valid(contract).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
-
-    //Controlla anche che l'utente corrente abbia
-    //i diritti di gestione anagrafica sull'office associato alla
-    //persona indicata nel DTO
-    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     Optional<WorkingTimeType> workingTimeType =  
         contractDto.getWorkingTimeTypeId() == null 
           ? Optional.absent()
             : Optional.fromNullable(WorkingTimeType.findById(contractDto.getWorkingTimeTypeId()));
 
-    contract.setPerson(personDao.getPersonById(contractDto.getPersonId()));
     if (!contractManager.properContractCreate(contract, workingTimeType, true)) {
       JsonResponse.badRequest("Problemi nella creazione del contratto, verificare le date");
     }
@@ -165,22 +166,17 @@ public class Contracts extends Controller {
     }
 
     val gson = gsonBuilder.create();
-    val contractDto = gson.fromJson(body, ContractUpdateDto.class); 
-    val validationResult = validation.valid(contractDto); 
-    if (!validationResult.ok) {
-      JsonResponse.badRequest(validation.errorsMap().toString());
-    }
+    val contractDto = contractDtoFromBody(body, ContractUpdateDto.class);
+
+    //Controlla che l'utente corrente abbia i diritti di gestione anagrafica anche
+    //sull'office della persona indicata nel DTO, prima di modificare il contratto
+    rules.checkIfPermitted(personFromDto(contractDto).getOffice());
 
     // Salvo la situazione precedente per capire da dove riaggiornare i riepiloghi
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
     final DateInterval previousInterval = wrappedContract.getContractDatabaseInterval();
 
     contractDto.update(contract);
-
-    //Controlla anche che l'utente corrente abbia
-    //i diritti di gestione anagrafica sull'office associato alla
-    //persona indicata nel DTO
-    rules.checkIfPermitted(contract.getPerson().getOffice());
 
     if (!validation.valid(contract).ok) {
       JsonResponse.badRequest(validation.errorsMap().toString());
@@ -195,6 +191,61 @@ public class Contracts extends Controller {
 
     log.info("Updated contract {} via REST", contract);
     renderJSON(gson.toJson(ContractShowDto.build(contract)));
+  }
+
+  /**
+   * Legge dal body JSON i dati di un contratto e risponde 400 se non sono validi: JSON
+   * malformato, date non valide, campi obbligatori assenti, tipologia di contratto sconosciuta
+   * o in contraddizione con onCertificate.
+   */
+  @Util
+  private static <T extends ContractCreateDto> T contractDtoFromBody(
+      String body, Class<T> dtoClass) {
+    val gson = gsonBuilder.create();
+    JsonObject json = null;
+    T contractDto = null;
+    try {
+      json = gson.fromJson(body, JsonObject.class);
+      contractDto = gson.fromJson(json, dtoClass);
+    } catch (com.google.gson.JsonParseException e) {
+      JsonResponse.badRequest("JSON non valido");
+    } catch (DateTimeException e) {
+      // i convertitori delle date java.time non trasformano gli errori in JsonParseException
+      JsonResponse.badRequest(String.format("Data non valida: %s", e.getMessage()));
+    }
+    if (contractDto == null) {
+      JsonResponse.badRequest();
+    }
+    if (!validation.valid(contractDto).ok) {
+      JsonResponse.badRequest(validation.errorsMap().toString());
+    }
+    // gson converte in null i valori sconosciuti di un enumerato: senza questo controllo
+    // verrebbe applicata la tipologia predefinita al posto di quella richiesta.
+    JsonElement contractType = json.get("contractType");
+    if (contractType != null && !contractType.isJsonNull()
+        && contractDto.getContractType() == null) {
+      JsonResponse.badRequest(String.format("contractType non valido, valori ammessi: %s",
+          Lists.newArrayList(ContractType.values())));
+    }
+    if (!contractDto.hasConsistentContractType()) {
+      JsonResponse.badRequest(
+          "contractType e onCertificate sono in contraddizione: onCertificate è true solo per "
+          + ContractType.structured_public_administration);
+    }
+    return contractDto;
+  }
+
+  /**
+   * La persona indicata nel DTO, letta dal database. Risponde 400 se non esiste.
+   */
+  @Util
+  private static Person personFromDto(ContractCreateDto contractDto) {
+    val person = personDao.getPersonById(contractDto.getPersonId());
+    if (person == null) {
+      JsonResponse.badRequest(
+          String.format("Persona con id %s non trovata", contractDto.getPersonId()));
+    }
+    return person;
   }
 
   /**
