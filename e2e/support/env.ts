@@ -55,6 +55,8 @@ export const PERSONNEL_ADMIN = {
 
 /** Ruolo assegnato a PERSONNEL_ADMIN, con l'etichetta mostrata nel form. */
 export const PERSONNEL_ADMIN_ROLE = 'Amministratore Personale';
+/** Titolo della sezione con gli utenti di PERSONNEL_ADMIN_ROLE nella pagina della sede. */
+export const PERSONNEL_ADMIN_ROLE_SECTION = 'Amministratore del personale';
 
 export function employeeData(): { personId: number } {
   return JSON.parse(fs.readFileSync(EMPLOYEE_DATA, 'utf8'));

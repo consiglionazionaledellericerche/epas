@@ -23,8 +23,12 @@ test.describe('notifiche', () => {
       div.setAttribute('data-notify-type', 'error');
       // come nel template: il testo del flash è nel contenuto, con l'escape HTML
       div.textContent = text;
-      document.body.appendChild(div);
-      (window as any).$('body').initepas();
+      // initepas() cerca tra i discendenti: il contenitore limita l'inizializzazione
+      // all'elemento aggiunto, senza ripeterla sul resto della pagina
+      const wrapper = document.createElement('div');
+      wrapper.appendChild(div);
+      document.body.appendChild(wrapper);
+      (window as any).$(wrapper).initepas();
     }, [title, text]);
 
     const notice = page.locator('.ui-pnotify').filter({ hasText: 'testo' });

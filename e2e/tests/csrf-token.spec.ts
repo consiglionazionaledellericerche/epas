@@ -45,11 +45,14 @@ test.describe('token anti-CSRF nelle chiamate ajax', () => {
   });
 
   test('le POST ajax senza un token valido sono rifiutate', async ({ page }) => {
+    test.skip(!!process.env.CSRF_MODE && process.env.CSRF_MODE !== 'enforce',
+      `ePAS avviato con CSRF_MODE=${process.env.CSRF_MODE}: le richieste senza token non sono rifiutate`);
     await page.goto(cartellino());
     const token = await csrfToken(page);
-    const now = new Date();
-    const today = [now.getDate(), now.getMonth() + 1, now.getFullYear()]
-      .map((n) => String(n).padStart(2, '0')).join('/');
+    // data di un giorno del cartellino, generata dal server: non dipende dal fuso del runner
+    const href = await page.locator('a[data-async-modal="#modalGroupAbsence"]').first().getAttribute('href');
+    const from = new URL(href ?? '', page.url()).searchParams.get('from');
+    expect(from, 'data nel link di inserimento assenza').toBeTruthy();
 
     const post = (headers: Record<string, string>) => page.evaluate(async ([personId, from, headers]) => {
       const response = await fetch('/absencegroups/insert', {
@@ -58,9 +61,9 @@ test.describe('token anti-CSRF nelle chiamate ajax', () => {
         body: new URLSearchParams({ personId, from }).toString(),
       });
       return response.status;
-    }, [String(employeeData().personId), today, headers] as const);
+    }, [String(employeeData().personId), from!, headers] as const);
 
-    expect(await post({}), 'senza token').toBe(403);
+    expect(await post({}), 'senza token (ePAS deve girare con CSRF_MODE=enforce)').toBe(403);
     expect(await post({ 'X-CSRF-Token': 'e2e-token-non-valido' }), 'token non valido').toBe(403);
     expect(await post({ 'X-CSRF-Token': token }), 'token della pagina').toBe(200);
   });

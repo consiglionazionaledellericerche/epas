@@ -34,10 +34,11 @@ Variabili opzionali:
 
 I test sul token anti-CSRF si aspettano ePAS con `CSRF_MODE=enforce`, il default di
 `stack.sh`: con `off` o `report` le richieste senza token non sono rifiutate e quei test
-falliscono.
+falliscono. Se `CSRF_MODE` è impostata anche per Playwright con un valore diverso da
+`enforce`, il test sulle richieste rifiutate è saltato.
 
 Non lanciare i test contro un ePAS con dati reali: `global-setup.ts` crea due persone e i
-test modificano la nota di un giorno del suo cartellino (poi la svuotano).
+test modificano la nota di un giorno del suo cartellino (poi ripristinano il valore precedente).
 
 ## Struttura
 

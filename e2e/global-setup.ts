@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import { request, type APIRequestContext } from '@playwright/test';
 import {
   ADMIN_STATE, ADMIN_USERNAME, AUTH_DIR, BASE_URL, EMPLOYEE, EMPLOYEE_DATA, EMPLOYEE_STATE,
-  PERSONNEL_ADMIN, PERSONNEL_ADMIN_ROLE, PERSONNEL_ADMIN_STATE, adminPassword,
+  PERSONNEL_ADMIN, PERSONNEL_ADMIN_ROLE, PERSONNEL_ADMIN_ROLE_SECTION, PERSONNEL_ADMIN_STATE,
+  adminPassword,
 } from './support/env';
 
 /**
@@ -46,7 +47,7 @@ async function prepare(rest: APIRequestContext, web: APIRequestContext, password
     ?? await createEmployee(rest, PERSONNEL_ADMIN, office.id);
   // il form di assegnazione dei ruoli elenca solo le persone con un contratto attivo
   await ensureContract(rest, web, personnelAdmin.id);
-  await assignRole(web, office.id, PERSONNEL_ADMIN, PERSONNEL_ADMIN_ROLE);
+  await assignRole(web, office.id, PERSONNEL_ADMIN, PERSONNEL_ADMIN_ROLE, PERSONNEL_ADMIN_ROLE_SECTION);
 
   await saveSessionAs(personnelAdmin.id, password, PERSONNEL_ADMIN_STATE);
   await saveSessionAs(employee.id, password, EMPLOYEE_STATE);
@@ -153,11 +154,19 @@ async function createContract(web: APIRequestContext, personId: number) {
 
 /**
  * Assegna al dipendente un ruolo sulla sede con il form dell'amministrazione, che elenca
- * utenti e ruoli con le loro etichette. Se il ruolo è già assegnato il form risponde 400.
+ * utenti e ruoli con le loro etichette. Se il ruolo è già assegnato non fa nulla.
+ *
+ * L'esito è letto dalla pagina della sede e non dalla risposta del form:
+ * Administrators.save risponde 400 con "Esiste già quel ruolo" a qualsiasi errore di
+ * validazione, e l'errore di @Unique è sul campo nascosto della sede, non mostrato.
  */
 async function assignRole(
   web: APIRequestContext, officeId: number, person: typeof EMPLOYEE, roleLabel: string,
+  roleSection: string,
 ) {
+  if (await hasRole(web, officeId, person, roleSection)) {
+    return;
+  }
   const form = await web.get('/administrators/blank', { params: { officeId } });
   const html = await form.text();
   const token = html.match(/name="authenticityToken" value="([^"]+)"/)?.[1];
@@ -174,11 +183,26 @@ async function assignRole(
       'uro.role.id': role,
     },
   });
-  const alreadyAssigned = response.status() === 400
-    && (await response.text()).includes('Esiste già quel ruolo');
-  if (!alreadyAssigned && (!response.ok() || response.url().includes('/login'))) {
+  if (!response.ok() || response.url().includes('/login')
+      || !(await hasRole(web, officeId, person, roleSection))) {
     throw new Error(`Assegnazione del ruolo fallita: HTTP ${response.status()}, ${response.url()}`);
   }
+}
+
+/** Indica se la pagina della sede elenca il dipendente nella sezione del ruolo. */
+async function hasRole(
+  web: APIRequestContext, officeId: number, person: typeof EMPLOYEE, roleSection: string,
+): Promise<boolean> {
+  const page = await web.get('/offices/edit', { params: { id: officeId } });
+  if (!page.ok() || page.url().includes('/login')) {
+    throw new Error(`Pagina della sede non disponibile: HTTP ${page.status()}, ${page.url()}`);
+  }
+  const sections = (await page.text()).split(/<h4>/);
+  const section = sections.find((s) => new RegExp(`^\\s*${roleSection}\\s*</h4>`).test(s));
+  if (section === undefined) {
+    throw new Error(`Sezione "${roleSection}" non trovata nella pagina della sede ${officeId}`);
+  }
+  return section.includes(`${person.surname} ${person.name}`);
 }
 
 /** Valore della option con l'etichetta indicata, eventualmente seguita da " - sede". */
