@@ -33,8 +33,7 @@ jobs:
           key: ivy-${{ hashFiles('conf/dependencies.yml', 'jars/**') }}
       -
         # Stessa immagine del Dockerfile (Play 1.5.3, JDK 11, python2), letta dalla sua
-        # riga FROM (non quella dello stage scratch della cache ivy): il digest è
-        # scritto in un solo posto. play autotest
+        # riga ARG PLAY_IMAGE: il digest è scritto in un solo posto. play autotest
         # esegue unit test, functional test e selenium su H2 in memoria. Esce con 1 se
         # trova test-result/result.failed, ma con 0 se non trova nessun risultato: per
         # questo si controlla anche che esista result.passed. Anche play deps esce con 0
@@ -45,7 +44,8 @@ jobs:
         name: play autotest
         run: |
           mkdir -p ~/.ivy2
-          IMAGE=$(sed -n '/^FROM scratch/!s/^FROM //p' Dockerfile | head -1)
+          IMAGE=$(sed -n 's/^ARG PLAY_IMAGE=//p' Dockerfile)
+          test -n "$IMAGE" || { echo "ARG PLAY_IMAGE non trovato nel Dockerfile"; exit 1; }
           docker run --rm -u root \
             -v "$PWD:/app" -v "$HOME/.ivy2:/root/.ivy2" -w /app \
             -e HOST_IDS="$(id -u):$(id -g)" \
@@ -77,11 +77,12 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       -
-        # La stessa cache ivy del job autotest (stessa chiave), passata alla build:
-        # play deps non riscarica le dipendenze. Con la cache vuota la build le scarica
-        # come in locale.
+        # La cache ivy del job autotest (stessa chiave), passata alla build: play deps
+        # non riscarica le dipendenze. Solo restore: la build non scrive in ~/.ivy2 e
+        # non deve salvare una cache vuota sotto la chiave che popola autotest. Se la
+        # chiave non c'è ancora (dipendenze cambiate) la build le scarica come in locale.
         name: Cache delle dipendenze
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: ~/.ivy2
           key: ivy-${{ hashFiles('conf/dependencies.yml', 'jars/**') }}
@@ -105,22 +106,19 @@ jobs:
         working-directory: e2e
         run: npm ci
       -
-        # Il browser dipende dalla versione di Playwright, fissata in package-lock.json.
-        # Le librerie di sistema (install-deps) non sono in cache e si installano sempre.
+        # Il browser dipende dalla versione di Playwright, fissata in package-lock.json,
+        # e dalla versione del sistema del runner (ImageOS).
         name: Cache del browser di Playwright
-        id: playwright-cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+          key: playwright-chromium-${{ runner.os }}-${{ env.ImageOS }}-${{ hashFiles('e2e/package-lock.json') }}
       -
+        # Con il browser già in cache install non lo riscarica; le librerie di sistema
+        # (--with-deps) non sono in cache e si installano sempre.
         name: Installazione del browser di Playwright
         working-directory: e2e
-        run: |
-          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" != "true" ]; then
-            npx playwright install chromium
-          fi
-          npx playwright install-deps chromium
+        run: npx playwright install --with-deps chromium
       -
         name: Test end-to-end
         working-directory: e2e

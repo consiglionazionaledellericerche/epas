@@ -1,9 +1,14 @@
+# Immagine di Play: il job autotest (.github/workflows/test.yml) legge questa riga
+# per usare la stessa immagine.
+ARG PLAY_IMAGE=criluc/play1:1.5.3-temurin-11-patched@sha256:d5484cc61982c71c0f9d0fa4b1c81cd4649a88e08d87efbc568f7a6c5642c92f
+
 # Cache ivy usata da play deps, vuota per default. In CI si passa quella del job
 # autotest con --build-context ivy=$HOME/.ivy2: e' montata solo durante la build e
-# non finisce nell'immagine.
+# non finisce nell'immagine. RUN --mount richiede BuildKit, il builder di default
+# da Docker 23.
 FROM scratch AS ivy
 
-FROM criluc/play1:1.5.3-temurin-11-patched@sha256:d5484cc61982c71c0f9d0fa4b1c81cd4649a88e08d87efbc568f7a6c5642c92f
+FROM ${PLAY_IMAGE}
 
 ENV user=epas
 ENV APP=ePas
@@ -26,7 +31,11 @@ WORKDIR ${APP_HOME}
 RUN --mount=type=bind,from=ivy,target=/root/.ivy2,rw \
     touch conf/dev.conf && \
     play clean && \
-    play deps --sync --forProd && \
+    # play deps esce con 0 anche quando non risolve qualche dipendenza: si cerca
+    # il messaggio nel log, come nel job autotest
+    { play deps --sync --forProd > /tmp/deps.log 2>&1; deps_status=$?; cat /tmp/deps.log; \
+      test $deps_status -eq 0 && ! grep -q "still missing" /tmp/deps.log; } && \
+    rm /tmp/deps.log && \
     play precompile && \
     # con --forProd le dipendenze sono copiate in lib/ e modules/: la cache ivy
     # (montata sopra, le scritture sono scartate) non serve a runtime. I moduli di
