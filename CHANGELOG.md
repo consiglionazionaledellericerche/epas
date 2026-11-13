@@ -43,7 +43,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     sono più leggibili da JavaScript. Nel Docker con PROTOCOL=https hanno anche l'attributo
     Secure e il browser li invia solo in https: se ePAS deve essere raggiunto anche in http
     (es. direttamente sulla porta 9000) impostare SESSION_SECURE=false, altrimenti il login in
-    http non funziona.
+    http non funziona. Attenzione all'aggiornamento: le installazioni con PROTOCOL=https
+    ricevono questo comportamento senza modificare la configurazione; all'avvio il container
+    lo segnala nel log con un WARNING.
 
 ## [2.40.0] - 2026-11-12
 ### Added

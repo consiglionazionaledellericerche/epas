@@ -23,17 +23,28 @@ export default async function globalSetup() {
     httpCredentials: { username: ADMIN_USERNAME, password, send: 'always' },
   });
   const web = await request.newContext({ baseURL: BASE_URL });
+  try {
+    await prepare(rest, web, password);
+  } finally {
+    await rest.dispose();
+    await web.dispose();
+  }
+}
 
+async function prepare(rest: APIRequestContext, web: APIRequestContext, password: string) {
   await login(web, ADMIN_USERNAME, password);
   await web.storageState({ path: ADMIN_STATE });
 
   const office = await firstOffice(rest);
-  let person = await findEmployee(rest, office.codeId);
+  let person = await findEmployee(rest);
   if (!person) {
     person = await createEmployee(rest, office.id);
   }
   if (!(await hasContract(rest, person.id))) {
     await createContract(web, person.id);
+    if (!(await hasContract(rest, person.id))) {
+      throw new Error(`Contratto non creato per il dipendente ${person.id}`);
+    }
   }
   fs.writeFileSync(EMPLOYEE_DATA, JSON.stringify({ personId: person.id }));
 
@@ -45,9 +56,6 @@ export default async function globalSetup() {
     throw new Error(`Cambio utente fallito: HTTP ${switched.status()}`);
   }
   await web.storageState({ path: EMPLOYEE_STATE });
-
-  await rest.dispose();
-  await web.dispose();
 }
 
 async function login(web: APIRequestContext, username: string, password: string) {
@@ -66,10 +74,17 @@ async function firstOffice(rest: APIRequestContext): Promise<{ id: number; codeI
   return offices[0];
 }
 
-async function findEmployee(rest: APIRequestContext, codeId: string) {
-  const response = await rest.get('/rest/v2/persons/list', { params: { codeId } });
-  const persons: { id: number; number: string }[] = await jsonOrThrow(response, 'elenco delle persone');
-  return persons.find((p) => p.number === EMPLOYEE.number);
+/**
+ * Cerca il dipendente per matricola: /rest/v2/persons/list restituisce solo le persone
+ * con un contratto attivo e non troverebbe un dipendente rimasto senza contratto da
+ * un'esecuzione precedente interrotta.
+ */
+async function findEmployee(rest: APIRequestContext): Promise<{ id: number } | undefined> {
+  const response = await rest.get('/rest/v2/persons/show', { params: { number: EMPLOYEE.number } });
+  if (response.status() === 404) {
+    return undefined;
+  }
+  return jsonOrThrow(response, 'ricerca del dipendente');
 }
 
 async function createEmployee(rest: APIRequestContext, officeId: number): Promise<{ id: number }> {
@@ -104,8 +119,9 @@ async function createContract(web: APIRequestContext, personId: number) {
       'wtt.id': wtt,
     },
   });
-  if (!response.ok()) {
-    throw new Error(`Inserimento del contratto fallito: HTTP ${response.status()}`);
+  // i redirect sono seguiti: un rinvio al login risponde comunque 200
+  if (!response.ok() || response.url().includes('/login')) {
+    throw new Error(`Inserimento del contratto fallito: HTTP ${response.status()}, ${response.url()}`);
   }
 }
 

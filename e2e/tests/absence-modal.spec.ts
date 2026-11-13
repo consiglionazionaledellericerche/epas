@@ -60,7 +60,11 @@ test.describe('modale di inserimento assenza', () => {
     await openModal(page);
     const modal = page.locator('#modalGroupAbsence');
     const to = modal.locator('input[name="to"]:not([type="hidden"])');
-    const from = await to.inputValue();
+    // la data di partenza è nel campo nascosto "from", sempre valorizzato: "to"
+    // può essere vuoto
+    await expect(to, 'campo "to" modificabile').toBeEditable();
+    const from = await to.locator('xpath=ancestor::form').locator('input[name="from"][type="hidden"]').inputValue();
+    expect(from, 'data "from" nel formato dd/MM/yyyy').toMatch(/^\d{2}\/\d{2}\/\d{4}$/);
     const [day, month, year] = from.split('/').map(Number);
     const nextDay = new Date(year, month - 1, day + 1);
     const newTo = [nextDay.getDate(), nextDay.getMonth() + 1, nextDay.getFullYear()]

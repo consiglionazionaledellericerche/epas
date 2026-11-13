@@ -24,7 +24,10 @@ Con `npx playwright test --ui` i test si seguono passo per passo. Dopo un errore
 Variabili opzionali:
 
 - `E2E_PORT` (per `stack.sh`): porta locale di ePAS, default 9000;
-- `E2E_BASE_URL`: indirizzo di ePAS per i test, default `http://localhost:9000`;
+- `E2E_BASE_URL`: indirizzo di ePAS per i test, default `http://localhost:9000`. Lo
+  stack imposta `SESSION_SECURE=true` e i browser accettano i cookie con l'attributo Secure
+  in http solo su `localhost`: con un altro host (es. un docker remoto) serve https,
+  oppure ePAS avviato con `SESSION_SECURE=false`, altrimenti il login del setup fallisce;
 - `E2E_ADMIN_USERNAME`, `E2E_ADMIN_PASSWORD`: utente con ruolo DEVELOPER usato per
   preparare i dati. Il default è l'utente `admin` creato dal job di bootstrap su un
   database vuoto.

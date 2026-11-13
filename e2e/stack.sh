@@ -44,11 +44,13 @@ up() {
   log "avvio di $POSTGRES_IMAGE"
   docker run -d --name "$PG" --network "$NETWORK" --network-alias postgres \
     -e POSTGRES_PASSWORD="$DB_PASS" -e POSTGRES_DB=epas "$POSTGRES_IMAGE" >/dev/null
+  # -h localhost: la connessione TCP. Sul socket unix risponde anche il server
+  # temporaneo dell'inizializzazione, che poi viene fermato e riavviato.
   for _ in $(seq 1 60); do
-    docker exec "$PG" pg_isready -U postgres -q 2>/dev/null && break
+    docker exec "$PG" pg_isready -h localhost -U postgres -q 2>/dev/null && break
     sleep 2
   done
-  docker exec "$PG" pg_isready -U postgres -q || fail "postgres non risponde"
+  docker exec "$PG" pg_isready -h localhost -U postgres -q || fail "postgres non risponde"
 
   # SESSION_SECURE=true: i cookie hanno l'attributo Secure come dietro https. I
   # browser trattano localhost come contesto sicuro e li accettano anche in http.
