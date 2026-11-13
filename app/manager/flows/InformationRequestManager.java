@@ -843,11 +843,38 @@ public class InformationRequestManager {
         break;
     }
     val currentPerson = Security.getUser().get().getPerson();
-    executeEvent(Optional.of(serviceRequest), Optional.of(illnessRequest), 
-        Optional.of(teleworkRequest), Optional.of(parentalLeaveRequest), currentPerson, 
-        InformationRequestEventType.MANAGER_REFUSAL, Optional.fromNullable(reason));
-    log.info("{} disapprovata dal responsabile di sede {}.", request,
+    executeEvent(Optional.fromNullable(serviceRequest), Optional.fromNullable(illnessRequest),
+        Optional.fromNullable(teleworkRequest), Optional.fromNullable(parentalLeaveRequest),
+        currentPerson, InformationRequestEventType.MANAGER_REFUSAL,
+        Optional.fromNullable(reason));
+    log.info("{} disapprovata dal responsabile di gruppo {}.", request,
         currentPerson.getFullname());
+  }
+
+  /**
+   * Individua il tipo di rifiuto che l'utente può effettuare sulla richiesta, in base alle
+   * approvazioni ancora mancanti e al suo ruolo.
+   *
+   * @param request la richiesta informativa
+   * @param user l'utente che vuole respingere la richiesta
+   * @return l'evento di rifiuto da eseguire, assente se l'utente non ha approvazioni in sospeso
+   *     da rilasciare sulla richiesta.
+   */
+  public Optional<InformationRequestEventType> refusalFor(InformationRequest request, User user) {
+    final Person requester = request.getPerson();
+    if (request.isOfficeHeadApprovalRequired() && request.getOfficeHeadApproved() == null
+        && isSeatSupervisorFor(user, requester)) {
+      return Optional.of(InformationRequestEventType.OFFICE_HEAD_REFUSAL);
+    }
+    if (request.isAdministrativeApprovalRequired() && request.getAdministrativeApproved() == null
+        && user.hasRolesOnOffice(requester.getOffice(), Role.PERSONNEL_ADMIN)) {
+      return Optional.of(InformationRequestEventType.ADMINISTRATIVE_REFUSAL);
+    }
+    if (!request.isFullyApproved() && request.getManagerApproved() == null
+        && user.isGroupManagerOf(requester)) {
+      return Optional.of(InformationRequestEventType.MANAGER_REFUSAL);
+    }
+    return Optional.absent();
   }
 
   /**
