@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     mezzo per verificare le sedi abilitate dall'indirizzo ip: il controllo confrontava ogni
     configurazione con tutte le sedi e il tempo cresceva con il quadrato del numero di sedi
     (#658).
+  - La cancellazione dal cartellino di una timbratura copiata dal telelavoro salva subito il
+    giorno: quando restavano altre timbrature, la lista modificata e non salvata faceva fallire
+    il salvataggio della transazione (ClassCastException nell'HibernateInterceptor di Play
+    durante la scrittura dello storico) (#666).
 
 ### Security
   - I lettori badge non possono più inserire assenze tramite i metodi
