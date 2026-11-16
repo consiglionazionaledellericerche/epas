@@ -40,9 +40,12 @@ import manager.recaps.personstamping.PersonStampingRecapFactory;
 import models.Office;
 import models.Person;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -150,23 +153,23 @@ public class MonthsRecapManager {
       throws IOException {
     
     CellStyle holiday = wb.createCellStyle();
-    holiday.setAlignment(CellStyle.ALIGN_CENTER);
-    holiday.setBorderLeft(CellStyle.VERTICAL_BOTTOM);
-    holiday.setBorderRight(CellStyle.VERTICAL_BOTTOM);
+    holiday.setAlignment(HorizontalAlignment.CENTER);
+    holiday.setBorderLeft(BorderStyle.DASHED);
+    holiday.setBorderRight(BorderStyle.DASHED);
     holiday.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
     holiday.setFillBackgroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
-    holiday.setFillPattern(CellStyle.SOLID_FOREGROUND);
+    holiday.setFillPattern(FillPatternType.SOLID_FOREGROUND);
     
     CellStyle workingDay = wb.createCellStyle();    
-    workingDay.setAlignment(CellStyle.ALIGN_CENTER);
+    workingDay.setAlignment(HorizontalAlignment.CENTER);
 
     
     Font font = wb.createFont();
     font.setFontHeightInPoints((short) 12);
     CellStyle cs = wb.createCellStyle();
     cs.setFont(font);
-    cs.setBorderBottom(CellStyle.BORDER_DOUBLE);
-    cs.setAlignment(CellStyle.ALIGN_CENTER);
+    cs.setBorderBottom(BorderStyle.DOUBLE);
+    cs.setAlignment(HorizontalAlignment.CENTER);
     try {
       FileOutputStream out = new FileOutputStream(file);
       Cell cell = row.createCell(0);
@@ -227,8 +230,8 @@ public class MonthsRecapManager {
     font.setFontHeightInPoints((short) 12);
     CellStyle cs = wb.createCellStyle();
     cs.setFont(font);
-    cs.setBorderBottom(CellStyle.BORDER_DOUBLE);
-    cs.setAlignment(CellStyle.ALIGN_CENTER);
+    cs.setBorderBottom(BorderStyle.DOUBLE);
+    cs.setAlignment(HorizontalAlignment.CENTER);
     return cs;
   }
 
@@ -242,13 +245,13 @@ public class MonthsRecapManager {
 
     Font font = wb.createFont();
     font.setFontHeightInPoints((short) 12);
-    font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+    font.setBold(true);
     CellStyle cs = wb.createCellStyle();
     cs.setFont(font);
-    cs.setBorderBottom(CellStyle.BORDER_DOUBLE);
-    cs.setAlignment(CellStyle.ALIGN_CENTER);
-    cs.setBorderLeft(CellStyle.VERTICAL_BOTTOM);
-    cs.setBorderRight(CellStyle.VERTICAL_BOTTOM); 
+    cs.setBorderBottom(BorderStyle.DOUBLE);
+    cs.setAlignment(HorizontalAlignment.CENTER);
+    cs.setBorderLeft(BorderStyle.DASHED);
+    cs.setBorderRight(BorderStyle.DASHED); 
     if (date.isPresent()) {
       MonthDay patron = (MonthDay) configurationManager
           .configValue(office, EpasParam.DAY_OF_PATRON, date.get());
@@ -258,7 +261,7 @@ public class MonthsRecapManager {
         log.debug("Applico lo stile per il festivo");        
         cs.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
         cs.setFillBackgroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
-        cs.setFillPattern(CellStyle.SOLID_FOREGROUND);        
+        cs.setFillPattern(FillPatternType.SOLID_FOREGROUND);        
       } 
     }
     

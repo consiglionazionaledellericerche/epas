@@ -29,7 +29,11 @@ import helpers.rest.GsonModule;
 import helpers.rest.JacksonModule;
 import it.cnr.iit.epas.AuthInfoBinder;
 import it.cnr.iit.epas.JsonStampingBinder;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import models.dto.ShiftEvent;
@@ -39,17 +43,37 @@ import models.exports.AuthInfo;
 import models.exports.StampingFromClient;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.drools.KnowledgeBase;
+import org.drools.KnowledgeBaseFactory;
+import org.drools.builder.KnowledgeBuilder;
+import org.drools.builder.KnowledgeBuilderFactory;
+import org.drools.builder.ResourceType;
+import org.drools.io.ResourceFactory;
+import org.drools.runtime.StatelessKnowledgeSession;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.junit.Test;
+import org.postgresql.Driver;
+import org.yaml.snakeyaml.Yaml;
+import play.Play;
 import play.libs.Mail;
 import play.test.UnitTest;
 import synch.perseoconsumers.people.PerseoPerson;
 
 /**
  * Verifica il comportamento delle librerie aggiornate nella riduzione delle vulnerabilità
- * (issue #628) sui percorsi dell'applicazione che le usano: Jackson 2.21, gson 2.13,
- * commons-email 1.6 con JavaMail 1.6.
+ * (issue #628 e #682) sui percorsi dell'applicazione che le usano: Jackson 2.21, gson 2.13,
+ * commons-email 1.6 con JavaMail 1.6, poi 4.1, snakeyaml 2, driver postgresql 42.7, drools
+ * senza protobuf.
  */
 public class LibraryUpgradesTest extends UnitTest {
 
@@ -255,6 +279,121 @@ public class LibraryUpgradesTest extends UnitTest {
     assertNotNull(sent);
     assertTrue(sent, sent.contains("Prova invio"));
     assertTrue(sent, sent.contains("Corpo del messaggio"));
+  }
+
+  // ---------------------------------------------------------------- poi
+
+  /**
+   * Gli stili usati negli export xls (grassetto, centrato, bordi, riempimento) sono scritti e
+   * riletti correttamente con l'API a enum di poi 4.
+   */
+  @Test
+  public void poiWritesStyledXls() throws Exception {
+    assertTrue(jarOf(Workbook.class), jarOf(Workbook.class).endsWith("poi-4.1.2.jar"));
+
+    byte[] content;
+    try (Workbook wb = new HSSFWorkbook()) {
+      Font font = wb.createFont();
+      font.setFontHeightInPoints((short) 12);
+      font.setBold(true);
+      CellStyle cs = wb.createCellStyle();
+      cs.setFont(font);
+      cs.setBorderBottom(BorderStyle.DOUBLE);
+      cs.setBorderLeft(BorderStyle.DASHED);
+      cs.setAlignment(HorizontalAlignment.CENTER);
+      cs.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
+      cs.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+      Sheet sheet = wb.createSheet("Riepilogo");
+      sheet.createRow(0).createCell(0).setCellValue("Intestazione");
+      sheet.getRow(0).getCell(0).setCellStyle(cs);
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      wb.write(out);
+      content = out.toByteArray();
+    }
+
+    try (Workbook wb = new HSSFWorkbook(new ByteArrayInputStream(content))) {
+      CellStyle cs = wb.getSheet("Riepilogo").getRow(0).getCell(0).getCellStyle();
+      assertEquals("Intestazione",
+          wb.getSheet("Riepilogo").getRow(0).getCell(0).getStringCellValue());
+      assertTrue(wb.getFontAt(cs.getFontIndexAsInt()).getBold());
+      assertEquals(BorderStyle.DOUBLE, cs.getBorderBottom());
+      assertEquals(BorderStyle.DASHED, cs.getBorderLeft());
+      assertEquals(HorizontalAlignment.CENTER, cs.getAlignment());
+      assertEquals(FillPatternType.SOLID_FOREGROUND, cs.getFillPattern());
+      assertEquals(IndexedColors.LIGHT_YELLOW.getIndex(), cs.getFillForegroundColor());
+    }
+  }
+
+  // ---------------------------------------------------------------- snakeyaml
+
+  /**
+   * I file caricati dal Bootstrap con Fixtures.loadModels sono letti da snakeyaml 2 come
+   * mappe, nello stesso modo in cui li legge Fixtures (new Yaml().load).
+   */
+  @Test
+  public void snakeyamlReadsBootstrapFixtures() {
+    assertTrue(jarOf(Yaml.class), jarOf(Yaml.class).endsWith("snakeyaml-2.7.jar"));
+
+    for (String name : new String[] {
+        "db/import/developer.yml", "db/import/fakeInstituteAndOffice.yml",
+        "db/import/qualifications.yml"}) {
+      String content = Play.getVirtualFile(name).contentAsString();
+      Object o = new Yaml().load(content);
+      assertTrue(name, o instanceof Map);
+      assertFalse(name, ((Map<?, ?>) o).isEmpty());
+    }
+    Map<?, ?> qualifications = new Yaml()
+        .load(Play.getVirtualFile("db/import/qualifications.yml").contentAsString());
+    Map<?, ?> first = (Map<?, ?>) qualifications.get("Qualification(livello1)");
+    assertEquals(1, first.get("qualification"));
+    assertEquals("livello 1", first.get("description"));
+  }
+
+  // ---------------------------------------------------------------- postgresql
+
+  /**
+   * Il driver JDBC caricato è quello aggiornato e non quello di play.
+   */
+  @Test
+  public void postgresqlDriverIsTheUpgradedVersion() {
+    assertTrue(jarOf(Driver.class), jarOf(Driver.class).endsWith("postgresql-42.7.14.jar"));
+  }
+
+  // ---------------------------------------------------------------- drools
+
+  /**
+   * protobuf (usata da drools solo per serializzare le sessioni) non è più nel classpath e le
+   * regole si compilano ed eseguono come prima.
+   */
+  @Test
+  public void droolsWorksWithoutProtobuf() {
+    try {
+      Class.forName("com.google.protobuf.Message", false, Play.classloader);
+      fail("protobuf-java non dovrebbe essere nel classpath");
+    } catch (ClassNotFoundException expected) {
+      // atteso
+    }
+
+    String drl = "package test;\n"
+        + "global java.util.List results;\n"
+        + "rule \"stringa\"\n"
+        + "when\n"
+        + "  $s : String(this == \"epas\")\n"
+        + "then\n"
+        + "  results.add($s);\n"
+        + "end\n";
+    KnowledgeBuilder builder = KnowledgeBuilderFactory.newKnowledgeBuilder();
+    builder.add(ResourceFactory.newByteArrayResource(drl.getBytes()), ResourceType.DRL);
+    assertFalse(builder.getErrors().toString(), builder.hasErrors());
+    KnowledgeBase knowledge = KnowledgeBaseFactory.newKnowledgeBase();
+    knowledge.addKnowledgePackages(builder.getKnowledgePackages());
+
+    List<Object> results = new ArrayList<>();
+    StatelessKnowledgeSession session = knowledge.newStatelessKnowledgeSession();
+    session.setGlobal("results", results);
+    session.execute(ImmutableList.of("epas", "altro"));
+
+    assertEquals(ImmutableList.of("epas"), results);
   }
 
   /**

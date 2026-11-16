@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     nella finestra di gestione del giorno e il token anti-CSRF nelle chiamate ajax. Lo stack
     dei test avvia ePAS con CSRF_MODE=enforce (#677).
 
+### Changed
+  - Aggiornate le librerie postgresql (42.7.14), poi (4.1.2), snakeyaml (2.7) e assertj
+    (3.27.7). protobuf-java non è più inclusa: drools la usa solo per serializzare le sessioni
+    (#682).
+
 ### Removed
   - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e
     /stampingsfromclient/absencenotrecompute (ora rispondono 404), non più usati dai client
