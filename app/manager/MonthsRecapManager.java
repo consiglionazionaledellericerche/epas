@@ -154,8 +154,8 @@ public class MonthsRecapManager {
     
     CellStyle holiday = wb.createCellStyle();
     holiday.setAlignment(HorizontalAlignment.CENTER);
-    holiday.setBorderLeft(BorderStyle.DASHED);
-    holiday.setBorderRight(BorderStyle.DASHED);
+    holiday.setBorderLeft(BorderStyle.MEDIUM);
+    holiday.setBorderRight(BorderStyle.MEDIUM);
     holiday.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
     holiday.setFillBackgroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
     holiday.setFillPattern(FillPatternType.SOLID_FOREGROUND);
@@ -250,8 +250,8 @@ public class MonthsRecapManager {
     cs.setFont(font);
     cs.setBorderBottom(BorderStyle.DOUBLE);
     cs.setAlignment(HorizontalAlignment.CENTER);
-    cs.setBorderLeft(BorderStyle.DASHED);
-    cs.setBorderRight(BorderStyle.DASHED); 
+    cs.setBorderLeft(BorderStyle.MEDIUM);
+    cs.setBorderRight(BorderStyle.MEDIUM); 
     if (date.isPresent()) {
       MonthDay patron = (MonthDay) configurationManager
           .configValue(office, EpasParam.DAY_OF_PATRON, date.get());

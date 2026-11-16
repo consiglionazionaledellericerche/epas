@@ -299,7 +299,7 @@ public class LibraryUpgradesTest extends UnitTest {
       CellStyle cs = wb.createCellStyle();
       cs.setFont(font);
       cs.setBorderBottom(BorderStyle.DOUBLE);
-      cs.setBorderLeft(BorderStyle.DASHED);
+      cs.setBorderLeft(BorderStyle.MEDIUM);
       cs.setAlignment(HorizontalAlignment.CENTER);
       cs.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
       cs.setFillPattern(FillPatternType.SOLID_FOREGROUND);
@@ -317,7 +317,7 @@ public class LibraryUpgradesTest extends UnitTest {
           wb.getSheet("Riepilogo").getRow(0).getCell(0).getStringCellValue());
       assertTrue(wb.getFontAt(cs.getFontIndexAsInt()).getBold());
       assertEquals(BorderStyle.DOUBLE, cs.getBorderBottom());
-      assertEquals(BorderStyle.DASHED, cs.getBorderLeft());
+      assertEquals(BorderStyle.MEDIUM, cs.getBorderLeft());
       assertEquals(HorizontalAlignment.CENTER, cs.getAlignment());
       assertEquals(FillPatternType.SOLID_FOREGROUND, cs.getFillPattern());
       assertEquals(IndexedColors.LIGHT_YELLOW.getIndex(), cs.getFillForegroundColor());
