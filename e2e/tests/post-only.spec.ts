@@ -71,6 +71,33 @@ test.describe('azioni che modificano dati solo in POST', () => {
     }
 
     /**
+     * Un campione delle azioni annotate nel primo gruppo (cf5daa7ac), di controller
+     * diversi: anche queste con un id che non esiste rispondono 404 senza modificare nulla.
+     */
+    const FIRST_GROUP = [
+      '/qualifications/delete?id=0',
+      '/timeslots/delete?id=0',
+      '/badgereaders/delete?id=0',
+      '/groups/deleteGroup?groupId=0',
+      '/workingtimes/delete?wttId=0',
+      '/administrators/delete?uroId=0',
+      '/absencegroups/deleteCategoryTab?categoryTabId=0',
+    ];
+
+    for (const url of FIRST_GROUP) {
+      test(`primo gruppo, GET rifiutata e POST con il token accettata: ${url}`, async ({ page }) => {
+        await page.goto('/');
+        const token = await csrfToken(page);
+
+        const get = await send(page, 'GET', url);
+        expect(get.status, 'GET senza token').toBe(403);
+
+        const post = await send(page, 'POST', url, token);
+        expect(post.status, 'POST con il token: oggetto inesistente').toBe(404);
+      });
+    }
+
+    /**
      * Azioni che in POST modificherebbero dati anche senza un id: solo la GET, che è
      * rifiutata da CsrfProtection prima di eseguire l'azione.
      */
@@ -85,6 +112,108 @@ test.describe('azioni che modificano dati solo in POST', () => {
         expect(get.status, 'GET senza token').toBe(403);
       });
     }
+  });
+
+  /**
+   * Gestori di public/javascripts/script.js per i link con data-method. Le richieste
+   * vanno a /stampings/delete con un id che non esiste (404, nessuna modifica) oppure sono
+   * intercettate prima di arrivare a ePAS.
+   */
+  test.describe('link con data-method', () => {
+    test.use({ storageState: ADMIN_STATE });
+
+    const MISSING_STAMPING = '/stampings/delete?id=0';
+
+    /**
+     * Aggiunge alla pagina un link con gli attributi indicati e lo restituisce: nelle view
+     * non c'è un link con data-confirm e data-method, né uno data-async raggiungibile
+     * senza dati di attestati.
+     */
+    async function addLink(page: Page, attributes: Record<string, string>) {
+      await page.evaluate((attributes) => {
+        const a = document.createElement('a');
+        a.id = 'e2e-post-only-link';
+        a.textContent = 'link di prova';
+        // in cima a page_content sarebbe coperto dalla barra di navigazione fissa
+        a.setAttribute('style', 'position: fixed; bottom: 10px; left: 10px; z-index: 2000');
+        for (const [name, value] of Object.entries(attributes)) {
+          a.setAttribute(name, value);
+        }
+        document.getElementById('page_content')!.prepend(a);
+      }, attributes);
+      return page.locator('#e2e-post-only-link');
+    }
+
+    test('il tag b.delete invia un form POST con il token', async ({ page }) => {
+      await page.goto('/qualifications/list');
+      const link = page.locator('a.btn-danger[data-method="DELETE"][href*="qualifications/delete" i]')
+        .first();
+      test.skip(await link.count() === 0, 'nessuna qualifica eliminabile nella pagina');
+      const token = await csrfToken(page);
+      // la qualifica non deve essere eliminata: la richiesta non arriva a ePAS
+      await page.route(/\/qualifications\/delete/i, (route) => route.fulfill({
+        status: 200, contentType: 'text/html', body: '<html><body>intercettata</body></html>',
+      }));
+      const [request] = await Promise.all([
+        page.waitForRequest(/\/qualifications\/delete/i),
+        link.click(),
+      ]);
+      expect(request.method()).toBe('POST');
+      expect(new URLSearchParams(request.postData() ?? '').get('authenticityToken')).toBe(token);
+    });
+
+    test('un link data-async con data-method="post" invia una POST ajax con il token', async ({ page }) => {
+      await page.goto('/');
+      const token = await csrfToken(page);
+      const link = await addLink(page, {
+        href: MISSING_STAMPING, 'data-async': '#page_content', 'data-method': 'post',
+      });
+      const [response] = await Promise.all([
+        page.waitForResponse(/\/stampings\/delete/i),
+        link.click(),
+      ]);
+      const request = response.request();
+      expect(request.method()).toBe('POST');
+      expect(await request.headerValue('x-requested-with')).toBe('XMLHttpRequest');
+      expect(await request.headerValue('x-csrf-token')).toBe(token);
+      expect(new URLSearchParams(request.postData() ?? '').get('id')).toBe('0');
+      expect(response.status(), 'superata la verifica: timbratura inesistente').toBe(404);
+    });
+
+    test('con data-confirm la POST parte solo dopo la conferma', async ({ page }) => {
+      await page.goto('/');
+      const token = await csrfToken(page);
+      const link = await addLink(page, {
+        href: MISSING_STAMPING, 'data-method': 'post', 'data-confirm': 'Confermi?',
+      });
+      const requests: string[] = [];
+      page.on('request', (r) => {
+        if (/\/stampings\/delete/i.test(r.url())) {
+          requests.push(r.method());
+        }
+      });
+      const dialog = page.locator('.bootbox.modal');
+
+      // annullata la conferma non parte nessuna richiesta, né GET né POST
+      await link.click();
+      await expect(dialog).toBeVisible();
+      await dialog.locator('[data-bb-handler="cancel"]').click();
+      await expect(dialog).toBeHidden();
+      expect(requests, 'richieste dopo l\'annullamento').toEqual([]);
+
+      // confermata, il link invia il form POST con il token
+      await link.click();
+      await expect(dialog).toBeVisible();
+      const [request] = await Promise.all([
+        page.waitForRequest(/\/stampings\/delete/i),
+        dialog.locator('[data-bb-handler="confirm"]').click(),
+      ]);
+      expect(request.method()).toBe('POST');
+      expect(new URLSearchParams(request.postData() ?? '').get('authenticityToken')).toBe(token);
+      expect((await request.response())?.status(), 'superata la verifica: timbratura inesistente')
+        .toBe(404);
+      expect(requests).toEqual(['POST']);
+    });
   });
 
   test.describe('eliminazione di una timbratura dal cartellino', () => {
