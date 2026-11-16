@@ -157,9 +157,12 @@ public class CsrfProtection extends Controller {
    * authenticityToken: leggere i parametri di una richiesta json consumerebbe il corpo che
    * l'azione deve ancora leggere.</p>
    *
-   * <p>Una sessione senza token è appena stata creata: la precedente è scaduta, oppure è
-   * stata sostituita dal login automatico OAuth nella stessa richiesta. Il token inviato è
-   * allora quello di una pagina aperta prima del cambio di sessione.</p>
+   * <p>Un token diverso da quello della sessione è di solito quello di una pagina aperta in
+   * una sessione precedente: con il login locale la pagina di login crea il token prima
+   * dell'autenticazione, quindi dopo un logout e un nuovo login la sessione ha già un token
+   * diverso (INVALID_TOKEN). Solo una sessione appena creata nella stessa richiesta, per
+   * esempio dal login automatico OAuth, non ha ancora un token (NEW_SESSION). Una sessione
+   * locale scaduta non arriva qui: Resecure.checkAccess rimanda prima al login.</p>
    */
   @Util
   private static CsrfProblem tokenProblem() {
@@ -176,7 +179,7 @@ public class CsrfProtection extends Controller {
         session.getAuthenticityToken().getBytes(StandardCharsets.UTF_8))) {
       return null;
     }
-    return newSession ? CsrfProblem.EXPIRED_SESSION : CsrfProblem.INVALID_TOKEN;
+    return newSession ? CsrfProblem.NEW_SESSION : CsrfProblem.INVALID_TOKEN;
   }
 
   @Util
@@ -206,22 +209,35 @@ public class CsrfProtection extends Controller {
 
   /**
    * Motivo per cui una richiesta non supera la verifica: la descrizione è per il log, il
-   * codice per l'header X-CSRF-Rejected della risposta.
+   * codice per l'header X-CSRF-Rejected della risposta. Pubblico perché la pagina 403 legge
+   * isStalePage().
    */
-  enum CsrfProblem {
-    CROSS_SITE("cross-site", "richiesta da un altro sito"),
-    MISSING_TOKEN("missing-token", "token assente"),
-    EXPIRED_SESSION("expired-session",
-        "token di una sessione precedente, scaduta o sostituita da un nuovo login"),
-    INVALID_TOKEN("invalid-token", "token non valido"),
-    CHECK_ERROR("check-error", "errore nella verifica");
+  public enum CsrfProblem {
+    CROSS_SITE("cross-site", "richiesta da un altro sito", false),
+    MISSING_TOKEN("missing-token", "token assente", false),
+    NEW_SESSION("new-session",
+        "token di una sessione precedente, la sessione corrente è appena stata creata", true),
+    INVALID_TOKEN("invalid-token", "token diverso da quello della sessione, di solito di una "
+        + "pagina aperta prima di un nuovo login", true),
+    CHECK_ERROR("check-error", "errore nella verifica", false);
 
     final String code;
     final String description;
+    private final boolean stalePage;
 
-    CsrfProblem(String code, String description) {
+    CsrfProblem(String code, String description, boolean stalePage) {
       this.code = code;
       this.description = description;
+      this.stalePage = stalePage;
+    }
+
+    /**
+     * Il token è quello di una pagina aperta in un'altra sessione: ricaricare la pagina
+     * risolve. Per gli altri motivi (token assente, richiesta da un altro sito, errore)
+     * ricaricare non basta.
+     */
+    public boolean isStalePage() {
+      return stalePage;
     }
   }
 

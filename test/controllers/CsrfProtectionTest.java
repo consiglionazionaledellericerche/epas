@@ -94,6 +94,8 @@ public class CsrfProtectionTest extends FunctionalTest {
     Response response = POST(newRequest(), savePasswordUrl(), passwordParams(), noFiles());
     assertStatus(403, response);
     assertEquals("missing-token", response.getHeader(CsrfProtection.REJECTED_HEADER));
+    // ricaricare la pagina non aggiunge il token: niente invito a ricaricare
+    assertContentMatch("controlli di sicurezza", response);
   }
 
   @Test
@@ -109,11 +111,30 @@ public class CsrfProtectionTest extends FunctionalTest {
   }
 
   /**
-   * Pagina aperta prima che la sessione cambiasse (scaduta, oppure un nuovo login): il
-   * token è quello della sessione precedente e la nuova sessione non ne ha ancora uno.
+   * Pagina aperta prima di un logout e di un nuovo login, come nel browser: la pagina di
+   * login crea il token prima dell'autenticazione, quindi la nuova sessione ha già un token
+   * diverso da quello della pagina.
    */
   @Test
-  public void tokenOfPreviousSessionIsRejectedAsExpiredSession() {
+  public void tokenOfPageOpenedBeforeNewLoginIsRejectedAsInvalid() {
+    loginFromLoginPage();
+    Map<String, String> params = passwordParams();
+    params.put("authenticityToken", token());
+    clearCookies();
+    loginFromLoginPage();
+    Response response = POST(newRequest(), savePasswordUrl(), params, noFiles());
+    assertStatus(403, response);
+    assertEquals("invalid-token", response.getHeader(CsrfProtection.REJECTED_HEADER));
+    assertContentMatch("sessione precedente", response);
+  }
+
+  /**
+   * Sessione creata nella stessa richiesta senza passare dalla pagina di login (come il
+   * login automatico OAuth): non ha ancora un token e quello inviato è di una sessione
+   * precedente.
+   */
+  @Test
+  public void tokenSentToSessionWithoutTokenIsRejectedAsNewSession() {
     login();
     Map<String, String> params = passwordParams();
     params.put("authenticityToken", token());
@@ -121,7 +142,7 @@ public class CsrfProtectionTest extends FunctionalTest {
     login();
     Response response = POST(newRequest(), savePasswordUrl(), params, noFiles());
     assertStatus(403, response);
-    assertEquals("expired-session", response.getHeader(CsrfProtection.REJECTED_HEADER));
+    assertEquals("new-session", response.getHeader(CsrfProtection.REJECTED_HEADER));
     assertContentMatch("sessione precedente", response);
   }
 
@@ -238,6 +259,12 @@ public class CsrfProtectionTest extends FunctionalTest {
     String token = tokenFrom(getContent(GET(Router.reverse("LostPassword.lostPassword").url)));
     params.put("authenticityToken", token);
     assertNotForbidden(POST(newRequest(), url, params, noFiles()));
+  }
+
+  /** Login come nel browser: prima la pagina di login, che crea il token della sessione. */
+  private void loginFromLoginPage() {
+    assertIsOk(GET("/login"));
+    login();
   }
 
   private void login() {
