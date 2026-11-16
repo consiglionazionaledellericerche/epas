@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Test end-to-end per le schede caricate con data-async, le notifiche, l'escape dei dati
     nella finestra di gestione del giorno e il token anti-CSRF nelle chiamate ajax. Lo stack
     dei test avvia ePAS con CSRF_MODE=enforce (#677).
+  - Content Security Policy in modalità di sola segnalazione: le pagine sono inviate con
+    l'header Content-Security-Policy-Report-Only e le violazioni segnalate dai browser sono
+    scritte nel log (WARN), senza bloccare nulla. Il comportamento si configura con csp.mode
+    (CSP_MODE nel docker: off, report, enforce) e la policy con csp.policy (#687).
 
 ### Changed
   - Nella modifica di un contratto via REST (/rest/v2/contracts/update) il campo onCertificate

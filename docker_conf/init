@@ -81,6 +81,7 @@ fi
 # configure ePAS
 SKIP_IP_CHECK=${SKIP_IP_CHECK:-false}
 CSRF_MODE=${CSRF_MODE:-off}
+CSP_MODE=${CSP_MODE:-report}
 METRICS_TOKEN=${METRICS_TOKEN:-}
 X_FORWARDED_SUPPORT=${X_FORWARDED_SUPPORT:-all}
 LOGIN_MAX_FAILURES=${LOGIN_MAX_FAILURES:-10}
@@ -402,6 +403,7 @@ fi
 
 sed 's#{{SKIP_IP_CHECK}}#'"${SKIP_IP_CHECK}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{CSRF_MODE}}#'"${CSRF_MODE}"'#' -i ${APP_HOME}/conf/prod.conf
+sed 's#{{CSP_MODE}}#'"${CSP_MODE}"'#' -i ${APP_HOME}/conf/prod.conf
 METRICS_TOKEN_ESCAPED=$(printf '%s' "${METRICS_TOKEN}" | sed 's/[\\&#]/\\&/g')
 sed 's#{{METRICS_TOKEN}}#'"${METRICS_TOKEN_ESCAPED}"'#' -i ${APP_HOME}/conf/prod.conf
 sed 's#{{X_FORWARDED_SUPPORT}}#'"${X_FORWARDED_SUPPORT}"'#' -i ${APP_HOME}/conf/prod.conf
