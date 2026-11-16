@@ -27,6 +27,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     (3.27.7). protobuf-java non è più inclusa: drools la usa solo per serializzare le sessioni
     (#682).
 
+  - La verifica anti-CSRF distingue nel log il token assente, il token diverso da quello
+    della sessione (di solito di una pagina aperta prima di un nuovo login), il token inviato
+    a una sessione appena creata (per esempio dal login automatico OAuth) e la richiesta da un
+    altro sito. In modalità enforce le chiamate ajax rifiutate mostrano un avviso e la pagina
+    403 spiega il motivo invece di segnalare un problema di permessi: per il token di una
+    sessione precedente invitano a ricaricare la pagina, negli altri casi a segnalare il
+    problema se si ripete (#689).
+
 ### Removed
   - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e
     /stampingsfromclient/absencenotrecompute (ora rispondono 404), non più usati dai client
