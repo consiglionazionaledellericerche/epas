@@ -32,6 +32,19 @@ all'interno della quale è necessario rimuovere dagli _arguments_ questa opzione
 ```
 visto che non più compatibile con Java 11 (naturalmente verificate il path corretto della vostra home).
 
+L'immagine docker di ePAS usa un play 1.5.3 con alcune correzioni (compatibilità con envers,
+attributo SameSite dei cookie). Per avere lo stesso comportamento in locale il
+_play-1.5.3.jar_ dell'installazione di play va sostituito con quello dell'immagine indicata
+nella riga FROM del _Dockerfile_:
+
+```
+docker run --rm ghcr.io/criluc/play1:1.5.3-temurin-11-patched-2 \
+  cat /opt/play/play-1.5.3/framework/play-1.5.3.jar > play-1.5.3.jar
+cp play-1.5.3.jar <installazione di play>/framework/
+```
+
+Con il jar originale il parametro _application.session.sameSite_ è ignorato.
+
 La configurazione per l'accesso al db e per sovrascriscrivere i paremetri tipici
 dello sviluppo è nel file _conf/dev.conf_.
 
