@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.GsonBuilder;
 import common.security.SecurityRules;
 import controllers.Resecure;
+import controllers.Security;
 import dao.StampingDao;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
@@ -35,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.ConsistencyManager;
 import manager.StampingManager;
+import models.User;
 import models.exports.StampingFromClient;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -110,6 +112,7 @@ public class Stampings extends Controller {
     //a cui si riferisce la timbratura
     rules.checkIfPermitted(person.get().getOffice());
 
+    warnIgnoredProvenance(stampingCreateDto);
     val stampingFromClient = StampingFromClient.build(stampingCreateDto);
     // Controlla che la timbratura non sia troppo nel passato o nel futuro.
     val dateTimeError = stampingManager.clientDateTimeError(stampingFromClient.dateTime,
@@ -163,6 +166,7 @@ public class Stampings extends Controller {
       JsonResponse.badRequest(validation.errorsMap().toString());
     }
 
+    warnIgnoredProvenance(stampingDto);
     stampingDto.update(stamping);
 
     val person = stamping.getPersonDay().getPerson();
@@ -210,4 +214,17 @@ public class Stampings extends Controller {
     JsonResponse.ok();
   }
   
+
+  /**
+   * Segnala nel log i flag markedByAdmin e markedByEmployee inviati dal client, che sono
+   * ignorati: una timbratura inviata da un lettore badge non è inserita da un amministratore né
+   * dal dipendente.
+   */
+  private static void warnIgnoredProvenance(StampingUpdateDto dto) {
+    if (dto.isMarkedByAdmin() || dto.isMarkedByEmployee()) {
+      log.warn("Ignorati i flag markedByAdmin={} e markedByEmployee={} inviati da {}",
+          dto.isMarkedByAdmin(), dto.isMarkedByEmployee(),
+          Security.getUser().transform(User::getUsername).orNull());
+    }
+  }
 }

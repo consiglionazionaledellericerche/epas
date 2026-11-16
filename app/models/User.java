@@ -210,6 +210,32 @@ public class User extends BaseModel {
         .anyMatch(uro -> Arrays.asList(args).contains(uro.getRole().getName()));
   }
 
+  /**
+   * True se l'utente ha almeno uno dei ruoli passati tra i parametri sulla sede indicata,
+   * false altrimenti.
+   *
+   * @param office la sede su cui verificare i ruoli
+   * @param args Stringhe corrispondenti ai ruoli da verificare.
+   * @return true se contiene almeno uno dei ruoli specificati sulla sede.
+   */
+  public boolean hasRolesOnOffice(Office office, String... args) {
+    return office != null && usersRolesOffices.stream()
+        .anyMatch(uro -> office.equals(uro.getOffice())
+            && Arrays.asList(args).contains(uro.getRole().getName()));
+  }
+
+  /**
+   * True se l'utente è responsabile di un gruppo di cui fa attualmente parte la persona
+   * passata come parametro, false altrimenti.
+   *
+   * @param other la persona da verificare
+   * @return true se la persona è tra quelle in carico all'utente come responsabile di gruppo.
+   */
+  public boolean isGroupManagerOf(Person other) {
+    return person != null && other != null && hasRoles(Role.GROUP_MANAGER)
+        && person.getPersonsInCharge().contains(other);
+  }
+
   public boolean hasAccountRoles(AccountRole... args) {
     return roles.stream()
         .anyMatch(role -> Arrays.asList(args).contains(role));

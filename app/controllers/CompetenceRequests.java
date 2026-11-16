@@ -334,18 +334,22 @@ public class CompetenceRequests extends Controller {
            * Nel caso di prove in locale, occorre cambiare l'indirizzo di Attestati nei parametri 
            * di configurazione del Play altrimenti viene lanciata un'eccezione a questa chiamata
            */
+          boolean validated = false;
           try {
-            val certData = certificationManager.getPersonCertData(person, year, month);
-            if (certData.validate) {
-              flash.error("Attestato già validato per l'anno/mese richiesto. "
-                  + "Non si può procedere con una richiesta di straordinario.");
-              list(competenceType);
-              return;
-            }
+            validated = certificationManager.getPersonMonthValidated(person, year, month)
+                .or(false);
           } catch (Exception e) {
-            log.warn("Impossibile effettuare il controllo di validazione dell'attestato " + 
-                " del {}/{} per la richiesta di straordinari di {}", 
+            log.warn("Impossibile effettuare il controllo di validazione dell'attestato " +
+                " del {}/{} per la richiesta di straordinari di {}",
                 month, year, person.getFullname());
+          }
+          // Il redirect di list() è un'eccezione: va fatto fuori dal try per non essere
+          // intercettato dal catch.
+          if (validated) {
+            flash.error("Attestato già validato per l'anno/mese richiesto. "
+                + "Non si può procedere con una richiesta di straordinario.");
+            list(competenceType);
+            return;
           }
         }        
         isOvertime = true;
@@ -641,6 +645,9 @@ public class CompetenceRequests extends Controller {
     notFoundIfNull(competenceRequest);
     User user = Security.getUser().get();
     rules.checkIfPermitted(competenceRequest);
+    if (!competenceRequestManager.isApprover(competenceRequest, user)) {
+      forbidden();
+    }
     if (competenceRequest.getType().equals(CompetenceRequestType.OVERTIME_REQUEST)) {
       
       boolean isSeatSupervisor = user.hasRoles(Role.SEAT_SUPERVISOR);
@@ -737,7 +744,12 @@ public class CompetenceRequests extends Controller {
    */
   public static void disapproval(long id, boolean disapproval, String reason) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    notFoundIfNull(competenceRequest);
+    rules.checkIfPermitted(competenceRequest);
     User user = Security.getUser().get();
+    if (!competenceRequestManager.isApprover(competenceRequest, user)) {
+      forbidden();
+    }
     if (!disapproval) {
       disapproval = true;
       int month = competenceRequest.getMonth();
@@ -747,36 +759,27 @@ public class CompetenceRequests extends Controller {
       render(competenceRequest, disapproval, month, psDto);
     }
 
-    if (competenceRequest.isManagerApprovalRequired()
-        && competenceRequest.getManagerApproved() == null
-        && rules.check("CompetenceRequests.reperibilityManagerDisapproval", competenceRequest)) {
-      log.debug("Disapproval da parte del REPERIBILITY_MANAGER, richiesta {}",
-          competenceRequest);
-      //TODO: caso di disapprovazione da parte del supervisore del servizio.
-      competenceRequestManager.reperibilityManagerDisapproval(id, reason);
+    if (competenceRequestManager.disapproval(competenceRequest, user, reason)) {
+      notificationManager
+      .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
+          Optional.absent(), false);
+      flash.error("Richiesta respinta");
+    } else {
+      flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
     }
-    if (competenceRequest.isEmployeeApprovalRequired() 
-        && competenceRequest.getEmployeeApproved() == null
-        && user.hasRoles(Role.EMPLOYEE)) {
-      //TODO: caso di disapprovazione da parte del dipendente reperibile
-      competenceRequestManager.employeeDisapproval(id, reason);
-    }
-    if (competenceRequest.isOfficeHeadApprovalRequired() 
-        && competenceRequest.getOfficeHeadApproved() == null 
-        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
-      competenceRequestManager.officeHeadDisapproval(id, reason);
-    }
-    
-    notificationManager
-    .sendEmailToUser(Optional.absent(), Optional.fromNullable(competenceRequest),
-        Optional.absent(), false);
-    flash.error("Richiesta respinta");
     show(competenceRequest.getId(), competenceRequest.getType());
     
   }
   
   public static void updateNote(long id, boolean confirmed, String reason) {
     CompetenceRequest competenceRequest = CompetenceRequest.findById(id);
+    notFoundIfNull(competenceRequest);
+    User user = Security.getUser().get();
+    // la nota può essere modificata dal richiedente e da chi deve approvare la richiesta
+    if (!competenceRequest.getPerson().equals(user.getPerson())
+        && !competenceRequestManager.isApprover(competenceRequest, user)) {
+      forbidden();
+    }
     if (!confirmed) {
       confirmed = true;      
       render("@updateNote", confirmed, competenceRequest);

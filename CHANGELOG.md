@@ -4,20 +4,236 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.38.0] - Unreleased
+## [Unreleased]
 ### Added
+  - Test end-to-end con Playwright (cartella e2e/), eseguiti in un browser contro l'immagine
+    docker: coprono template e javascript, a partire dagli attributi del cookie di sessione e
+    dalla finestra di inserimento delle assenze. Sono eseguiti a ogni pull request (#671).
+  - Test end-to-end per le schede caricate con data-async, le notifiche, l'escape dei dati
+    nella finestra di gestione del giorno e il token anti-CSRF nelle chiamate ajax. Lo stack
+    dei test avvia ePAS con CSRF_MODE=enforce (#677).
   - API REST self-service per il dipendente autenticato (/rest/v4/me), pensate per l'app mobile:
     profilo, situazione mensile e giornaliera, ferie e permessi, buoni pasto residui e gestione
     delle proprie richieste di assenza (elenco, dettaglio, inserimento e ritiro). Documentate in
-    docs/rest/meServices.rst.
+    docs/rest/meServices.rst (#618).
   - Aggiunto il parametro keycloak.additional_client_ids (KEYCLOAK_ADDITIONAL_CLIENT_IDS nel
     docker) con gli altri client OIDC dello stesso realm, per esempio l'app mobile, i cui access
-    token sono accettati dalle API REST.
+    token sono accettati dalle API REST (#618).
 
 ### Changed
+  - Nella modifica di un contratto via REST (/rest/v2/contracts/update) il campo onCertificate
+    non è più ignorato: se è passato senza contractType e ha un valore diverso da quello
+    attuale, il contratto diventa dipendente strutturato (true) o non strutturato (false). I
+    client che inviano sempre onCertificate con un valore fisso devono inviare quello attuale
+    del contratto, oppure contractType (#672).
+  - La verifica anti-CSRF è ora in modalità report per default (csrf.mode, CSRF_MODE nel
+    docker): le richieste senza token valido non sono rifiutate ma segnalate nel log a livello
+    WARN. Anche un valore non valido del parametro vale report invece di disattivare la
+    verifica. Per tornare al comportamento precedente impostare CSRF_MODE=off (#680).
+  - Aggiornate le librerie postgresql (42.7.14), poi (4.1.2), snakeyaml (2.7) e assertj
+    (3.27.7). protobuf-java non è più inclusa: drools la usa solo per serializzare le sessioni
+    (#682).
   - La logica di inserimento delle richieste di assenza è spostata in AbsenceRequestManager.
     Le richieste dei responsabili di sede o di gruppo che si auto approvano sono ora approvate
-    direttamente al salvataggio, invece che tramite il passaggio dalla pagina di approvazione.
+    direttamente al salvataggio, invece che tramite il passaggio dalla pagina di approvazione
+    (#618).
+
+### Removed
+  - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e
+    /stampingsfromclient/absencenotrecompute (ora rispondono 404), non più usati dai client
+    ufficiali (epas-client, epas-client-sql). Eventuali client non ufficiali che li usano
+    ancora devono passare a /rest/absences/insertAbsence, che accetta parametri diversi: la
+    persona si indica con id, eppn, email, perseoId, codice fiscale o matricola, il codice con
+    absenceCode, il periodo con begin ed end, l'eventuale durata con hours e minutes al posto di
+    inizio e fine.
+
+### Fixed
+  - Il responsabile di gruppo può di nuovo respingere le richieste di uscita di servizio: il
+    rifiuto non veniva registrato e la pagina rispondeva con un errore inaspettato (#668).
+  - La pagina di login e le pagine della timbratura web non impiegano più circa un secondo e
+    mezzo per verificare le sedi abilitate dall'indirizzo ip: il controllo confrontava ogni
+    configurazione con tutte le sedi e il tempo cresceva con il quadrato del numero di sedi
+    (#658).
+  - La cancellazione dal cartellino di una timbratura copiata dal telelavoro salva subito il
+    giorno: quando restavano altre timbrature, la lista modificata e non salvata faceva fallire
+    il salvataggio della transazione (ClassCastException nell'HibernateInterceptor di Play
+    durante la scrittura dello storico) (#666).
+  - La creazione di un contratto via REST (/rest/v2/contracts/create) non risponde più sempre
+    400: la tipologia del contratto, obbligatoria, non si poteva indicare. Ora si passa con il
+    nuovo campo contractType (interim, structured_public_administration, unstructured), che
+    si può usare anche nella modifica ed è presente nelle risposte. Se manca, il contratto è
+    creato come dipendente strutturato, oppure come non strutturato se onCertificate è false.
+    Un body con JSON malformato o date non valide risponde 400 invece di 500. La creazione e
+    la modifica verificano i permessi sulla persona indicata prima di ogni altra operazione, e
+    una persona inesistente risponde 400 invece di 500 (#672).
+
+### Security
+  - I lettori badge non possono più inserire assenze tramite i metodi
+    /stampingsfromclient/absence e /stampingsfromclient/absencenotrecompute, rimossi (vedi
+    Removed).
+  - Le timbrature inviate dai lettori badge (/stampings/create, /stampingsfromclient/* e REST
+    v3) non possono più risultare inserite da un amministratore o dal dipendente: il flag admin
+    e i campi markedByAdmin e markedByEmployee inviati dal client sono ignorati (con un WARN
+    nel log se valgono true), e una timbratura aggiornata via REST da un lettore non risulta più
+    inserita da un amministratore o dal dipendente. I client ufficiali (epas-client,
+    epas-client-sql) non impostano questi flag.
+  - I cookie di Play (PLAY_SESSION, PLAY_FLASH, PLAY_ERRORS) hanno l'attributo HttpOnly e non
+    sono più leggibili da JavaScript. Nel Docker con PROTOCOL=https hanno anche l'attributo
+    Secure e il browser li invia solo in https: se ePAS deve essere raggiunto anche in http
+    (es. direttamente sulla porta 9000) impostare SESSION_SECURE=false, altrimenti il login in
+    http non funziona. Attenzione all'aggiornamento: le installazioni con PROTOCOL=https
+    ricevono questo comportamento senza modificare la configurazione; all'avvio il container
+    lo segnala nel log con un WARNING.
+
+## [2.40.0] - 2026-11-12
+### Added
+  - Workflow GitHub Actions che esegue play autotest su ogni pull request e su ogni push su
+    main, con la stessa immagine Docker di Play usata per il build.
+  - Documentazione del reverse proxy: formato di X_FORWARDED_SUPPORT con più proxy (in catena
+    o in parallelo, solo ip esatti separati da virgola), rimozione dell'header Server di ePAS
+    con Apache e Traefik, header di sicurezza (HSTS, nosniff, X-Frame-Options,
+    Referrer-Policy) e attributi Secure e HttpOnly sui cookie negli esempi di Apache, nginx e
+    Traefik, differenze di percorsi e comandi di Apache su RHEL/AlmaLinux.
+
+### Fixed
+  - Un POST /login senza username o senza password non risponde più con un errore 500
+    (NullPointerException nel modulo secure di Play), ma come un normale login fallito.
+  - Velocizzato l'inserimento delle assenze per i dipendenti con molte assenze negli anni,
+    in particolare per i gruppi senza scadenza (es. codice 26) o con periodi lunghi (congedi
+    parentali). Durante la simulazione dell'inserimento alcune query venivano ripetute per ogni
+    assenza del periodo: l'inserimento del codice 26 su un mese passa da oltre 10 minuti a
+    pochi secondi.
+  - Il controllo della fascia obbligatoria (permesso breve) e il ricalcolo delle ferie lanciati
+    fuori da una richiesta web, ad esempio dai job schedulati, partono solo dopo il salvataggio
+    dei dati e li rileggono dal database, invece di girare in parallelo su dati non ancora
+    salvati.
+
+### Security
+  - Nei template label() restituisce come HTML solo il testo dei messaggi dell'applicazione:
+    i testi che non sono chiavi dei messaggi sono codificati, come gli argomenti inseriti nei
+    messaggi (tranne numeri, booleani e date).
+  - I tag che ricevono testi dai chiamanti (titolo di modalAsync e tabItem, label di b.cancel,
+    b.li, secure.li, f.simpleView, f.searchInput e ff.fedit, testo di b.submit e popover di
+    bb.b_link) li mostrano con label() invece che con &{}, che non applica l'escape: ad esempio
+    il nome della persona nel titolo delle finestre modali era inserito come HTML.
+  - Le notifiche PNotify mostrano titolo e testo come testo e non come HTML, e i messaggi flash
+    sono codificati nella pagina.
+  - Ridotte le vulnerabilità note nelle dipendenze (issue #628): tika-langdetect sostituita
+    da tika-core 3.3.3 (eliminate cxf e spring-core), escluse le dipendenze transitive non usate
+    di gelfj (amqp-client), dbunit (commons-collections 3.2.1, poi-ooxml, xmlbeans) e
+    usertype.core (spring-core). Aggiornate jackson 2.21.8, micrometer 1.15.12, guava 33.7.2,
+    commons-beanutils 1.11.0, commons-email 1.6.0 e gson 2.13.2. Dall'immagine docker sono
+    rimossi i jar sostituiti di play, h2, c3p0 (non usato: il pool è HikariCP), ehcache 2.10.6
+    (contiene versioni vulnerabili di jackson e jetty; la cache di play usa ehcache-core
+    2.6.11) e il log4j 1.2.16 del modulo pdf.
+
+## [2.39.2] - 2026-11-10
+### Added
+  - Nuova utility in Amministrazione > Utility per ricalcolare dal 2 luglio 2026 il buono pasto
+    nei giorni con il codice 103RT. Una simulazione mostra i giorni che maturano il buono, con
+    tipologia di orario e ore previste, evidenziando quelli con meno di 6 ore previste
+    dall'orario; il ricalcolo viene eseguito in background.
+
+### Changed
+  - Il codice 103RT (telelavoro ricercatori/tecnologi) non impedisce più il buono pasto: non
+    giustifica tempo e il buono matura solo se le timbrature in telelavoro del giorno
+    raggiungono la soglia prevista dall'orario di lavoro.
+
+### Fixed
+  - Cancellando l'ultima timbratura in telelavoro di un giorno viene rimosso anche il codice
+    103RT inserito in automatico, e il giorno viene ricalcolato dopo la rimozione. Prima il
+    codice restava nel cartellino senza timbrature.
+
+## [2.39.1] - 2026-11-09
+### Added
+  - Nuova utility in Amministrazione > Utility per convertire i codici di telelavoro 103 nel
+    codice 103BP (telelavoro con maturazione del buono pasto) dal 2 luglio 2026, per i dipendenti
+    con orario normale o part time orizzontale di almeno 6 ore in tutti i giorni lavorativi. Una
+    simulazione mostra prima i codici da convertire e quelli esclusi con il motivo (altri codici di
+    assenza nel giorno, 103 inserito più volte, orario non orizzontale o sotto le 6 ore). La
+    conversione gira in background, una per volta, con l'avanzamento mostrato nella pagina, e
+    ricalcola la situazione dei dipendenti coinvolti. Il filtro per sede usa la sede attuale del
+    dipendente.
+
+### Fixed
+  - Le pagine delle timbrature in telelavoro considerano giorni di telelavoro anche quelli con il
+    codice 103BP e non più solo quelli con il 103.
+
+## [2.39.0] - 2026-11-06
+### Security
+  - Aggiornate le librerie con vulnerabilità note: jsoup 1.23.2, postgresql 42.2.29,
+    commons-compress 1.28.0, xercesImpl 2.12.2, tika 1.28.5, jjwt 0.11.5, poi 3.16.
+  - Sostituite le librerie incluse in play 1.5.3 con versioni aggiornate: log4j 1.2.17 con
+    reload4j 1.2.27, commons-fileupload 1.6.0, xstream 1.4.21, snakeyaml 1.33, dom4j 2.1.4,
+    commons-io 2.20.0 e commons-codec 1.19.0. Le vecchie versioni e il driver mysql non usato
+    sono rimossi dall'immagine docker.
+    
+### Fixed
+  - Le richieste di permesso personale (gruppo 661) che contengono giorni non inseribili, ad
+    esempio oltre il limite annuale di 18 ore, non possono più essere inviate. Prima la richiesta
+    veniva salvata e approvata per l'intero periodo, ma all'approvazione venivano inseriti solo i
+    giorni entro il limite. Il controllo è ripetuto anche al salvataggio della richiesta.
+  - Dopo un login fallito la password non viene più salvata nel cookie del flash.
+  - Password, token, secret e parametri del callback OAuth sono oscurati nei log delle richieste
+    lente.
+  - I token OAuth di Attestati (access token e refresh token) non vengono più scritti nei log.
+  - I login LDAP e Shibboleth non accettano più redirect verso altri siti tramite il parametro
+    return.
+  - Il recupero password non rivela più se un indirizzo email è registrato: risposta, errori e
+    tempi non dipendono dall'indirizzo, perché la mail è preparata e inviata in un job.
+  - Non è più possibile inserire una richiesta di straordinario per un mese con l'attestato già
+    validato. Il blocco non veniva mai applicato e il controllo poteva usare un dato vecchio
+    fino a 20 minuti: ora legge da Attestati solo il flag di validazione.
+    
+### Changed
+  - Nel docker-compose.yml di esempio la porta 9000 è pubblicata solo su 127.0.0.1: resta
+    raggiungibile dal reverse proxy installato sullo stesso server ma non dalla rete. Chi si
+    collega direttamente alla 9000 da un'altra macchina deve passare dal proxy o da un tunnel ssh.
+  - L'application.secret è obbligatorio in produzione: l'applicazione non si avvia se non è
+    impostato, se è più corto di 32 caratteri o se è uno dei valori pubblicati nel repository.
+    Nel docker l'avvio si interrompe se manca APPLICATION_SECRET, invece di usare in silenzio il
+    secret di application.conf, che è pubblico e permetteva a chiunque di firmare un cookie di
+    sessione valido per qualunque utente. Il secret di application.conf è sostituito da un valore
+    solo per sviluppo e test. Chi non aveva impostato APPLICATION_SECRET deve impostarlo prima
+    dell'aggiornamento (le sessioni aperte andranno rifatte); chi lo aveva impostato non deve fare
+    nulla.
+  - Le metriche su /metrics/prometheus richiedono un token, da impostare con metrics.token
+    (METRICS_TOKEN nel docker) e inviare nell'header Authorization: Bearer. Senza token
+    configurato rispondono 403: chi le raccoglie con Prometheus deve aggiornare la configurazione.
+  - Gli endpoint REST sullo stato di validazione degli attestati (per sede e per persona) leggono
+    da Attestati solo il flag di validazione, senza ricalcolare la situazione mensile né
+    aggiornare le certificazioni salvate in ePAS. L'endpoint per sede usa un'unica chiamata
+    ad Attestati (/api/ext/dipendenti/statoValida) con il codice della sede richiesta, invece di
+    una per dipendente. Se Attestati non è raggiungibile, non risponde correttamente o
+    restituisce una risposta in un formato diverso dal previsto, entrambi gli endpoint rispondono
+    503 invece di 500 o di considerare le persone non validate.
+  - Il codice 58 (aspettativa per funzione pubblica non retribuita) riduce ferie e permessi
+    come gli altri codici del gruppo RIDUCE_FERIE_CNR.
+  - La descrizione del gruppo G_39LA diventa "Lavoro Agile per dipendenti fragili" e la scheda
+    "Assistenza parenti immunodepressi" della form di inserimento assenze diventa "Lavoro agile
+    per dipendenti fragili".
+  - Il codice 39LA non è più inseribile dal gruppo Altri codici, ma solo dal gruppo G_39LA.
+  - Nella scheda "Lavoro agile per dipendenti fragili" il codice 39LABP è proposto prima del 39LA.
+### Added
+  - Documentazione della configurazione del reverse proxy (docs/sysadmin/reverseProxy.rst):
+    porta 9000 non esposta, X_FORWARDED_SUPPORT e PROTOCOL, esempi per Apache con una sola
+    istanza e con bilanciamento, nginx e Traefik, verifica della configurazione.
+  - Riattivato il codice 103BP "Telelavoro con maturazione buono pasto", valido dal 1° luglio
+    2026 come da nota del DG sul buono pasto in telelavoro domiciliare. Il codice è nel gruppo
+    Telelavoro accanto al 103, è inviato ad Attestati come 103 e fa maturare il buono pasto.
+    Come per LAGILEBP, se lo inseriscono da soli i dipendenti abilitati al telelavoro e lo
+    inseriscono gli amministratori del personale; nella form è proposto per primo.
+  - Nella modifica del contratto è possibile impostare i giorni di riposo compensativo già
+    effettuati alla data di inizializzazione (sourceRecoveryDayUsed), insieme alla data di
+    inizializzazione dei riposi compensativi. Entrambi i campi sono modificabili da chi ha il
+    permesso di modifica del contratto (amministratori, sviluppatori e gestori dell'anagrafica).
+
+## [2.38.0] - 2026-10-28
+### Fixed
+  - Rafforzati i controlli sui permessi in alcune azioni e nelle approvazioni dei flussi.
+  - Rafforzati i controlli sui permessi nell'inserimento delle assenze, negli allegati, nelle ore
+    di formazione, nelle timbrature in telelavoro e nell'esportazione della situazione personale.
+  - Il testo inserito dagli utenti nei popover è mostrato come testo.
 
 ## [2.37.3] - 2026-10-19
 ### Added

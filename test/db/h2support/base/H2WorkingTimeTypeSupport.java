@@ -49,8 +49,14 @@ public class H2WorkingTimeTypeSupport {
     workingTimeTypeDay.setHoliday(workingDayDefinition.holiday);
     workingTimeTypeDay.setMealTicketTime(workingDayDefinition.mealTicketTime);
     workingTimeTypeDay.setBreakTicketTime(workingDayDefinition.breakTicketTime);
-    workingTimeTypeDay.setTicketAfternoonThreshold(workingDayDefinition.ticketAfternoonThreshold);
-    workingTimeTypeDay.ticketAfternoonWorkingTime = workingDayDefinition.ticketAfternoonWorkingTime;
+    // come in WorkingTimeTypeManager, se non specificate le soglie pomeridiane valgono 0
+    if (workingDayDefinition.ticketAfternoonThreshold != null) {
+      workingTimeTypeDay.setTicketAfternoonThreshold(workingDayDefinition.ticketAfternoonThreshold);
+    }
+    if (workingDayDefinition.ticketAfternoonWorkingTime != null) {
+      workingTimeTypeDay.ticketAfternoonWorkingTime =
+          workingDayDefinition.ticketAfternoonWorkingTime;
+    }
     workingTimeTypeDay.save();
     return workingTimeTypeDay;
   }

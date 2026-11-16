@@ -15,23 +15,29 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package models.exports;
+package manager.attestati.dto.show;
 
-import models.Person;
-import org.joda.time.LocalDate;
+import java.util.List;
 
 /**
- * Utilizzato per importare via REST le assenze.
+ * DTO con lo stato di validazione degli attestati mensili dei dipendenti di una sede.
+ * GET /api/ext/dipendenti/statoValida/{codiceSede}/{anno}/{mese}
  */
-public class AbsenceFromClient {
+public class StatoValidazioneDipendenti {
 
-  public Person person;
-  public LocalDate date;
-  public String code;
+  public String codiceSede;
+  public int anno;
+  public int mese;
+  // Senza inizializzazione: se Attestati non restituisce il campo resta null e la
+  // risposta viene trattata come errore invece che come sede senza validazioni.
+  public List<ValidazioneDipendente> dipendenti;
 
-  public String inizio;
-  public String fine;
-  public String durata;
+  /**
+   * Stato di validazione dell'attestato mensile di un dipendente.
+   */
+  public static class ValidazioneDipendente {
+    public String matricola;
+    public boolean validato;
+  }
 
-  public String tipog;
 }

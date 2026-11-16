@@ -34,7 +34,7 @@
 	<label class="control-label #{if _sronly}sr-only#{/if}" 
 	       for="${field.id}">
 	    #{if !_sronly} 
-		  &{computedLabel} #{if _required}*#{/if}
+		  ${computedLabel?.label()} #{if _required}*#{/if}
 		#{/if} 
 	</label>
 	

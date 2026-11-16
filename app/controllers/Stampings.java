@@ -497,6 +497,7 @@ public class Stampings extends Controller {
     notFoundIfNull(stamping);
     val currentStamping = stampingDao.getStampingById(stampingId);
     notFoundIfNull(currentStamping);
+    rules.checkIfPermitted(currentStamping);
     currentStamping.setReason(stamping.getReason());
     currentStamping.setPlace(stamping.getPlace());
     currentStamping.setNote(stamping.getNote());

@@ -23,10 +23,12 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
+import com.querydsl.core.Tuple;
 import dao.OfficeDao;
 import dao.UsersRolesOfficesDao;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -36,7 +38,6 @@ import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.configurations.EpasParam.EpasParamValueType;
 import manager.configurations.EpasParam.EpasParamValueType.IpList;
-import models.Configuration;
 import models.Office;
 import models.Role;
 import models.User;
@@ -125,32 +126,46 @@ public class OfficeManager {
       return Sets.newHashSet();
     }
 
-    List<Office> officesWebStampingEnabled = officeDao.getOfficesWebStampingEnabled();
-    log.debug("officesWebStampingEnabled= {}", officesWebStampingEnabled);
-    
-    Set<Office> offices = Sets.newHashSet();
-    Set<Office> compatibilityOffices = Sets.newHashSet();
-    List<Configuration> configurationWithType = configurationManager
-        .configurationWithType(EpasParam.ADDRESSES_ALLOWED);
+    // Si lavora sugli id: il confronto tra entità (equals di Play, che ricalcola la chiave per
+    // riflessione) su tutte le sedi costava secondi a ogni login e a ogni timbratura web.
+    final Set<Long> officeIdsWebStampingEnabled =
+        new HashSet<>(officeDao.getOfficeIdsWebStampingEnabled());
+    log.debug("officeIdsWebStampingEnabled= {}", officeIdsWebStampingEnabled);
 
-    for (Configuration configuration : configurationWithType) {
-      IpList ipList = (IpList) EpasParamValueType.parseValue(EpasParamValueType.IP_LIST,
-          (String) configuration.getValue());
-      if (ipList == null || !officesWebStampingEnabled.contains(configuration.getOffice())) {
+    final Set<Long> officeIds = Sets.newHashSet();
+    final Set<Long> compatibilityOfficeIds = Sets.newHashSet();
+    for (Tuple configuration
+        : configurationManager.configurationValuesWithType(EpasParam.ADDRESSES_ALLOWED)) {
+      final Long officeId = configuration.get(0, Long.class);
+      if (!officeIdsWebStampingEnabled.contains(officeId)) {
+        continue;
+      }
+      final IpList ipList = (IpList) EpasParamValueType.parseValue(EpasParamValueType.IP_LIST,
+          configuration.get(1, String.class));
+      if (ipList == null) {
         continue;
       }
       if (ipList.ipList.contains(ipAddress.get())) {
-        offices.add(configuration.getOffice());
+        officeIds.add(officeId);
       } else if (compatibilityAddresses.stream().anyMatch(ipList.ipList::contains)) {
-        compatibilityOffices.add(configuration.getOffice());
+        compatibilityOfficeIds.add(officeId);
       }
     }
-    compatibilityOffices.removeAll(offices);
-    if (!compatibilityOffices.isEmpty()) {
+    compatibilityOfficeIds.removeAll(officeIds);
+
+    final Set<Office> offices = loadOffices(officeIds);
+    if (!compatibilityOfficeIds.isEmpty()) {
+      final Set<Office> compatibilityOffices = loadOffices(compatibilityOfficeIds);
       warnCompatibilityAccess(ipAddress.get(), compatibilityAddresses, compatibilityOffices);
       offices.addAll(compatibilityOffices);
     }
     return offices;
+  }
+
+  private Set<Office> loadOffices(Set<Long> officeIds) {
+    return officeIds.stream().map(officeDao::getOfficeById)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toCollection(HashSet::new));
   }
 
   private static void warnCompatibilityAccess(String ipAddress,

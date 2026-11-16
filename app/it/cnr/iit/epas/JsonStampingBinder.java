@@ -24,6 +24,7 @@ import common.injection.StaticInject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import lombok.extern.slf4j.Slf4j;
+import manager.StampingManager;
 import models.enumerate.StampTypes;
 import models.exports.StampingFromClient;
 import org.joda.time.LocalDateTime;
@@ -73,12 +74,10 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
         }
       }
 
-      if (jsonObject.has("admin") && !jsonObject.get("admin").isJsonNull()) {
-        String admin = jsonObject.get("admin").getAsString();
-        if ("true".equals(admin)) {
-          stamping.markedByAdmin = true;
-        }
-      }
+      // Il flag admin inviato dal client non è attendibile: una timbratura del lettore badge
+      // non è mai inserita da un amministratore. Viene ignorato e solo segnalato nel log.
+      final boolean adminFlag = jsonObject.has("admin") && !jsonObject.get("admin").isJsonNull()
+          && "true".equals(jsonObject.get("admin").getAsString());
       String terminal = "";
       if (jsonObject.has("terminale")) {
         terminal = jsonObject.get("terminale").getAsString();
@@ -87,10 +86,11 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
       } else {
         terminal = "";
       }
-      if (!Strings.isNullOrEmpty(terminal)) {
-        stamping.zona = terminal;
-      } else {
-        stamping.zona = null;
+      // Il terminale compare anche nel WARN: normalizzarlo prima di scriverlo nel log.
+      stamping.zona = StampingManager.clientText(terminal);
+      if (adminFlag) {
+        log.warn("Ignorato il flag admin=true nella timbratura inviata dal terminale {}",
+            stamping.zona);
       }
       
       Integer anno = jsonObject.get("anno").getAsInt();

@@ -1666,13 +1666,16 @@ public enum DefaultAbsenceType {
       ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, 
       MealTicketBehaviour.notAllowMealTicket, 0, null,
       Sets.newHashSet(), null, null, false, false, true, null), 
+  // Non giustifica tempo: il buono pasto matura solo in base alle timbrature in telelavoro.
   A_103RT("103", "Telelavoro ricercatori/tecnologi no giust. orario", false,
-      ImmutableSet.of(JustifiedTypeName.nothing), 0, false, MealTicketBehaviour.preventMealTicket, 
+      ImmutableSet.of(JustifiedTypeName.nothing), 0, false, MealTicketBehaviour.allowMealTicket,
       0, null, Sets.newHashSet(), null, null, false, false, true, null), 
-//  A_103BP("103BP", "Telelavoro buono pasto", false,
-//      ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, true, 
-//      MealTicketBehaviour.allowMealTicket, 0, null,
-//      Sets.newHashSet(), null, null, false, false, true, null),
+  // Buono pasto in telelavoro domiciliare dal 1° luglio 2026 (nota del DG, in analogia
+  // con il buono pasto in lavoro agile del CCNL 2025-2027).
+  A_103BP("103", "Telelavoro con maturazione buono pasto", false,
+      ImmutableSet.of(JustifiedTypeName.complete_day_and_add_overtime), 0, false, 
+      MealTicketBehaviour.allowMealTicket, 0, null,
+      Sets.newHashSet(), new LocalDate(2026, 7, 1), null, false, false, true, null),
 
   A_7M("7M", "Permesso sindacale in ore e minuti", true,
       ImmutableSet.of(JustifiedTypeName.specified_minutes), 0, false, 

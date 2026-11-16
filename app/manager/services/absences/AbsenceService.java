@@ -339,6 +339,10 @@ public class AbsenceService {
 
     // Gli esiti sotto forma di template rows
     List<TemplateRow> insertTemplateRows = Lists.newArrayList();
+    // Prelevato una sola volta: dentro i cicli comporterebbe una query per ogni giorno
+    // di ogni periodo, con tempi molto lunghi per i gruppi con storico esteso.
+    final JustifiedType nothingJustifiedType =
+        absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.nothing);
     for (PeriodChain periodChain : chains) {
 
       // caso particolare di errore figli.
@@ -364,8 +368,7 @@ public class AbsenceService {
         }
         if (addResult) {
           for (DayInPeriod dayInPeriod : absencePeriod.daysInPeriod.values()) {
-            insertTemplateRows.addAll(dayInPeriod.templateRowsForInsert(
-                absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.nothing)));
+            insertTemplateRows.addAll(dayInPeriod.templateRowsForInsert(nothingJustifiedType));
           }
         }
       }

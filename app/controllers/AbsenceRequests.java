@@ -91,6 +91,11 @@ import play.mvc.With;
 @With(Resecure.class)
 public class AbsenceRequests extends Controller {
 
+  private static final String PERSONAL_PERMISSION_NOT_INSERTABLE = 
+      "Non tutti i giorni richiesti possono essere inseriti: il residuo dei permessi personali "
+      + "non è sufficiente oppure alcuni giorni contengono già un'assenza. "
+      + "Modificare le date della richiesta.";
+
   @Inject
   static PersonDao personDao;
 
@@ -588,6 +593,12 @@ public class AbsenceRequests extends Controller {
 
     absenceRequestManager.checkAbsenceRequestDates(absenceRequest, insertReport);
 
+    if (absenceRequestManager.isPersonalPermissionNotFullyInsertable(
+        absenceRequest, insertReport)) {
+      Validation.addError("absenceRequest.endTo", PERSONAL_PERMISSION_NOT_INSERTABLE);
+      insertable = false;
+    }
+
     int compensatoryRestAvailable = 0;
     if (absenceRequest.getType().equals(AbsenceRequestType.COMPENSATORY_REST)
         && absenceRequest.getPerson().isTopQualification()) {
@@ -644,6 +655,27 @@ public class AbsenceRequests extends Controller {
       absenceRequest.setPerson(currentPerson);
     }
 
+    absenceRequestManager.prepareNewRequest(absenceRequest, hours, minutes, absenceType,
+        absenceCode);
+
+    // Le richieste di permesso personale devono essere inseribili per intero: i giorni oltre
+    // il limite annuale non verrebbero inseriti all'approvazione della richiesta.
+    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
+      AbsenceForm absenceForm = absenceRequestManager.buildAbsenceForm(absenceRequest);
+      InsertReport insertReport = 
+          absenceRequestManager.simulateInsert(absenceRequest, absenceForm);
+      if (absenceRequestManager.isPersonalPermissionNotFullyInsertable(
+          absenceRequest, insertReport)) {
+        Validation.addError("absenceRequest.endTo", PERSONAL_PERMISSION_NOT_INSERTABLE);
+        response.status = 400;
+        boolean insertable = false;
+        PeriodChain periodChain = absenceService
+            .residual(absenceRequest.getPerson(), absenceForm.groupSelected, LocalDate.now());
+        render("@edit", absenceRequest, insertable, insertReport, absenceForm, periodChain,
+            allDay);
+      }
+    }
+
     val outcome = absenceRequestManager.saveNewRequest(absenceRequest, hours, minutes,
         absenceType, absenceCode, Security.getUser().get());
 
@@ -684,6 +716,9 @@ public class AbsenceRequests extends Controller {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
     notFoundIfNull(absenceRequest);
     User user = Security.getUser().get();
+    if (!absenceRequestManager.isApprover(absenceRequest, user)) {
+      forbidden();
+    }
 
     boolean approved = absenceRequestManager.approval(absenceRequest, user);
 
@@ -709,19 +744,24 @@ public class AbsenceRequests extends Controller {
    */
   public static void disapproval(long id, boolean disapproval, String reason) {
     AbsenceRequest absenceRequest = AbsenceRequest.findById(id);
+    notFoundIfNull(absenceRequest);
     User user = Security.getUser().get();
+    if (!absenceRequestManager.isApprover(absenceRequest, user)) {
+      forbidden();
+    }
     if (!disapproval) {
       disapproval = true;
       render(absenceRequest, disapproval);
     }
+    final Person requester = absenceRequest.getPerson();
     if (absenceRequest.isManagerApprovalRequired() && absenceRequest.getManagerApproved() == null
-        && user.hasRoles(Role.GROUP_MANAGER)) {
+        && user.isGroupManagerOf(requester)) {
       // caso di approvazione da parte del responsabile di gruppo.
       absenceRequestManager.managerDisapproval(id, reason);
     }
     if (absenceRequest.isAdministrativeApprovalRequired()
         && absenceRequest.getAdministrativeApproved() == null 
-        && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+        && user.hasRolesOnOffice(requester.getOffice(), Role.PERSONNEL_ADMIN)) {
       // caso di approvazione da parte dell'amministratore del personale
       absenceRequestManager.personnelAdministratorDisapproval(id, reason);
     }
@@ -729,7 +769,7 @@ public class AbsenceRequests extends Controller {
     if ((absenceRequest.isOfficeHeadApprovalRequired() 
           || absenceRequest.isOfficeHeadApprovalForManagerRequired())
         && absenceRequest.getOfficeHeadApproved() == null
-        && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+        && absenceRequestManager.isSeatSupervisorFor(user, requester)) {
       log.info("Rifiuto da parte del responsabile di sede {} per {}", 
           user.getLabel(), absenceRequest);
       // caso di approvazione da parte del responsabile di sede

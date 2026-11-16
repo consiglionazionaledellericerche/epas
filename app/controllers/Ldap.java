@@ -18,6 +18,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import common.security.LocalUrls;
 import dao.PersonDao;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -51,11 +52,11 @@ public class Ldap extends Controller {
    */
   private static void redirectToOriginalUrl() {
     String url = flash.get("url");
-    if (url == null) {
+    if (!LocalUrls.isLocal(url)) {
       url = request.params.get("return");
     }
-    if (url == null) {
-      url = 
+    if (!LocalUrls.isLocal(url)) {
+      url =
           Play.configuration.getProperty("ldap.login.return", 
               Play.configuration.getProperty("http.path", "/"));
       log.debug("url from ldap.login.return = {}", url);

@@ -322,36 +322,6 @@ public class AbsenceManager {
         true, false);
   }
 
-  /**
-   * Metodo full per inserimento assenza. - persistenza assenza - ricalcoli person situation - invio
-   * email per conflitto reperibilità
-   */
-  public AbsenceInsertReport insertAbsenceRecompute(
-      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo, 
-      Optional<LocalDate> recoveryDate, AbsenceType absenceType, Optional<Blob> file, 
-      Optional<String> mealTicket, Optional<Integer> justifiedMinutes) {
-
-    return insertAbsence(person, dateFrom, dateTo, 
-        absenceType, file, mealTicket, justifiedMinutes,
-        false, true);
-  }
-
-  /**
-   * Metodo per inserimento assenza senza ricalcoli. (Per adesso utilizzato solo da solari roma per
-   * import iniziale di assenze molto indietro nel tempo. Non ritengo ci siano ulteriori utilità
-   * future). - persistenza assenza - no ricalcoli person situation - no invio email per conflitto
-   * reperibilità
-   */
-  public AbsenceInsertReport insertAbsenceNotRecompute(
-      Person person, LocalDate dateFrom, Optional<LocalDate> dateTo, 
-      Optional<LocalDate> recoveryDate, AbsenceType absenceType, Optional<Blob> file, 
-      Optional<String> mealTicket, Optional<Integer> justifiedMinutes) {
-
-    return insertAbsence(person, dateFrom, dateTo,  
-        absenceType, file, mealTicket, justifiedMinutes,
-        false, false);
-  }
-
   private AbsenceInsertReport insertAbsence(
       Person person, LocalDate dateFrom, Optional<LocalDate> dateTo, 
       AbsenceType absenceType, Optional<Blob> file, 

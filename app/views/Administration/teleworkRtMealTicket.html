@@ -1,0 +1,177 @@
+#{extends 'main.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Buono pasto nei giorni con 103RT' /}
+
+<div class="container">
+
+  <h3><i class="fa fa-cutlery"></i> Ricalcolo del buono pasto nei giorni con 103RT</h3>
+
+  #{alert color:'info'}
+  <p>
+    Il codice <strong>103RT</strong> (telelavoro ricercatori/tecnologi) non impedisce più il
+    buono pasto: il buono matura solo se le timbrature in telelavoro del giorno raggiungono la
+    soglia prevista dall'orario di lavoro. I giorni già calcolati con il vecchio comportamento
+    vanno ricalcolati.
+  </p>
+  <p>
+    La simulazione ricalcola in memoria ogni giorno con il 103RT senza salvare nulla. Sono
+    evidenziati i giorni in cui il buono maturerebbe anche se l'orario del giorno prevede meno
+    di 6 ore di lavoro (ad esempio part time o allattamento). Il ricalcolo è previsto dal
+    ${manager.TeleworkRtMealTicketManager.MEAL_TICKET_BEGIN.toString('dd/MM/yyyy')}
+    e la data di fine non può superare oggi.
+  </p>
+  <p>
+    Il filtro per sede considera la sede <strong>attuale</strong> del dipendente. Il ricalcolo
+    viene eseguito in background e può richiedere diversi minuti: l'avanzamento è mostrato in
+    questa pagina.
+  </p>
+  #{/alert}
+
+  #{if recompute}
+    #{if recompute.running}
+      <div class="alert alert-warning">
+        <p><i class="fa fa-spinner fa-spin"></i> <strong>Ricalcolo in corso</strong> da
+          ${recompute.minutes} minuti (dal ${recompute.from.toString('dd/MM/yyyy')} al
+          ${recompute.to.toString('dd/MM/yyyy')}, ${recompute.office ?: 'tutte le sedi'}).</p>
+        #{if recompute.totalPeople > 0}
+          <p>Ricalcolati <strong>${recompute.processedPeople}</strong> dipendenti su
+            <strong>${recompute.totalPeople}</strong>.</p>
+        #{/if}
+        #{else}
+          <p>Analisi dei giorni con 103RT in corso...</p>
+        #{/else}
+        <p><small>La pagina si aggiorna automaticamente ogni 15 secondi.</small></p>
+      </div>
+      <script>setTimeout(function () { window.location.reload(); }, 15000);</script>
+    #{/if}
+    #{else}
+      <div class="alert ${recompute.error || !recompute.failedPeople.isEmpty() ? 'alert-danger' : 'alert-success'}">
+        <p><strong>Ultimo ricalcolo terminato</strong> il
+          ${recompute.endedAt.toString('dd/MM/yyyy HH:mm')} in ${recompute.minutes} minuti
+          (dal ${recompute.from.toString('dd/MM/yyyy')} al ${recompute.to.toString('dd/MM/yyyy')},
+          ${recompute.office ?: 'tutte le sedi'}).</p>
+        <p>Ricalcolati <strong>${recompute.processedPeople - recompute.failedPeople.size()}</strong>
+          dipendenti, <strong>${recompute.days}</strong> giorni con 103RT che maturano il buono
+          pasto.</p>
+        #{if !recompute.failedPeople.isEmpty()}
+          <p>Dipendenti non ricalcolati per errore (vedere i log):
+            ${recompute.failedPeople.join(', ')}</p>
+        #{/if}
+        #{if recompute.error}
+          <p>Ricalcolo interrotto per errore: ${recompute.error}</p>
+        #{/if}
+      </div>
+    #{/else}
+  #{/if}
+
+  #{panel title:'Periodo e sede', dim:12 }
+  #{form @Administration.teleworkRtMealTicket(), class:'form-horizontal', method:'get'}
+    #{f.date 'from', label:'Dal', required:true, value:dateFrom?.toString('dd/MM/yyyy') /}
+    #{f.date 'to', label:'Al', required:true, value:dateTo?.toString('dd/MM/yyyy') /}
+    #{f.selectModel 'office', items:templateUtility.officesAllowed(), label:'Sede',
+        value:selectedOffice, placeholder:'Tutte le sedi' /}
+    #{b.buttons center:true}
+      <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Simula</button>
+    #{/b.buttons}
+  #{/form}
+  #{/panel}
+
+  #{if report}
+
+  #{panel title:'Giorni con 103RT che maturano il buono pasto', dim:12, color:'primary' }
+    #{if report.gaining.isEmpty()}
+      <p>Nessun giorno con 103RT matura il buono pasto nel periodo selezionato.</p>
+    #{/if}
+    #{else}
+      <p>
+        <strong>${report.daysGaining}</strong> giorni con 103RT maturano il buono pasto per
+        <strong>${report.peopleGaining}</strong> dipendenti, dal
+        ${report.from.toString('dd/MM/yyyy')} al ${report.to.toString('dd/MM/yyyy')}.
+        #{if report.daysWithoutRight > 0}
+          Di questi, <strong class="text-danger">${report.daysWithoutRight}</strong> sono in
+          giorni in cui l'orario prevede meno di 6 ore di lavoro (righe evidenziate).
+        #{/if}
+      </p>
+
+      #{form @Administration.recomputeTeleworkRtMealTicket(), method:'post'}
+        <input type="hidden" name="from" value="${report.from.toString('dd/MM/yyyy')}">
+        <input type="hidden" name="to" value="${report.to.toString('dd/MM/yyyy')}">
+        #{if selectedOffice}<input type="hidden" name="office.id" value="${selectedOffice.id}">#{/if}
+        #{b.buttons center:true}
+          <button type="submit" class="btn btn-danger"
+              onclick="return confirm('Confermi il ricalcolo dei ${report.peopleGaining} dipendenti con giorni 103RT che maturano il buono pasto? Il ricalcolo verrà eseguito in background.');">
+            <i class="fa fa-refresh"></i> Esegui il ricalcolo
+          </button>
+        #{/b.buttons}
+      #{/form}
+
+      <table class="table table-condensed table-hover">
+        <thead>
+          <tr>
+            <th>Dipendente</th>
+            <th>Matricola</th>
+            <th>Sede</th>
+            <th>Orario di lavoro</th>
+            <th>Tipologia</th>
+            <th>Ore previste</th>
+            <th class="text-right">Giorni</th>
+            <th>Date e ore timbrate</th>
+          </tr>
+        </thead>
+        <tbody>
+        #{list items:report.gaining, as:'row'}
+          <tr class="${row.withoutRight ? 'danger' : ''}">
+            <td>${row.person.fullname}</td>
+            <td>${row.person.number}</td>
+            <td>${row.person.office?.name}</td>
+            <td>${row.workingTimeType}</td>
+            <td>${row.partTime}</td>
+            <td>${row.scheduledHours}</td>
+            <td class="text-right">${row.days}</td>
+            <td>${row.details}</td>
+          </tr>
+        #{/list}
+        </tbody>
+      </table>
+    #{/else}
+  #{/panel}
+
+  #{panel title:'Giorni con 103RT invariati', dim:12 }
+    #{if report.unchanged.isEmpty()}
+      <p>Nessun giorno con 103RT invariato nel periodo selezionato.</p>
+    #{/if}
+    #{else}
+      <p><strong>${report.daysUnchanged}</strong> giorni con 103RT restano senza buono pasto o
+        lo avevano già.</p>
+      <table class="table table-condensed table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Dipendente</th>
+            <th>Matricola</th>
+            <th>Sede</th>
+            <th>Orario di lavoro</th>
+            <th>Esito</th>
+            <th class="text-right">Giorni</th>
+            <th>Periodo</th>
+          </tr>
+        </thead>
+        <tbody>
+        #{list items:report.unchanged, as:'row'}
+          <tr>
+            <td>${row.person.fullname}</td>
+            <td>${row.person.number}</td>
+            <td>${row.person.office?.name}</td>
+            <td>${row.workingTimeType}</td>
+            <td>${row.outcome.label}</td>
+            <td class="text-right">${row.days}</td>
+            <td>dal ${row.firstDate.toString('dd/MM/yyyy')} al ${row.lastDate.toString('dd/MM/yyyy')}</td>
+          </tr>
+        #{/list}
+        </tbody>
+      </table>
+    #{/else}
+  #{/panel}
+
+  #{/if}
+
+</div>

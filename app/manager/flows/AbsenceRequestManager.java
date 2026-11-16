@@ -446,22 +446,18 @@ public class AbsenceRequestManager {
   }
 
   /**
-   * Salva una nuova richiesta di assenza e ne avvia il flusso, effettuando le eventuali
-   * approvazioni automatiche ed inviando le notifiche previste.
-   *
-   * <p>La verifica che l'utente possa inserire la richiesta per la persona indicata è a carico
-   * del chiamante.</p>
+   * Prepara una nuova richiesta di assenza per il salvataggio: azzera lo stato del flusso,
+   * imposta le approvazioni necessarie, la data di fine, ore e minuti e il codice di assenza.
+   * Può essere chiamato più volte sulla stessa richiesta.
    *
    * @param absenceRequest la nuova richiesta di assenza, con persona e tipo impostati
    * @param hours le ore richieste (per i permessi orari)
    * @param minutes i minuti richiesti (per i permessi orari)
    * @param absenceType il tipo di assenza scelto (per i permessi personali)
    * @param absenceCode il codice di assenza scelto, se presente
-   * @param currentUser l'utente che inserisce la richiesta
-   * @return l'esito dell'inserimento
    */
-  public NewRequestOutcome saveNewRequest(AbsenceRequest absenceRequest, Integer hours,
-      Integer minutes, AbsenceType absenceType, String absenceCode, User currentUser) {
+  public void prepareNewRequest(AbsenceRequest absenceRequest, Integer hours,
+      Integer minutes, AbsenceType absenceType, String absenceCode) {
     Verify.verify(!absenceRequest.isPersistent(), "La richiesta di assenza deve essere nuova");
 
     initNewRequest(absenceRequest);
@@ -486,6 +482,26 @@ public class AbsenceRequestManager {
     if (absenceCode != null && !absenceCode.isBlank()) {
       absenceRequest.setAbsenceCode(absenceCode);
     }
+  }
+
+  /**
+   * Salva una nuova richiesta di assenza e ne avvia il flusso, effettuando le eventuali
+   * approvazioni automatiche ed inviando le notifiche previste.
+   *
+   * <p>La verifica che l'utente possa inserire la richiesta per la persona indicata è a carico
+   * del chiamante.</p>
+   *
+   * @param absenceRequest la nuova richiesta di assenza, con persona e tipo impostati
+   * @param hours le ore richieste (per i permessi orari)
+   * @param minutes i minuti richiesti (per i permessi orari)
+   * @param absenceType il tipo di assenza scelto (per i permessi personali)
+   * @param absenceCode il codice di assenza scelto, se presente
+   * @param currentUser l'utente che inserisce la richiesta
+   * @return l'esito dell'inserimento
+   */
+  public NewRequestOutcome saveNewRequest(AbsenceRequest absenceRequest, Integer hours,
+      Integer minutes, AbsenceType absenceType, String absenceCode, User currentUser) {
+    prepareNewRequest(absenceRequest, hours, minutes, absenceType, absenceCode);
 
     List<LocalDate> troubleDays = getTroubleDays(absenceRequest);
     if (!troubleDays.isEmpty()) {
@@ -724,31 +740,8 @@ public class AbsenceRequestManager {
     log.debug("Flusso relativo a {} terminato. Inserimento in corso delle assenze.",
         absenceRequest);
     GroupAbsenceType groupAbsenceType = getGroupAbsenceType(absenceRequest);
-    Integer hours = null;
-    Integer minutes = null;
-    AbsenceType absenceType = null;
-    JustifiedType type = null;
-    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
-      hours = absenceRequest.getHours();
-      minutes = absenceRequest.getMinutes();
-      if (hours != null && minutes != null) {
-        absenceType = absenceDao.absenceTypeByCode("661M").get();
-        type = absenceDao
-            .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
-
-      }
-    }
-    if (absenceRequest.getAbsenceCode() != null) {
-      absenceType = absenceDao.absenceTypeByCode(absenceRequest.getAbsenceCode()).get();
-    }
-    AbsenceForm absenceForm = absenceService.buildAbsenceForm(absenceRequest.getPerson(),
-        absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
-        false, absenceType, type, hours, minutes, false, true);
-    InsertReport insertReport =
-        absenceService.insert(
-            absenceRequest.getPerson(), absenceForm.groupSelected, absenceForm.from,
-            absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
-            hours, minutes, false, absenceManager);
+    AbsenceForm absenceForm = buildAbsenceForm(absenceRequest);
+    InsertReport insertReport = simulateInsert(absenceRequest, absenceForm);
     if (insertReport.criticalErrors.isEmpty()) {
       for (Absence absence : insertReport.absencesToPersist) {
         PersonDay personDay = 
@@ -783,6 +776,70 @@ public class AbsenceRequestManager {
       consistencyManager.updatePersonSituation(absenceRequest.getPerson().id, absenceForm.from);    
     }
     return insertReport;
+  }
+
+  /**
+   * Costruisce il form di inserimento delle assenze corrispondente alla richiesta.
+   *
+   * @param absenceRequest la richiesta di assenza
+   * @return il form di inserimento delle assenze.
+   */
+  public AbsenceForm buildAbsenceForm(AbsenceRequest absenceRequest) {
+    GroupAbsenceType groupAbsenceType = getGroupAbsenceType(absenceRequest);
+    Integer hours = null;
+    Integer minutes = null;
+    AbsenceType absenceType = null;
+    JustifiedType type = null;
+    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
+      hours = absenceRequest.getHours();
+      minutes = absenceRequest.getMinutes();
+      if (hours != null && minutes != null) {
+        absenceType = absenceDao.absenceTypeByCode("661M").get();
+        type = absenceDao
+            .getOrBuildJustifiedType(JustifiedTypeName.specified_minutes);
+
+      }
+    }
+    if (absenceRequest.getAbsenceCode() != null) {
+      absenceType = absenceDao.absenceTypeByCode(absenceRequest.getAbsenceCode()).get();
+    }
+    return absenceService.buildAbsenceForm(absenceRequest.getPerson(),
+        absenceRequest.startAtAsDate(), null, absenceRequest.endToAsDate(), null, groupAbsenceType,
+        false, absenceType, type, hours, minutes, false, true);
+  }
+
+  /**
+   * Simula l'inserimento delle assenze della richiesta senza persisterle.
+   *
+   * @param absenceRequest la richiesta di assenza
+   * @param absenceForm il form di inserimento costruito dalla richiesta
+   * @return il report dell'inserimento simulato.
+   */
+  public InsertReport simulateInsert(AbsenceRequest absenceRequest, AbsenceForm absenceForm) {
+    Integer hours = null;
+    Integer minutes = null;
+    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)) {
+      hours = absenceRequest.getHours();
+      minutes = absenceRequest.getMinutes();
+    }
+    return absenceService.insert(
+        absenceRequest.getPerson(), absenceForm.groupSelected, absenceForm.from,
+        absenceForm.to, absenceForm.absenceTypeSelected, absenceForm.justifiedTypeSelected,
+        hours, minutes, false, absenceManager);
+  }
+
+  /**
+   * Verifica se una richiesta di permesso personale contiene giorni che non possono essere
+   * inseriti, ad esempio perché supera il limite annuale del gruppo 661.
+   *
+   * @param absenceRequest la richiesta di assenza
+   * @param insertReport il report dell'inserimento simulato della richiesta
+   * @return true se la richiesta è di permesso personale e non tutti i giorni sono inseribili.
+   */
+  public boolean isPersonalPermissionNotFullyInsertable(AbsenceRequest absenceRequest,
+      InsertReport insertReport) {
+    return absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION)
+        && (insertReport.howManyError() > 0 || insertReport.howManySuccess() == 0);
   }
 
   /**
@@ -896,19 +953,20 @@ public class AbsenceRequestManager {
    */
   public boolean approval(AbsenceRequest absenceRequest, User user) {
 
+    final Person requester = absenceRequest.getPerson();
+
     // verifico se posso inserire l'assenza
     if (!absenceRequest.isOfficeHeadApprovalForManagerRequired() 
         && user.hasRoles(Role.GROUP_MANAGER)
-        && absenceRequest.getPerson().equals(user.getPerson())) {
+        && requester.equals(user.getPerson())) {
       managerSelfApproval(absenceRequest.id, user);
       return true;
     }
     if (absenceRequest.isManagerApprovalRequired() && absenceRequest.getManagerApproved() == null
-        && user.hasRoles(Role.GROUP_MANAGER)) {
+        && user.isGroupManagerOf(requester)) {
       // caso di approvazione da parte del responsabile di gruppo.
       managerApproval(absenceRequest.id, user);
-      if (user.getUsersRolesOffices().stream()
-          .anyMatch(uro -> uro.getRole().getName().equals(Role.SEAT_SUPERVISOR))
+      if (isSeatSupervisorFor(user, requester)
           && absenceRequest.isOfficeHeadApprovalRequired()) {
         // se il responsabile di gruppo è anche responsabile di sede faccio un'unica approvazione
         officeHeadApproval(absenceRequest.id, user);
@@ -917,22 +975,55 @@ public class AbsenceRequestManager {
     }
     if (absenceRequest.isAdministrativeApprovalRequired()
         && absenceRequest.getAdministrativeApproved() == null 
-        && user.hasRoles(Role.PERSONNEL_ADMIN)) {
+        && user.hasRolesOnOffice(requester.getOffice(), Role.PERSONNEL_ADMIN)) {
       // caso di approvazione da parte dell'amministratore del personale
       personnelAdministratorApproval(absenceRequest.id, user);
       return true;
     }
     if (absenceRequest.isOfficeHeadApprovalForManagerRequired()
-        && absenceRequest.getOfficeHeadApproved() == null && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+        && absenceRequest.getOfficeHeadApproved() == null
+        && isSeatSupervisorFor(user, requester)) {
       officeHeadApproval(absenceRequest.id, user);
       return true;
     }
-    if (!absenceRequest.isFullyApproved() && user.hasRoles(Role.SEAT_SUPERVISOR)) {
+    if (!absenceRequest.isFullyApproved() && isSeatSupervisorFor(user, requester)) {
       // caso di approvazione da parte del responsabile di sede
       officeHeadApproval(absenceRequest.id, user);
       return true;
     }
     return false;
+  }
+
+  /**
+   * Verifica se l'utente è tra quelli che possono approvare o respingere la richiesta:
+   * responsabile di gruppo della persona che ha fatto la richiesta (o la persona stessa se
+   * responsabile di gruppo), oppure responsabile di sede o amministratore del personale della
+   * sede della persona.
+   *
+   * @param absenceRequest la richiesta di assenza
+   * @param user l'utente che vuole approvare o respingere
+   * @return true se l'utente può approvare o respingere la richiesta, false altrimenti.
+   */
+  public boolean isApprover(AbsenceRequest absenceRequest, User user) {
+    final Person requester = absenceRequest.getPerson();
+    return (user.hasRoles(Role.GROUP_MANAGER) && requester.equals(user.getPerson()))
+        || user.isGroupManagerOf(requester)
+        || isSeatSupervisorFor(user, requester)
+        || user.hasRolesOnOffice(requester.getOffice(), Role.PERSONNEL_ADMIN);
+  }
+
+  /**
+   * Verifica se l'utente può agire come responsabile di sede sulle richieste della persona:
+   * deve essere responsabile della sede della persona, oppure deve trattarsi di una sua
+   * richiesta.
+   *
+   * @param user l'utente che vuole approvare o respingere
+   * @param requester la persona che ha effettuato la richiesta
+   * @return true se l'utente può agire come responsabile di sede, false altrimenti.
+   */
+  public boolean isSeatSupervisorFor(User user, Person requester) {
+    return user.hasRolesOnOffice(requester.getOffice(), Role.SEAT_SUPERVISOR)
+        || (requester.equals(user.getPerson()) && user.hasRoles(Role.SEAT_SUPERVISOR));
   }
 
   /**

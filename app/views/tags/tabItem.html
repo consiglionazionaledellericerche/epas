@@ -4,5 +4,5 @@
     _active: se la tab è aperta
  }*
 <li role="presentation" #{if _active} class="active" #{/if}><a href="#${_id}" aria-controls="${_id}"
-                                                               role="tab" data-toggle="tab">&{_title}</a></li>
+                                                               role="tab" data-toggle="tab">${_title?.label()}</a></li>
  

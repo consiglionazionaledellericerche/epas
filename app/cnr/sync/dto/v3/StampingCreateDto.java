@@ -17,16 +17,12 @@
 
 package cnr.sync.dto.v3;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import common.injection.StaticInject;
 import java.time.LocalDateTime;
-import javax.inject.Inject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.val;
 import models.Stamping;
 import models.enumerate.StampTypes;
-import org.modelmapper.ModelMapper;
 import play.data.validation.Required;
 
 /**
@@ -35,7 +31,6 @@ import play.data.validation.Required;
  * @author Cristian Lucchesi
  *
  */
-@StaticInject
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class StampingCreateDto extends StampingUpdateDto {
@@ -46,16 +41,12 @@ public class StampingCreateDto extends StampingUpdateDto {
   @Required
   private LocalDateTime dateTime;
 
-  @Inject
-  @JsonIgnore
-  static ModelMapper modelMapper;
-
   /**
    * Nuova istanza di un oggetto Stamping a partire dai 
-   * valori presenti nel rispettivo DTO.
+   * valori presenti nel rispettivo DTO, esclusi markedByAdmin e markedByEmployee.
    */
   public static Stamping build(StampingCreateDto stampingDto) {
-    val stamping = modelMapper.map(stampingDto, Stamping.class);
+    val stamping = toStamping(stampingDto);
 
     if (stampingDto.getReasonType() != null) {
       stamping.setStampType(StampTypes.byCode(stampingDto.getReasonType().name()));

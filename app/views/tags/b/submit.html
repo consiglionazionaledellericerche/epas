@@ -9,5 +9,5 @@
       #{if _id}id=${_id}#{/if}
       #{if _disabled} disabled #{/if}
       type="submit">
-     <i class="fa fa-${fa}"></i><span class="hidden-xs"> &{_arg}</span>
+     <i class="fa fa-${fa}"></i><span class="hidden-xs"> ${_arg.label()}</span>
 </button>
