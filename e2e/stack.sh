@@ -11,12 +11,15 @@
 #   E2E_PORT        porta locale di ePAS (default 9000)
 #   POSTGRES_IMAGE  immagine di postgres (default postgres:12, come nel docker-compose)
 #   E2E_TIMEOUT     secondi di attesa per l'avvio di ePAS (default 300)
+#   CSRF_MODE       verifica anti-CSRF di ePAS (default enforce: i test sul token
+#                   si aspettano che le richieste senza token siano rifiutate)
 
 set -euo pipefail
 
 E2E_PORT=${E2E_PORT:-9000}
 POSTGRES_IMAGE=${POSTGRES_IMAGE:-postgres:12}
 E2E_TIMEOUT=${E2E_TIMEOUT:-300}
+CSRF_MODE=${CSRF_MODE:-enforce}
 
 NETWORK=epas-e2e
 PG=epas-e2e-pg
@@ -55,7 +58,8 @@ up() {
   # SESSION_SECURE=true: i cookie hanno l'attributo Secure come dietro https. I
   # browser trattano localhost come contesto sicuro e li accettano anche in http.
   # JOBS_ACTIVE=true serve al job di bootstrap, che crea l'utente admin e la sede
-  # iniziale su un database vuoto.
+  # iniziale su un database vuoto. CSRF_MODE=enforce: le richieste senza token
+  # anti-CSRF sono rifiutate, così i test verificano che il javascript lo invii.
   log "avvio di $image su http://localhost:$E2E_PORT"
   docker run -d --name "$APP" --network "$NETWORK" -p "127.0.0.1:$E2E_PORT:9000" \
     -e VIRTUAL_HOST=localhost \
@@ -64,6 +68,7 @@ up() {
     -e SESSION_SECURE=true \
     -e JOBS_ACTIVE=true \
     -e SKIP_IP_CHECK=true \
+    -e CSRF_MODE="$CSRF_MODE" \
     "$image" >/dev/null
 
   log "attesa dell'avvio di ePAS (massimo ${E2E_TIMEOUT}s)"
