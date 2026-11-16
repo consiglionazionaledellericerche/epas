@@ -40,25 +40,23 @@ async function prepare(rest: APIRequestContext, web: APIRequestContext, password
   const office = await firstOffice(rest);
   const employee = await findEmployee(rest, EMPLOYEE.number)
     ?? await createEmployee(rest, EMPLOYEE, office.id);
-  await ensureContract(rest, web, employee.id);
+  await ensureContract(rest, employee.id);
   fs.writeFileSync(EMPLOYEE_DATA, JSON.stringify({ personId: employee.id }));
 
   const personnelAdmin = await findEmployee(rest, PERSONNEL_ADMIN.number)
     ?? await createEmployee(rest, PERSONNEL_ADMIN, office.id);
   // il form di assegnazione dei ruoli elenca solo le persone con un contratto attivo
-  await ensureContract(rest, web, personnelAdmin.id);
+  await ensureContract(rest, personnelAdmin.id);
   await assignRole(web, office.id, PERSONNEL_ADMIN, PERSONNEL_ADMIN_ROLE, PERSONNEL_ADMIN_ROLE_SECTION);
 
   await saveSessionAs(personnelAdmin.id, password, PERSONNEL_ADMIN_STATE);
   await saveSessionAs(employee.id, password, EMPLOYEE_STATE);
 }
 
-async function ensureContract(rest: APIRequestContext, web: APIRequestContext, personId: number) {
+/** Crea il contratto se la persona non ne ha (API REST: serve il contesto rest, non web). */
+async function ensureContract(rest: APIRequestContext, personId: number) {
   if (!(await hasContract(rest, personId))) {
-    await createContract(web, personId);
-    if (!(await hasContract(rest, personId))) {
-      throw new Error(`Contratto non creato per il dipendente ${personId}`);
-    }
+    await createContract(rest, personId);
   }
 }
 
