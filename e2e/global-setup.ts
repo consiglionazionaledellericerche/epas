@@ -53,10 +53,7 @@ async function prepare(rest: APIRequestContext, web: APIRequestContext, password
   await saveSessionAs(employee.id, password, EMPLOYEE_STATE);
 }
 
-/**
- * Crea il contratto via REST se la persona non ne ha: l'API usa la basic auth del contesto
- * rest, la sessione web non è accettata (403).
- */
+/** Crea il contratto se la persona non ne ha (API REST: serve il contesto rest, non web). */
 async function ensureContract(rest: APIRequestContext, personId: number) {
   if (!(await hasContract(rest, personId))) {
     await createContract(rest, personId);
