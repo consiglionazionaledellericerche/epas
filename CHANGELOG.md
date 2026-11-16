@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     attuale, il contratto diventa dipendente strutturato (true) o non strutturato (false). I
     client che inviano sempre onCertificate con un valore fisso devono inviare quello attuale
     del contratto, oppure contractType (#672).
+  - La verifica anti-CSRF è ora in modalità report per default (csrf.mode, CSRF_MODE nel
+    docker): le richieste senza token valido non sono rifiutate ma segnalate nel log a livello
+    WARN. Anche un valore non valido del parametro vale report invece di disattivare la
+    verifica. Per tornare al comportamento precedente impostare CSRF_MODE=off (#680).
 
 ### Removed
   - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e
