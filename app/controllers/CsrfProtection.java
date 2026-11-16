@@ -33,8 +33,8 @@ import play.mvc.Util;
  *
  * <p>Il comportamento dipende dal parametro di configurazione csrf.mode:
  * <ul>
- *   <li>off (default): nessuna verifica;</li>
- *   <li>report: le richieste non valide sono solo segnalate nel log;</li>
+ *   <li>off: nessuna verifica;</li>
+ *   <li>report (default): le richieste non valide sono solo segnalate nel log;</li>
  *   <li>enforce: le richieste non valide sono rifiutate con 403.</li>
  * </ul>
  * Sono verificate:
@@ -54,6 +54,8 @@ import play.mvc.Util;
 public class CsrfProtection extends Controller {
 
   static final String CSRF_MODE = "csrf.mode";
+  // usata se csrf.mode non è impostato o non è valido
+  static final CsrfMode DEFAULT_MODE = CsrfMode.REPORT;
   private static final String CSRF_PARAM = "authenticityToken";
   // in play gli header della richiesta hanno il nome in minuscolo
   private static final String CSRF_HEADER = "x-csrf-token";
@@ -166,14 +168,15 @@ public class CsrfProtection extends Controller {
 
   @Util
   static CsrfMode csrfMode() {
-    val value = Play.configuration.getProperty(CSRF_MODE, "off").trim();
+    val value = Play.configuration.getProperty(CSRF_MODE, DEFAULT_MODE.name()).trim();
     for (CsrfMode mode : CsrfMode.values()) {
       if (mode.name().equalsIgnoreCase(value)) {
         return mode;
       }
     }
-    log.warn("Valore '{}' non valido per {}, verifica CSRF disattivata", value, CSRF_MODE);
-    return CsrfMode.OFF;
+    log.warn("Valore '{}' non valido per {}, uso {}", value, CSRF_MODE,
+        DEFAULT_MODE.name().toLowerCase());
+    return DEFAULT_MODE;
   }
 
   /**

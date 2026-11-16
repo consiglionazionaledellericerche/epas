@@ -648,7 +648,6 @@ public class InformationRequests extends Controller {
     if (!informationRequestManager.isApprover(informationRequest, user)) {
       forbidden();
     }
-    final Person requester = informationRequest.getPerson();
     switch (informationRequest.getInformationType()) {
       case SERVICE_INFORMATION:
         serviceRequest = informationRequestDao.getServiceById(id).get();
@@ -675,34 +674,37 @@ public class InformationRequests extends Controller {
         parentalLeaveRequest = informationRequestDao.getParentalLeaveById(id).get();
         if (!disapproval) {
           disapproval = true;
-          render(teleworkRequest, informationRequest, disapproval, parentalLeaveRequest);
+          render(informationRequest, disapproval, parentalLeaveRequest);
         }
         break;
       default:
         break;
     }
 
-    if (informationRequest.isOfficeHeadApprovalRequired()
-        && informationRequest.getOfficeHeadApproved() == null
-        && informationRequestManager.isSeatSupervisorFor(user, requester)) {
-      // caso di approvazione da parte del responsabile di sede
-      informationRequestManager.officeHeadDisapproval(id, reason);
+    Optional<InformationRequestEventType> refusal =
+        informationRequestManager.refusalFor(informationRequest, user);
+    if (refusal.isPresent()) {
+      switch (refusal.get()) {
+        case OFFICE_HEAD_REFUSAL:
+          informationRequestManager.officeHeadDisapproval(id, reason);
+          break;
+        case ADMINISTRATIVE_REFUSAL:
+          informationRequestManager.personnelAdministratorDisapproval(id, reason);
+          break;
+        case MANAGER_REFUSAL:
+          informationRequestManager.managerDisapproval(id, reason);
+          break;
+        default:
+          break;
+      }
       flash.error("Richiesta respinta");
-      InformationType type = informationRequest.getInformationType();
-      render("@show", informationRequest, type, serviceRequest,
-          illnessRequest, teleworkRequest, parentalLeaveRequest, user);
+    } else {
+      flash.error("Non ci sono approvazioni in sospeso che puoi respingere su questa richiesta.");
     }
-    if (informationRequest.isAdministrativeApprovalRequired()
-        && informationRequest.getAdministrativeApproved() == null
-        && user.hasRolesOnOffice(requester.getOffice(), Role.PERSONNEL_ADMIN)) {
-      informationRequestManager.personnelAdministratorDisapproval(id, reason);
-      flash.error("Richiesta respinta");
-      InformationType type = informationRequest.getInformationType();
-      render("@show", informationRequest, type, serviceRequest,
-          illnessRequest, teleworkRequest, parentalLeaveRequest, user);
-    }
-      
-    render("@show", informationRequest, user);
+    InformationType type = informationRequest.getInformationType();
+    disapproval = false;
+    render("@show", informationRequest, type, serviceRequest,
+        illnessRequest, teleworkRequest, parentalLeaveRequest, user, disapproval);
   }
 
   /**
