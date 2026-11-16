@@ -124,6 +124,20 @@ public class CsrfProtectionTest extends FunctionalTest {
     assertNotForbidden(POST(newRequest(), savePasswordUrl(), passwordParams(), noFiles()));
   }
 
+  @Test
+  public void defaultModeIsReport() {
+    Play.configuration.remove(CsrfProtection.CSRF_MODE);
+    assertEquals(CsrfProtection.CsrfMode.REPORT, CsrfProtection.csrfMode());
+    login();
+    assertNotForbidden(POST(newRequest(), savePasswordUrl(), passwordParams(), noFiles()));
+  }
+
+  @Test
+  public void invalidModeFallsBackToReport() {
+    Play.configuration.setProperty(CsrfProtection.CSRF_MODE, "enabled");
+    assertEquals(CsrfProtection.CsrfMode.REPORT, CsrfProtection.csrfMode());
+  }
+
   /**
    * I client REST (header Authorization) non sono verificati, anche se conservano il cookie
    * di sessione.
