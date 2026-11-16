@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     docker): le richieste senza token valido non sono rifiutate ma segnalate nel log a livello
     WARN. Anche un valore non valido del parametro vale report invece di disattivare la
     verifica. Per tornare al comportamento precedente impostare CSRF_MODE=off (#680).
+  - Aggiornate le librerie postgresql (42.7.14), poi (4.1.2), snakeyaml (2.7) e assertj
+    (3.27.7). protobuf-java non è più inclusa: drools la usa solo per serializzare le sessioni
+    (#682).
 
 ### Removed
   - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e

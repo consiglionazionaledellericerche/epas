@@ -36,20 +36,22 @@ require:
         - org.apache.poi -> poi-ooxml-schemas
         - org.apache.xmlbeans -> xmlbeans
     - org.mockito -> mockito-core 3.11.0
-    - org.assertj -> assertj-core 3.19.0:
+    - org.assertj -> assertj-core 3.27.7:
        exclude:
         - org.ow2.asm -> asm *
-    - org.assertj -> assertj-guava 3.4.0:
+    - org.assertj -> assertj-guava 3.27.7:
        exclude:
         - org.ow2.asm -> asm *
+    # xstream è dichiarata sotto in versione aggiornata. protobuf serve a drools solo per
+    # serializzare le sessioni (marshalling), non usato dalle regole di sicurezza
     - org.drools -> drools-core 5.6.0.Final:
-       # xstream è dichiarata sotto in versione aggiornata
        exclude:
         - com.thoughtworks.xstream -> xstream
+        - com.google.protobuf -> protobuf-java
     - org.drools -> drools-compiler 5.6.0.Final:
-       # xstream è dichiarata sotto in versione aggiornata
        exclude:
         - com.thoughtworks.xstream -> xstream
+        - com.google.protobuf -> protobuf-java
     - net.lingala.zip4j -> zip4j 2.8.0
     - com.querydsl -> querydsl-codegen 4.2.2:
         exclude:
@@ -94,7 +96,7 @@ require:
     - com.fasterxml.jackson.module -> jackson-module-afterburner 2.21.8
     - com.github.fge -> jackson-coreutils 1.8
     - org.testng -> testng 6.9.10
-    - org.apache.poi -> poi 3.16
+    - org.apache.poi -> poi 4.1.2
     # amqp-client serve solo per l'invio via AMQP, non usato (si usa UDP/TCP)
     - org.graylog2 -> gelfj 1.1.16:
        exclude:
@@ -102,7 +104,7 @@ require:
     - org.apache.commons -> commons-csv 1.8
     - org.apache.commons -> commons-compress 1.28.0
     - io.micrometer -> micrometer-registry-prometheus 1.15.12
-    - org.postgresql ->  postgresql 42.2.29:
+    - org.postgresql -> postgresql 42.7.14:
        force: true
        exclude:
         - org.osgi -> org.osgi.core
@@ -123,7 +125,7 @@ require:
        force: true
        transitive: false
     - io.github.x-stream -> mxparser 1.2.2
-    - org.yaml -> snakeyaml 1.33:
+    - org.yaml -> snakeyaml 2.7:
        force: true
     - org.dom4j -> dom4j 2.1.4:
        force: true
