@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     nella finestra di gestione del giorno e il token anti-CSRF nelle chiamate ajax. Lo stack
     dei test avvia ePAS con CSRF_MODE=enforce (#677).
 
+### Changed
+  - La verifica anti-CSRF è ora in modalità report per default (csrf.mode, CSRF_MODE nel
+    docker): le richieste senza token valido non sono rifiutate ma segnalate nel log a livello
+    WARN. Anche un valore non valido del parametro vale report invece di disattivare la
+    verifica. Per tornare al comportamento precedente impostare CSRF_MODE=off (#680).
+
 ### Removed
   - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e
     /stampingsfromclient/absencenotrecompute (ora rispondono 404), non più usati dai client
