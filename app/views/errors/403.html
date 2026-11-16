@@ -7,6 +7,15 @@
     <img src="http://icons.iconarchive.com/icons/3dlb/3d-vol2/256/warning-icon.png">
   </div>
   <div class="pagination-centered">
+    #{if request?.args?.get('csrfRejected')}
+    *{ rifiuto della verifica anti-CSRF (CsrfProtection), di solito una pagina aperta prima
+       che la sessione scadesse o fosse sostituita da un nuovo login }*
+    <p class="lead">L'operazione non è stata eseguita: la pagina era stata aperta in una
+      sessione precedente, scaduta o sostituita da un nuovo accesso.</p>
+    <p>Tornare alla pagina precedente, ricaricarla e ripetere l'operazione.</p>
+    #{/if}
+    #{else}
     <p class="lead">L'utente non dispone dei permessi per effettuare l'operazione richiesta.<p>
+    #{/else}
   </div>
 </div>

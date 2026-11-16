@@ -91,7 +91,51 @@ public class CsrfProtectionTest extends FunctionalTest {
   @Test
   public void formPostWithoutTokenIsRejected() {
     login();
-    assertStatus(403, POST(newRequest(), savePasswordUrl(), passwordParams(), noFiles()));
+    Response response = POST(newRequest(), savePasswordUrl(), passwordParams(), noFiles());
+    assertStatus(403, response);
+    assertEquals("missing-token", response.getHeader(CsrfProtection.REJECTED_HEADER));
+  }
+
+  @Test
+  public void wrongTokenIsRejectedAsInvalid() {
+    login();
+    // la sessione ha già un token
+    token();
+    Map<String, String> params = passwordParams();
+    params.put("authenticityToken", "token-sbagliato");
+    Response response = POST(newRequest(), savePasswordUrl(), params, noFiles());
+    assertStatus(403, response);
+    assertEquals("invalid-token", response.getHeader(CsrfProtection.REJECTED_HEADER));
+  }
+
+  /**
+   * Pagina aperta prima che la sessione cambiasse (scaduta, oppure un nuovo login): il
+   * token è quello della sessione precedente e la nuova sessione non ne ha ancora uno.
+   */
+  @Test
+  public void tokenOfPreviousSessionIsRejectedAsExpiredSession() {
+    login();
+    Map<String, String> params = passwordParams();
+    params.put("authenticityToken", token());
+    clearCookies();
+    login();
+    Response response = POST(newRequest(), savePasswordUrl(), params, noFiles());
+    assertStatus(403, response);
+    assertEquals("expired-session", response.getHeader(CsrfProtection.REJECTED_HEADER));
+    assertContentMatch("sessione precedente", response);
+  }
+
+  /**
+   * Il dipendente non ha accesso alle utilità di amministrazione: la pagina 403 resta
+   * quella dei permessi.
+   */
+  @Test
+  public void otherForbiddenPagesKeepThePermissionMessage() {
+    login();
+    Response response = GET("/administration/utilities");
+    assertStatus(403, response);
+    assertNull(response.getHeader(CsrfProtection.REJECTED_HEADER));
+    assertContentMatch("non dispone dei permessi", response);
   }
 
   @Test
@@ -114,7 +158,9 @@ public class CsrfProtectionTest extends FunctionalTest {
   public void reportModeOnlyLogs() {
     Play.configuration.setProperty(CsrfProtection.CSRF_MODE, "report");
     login();
-    assertNotForbidden(POST(newRequest(), savePasswordUrl(), passwordParams(), noFiles()));
+    Response response = POST(newRequest(), savePasswordUrl(), passwordParams(), noFiles());
+    assertNotForbidden(response);
+    assertNull(response.getHeader(CsrfProtection.REJECTED_HEADER));
   }
 
   @Test

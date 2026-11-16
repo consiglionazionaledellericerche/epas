@@ -24,6 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     WARN. Anche un valore non valido del parametro vale report invece di disattivare la
     verifica. Per tornare al comportamento precedente impostare CSRF_MODE=off (#680).
 
+  - La verifica anti-CSRF distingue nel log il token assente, il token di una sessione
+    precedente (scaduta o sostituita da un nuovo login) e il token non valido. In modalità
+    enforce le chiamate ajax rifiutate mostrano un avviso che invita a ricaricare la pagina e
+    la pagina 403 spiega il motivo invece di segnalare un problema di permessi (#689).
+
 ### Removed
   - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e
     /stampingsfromclient/absencenotrecompute (ora rispondono 404), non più usati dai client

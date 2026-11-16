@@ -14,6 +14,24 @@ $.ajaxPrefilter(function(options, originalOptions, xhr) {
   }
 });
 
+/**
+ * Chiamate ajax rifiutate dalla verifica anti-CSRF (risposta 403 con l'header
+ * X-CSRF-Rejected), di solito perché la pagina era stata aperta prima che la sessione
+ * scadesse o fosse sostituita da un nuovo login: l'operazione non è stata eseguita e
+ * l'utente deve ricaricare la pagina.
+ */
+$(document).ajaxError(function(event, xhr) {
+  if (xhr.status === 403 && xhr.getResponseHeader('X-CSRF-Rejected')
+      && !$('.bootbox.csrf-rejected').length) {
+    bootbox.alert({
+      className: 'csrf-rejected',
+      message: "L'operazione non è stata eseguita: la pagina era stata aperta in una "
+        + "sessione precedente, scaduta o sostituita da un nuovo accesso. "
+        + "Ricaricare la pagina e ripetere l'operazione."
+    });
+  }
+});
+
 $(function($) {
 	/* Gestione tab di autenticazione */
     $('#login-idp-link').click(function(e) {
