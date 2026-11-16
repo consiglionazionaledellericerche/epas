@@ -11,8 +11,11 @@ require:
     - play-codeborne -> fastergt 1.10
     - org.hibernate -> hibernate-envers 5.4.1.Final:
        transitive: false
-    - org.jadira.usertype -> usertype.core 6.0.1.GA
-    - com.google.guava -> guava 33.3.0-jre
+    # spring-core serve solo all'integrazione con spring di jadira bindings, non usata
+    - org.jadira.usertype -> usertype.core 6.0.1.GA:
+       exclude:
+        - org.springframework -> spring-core
+    - com.google.guava -> guava 33.7.2-jre
     - com.google.inject -> guice 5.0.1:
        exclude:
         - org.ow2.asm -> asm *
@@ -25,7 +28,13 @@ require:
         - jaxen -> jaxen *
     - org.mnode.ical4j -> ical4j 3.0.25
     - org.jsoup -> jsoup 1.23.2
-    - org.dbunit -> dbunit 2.5.1
+    # usata solo dai test: le dipendenze escluse (vulnerabili) non servono
+    - org.dbunit -> dbunit 2.5.1:
+       exclude:
+        - commons-collections -> commons-collections
+        - org.apache.poi -> poi-ooxml
+        - org.apache.poi -> poi-ooxml-schemas
+        - org.apache.xmlbeans -> xmlbeans
     - org.mockito -> mockito-core 3.11.0
     - org.assertj -> assertj-core 3.19.0:
        exclude:
@@ -76,20 +85,23 @@ require:
     - org.projectlombok -> lombok 1.18.20
     - com.fatboyindustrial.gson-jodatime-serialisers -> gson-jodatime-serialisers 1.8.0
     - com.fatboyindustrial.gson-javatime-serialisers -> gson-javatime-serialisers 1.1.1
-    - com.fasterxml.jackson.core -> jackson-core 2.12.3
-    - com.fasterxml.jackson.core -> jackson-annotations 2.12.3
-    - com.fasterxml.jackson.core -> jackson-databind 2.12.3
-    - com.fasterxml.jackson.datatype -> jackson-datatype-hibernate5 2.12.3
-    - com.fasterxml.jackson.datatype -> jackson-datatype-joda 2.12.3
-    - com.fasterxml.jackson.datatype -> jackson-datatype-jsr310 2.12.3 
-    - com.fasterxml.jackson.module -> jackson-module-afterburner 2.12.3
+    - com.fasterxml.jackson.core -> jackson-core 2.21.8
+    - com.fasterxml.jackson.core -> jackson-annotations 2.21
+    - com.fasterxml.jackson.core -> jackson-databind 2.21.8
+    - com.fasterxml.jackson.datatype -> jackson-datatype-hibernate5 2.21.8
+    - com.fasterxml.jackson.datatype -> jackson-datatype-joda 2.21.8
+    - com.fasterxml.jackson.datatype -> jackson-datatype-jsr310 2.21.8
+    - com.fasterxml.jackson.module -> jackson-module-afterburner 2.21.8
     - com.github.fge -> jackson-coreutils 1.8
     - org.testng -> testng 6.9.10
     - org.apache.poi -> poi 3.16
-    - org.graylog2 -> gelfj 1.1.16
+    # amqp-client serve solo per l'invio via AMQP, non usato (si usa UDP/TCP)
+    - org.graylog2 -> gelfj 1.1.16:
+       exclude:
+        - com.rabbitmq -> amqp-client
     - org.apache.commons -> commons-csv 1.8
     - org.apache.commons -> commons-compress 1.28.0
-    - io.micrometer -> micrometer-registry-prometheus 1.15.0
+    - io.micrometer -> micrometer-registry-prometheus 1.15.12
     - org.postgresql ->  postgresql 42.2.29:
        force: true
        exclude:
@@ -124,28 +136,39 @@ require:
         - javax.xml.stream -> *
         - javax.xml.bind -> *
         - jaxen -> *
-    # richieste da commons-compress e commons-fileupload
+    - commons-beanutils -> commons-beanutils 1.11.0:
+       force: true
+       transitive: false
+    - org.apache.commons -> commons-email 1.6.0:
+       force: true
+       transitive: false
+    # JavaMail 1.6 richiesta da commons-email 1.6 (la mail-1.4.7 di play e' rimossa
+    # dall'immagine). Dichiarata esplicitamente per non dipendere da quella portata da
+    # ical4j; activation e' quella di play (framework/lib)
+    - com.sun.mail -> javax.mail 1.6.2:
+       force: true
+       transitive: false
+    - com.google.code.gson -> gson 2.13.2:
+       force: true
+       transitive: false
+    # richieste da commons-compress, commons-fileupload e tika-core (helpers.ImageUtils)
     - commons-io -> commons-io 2.20.0:
        force: true
     - commons-codec -> commons-codec 1.19.0:
        force: true
     - it.cnr.iit -> play-qmodel 1.5.3
     - org.modelmapper -> modelmapper 2.4.4
-    - org.apache.tika -> tika-langdetect 1.28.5
+    # serve solo il riconoscimento dei mime type (helpers.ImageUtils). Senza dipendenze
+    # transitive: commons-io e' dichiarata sopra, slf4j-api e' quella di play (la 2.x
+    # richiesta da tika non troverebbe il binding log4j di play)
+    - org.apache.tika -> tika-core 3.3.3:
+       transitive: false
     - io.jsonwebtoken -> jjwt-impl 0.11.5
     - io.jsonwebtoken -> jjwt-jackson 0.11.5
     - io.github.openfeign -> feign-core 12.4
-    - io.github.openfeign -> feign-jackson 12.4
     - io.github.openfeign -> feign-gson 12.4
-    - io.github.openfeign -> feign-okhttp 12.4
-    - io.github.openfeign -> feign-slf4j 12.4
     - io.github.openfeign -> feign-micrometer 12.4
-    - io.github.openfeign.form -> feign-form 3.8.0
-    # Attenzione: deve essere allineato alla versione del okhttp3
-    - com.squareup.okhttp3 -> logging-interceptor 4.6.0
-    - io.github.resilience4j -> resilience4j-feign 1.7.1
     - com.auth0 -> jwks-rsa 0.19.0
-    - it.cnr.iit -> keycloak-client 16.1
 
 # My custom repository
 
@@ -165,4 +188,3 @@ repositories:
         artifact: ${application.path}/jars/[module]-[revision].jar
         contains:
           - it.cnr.iit -> play-qmodel 1.5.3
-          - it.cnr.iit -> keycloak-client 16.1

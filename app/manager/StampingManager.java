@@ -406,7 +406,6 @@ public class StampingManager {
           person.fullName(), stampingFromClient.dateTime.minusMinutes(1));
       Stamping stamping = new Stamping(personDay, stampingFromClient.dateTime.minusMinutes(1));
       stamping.setDate(stampingFromClient.dateTime.minusMinutes(1));
-      stamping.setMarkedByAdmin(stampingFromClient.markedByAdmin);
       stamping.setWay(WayType.out);
       stamping.setStampType(StampTypes.LAVORO_FUORI_SEDE);      
       stamping.setNote(Messages.get("stampingNote"));
@@ -416,7 +415,9 @@ public class StampingManager {
     //Creazione stamping e inserimento
     Stamping stamping = new Stamping(personDay, stampingFromClient.dateTime);
     stamping.setDate(stampingFromClient.dateTime);
-    stamping.setMarkedByAdmin(stampingFromClient.markedByAdmin);
+    // La timbratura arriva da un lettore badge: non è inserita da un amministratore né dal
+    // dipendente, qualunque cosa dichiari il client (markedByAdmin e markedByEmployee restano
+    // false).
     stamping.setWay(way);
     stamping.setStampType(stampingFromClient.stampType);
     stamping.setStampingZone(clientText(stampingFromClient.zona));

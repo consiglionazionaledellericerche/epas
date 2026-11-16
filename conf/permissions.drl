@@ -3773,8 +3773,6 @@ when
     /* duplicate */
     "StampingsFromClient.create",
     "StampingsFromClient.createNotRecompute",
-    "StampingsFromClient.absence",
-    "StampingsFromClient.absenceNotRecompute",
     "rest.v3.Stampings.show",
     "rest.v3.Stampings.create",
     "rest.v3.Stampings.update",
@@ -3794,8 +3792,6 @@ when
 
     "StampingsFromClient.create",
     "StampingsFromClient.createNotRecompute",
-    "StampingsFromClient.absence",
-    "StampingsFromClient.absenceNotRecompute",
     "rest.v3.Stampings.show",
     "rest.v3.Stampings.create",
     "rest.v3.Stampings.update",

@@ -422,6 +422,10 @@ public class TeleworkStampingManager {
   public void deleteStampingAndTeleworkAbsenceCode(PersonDay pd, Stamping stamping) {
     stamping.delete();
     pd.getStampings().remove(stamping);
+    // Con il salvataggio esplicito di Play la collezione modificata va salvata subito: se resta
+    // in sospeso viene ripresa nel flush di Envers al commit e l'HibernateInterceptor di Play
+    // fallisce sulla riga di audit (ClassCastException HashMap -> JPABase).
+    pd.save();
     if (pd.getStampings().isEmpty()) {
       deleteTeleworkAbsenceCode(pd);
     }
