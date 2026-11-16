@@ -630,7 +630,7 @@ when
   $prt: PersonReperibilityType() from $p.reperibilityTypes
   $rep: PersonReperibility() from $prt.personReperibilities
   $cr: CompetenceRequest(person == $rep.person && managerApprovalRequired == true 
-         && managerApproved == null, flowEnded == false,
+         && !isManagerApproved(), flowEnded == false,
          type == CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST)
   $c: PermissionCheck(action in (
           "CompetenceRequests.approval",
@@ -926,7 +926,7 @@ rule EmployCanDeleteSpecificAbsenceRequest
 when
   UsersRolesOffices(role.name == Role.EMPLOYEE)
   $ar: AbsenceRequest(person == currentOperator.person, flowEnded == false,
-  		managerApproved == null, administrativeApproved == null, officeHeadApproved == null)
+  		!isManagerApproved(), !isAdministrativeApproved(), !isOfficeHeadApproved())
   $c: PermissionCheck( action in ("AbsenceRequests.delete" ), target==$ar, granted == false)
 then
   $c.grant();
@@ -972,7 +972,7 @@ rule EmployCanDeleteSpecificInformationRequest
 when
   UsersRolesOffices(role.name == Role.EMPLOYEE)
   $ir: InformationRequest(person == currentOperator.person, flowEnded == false,
-  		officeHeadApproved == null)
+  		!isOfficeHeadApproved())
   $c: PermissionCheck( action in ("InformationRequests.delete" ), target==$ir, granted == false)
 then
   $c.grant();
