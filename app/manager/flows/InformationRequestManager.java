@@ -861,6 +861,11 @@ public class InformationRequestManager {
    *     da rilasciare sulla richiesta.
    */
   public Optional<InformationRequestEventType> refusalFor(InformationRequest request, User user) {
+    // si può respingere solo un flusso avviato e non ancora concluso: dopo un rifiuto le
+    // approvazioni tornano assenti e senza questo controllo la richiesta sarebbe respinta di nuovo
+    if (!request.isFlowStarted() || request.isFlowEnded()) {
+      return Optional.absent();
+    }
     final Person requester = request.getPerson();
     if (request.isOfficeHeadApprovalRequired() && request.getOfficeHeadApproved() == null
         && isSeatSupervisorFor(user, requester)) {
@@ -870,7 +875,7 @@ public class InformationRequestManager {
         && user.hasRolesOnOffice(requester.getOffice(), Role.PERSONNEL_ADMIN)) {
       return Optional.of(InformationRequestEventType.ADMINISTRATIVE_REFUSAL);
     }
-    if (!request.isFullyApproved() && request.getManagerApproved() == null
+    if (request.isManagerApprovalRequired() && request.getManagerApproved() == null
         && user.isGroupManagerOf(requester)) {
       return Optional.of(InformationRequestEventType.MANAGER_REFUSAL);
     }
