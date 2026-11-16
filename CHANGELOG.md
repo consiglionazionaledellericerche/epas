@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     dei test avvia ePAS con CSRF_MODE=enforce (#677).
 
 ### Changed
+  - Nella modifica di un contratto via REST (/rest/v2/contracts/update) il campo onCertificate
+    non è più ignorato: se è passato senza contractType e ha un valore diverso da quello
+    attuale, il contratto diventa dipendente strutturato (true) o non strutturato (false). I
+    client che inviano sempre onCertificate con un valore fisso devono inviare quello attuale
+    del contratto, oppure contractType (#672).
+  - La verifica anti-CSRF è ora in modalità report per default (csrf.mode, CSRF_MODE nel
+    docker): le richieste senza token valido non sono rifiutate ma segnalate nel log a livello
+    WARN. Anche un valore non valido del parametro vale report invece di disattivare la
+    verifica. Per tornare al comportamento precedente impostare CSRF_MODE=off (#680).
   - Aggiornate le librerie postgresql (42.7.14), poi (4.1.2), snakeyaml (2.7) e assertj
     (3.27.7). protobuf-java non è più inclusa: drools la usa solo per serializzare le sessioni
     (#682).
@@ -28,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     inizio e fine.
 
 ### Fixed
+  - Il responsabile di gruppo può di nuovo respingere le richieste di uscita di servizio: il
+    rifiuto non veniva registrato e la pagina rispondeva con un errore inaspettato (#668).
   - La pagina di login e le pagine della timbratura web non impiegano più circa un secondo e
     mezzo per verificare le sedi abilitate dall'indirizzo ip: il controllo confrontava ogni
     configurazione con tutte le sedi e il tempo cresceva con il quadrato del numero di sedi
@@ -36,6 +47,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     giorno: quando restavano altre timbrature, la lista modificata e non salvata faceva fallire
     il salvataggio della transazione (ClassCastException nell'HibernateInterceptor di Play
     durante la scrittura dello storico) (#666).
+  - La creazione di un contratto via REST (/rest/v2/contracts/create) non risponde più sempre
+    400: la tipologia del contratto, obbligatoria, non si poteva indicare. Ora si passa con il
+    nuovo campo contractType (interim, structured_public_administration, unstructured), che
+    si può usare anche nella modifica ed è presente nelle risposte. Se manca, il contratto è
+    creato come dipendente strutturato, oppure come non strutturato se onCertificate è false.
+    Un body con JSON malformato o date non valide risponde 400 invece di 500. La creazione e
+    la modifica verificano i permessi sulla persona indicata prima di ogni altra operazione, e
+    una persona inesistente risponde 400 invece di 500 (#672).
 
 ### Security
   - I lettori badge non possono più inserire assenze tramite i metodi

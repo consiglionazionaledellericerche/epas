@@ -31,7 +31,9 @@ import models.flows.Affiliation;
 import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.CompetenceRequestType;
+import models.flows.enumerate.InformationRequestEventType;
 import models.informationrequests.IllnessRequest;
+import models.informationrequests.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
 import play.test.UnitTest;
@@ -187,6 +189,76 @@ public class FlowApproversTest extends UnitTest {
         Optional.of(request), Optional.absent(),
         Optional.absent(), userWithRole(officeB, Role.SEAT_SUPERVISOR)));
     assertNull(request.getOfficeHeadApproved());
+  }
+
+  private ServiceRequest startedServiceRequest() {
+    ServiceRequest request = new ServiceRequest();
+    request.setPerson(requester);
+    request.setOfficeHeadApprovalRequired(true);
+    request.setManagerApprovalRequired(true);
+    request.setFlowStarted(true);
+    return request;
+  }
+
+  @Test
+  public void groupManagerCanRefuseAServiceRequest() {
+    ServiceRequest request = startedServiceRequest();
+    User manager = userWithRole(officeB, Role.GROUP_MANAGER);
+    addToGroupOf(manager, requester, null);
+
+    assertEquals(Optional.of(InformationRequestEventType.MANAGER_REFUSAL),
+        informationRequestManager.refusalFor(request, manager));
+    assertEquals(Optional.of(InformationRequestEventType.OFFICE_HEAD_REFUSAL),
+        informationRequestManager.refusalFor(request,
+            userWithRole(officeA, Role.SEAT_SUPERVISOR)));
+    assertFalse(informationRequestManager.refusalFor(request,
+        userWithRole(officeB, Role.SEAT_SUPERVISOR)).isPresent());
+
+    request.setManagerApproved(java.time.LocalDateTime.now());
+    assertFalse("il responsabile di gruppo ha già approvato",
+        informationRequestManager.refusalFor(request, manager).isPresent());
+  }
+
+  @Test
+  public void groupManagerCannotRefuseWhenHisApprovalIsNotRequired() {
+    User manager = userWithRole(officeB, Role.GROUP_MANAGER);
+    addToGroupOf(manager, requester, null);
+
+    IllnessRequest illness = new IllnessRequest();
+    illness.setPerson(requester);
+    illness.setFlowStarted(true);
+    assertFalse("la malattia non prevede l'approvazione del responsabile di gruppo",
+        informationRequestManager.refusalFor(illness, manager).isPresent());
+
+    ServiceRequest service = startedServiceRequest();
+    service.setManagerApprovalRequired(false);
+    assertFalse(informationRequestManager.refusalFor(service, manager).isPresent());
+    assertEquals(Optional.of(InformationRequestEventType.OFFICE_HEAD_REFUSAL),
+        informationRequestManager.refusalFor(service,
+            userWithRole(officeA, Role.SEAT_SUPERVISOR)));
+  }
+
+  @Test
+  public void onlyStartedAndOpenFlowsCanBeRefused() {
+    User manager = userWithRole(officeB, Role.GROUP_MANAGER);
+    addToGroupOf(manager, requester, null);
+    User seatSupervisor = userWithRole(officeA, Role.SEAT_SUPERVISOR);
+
+    ServiceRequest notStarted = startedServiceRequest();
+    notStarted.setFlowStarted(false);
+    assertFalse(informationRequestManager.refusalFor(notStarted, manager).isPresent());
+    assertFalse(informationRequestManager.refusalFor(notStarted, seatSupervisor).isPresent());
+
+    // stato lasciato da un rifiuto: approvazioni azzerate, flusso non avviato e concluso
+    ServiceRequest refused = startedServiceRequest();
+    refused.setFlowStarted(false);
+    refused.setFlowEnded(true);
+    assertFalse(informationRequestManager.refusalFor(refused, manager).isPresent());
+    assertFalse(informationRequestManager.refusalFor(refused, seatSupervisor).isPresent());
+
+    ServiceRequest ended = startedServiceRequest();
+    ended.setFlowEnded(true);
+    assertFalse(informationRequestManager.refusalFor(ended, manager).isPresent());
   }
 
   @Test
