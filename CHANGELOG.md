@@ -34,6 +34,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     403 spiega il motivo invece di segnalare un problema di permessi: per il token di una
     sessione precedente invitano a ricaricare la pagina, negli altri casi a segnalare il
     problema se si ripete (#689).
+  - Le azioni del vecchio calendario di reperibilità e turni (/reperibility/{type}/... e
+    /shift/{type}/..., usate in passato dal portale sistorg) verificano che la reperibilità o
+    il turno siano di una sede su cui l'utente ha il ruolo, e registrano ogni chiamata nel log
+    a livello INFO ("API del vecchio calendario"). L'interfaccia di ePAS non le usa più: in
+    assenza di chiamate saranno rimosse in una prossima versione. Non cambiano le esportazioni
+    PDF e i calendari iCal (#696).
 
 ### Removed
   - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e

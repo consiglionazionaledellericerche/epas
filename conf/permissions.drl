@@ -3975,6 +3975,45 @@ then
 end
 */
 
+/*
+ * Azioni del vecchio calendario di turni e reperibilità (portale sistorg): oltre al ruolo
+ * serve che il turno o la reperibilità siano di una sede su cui si ha quel ruolo.
+ */
+rule ManageShift_InOffice
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ Role(name == "shiftManager") from $uro.role
+ $c: PermissionCheck(action in (
+        "Shift.personList",
+        "Shift.timeTable",
+        "Shift.find",
+        "Shift.update",
+        "Shift.exportMonthCalAsPDF",
+        "Shift.absence"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+rule ManageReperibility_InOffice
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ Role(name == "reperibilityManager") from $uro.role
+ $c: PermissionCheck(action in (
+        "Reperibility.personList",
+        "Reperibility.find",
+        "Reperibility.who",
+        "Reperibility.absence",
+        "Reperibility.whoIsAbsent",
+        "Reperibility.update",
+        "Reperibility.changePeriods"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
 rule ManageShift
 when
  $uro: UsersRolesOffices()
