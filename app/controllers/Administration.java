@@ -1158,6 +1158,7 @@ public class Administration extends Controller {
    *
    * @param id l'id del contratto da verificare e correggere se necessario
    */
+  @PostOnly
   public static void fixPreviousContract(Long id) {
     val contract = contractDao.byId(id);
     notFoundIfNull(contract);
@@ -1174,6 +1175,7 @@ public class Administration extends Controller {
    * Controlla tutti i contratti con previousContract impostato
    * che potrebbero avere dei problemi e li corregge se necessario.
    */
+  @PostOnly
   public static void fixContractsWithWrongPreviousContract(Optional<Integer> maxSize) {
     log.info("Richiesto il fix del previousContract di max {} contratti", maxSize);
     int fixedContracts = contractManager.fixContractsWithWrongPreviousContract(maxSize);

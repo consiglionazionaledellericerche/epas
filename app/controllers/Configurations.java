@@ -581,6 +581,7 @@ public class Configurations extends Controller {
    *
    * @param attachmentId l'identificativo dell'allegato da rimuovere
    */
+  @PostOnly
   public static void removeAttachment(Long attachmentId) {
 
     final Attachment attachment = Attachment.findById(attachmentId);

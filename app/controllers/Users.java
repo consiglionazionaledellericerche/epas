@@ -181,6 +181,7 @@ public class Users extends Controller {
    *
    * @param uroId l'identificativo dell'userRoleOffice da eliminare
    */
+  @PostOnly
   public static void removeRole(Long uroId) {
 
     final UsersRolesOffices uro = uroDao.getById(uroId);

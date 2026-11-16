@@ -146,7 +146,7 @@
   <div class="text-center">
     <p>Associa a <strong>${badgeSystem.name}</strong> per tutti i dipendenti attivi di <strong>${badgeSystem.office.name}</strong>
       la matricola come codice badge.</p>
-    <a class="btn btn-primary" href="@{joinPersonNumbers(badgeSystem.id)}">
+    <a data-method="post" class="btn btn-primary" href="@{joinPersonNumbers(badgeSystem.id)}">
       Associa Matricole
     </a>
   </div>

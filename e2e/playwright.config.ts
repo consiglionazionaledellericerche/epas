@@ -4,8 +4,9 @@ import { BASE_URL, EMPLOYEE_STATE } from './support/env';
 /**
  * I test girano contro un ePAS già avviato (vedi stack.sh). Condividono lo stesso
  * database, quindi sono eseguiti in sequenza e non inseriscono dati oltre a quelli
- * creati da global-setup.ts: l'unica modifica, la nota di un giorno in
- * tests/day-modal.spec.ts, è ripristinata al termine del test.
+ * creati da global-setup.ts: la nota di un giorno in tests/day-modal.spec.ts è
+ * ripristinata al termine del test e la timbratura inserita da tests/post-only.spec.ts
+ * è eliminata.
  */
 export default defineConfig({
   testDir: './tests',

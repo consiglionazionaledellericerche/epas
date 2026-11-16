@@ -524,6 +524,7 @@ public class Stampings extends Controller {
    *
    * @param id timbratura
    */
+  @PostOnly
   public static void delete(Long id) {
 
     final Stamping stamping = stampingDao.getStampingById(id);
@@ -558,6 +559,7 @@ public class Stampings extends Controller {
    * @param stampingId timbratura
    * @param note       note
    */
+  @PostOnly
   public static void updateEmployee(Long stampingId,
       @As(binder = NullStringBinder.class) String note) {
 

@@ -108,6 +108,7 @@ public class Institutes extends Controller {
    *
    * @param id l'identificativo dell'istituto da cancellare
    */
+  @PostOnly
   public static void delete(Long id) {
     final Institute institute = Institute.findById(id);
     notFoundIfNull(institute);

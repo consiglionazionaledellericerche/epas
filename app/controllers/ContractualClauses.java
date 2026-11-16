@@ -125,6 +125,7 @@ public class ContractualClauses extends Controller {
    *
    * @param contractualClauseId tab
    */
+  @PostOnly
   public static void delete(Long contractualClauseId) {
     ContractualClause contractualClause = ContractualClause.findById(contractualClauseId);
     notFoundIfNull(contractualClause);

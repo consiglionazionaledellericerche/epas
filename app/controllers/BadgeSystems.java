@@ -317,6 +317,7 @@ public class BadgeSystems extends Controller {
   /**
    * Associa nel gruppo per tutti i dipendenti il vecchio campo person.number.
    */
+  @PostOnly
   public static void joinPersonNumbers(Long badgeSystemId) {
 
     BadgeSystem badgeSystem = badgeSystemDao.byId(badgeSystemId);

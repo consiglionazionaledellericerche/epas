@@ -98,6 +98,7 @@ public class CheckGreenPasses extends Controller {
    *
    * @param person la persona da controllare
    */
+  @PostOnly
   public static void save(Person person) {
     notFoundIfNull(person);
     rules.checkIfPermitted(person.getOffice());

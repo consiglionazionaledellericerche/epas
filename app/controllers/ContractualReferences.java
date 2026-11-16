@@ -103,6 +103,7 @@ public class ContractualReferences extends Controller {
    *
    * @param contractualReferenceId tab
    */
+  @PostOnly
   public static void delete(Long contractualReferenceId) {
     ContractualReference contractualReference = 
         ContractualReference.findById(contractualReferenceId);
@@ -118,6 +119,7 @@ public class ContractualReferences extends Controller {
    * @param contractualReferenceId id del riferimento di cui cancellare
    *     l'allegato.
    */
+  @PostOnly
   public static void deleteFile(Long contractualReferenceId) {
     ContractualReference contractualReference = 
         ContractualReference.findById(contractualReferenceId);

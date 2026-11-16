@@ -79,7 +79,7 @@
 	</form>
 	<div class="alert alert-danger center">
 	  E' possibile eliminare questa timbratura.<br>
-	  <a class="btn btn-danger" href=@{delete(stamping.id)}><i class="fa fa-trash"></i>Elimina</a>
+	  <a data-method="post" class="btn btn-danger" href="@{delete(stamping.id)}"><i class="fa fa-trash"></i>Elimina</a>
 	</div>
 	#{/if}
   #{/tabContentItem}

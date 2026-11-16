@@ -125,7 +125,9 @@ $(function($) {
     $spinner.removeClass('hidden');
     $spinner.addClass('visible');
     url = url.substring(0, url.indexOf('?'));
-    method = 'get';
+    // data-method="post" per le azioni che modificano dati: il token anti-CSRF è aggiunto
+    // nell'header X-CSRF-Token da ajaxPrefilter
+    var method = String($a.data('method') || 'get').toUpperCase() === 'GET' ? 'get' : 'post';
     // TODO: chiamata ajax simile alla versione form. 
     $.ajax({
       type: method,

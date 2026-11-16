@@ -95,7 +95,7 @@
       #{if certificationsSummary.get(wrPerson.value.number).present }
           %{ situation = certificationsSummary.get(wrPerson.value.number).get() }%
           #{if situation.toAddAuto()}
-            <a class="btn btn-xs btn-warning" data-async="#page_content" data-spinner="#defaultSpinner"
+            <a class="btn btn-xs btn-warning" data-method="post" data-async="#page_content" data-spinner="#defaultSpinner"
               href="@{syncCertificationsAbsences(wrPerson.value.id, year)}">Importa</a>
           #{/if}
       #{/if}    

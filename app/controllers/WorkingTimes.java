@@ -462,6 +462,7 @@ public class WorkingTimes extends Controller {
   /**
    * Salvataggio tipo orario.
    */
+  @PostOnly
   public static void save(@Valid WorkingTimeType wtt, WorkingTimeTypeDay wttd1,
       WorkingTimeTypeDay wttd2, WorkingTimeTypeDay wttd3,
       WorkingTimeTypeDay wttd4, WorkingTimeTypeDay wttd5,

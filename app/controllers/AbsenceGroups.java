@@ -1427,6 +1427,7 @@ public class AbsenceGroups extends Controller {
   /**
    * Importa le assenze mancanti da attestati.
    */
+  @PostOnly
   public static void syncCertificationsAbsences(Long personId, Integer year)
       throws NoSuchFieldException, ExecutionException {
 
