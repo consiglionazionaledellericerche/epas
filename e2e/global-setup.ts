@@ -40,25 +40,23 @@ async function prepare(rest: APIRequestContext, web: APIRequestContext, password
   const office = await firstOffice(rest);
   const employee = await findEmployee(rest, EMPLOYEE.number)
     ?? await createEmployee(rest, EMPLOYEE, office.id);
-  await ensureContract(rest, web, employee.id);
+  await ensureContract(rest, employee.id);
   fs.writeFileSync(EMPLOYEE_DATA, JSON.stringify({ personId: employee.id }));
 
   const personnelAdmin = await findEmployee(rest, PERSONNEL_ADMIN.number)
     ?? await createEmployee(rest, PERSONNEL_ADMIN, office.id);
   // il form di assegnazione dei ruoli elenca solo le persone con un contratto attivo
-  await ensureContract(rest, web, personnelAdmin.id);
+  await ensureContract(rest, personnelAdmin.id);
   await assignRole(web, office.id, PERSONNEL_ADMIN, PERSONNEL_ADMIN_ROLE, PERSONNEL_ADMIN_ROLE_SECTION);
 
   await saveSessionAs(personnelAdmin.id, password, PERSONNEL_ADMIN_STATE);
   await saveSessionAs(employee.id, password, EMPLOYEE_STATE);
 }
 
-async function ensureContract(rest: APIRequestContext, web: APIRequestContext, personId: number) {
+/** Crea il contratto se la persona non ne ha (API REST: serve il contesto rest, non web). */
+async function ensureContract(rest: APIRequestContext, personId: number) {
   if (!(await hasContract(rest, personId))) {
-    await createContract(web, personId);
-    if (!(await hasContract(rest, personId))) {
-      throw new Error(`Contratto non creato per il dipendente ${personId}`);
-    }
+    await createContract(rest, personId);
   }
 }
 
@@ -124,31 +122,17 @@ async function hasContract(rest: APIRequestContext, personId: number): Promise<b
   return (await jsonOrThrow(response, 'contratti del dipendente')).length > 0;
 }
 
-/**
- * Il contratto è inserito con il form web: l'API REST di creazione non permette di
- * indicare il tipo di contratto, che è obbligatorio (#672).
- */
-async function createContract(web: APIRequestContext, personId: number) {
-  const form = await web.get('/contracts/insert', { params: { 'person.id': personId } });
-  const html = await form.text();
-  const token = html.match(/name="authenticityToken" value="([^"]+)"/)?.[1];
-  // orario di lavoro "Normale", presente nei dati iniziali
-  const wtt = html.match(/<option value="(\d+)"[^>]*>\s*Normale\s*</)?.[1];
-  if (!form.ok() || !token || !wtt) {
-    throw new Error(`Form di inserimento del contratto non valido (HTTP ${form.status()})`);
-  }
-  const response = await web.post('/contracts/save', {
-    form: {
-      authenticityToken: token,
-      'contract.person.id': String(personId),
-      'contract.beginDate': `01/01/${new Date().getFullYear() - 1}`,
-      'contract.contractType': 'structured_public_administration',
-      'wtt.id': wtt,
+async function createContract(rest: APIRequestContext, personId: number) {
+  const response = await rest.post('/rest/v2/contracts/create', {
+    data: {
+      personId,
+      beginDate: `${new Date().getFullYear() - 1}-01-01`,
+      contractType: 'structured_public_administration',
     },
   });
-  // i redirect sono seguiti: un rinvio al login risponde comunque 200
-  if (!response.ok() || response.url().includes('/login')) {
-    throw new Error(`Inserimento del contratto fallito: HTTP ${response.status()}, ${response.url()}`);
+  const contract = await jsonOrThrow(response, 'creazione del contratto');
+  if (!contract.id) {
+    throw new Error(`Contratto non creato per il dipendente ${personId}`);
   }
 }
 
