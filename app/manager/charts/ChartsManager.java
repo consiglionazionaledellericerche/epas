@@ -81,9 +81,11 @@ import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -882,11 +884,11 @@ public class ChartsManager {
     Font font = wb.createFont();
     font.setFontHeightInPoints((short) 12);
     font.setColor((short) 0xc);
-    font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+    font.setBold(true);
     CellStyle cs = wb.createCellStyle();
     cs.setFont(font);
-    cs.setBorderBottom(CellStyle.BORDER_DOUBLE);
-    cs.setAlignment(CellStyle.ALIGN_CENTER);
+    cs.setBorderBottom(BorderStyle.DOUBLE);
+    cs.setAlignment(HorizontalAlignment.CENTER);
     return cs;
   }
 
@@ -901,7 +903,7 @@ public class ChartsManager {
     cs.setFillForegroundColor(IndexedColors.BLUE_GREY.getIndex());
     Font font = wb.createFont();
     font.setColor(Font.COLOR_RED);
-    cs.setAlignment(CellStyle.ALIGN_CENTER);
+    cs.setAlignment(HorizontalAlignment.CENTER);
     cs.setFont(font);
     return cs;
   }
@@ -915,7 +917,7 @@ public class ChartsManager {
   private static final CellStyle createWorkingday(Workbook wb) {
     CellStyle cs = wb.createCellStyle();
     Font font = wb.createFont();
-    cs.setAlignment(CellStyle.ALIGN_CENTER);
+    cs.setAlignment(HorizontalAlignment.CENTER);
     cs.setFont(font);
     return cs;
   }

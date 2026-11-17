@@ -12,6 +12,9 @@ GET		/shibboleth/logout                 shib.Shibboleth.logout
 GET /oauth/login           Resecure.oauthLogin
 GET /oauth/callback        Resecure.oauthCallback
 
+# Segnalazioni di violazione della Content Security Policy inviate dai browser
+POST /csp/report            CspReports.report
+
 # Home page
 GET     /                                       Application.index
 

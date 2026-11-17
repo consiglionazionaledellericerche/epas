@@ -7,6 +7,24 @@
     <img src="http://icons.iconarchive.com/icons/3dlb/3d-vol2/256/warning-icon.png">
   </div>
   <div class="pagination-centered">
+    %{ csrfProblem = request?.args?.get('csrfRejected') }%
+    #{if csrfProblem?.stalePage}
+    *{ rifiuto della verifica anti-CSRF (CsrfProtection) per il token di una pagina aperta
+       in una sessione precedente, di solito prima di un nuovo login }*
+    <p class="lead">L'operazione non è stata eseguita: la pagina era stata aperta in una
+      sessione precedente, scaduta o sostituita da un nuovo accesso.</p>
+    <p>Tornare alla pagina precedente, ricaricarla e ripetere l'operazione.</p>
+    #{/if}
+    #{elseif csrfProblem}
+    *{ altri rifiuti della verifica anti-CSRF: token assente, richiesta da un altro sito o
+       errore nella verifica, che ricaricare la pagina non risolve }*
+    <p class="lead">L'operazione non è stata eseguita perché la richiesta non ha superato i
+      controlli di sicurezza.</p>
+    <p>Se il problema si ripete anche dopo aver ricaricato la pagina, segnalarlo
+      all'assistenza.</p>
+    #{/elseif}
+    #{else}
     <p class="lead">L'utente non dispone dei permessi per effettuare l'operazione richiesta.<p>
+    #{/else}
   </div>
 </div>

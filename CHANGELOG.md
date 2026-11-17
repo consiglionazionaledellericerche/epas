@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+  - Content Security Policy in modalità di sola segnalazione: le pagine sono inviate con
+    l'header Content-Security-Policy-Report-Only e le violazioni segnalate dai browser sono
+    scritte nel log (WARN), senza bloccare nulla. Il comportamento si configura con csp.mode
+    (CSP_MODE nel docker: off, report, enforce) e la policy con csp.policy (#687).
+
+### Changed
+  - ivy 2.4.0 di play è sostituita dalla 2.5.2, usata da play all'avvio per caricare i
+    moduli. ant non è più inclusa nell'immagine docker, così come la cartella lib-test di play,
+    che serve solo alla sua compilazione (#684).
+
+## [2.41.0] - 2026-11-16
+### Added
   - Test end-to-end con Playwright (cartella e2e/), eseguiti in un browser contro l'immagine
     docker: coprono template e javascript, a partire dagli attributi del cookie di sessione e
     dalla finestra di inserimento delle assenze. Sono eseguiti a ogni pull request (#671).
@@ -23,6 +35,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     attuale, il contratto diventa dipendente strutturato (true) o non strutturato (false). I
     client che inviano sempre onCertificate con un valore fisso devono inviare quello attuale
     del contratto, oppure contractType (#672).
+  - La verifica anti-CSRF è ora in modalità report per default (csrf.mode, CSRF_MODE nel
+    docker): le richieste senza token valido non sono rifiutate ma segnalate nel log a livello
+    WARN. Anche un valore non valido del parametro vale report invece di disattivare la
+    verifica. Per tornare al comportamento precedente impostare CSRF_MODE=off (#680).
+  - Aggiornate le librerie postgresql (42.7.14), poi (4.1.2), snakeyaml (2.7) e assertj
+    (3.27.7). protobuf-java non è più inclusa: drools la usa solo per serializzare le sessioni
+    (#682).
+
+  - La verifica anti-CSRF distingue nel log il token assente, il token diverso da quello
+    della sessione (di solito di una pagina aperta prima di un nuovo login), il token inviato
+    a una sessione appena creata (per esempio dal login automatico OAuth) e la richiesta da un
+    altro sito. In modalità enforce le chiamate ajax rifiutate mostrano un avviso e la pagina
+    403 spiega il motivo invece di segnalare un problema di permessi: per il token di una
+    sessione precedente invitano a ricaricare la pagina, negli altri casi a segnalare il
+    problema se si ripete (#689).
 
 ### Removed
   - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e
