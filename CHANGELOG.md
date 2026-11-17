@@ -6,6 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+  - Content Security Policy in modalità di sola segnalazione: le pagine sono inviate con
+    l'header Content-Security-Policy-Report-Only e le violazioni segnalate dai browser sono
+    scritte nel log (WARN), senza bloccare nulla. Il comportamento si configura con csp.mode
+    (CSP_MODE nel docker: off, report, enforce) e la policy con csp.policy (#687).
+
+### Changed
+  - Gli script e i fogli di stile caricati dai CDN hanno gli attributi integrity (Subresource
+    Integrity) e crossorigin: il browser li usa solo se corrispondono all'hash indicato nella
+    pagina. Fanno eccezione il loader di Google Charts e il css di Google Fonts, che non hanno
+    un contenuto fisso. Gli indirizzi senza protocollo (//...) sono ora in https (#690).
+  - ivy 2.4.0 di play è sostituita dalla 2.5.2, usata da play all'avvio per caricare i
+    moduli. ant non è più inclusa nell'immagine docker, così come la cartella lib-test di play,
+    che serve solo alla sua compilazione (#684).
+
+## [2.41.0] - 2026-11-16
+### Added
   - Test end-to-end con Playwright (cartella e2e/), eseguiti in un browser contro l'immagine
     docker: coprono template e javascript, a partire dagli attributi del cookie di sessione e
     dalla finestra di inserimento delle assenze. Sono eseguiti a ogni pull request (#671).
