@@ -34,7 +34,7 @@ import play.mvc.Util;
  *
  * <p>Il browser le invia da solo, anche dalla pagina di login e senza il token anti-CSRF:
  * l'azione non richiede quindi l'autenticazione. Per questo il corpo letto è limitato, ogni
- * violazione è scritta nel log una sola volta all'ora e il numero di righe al minuto è
+ * violazione è scritta nel log una sola volta all'ora e il numero di righe al secondo è
  * limitato, così l'indirizzo non può essere usato per riempire il log.</p>
  *
  * @see ContentSecurityPolicy
