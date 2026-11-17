@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+  - ivy 2.4.0 di play è sostituita dalla 2.5.2, usata da play all'avvio per caricare i
+    moduli. ant non è più inclusa nell'immagine docker, così come la cartella lib-test di play,
+    che serve solo alla sua compilazione (#684).
+
 ## [2.41.0] - 2026-11-16
 ### Added
   - Test end-to-end con Playwright (cartella e2e/), eseguiti in un browser contro l'immagine
