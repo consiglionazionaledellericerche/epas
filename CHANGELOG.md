@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     (CSP_MODE nel docker: off, report, enforce) e la policy con csp.policy (#687).
 
 ### Changed
+  - Le azioni del vecchio calendario di reperibilità e turni (/reperibility/{type}/... e
+    /shift/{type}/..., usate in passato dal portale sistorg) verificano che la reperibilità o
+    il turno siano di una sede su cui l'utente ha il ruolo, e registrano ogni chiamata nel log
+    a livello INFO ("API del vecchio calendario"). L'interfaccia di ePAS non le usa più: in
+    assenza di chiamate saranno rimosse in una prossima versione. Non cambiano le esportazioni
+    PDF e i calendari iCal (#696).
   - Gli script e i fogli di stile caricati dai CDN hanno gli attributi integrity (Subresource
     Integrity) e crossorigin: il browser li usa solo se corrispondono all'hash indicato nella
     pagina. Fanno eccezione il loader di Google Charts e il css di Google Fonts, che non hanno
