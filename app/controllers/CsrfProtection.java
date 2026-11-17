@@ -60,6 +60,15 @@ public class CsrfProtection extends Controller {
   // in play gli header della richiesta hanno il nome in minuscolo
   private static final String CSRF_HEADER = "x-csrf-token";
   private static final String AUTHORIZATION_HEADER = "authorization";
+  /**
+   * Header della risposta 403 della verifica, con il codice del motivo: il javascript lo usa
+   * per riconoscere il rifiuto e spiegare all'utente cosa è successo.
+   */
+  static final String REJECTED_HEADER = "X-CSRF-Rejected";
+  /** Argomento della richiesta che segnala alla pagina 403 il rifiuto della verifica. */
+  static final String REJECTED_ARG = "csrfRejected";
+  /** Chiave del token nella sessione di Play (Scope.Session.AT_KEY, non pubblica). */
+  private static final String SESSION_TOKEN_KEY = "___AT";
   private static final String FETCH_SITE_HEADER = "sec-fetch-site";
   private static final String FETCH_MODE_HEADER = "sec-fetch-mode";
   private static final String ORIGIN_HEADER = "origin";
@@ -77,22 +86,25 @@ public class CsrfProtection extends Controller {
     if (mode == CsrfMode.OFF) {
       return;
     }
-    String problem;
+    CsrfProblem problem;
     try {
       problem = csrfProblem();
     } catch (Exception ex) {
       log.error("Errore durante la verifica del token CSRF per {} {}",
           request.method, request.path, ex);
       // in enforce una verifica non completata non lascia passare la richiesta
-      problem = mode == CsrfMode.ENFORCE ? "errore nella verifica" : null;
+      problem = mode == CsrfMode.ENFORCE ? CsrfProblem.CHECK_ERROR : null;
     }
     if (problem == null) {
       return;
     }
     log.warn("Richiesta CSRF non valida ({}): method={}, path={}, action={}, user={}, "
-        + "referer={}, user-agent={}", problem, request.method, request.path, request.action,
-        session.get(USERNAME), headerValue(REFERER_HEADER), headerValue(USER_AGENT_HEADER));
+        + "referer={}, user-agent={}", problem.description, request.method, request.path,
+        request.action, session.get(USERNAME), headerValue(REFERER_HEADER),
+        headerValue(USER_AGENT_HEADER));
     if (mode == CsrfMode.ENFORCE) {
+      response.setHeader(REJECTED_HEADER, problem.code);
+      request.args.put(REJECTED_ARG, problem);
       forbidden("Richiesta non valida, ricaricare la pagina e riprovare.");
     }
   }
@@ -101,7 +113,7 @@ public class CsrfProtection extends Controller {
    * Il motivo per cui la richiesta non supera la verifica, null se la supera.
    */
   @Util
-  static String csrfProblem() {
+  static CsrfProblem csrfProblem() {
     if (getActionAnnotation(NoCheck.class) != null
         || getControllerInheritedAnnotation(NoCheck.class) != null
         || isRestClient()) {
@@ -109,12 +121,12 @@ public class CsrfProtection extends Controller {
     }
     if ("cross-site".equals(headerValue(FETCH_SITE_HEADER))
         && !"navigate".equals(headerValue(FETCH_MODE_HEADER))) {
-      return "richiesta da un altro sito";
+      return CsrfProblem.CROSS_SITE;
     }
     if (SAFE_METHODS.contains(request.method)) {
       return null;
     }
-    return isTokenValid() ? null : "token assente o non valido";
+    return tokenProblem();
   }
 
   /**
@@ -139,19 +151,35 @@ public class CsrfProtection extends Controller {
   }
 
   /**
-   * Il token è letto dall'header X-CSRF-Token e, solo per i form, dal parametro
+   * Il problema del token inviato, null se è quello della sessione.
+   *
+   * <p>Il token è letto dall'header X-CSRF-Token e, solo per i form, dal parametro
    * authenticityToken: leggere i parametri di una richiesta json consumerebbe il corpo che
-   * l'azione deve ancora leggere.
+   * l'azione deve ancora leggere.</p>
+   *
+   * <p>Un token diverso da quello della sessione è di solito quello di una pagina aperta in
+   * una sessione precedente: con il login locale la pagina di login crea il token prima
+   * dell'autenticazione, quindi dopo un logout e un nuovo login la sessione ha già un token
+   * diverso (INVALID_TOKEN). Solo una sessione appena creata nella stessa richiesta, per
+   * esempio dal login automatico OAuth, non ha ancora un token (NEW_SESSION). Una sessione
+   * locale scaduta non arriva qui: Resecure.checkAccess rimanda prima al login.</p>
    */
   @Util
-  private static boolean isTokenValid() {
+  private static CsrfProblem tokenProblem() {
     String token = headerValue(CSRF_HEADER);
     if (token == null && isFormRequest()) {
       token = params.get(CSRF_PARAM);
     }
-    return token != null && MessageDigest.isEqual(
-        token.getBytes(StandardCharsets.UTF_8),
-        session.getAuthenticityToken().getBytes(StandardCharsets.UTF_8));
+    if (token == null || token.isEmpty()) {
+      return CsrfProblem.MISSING_TOKEN;
+    }
+    // da controllare prima di getAuthenticityToken(), che crea il token se manca
+    final boolean newSession = !session.contains(SESSION_TOKEN_KEY);
+    if (MessageDigest.isEqual(token.getBytes(StandardCharsets.UTF_8),
+        session.getAuthenticityToken().getBytes(StandardCharsets.UTF_8))) {
+      return null;
+    }
+    return newSession ? CsrfProblem.NEW_SESSION : CsrfProblem.INVALID_TOKEN;
   }
 
   @Util
@@ -177,6 +205,40 @@ public class CsrfProtection extends Controller {
     log.warn("Valore '{}' non valido per {}, uso {}", value, CSRF_MODE,
         DEFAULT_MODE.name().toLowerCase());
     return DEFAULT_MODE;
+  }
+
+  /**
+   * Motivo per cui una richiesta non supera la verifica: la descrizione è per il log, il
+   * codice per l'header X-CSRF-Rejected della risposta. Pubblico perché la pagina 403 legge
+   * isStalePage().
+   */
+  public enum CsrfProblem {
+    CROSS_SITE("cross-site", "richiesta da un altro sito", false),
+    MISSING_TOKEN("missing-token", "token assente", false),
+    NEW_SESSION("new-session",
+        "token di una sessione precedente, la sessione corrente è appena stata creata", true),
+    INVALID_TOKEN("invalid-token", "token diverso da quello della sessione, di solito di una "
+        + "pagina aperta prima di un nuovo login", true),
+    CHECK_ERROR("check-error", "errore nella verifica", false);
+
+    final String code;
+    final String description;
+    private final boolean stalePage;
+
+    CsrfProblem(String code, String description, boolean stalePage) {
+      this.code = code;
+      this.description = description;
+      this.stalePage = stalePage;
+    }
+
+    /**
+     * Il token è quello di una pagina aperta in un'altra sessione: ricaricare la pagina
+     * risolve. Per gli altri motivi (token assente, richiesta da un altro sito, errore)
+     * ricaricare non basta.
+     */
+    public boolean isStalePage() {
+      return stalePage;
+    }
   }
 
   /**

@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+  - ivy 2.4.0 di play è sostituita dalla 2.5.2, usata da play all'avvio per caricare i
+    moduli. ant non è più inclusa nell'immagine docker, così come la cartella lib-test di play,
+    che serve solo alla sua compilazione (#684).
+
+## [2.41.0] - 2026-11-16
 ### Added
   - Test end-to-end con Playwright (cartella e2e/), eseguiti in un browser contro l'immagine
     docker: coprono template e javascript, a partire dagli attributi del cookie di sessione e
@@ -23,9 +29,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     docker): le richieste senza token valido non sono rifiutate ma segnalate nel log a livello
     WARN. Anche un valore non valido del parametro vale report invece di disattivare la
     verifica. Per tornare al comportamento precedente impostare CSRF_MODE=off (#680).
-  - ivy 2.4.0 di play è sostituita dalla 2.5.2, usata da play all'avvio per caricare i
-    moduli. ant non è più inclusa nell'immagine docker, così come la cartella lib-test di play,
-    che serve solo alla sua compilazione (#684).
+  - Aggiornate le librerie postgresql (42.7.14), poi (4.1.2), snakeyaml (2.7) e assertj
+    (3.27.7). protobuf-java non è più inclusa: drools la usa solo per serializzare le sessioni
+    (#682).
+
+  - La verifica anti-CSRF distingue nel log il token assente, il token diverso da quello
+    della sessione (di solito di una pagina aperta prima di un nuovo login), il token inviato
+    a una sessione appena creata (per esempio dal login automatico OAuth) e la richiesta da un
+    altro sito. In modalità enforce le chiamate ajax rifiutate mostrano un avviso e la pagina
+    403 spiega il motivo invece di segnalare un problema di permessi: per il token di una
+    sessione precedente invitano a ricaricare la pagina, negli altri casi a segnalare il
+    problema se si ripete (#689).
 
 ### Removed
   - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e
