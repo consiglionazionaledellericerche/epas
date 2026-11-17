@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     (CSP_MODE nel docker: off, report, enforce) e la policy con csp.policy (#687).
 
 ### Changed
+  - Gli script e i fogli di stile caricati dai CDN hanno gli attributi integrity (Subresource
+    Integrity) e crossorigin: il browser li usa solo se corrispondono all'hash indicato nella
+    pagina. Fanno eccezione il loader di Google Charts e il css di Google Fonts, che non hanno
+    un contenuto fisso. Gli indirizzi senza protocollo (//...) sono ora in https (#690).
   - ivy 2.4.0 di play è sostituita dalla 2.5.2, usata da play all'avvio per caricare i
     moduli. ant non è più inclusa nell'immagine docker, così come la cartella lib-test di play,
     che serve solo alla sua compilazione (#684).
