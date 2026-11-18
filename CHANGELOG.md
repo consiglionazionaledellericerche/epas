@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     l'header Content-Security-Policy-Report-Only e le violazioni segnalate dai browser sono
     scritte nel log (WARN), senza bloccare nulla. Il comportamento si configura con csp.mode
     (CSP_MODE nel docker: off, report, enforce) e la policy con csp.policy (#687).
+  - Workflow GitHub Actions che analizza con Trivy l'immagine docker (pacchetti del sistema
+    operativo e jar) a ogni pull request, su main e ogni settimana. Fallisce con vulnerabilità
+    CRITICAL o HIGH non elencate in .trivyignore.yaml, dove ogni eccezione è motivata e ha una
+    scadenza (#705).
 
 ### Changed
   - Le azioni del vecchio calendario di reperibilità e turni (/reperibility/{type}/... e
