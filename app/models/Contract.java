@@ -194,15 +194,38 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
 
   /**
    * Ritorna la lista dei vacationPeriods del contratto e del precedente se presente.
+   * I piani ferie del contratto precedente sono limitati alla sua data di fine: quelli che
+   * iniziano dopo vengono ignorati e quelli che la superano sono sostituiti da una copia
+   * (non persistita) che termina alla fine del contratto precedente. In questo modo non si
+   * sovrappongono ai piani ferie del contratto attuale.
    *
    * @return i vacationPeriods del contratto più quelli del contratto precedente se presente.
-   * 
+   *
    */
   @Transient
   public List<VacationPeriod> getExtendedVacationPeriods() {
     List<VacationPeriod> vp = new ArrayList<VacationPeriod>(getVacationPeriods());
     if (getPreviousContract() != null) {
-      vp.addAll(getPreviousContract().getVacationPeriods());
+      LocalDate previousEnd = getPreviousContract().calculatedEnd();
+      for (VacationPeriod previous : getPreviousContract().getVacationPeriods()) {
+        if (previousEnd == null) {
+          vp.add(previous);
+          continue;
+        }
+        if (previous.getBeginDate().isAfter(previousEnd)) {
+          continue;
+        }
+        if (previous.getEndDate() == null || previous.getEndDate().isAfter(previousEnd)) {
+          VacationPeriod trimmed = new VacationPeriod();
+          trimmed.setContract(getPreviousContract());
+          trimmed.setVacationCode(previous.getVacationCode());
+          trimmed.setBeginDate(previous.getBeginDate());
+          trimmed.setEndDate(previousEnd);
+          vp.add(trimmed);
+        } else {
+          vp.add(previous);
+        }
+      }
     }
     return vp;
   }

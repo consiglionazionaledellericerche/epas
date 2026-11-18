@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+  - Inserimento delle ferie con errore TwoPeriods per i contratti collegati al precedente
+    quando i piani ferie del contratto precedente vanno oltre la sua data di fine: nel calcolo
+    sono considerati solo fino alla fine del contratto precedente (#719).
+
 ## [2.42.0] - 2026-11-18
 ### Added
   - Content Security Policy in modalità di sola segnalazione: le pagine sono inviate con
