@@ -18,7 +18,10 @@ vulnerabilities:
     paths: ["opt/play/play-1.5.3/framework/lib/netty-3.10.6.Final.jar"]
     statement: >-
       Request smuggling con header senza due punti: mitigata dal reverse proxy, che
-      rifiuta le righe di header malformate. La porta 9000 è esposta solo su 127.0.0.1.
+      rifiuta le righe di header malformate (Apache con HttpProtocolOptions Strict,
+      default dalla 2.4.24; nginx). docs/sysadmin/reverseProxy.rst richiede che la
+      porta 9000 sia raggiungibile solo dal proxy: nel docker-compose.yml di esempio è
+      pubblicata solo su 127.0.0.1.
     expired_at: 2027-05-18
 
   - id: CVE-2019-16869

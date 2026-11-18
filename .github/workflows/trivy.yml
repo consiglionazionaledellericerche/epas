@@ -43,6 +43,8 @@ jobs:
       -
         # Database delle vulnerabilità (generale e Java): la chiave cambia ogni giorno,
         # così il database è al più di un giorno prima e non viene riscaricato a ogni job.
+        # La cache dei layer analizzati resta in memoria (--cache-backend memory), così
+        # .trivy-cache contiene solo i database e non cresce con le immagini costruite.
         name: Data per la cache del database
         id: date
         run: echo "day=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
@@ -60,20 +62,23 @@ jobs:
         run: |
           mkdir -p .trivy-cache
           docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/work" -w /work "$TRIVY_IMAGE" image \
-            --cache-dir /work/.trivy-cache --skip-version-check --input epas.tar \
-            --scanners vuln --format json --output trivy-report.json
+            --cache-dir /work/.trivy-cache --cache-backend memory --skip-version-check \
+            --input epas.tar --scanners vuln --format json --output trivy-report.json
       -
         # Il gate: CRITICAL e HIGH al netto di .trivyignore.yaml. Il report completo ha
-        # già aggiornato il database, quindi qui non si riscarica.
+        # già aggiornato il database, quindi qui non si riscarica. L'esito è letto senza
+        # pipe, così non dipende da pipefail: il riepilogo è scritto anche se il gate fallisce.
         name: Vulnerabilità CRITICAL e HIGH
         run: |
           docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/work" -w /work "$TRIVY_IMAGE" image \
-            --cache-dir /work/.trivy-cache --skip-db-update --skip-java-db-update \
-            --skip-version-check --quiet --input epas.tar --scanners vuln \
-            --severity CRITICAL,HIGH --ignorefile .trivyignore.yaml --exit-code 1 \
-            --format table --table-mode detailed --show-suppressed \
-            | tee trivy-gate.txt
-          status=${PIPESTATUS[0]}
+            --cache-dir /work/.trivy-cache --cache-backend memory --skip-db-update \
+            --skip-java-db-update --skip-version-check --quiet --input epas.tar \
+            --scanners vuln --severity CRITICAL,HIGH --ignorefile .trivyignore.yaml \
+            --exit-code 1 --format table --table-mode detailed --show-suppressed \
+            --output trivy-gate.txt \
+            && status=0 || status=$?
+          touch trivy-gate.txt
+          cat trivy-gate.txt
           {
             echo '## Trivy: vulnerabilità CRITICAL e HIGH'
             echo
