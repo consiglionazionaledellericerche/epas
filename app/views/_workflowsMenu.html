@@ -17,11 +17,15 @@
   teleworkRequests = templateUtility.teleworkRequests()
   serviceRequests = templateUtility.serviceRequests()
   illnessRequests = templateUtility.illnessRequests()
+  parentalLeaveRequests = templateUtility.parentalLeaveRequests()
   personalPermissionRequests = templateUtility.personalPermissionRequests()
-  changeReperibilityRequests = templateUtility.changeReperibilityRequests()
   overtimeRequestsInAdvance = templateUtility.overtimeRequestsInAdvance()
   enableIllnessFlow = templateUtility.enableIllnessFlow()
   vacationDelayRequests = templateUtility.vacationDelayRequests()
+  totalRequests = compensatoryRestRequests + vacationRequests + overtimeRequests +
+      personalPermissionRequests + teleworkRequests + serviceRequests +
+      illnessRequests + parentalLeaveRequests + changeReperibilityRequests +
+      overtimeRequestsInAdvance + vacationDelayRequests
 }%
 
   <li class="dropdown #{if request.action in actions}active#{/if}">
@@ -29,25 +33,8 @@
     *{ responsività dropDown }*
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
 		<i class="fa fa-recycle fa-fw"></i>  
-		    #{if compensatoryRestRequests > 0 || vacationRequests > 0
-		    	|| templateUtility.overtimeRequests() > 0
-		    	|| personalPermissionRequests > 0
-		    	|| changeReperibilityRequests > 0 || teleworkRequests > 0
-		    	|| serviceRequests > 0 || illnessRequests > 0
-		    	|| personalPermissionRequests > 0 
-		    	|| changeReperibilityRequests > 0
-		    	|| overtimeRequestsInAdvance > 0
-				|| vacationDelayRequests > 0}
-      			<span class="label label-danger label-badge">${compensatoryRestRequests 
-      				+ vacationRequests 
-      				+ overtimeRequests
-      				+ personalPermissionRequests
-      				+ teleworkRequests + serviceRequests
-      				+ illnessRequests
-      				+ changeReperibilityRequests
-      				+ overtimeRequestsInAdvance
-					+ vacationDelayRequests}
-      			</span>
+		    #{if totalRequests > 0}
+      			<span class="label label-danger label-badge">${totalRequests}</span>
     		#{/if}
 	     <!-- visualizza l'username -->
 	     <div class="visible-lg-inline visible-xs-inline"> Flussi di lavoro
@@ -148,29 +135,29 @@
 
       #{b.li @AbsenceRequests.vacationsToApprove()}
         <i class="fa fa-plane" aria-hidden="true"></i>
-        #{if templateUtility.vacationRequests() > 0}
-          <span class="label label-danger label-badge">${templateUtility.vacationRequests()}</span>
+        #{if vacationRequests > 0}
+          <span class="label label-danger label-badge">${vacationRequests}</span>
         #{/if}
       #{/b.li}
 
       #{b.li @AbsenceRequests.compensatoryRestsToApprove()}
         <i class="fa fa-bath" aria-hidden="true"></i>
-        #{if templateUtility.compensatoryRestRequests() > 0}
-          <span class="label label-danger label-badge">${templateUtility.compensatoryRestRequests()}</span>
+        #{if compensatoryRestRequests > 0}
+          <span class="label label-danger label-badge">${compensatoryRestRequests}</span>
         #{/if}
       #{/b.li}
 
       #{b.li @AbsenceRequests.permissionsToApprove()}
         <i class="fa fa-exclamation" aria-hidden="true"></i>
-        #{if templateUtility.personalPermissionRequests() > 0}
-          <span class="label label-danger label-badge">${templateUtility.personalPermissionRequests()}</span>
+        #{if personalPermissionRequests > 0}
+          <span class="label label-danger label-badge">${personalPermissionRequests}</span>
         #{/if}
       #{/b.li}
       
       #{b.li @AbsenceRequests.vacationsDelayToApprove()}
         <i class="fa fa-plane" aria-hidden="true"></i>
-        #{if templateUtility.vacationDelayRequests() > 0}
-          <span class="label label-danger label-badge">${templateUtility.vacationDelayRequests()}</span>
+        #{if vacationDelayRequests > 0}
+          <span class="label label-danger label-badge">${vacationDelayRequests}</span>
         #{/if}
       #{/b.li}
 
@@ -201,7 +188,7 @@
             #{/if}
           #{/secure.li}
 
-         #{if templateUtility.enableIllnessFlow()}
+         #{if enableIllnessFlow}
            #{b.li @InformationRequests.illnessToApprove()}
              <i class="fa fa-h-square" aria-hidden="true"></i>
              #{if illnessRequests > 0}
