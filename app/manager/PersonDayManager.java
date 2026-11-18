@@ -22,9 +22,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
+import com.google.common.collect.Sets;
 import com.google.common.collect.TreeRangeSet;
 import dao.ContractDao;
 import dao.GeneralSettingDao;
@@ -179,16 +181,43 @@ public class PersonDayManager {
   }
 
   /**
-   * Metodo che ritorna true se l'assenza è compatibile con la reperibilità, 
-   * false altrimenti.
+   * Tipi di giustificazione che coprono l'intera giornata: un'assenza con uno di questi
+   * tipi e con codice non compatibile con la reperibilità impedisce la reperibilità nel giorno.
+   * Le assenze orarie non la impediscono.
+   */
+  public static final ImmutableSet<JustifiedTypeName> REPERIBILITY_BLOCKING_JUSTIFIED_TYPES =
+      Sets.immutableEnumSet(JustifiedTypeName.all_day, JustifiedTypeName.all_day_percentage,
+          JustifiedTypeName.all_day_limit, JustifiedTypeName.assign_all_day,
+          JustifiedTypeName.complete_day_and_add_overtime);
+
+  /**
+   * Se l'assenza è incompatibile con la reperibilità: il codice non è compatibile con la
+   * reperibilità e l'assenza copre l'intera giornata (le assenze orarie sono sempre
+   * compatibili). Se il tipo di giustificazione non è noto l'assenza è considerata giornaliera.
+   *
+   * @param absence l'assenza da verificare
+   * @return true se l'assenza impedisce la reperibilità nel giorno, false altrimenti.
+   */
+  public static boolean isAbsenceIncompatibleWithReperibility(Absence absence) {
+    if (absence.getAbsenceType().isReperibilityCompatible()) {
+      return false;
+    }
+    return absence.getJustifiedType() == null
+        || REPERIBILITY_BLOCKING_JUSTIFIED_TYPES.contains(absence.getJustifiedType().getName());
+  }
+
+  /**
+   * Metodo che ritorna true se le assenze del giorno sono compatibili con la reperibilità,
+   * false altrimenti. Sono incompatibili solo le assenze giornaliere con codice non
+   * compatibile con la reperibilità.
    *
    * @param personDay il personDay su cui cercare le assenze
-   * @return true se l'assenza è compatibile con la reperibilità, false altrimenti.
+   * @return true se le assenze sono compatibili con la reperibilità, false altrimenti.
    */
   public boolean isAbsenceCompatibleWithReperibility(PersonDay personDay) {
 
     return personDay.getAbsences().stream()
-        .noneMatch(abs -> !abs.getAbsenceType().isReperibilityCompatible());
+        .noneMatch(PersonDayManager::isAbsenceIncompatibleWithReperibility);
 
   }
 
