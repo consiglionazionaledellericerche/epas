@@ -26,9 +26,7 @@ import dao.GeneralSettingDao;
 import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
-import dao.RoleDao;
 import dao.UserDao;
-import dao.UsersRolesOfficesDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
@@ -40,7 +38,6 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import manager.ContractManager;
 import manager.EmailManager;
-import manager.OfficeManager;
 import manager.PersonManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
@@ -51,11 +48,10 @@ import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
+import models.PersonOffice;
 import models.PersonChildren;
 import models.PersonDay;
-import models.Role;
 import models.User;
-import models.UsersRolesOffices;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import org.apache.commons.lang.WordUtils;
@@ -85,8 +81,6 @@ public class Persons extends Controller {
   @Inject
   static EmailManager emailManager;
   @Inject
-  static OfficeManager officeManager;
-  @Inject
   static PersonDao personDao;
   @Inject
   static WrapperModelFunctionFactory wrapperFunctionFactory;
@@ -110,10 +104,6 @@ public class Persons extends Controller {
   static PersonStampingRecapFactory stampingsRecapFactory;
   @Inject
   static AbsenceComponentDao absenceComponentDao;
-  @Inject
-  static UsersRolesOfficesDao uroDao;
-  @Inject
-  static RoleDao roleDao;
   @Inject
   static GeneralSettingDao generalSettingDao;
 
@@ -165,8 +155,10 @@ public class Persons extends Controller {
    *
    * @param person la persona da inserire
    * @param contract il contratto associato alla persona
+   * @param office la sede di afferenza, a partire dalla data di inizio del contratto
    */
-  public static void save(@Valid @Required Person person, @Valid Contract contract) {
+  public static void save(@Valid @Required Person person, @Valid Contract contract,
+      @Required Office office) {
 
     if (contract.getEndDate() != null && !contract.getEndDate().isAfter(contract.getBeginDate())) {
       Validation.addError("contract.endDate", "Dev'essere successivo all'inizio del contratto");
@@ -177,16 +169,18 @@ public class Persons extends Controller {
 
     if (Validation.hasErrors()) {
       flash.error("Correggere gli errori indicati");
-      render("@insertPerson", person, contract);
+      render("@insertPerson", person, contract, office);
     }
 
-    rules.checkIfPermitted(person.getOffice());
+    rules.checkIfPermitted(office);
+    person.changeOffice(office, contract.getBeginDate());
 
     person.setName(WordUtils.capitalizeFully(person.getName()));
     person.setSurname(WordUtils.capitalizeFully(person.getSurname()));
 
     personManager.properPersonCreate(person);
     person.save();
+    person.getPersonOffices().forEach(PersonOffice::save);
 
     contract.setPerson(person);
     
@@ -253,19 +247,8 @@ public class Persons extends Controller {
       render("@edit", person);
     }
 
+    // La sede non è modificabile da qui: le afferenze sono gestite in PersonOffices.
     rules.checkIfPermitted(person.getOffice());
-    //Aggiungo l'aggiornamento del ruolo di dipendente sull'eventuale nuova sede
-    List<UsersRolesOffices> uroList = uroDao.getUsersRolesOfficesByUser(person.getUser());
-    if (uroList.stream().anyMatch(uro -> uro.getRole().getName().equals(Role.EMPLOYEE) 
-        && !uro.getOffice().equals(person.getOffice()))) {
-      for (UsersRolesOffices uro : uroList) {
-        if (uro.getRole().getName().equals(Role.EMPLOYEE)) {
-          uro.delete();
-        }
-      }
-      Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
-      officeManager.setUro(person.getUser(), person.getOffice(), employee); 
-    }
 
     person.setEppn(Optional.fromNullable(person.getEppn()).orNull());
     person.setFiscalCode(Optional.fromNullable(person.getFiscalCode()).orNull());

@@ -20,6 +20,7 @@ package dao;
 import com.google.common.base.Optional;
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import java.util.List;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -31,6 +32,7 @@ import models.Stamping.WayType;
 import models.query.QPerson;
 import models.query.QStampModificationType;
 import models.query.QStamping;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.YearMonth;
 
@@ -106,8 +108,7 @@ public class StampingDao extends DaoBase {
             .and(stamping.personDay.date
                 .loe(yearMonth.toLocalDate(1).dayOfMonth()
                     .withMaximumValue()))
-            .and(person.office.isNotNull())
-            .and(person.office.eq(office)))
+            .and(PersonOfficeFilter.inOfficeAt(person, office, stamping.personDay.date)))
         .orderBy(person.surname.asc(), stamping.personDay.date.asc())
         .fetch();
   }

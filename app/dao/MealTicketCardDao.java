@@ -19,6 +19,7 @@ package dao;
 
 import com.google.inject.Provider;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -83,7 +84,8 @@ public class MealTicketCardDao extends DaoBase {
     return Optional.ofNullable(getQueryFactory()
         .selectFrom(mealTicketCard)
             .where(mealTicketCard.number.eq(number)
-                .and(mealTicketCard.person.office.eq(office))
+                .and(mealTicketCard.person.id.in(
+                    PersonOfficeFilter.personIdsInOffices(office)))
                 .and(mealTicketCard.isActive.eq(true))).fetchFirst());
   }
   

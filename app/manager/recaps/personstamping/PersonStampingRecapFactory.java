@@ -17,12 +17,15 @@
 
 package manager.recaps.personstamping;
 
+import com.google.common.base.Optional;
 import dao.PersonDayDao;
 import dao.wrapper.IWrapperFactory;
+import java.util.Set;
 import javax.inject.Inject;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import models.Person;
+import org.joda.time.LocalDate;
 
 /**
  * Factory per PersonStampingRecap.
@@ -57,10 +60,19 @@ public class PersonStampingRecapFactory {
    */
   public PersonStampingRecap create(Person person, int year, int month, 
       boolean considerExitingNow) {
+    return create(person, year, month, considerExitingNow, Optional.absent());
+  }
+
+  /**
+   * Costruisce il riepilogo mensile delle timbrature limitato ai giorni indicati (i giorni di
+   * afferenza alla sede di chi lo consulta).
+   */
+  public PersonStampingRecap create(Person person, int year, int month,
+      boolean considerExitingNow, Optional<Set<LocalDate>> visibleDays) {
 
     return new PersonStampingRecap(personDayManager, personDayDao,
         personManager, stampingDayRecapFactory,
-        wrapperFactory, year, month, person, considerExitingNow);
+        wrapperFactory, year, month, person, considerExitingNow, visibleDays);
   }
 
 }

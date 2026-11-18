@@ -26,6 +26,7 @@ import com.google.inject.Provider;
 import common.security.PasswordHasher;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
 import java.util.Arrays;
@@ -45,6 +46,7 @@ import models.enumerate.TeleworkStampTypes;
 import models.query.QBadgeReader;
 import models.query.QPerson;
 import models.query.QUser;
+import org.joda.time.LocalDate;
 
 /**
  * DAO per gli User.
@@ -174,7 +176,8 @@ public class UserDao extends DaoBase {
 
     BooleanBuilder condition = new BooleanBuilder()
         // La persona associata all'utente fa parte di uno degli uffici specificati
-        .andAnyOf(person.office.in(offices),
+        .andAnyOf(person.id.in(
+            PersonOfficeFilter.personIdsInOffices(offices)),
             // oppure il proprietario dell'utente è tra gli uffici specificati
             user.owner.in(offices));
     // Filtro nome

@@ -52,7 +52,7 @@ public class CancellazioneRigaAssenza {
    * Constructor.
    */
   public CancellazioneRigaAssenza(Certification certification) {
-    codiceSede = Integer.parseInt(certification.getPerson().getOffice().getCodeId());
+    codiceSede = Integer.parseInt(certification.getSendingOffice().getCodeId());
     anno = certification.getYear();
     mese = certification.getMonth();
 

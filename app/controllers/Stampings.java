@@ -206,11 +206,19 @@ public class Stampings extends Controller {
     Person person = personDao.getPersonById(personId);
     Preconditions.checkNotNull(person);
 
-    rules.checkIfPermitted(person.getOffice());
-
     val yearMonth = new YearMonth(
         year != 0 ? year : YearMonth.now().getYear(),
             month != 0 ? month : YearMonth.now().getMonthOfYear());
+
+    // Ogni sede vede solo i giorni in cui la persona vi afferisce
+    val monthBegin = yearMonth.toLocalDate(1);
+    val monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+    val visibleDays = rules.permittedDaysByOffice(person, monthBegin, monthEnd);
+    if (visibleDays.isEmpty()) {
+      forbidden();
+    }
+    // Data di riferimento per i permessi di inserimento: un giorno visibile del mese
+    val referenceDate = visibleDays.stream().min(LocalDate::compareTo).get();
 
     IWrapperPerson wrPerson = wrapperFactory.create(person);
 
@@ -225,18 +233,21 @@ public class Stampings extends Controller {
 
     PersonStampingRecap psDto = 
         stampingsRecapFactory.create(
-            person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true);
+            person, yearMonth.getYear(), yearMonth.getMonthOfYear(), true,
+            visibleDays.isEmpty() ? Optional.absent() : Optional.of(visibleDays));
 
     val currentUser = Security.getUser();
     val canEditAllStampingsAndAbsences = 
         currentUser.isPresent() &&
         (currentUser.get().hasAccountRoles(models.enumerate.AccountRole.ADMIN, models.enumerate.AccountRole.DEVELOPER) 
           || currentUser.get().hasRoles(models.Role.PERSONNEL_ADMIN));
-    val canInsertAbsences = 
-        rules.check("AbsenceGroups.insert", yearMonth) && rules.check("AbsenceGroups.insert", person);
-    val canInsertStampings = 
-        rules.check("Stampings.insert", yearMonth) && rules.check("Stampings.insert", person);
-    val canViewPersonDayHistory = rules.check("PersonDays.personDayHistory", person.getOffice());
+    val canInsertAbsences = rules.check("AbsenceGroups.insert", yearMonth)
+        && rules.check("AbsenceGroups.insert", person, referenceDate);
+    val canInsertStampings = rules.check("Stampings.insert", yearMonth)
+        && rules.check("Stampings.insert", person, referenceDate);
+    val canViewPersonDayHistory = rules.check("PersonDays.personDayHistory",
+        person.getOfficeAt(referenceDate) != null ? person.getOfficeAt(referenceDate)
+            : person.getOffice());
 
     render(psDto, person, yearMonth, 
         canEditAllStampingsAndAbsences, canInsertAbsences, canInsertStampings, canViewPersonDayHistory);
@@ -256,7 +267,7 @@ public class Stampings extends Controller {
 
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
-    rules.checkIfPermitted(person);
+    rules.checkIfPermitted(person, date);
 
     render("@edit", person, date);
   }
@@ -275,7 +286,7 @@ public class Stampings extends Controller {
     Preconditions.checkNotNull(date);
     Preconditions.checkState(!date.isAfter(LocalDate.now()));
 
-    rules.checkIfPermitted(person);
+    rules.checkIfPermitted(person, date);
 
     List<StampTypes> offsite = Lists.newArrayList();
     offsite.add(StampTypes.LAVORO_FUORI_SEDE);

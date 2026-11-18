@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -90,8 +91,8 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   private List<BadgeSystem> badgeSystems = Lists.newArrayList();
 
-  @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
-  private List<Person> persons = Lists.newArrayList();
+  @OneToMany(mappedBy = "office")
+  private List<PersonOffice> personOffices = Lists.newArrayList();
 
   @OneToMany(mappedBy = "office", cascade = {CascadeType.REMOVE})
   private List<Configuration> configurations = Lists.newArrayList();
@@ -140,6 +141,53 @@ public class Office extends PeriodModel implements IPropertiesInPeriodOwner {
   @PrePersist
   private void onUpdate() {
     this.updatedAt = LocalDateTime.now();
+  }
+
+  /**
+   * Le persone la cui sede corrente (vedi {@link Person#getOffice()}) è questa sede.
+   * Usato dalle regole dei permessi: solo la sede corrente gestisce la persona.
+   */
+  @Transient
+  public List<Person> getPersons() {
+    return personOffices.stream()
+        .map(PersonOffice::getPerson).distinct()
+        .filter(p -> this.equals(p.getOffice()))
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Verifica se questa è la sede corrente della persona indicata.
+   *
+   * @param target la persona (oggetto generico per l'uso nelle regole dei permessi)
+   * @return true se target è una persona la cui sede corrente è questa sede.
+   */
+  @Transient
+  public boolean isCurrentOfficeOf(Object target) {
+    return target instanceof Person && this.equals(((Person) target).getOffice());
+  }
+
+  /**
+   * Verifica se questa è la sede della persona indicata alla data di riferimento, o la sede
+   * corrente se la data è nulla.
+   */
+  @Transient
+  public boolean isOfficeOf(Object target, LocalDate date) {
+    if (date == null) {
+      return isCurrentOfficeOf(target);
+    }
+    return target instanceof Person && this.equals(((Person) target).getOfficeAt(date));
+  }
+
+  /**
+   * Le persone che hanno afferito alla sede in almeno un giorno dell'intervallo.
+   */
+  @Transient
+  public List<Person> getPersonsInPeriod(LocalDate begin, LocalDate end) {
+    return personOffices.stream()
+        .filter(po -> (end == null || !po.getBeginDate().isAfter(end))
+            && (po.getEndDate() == null || !po.getEndDate().isBefore(begin)))
+        .map(PersonOffice::getPerson).distinct()
+        .collect(Collectors.toList());
   }
 
   @Transient

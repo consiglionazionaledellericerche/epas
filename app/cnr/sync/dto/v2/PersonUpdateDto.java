@@ -18,7 +18,6 @@
 package cnr.sync.dto.v2;
 
 import lombok.Builder;
-import models.Office;
 import models.Person;
 import models.Qualification;
 
@@ -54,9 +53,7 @@ public class PersonUpdateDto extends PersonCreateDto {
               .filter(q -> ((Qualification) q).getQualification() == getQualification().intValue())
               .findFirst().get()));        
     }
-    if (getOfficeId() != null) {
-      person.setOffice(Office.findById(getOfficeId()));  
-    }
-
+    //Il cambio di sede (officeId) non è applicato qui: è gestito dal controller tramite
+    //PersonOfficeManager ed è riservato agli amministratori di sistema.
   }
 }

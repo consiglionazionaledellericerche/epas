@@ -1576,7 +1576,7 @@ public class PersonDayManager {
   public boolean isHoliday(Person person, LocalDate date, boolean saturdayHoliday) {
     //Festività generale
     MonthDay patron = (MonthDay) configurationManager
-        .configValue(person.getOffice(), EpasParam.DAY_OF_PATRON, date);
+        .configValue(person.getOfficeAtOrCurrent(date), EpasParam.DAY_OF_PATRON, date);
     if (DateUtility.isGeneralHoliday(Optional.fromNullable(patron), date)) {
       return true;
     }
@@ -1760,7 +1760,8 @@ public class PersonDayManager {
     int lunchTime = 0;
 
     LocalTimeInterval lunchInterval = (LocalTimeInterval) configurationManager.configValue(
-        personDay.getPerson().getOffice(), EpasParam.LUNCH_INTERVAL, personDay.getDate());
+        personDay.getPerson().getOfficeAtOrCurrent(personDay.getDate()),
+        EpasParam.LUNCH_INTERVAL, personDay.getDate());
 
     val gapLunchPairs = getGapLunchPairs(personDay, lunchInterval.from, 
         lunchInterval.to, Optional.absent());

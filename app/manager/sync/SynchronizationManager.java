@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import manager.ContractManager;
 import manager.OfficeManager;
+import manager.PersonOfficeManager;
 import manager.RegistryNotificationManager;
 import manager.UserManager;
 import manager.configurations.ConfigurationManager;
@@ -60,6 +61,7 @@ public class SynchronizationManager {
   private RoleDao roleDao;
   private OfficeManager officeManager;
   private RegistryNotificationManager registryNotificationManager;
+  private PersonOfficeManager personOfficeManager;
   private ConfigurationManager configurationManager;
 
   /**
@@ -70,7 +72,8 @@ public class SynchronizationManager {
       ContractPerseoConsumer contractPerseoConsumer,
       PersonDao personDao, UserManager userManager, 
       ContractManager contractManager, RoleDao roleDao,
-      OfficeManager officeManager, RegistryNotificationManager registryNotificationManager) {
+      OfficeManager officeManager, RegistryNotificationManager registryNotificationManager,
+      PersonOfficeManager personOfficeManager) {
     this.peoplePerseoConsumer = peoplePerseoConsumer;
     this.contractPerseoConsumer = contractPerseoConsumer;
     this.personDao = personDao;
@@ -79,6 +82,7 @@ public class SynchronizationManager {
     this.roleDao = roleDao;
     this.officeManager = officeManager;
     this.registryNotificationManager = registryNotificationManager;
+    this.personOfficeManager = personOfficeManager;
   }
 
   /**
@@ -160,11 +164,11 @@ public class SynchronizationManager {
           epasPerson.getFullname(), epasPerson.getNumber(), 
           epasPerson.getOffice().getName(), office);
 
-      Office oldOffice = epasPerson.getOffice(); 
-      epasPerson.setOffice(office);
-      epasPerson.save();
-
-      registryNotificationManager.notifyPersonHasChangedOffice(epasPerson, oldOffice);
+      Office oldOffice = epasPerson.getOffice();
+      //L'afferenza precedente viene chiusa e il trasferimento decorre dalla data odierna;
+      //il manager allinea il ruolo di dipendente e notifica il cambio di sede.
+      personOfficeManager.changeOffice(epasPerson, office, LocalDate.now()).getMessages()
+          .forEach(syncResult::add);
       return syncResult.add(
           String.format(
               "Effettuato il campo di sede per %s. Vecchia sede %s, nuova sede %s.",
@@ -172,8 +176,9 @@ public class SynchronizationManager {
     }
 
     // join dell'office (in automatico ancora non c'è...)
-    perseoPerson.setOffice(office);
     perseoPerson.setBeginDate(LocalDate.now().withDayOfMonth(1).withMonthOfYear(1).minusDays(1));
+    //L'afferenza alla sede decorre dalla data di inizio della persona.
+    perseoPerson.changeOffice(office, perseoPerson.getBeginDate());
     val validation = Validation.current.get(); 
     validation.valid(perseoPerson);
     if (Validation.hasErrors()) {
@@ -227,6 +232,9 @@ public class SynchronizationManager {
     try {
       person.setUser(userManager.createUser(person));
       person.save();
+      //Le afferenze alle sedi vanno salvate dopo la persona perché la relazione
+      //con PersonOffice non è in cascata sul salvataggio.
+      person.getPersonOffices().forEach(personOffice -> personOffice.save());
 
       Role employee = roleDao.getRoleByName(Role.EMPLOYEE);
       officeManager.setUro(person.getUser(), person.getOffice(), employee);

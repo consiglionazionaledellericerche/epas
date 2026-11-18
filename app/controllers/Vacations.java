@@ -222,7 +222,10 @@ public class Vacations extends Controller {
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);
     notFoundIfNull(type);
-    rules.checkIfPermitted(contract.getPerson().getOffice());
+    // Il prospetto dell'anno è visibile alle sedi a cui la persona ha afferito nell'anno o
+    // nell'anno successivo (dal cui prospetto si consultano i residui dell'anno precedente)
+    rules.checkIfPermittedOnDays(contract.getPerson(), new LocalDate(year, 1, 1),
+        new LocalDate(year + 1, 12, 31));
     
     GroupAbsenceType vacationGroup = absenceComponentDao
         .groupAbsenceTypeByName(DefaultGroup.FERIE_CNR.name()).get();

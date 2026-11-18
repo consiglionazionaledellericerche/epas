@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQueryFactory;
+import dao.filter.PersonOfficeFilter;
 import dao.wrapper.IWrapperFactory;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
@@ -137,7 +138,8 @@ public class ContractDao extends DaoBase {
     }
 
     if (office.isPresent()) {
-      condition.and(contract.person.office.eq(office.get()));
+      condition.and(contract.person.id.in(
+          PersonOfficeFilter.personIdsInOffices(office.get(), begin, end.orNull())));
     }
 
     return getQueryFactory().selectFrom(contract).where(condition).fetch();
@@ -177,7 +179,8 @@ public class ContractDao extends DaoBase {
     }
 
     if (office.isPresent()) {
-      condition.and(contract.person.office.eq(office.get()));
+      condition.and(contract.person.id.in(
+          PersonOfficeFilter.personIdsInOffices(office.get(), begin, end)));
     }
 
     return getQueryFactory().selectFrom(contract).where(condition).fetch();

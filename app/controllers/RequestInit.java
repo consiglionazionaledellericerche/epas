@@ -433,7 +433,14 @@ public class RequestInit extends Controller {
     }
 
     if (personSwitcher.contains(currentAction) && userDao.hasAdminRoles(user)) {
-      List<PersonDao.PersonLite> persons = personDao.liteList(offices, year, month, false);
+      // Per le viste annuali compaiono le persone che hanno afferito alle sedi nell'anno
+      final boolean yearlyView = yearSwitcher.contains(currentAction)
+          && !monthYearSwitcher.contains(currentAction)
+          && !dayMonthYearSwitcher.contains(currentAction);
+      List<PersonDao.PersonLite> persons = yearlyView
+          ? personDao.liteList(offices, new LocalDate(year, 1, 1), new LocalDate(year, 12, 31),
+              false)
+          : personDao.liteList(offices, year, month, false);
       renderArgs.put("navPersons", persons);
       renderArgs.put("switchPerson", true);
       //Patch: caso in cui richiedo una operazione con switch person (ex il tabellone timbrature) 

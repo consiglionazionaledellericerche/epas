@@ -159,7 +159,8 @@ title:person.fullname + ' - ' + code.description + ' ' + code.code}
 	  		#{f.hidden 'competence.month', value:month /}
 	    	#{f.hidden 'competence.year', value:year /}
 	    	#{f.hidden 'competence.person.id', value:person.id /}  
-	    	#{f.hidden 'competence.competenceCode.id', value:code.id /}  	
+	    	#{f.hidden 'competence.competenceCode.id', value:code.id /}
+	    	#{f.hidden 'competence.office.id', value:office.id /}
 	  	#{/else}
 		#{b.buttons center:true}
 			#{b.submit 'Modifica'/}

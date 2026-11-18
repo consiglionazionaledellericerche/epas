@@ -41,6 +41,8 @@ public class QCompetence extends EntityPathBase<Competence> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
+    public final QOffice office;
+
     public final QPerson person;
 
     public final StringPath reason = createString("reason");
@@ -73,6 +75,7 @@ public class QCompetence extends EntityPathBase<Competence> {
     public QCompetence(Class<? extends Competence> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.competenceCode = inits.isInitialized("competenceCode") ? new QCompetenceCode(forProperty("competenceCode"), inits.get("competenceCode")) : null;
+        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
     }
 
