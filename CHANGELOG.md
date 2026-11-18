@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+  - Chiudendo o accorciando un contratto i giorni del cartellino successivi alla fine del
+    contratto vengono azzerati e non maturano più residuo. L'evoluzione 231 azzera i giorni
+    già presenti fuori da ogni contratto (#693).
+
 ## [2.42.0] - 2026-11-18
 ### Added
   - Content Security Policy in modalità di sola segnalazione: le pagine sono inviate con

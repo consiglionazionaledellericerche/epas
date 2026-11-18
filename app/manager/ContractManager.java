@@ -239,6 +239,13 @@ public class ContractManager {
 
     recomputeContract(contract, Optional.fromNullable(from), false, onlyRecaps);
 
+    // I giorni successivi alla fine del contratto non vengono ricalcolati: se il contratto è
+    // stato chiuso o accorciato vanno azzerati, altrimenti continuano a maturare residuo.
+    if (contract.calculatedEnd() != null) {
+      consistencyManager.resetPersonDaysOutOfContract(contract.getPerson(),
+          contract.calculatedEnd().plusDays(1));
+    }
+
     return true;
   }
 
