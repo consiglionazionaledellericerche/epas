@@ -14,6 +14,29 @@ $.ajaxPrefilter(function(options, originalOptions, xhr) {
   }
 });
 
+/**
+ * Chiamate ajax rifiutate dalla verifica anti-CSRF (risposta 403 con l'header
+ * X-CSRF-Rejected e il codice del motivo, vedi CsrfProtection.CsrfProblem): l'operazione
+ * non è stata eseguita. Con il token di una pagina aperta in una sessione precedente
+ * (new-session, invalid-token) basta ricaricare la pagina; per gli altri motivi (token
+ * assente, richiesta da un altro sito, errore nella verifica) no.
+ */
+var CSRF_STALE_PAGE_CODES = ['new-session', 'invalid-token'];
+$(document).ajaxError(function(event, xhr) {
+  var code = xhr.status === 403 && xhr.getResponseHeader('X-CSRF-Rejected');
+  if (!code || $('.bootbox.csrf-rejected').length) {
+    return;
+  }
+  var message = CSRF_STALE_PAGE_CODES.indexOf(code) >= 0
+    ? "L'operazione non è stata eseguita: la pagina era stata aperta in una "
+      + "sessione precedente, scaduta o sostituita da un nuovo accesso. "
+      + "Ricaricare la pagina e ripetere l'operazione."
+    : "L'operazione non è stata eseguita perché la richiesta non ha superato i "
+      + "controlli di sicurezza. Se il problema si ripete anche dopo aver ricaricato "
+      + "la pagina, segnalarlo all'assistenza.";
+  bootbox.alert({ className: 'csrf-rejected', message: message });
+});
+
 $(function($) {
 	/* Gestione tab di autenticazione */
     $('#login-idp-link').click(function(e) {

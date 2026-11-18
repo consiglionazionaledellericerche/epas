@@ -54,9 +54,11 @@ import models.User;
 import models.absences.Absence;
 import models.enumerate.BlockType;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -244,7 +246,7 @@ public class MealTicketCardManager {
     }
     int rownum = 1;
     CellStyle style = wb.createCellStyle();
-    style.setAlignment(CellStyle.ALIGN_CENTER);
+    style.setAlignment(HorizontalAlignment.CENTER);
     for (Person person : personList) {
       PersonStampingRecap psDto = stampingsRecapFactory.create(person, year,
           month, false);
@@ -318,11 +320,11 @@ public class MealTicketCardManager {
     Font font = wb.createFont();
     font.setFontHeightInPoints((short) 12);
     font.setColor((short) 0xc);
-    font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+    font.setBold(true);
     CellStyle cs = wb.createCellStyle();
     cs.setFont(font);
-    cs.setBorderBottom(CellStyle.BORDER_DOUBLE);
-    cs.setAlignment(CellStyle.ALIGN_CENTER);
+    cs.setBorderBottom(BorderStyle.DOUBLE);
+    cs.setAlignment(HorizontalAlignment.CENTER);
     return cs;
   }
 

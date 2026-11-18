@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import common.security.PostOnly;
+import common.security.SecurityRules;
 import controllers.Resecure.BasicAuth;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
@@ -104,6 +105,29 @@ public class Reperibility extends Controller {
   private static UsersRolesOfficesDao uroDao;
   @Inject
   private static RoleDao roleDao;
+  @Inject
+  private static SecurityRules rules;
+
+  /**
+   * Controlli comuni alle azioni del vecchio calendario (portale sistorg), che l'interfaccia
+   * di ePAS non usa più: la chiamata è registrata nel log, per sapere se hanno ancora dei
+   * client, ed è permessa solo sulle reperibilità delle sedi su cui si ha il ruolo.
+   *
+   * @param type l'id del tipo di reperibilità
+   * @return il tipo di reperibilità, mai null
+   */
+  private static PersonReperibilityType legacyReperibilityType(Long type) {
+    log.info("API del vecchio calendario: {} con type={} chiamata da {}",
+        request.action, type, Security.getUser().orNull());
+    final PersonReperibilityType reperibilityType =
+        type == null ? null : personReperibilityDayDao.getPersonReperibilityTypeById(type);
+    notFoundIfNull(reperibilityType, String.format("ReperibilityType id = %s doesn't exist", type));
+    if (reperibilityType.getOffice() == null) {
+      forbidden();
+    }
+    rules.checkIfPermitted(reperibilityType.getOffice());
+    return reperibilityType;
+  }
 
   /**
    * Restituisce la lista dei reperibili attivi al momento di un determinato tipo.
@@ -116,7 +140,7 @@ public class Reperibility extends Controller {
     response.accessControl("*");
     //response.setHeader("Access-Control-Allow-Origin", "http://sistorg.devel.iit.cnr.it");
 
-    log.debug("Esegue la personList con type={}", type);
+    legacyReperibilityType(type);
 
     List<Person> personList = personDao.getPersonForReperibility(type);
     log.debug("Reperibility personList called, found {} reperible person", personList.size());
@@ -146,10 +170,8 @@ public class Reperibility extends Controller {
     //response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
     // reperibility type validation
-    PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
-    notFoundIfNull(reperibilityType, String.format("ReperibilityType id = %s doesn't exist", type));
-
-    PersonReperibilityType prt = personReperibilityDayDao.getPersonReperibilityTypeById(type);
+    PersonReperibilityType reperibilityType = legacyReperibilityType(type);
+    PersonReperibilityType prt = reperibilityType;
 
     // date interval construction
     final LocalDate from = new LocalDate(yearFrom, monthFrom, dayFrom);
@@ -187,8 +209,7 @@ public class Reperibility extends Controller {
     List<Person> personList = new ArrayList<Person>();
 
     // reperibility type validation
-    PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
-    notFoundIfNull(reperibilityType, String.format("ReperibilityType id = %s doesn't exist", type));
+    PersonReperibilityType reperibilityType = legacyReperibilityType(type);
 
     // date interval construction
     final LocalDate from = new LocalDate(yearFrom, monthFrom, dayFrom);
@@ -222,8 +243,7 @@ public class Reperibility extends Controller {
 
     log.trace("Sono nella absence");
 
-    PersonReperibilityType repType = PersonReperibilityType.findById(type);
-    notFoundIfNull(repType, String.format("PersonReperibilityType type = %s doesn't exist", type));
+    PersonReperibilityType repType = legacyReperibilityType(type);
 
     // date interval construction
     final LocalDate from = new LocalDate(yearFrom, monthFrom, dayFrom);
@@ -274,6 +294,8 @@ public class Reperibility extends Controller {
     response.accessControl("*");
     //response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
+    legacyReperibilityType(type);
+
     // date interval construction
     final LocalDate from = new LocalDate(yearFrom, monthFrom, dayFrom);
     final LocalDate to = new LocalDate(yearTo, monthTo, dayTo);
@@ -320,18 +342,12 @@ public class Reperibility extends Controller {
   public static void update(Long type, Integer year, Integer month,
       @As(binder = JsonReperibilityPeriodsBinder.class) ReperibilityPeriods body) {
 
+    final PersonReperibilityType reperibilityType = legacyReperibilityType(type);
+
     log.debug("update: Received reperebilityPeriods {}", body);
     if (body == null) {
       badRequest();
       return;
-    }
-
-    //PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
-    final PersonReperibilityType reperibilityType =
-        personReperibilityDayDao.getPersonReperibilityTypeById(type);
-    if (reperibilityType == null) {
-      throw new IllegalArgumentException(
-          String.format("ReperibilityType id = %s doesn't exist", type));
     }
 
     //Conterrà i giorni del mese che devono essere attribuiti a qualche reperibile
@@ -367,15 +383,12 @@ public class Reperibility extends Controller {
   public static void changePeriods(
       Long type, @As(binder = JsonReperibilityChangePeriodsBinder.class) ReperibilityPeriods body) {
 
-    log.debug("update: Received reperebilityPeriods %s", body);
+    PersonReperibilityType reperibilityType = legacyReperibilityType(type);
+
+    log.debug("update: Received reperebilityPeriods {}", body);
     if (body == null) {
       badRequest();
     }
-
-    PersonReperibilityType reperibilityType =
-        personReperibilityDayDao.getPersonReperibilityTypeById(type);
-
-    notFoundIfNull(reperibilityType, String.format("ReperibilityType id = %s doesn't exist", type));
 
     boolean changed =
         reperibilityManager.changeTwoReperibilityPeriods(reperibilityType, body.periods);

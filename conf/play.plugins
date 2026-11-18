@@ -2,3 +2,4 @@
 1004:common.security.SecureRulesPlugin
 1005:helpers.jpa.JpaReferencePlugin
 150:common.security.LoginParamsPlugin
+160:common.security.ContentSecurityPolicyPlugin

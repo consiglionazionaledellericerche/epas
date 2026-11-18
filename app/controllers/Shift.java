@@ -24,6 +24,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+import common.security.SecurityRules;
 import controllers.Resecure.BasicAuth;
 import controllers.Resecure.NoCheck;
 import dao.AbsenceDao;
@@ -105,6 +106,37 @@ public class Shift extends Controller {
   private static UsersRolesOfficesDao uroDao;
   @Inject
   private static RoleDao roleDao;
+  @Inject
+  private static SecurityRules rules;
+
+  /**
+   * Controlli comuni alle azioni del vecchio calendario (portale sistorg), che l'interfaccia
+   * di ePAS non usa più: la chiamata è registrata nel log, per sapere se hanno ancora dei
+   * client, ed è permessa solo sui turni delle sedi su cui si ha il ruolo.
+   *
+   * @param type il parametro type della richiesta, solo per il log
+   * @param shiftCategory il servizio di turno a cui si riferisce la richiesta
+   */
+  private static void legacyApiCall(Object type, ShiftCategories shiftCategory) {
+    log.info("API del vecchio calendario: {} con type={} chiamata da {}",
+        request.action, type, Security.getUser().orNull());
+    notFoundIfNull(shiftCategory, String.format("ShiftType type = %s doesn't exist", type));
+    if (shiftCategory.getOffice() == null) {
+      forbidden();
+    }
+    rules.checkIfPermitted(shiftCategory.getOffice());
+  }
+
+  /**
+   * Come legacyApiCall, a partire dal nome dell'attività di turno.
+   *
+   * @return l'attività di turno, mai null
+   */
+  private static ShiftType legacyShiftType(String type) {
+    final ShiftType shiftType = type == null ? null : shiftDao.getShiftTypeByType(type);
+    legacyApiCall(type, shiftType == null ? null : shiftType.getShiftCategories());
+    return shiftType;
+  }
 
 
   /**
@@ -116,10 +148,7 @@ public class Shift extends Controller {
   public static void personList(String type) {
     response.accessControl("*");
 
-    log.debug("Cerco persone del turno {}", type);
-
-    ShiftType shiftType = shiftDao.getShiftTypeByType(type);
-    notFoundIfNull(shiftType, String.format("ShiftType type = %s doesn't exist", type));
+    ShiftType shiftType = legacyShiftType(type);
 
     log.debug("Cerco Turnisti di tipo {}", shiftType.getType());
 
@@ -144,9 +173,7 @@ public class Shift extends Controller {
 
     log.trace("Cercata la time table di un turno");
 
-    // type validation
-    ShiftType shiftType = shiftDao.getShiftTypeByType(type);
-    notFoundIfNull(shiftType, String.format("ShiftType type = %s doesn't exist", type));
+    ShiftType shiftType = legacyShiftType(type);
 
     log.debug("Cerco la time table del turno di tipo {}", shiftType.getType());
 
@@ -170,9 +197,7 @@ public class Shift extends Controller {
 
     response.accessControl("*");
 
-    // type validation
-    ShiftType shiftType = shiftDao.getShiftTypeByType(type);
-    notFoundIfNull(shiftType, String.format("ShiftType type = %s doesn't exist", type));
+    ShiftType shiftType = legacyShiftType(type);
 
     log.debug("Cerco turni di tipo {}", shiftType.getType());
 
@@ -217,16 +242,12 @@ public class Shift extends Controller {
   public static void update(
       String type, Integer year, Integer month,
       @As(binder = JsonShiftPeriodsBinder.class) ShiftPeriods body) {
+    ShiftType shiftType = legacyShiftType(type);
+
     log.debug("update: Received shiftPeriods {}", body);
 
     if (body == null) {
       badRequest();
-    }
-
-    // type validation
-    ShiftType shiftType = shiftDao.getShiftTypeByType(type);
-    if (shiftType == null) {
-      throw new IllegalArgumentException(String.format("ShiftType type = %s doesn't exist", type));
     }
 
     log.debug("shiftType={}", shiftType.getDescription());
@@ -248,6 +269,9 @@ public class Shift extends Controller {
   //@BasicAuth
   public static void getInconsistencyTimestamps2Timetable(
       ShiftType shiftType, LocalDate startDate, LocalDate endDate) {
+
+    legacyApiCall(shiftType == null ? null : shiftType.id,
+        shiftType == null ? null : shiftType.getShiftCategories());
 
     // crea la tabella per registrare le assenze e le timbrature inconsistenti con i turni trovati
     Table<Person, String, List<String>> inconsistentAbsence =
@@ -415,7 +439,8 @@ public class Shift extends Controller {
     log.debug("sono nella exportMonthCalAsPDF con shiftCategory={} year={} e month={}",
         type, year, month);
 
-    ShiftCategories shiftCategory = ShiftCategories.findById(type);
+    ShiftCategories shiftCategory = type == null ? null : ShiftCategories.findById(type);
+    legacyApiCall(type, shiftCategory);
     if (shiftCategory == null) {
       notFound(String.format("shiftCategory shiftCategory = %s doesn't exist", shiftCategory));
     }
@@ -461,10 +486,7 @@ public class Shift extends Controller {
       Integer yearTo, Integer monthTo, Integer dayTo, String type) {
     response.accessControl("*");
 
-    ShiftType shiftType = shiftDao.getShiftTypeByType(type);
-    if (shiftType == null) {
-      notFound(String.format("ShiftType type = %s doesn't exist", type));
-    }
+    ShiftType shiftType = legacyShiftType(type);
     log.debug("Cerco Turnisti di tipo {}", shiftType.getType());
 
     // get the list of persons involved in the shift of type 'type'

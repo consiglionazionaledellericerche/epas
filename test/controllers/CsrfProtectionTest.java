@@ -91,7 +91,72 @@ public class CsrfProtectionTest extends FunctionalTest {
   @Test
   public void formPostWithoutTokenIsRejected() {
     login();
-    assertStatus(403, POST(newRequest(), savePasswordUrl(), passwordParams(), noFiles()));
+    Response response = POST(newRequest(), savePasswordUrl(), passwordParams(), noFiles());
+    assertStatus(403, response);
+    assertEquals("missing-token", response.getHeader(CsrfProtection.REJECTED_HEADER));
+    // ricaricare la pagina non aggiunge il token: niente invito a ricaricare
+    assertContentMatch("controlli di sicurezza", response);
+  }
+
+  @Test
+  public void wrongTokenIsRejectedAsInvalid() {
+    login();
+    // la sessione ha già un token
+    token();
+    Map<String, String> params = passwordParams();
+    params.put("authenticityToken", "token-sbagliato");
+    Response response = POST(newRequest(), savePasswordUrl(), params, noFiles());
+    assertStatus(403, response);
+    assertEquals("invalid-token", response.getHeader(CsrfProtection.REJECTED_HEADER));
+  }
+
+  /**
+   * Pagina aperta prima di un logout e di un nuovo login, come nel browser: la pagina di
+   * login crea il token prima dell'autenticazione, quindi la nuova sessione ha già un token
+   * diverso da quello della pagina.
+   */
+  @Test
+  public void tokenOfPageOpenedBeforeNewLoginIsRejectedAsInvalid() {
+    loginFromLoginPage();
+    Map<String, String> params = passwordParams();
+    params.put("authenticityToken", token());
+    clearCookies();
+    loginFromLoginPage();
+    Response response = POST(newRequest(), savePasswordUrl(), params, noFiles());
+    assertStatus(403, response);
+    assertEquals("invalid-token", response.getHeader(CsrfProtection.REJECTED_HEADER));
+    assertContentMatch("sessione precedente", response);
+  }
+
+  /**
+   * Sessione creata nella stessa richiesta senza passare dalla pagina di login (come il
+   * login automatico OAuth): non ha ancora un token e quello inviato è di una sessione
+   * precedente.
+   */
+  @Test
+  public void tokenSentToSessionWithoutTokenIsRejectedAsNewSession() {
+    login();
+    Map<String, String> params = passwordParams();
+    params.put("authenticityToken", token());
+    clearCookies();
+    login();
+    Response response = POST(newRequest(), savePasswordUrl(), params, noFiles());
+    assertStatus(403, response);
+    assertEquals("new-session", response.getHeader(CsrfProtection.REJECTED_HEADER));
+    assertContentMatch("sessione precedente", response);
+  }
+
+  /**
+   * Il dipendente non ha accesso alle utilità di amministrazione: la pagina 403 resta
+   * quella dei permessi.
+   */
+  @Test
+  public void otherForbiddenPagesKeepThePermissionMessage() {
+    login();
+    Response response = GET("/administration/utilities");
+    assertStatus(403, response);
+    assertNull(response.getHeader(CsrfProtection.REJECTED_HEADER));
+    assertContentMatch("non dispone dei permessi", response);
   }
 
   @Test
@@ -114,7 +179,9 @@ public class CsrfProtectionTest extends FunctionalTest {
   public void reportModeOnlyLogs() {
     Play.configuration.setProperty(CsrfProtection.CSRF_MODE, "report");
     login();
-    assertNotForbidden(POST(newRequest(), savePasswordUrl(), passwordParams(), noFiles()));
+    Response response = POST(newRequest(), savePasswordUrl(), passwordParams(), noFiles());
+    assertNotForbidden(response);
+    assertNull(response.getHeader(CsrfProtection.REJECTED_HEADER));
   }
 
   @Test
@@ -186,7 +253,10 @@ public class CsrfProtectionTest extends FunctionalTest {
   @Test
   public void getToPostOnlyActionIsRejected() {
     login();
-    assertStatus(403, GET(newRequest(), savePasswordUrl() + "?" + query(passwordParams())));
+    Response response =
+        GET(newRequest(), savePasswordUrl() + "?" + query(passwordParams()));
+    assertStatus(403, response);
+    assertEquals("post-only", response.getHeader(CsrfProtection.REJECTED_HEADER));
   }
 
   @Test
@@ -227,6 +297,12 @@ public class CsrfProtectionTest extends FunctionalTest {
     String token = tokenFrom(getContent(GET(Router.reverse("LostPassword.lostPassword").url)));
     params.put("authenticityToken", token);
     assertNotForbidden(POST(newRequest(), url, params, noFiles()));
+  }
+
+  /** Login come nel browser: prima la pagina di login, che crea il token della sessione. */
+  private void loginFromLoginPage() {
+    assertIsOk(GET("/login"));
+    login();
   }
 
   private void login() {

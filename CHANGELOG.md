@@ -4,7 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.42.0] - 2026-11-18
+### Added
+  - Content Security Policy in modalità di sola segnalazione: le pagine sono inviate con
+    l'header Content-Security-Policy-Report-Only e le violazioni segnalate dai browser sono
+    scritte nel log (WARN), senza bloccare nulla. Il comportamento si configura con csp.mode
+    (CSP_MODE nel docker: off, report, enforce) e la policy con csp.policy (#687).
+
+### Changed
+  - Le azioni del vecchio calendario di reperibilità e turni (/reperibility/{type}/... e
+    /shift/{type}/..., usate in passato dal portale sistorg) verificano che la reperibilità o
+    il turno siano di una sede su cui l'utente ha il ruolo, e registrano ogni chiamata nel log
+    a livello INFO ("API del vecchio calendario"). L'interfaccia di ePAS non le usa più: in
+    assenza di chiamate saranno rimosse in una prossima versione. Non cambiano le esportazioni
+    PDF e i calendari iCal (#696).
+  - Gli script e i fogli di stile caricati dai CDN hanno gli attributi integrity (Subresource
+    Integrity) e crossorigin: il browser li usa solo se corrispondono all'hash indicato nella
+    pagina. Fanno eccezione il loader di Google Charts e il css di Google Fonts, che non hanno
+    un contenuto fisso. Gli indirizzi senza protocollo (//...) sono ora in https (#690).
+  - ivy 2.4.0 di play è sostituita dalla 2.5.2, usata da play all'avvio per caricare i
+    moduli. ant non è più inclusa nell'immagine docker, così come la cartella lib-test di play,
+    che serve solo alla sua compilazione (#684).
+
+## [2.41.0] - 2026-11-16
 ### Added
   - Test end-to-end con Playwright (cartella e2e/), eseguiti in un browser contro l'immagine
     docker: coprono template e javascript, a partire dagli attributi del cookie di sessione e
@@ -23,6 +45,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     docker): le richieste senza token valido non sono rifiutate ma segnalate nel log a livello
     WARN. Anche un valore non valido del parametro vale report invece di disattivare la
     verifica. Per tornare al comportamento precedente impostare CSRF_MODE=off (#680).
+  - Aggiornate le librerie postgresql (42.7.14), poi (4.1.2), snakeyaml (2.7) e assertj
+    (3.27.7). protobuf-java non è più inclusa: drools la usa solo per serializzare le sessioni
+    (#682).
+
+  - La verifica anti-CSRF distingue nel log il token assente, il token diverso da quello
+    della sessione (di solito di una pagina aperta prima di un nuovo login), il token inviato
+    a una sessione appena creata (per esempio dal login automatico OAuth) e la richiesta da un
+    altro sito. In modalità enforce le chiamate ajax rifiutate mostrano un avviso e la pagina
+    403 spiega il motivo invece di segnalare un problema di permessi: per il token di una
+    sessione precedente invitano a ricaricare la pagina, negli altri casi a segnalare il
+    problema se si ripete (#689).
 
 ### Removed
   - Rimossi i metodi deprecati dal 2020 /stampingsfromclient/absence e
