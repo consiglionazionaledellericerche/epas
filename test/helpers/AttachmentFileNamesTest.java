@@ -17,7 +17,8 @@
 
 package helpers;
 
-import java.io.ByteArrayInputStream;
+import java.util.HashSet;
+import java.util.Set;
 import models.Person;
 import models.PersonDay;
 import models.absences.Absence;
@@ -42,9 +43,13 @@ public class AttachmentFileNamesTest extends UnitTest {
     absence.setPersonDay(new PersonDay(person, new LocalDate(2026, 11, 8)));
     absence.setAbsenceType(absenceType);
     if (fileType != null) {
-      Blob blob = new Blob();
-      blob.set(new ByteArrayInputStream(new byte[] {1}), fileType);
-      absence.setAbsenceFile(blob);
+      // basta il tipo per dedurre l'estensione: nessun file scritto su disco
+      absence.setAbsenceFile(new Blob() {
+        @Override
+        public String type() {
+          return fileType;
+        }
+      });
     }
     return absence;
   }
@@ -66,5 +71,58 @@ public class AttachmentFileNamesTest extends UnitTest {
   public void unknownTypeHasNoExtension() {
     assertEquals("2026-11-08-31-Bianchi-Anna",
         AttachmentFileNames.forAbsence(absence("31", "Bianchi", "Anna", null)));
+  }
+
+  @Test
+  public void unsafeCharactersAndDotsAreReplaced() {
+    assertEquals("2026-11-08-31-Verdi-Maria-G-Anna",
+        AttachmentFileNames.forAbsence(absence("31", "Verdi", "Maria G. Anna", null)));
+  }
+
+  @Test
+  public void lettersWithoutDecompositionAreKept() {
+    assertEquals("2026-11-08-111-Łukasz-Strauß.pdf",
+        AttachmentFileNames.forAbsence(
+            absence("111", "Łukasz", "Strauß", "application/pdf")));
+    assertEquals("2026-11-08-111-Иванов-Иван.pdf",
+        AttachmentFileNames.forAbsence(
+            absence("111", "Иванов", "Иван", "application/pdf")));
+  }
+
+  @Test
+  public void absenceWithoutPersonDayHasNoPerson() {
+    AbsenceType absenceType = new AbsenceType();
+    absenceType.setCode("111");
+    Absence absence = new Absence();
+    absence.setAbsenceType(absenceType);
+    absence.date = new LocalDate(2026, 11, 8);
+    assertEquals("2026-11-08-111", AttachmentFileNames.forAbsence(absence));
+  }
+
+  @Test
+  public void uniqueNameAddsCounterBeforeExtension() {
+    Set<String> used = new HashSet<>();
+    assertEquals("2026-11-08-111-Rossi-Mario.pdf",
+        AttachmentFileNames.uniqueName(used, "2026-11-08-111-Rossi-Mario.pdf"));
+    assertEquals("2026-11-08-111-Rossi-Mario-2.pdf",
+        AttachmentFileNames.uniqueName(used, "2026-11-08-111-Rossi-Mario.pdf"));
+    assertEquals("2026-11-08-111-Rossi-Mario-3.pdf",
+        AttachmentFileNames.uniqueName(used, "2026-11-08-111-Rossi-Mario.pdf"));
+  }
+
+  @Test
+  public void uniqueNameWithoutExtension() {
+    Set<String> used = new HashSet<>();
+    AttachmentFileNames.uniqueName(used, "2026-11-08-31-Bianchi-Anna");
+    assertEquals("2026-11-08-31-Bianchi-Anna-2",
+        AttachmentFileNames.uniqueName(used, "2026-11-08-31-Bianchi-Anna"));
+  }
+
+  @Test
+  public void uniqueNameIgnoresCase() {
+    Set<String> used = new HashSet<>();
+    AttachmentFileNames.uniqueName(used, "2026-11-08-111-DE-LUCA-Mario.pdf");
+    assertEquals("2026-11-08-111-De-Luca-Mario-2.pdf",
+        AttachmentFileNames.uniqueName(used, "2026-11-08-111-De-Luca-Mario.pdf"));
   }
 }

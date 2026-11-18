@@ -368,23 +368,16 @@ public class Absences extends Controller {
       if (!abs.getPersonDay().getPerson().getOffice().equals(office)) {
         continue;
       }
-      try {
-
-        FileInputStream fis = new FileInputStream(abs.getAbsenceFile().getFile());
-
-        zos.putNextEntry(new ZipEntry(uniqueEntryName(entryNames,
+      try (FileInputStream fis = new FileInputStream(abs.getAbsenceFile().getFile())) {
+        zos.putNextEntry(new ZipEntry(AttachmentFileNames.uniqueName(entryNames,
             AttachmentFileNames.forAbsence(abs))));
-
         int length;
         while ((length = fis.read(buffer)) >= 0) {
           zos.write(buffer, 0, length);
         }
-
         zos.closeEntry();
-
-        fis.close();
       } catch (IOException ex) {
-        ex.printStackTrace();
+        log.warn("Impossibile aggiungere allo zip l'allegato dell'assenza {}", abs.id, ex);
       }
     }
 
@@ -392,22 +385,6 @@ public class Absences extends Controller {
 
     renderBinary(new ByteArrayInputStream(out.toByteArray()),
         "attachment-" + code.replaceAll("[^A-Za-z0-9_-]", "_") + ".zip", false);
-  }
-
-  /**
-   * Il nome della voce dello zip: se è già usato si aggiunge un numero progressivo prima
-   * dell'estensione (es. ...-Rossi-Mario-2.pdf).
-   */
-  private static String uniqueEntryName(Set<String> entryNames, String name) {
-    String candidate = name;
-    int dot = name.lastIndexOf('.');
-    String base = dot > 0 ? name.substring(0, dot) : name;
-    String extension = dot > 0 ? name.substring(dot) : "";
-    int counter = 2;
-    while (!entryNames.add(candidate)) {
-      candidate = base + "-" + counter++ + extension;
-    }
-    return candidate;
   }
 
   /**

@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     di assenza, cognome e nome del dipendente (es. 2026-11-18-111-Rossi-Mario.pdf), sia
     singolarmente sia nello zip mensile per codice, che prima conteneva file senza nome
     leggibile e senza estensione (#703).
+  - L'endpoint REST /rest/absences/attachment restituisce l'allegato con lo stesso nome
+    (prima era assenza-Nome-Cognome-data.ext): le integrazioni che usano il nome del file
+    indicato nel Content-Disposition devono adeguarsi (#703).
 
 ## [2.42.0] - 2026-11-18
 ### Added
