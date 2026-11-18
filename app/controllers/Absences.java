@@ -30,7 +30,7 @@ import dao.AbsenceTypeDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
-import helpers.ImageUtils;
+import helpers.AttachmentFileNames;
 import it.cnr.iit.epas.DateUtility;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -42,6 +42,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.inject.Inject;
@@ -330,13 +331,7 @@ public class Absences extends Controller {
     }
 
     response.setContentTypeIfNotSet(absence.getAbsenceFile().type());
-    String filename = String.format("assenza-%s-%s",
-        absence.getPersonDay().getPerson().getFullname().replace(" ", "-"), 
-        absence.getAbsenceDate());
-    if (ImageUtils.fileExtension(absence.getAbsenceFile()).isPresent()) {
-      filename = String.format("%s%s", filename, 
-          ImageUtils.fileExtension(absence.getAbsenceFile()).get());
-    }
+    String filename = AttachmentFileNames.forAbsence(absence);
 
     log.debug("Allegato relativo all'assenza: {}", absence.getAbsenceFile().getFile());
     renderBinary(absence.getAbsenceFile().get(), filename, absence.getAbsenceFile().length());
@@ -366,6 +361,7 @@ public class Absences extends Controller {
         new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
         Optional.<JustifiedTypeName>absent(), true, false);
     byte[] buffer = new byte[1024];
+    Set<String> entryNames = Sets.newHashSet();
 
     for (Absence abs : absList) {
       // solo gli allegati delle persone della sede
@@ -376,7 +372,8 @@ public class Absences extends Controller {
 
         FileInputStream fis = new FileInputStream(abs.getAbsenceFile().getFile());
 
-        zos.putNextEntry(new ZipEntry(abs.getAbsenceFile().getFile().getName()));
+        zos.putNextEntry(new ZipEntry(uniqueEntryName(entryNames,
+            AttachmentFileNames.forAbsence(abs))));
 
         int length;
         while ((length = fis.read(buffer)) >= 0) {
@@ -395,6 +392,22 @@ public class Absences extends Controller {
 
     renderBinary(new ByteArrayInputStream(out.toByteArray()),
         "attachment-" + code.replaceAll("[^A-Za-z0-9_-]", "_") + ".zip", false);
+  }
+
+  /**
+   * Il nome della voce dello zip: se è già usato si aggiunge un numero progressivo prima
+   * dell'estensione (es. ...-Rossi-Mario-2.pdf).
+   */
+  private static String uniqueEntryName(Set<String> entryNames, String name) {
+    String candidate = name;
+    int dot = name.lastIndexOf('.');
+    String base = dot > 0 ? name.substring(0, dot) : name;
+    String extension = dot > 0 ? name.substring(dot) : "";
+    int counter = 2;
+    while (!entryNames.add(candidate)) {
+      candidate = base + "-" + counter++ + extension;
+    }
+    return candidate;
   }
 
   /**
