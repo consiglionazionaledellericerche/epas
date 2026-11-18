@@ -176,15 +176,9 @@ public class StampingManager {
 
     int max = 0;
 
-    for (Person person : activePersonsInDay) {
-      Optional<PersonDay> pd = personDayDao.getPersonDay(person, date);
-
-      if (pd.isPresent()) {
-        PersonDay personDay = pd.get();
-        if (max < personDayManager.numberOfInOutInPersonDay(personDay)) {
-          max = personDayManager.numberOfInOutInPersonDay(personDay);
-        }
-      }
+    for (PersonDay personDay : personDayDao
+        .getPersonDaysForPeopleInDayFetched(activePersonsInDay, date).values()) {
+      max = Math.max(max, personDayManager.numberOfInOutInPersonDay(personDay));
     }
 
     if (max < 2) {
@@ -444,16 +438,20 @@ public class StampingManager {
       List<Person> activePersonsInDay,
       LocalDate dayPresence, int numberOfInOut) {
 
+    // Giorni (con timbrature e assenze) e contratti di tutte le persone caricati in blocco:
+    // il numero di query non dipende dal numero di persone.
+    Map<Long, PersonDay> personDays =
+        personDayDao.getPersonDaysForPeopleInDayFetched(activePersonsInDay, dayPresence);
+    personDao.fetchContractsForDayComputation(activePersonsInDay);
+
     List<PersonStampingDayRecap> daysRecap = new ArrayList<>();
     for (Person person : activePersonsInDay) {
-
-      person = personDao.getPersonById(person.id);
-      Optional<PersonDay> pd = personDayDao.getPersonDay(person, dayPresence);
-
-      if (pd.isPresent()) {
-        personDayManager.setValidPairStampings(pd.get().getStampings());
+      PersonDay pd = personDays.get(person.id);
+      if (pd != null) {
+        personDayManager.setValidPairStampings(pd.getStampings());
+        // Il progressivo non è mostrato: niente lettura del mese per il giorno precedente.
         daysRecap.add(stampingDayRecapFactory
-            .create(pd.get(), numberOfInOut, true, Optional.absent()));
+            .createWithoutProgressive(pd, numberOfInOut));
       }
     }
     return daysRecap;
