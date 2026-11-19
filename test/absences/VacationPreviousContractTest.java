@@ -20,6 +20,7 @@ package absences;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import common.injection.StaticInject;
+import dao.ContractDao;
 import dao.absences.AbsenceComponentDao;
 import db.h2support.H2Examples;
 import db.h2support.base.H2WorkingTimeTypeSupport;
@@ -66,12 +67,25 @@ public class VacationPreviousContractTest extends UnitTest {
   private static AbsenceService absenceService;
   @Inject
   private static AbsenceComponentDao absenceComponentDao;
+  @Inject
+  private static ContractDao contractDao;
 
   /**
    * Crea il contratto precedente a tempo indeterminato (piani ferie 26+4 per tre anni e 28+4
    * senza fine), lo chiude senza toccare i piani ferie e crea il contratto attuale collegato.
    */
   private Contract buildCurrentContract() {
+    Contract current = buildUnlinkedCurrentContract();
+    current.setPreviousContract(contractDao.getPreviousContract(current).get());
+    current.save();
+    current.getPerson().refresh();
+    return current;
+  }
+
+  /**
+   * Come {@link #buildCurrentContract()} ma senza collegare il contratto attuale al precedente.
+   */
+  private Contract buildUnlinkedCurrentContract() {
     Person person = h2Examples.normalEmployee(PREVIOUS_BEGIN, Optional.absent());
     Contract previous = person.getContracts().get(0);
     previous.setEndDate(PREVIOUS_END);
@@ -84,8 +98,6 @@ public class VacationPreviousContractTest extends UnitTest {
     assertTrue(contractManager.properContractCreate(current,
         Optional.of(h2WorkingTimeTypeSupport.getWorkingTimeType(WorkingDefinition.Normal)),
         false));
-    current.setPreviousContract(previous);
-    current.save();
     person.refresh();
     return current;
   }
@@ -132,5 +144,52 @@ public class VacationPreviousContractTest extends UnitTest {
 
     assertTrue(insertReport.criticalErrors.isEmpty());
     assertEquals(1, insertReport.howManySuccess());
+  }
+
+  @Test
+  public void mergeVacationPeriodsIgnoresPeriodsAfterPreviousContractEnd() {
+    Contract current = buildUnlinkedCurrentContract();
+
+    assertTrue(contractManager.applyPreviousContractLink(current, true));
+    current = contractDao.getContractById(current.getId());
+    current.refresh();
+
+    // il 28+4 parte dopo tre anni dall'inizio del 26+4 del contratto precedente, non dal primo
+    // giorno del contratto attuale (il 28+4 del precedente inizia dopo la sua fine)
+    LocalDate expected28 = PREVIOUS_BEGIN.plusYears(3);
+    VacationPeriod twentysix = null;
+    VacationPeriod twentyeight = null;
+    for (VacationPeriod vp : current.getVacationPeriods()) {
+      if (vp.getVacationCode() == VacationCode.CODE_26_4) {
+        twentysix = vp;
+      } else if (vp.getVacationCode() == VacationCode.CODE_28_4) {
+        twentyeight = vp;
+      }
+    }
+    assertNotNull(twentysix);
+    assertEquals(CURRENT_BEGIN, twentysix.getBeginDate());
+    assertEquals(expected28.minusDays(1), twentysix.getEndDate());
+    assertNotNull(twentyeight);
+    assertEquals(expected28, twentyeight.getBeginDate());
+    assertEquals(CURRENT_END, twentyeight.getEndDate());
+  }
+
+  @Test
+  public void fixVacationPeriodsAfterContractEnd() {
+    Contract current = buildCurrentContract();
+    Contract previous = current.getPreviousContract();
+    assertTrue(contractDao.getContractsWithVacationPeriodsAfterEnd().contains(previous));
+
+    assertTrue(contractManager.fixVacationPeriodsAfterContractEnd() >= 1);
+
+    previous.refresh();
+    assertEquals(1, previous.getVacationPeriods().size());
+    VacationPeriod vp = previous.getVacationPeriods().get(0);
+    assertEquals(VacationCode.CODE_26_4, vp.getVacationCode());
+    assertEquals(PREVIOUS_BEGIN, vp.getBeginDate());
+    assertEquals(PREVIOUS_END, vp.getEndDate());
+
+    // eseguito di nuovo non trova più il contratto
+    assertFalse(contractDao.getContractsWithVacationPeriodsAfterEnd().contains(previous));
   }
 }
