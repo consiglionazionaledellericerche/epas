@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - L'endpoint REST /rest/absences/attachment restituisce l'allegato con lo stesso nome
     (prima era assenza-Nome-Cognome-data.ext): le integrazioni che usano il nome del file
     indicato nel Content-Disposition devono adeguarsi (#703).
+  - Il menu dei flussi di lavoro, presente in tutte le pagine, calcola i conteggi delle
+    richieste da approvare una sola volta per richiesta HTTP, leggendo una sola volta i ruoli
+    dell'utente e i gruppi della sede: per un responsabile di sede sono circa 27 query in meno
+    per pagina. Il badge delle richieste di congedo parentale da approvare, prima mai
+    valorizzato, mostra il numero di richieste ed è incluso nel totale del menu (#708).
 
 ## [2.42.0] - 2026-11-18
 ### Added
