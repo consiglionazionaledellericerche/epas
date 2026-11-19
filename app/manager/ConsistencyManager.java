@@ -34,7 +34,6 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperPersonDay;
 import helpers.jpa.AfterCommitJobs;
-import it.cnr.iit.epas.DateInterval;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -644,11 +643,12 @@ public class ConsistencyManager {
     for (Contract contract : person.getContracts()) {
 
       IWrapperContract wrContract = wrapperFactory.create(contract);
-      DateInterval contractDateInterval = wrContract.getContractDateInterval();
-      YearMonth endContractYearMonth = new YearMonth(contractDateInterval.getEnd());
 
-      // Se yearMonthFrom non è successivo alla fine del contratto...
-      if (!yearMonthFrom.isAfter(endContractYearMonth)) {
+      // I riepiloghi arrivano al più al mese corrente o, se precedente, al mese di fine
+      // contratto. Da un mese successivo non c'è nulla da costruire: senza questo controllo,
+      // mancando il riepilogo del mese precedente, verrebbero ricostruiti tutti i riepiloghi
+      // del contratto (#710).
+      if (!yearMonthFrom.isAfter(wrContract.getLastMonthToRecap())) {
 
         if (contract.getExtendedVacationPeriods().isEmpty()) {
           log.error("No vacation period {}", contract.toString());
@@ -700,8 +700,10 @@ public class ConsistencyManager {
    * Costruttore dei riepiloghi mensili per contract. <br> Se il contratto non è inizializzato
    * correttamente non effettua alcun ricalcolo. <br> Se yearMonthFrom è absent() calcola tutti i
    * riepiloghi dall'inizio del contratto. <br> Se yearMonthFrom è present() calcola tutti i
-   * riepiloghi da yearMonthFrom. <br> Se non esiste il riepilogo precedente a yearMonthFrom chiama
-   * la stessa procedura dall'inizio del contratto. (Capire se questo caso si verifica mai).
+   * riepiloghi da yearMonthFrom. <br> Se yearMonthFrom è successivo all'ultimo mese da riepilogare
+   * non c'è nulla da costruire (#710). <br> Se non esiste il riepilogo precedente a yearMonthFrom
+   * ricostruisce tutti i riepiloghi dall'inizio del contratto, che includono già yearMonthFrom e
+   * i mesi successivi (succede quando mancano riepiloghi passati).
    */
   private void populateContractMonthRecap(IWrapperContract contract,
       Optional<YearMonth> yearMonthFrom, List<TimeVariation> timeVariationList) {
@@ -712,6 +714,13 @@ public class ConsistencyManager {
     Optional<YearMonth> firstContractMonthRecap = contract.getFirstMonthToRecap();
     if (!firstContractMonthRecap.isPresent()) {
       // Non ho inizializzazione.
+      return;
+    }
+
+    // Ultimo mese da costruire: il mese corrente o, se precedente, quello di fine contratto.
+    YearMonth lastMonthToCompute = contract.getLastMonthToRecap();
+    if (yearMonthFrom.isPresent() && yearMonthFrom.get().isAfter(lastMonthToCompute)) {
+      // Nessun riepilogo da costruire (#710).
       return;
     }
 
@@ -729,7 +738,10 @@ public class ConsistencyManager {
       if (!previousMonthRecap.isPresent()) {
         // Ho chiesto un mese specifico ma non ho il riepilogo precedente
         // per costruirlo. Soluzione: costruisco tutti i riepiloghi del contratto.
+        // La ricostruzione completa arriva fino a lastMonthToCompute: proseguire
+        // ricalcolerebbe yearMonthFrom senza riepilogo precedente, azzerando i residui.
         populateContractMonthRecap(contract, Optional.<YearMonth>absent(), timeVariationList);
+        return;
       }
     } else if (contract.getValue().getSourceDateResidual() != null
         && yearMonthToCompute.isEqual(new YearMonth(contract.getValue().getSourceDateResidual()))) {
@@ -743,7 +755,6 @@ public class ConsistencyManager {
     }
 
     // Ciclo sui mesi successivi fino all'ultimo mese da costruire
-    YearMonth lastMonthToCompute = contract.getLastMonthToRecap();
 
     // Contiene il riepilogo da costruire.
     ContractMonthRecap currentMonthRecap;

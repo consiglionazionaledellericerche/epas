@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     dell'utente e i gruppi della sede: per un responsabile di sede sono circa 27 query in meno
     per pagina. Il badge delle richieste di congedo parentale da approvare, prima mai
     valorizzato, mostra il numero di richieste ed è incluso nel totale del menu (#708).
+  - Salvando un'assenza (per esempio ferie programmate) a due o più mesi da oggi non vengono più
+    ricalcolati tutti i riepiloghi mensili del contratto dall'inizio: i riepiloghi arrivano al
+    mese corrente e per i mesi successivi non c'è nulla da costruire (#710).
 
 ### Fixed
   - Chiudendo o accorciando un contratto i giorni del cartellino successivi alla fine del
@@ -27,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     nell'avviso mostrato inserendo un'assenza in un giorno di reperibilità e nel riepilogo
     delle incongruenze sono considerate solo le assenze giornaliere con codice non compatibile
     con la reperibilità (#702).
+  - Ricalcolando i riepiloghi mensili da un mese di cui manca il riepilogo precedente, dopo la
+    ricostruzione completa il mese richiesto e i successivi venivano ricalcolati di nuovo senza
+    riepilogo precedente, azzerando i residui portati avanti (#710).
 
 ### Fixed
   - Inserimento delle ferie con errore TwoPeriods per i contratti collegati al precedente
