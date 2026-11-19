@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     per pagina. Il badge delle richieste di congedo parentale da approvare, prima mai
     valorizzato, mostra il numero di richieste ed è incluso nel totale del menu (#708).
 
+### Fixed
+  - Chiudendo o accorciando un contratto i giorni del cartellino successivi alla fine del
+    contratto vengono azzerati e non maturano più residuo. L'evoluzione 231 azzera i giorni
+    già presenti fuori da ogni contratto (#693).
+
 ## [2.42.0] - 2026-11-18
 ### Added
   - Content Security Policy in modalità di sola segnalazione: le pagine sono inviate con

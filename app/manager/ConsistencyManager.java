@@ -442,6 +442,56 @@ public class ConsistencyManager {
 
 
   /**
+   * Azzera i giorni della persona a partire dalla data from che non ricadono in alcun contratto
+   * (ad esempio i giorni successivi alla chiusura di un contratto), in modo che non maturino
+   * residuo. Il ricalcolo della situazione salta i giorni fuori contratto, che altrimenti
+   * resterebbero con i valori calcolati quando il contratto era ancora attivo.
+   *
+   * @param person la persona
+   * @param from la data da cui azzerare i giorni fuori contratto
+   * @return il numero di giorni azzerati
+   */
+  public int resetPersonDaysOutOfContract(Person person, LocalDate from) {
+    int count = 0;
+    for (PersonDay personDay : personDayDao.getPersonDayInPeriod(person, from,
+        Optional.<LocalDate>absent())) {
+      IWrapperPersonDay pd = wrapperFactory.create(personDay);
+      if (!pd.getPersonDayContract().isPresent() && !isReset(personDay)) {
+        resetPersonDay(personDay);
+        count++;
+      }
+    }
+    if (count > 0) {
+      log.info("Azzerati {} giorni fuori contratto di {} a partire dal {}", count,
+          person.getFullname(), from);
+    }
+    return count;
+  }
+
+  private boolean isReset(PersonDay personDay) {
+    return !personDay.isHoliday() && Integer.valueOf(0).equals(personDay.getTimeAtWork())
+        && Integer.valueOf(0).equals(personDay.getProgressive())
+        && Integer.valueOf(0).equals(personDay.getDifference())
+        && personDay.getStampModificationType() == null
+        && (personDay.isTicketForcedByAdmin() || !personDay.isTicketAvailable());
+  }
+
+  /**
+   * Azzera i valori calcolati del giorno (tempo a lavoro, differenza, progressivo, buono pasto
+   * se non forzato) e lo persiste.
+   */
+  private void resetPersonDay(PersonDay personDay) {
+    personDay.setHoliday(false);
+    personDay.setTimeAtWork(0);
+    personDay.setProgressive(0);
+    personDay.setDifference(0);
+    personDayManager.setTicketStatusIfNotForced(personDay,
+        MealTicketBehaviour.notAllowMealTicket);
+    personDay.setStampModificationType(null);
+    personDay.save();
+  }
+
+  /**
    * (1) Controlla che il personDay sia ben formato (altrimenti lo inserisce nella tabella
    * PersonDayInTrouble) (2) Popola i valori aggiornati del person day e li persiste nel db.
    */
@@ -451,14 +501,7 @@ public class ConsistencyManager {
 
     // il contratto non esiste più nel giorno perchè è stata inserita data terminazione
     if (!pd.getPersonDayContract().isPresent()) {
-      pd.getValue().setHoliday(false);
-      pd.getValue().setTimeAtWork(0);
-      pd.getValue().setProgressive(0);
-      pd.getValue().setDifference(0);
-      personDayManager.setTicketStatusIfNotForced(pd.getValue(), 
-          MealTicketBehaviour.notAllowMealTicket);
-      pd.getValue().setStampModificationType(null);
-      pd.getValue().save();
+      resetPersonDay(pd.getValue());
       return;
     }
 
@@ -467,15 +510,7 @@ public class ConsistencyManager {
         && pd.getPersonDayContract().get().getSourceDateResidual() != null
         && pd.getValue().getDate().isBefore(pd.getPersonDayContract()
             .get().getSourceDateResidual())) {
-
-      pd.getValue().setHoliday(false);
-      pd.getValue().setTimeAtWork(0);
-      pd.getValue().setProgressive(0);
-      pd.getValue().setDifference(0);
-      personDayManager.setTicketStatusIfNotForced(pd.getValue(), 
-          MealTicketBehaviour.notAllowMealTicket);
-      pd.getValue().setStampModificationType(null);
-      pd.getValue().save();
+      resetPersonDay(pd.getValue());
       return;
     }
 
