@@ -44,6 +44,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - ivy 2.4.0 di play è sostituita dalla 2.5.2, usata da play all'avvio per caricare i
     moduli. ant non è più inclusa nell'immagine docker, così come la cartella lib-test di play,
     che serve solo alla sua compilazione (#684).
+  - La presenza giornaliera legge in blocco giorni, timbrature, assenze e contratti di tutte
+    le persone della sede, invece di qualche query per ogni persona, e per il giorno corrente
+    non rilegge più il mese di ogni persona in servizio per calcolare un progressivo che la
+    pagina non mostra. Vale anche per la presenza giornaliera del responsabile di gruppo e per
+    il sorteggio del controllo green pass (#709).
 
 ## [2.41.0] - 2026-11-16
 ### Added

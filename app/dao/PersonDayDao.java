@@ -18,11 +18,14 @@
 package dao;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 import com.google.inject.Provider;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.JPQLQueryFactory;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import models.Office;
@@ -32,6 +35,7 @@ import models.absences.Absence;
 import models.absences.AbsenceType;
 import models.absences.query.QAbsence;
 import models.absences.query.QAbsenceType;
+import models.absences.query.QJustifiedType;
 import models.enumerate.StampTypes;
 import models.query.QPerson;
 import models.query.QPersonDay;
@@ -303,6 +307,46 @@ public class PersonDayDao extends DaoBase {
     return getQueryFactory().selectFrom(personDay)
         .where(personDay.date.eq(date).and(personDay.person.in(personList)))
         .orderBy(personDay.person.surname.asc()).fetch();
+  }
+
+  /**
+   * I personday di un singolo giorno di una lista di persone, con timbrature, giorni con
+   * problemi e assenze già caricati: tre query in tutto, indipendentemente dal numero di
+   * persone.
+   *
+   * @param personList le persone
+   * @param date il giorno
+   * @return i personday esistenti per le persone in quel giorno, indicizzati per id della persona.
+   */
+  public Map<Long, PersonDay> getPersonDaysForPeopleInDayFetched(
+      Collection<Person> personList, LocalDate date) {
+    if (personList.isEmpty()) {
+      return Maps.newHashMap();
+    }
+    final QPersonDay personDay = QPersonDay.personDay;
+    final BooleanBuilder condition = new BooleanBuilder(
+        personDay.date.eq(date).and(personDay.person.in(personList)));
+
+    getQueryFactory().selectFrom(personDay).distinct()
+        .leftJoin(personDay.stampings, QStamping.stamping).fetchJoin()
+        .where(condition).fetch();
+
+    getQueryFactory().selectFrom(personDay).distinct()
+        .leftJoin(personDay.troubles, QPersonDayInTrouble.personDayInTrouble).fetchJoin()
+        .where(condition).fetch();
+
+    final QAbsence absence = QAbsence.absence;
+    final List<PersonDay> personDays = getQueryFactory().selectFrom(personDay).distinct()
+        .leftJoin(personDay.absences, absence).fetchJoin()
+        .leftJoin(absence.absenceType, QAbsenceType.absenceType).fetchJoin()
+        .leftJoin(absence.justifiedType, QJustifiedType.justifiedType).fetchJoin()
+        .where(condition).fetch();
+
+    final Map<Long, PersonDay> result = Maps.newHashMap();
+    for (PersonDay pd : personDays) {
+      result.put(pd.getPerson().id, pd);
+    }
+    return result;
   }
 
   /**

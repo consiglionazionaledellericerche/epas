@@ -168,6 +168,28 @@ public class H2Examples {
    */
   public Person activeNormalEmployee(LocalDate beginContract) {
     Person person = normalEmployee(beginContract, Optional.absent());
+    return activate(person, beginContract);
+  }
+
+  /**
+   * Istanza di un dipendente con orario Normale in una sede esistente, attivo dall'inizio del
+   * contratto come {@link #activeNormalEmployee(LocalDate)}.
+   *
+   * @param office sede del dipendente
+   * @param beginContract inizio contratto e data di attivazione
+   * @return persisted entity
+   */
+  public Person activeNormalEmployee(Office office, LocalDate beginContract) {
+    Person person = createPerson(office, "normalEmployee" + beginContract + UUID.randomUUID());
+    WorkingTimeType normal = h2WorkingTimeTypeSupport.getWorkingTimeType(WorkingDefinition.Normal);
+    Contract contract =
+        buildContract(person, beginContract, Optional.absent(), Optional.absent(), normal);
+    contract.refresh();
+    person.refresh();
+    return activate(person, beginContract);
+  }
+
+  private Person activate(Person person, LocalDate beginContract) {
     person.setBeginDate(beginContract);
     person.save();
     for (PersonConfiguration configuration : person.getPersonConfigurations()) {
