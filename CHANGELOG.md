@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+  - Gli allegati delle assenze si scaricano con un nome composto da anno, mese, giorno, codice
+    di assenza, cognome e nome del dipendente (es. 2026-11-18-111-Rossi-Mario.pdf), sia
+    singolarmente sia nello zip mensile per codice, che prima conteneva file senza nome
+    leggibile e senza estensione (#703).
+  - L'endpoint REST /rest/absences/attachment restituisce l'allegato con lo stesso nome
+    (prima era assenza-Nome-Cognome-data.ext): le integrazioni che usano il nome del file
+    indicato nel Content-Disposition devono adeguarsi (#703).
+
 ### Fixed
   - Inserimento delle ferie con errore TwoPeriods per i contratti collegati al precedente
     quando i piani ferie del contratto precedente vanno oltre la sua data di fine: nel calcolo

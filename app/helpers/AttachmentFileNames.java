@@ -1,0 +1,97 @@
+/*
+ * Copyright (C) 2026  Consiglio Nazionale delle Ricerche
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU Affero General Public License as
+ *     published by the Free Software Foundation, either version 3 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU Affero General Public License for more details.
+ *
+ *     You should have received a copy of the GNU Affero General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package helpers;
+
+import java.text.Normalizer;
+import java.util.Locale;
+import java.util.Set;
+import models.Person;
+import models.absences.Absence;
+import org.joda.time.LocalDate;
+
+/**
+ * Nomi dei file degli allegati delle assenze. Il file è salvato con un UUID come nome, il nome
+ * leggibile viene costruito al momento dello scaricamento (singolo o nello zip).
+ */
+public final class AttachmentFileNames {
+
+  private AttachmentFileNames() {
+  }
+
+  /**
+   * Il nome del file dell'allegato di un'assenza: anno-mese-giorno-codice-cognome-nome seguito
+   * dall'estensione dedotta dal tipo del file (es. 2026-11-18-111-Rossi-Mario.pdf). Per le
+   * assenze non ancora associate a un giorno (simulazioni) cognome e nome sono omessi.
+   *
+   * @param absence l'assenza con allegato
+   * @return il nome del file
+   */
+  public static String forAbsence(Absence absence) {
+    LocalDate date = absence.getAbsenceDate();
+    String name = String.format("%s-%s", date.toString("yyyy-MM-dd"),
+        sanitize(absence.getAbsenceType().getCode()));
+    if (absence.getPersonDay() != null && absence.getPersonDay().getPerson() != null) {
+      Person person = absence.getPersonDay().getPerson();
+      name = String.format("%s-%s-%s", name, sanitize(person.getSurname()),
+          sanitize(person.getName()));
+    }
+    if (absence.getAbsenceFile() != null) {
+      String extension = ImageUtils.fileExtension(absence.getAbsenceFile()).orElse("");
+      name = name + extension;
+    }
+    return name;
+  }
+
+  /**
+   * Un nome non ancora presente tra quelli già usati, che viene aggiunto all'insieme: se il nome
+   * è già usato si aggiunge un numero progressivo prima dell'estensione (es.
+   * ...-Rossi-Mario-2.pdf). Il confronto ignora maiuscole e minuscole perché i file system di
+   * Windows e macOS non le distinguono.
+   *
+   * @param usedNames i nomi già usati, in minuscolo
+   * @param name il nome desiderato, prodotto da {@link #forAbsence(Absence)}
+   * @return il nome da usare
+   */
+  public static String uniqueName(Set<String> usedNames, String name) {
+    // l'unico punto possibile è quello dell'estensione, sanitize toglie gli altri
+    int dot = name.lastIndexOf('.');
+    String base = dot > 0 ? name.substring(0, dot) : name;
+    String extension = dot > 0 ? name.substring(dot) : "";
+    String candidate = name;
+    int counter = 2;
+    while (!usedNames.add(candidate.toLowerCase(Locale.ROOT))) {
+      candidate = base + "-" + counter++ + extension;
+    }
+    return candidate;
+  }
+
+  /**
+   * Rende il testo utilizzabile in un nome di file: toglie gli accenti e sostituisce con un
+   * trattino i caratteri diversi da lettere, cifre e trattino basso. Le lettere senza
+   * scomposizione (es. Ł, ß) e quelle di altri alfabeti sono mantenute.
+   */
+  static String sanitize(String text) {
+    if (text == null) {
+      return "";
+    }
+    String plain = Normalizer.normalize(text.trim(), Normalizer.Form.NFD)
+        .replaceAll("\\p{M}", "");
+    plain = Normalizer.normalize(plain, Normalizer.Form.NFC);
+    return plain.replaceAll("[^\\p{L}\\p{N}_]+", "-").replaceAll("^-+|-+$", "");
+  }
+}
