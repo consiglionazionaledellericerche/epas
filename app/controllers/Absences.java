@@ -34,9 +34,9 @@ import helpers.AttachmentFileNames;
 import it.cnr.iit.epas.DateUtility;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -359,8 +359,7 @@ public class Absences extends Controller {
         Optional.<Person>absent(), Optional.fromNullable(code),
         new LocalDate(year, month, 1),
         new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(),
-        Optional.<JustifiedTypeName>absent(), true, false);
-    byte[] buffer = new byte[1024];
+        Optional.<JustifiedTypeName>absent(), true, true);
     Set<String> entryNames = Sets.newHashSet();
 
     for (Absence abs : absList) {
@@ -368,17 +367,19 @@ public class Absences extends Controller {
       if (!abs.getPersonDay().getPerson().getOffice().equals(office)) {
         continue;
       }
-      try (FileInputStream fis = new FileInputStream(abs.getAbsenceFile().getFile())) {
-        zos.putNextEntry(new ZipEntry(AttachmentFileNames.uniqueName(entryNames,
-            AttachmentFileNames.forAbsence(abs))));
-        int length;
-        while ((length = fis.read(buffer)) >= 0) {
-          zos.write(buffer, 0, length);
-        }
-        zos.closeEntry();
+      // il file è letto per intero prima di aprire la voce: se la lettura fallisce
+      // nello zip non resta una voce troncata
+      byte[] content;
+      try {
+        content = Files.readAllBytes(abs.getAbsenceFile().getFile().toPath());
       } catch (IOException ex) {
         log.warn("Impossibile aggiungere allo zip l'allegato dell'assenza {}", abs.id, ex);
+        continue;
       }
+      zos.putNextEntry(new ZipEntry(AttachmentFileNames.uniqueName(entryNames,
+          AttachmentFileNames.forAbsence(abs))));
+      zos.write(content);
+      zos.closeEntry();
     }
 
     zos.close();
