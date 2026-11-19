@@ -53,40 +53,72 @@ public class FutureMonthRecapTest extends UnitTest {
     return wrapperFactory.create(contract).getContractMonthRecap(yearMonth).get();
   }
 
+  /**
+   * Nessun riepilogo del contratto oltre il mese indicato.
+   */
+  private void assertNoRecapAfter(Person person, YearMonth lastMonth) {
+    Contract contract = person.getContracts().get(0);
+    contract.refresh();
+    for (ContractMonthRecap cmr : contract.getContractMonthRecaps()) {
+      assertFalse(new YearMonth(cmr.getYear(), cmr.getMonth()).isAfter(lastMonth));
+    }
+  }
+
   @Test
   public void futureMonthDoesNotRebuildContractRecaps() {
-    LocalDate begin = LocalDate.now().minusMonths(3).withDayOfMonth(1);
+    LocalDate today = LocalDate.now();
+    LocalDate begin = today.minusMonths(3).withDayOfMonth(1);
     Person person = h2Examples.normalEmployee(begin, Optional.absent());
     consistencyManager.updatePersonRecaps(person.id, begin);
 
     YearMonth firstMonth = new YearMonth(begin);
-    YearMonth currentMonth = new YearMonth(LocalDate.now());
+    YearMonth currentMonth = new YearMonth(today);
     assertTrue(recap(person, currentMonth).isPersistent());
 
     ContractMonthRecap first = recap(person, firstMonth);
     first.setRemainingMinutesCurrentYear(SENTINEL);
     first.save();
 
-    consistencyManager.updatePersonRecaps(person.id, LocalDate.now().plusMonths(3));
+    consistencyManager.updatePersonRecaps(person.id, today.plusMonths(3));
 
     first = recap(person, firstMonth);
     first.refresh();
     assertEquals(Integer.valueOf(SENTINEL), first.getRemainingMinutesCurrentYear());
-    // nessun riepilogo oltre il mese corrente
-    Contract contract = person.getContracts().get(0);
-    contract.refresh();
-    for (ContractMonthRecap cmr : contract.getContractMonthRecaps()) {
-      assertFalse(new YearMonth(cmr.getYear(), cmr.getMonth()).isAfter(currentMonth));
-    }
+    assertNoRecapAfter(person, currentMonth);
+  }
+
+  @Test
+  public void monthAfterContractEndDoesNotRebuildContractRecaps() {
+    LocalDate today = LocalDate.now();
+    LocalDate begin = today.minusMonths(6).withDayOfMonth(1);
+    LocalDate end = today.minusMonths(3).dayOfMonth().withMaximumValue();
+    Person person = h2Examples.normalEmployee(begin, Optional.of(end));
+    consistencyManager.updatePersonRecaps(person.id, begin);
+
+    YearMonth firstMonth = new YearMonth(begin);
+    YearMonth endMonth = new YearMonth(end);
+    assertTrue(recap(person, endMonth).isPersistent());
+
+    ContractMonthRecap first = recap(person, firstMonth);
+    first.setRemainingMinutesCurrentYear(SENTINEL);
+    first.save();
+
+    consistencyManager.updatePersonRecaps(person.id, end.plusMonths(1).withDayOfMonth(1));
+
+    first = recap(person, firstMonth);
+    first.refresh();
+    assertEquals(Integer.valueOf(SENTINEL), first.getRemainingMinutesCurrentYear());
+    assertNoRecapAfter(person, endMonth);
   }
 
   @Test
   public void pastMonthStillRebuildsFollowingRecaps() {
-    LocalDate begin = LocalDate.now().minusMonths(3).withDayOfMonth(1);
+    LocalDate today = LocalDate.now();
+    LocalDate begin = today.minusMonths(3).withDayOfMonth(1);
     Person person = h2Examples.normalEmployee(begin, Optional.absent());
     consistencyManager.updatePersonRecaps(person.id, begin);
 
-    YearMonth currentMonth = new YearMonth(LocalDate.now());
+    YearMonth currentMonth = new YearMonth(today);
     ContractMonthRecap current = recap(person, currentMonth);
     current.setRemainingMinutesCurrentYear(SENTINEL);
     current.save();
@@ -95,6 +127,50 @@ public class FutureMonthRecapTest extends UnitTest {
 
     current = recap(person, currentMonth);
     current.refresh();
-    assertFalse(SENTINEL == current.getRemainingMinutesCurrentYear());
+    assertNotEquals(Integer.valueOf(SENTINEL), current.getRemainingMinutesCurrentYear());
+  }
+
+  /**
+   * Se manca il riepilogo del mese precedente a quello richiesto vengono ricostruiti tutti i
+   * riepiloghi del contratto, e il mese richiesto non deve poi essere ricalcolato senza
+   * riepilogo precedente, perdendo i residui accumulati.
+   */
+  @Test
+  public void missingPreviousRecapKeepsResiduals() {
+    LocalDate today = LocalDate.now();
+    LocalDate begin = today.minusMonths(3).withDayOfMonth(1);
+    Person person = h2Examples.normalEmployee(begin, Optional.absent());
+    // Inizializzazione con un residuo da portare avanti nei mesi successivi.
+    Contract init = person.getContracts().get(0);
+    LocalDate sourceDate = begin.dayOfMonth().withMaximumValue();
+    init.setSourceDateResidual(sourceDate);
+    init.setSourceDateMealTicket(sourceDate);
+    init.setSourceRemainingMinutesCurrentYear(600);
+    init.setSourceRemainingMinutesLastYear(0);
+    init.setSourceRemainingMealTicket(0);
+    init.save();
+    consistencyManager.updatePersonRecaps(person.id, begin);
+
+    YearMonth gapMonth = new YearMonth(begin).plusMonths(1);
+    YearMonth requestedMonth = gapMonth.plusMonths(1);
+    ContractMonthRecap expected = recap(person, requestedMonth);
+    int expectedResidual =
+        expected.getRemainingMinutesCurrentYear() + expected.getRemainingMinutesLastYear();
+
+    ContractMonthRecap gap = recap(person, gapMonth);
+    // Il test ha senso solo se il mese mancante porta avanti un residuo.
+    assertNotEquals(0,
+        gap.getRemainingMinutesCurrentYear() + gap.getRemainingMinutesLastYear());
+    Contract contract = person.getContracts().get(0);
+    contract.getContractMonthRecaps().remove(gap);
+    gap.delete();
+
+    consistencyManager.updatePersonRecaps(person.id, requestedMonth.toLocalDate(1));
+
+    assertTrue(recap(person, gapMonth).isPersistent());
+    ContractMonthRecap rebuilt = recap(person, requestedMonth);
+    rebuilt.refresh();
+    assertEquals(expectedResidual,
+        rebuilt.getRemainingMinutesCurrentYear() + rebuilt.getRemainingMinutesLastYear());
   }
 }

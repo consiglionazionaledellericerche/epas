@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Chiudendo o accorciando un contratto i giorni del cartellino successivi alla fine del
     contratto vengono azzerati e non maturano più residuo. L'evoluzione 231 azzera i giorni
     già presenti fuori da ogni contratto (#693).
+  - Ricalcolando i riepiloghi mensili da un mese di cui manca il riepilogo precedente, dopo la
+    ricostruzione completa il mese richiesto e i successivi venivano ricalcolati di nuovo senza
+    riepilogo precedente, azzerando i residui portati avanti (#710).
 
 ### Fixed
   - Inserimento delle ferie con errore TwoPeriods per i contratti collegati al precedente
