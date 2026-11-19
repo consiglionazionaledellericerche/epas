@@ -13,8 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - L'endpoint REST /rest/absences/attachment restituisce l'allegato con lo stesso nome
     (prima era assenza-Nome-Cognome-data.ext): le integrazioni che usano il nome del file
     indicato nel Content-Disposition devono adeguarsi (#703).
+  - Il menu dei flussi di lavoro, presente in tutte le pagine, calcola i conteggi delle
+    richieste da approvare una sola volta per richiesta HTTP, leggendo una sola volta i ruoli
+    dell'utente e i gruppi della sede: per un responsabile di sede sono circa 27 query in meno
+    per pagina. Il badge delle richieste di congedo parentale da approvare, prima mai
+    valorizzato, mostra il numero di richieste ed è incluso nel totale del menu (#708).
 
 ### Fixed
+  - Chiudendo o accorciando un contratto i giorni del cartellino successivi alla fine del
+    contratto vengono azzerati e non maturano più residuo. L'evoluzione 231 azzera i giorni
+    già presenti fuori da ogni contratto (#693).
   - Le assenze orarie non impediscono più la reperibilità: nel calendario di reperibilità,
     nell'avviso mostrato inserendo un'assenza in un giorno di reperibilità e nel riepilogo
     delle incongruenze sono considerate solo le assenze giornaliere con codice non compatibile
@@ -45,6 +53,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - ivy 2.4.0 di play è sostituita dalla 2.5.2, usata da play all'avvio per caricare i
     moduli. ant non è più inclusa nell'immagine docker, così come la cartella lib-test di play,
     che serve solo alla sua compilazione (#684).
+  - La presenza giornaliera legge in blocco giorni, timbrature, assenze e contratti di tutte
+    le persone della sede, invece di qualche query per ogni persona, e per il giorno corrente
+    non rilegge più il mese di ogni persona in servizio per calcolare un progressivo che la
+    pagina non mostra. Vale anche per la presenza giornaliera del responsabile di gruppo e per
+    il sorteggio del controllo green pass (#709).
 
 ## [2.41.0] - 2026-11-16
 ### Added
