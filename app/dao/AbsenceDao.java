@@ -139,7 +139,7 @@ public class AbsenceDao extends DaoBase {
 
     JPQLQuery<Absence> query = getQueryFactory().selectFrom(absence).where(condition);
     if (ordered) {
-      query.orderBy(absence.personDay.date.asc());
+      query.orderBy(absence.personDay.date.asc(), absence.id.asc());
     }
     return query.fetch();
 
