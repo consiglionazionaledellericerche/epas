@@ -5,6 +5,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+  - Gli allegati delle assenze si scaricano con un nome composto da anno, mese, giorno, codice
+    di assenza, cognome e nome del dipendente (es. 2026-11-18-111-Rossi-Mario.pdf), sia
+    singolarmente sia nello zip mensile per codice, che prima conteneva file senza nome
+    leggibile e senza estensione (#703).
+  - L'endpoint REST /rest/absences/attachment restituisce l'allegato con lo stesso nome
+    (prima era assenza-Nome-Cognome-data.ext): le integrazioni che usano il nome del file
+    indicato nel Content-Disposition devono adeguarsi (#703).
+  - Il menu dei flussi di lavoro, presente in tutte le pagine, calcola i conteggi delle
+    richieste da approvare una sola volta per richiesta HTTP, leggendo una sola volta i ruoli
+    dell'utente e i gruppi della sede: per un responsabile di sede sono circa 27 query in meno
+    per pagina. Il badge delle richieste di congedo parentale da approvare, prima mai
+    valorizzato, mostra il numero di richieste ed è incluso nel totale del menu (#708).
+
 ### Fixed
   - Chiudendo o accorciando un contratto i giorni del cartellino successivi alla fine del
     contratto vengono azzerati e non maturano più residuo. L'evoluzione 231 azzera i giorni
@@ -16,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     l'header Content-Security-Policy-Report-Only e le violazioni segnalate dai browser sono
     scritte nel log (WARN), senza bloccare nulla. Il comportamento si configura con csp.mode
     (CSP_MODE nel docker: off, report, enforce) e la policy con csp.policy (#687).
+  - Workflow GitHub Actions che analizza con Trivy l'immagine docker (pacchetti del sistema
+    operativo e jar) a ogni pull request, su main e ogni settimana. Fallisce con vulnerabilità
+    CRITICAL o HIGH non elencate in .trivyignore.yaml, dove ogni eccezione è motivata e ha una
+    scadenza (#705).
 
 ### Changed
   - Le azioni del vecchio calendario di reperibilità e turni (/reperibility/{type}/... e

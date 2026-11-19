@@ -81,13 +81,11 @@ import models.absences.AbsenceType;
 import models.absences.AmountType;
 import models.absences.CategoryGroupAbsenceType;
 import models.absences.GroupAbsenceType;
-import models.base.InformationRequest;
 import models.contractual.ContractualReference;
 import models.enumerate.InformationType;
 import models.enumerate.LimitType;
 import models.enumerate.StampTypes;
 import models.enumerate.TeleworkStampTypes;
-import models.flows.AbsenceRequest;
 import models.flows.CompetenceRequest;
 import models.flows.Group;
 import models.flows.enumerate.AbsenceRequestType;
@@ -96,6 +94,7 @@ import models.flows.enumerate.CompetenceRequestType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import play.Play;
+import play.mvc.Http;
 import synch.diagnostic.SynchDiagnostic;
 
 /**
@@ -108,6 +107,7 @@ public class TemplateUtility {
   private static final String WORKDAYS_REP = "207";
   private static final String HOLIDAYS_REP = "208";
   private static final String FLOWS_ACTIVE = "flows.active";
+  private static final String REQUEST_CACHE_PREFIX = TemplateUtility.class.getName() + ".";
 
   private final SecureManager secureManager;
   private final OfficeDao officeDao;
@@ -281,24 +281,81 @@ public class TemplateUtility {
   }
 
   /**
+   * Valore calcolato al più una volta per richiesta HTTP.
+   *
+   * <p>Il menu dei flussi è incluso in tutte le pagine e chiede gli stessi conteggi più volte: il
+   * risultato viene conservato negli argomenti della richiesta corrente. Fuori da una richiesta
+   * (job, test) il valore viene calcolato ogni volta.</p>
+   */
+  @SuppressWarnings("unchecked")
+  private <T> T perRequest(String key, java.util.function.Supplier<T> supplier) {
+    Http.Request request = Http.Request.current();
+    if (request == null) {
+      return supplier.get();
+    }
+    String cacheKey = REQUEST_CACHE_PREFIX + key;
+    if (!request.args.containsKey(cacheKey)) {
+      request.args.put(cacheKey, supplier.get());
+    }
+    return (T) request.args.get(cacheKey);
+  }
+
+  private List<UsersRolesOffices> userRolesOffices(User user) {
+    return perRequest("uros", () -> uroDao.getUsersRolesOfficesByUser(user));
+  }
+
+  private List<Group> officeGroups(User user) {
+    return perRequest("groups", () -> groupDao.groupsByOffice(
+        user.getPerson().getOffice(), Optional.absent(), Optional.of(false)));
+  }
+
+  private int absenceRequestsToApprove(AbsenceRequestType type) {
+    return perRequest("absenceRequests." + type, () -> {
+      User user = Security.getUser().get();
+      if (user.isSystemUser()) {
+        return 0;
+      }
+      return absenceRequestDao
+          .toApproveResults(userRolesOffices(user), Optional.absent(), Optional.absent(),
+              type, officeGroups(user), user.getPerson())
+          .size();
+    });
+  }
+
+  private int informationRequestsToApprove(InformationType type) {
+    return perRequest("informationRequests." + type, () -> {
+      User user = Security.getUser().get();
+      if (user.isSystemUser()) {
+        return 0;
+      }
+      return informationRequestDao
+          .toApproveResults(userRolesOffices(user), Optional.absent(), Optional.absent(),
+              type, user.getPerson())
+          .size();
+    });
+  }
+
+  private List<CompetenceRequest> competenceRequestsToApprove(CompetenceRequestType type) {
+    return perRequest("competenceRequests." + type, () -> {
+      User user = Security.getUser().get();
+      if (user.isSystemUser()) {
+        return Lists.<CompetenceRequest>newArrayList();
+      }
+      return competenceRequestDao
+          .toApproveResults(userRolesOffices(user),
+              LocalDateTime.now().minusMonths(1),
+              Optional.absent(), type, user.getPerson());
+    });
+  }
+
+  /**
    * Metodo di utilità per far comparire il badge con la quantità di richieste di riposi 
    * compensativi da approvare nel template.
    *
    * @return la quantità di riposi compensativi da approvare.
    */
   public final int compensatoryRestRequests() {
-    User user = Security.getUser().get();
-    if (user.isSystemUser()) {
-      return 0;
-    }
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = 
-        groupDao.groupsByOffice(
-            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
-    Set<AbsenceRequest> results = absenceRequestDao
-        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
-            AbsenceRequestType.COMPENSATORY_REST, groups, user.getPerson());
-    return results.size();
+    return absenceRequestsToApprove(AbsenceRequestType.COMPENSATORY_REST);
   }
 
   /**
@@ -308,19 +365,7 @@ public class TemplateUtility {
    * @return la quantità di richieste ferie da approvare.
    */
   public final int vacationRequests() {
-    User user = Security.getUser().get();
-    if (user.isSystemUser()) {
-      return 0;
-    }
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = 
-        groupDao.groupsByOffice(
-            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
-    Set<AbsenceRequest> results = absenceRequestDao
-        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
-            AbsenceRequestType.VACATION_REQUEST, groups, user.getPerson());
-
-    return results.size();
+    return absenceRequestsToApprove(AbsenceRequestType.VACATION_REQUEST);
   }
 
   /**
@@ -330,19 +375,7 @@ public class TemplateUtility {
    * @return la quantità di richieste di permesso personale da approvare.
    */
   public final int personalPermissionRequests() {
-    User user = Security.getUser().get();
-    if (user.isSystemUser()) {
-      return 0;
-    }
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = 
-        groupDao.groupsByOffice(
-            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
-    Set<AbsenceRequest> results = absenceRequestDao
-        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
-            AbsenceRequestType.PERSONAL_PERMISSION, groups, user.getPerson());
-
-    return results.size();
+    return absenceRequestsToApprove(AbsenceRequestType.PERSONAL_PERMISSION);
   }
 
 
@@ -353,18 +386,7 @@ public class TemplateUtility {
    * @return la quantità di richieste di cambio di reperibilità attive.
    */
   public final int changeReperibilityRequests() {
-    User user = Security.getUser().get();
-    if (user.isSystemUser()) {
-      return 0;
-    }
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-
-    List<CompetenceRequest> results = competenceRequestDao
-        .toApproveResults(roleList, 
-            LocalDateTime.now().minusMonths(1), 
-            Optional.absent(), CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST, 
-            user.getPerson());
-    return results.size();
+    return competenceRequestsToApprove(CompetenceRequestType.CHANGE_REPERIBILITY_REQUEST).size();
   }
 
   /**
@@ -373,16 +395,7 @@ public class TemplateUtility {
    * @return la quantità di richieste di telelavoro pendenti.
    */
   public final int teleworkRequests() {
-    User user = Security.getUser().get();
-    if (user.isSystemUser()) {
-      return 0;
-    }
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<InformationRequest> results = informationRequestDao
-        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
-            InformationType.TELEWORK_INFORMATION, user.getPerson());
-
-    return results.size();
+    return informationRequestsToApprove(InformationType.TELEWORK_INFORMATION);
   }
 
   /**
@@ -391,16 +404,7 @@ public class TemplateUtility {
    * @return la quantità di richieste di uscite di servizio pendenti.
    */
   public final int serviceRequests() {
-    User user = Security.getUser().get();
-    if (user.isSystemUser()) {
-      return 0;
-    }
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<InformationRequest> results = informationRequestDao
-        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
-            InformationType.SERVICE_INFORMATION, user.getPerson());
-
-    return results.size();
+    return informationRequestsToApprove(InformationType.SERVICE_INFORMATION);
   }
 
   /**
@@ -409,87 +413,55 @@ public class TemplateUtility {
    * @return la quantità di richieste di informazione di malattia pendenti.
    */
   public final int illnessRequests() {
-    User user = Security.getUser().get();
-    if (user.isSystemUser()) {
-      return 0;
-    }
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<InformationRequest> results = informationRequestDao
-        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
-            InformationType.ILLNESS_INFORMATION, user.getPerson());
-
-    return results.size();
+    return informationRequestsToApprove(InformationType.ILLNESS_INFORMATION);
   }
 
   /**
-   * Metodo di utilità per conteggiare le richieste pendenti di approvazione telelavoro. 
+   * Metodo di utilità per conteggiare le richieste pendenti di congedo parentale. 
    *
-   * @return la quantità di richieste di telelavoro pendenti.
+   * @return la quantità di richieste di congedo parentale pendenti.
    */
   public final int parentalLeaveRequests() {
-    User user = Security.getUser().get();
-    if (user.isSystemUser()) {
-      return 0;
-    }
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<InformationRequest> results = informationRequestDao
-        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
-            InformationType.PARENTAL_LEAVE_INFORMATION, user.getPerson());
-
-    return results.size();
+    return informationRequestsToApprove(InformationType.PARENTAL_LEAVE_INFORMATION);
   }
 
+  /**
+   * Richieste di straordinario da approvare. Se la sede prevede la richiesta preventiva con
+   * conferma, conta solo quelle all'inizio del flusso.
+   */
   public final int overtimeRequests() {
-    User user = Security.getUser().get();
-    if (user.isSystemUser()) {
-      return 0;
-    }
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<CompetenceRequest> results = competenceRequestDao
-        .toApproveResults(roleList, 
-            LocalDateTime.now().minusMonths(1), 
-            Optional.absent(), CompetenceRequestType.OVERTIME_REQUEST, user.getPerson());
-    Office office = user.getPerson().getOffice();
-    java.util.Optional<Configuration> conf = office.getConfigurations().stream()
-        .filter(c -> c.getEpasParam().equals(EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION))
-        .findFirst();
-    if (conf.isPresent() && conf.get().getFieldValue().equals("true")) {
-      results = results.stream().filter(cr -> cr.actualEvent().eventType
-          .equals(CompetenceRequestEventType.STARTING_APPROVAL_FLOW)).collect(Collectors.toList());
-    }
-    return results.size();
+    return perRequest("overtimeRequests", () -> {
+      User user = Security.getUser().get();
+      if (user.isSystemUser()) {
+        return 0;
+      }
+      List<CompetenceRequest> results =
+          competenceRequestsToApprove(CompetenceRequestType.OVERTIME_REQUEST);
+      Office office = user.getPerson().getOffice();
+      java.util.Optional<Configuration> conf = office.getConfigurations().stream()
+          .filter(c -> c.getEpasParam()
+              .equals(EpasParam.OVERTIME_ADVANCE_REQUEST_AND_CONFIRMATION))
+          .findFirst();
+      if (conf.isPresent() && conf.get().getFieldValue().equals("true")) {
+        return (int) results.stream().filter(cr -> cr.actualEvent().eventType
+            .equals(CompetenceRequestEventType.STARTING_APPROVAL_FLOW)).count();
+      }
+      return results.size();
+    });
   }
 
+  /**
+   * Richieste di straordinario preventive già approvate una prima volta.
+   */
   public final int overtimeRequestsInAdvance() {
-    User user = Security.getUser().get();
-    if (user.isSystemUser()) {
-      return 0;
-    }
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<CompetenceRequest> results = competenceRequestDao
-        .toApproveResults(roleList, 
-            LocalDateTime.now().minusMonths(1), 
-            Optional.absent(), CompetenceRequestType.OVERTIME_REQUEST, user.getPerson());
-    results = results.stream().filter(cr -> cr.actualEvent().eventType
-        .equals(CompetenceRequestEventType.FIRST_APPROVAL)).collect(Collectors.toList());      
-
-    return results.size();
+    return (int) competenceRequestsToApprove(CompetenceRequestType.OVERTIME_REQUEST).stream()
+        .filter(cr -> cr.actualEvent().eventType
+            .equals(CompetenceRequestEventType.FIRST_APPROVAL))
+        .count();
   }
   
   public final int vacationDelayRequests() {
-    User user = Security.getUser().get();
-    if (user.isSystemUser()) {
-      return 0;
-    }
-    List<UsersRolesOffices> roleList = uroDao.getUsersRolesOfficesByUser(user);
-    List<Group> groups = 
-        groupDao.groupsByOffice(
-            user.getPerson().getOffice(), Optional.absent(), Optional.of(false));
-    Set<AbsenceRequest> results = absenceRequestDao
-        .toApproveResults(roleList, Optional.absent(), Optional.absent(), 
-            AbsenceRequestType.VACATION_DELAY_REQUEST, groups, user.getPerson());
-
-    return results.size();
+    return absenceRequestsToApprove(AbsenceRequestType.VACATION_DELAY_REQUEST);
   }
 
 
