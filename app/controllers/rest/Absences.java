@@ -34,7 +34,7 @@ import dao.AbsenceTypeDao;
 import dao.PersonDao;
 import dao.absences.AbsenceComponentDao;
 import dao.wrapper.IWrapperFactory;
-import helpers.ImageUtils;
+import helpers.AttachmentFileNames;
 import helpers.JsonResponse;
 import helpers.rest.RestUtils;
 import helpers.rest.RestUtils.HttpMethod;
@@ -406,13 +406,7 @@ public class Absences extends Controller {
     log.debug("Rendering attachment ( type = {} ) for absence.id {}, file {}", 
         absence.getAbsenceFile().type(), absence.id, absence.getAbsenceFile().getFile());
 
-    String filename = String.format("assenza-%s-%s",
-        absence.getPersonDay().getPerson().getFullname().replace(" ", "-"),
-        absence.getAbsenceDate());
-    if (ImageUtils.fileExtension(absence.getAbsenceFile()).isPresent()) {
-      filename = 
-          String.format("%s%s", filename, ImageUtils.fileExtension(absence.getAbsenceFile()).get());
-    }
+    String filename = AttachmentFileNames.forAbsence(absence);
 
     renderBinary(absence.getAbsenceFile().get(), filename, absence.getAbsenceFile().length());
   }
