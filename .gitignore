@@ -33,3 +33,5 @@ lib/
 share/
 /lib64
 /pyvenv.cfg
+# analisi Trivy in locale (README_DEVELOPERS.md)
+/epas.tar
