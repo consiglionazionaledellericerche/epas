@@ -795,7 +795,7 @@ public class ReperibilityManager {
       } else if (!personDay.get().isHoliday() && !personDay.get().getAbsences().isEmpty()) {
         // check for absences
         for (Absence absence : personDay.get().getAbsences()) {
-          if (!absence.getAbsenceType().isReperibilityCompatible()) {
+          if (PersonDayManager.isAbsenceIncompatibleWithReperibility(absence)) {
             log.info("La reperibilità di {} è incompatibile con la sua assenza nel "
                 + "giorno {}", person.getFullname(), personReperibilityDay.getDate());
 

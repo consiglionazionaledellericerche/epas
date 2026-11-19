@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Chiudendo o accorciando un contratto i giorni del cartellino successivi alla fine del
     contratto vengono azzerati e non maturano più residuo. L'evoluzione 231 azzera i giorni
     già presenti fuori da ogni contratto (#693).
+  - Le assenze orarie non impediscono più la reperibilità: nel calendario di reperibilità,
+    nell'avviso mostrato inserendo un'assenza in un giorno di reperibilità e nel riepilogo
+    delle incongruenze sono considerate solo le assenze giornaliere con codice non compatibile
+    con la reperibilità (#702).
   - Ricalcolando i riepiloghi mensili da un mese di cui manca il riepilogo precedente, dopo la
     ricostruzione completa il mese richiesto e i successivi venivano ricalcolati di nuovo senza
     riepilogo precedente, azzerando i residui portati avanti (#710).
