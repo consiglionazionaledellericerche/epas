@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     dell'utente e i gruppi della sede: per un responsabile di sede sono circa 27 query in meno
     per pagina. Il badge delle richieste di congedo parentale da approvare, prima mai
     valorizzato, mostra il numero di richieste ed è incluso nel totale del menu (#708).
+  - Salvando un'assenza (per esempio ferie programmate) a due o più mesi da oggi non vengono più
+    ricalcolati tutti i riepiloghi mensili del contratto dall'inizio: i riepiloghi arrivano al
+    mese corrente e per i mesi successivi non c'è nulla da costruire (#710).
 
 ### Fixed
   - Chiudendo o accorciando un contratto i giorni del cartellino successivi alla fine del

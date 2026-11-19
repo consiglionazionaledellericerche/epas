@@ -34,7 +34,6 @@ import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperPersonDay;
 import helpers.jpa.AfterCommitJobs;
-import it.cnr.iit.epas.DateInterval;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -644,11 +643,12 @@ public class ConsistencyManager {
     for (Contract contract : person.getContracts()) {
 
       IWrapperContract wrContract = wrapperFactory.create(contract);
-      DateInterval contractDateInterval = wrContract.getContractDateInterval();
-      YearMonth endContractYearMonth = new YearMonth(contractDateInterval.getEnd());
 
-      // Se yearMonthFrom non è successivo alla fine del contratto...
-      if (!yearMonthFrom.isAfter(endContractYearMonth)) {
+      // I riepiloghi arrivano al più al mese corrente o, se precedente, al mese di fine
+      // contratto. Da un mese successivo non c'è nulla da costruire: senza questo controllo,
+      // mancando il riepilogo del mese precedente, verrebbero ricostruiti tutti i riepiloghi
+      // del contratto (#710).
+      if (!yearMonthFrom.isAfter(wrContract.getLastMonthToRecap())) {
 
         if (contract.getExtendedVacationPeriods().isEmpty()) {
           log.error("No vacation period {}", contract.toString());
