@@ -28,12 +28,14 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 import manager.recaps.recomputation.RecomputeRecap;
+import manager.services.absences.AbsenceService;
 import models.Contract;
 import models.ContractMandatoryTimeSlot;
 import models.ContractMonthRecap;
@@ -64,6 +66,7 @@ public class ContractManager {
   private final PersonDayInTroubleManager personDayInTroubleManager;
   private final WorkingTimeTypeDao workingTimeTypeDao;
   private final ContractDao contractDao;
+  private final AbsenceService absenceService;
 
   /**
    * Constructor.
@@ -72,13 +75,15 @@ public class ContractManager {
    * @param periodManager               {@link manager.PeriodManager}
    * @param personDayInTroubleManager   {@link manager.PersonDayInTroubleManager}
    * @param wrapperFactory              {@link IWrapperFactory}
+   * @param absenceService              {@link AbsenceService}
    */
   @Inject
   public ContractManager(
       final ConsistencyManager consistencyManager,
       final PeriodManager periodManager, final PersonDayInTroubleManager personDayInTroubleManager, 
       final WorkingTimeTypeDao workingTimeTypeDao,
-      final IWrapperFactory wrapperFactory, final ContractDao contractDao) {
+      final IWrapperFactory wrapperFactory, final ContractDao contractDao,
+      final AbsenceService absenceService) {
 
     this.consistencyManager = consistencyManager;
     this.periodManager = periodManager;
@@ -86,6 +91,7 @@ public class ContractManager {
     this.workingTimeTypeDao = workingTimeTypeDao;
     this.wrapperFactory = wrapperFactory;
     this.contractDao = contractDao;
+    this.absenceService = absenceService;
   }
 
   /**
@@ -452,7 +458,10 @@ public class ContractManager {
 
   /**
    * Sistema le durate dei piani ferie in relazione alle date dei piani ferie del contratto 
-   * precedente.
+   * precedente. Dei piani ferie del contratto precedente si considerano solo quelli compresi
+   * nel suo intervallo (vedi {@link Contract#getVacationPeriodsWithinContract()}): un 28+4
+   * rimasto oltre la fine del contratto precedente non deve far partire il nuovo contratto
+   * col 28+4 dal primo giorno.
    *
    * @param contract il contratto attuale
    * @param previousContract il contratto precedente
@@ -462,11 +471,15 @@ public class ContractManager {
     VacationPeriod twentyeightplus4 = null;
     VacationPeriod other = null;
     IWrapperContract wrappedContract = wrapperFactory.create(contract);
-    List<VacationPeriod> vpList = previousContract.getVacationPeriods();    
+    List<VacationPeriod> vpList = previousContract.getVacationPeriodsWithinContract();
     VacationPeriod vp = null;
     for (VacationPeriod vpPrevious : vpList) {
       if (vpPrevious.getVacationCode().equals(VacationCode.CODE_26_4)) {
-        twentysixplus4 = vpPrevious;
+        // se ci sono più periodi 26+4 conta il primo
+        if (twentysixplus4 == null
+            || vpPrevious.getBeginDate().isBefore(twentysixplus4.getBeginDate())) {
+          twentysixplus4 = vpPrevious;
+        }
       } else if (vpPrevious.getVacationCode().equals(VacationCode.CODE_28_4)) {
         twentyeightplus4 = vpPrevious;
       } else {
@@ -487,11 +500,19 @@ public class ContractManager {
     if (twentysixplus4 != null && twentyeightplus4 == null) {
       // si calcola la durata del piano ferie 26+4 e in base a quello il nuovo contratto parte con
       // 26+4 e 28+4 parte dopo 3 anni dall'inizio di 26+4 nel vecchio contratto
-      vp = new VacationPeriod();
-      vp.setContract(contract);
-      vp.setVacationCode(VacationCode.CODE_28_4);
-      vp.setBeginDate(twentysixplus4.getBeginDate().plusYears(3));
-      vp.setEndDate(contract.getEndDate());
+      LocalDate begin28 = twentysixplus4.getBeginDate().plusYears(3);
+      if (begin28.isBefore(contract.getBeginDate())) {
+        // i tre anni sono già trascorsi: il nuovo contratto parte col 28+4
+        begin28 = contract.getBeginDate();
+      }
+      LocalDate contractEnd = contract.calculatedEnd();
+      if (contractEnd == null || !begin28.isAfter(contractEnd)) {
+        vp = new VacationPeriod();
+        vp.setContract(contract);
+        vp.setVacationCode(VacationCode.CODE_28_4);
+        vp.setBeginDate(begin28);
+        vp.setEndDate(contract.getEndDate());
+      }
     }
     if (vp != null) {
       List<IPropertyInPeriod> periodRecaps = periodManager.updatePeriods(vp, false);
@@ -643,6 +664,80 @@ public class ContractManager {
     return contractFixed.get();
   }
   
+  /**
+   * Corregge i contratti terminati che hanno piani ferie oltre la loro data di fine: i piani
+   * che iniziano dopo la fine sono cancellati e l'ultimo è limitato alla fine del contratto
+   * (vedi {@link PeriodManager#updatePropertiesInPeriodOwner}). Sono svuotate le cache dei
+   * riepiloghi ferie del contratto e dei contratti collegati che lo hanno come precedente.
+   * Per questi ultimi segnala nel log quelli che hanno solo il piano 26+4 mentre per la
+   * continuità col precedente dovrebbero passare al 28+4: il loro piano ferie va verificato.
+   *
+   * @return il numero di contratti corretti.
+   */
+  public int fixVacationPeriodsAfterContractEnd() {
+    int fixed = 0;
+    for (Contract contract : contractDao.getContractsWithVacationPeriodsAfterEnd()) {
+      String before = describeVacationPeriods(contract);
+      periodManager.updatePropertiesInPeriodOwner(contract);
+      JPA.em().refresh(contract);
+      log.info("Piani ferie del contratto id={} (persona id={}, fine {}) limitati alla fine "
+          + "del contratto: prima {}, dopo {}", contract.getId(),
+          contract.getPerson().getId(), contract.calculatedEnd(), before,
+          describeVacationPeriods(contract));
+      absenceService.emptyVacationCache(contract);
+      for (Contract next : contract.getPerson().getContracts()) {
+        if (contract.equals(next.getPreviousContract())) {
+          absenceService.emptyVacationCache(next);
+          warnIfMissing28plus4(next, contract);
+        }
+      }
+      fixed++;
+    }
+    return fixed;
+  }
+
+  /**
+   * Segnala nel log il contratto collegato al precedente che non ha il piano 28+4 anche se,
+   * contando l'inizio del 26+4 nel contratto precedente, dovrebbe averlo.
+   */
+  private void warnIfMissing28plus4(Contract contract, Contract previousContract) {
+    LocalDate begin26 = null;
+    for (VacationPeriod vp : previousContract.getVacationPeriodsWithinContract()) {
+      if (vp.getVacationCode() == VacationCode.CODE_28_4) {
+        return;
+      }
+      if (vp.getVacationCode() == VacationCode.CODE_26_4
+          && (begin26 == null || vp.getBeginDate().isBefore(begin26))) {
+        begin26 = vp.getBeginDate();
+      }
+    }
+    if (begin26 == null) {
+      return;
+    }
+    LocalDate expected28 = begin26.plusYears(3);
+    LocalDate end = contract.calculatedEnd();
+    if (end != null && expected28.isAfter(end)) {
+      return;
+    }
+    for (VacationPeriod vp : contract.getVacationPeriods()) {
+      if (vp.getVacationCode() == VacationCode.CODE_28_4) {
+        return;
+      }
+    }
+    log.warn("Il contratto id={} (persona id={}) è collegato al precedente id={} ma non ha il "
+        + "piano ferie 28+4, che per la continuità dovrebbe iniziare il {}: verificare il piano "
+        + "ferie: {}", contract.getId(), contract.getPerson().getId(),
+        previousContract.getId(), expected28, describeVacationPeriods(contract));
+  }
+
+  private String describeVacationPeriods(Contract contract) {
+    return contract.getVacationPeriods().stream()
+        .sorted((a, b) -> a.getBeginDate().compareTo(b.getBeginDate()))
+        .map(vp -> vp.getVacationCode() + " " + vp.getBeginDate() + "/"
+            + (vp.getEndDate() != null ? vp.getEndDate() : "-"))
+        .collect(Collectors.joining(", ", "[", "]"));
+  }
+
   public boolean updateContractVacationPeriod(VacationPeriod vp) {
     Verify.verifyNotNull(vp.getContract());
     Verify.verifyNotNull(vp.getBeginDate());

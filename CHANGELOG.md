@@ -24,6 +24,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     contratto vengono azzerati e non maturano più residuo. L'evoluzione 231 azzera i giorni
     già presenti fuori da ogni contratto (#693).
 
+### Fixed
+  - Inserimento delle ferie con errore TwoPeriods per i contratti collegati al precedente
+    quando i piani ferie del contratto precedente vanno oltre la sua data di fine: nel calcolo
+    sono considerati solo fino alla fine del contratto precedente (#719).
+  - Collegando un contratto al precedente, i piani ferie del precedente oltre la sua data di
+    fine non sono più considerati: prima un 28+4 rimasto oltre la fine faceva partire il nuovo
+    contratto col 28+4 dal primo giorno, invece che dopo tre anni dall'inizio del 26+4 (#719).
+  - All'avvio un job limita alla data di fine i piani ferie dei contratti terminati che vanno
+    oltre e segnala nel log (WARN) i contratti collegati al precedente senza il piano 28+4 che
+    dovrebbero avere per la continuità. Per le persone interessate il riepilogo di ferie e
+    permessi può cambiare, perché prima i periodi sovrapposti entravano nel calcolo (#719).
+
 ## [2.42.0] - 2026-11-18
 ### Added
   - Content Security Policy in modalità di sola segnalazione: le pagine sono inviate con
