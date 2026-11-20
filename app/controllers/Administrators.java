@@ -17,6 +17,7 @@
 
 package controllers;
 
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -74,6 +75,7 @@ public class Administrators extends Controller {
    *
    * @param uro l'user_role_office da salvare
    */
+  @PostOnly
   public static void save(@Valid UsersRolesOffices uro) {
 
     if (Validation.hasErrors()) {
@@ -99,6 +101,7 @@ public class Administrators extends Controller {
    *
    * @param uroId l'id dell'user_role_office
    */
+  @PostOnly
   public static void delete(Long uroId) {
 
     final UsersRolesOffices uro = UsersRolesOffices.findById(uroId);

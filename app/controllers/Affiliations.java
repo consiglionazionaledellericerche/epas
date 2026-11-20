@@ -18,6 +18,7 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.AffiliationDao;
 import dao.GroupDao;
@@ -87,6 +88,7 @@ public class Affiliations extends Controller {
   /**
    * Inserimento/Modifica di un'affiliazione.
    */
+  @PostOnly
   public static void save(@Valid @Required Affiliation affiliation) {
     if (Validation.hasErrors()) {
       response.status = 400;

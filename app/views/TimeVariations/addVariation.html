@@ -45,7 +45,7 @@ title:'Recupero orario per assenza ' + absence.absenceType.code
   			<td><span class="badge">${tv.dateVariation.format()}</span></td>
   			<td>${(int)(tv.timeVariation / 60)} ore e ${tv.timeVariation % 60} minuti</td>
   			<td>
-      			#{secure.link @TimeVariations.removeVariation(tv.id)}
+      			#{secure.link @TimeVariations.removeVariation(tv.id), 'data-method':'post'}
 					Rimuovi
       			#{/secure.link}
   			</td>

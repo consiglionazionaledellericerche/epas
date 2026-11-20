@@ -70,7 +70,7 @@
 	#{b.buttons center:true}
 	#{if competenceRequest.type.equals(models.flows.enumerate.CompetenceRequestType.OVERTIME_REQUEST)}
 		#{secure.check 'CompetenceRequests.delete', target:competenceRequest}
-			#{b.link @delete(competenceRequest.id), color:'danger', title:'Revoca' /}
+			#{b.link @delete(competenceRequest.id), 'data-method':'post', color:'danger', title:'Revoca' /}
 		#{/secure.check}
 		#{secure.check 'CompetenceRequests.approval', target:competenceRequest}
 			<a class="btn btn-success btn-md" href="@{CompetenceRequests.approval(competenceRequest.id)}" data-async-modal="#defaultModal" color="primary" title="Approva">
@@ -85,10 +85,10 @@
     #{/if}
     #{else}
     	#{secure.check 'CompetenceRequests.delete', target:competenceRequest}
-			#{b.link @delete(competenceRequest.id), color:'danger', title:'Revoca' /}
+			#{b.link @delete(competenceRequest.id), 'data-method':'post', color:'danger', title:'Revoca' /}
 		#{/secure.check}
 		#{secure.check 'CompetenceRequests.approval', target:competenceRequest}
-			#{b.link @approval(competenceRequest.id), color:'success', title:'Approva'/}
+			#{b.link @approval(competenceRequest.id), 'data-method':'post', color:'success', title:'Approva'/}
 		#{/secure.check}
 		#{secure.check 'CompetenceRequests.disapproval', target:competenceRequest}
 			#{b.link @disapproval(competenceRequest.id, disapproval), 'data-async-modal': '#defaultModal', color:'warning', title:'Rifiuta'/}			

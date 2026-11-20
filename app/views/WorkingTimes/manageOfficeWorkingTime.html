@@ -79,7 +79,7 @@
 				    	  </a>    
 				    	  #{if wtt.getAssociatedActiveContract(office).size() == 0 }
 				    	    #{secure.check 'WorkingTimes.toggleWorkingTimeTypeEnabled'}
-				    	    <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.value.id)}">
+				    	    <a data-method="post" href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.value.id)}">
 				    	      <i data-toggle="tooltip" data-placement="bottom" title="Disattiva tipo orario non associato ad alcun contratto attivo" class="fa fa-power-off"></i>
 				    	    </a>
 				    	    #{/secure.check}
@@ -98,7 +98,7 @@
 				          ${wtt.getAssociatedContract().size()}
 				          #{if wtt.getAssociatedContract().size() == 0 }
 				            #{secure.check 'WorkingTimes.toggleWorkingTimeTypeEnabled'}
-				    	    <a href="@{WorkingTimes.delete(wtt.value.id)}">
+				    	    <a data-method="post" href="@{WorkingTimes.delete(wtt.value.id)}">
 				    	      <i data-toggle="tooltip" data-placement="bottom" title="Elimina tipo orario non associato ad alcun contratto" class="fa fa-trash-o"></i>
 				    	    </a>
 				    	    #{/secure.check}
@@ -152,7 +152,7 @@
 	
 				        <td class="center">
 							#{if !setting.disableMealTimeInWorkingTimeCreation}
-				          <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.value.id)}">
+				          <a data-method="post" href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.value.id)}">
 				    	    <i data-toggle="tooltip" data-placement="bottom" title="Riattiva tipo orario" class="fa fa-power-off"></i>
 				    	  </a>
 						  #{/if}
@@ -164,7 +164,7 @@
 				        <td  class="center">
 				          ${wtt.getAssociatedContract().size()}
 				          #{if wtt.getAssociatedContract().size() == 0 }
-				    	    <a href="@{WorkingTimes.delete(wtt.value.id)}">
+				    	    <a data-method="post" href="@{WorkingTimes.delete(wtt.value.id)}">
 				    	      <i data-toggle="tooltip" data-placement="bottom" title="Elimina tipo orario non associato ad alcun contratto" class="fa fa-trash-o"></i>
 				    	    </a>
 				    	  #{/if}

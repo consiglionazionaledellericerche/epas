@@ -16,8 +16,9 @@
     <p>Tornare alla pagina precedente, ricaricarla e ripetere l'operazione.</p>
     #{/if}
     #{elseif csrfProblem}
-    *{ altri rifiuti della verifica anti-CSRF: token assente, richiesta da un altro sito o
-       errore nella verifica, che ricaricare la pagina non risolve }*
+    *{ altri rifiuti della verifica anti-CSRF: token assente, richiesta da un altro sito,
+       azione PostOnly richiesta in GET o errore nella verifica, che ricaricare la pagina non
+       risolve }*
     <p class="lead">L'operazione non è stata eseguita perché la richiesta non ha superato i
       controlli di sicurezza.</p>
     <p>Se il problema si ripete anche dopo aver ricaricato la pagina, segnalarlo

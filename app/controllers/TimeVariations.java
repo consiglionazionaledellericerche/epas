@@ -20,6 +20,7 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Verify;
 import com.google.common.collect.Sets;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.OfficeDao;
@@ -97,6 +98,7 @@ public class TimeVariations extends Controller {
    * @param hours le ore da restituire
    * @param minutes i minuti da restituire
    */
+  @PostOnly
   public static void saveVariation(long absenceId, int hours, int minutes, 
       Optional<LocalDate> dateVariation) {
     final Absence absence = absenceDao.getAbsenceById(absenceId);
@@ -125,6 +127,7 @@ public class TimeVariations extends Controller {
    *
    * @param timeVariationId l'id della variazione oraria
    */
+  @PostOnly
   public static void removeVariation(long timeVariationId) {
     final TimeVariation timeVariation = timeVariationDao.getById(timeVariationId);
     notFoundIfNull(timeVariation);

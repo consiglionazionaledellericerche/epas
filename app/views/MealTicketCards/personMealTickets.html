@@ -53,7 +53,7 @@
 			Esistono buoni pasto elettronici non associati ad alcuna card (probabilmente frutto di inserimenti di buoni
 			elettronici nella vecchia modalità).
 			Premere su questo bottone per associarli tutti alla card attualmente in uso da parte del dipendente:
-			<a class="btn btn-xs btn-warning"
+			<a data-method="post" class="btn btn-xs btn-warning"
      		href="@{MealTicketCards.assignOrphanElectronicMealTickets(card.id, person.id)}">
      		Carica buoni elettronici sulla card attuale<i class="fa fa-card" aria-hidden="true"></i></a>	
    	 	#{/alert}

@@ -20,6 +20,7 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import common.security.ClientAddress;
+import common.security.PostOnly;
 import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -246,6 +247,7 @@ public class Clocks extends Controller {
    * @param stampType Causale timbratura
    * @param note      eventuali note.
    */
+  @PostOnly
   public static void insertWebStamping(WayType way, StampTypes stampType,
       @As(binder = NullStringBinder.class) String note) {
 

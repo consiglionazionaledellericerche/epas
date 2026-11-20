@@ -146,7 +146,7 @@
   <div class="text-center">
     <p>Associa a <strong>${badgeSystem.name}</strong> per tutti i dipendenti attivi di <strong>${badgeSystem.office.name}</strong>
       la matricola come codice badge.</p>
-    <a class="btn btn-primary" href="@{joinPersonNumbers(badgeSystem.id)}">
+    <a data-method="post" class="btn btn-primary" href="@{joinPersonNumbers(badgeSystem.id)}">
       Associa Matricole
     </a>
   </div>
@@ -165,7 +165,7 @@
     <p>E' possibile eliminare il &{'badgeSystem'} <strong>${badgeSystem.name}</strong> poichè non è
       associato ad
       alcuna &{'badgeReader'}.</p>
-    <a class="btn btn-danger" href=@{BadgeSystems.delete(badgeSystem.id)}>Elimina</a>
+    <a data-method="post" class="btn btn-danger" href=@{BadgeSystems.delete(badgeSystem.id)}>Elimina</a>
     #{/alert}
   </div>
   #{/if}

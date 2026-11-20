@@ -45,7 +45,7 @@
 	      #{/if}
 	      <span class="label label-success">${perseoContract.perseoId}</span>
 	      #{if contract.perseoId == null}
-	        <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinContract(contract.id, perseoContract.perseoId)}">Associa</a>
+	        <a data-method="post" class="btn btn btn-info btn-xs" href="@{Synchronizations.joinContract(contract.id, perseoContract.perseoId)}">Associa</a>
 	        #{if !contract.beginDate.isEqual(perseoContract.beginDate) }
 	          <i class="fa fa-warning text-danger" aria-hidden="true"
 	           popover-hover-2 data-content="Le date inizio non corrispondono..."></i> 
@@ -74,7 +74,7 @@
 #{alert color:'info'}
   <p>Associa tutti i contratti attivi in epas non ancora associati. 
   Verificare bene per tutti l'associazione suggerita sulla base del contratto attivo in perseo.
-    <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinAllActiveContractsInOffice(office.id)}">Associa</a>
+    <a data-method="post" class="btn btn btn-info btn-xs" href="@{Synchronizations.joinAllActiveContractsInOffice(office.id)}">Associa</a>
   </p>
 #{/alert}
 

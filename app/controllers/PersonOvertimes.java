@@ -16,6 +16,7 @@
  */
 package controllers;
 
+import common.security.PostOnly;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -67,6 +68,7 @@ public class PersonOvertimes extends Controller {
     render(personOvertimes, person, year, personOvertime);
   }
   
+  @PostOnly
   public static void saveHours(PersonOvertime personOvertime, 
       int year, Long personId) {
     Person person = personDao.getPersonById(personId);

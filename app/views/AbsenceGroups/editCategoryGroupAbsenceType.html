@@ -25,7 +25,7 @@
         <div class="container center">
             <a class="btn btn-default" href="@{AbsenceGroups.showCategories()}">Torna alle Categorie</a>
 	        <input class="btn btn-primary" type="submit" value="Ok">
-	        <a class="btn btn-danger" href="@{AbsenceGroups.deleteCategoryGroupAbsenceType(categoryGroupAbsenceType.id)}">Elimina</a>
+	        <a data-method="post" class="btn btn-danger" href="@{AbsenceGroups.deleteCategoryGroupAbsenceType(categoryGroupAbsenceType.id)}">Elimina</a>
         </div>
    #{/form}
 

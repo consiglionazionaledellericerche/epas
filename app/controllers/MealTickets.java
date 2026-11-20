@@ -22,6 +22,7 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.ContractDao;
 import dao.ContractMonthRecapDao;
@@ -267,6 +268,7 @@ public class MealTickets extends Controller {
    * @param deliveryDate     data consegna
    * @param expireDate       data scadenza
    */
+  @PostOnly
   public static void submitPersonMealTicket(Long contractId, @Required String codeBlock,
       @Required BlockType blockType,
       @Required @Min(1) @Max(99) Integer ticketNumberFrom,
@@ -385,6 +387,7 @@ public class MealTickets extends Controller {
    * @param undo       se voglio annullare la restituzione
    * @param confirmed  conferma
    */
+  @PostOnly
   public static void performReturnPersonCodeBlock(Long contractId, String codeBlock,
       int first, int last, boolean undo, boolean confirmed) {
 
@@ -472,6 +475,7 @@ public class MealTickets extends Controller {
    * @param last       al
    * @param confirmed  conferma
    */
+  @PostOnly
   public static void performDeletePersonCodeBlock(Long contractId, String codeBlock,
       int first, int last, boolean confirmed) {
 
@@ -554,6 +558,7 @@ public class MealTickets extends Controller {
    * @param contractId l'identificativo del contratto
    * @param codeBlock il codice del blocchetto da modificare
    */
+  @PostOnly
   public static void performConvertPersonCodeBlock(Long contractId, String codeBlock) {
     Contract contract = contractDao.getContractById(contractId);
     notFoundIfNull(contract);

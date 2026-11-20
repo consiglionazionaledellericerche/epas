@@ -70,7 +70,7 @@
 	       #{list items:wrOffice.seatSupervisor, as:'userRole'}
 	         <li class="list-group-item clearfix">
 						 <span class="label label-primary"> ${userRole.user.person.fullname}</span>
-             <a class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
+             <a data-method="post" class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
                <i class="fa fa-trash"></i> Rimuovi
              </a>
 	          </li>
@@ -89,7 +89,7 @@
 	       #{list items:wrOffice.technicalAdmins, as:'userRole'}
 	         <li class="list-group-item clearfix">
 						 <span class="label label-info"> ${userRole.user.person.fullname}</span>
-             <a class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
+             <a data-method="post" class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
                <i class="fa fa-trash"></i> Rimuovi
              </a>
 	          </li>
@@ -108,7 +108,7 @@
 			#{list items:wrOffice.personnelAdmins, as:'userRole'}
 			<li class="list-group-item clearfix">
 				<span class="label label-success"> ${userRole.user.person.fullname}</span>
-				<a class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
+				<a data-method="post" class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
 					<i class="fa fa-trash"></i> Rimuovi
 				</a>
 			</li>
@@ -124,7 +124,7 @@
           #{list items:wrOffice.miniAdmins, as:'userRole'}
           <li class="list-group-item clearfix">
             <span class="label label-warning"> ${userRole.user.person.fullname}</span>
-            <a class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
+            <a data-method="post" class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
               <i class="fa fa-trash"></i> Rimuovi
             </a>
           </li>
@@ -140,7 +140,7 @@
           #{list items:wrOffice.mealTicketManagers, as:'userRole'}
           <li class="list-group-item clearfix">
             <span class="label label-warning"> ${userRole.user.person.fullname}</span>
-            <a class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
+            <a data-method="post" class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
               <i class="fa fa-trash"></i> Rimuovi
             </a>
           </li>
@@ -156,7 +156,7 @@
           #{list items:wrOffice.registryManagers, as:'userRole'}
           <li class="list-group-item clearfix">
             <span class="label label-primary"> ${userRole.user.person.fullname}</span>
-            <a class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
+            <a data-method="post" class="label label-badge label-danger pull-right" href="@{Administrators.delete(userRole.id)}" webui-popover-hover data-content="Revoca Ruolo" >
               <i class="fa fa-trash"></i> Rimuovi
             </a>
           </li>
@@ -179,7 +179,7 @@
      #{accordionItem 'deleteItem', parent:'delete', title:'Eliminare questa sede', open:false, color:'danger'}
 	  <div class="text-danger center">
 	    E' possibile eliminare la sede ${office.name} poichè non ha alcun dipendente inserito.<br>
-		<a class="btn btn-danger" href=@{Offices.delete(office.id)}></i>Elimina</a> 
+		<a data-method="post" class="btn btn-danger" href=@{Offices.delete(office.id)}></i>Elimina</a> 
 	  </div>
      #{/accordionItem}
     #{/accordionGroup }  

@@ -39,7 +39,7 @@
 	        <span class="label label-primary">${perseoPerson.qualification}</span>
 	        <span class="label label-success">${perseoPerson.perseoId}</span>
 	        #{if epasPerson == null}
-	         <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importPerson(perseoPerson.perseoId)}">Importa</a>
+	         <a data-method="post" class="btn btn btn-info btn-xs" href="@{Synchronizations.importPerson(perseoPerson.perseoId)}">Importa</a>
 	        #{/if}#{else}
 	           #{if !properSynchronized}
 	            <i class="fa fa-warning fa-2x text-danger" aria-hidden="true"
@@ -52,7 +52,7 @@
 	             <span class="label label-default">${epasPerson.name}</span>
 	             <span class="label label-default">${epasPerson.surname}</span>
 	             <span class="label label-default">${epasPerson.qualification}</span>
-	             <a href="@{Synchronizations.syncPerson(epasPerson.id)}"
+	             <a data-method="post" href="@{Synchronizations.syncPerson(epasPerson.id)}"
 	           	 	class="btn btn-xs btn-info">sincronizza</a>	           
 	               
 	           #{/if}
@@ -83,11 +83,11 @@
 	             #{if epasContract.isTemporaryMissing && epasContract.endDate == null}
 	               <span class="label label-warning">Temporary</span>
 	             #{/if} 
-	             <a href="@{Synchronizations.syncPerson(epasPerson.id)}"
+	             <a data-method="post" href="@{Synchronizations.syncPerson(epasPerson.id)}"
 	             	class="btn btn-xs btn-info">sincronizza</a>
 	           #{/if}
 	        #{/if}#{else}
-	          <a class="btn btn btn-info btn-xs" 
+	          <a data-method="post" class="btn btn btn-info btn-xs" 
 	          href="@{Synchronizations.importContract(perseoContract.perseoId, perseoContract.person.id)}">Importa</a>
 	        #{/else}
 	      #{/list}
@@ -132,10 +132,10 @@
 
   #{alert color:'info'}
     <p>Importa tutte le persone non ancora importate. Verificare che tutte le persone strutturate siano correttamente associate.
-      <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importAllPersonInOffice(office.id)}">Importa</a>
+      <a data-method="post" class="btn btn btn-info btn-xs" href="@{Synchronizations.importAllPersonInOffice(office.id)}">Importa</a>
     </p>
     <p>Importa tutti i contratti non ancora importati.
-      <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importAllContractsInOffice(office.id)}">Importa</a>
+      <a data-method="post" class="btn btn btn-info btn-xs" href="@{Synchronizations.importAllContractsInOffice(office.id)}">Importa</a>
     </p>
   #{/alert}  
   

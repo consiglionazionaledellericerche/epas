@@ -24,6 +24,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import controllers.Resecure.BasicAuth;
 import dao.AbsenceDao;
@@ -502,6 +503,7 @@ public class Reperibility extends Controller {
    *
    */
   @BasicAuth
+  @PostOnly
   public static void exportMonthAsPDF(
       @Required int year, @Required int month, @Required Long type) {
 

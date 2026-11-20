@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -154,6 +155,7 @@ public class PersonMonths extends Controller {
    * @param month mese
    * @param year  anno
    */
+  @PostOnly
   public static void saveTrainingHours(@Valid @Min(0) Integer begin, @Min(0) @Valid Integer end,
       @Required @Valid @Min(0) Integer value, Integer month, Integer year, 
       Long personMonthSituationId) {
@@ -292,6 +294,7 @@ public class PersonMonths extends Controller {
    *
    * @param personMonthRecapId l'id delle ore di formazione da cancellare
    */
+  @PostOnly
   public static void deleteTrainingHoursConfirmed(Long personMonthRecapId) {
 
     PersonMonthRecap pm = personMonthRecapDao.getPersonMonthRecapById(personMonthRecapId);
@@ -313,6 +316,7 @@ public class PersonMonths extends Controller {
    * @param personMonthRecapId l'identificativo delle ore di formazione da eliminare
    * @param officeId l'identificativo della sede
    */
+  @PostOnly
   public static void deletePeopleTrainingHoursConfirmed(Long personMonthRecapId, Long officeId) {
     Office office = officeDao.getOfficeById(officeId);
     notFoundIfNull(office);
@@ -378,6 +382,7 @@ public class PersonMonths extends Controller {
    * @param year l'anno in cui si è fatta la formazione
    * @param person la persona che ha fatto la formazione
    */
+  @PostOnly
   public static void save(@Valid @Min(0) Integer begin, @Min(0) @Valid Integer end,
       @Required @Valid @Min(0) Integer value, Integer month, Integer year, Person person,
       Long personMonthSituationId) {
