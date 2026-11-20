@@ -19,10 +19,14 @@ package common.security;
 
 import com.google.common.base.Strings;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.IncorrectClaimException;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.MissingClaimException;
 import io.jsonwebtoken.SigningKeyResolver;
 import java.security.Key;
+import java.util.Set;
 
 /**
  * Validazione dei JWT utilizzati per l'autenticazione.
@@ -84,24 +88,40 @@ public final class JwtValidator {
   }
 
   /**
-   * Valida un access token rilasciato dall'identity provider OpenID Connect a ePAS.
+   * Valida un access token rilasciato dall'identity provider OpenID Connect a ePAS o ad uno
+   * degli altri client ammessi.
    *
    * @param jwt il token
    * @param resolver il resolver delle chiavi pubbliche dell'identity provider (JWKS)
    * @param issuer l'issuer atteso (quello dell'identity provider configurato)
-   * @param clientId il client id di ePAS, che deve corrispondere al claim azp
+   * @param clientIds i client ammessi (quello di ePAS ed eventuali altri, come l'app mobile),
+   *     uno dei quali deve corrispondere al claim azp
    * @return i claims del token validato
    */
   public static Claims validateOidc(
-      String jwt, SigningKeyResolver resolver, String issuer, String clientId) {
-    return Jwts.parserBuilder()
+      String jwt, SigningKeyResolver resolver, String issuer, Set<String> clientIds) {
+    Jws<Claims> jws = Jwts.parserBuilder()
         .setSigningKeyResolver(resolver)
         .requireIssuer(issuer)
-        .require(AUTHORIZED_PARTY, clientId)
         .require(TOKEN_TYPE, ACCESS_TOKEN_TYPE)
         .setAllowedClockSkewSeconds(ALLOWED_CLOCK_SKEW_SECONDS)
         .build()
-        .parseClaimsJws(jwt)
-        .getBody();
+        .parseClaimsJws(jwt);
+    Claims claims = jws.getBody();
+    String authorizedParty = claims.get(AUTHORIZED_PARTY, String.class);
+    if (Strings.isNullOrEmpty(authorizedParty)) {
+      MissingClaimException ex = new MissingClaimException(jws.getHeader(), claims,
+          "JWT privo del claim " + AUTHORIZED_PARTY);
+      ex.setClaimName(AUTHORIZED_PARTY);
+      throw ex;
+    }
+    if (!clientIds.contains(authorizedParty)) {
+      IncorrectClaimException ex = new IncorrectClaimException(jws.getHeader(), claims,
+          "JWT rilasciato al client non ammesso " + authorizedParty);
+      ex.setClaimName(AUTHORIZED_PARTY);
+      ex.setClaimValue(authorizedParty);
+      throw ex;
+    }
+    return claims;
   }
 }

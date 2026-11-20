@@ -23,6 +23,7 @@ nel docker-compose.yml di esempio:
       #- KEYCLOAK_CONFIG_URI=${KEYCLOAK_CONFIG_URI}       #Opzionale se OAUTH_LOGIN è false, altrimenti obbligatorio. default: file://${application.path}/conf/default-keycloak.json. Di solito è un URL dell'IdP OIDC
       #- KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}         #Opzionale. default: false.
       #- KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET} #Opzionale se OAUTH_LOGIN è false, altrimenti obbligatorio.
+      #- KEYCLOAK_ADDITIONAL_CLIENT_IDS=${KEYCLOAK_ADDITIONAL_CLIENT_IDS} #Opzionale. Altri client (separati da virgola) accettati dalle API REST, es. l'app mobile
       #- KEYCLOAK_JWT_FIELD=${KEYCLOAK_JWT_FIELD}         #Opzionale. default: email
 
 Per utilizzare l'autenticazione di tipo OAuth è necessario prima di tutto configurare sul proprio
@@ -56,6 +57,19 @@ autenticarsi tramite l'IDP OIDC configurato con i parametri di cui sopra.
    :scale: 80
 
    Pagina di login con autenticazione OIDC
+
+Access token di altri client (app mobile)
+-----------------------------------------
+Le API REST di ePAS accettano nell'header *Authorization: Bearer* gli access token rilasciati
+al client OIDC di ePAS (*KEYCLOAK_CLIENT_ID*). Per permettere ad altri client dello stesso realm,
+per esempio l'app mobile di ePAS, di chiamare le API REST con i propri access token è necessario
+elencarli, separati da virgola, nella variabile d'ambiente **KEYCLOAK_ADDITIONAL_CLIENT_IDS**
+(parametro *keycloak.additional_client_ids* nella configurazione di ePAS), per esempio
+*KEYCLOAK_ADDITIONAL_CLIENT_IDS=epas-mobile*.
+
+Per l'app mobile il client da creare sull'Identity Provider è di tipo *pubblico* (senza secret,
+con PKCE), con le *Valid Redirect URIs* previste dall'app. ePAS verifica firma, issuer e tipo
+dell'access token e che il claim *azp* corrisponda ad uno dei client ammessi.
 
 Match tra utenti Keycloak e utenti ePAS
 ------------------------------------------

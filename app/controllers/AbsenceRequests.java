@@ -25,7 +25,6 @@ import com.google.common.collect.Lists;
 import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.AbsenceRequestDao;
-import dao.GeneralSettingDao;
 import dao.GroupDao;
 import dao.PersonDao;
 import dao.PersonReperibilityDayDao;
@@ -48,6 +47,7 @@ import manager.NotificationManager.Crud;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.flows.AbsenceRequestManager;
+import manager.flows.AbsenceRequestManager.NewRequestOutcome;
 import manager.recaps.personstamping.PersonStampingRecap;
 import manager.recaps.personstamping.PersonStampingRecapFactory;
 import manager.services.absences.AbsenceForm;
@@ -141,9 +141,6 @@ public class AbsenceRequests extends Controller {
   @Inject
   static PersonReperibilityDayDao personReperibilityDayDao;
 
-  @Inject
-  static GeneralSettingDao generalSettingDao;
-  
   @Inject
   static AbsenceDao absenceDao;
 
@@ -658,28 +655,8 @@ public class AbsenceRequests extends Controller {
       absenceRequest.setPerson(currentPerson);
     }
 
-    absenceRequestManager.initNewRequest(absenceRequest);
-    absenceRequestManager.configure(absenceRequest);
-
-    if (absenceRequest.getEndTo() == null) {
-      absenceRequest.setEndTo(absenceRequest.getStartAt());
-    }
-    
-    if (absenceRequest.getType().equals(AbsenceRequestType.PERSONAL_PERMISSION) 
-        && absenceType.isAllDayPermitted()) {
-      absenceRequest.setHours(null);
-      absenceRequest.setMinutes(null);
-    } else {
-      absenceRequest.setHours(hours);
-      if (minutes != null) {
-        absenceRequest.setMinutes(minutes);
-      } else {
-        absenceRequest.setMinutes(0);
-      }    
-    }
-    if (!absenceCode.isBlank()) {
-      absenceRequest.setAbsenceCode(absenceCode);
-    }
+    absenceRequestManager.prepareNewRequest(absenceRequest, hours, minutes, absenceType,
+        absenceCode);
 
     // Le richieste di permesso personale devono essere inseribili per intero: i giorni oltre
     // il limite annuale non verrebbero inseriti all'approvazione della richiesta.
@@ -699,43 +676,14 @@ public class AbsenceRequests extends Controller {
       }
     }
 
-    boolean isNewRequest = !absenceRequest.isPersistent();
-    List<LocalDate> troubleDays = absenceRequestManager.getTroubleDays(absenceRequest);
-    if (!troubleDays.isEmpty()) {
-      absenceRequest.setNote(absenceRequestManager.generateNoteForShiftOrReperibility(troubleDays));
+    val outcome = absenceRequestManager.saveNewRequest(absenceRequest, hours, minutes,
+        absenceType, absenceCode, Security.getUser().get());
+
+    if (outcome == NewRequestOutcome.APPROVAL_FAILED) {
+      flash.error("Problemi nel completare l'operazione contattare il supporto tecnico di ePAS.");
+    } else {
+      flash.success("Operazione effettuata correttamente");
     }
-
-    absenceRequest.save();
-
-    // Avvia il flusso se necessario.
-    if (isNewRequest || !absenceRequest.isFlowStarted()) {
-      absenceRequestManager.executeEvent(absenceRequest, absenceRequest.getPerson(),
-          AbsenceRequestEventType.STARTING_APPROVAL_FLOW, Optional.absent());
-      
-      //Nel caso si tratti di una "comunicazione" di assenza da parte di 
-      //un livelli I-III e non sia necessaria nessuna autorizzazione, allora
-      //si invia solo una notifica al responsabile sede e/o responsabile gruppo
-      //(dipendente dalla configurazione)
-      if (!generalSettingDao.generalSetting().isEnableAbsenceTopLevelAuthorization() 
-          && absenceRequest.getPerson().isTopQualification() 
-          && absenceRequest.getType().canBeInsertedByTopLevelWithoutApproval) {
-        absenceRequestManager.topLevelSelfApproval(absenceRequest, absenceRequest.getPerson());
-        notificationManager.sendEmailAbsenceNotification(absenceRequest);
-      } else if (absenceRequest.getPerson().isSeatSupervisor() 
-          || (absenceRequest.getPerson().isGroupManager()
-          && !absenceRequest.isOfficeHeadApprovalForManagerRequired())) {
-        approval(absenceRequest.id);
-      } else {
-        // invio la notifica al primo che deve validare la mia richiesta
-        notificationManager.notificationAbsenceRequestPolicy(absenceRequest.getPerson().getUser(),
-            absenceRequest, Crud.CREATE);
-        // invio anche la mail
-        notificationManager.sendEmailAbsenceRequestPolicy(absenceRequest.getPerson().getUser(),
-            absenceRequest, true);
-      }
-
-    }
-    flash.success("Operazione effettuata correttamente");
 
     AbsenceRequests.list(absenceRequest.getType());
   }

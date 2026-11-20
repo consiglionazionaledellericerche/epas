@@ -34,6 +34,7 @@ import java.security.Key;
 import java.security.KeyPair;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.Set;
 import javax.crypto.SecretKey;
 import org.junit.Test;
 import play.test.UnitTest;
@@ -46,6 +47,7 @@ public class JwtValidatorTest extends UnitTest {
   private static final String OIDC_ISSUER = "https://sso.example.org/auth/realms/TEST";
   private static final String LOCAL_ISSUER = "https://epas.example.org/";
   private static final String CLIENT_ID = "epas";
+  private static final String MOBILE_CLIENT_ID = "epas-mobile";
   private static final String EMAIL = "mario.rossi@example.org";
 
   private static final KeyPair IDP_KEYS = Keys.keyPairFor(SignatureAlgorithm.RS256);
@@ -75,7 +77,8 @@ public class JwtValidatorTest extends UnitTest {
   }
 
   private static Claims validateOidc(String jwt) {
-    return JwtValidator.validateOidc(jwt, RESOLVER, OIDC_ISSUER, CLIENT_ID);
+    return JwtValidator.validateOidc(jwt, RESOLVER, OIDC_ISSUER,
+        Set.of(CLIENT_ID, MOBILE_CLIENT_ID));
   }
 
   @Test
@@ -100,6 +103,13 @@ public class JwtValidatorTest extends UnitTest {
   public void accessTokenOfAnotherIssuerIsRejected() {
     validateOidc(accessToken().setIssuer("https://sso.example.org/auth/realms/OTHER")
         .signWith(IDP_KEYS.getPrivate()).compact());
+  }
+
+  @Test
+  public void accessTokenOfAdditionalClientIsAccepted() {
+    String jwt = accessToken().claim("azp", MOBILE_CLIENT_ID)
+        .signWith(IDP_KEYS.getPrivate()).compact();
+    assertEquals(EMAIL, validateOidc(jwt).get("email", String.class));
   }
 
   @Test(expected = IncorrectClaimException.class)
