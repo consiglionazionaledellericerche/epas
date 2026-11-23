@@ -82,6 +82,11 @@ public class PersonDayManager {
 
   private static final Integer MAX_QUANTITY_TO_ALLOW_MEAL_TICKET = 240;
   private static final Integer WORKING_TIME_TO_ALLOW_MEAL_TICKET = 360;
+  /**
+   * Minuti minimi di tempo da timbrature per i livelli I-III, sotto i quali il giorno è
+   * segnalato come tempo a lavoro insufficiente.
+   */
+  public static final int MIN_STAMPINGS_TIME_FOR_TOP_LEVELS = 60;
 
   private final ConfigurationManager configurationManager;
   private final PersonDayInTroubleManager personDayInTroubleManager;
@@ -1088,17 +1093,53 @@ public class PersonDayManager {
       personDayInTroubleManager.fixTrouble(personDay, Troubles.UNCOUPLED_HOLIDAY);
     }
 
-    // ### CASO 4 Tempo a lavoro (di timbrature + assenze) non sufficiente
-    // Per i livelli 4-8 dev'essere almeno la metà del tempo a lavoro
-    if (personDay.getPerson().getQualification().getQualification() > 3
-        && isAllDayAbsences == false && personDay.isHoliday() == false
-        && personDay.getTimeAtWork() < (pd.getWorkingTimeTypeDay().get().getWorkingTime() / 2)) {
+    // ### CASO 4 Tempo a lavoro non sufficiente
+    if (isNotEnoughWorkTime(pd, isAllDayAbsences)) {
       personDayInTroubleManager.setTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
-
     } else {
       personDayInTroubleManager.fixTrouble(personDay, Troubles.NOT_ENOUGH_WORKTIME);
-
     }
+
+  }
+
+  /**
+   * Verifica se il tempo a lavoro del giorno è insufficiente.
+   * <ul>
+   * <li>Livelli IV-VIII: il tempo a lavoro (timbrature + assenze) dev'essere almeno la metà
+   * dell'orario previsto, salvo assenze giornaliere.</li>
+   * <li>Livelli I-III: il tempo da timbrature dev'essere almeno di
+   * {@value #MIN_STAMPINGS_TIME_FOR_TOP_LEVELS} minuti, salvo presenza automatica e assenze
+   * che giustificano tempo (giornaliere, a completamento o orarie). Le assenze che non
+   * giustificano niente non evitano la segnalazione.</li>
+   * </ul>
+   *
+   * @param pd il wrapper del giorno
+   * @param isAllDayAbsences se nel giorno c'è un'assenza giornaliera
+   * @return true se il tempo a lavoro del giorno è insufficiente.
+   */
+  boolean isNotEnoughWorkTime(IWrapperPersonDay pd, boolean isAllDayAbsences) {
+    final PersonDay personDay = pd.getValue();
+    if (personDay.isHoliday()) {
+      return false;
+    }
+    if (personDay.getPerson().getQualification().getQualification() > 3) {
+      return !isAllDayAbsences
+          && personDay.getTimeAtWork() < (pd.getWorkingTimeTypeDay().get().getWorkingTime() / 2);
+    }
+    if (pd.isFixedTimeAtWork() || hasAbsencesJustifyingTime(personDay)) {
+      return false;
+    }
+    return personDay.getStampingsTime() < MIN_STAMPINGS_TIME_FOR_TOP_LEVELS;
+  }
+
+  /**
+   * Se nel giorno c'è almeno un'assenza che giustifica tempo, cioè con un tipo di
+   * giustificazione diverso da "nothing".
+   */
+  private boolean hasAbsencesJustifyingTime(PersonDay personDay) {
+    return personDay.getAbsences().stream()
+        .anyMatch(abs -> abs.getJustifiedType() == null
+            || abs.getJustifiedType().getName() != JustifiedTypeName.nothing);
 
   }
 
