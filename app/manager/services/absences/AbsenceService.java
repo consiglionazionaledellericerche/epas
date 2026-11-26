@@ -32,6 +32,7 @@ import javax.inject.Inject;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import manager.AbsenceManager;
+import manager.PersonDayManager;
 import manager.SecureManager;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -793,7 +794,7 @@ public class AbsenceService {
         templateRow.groupAbsenceType = groupAbsenceType;
         insertReport.insertTemplateRows.add(templateRow);
         insertReport.absencesToPersist.add(templateRow.absence);
-        if (!templateRow.absence.getAbsenceType().isReperibilityCompatible()
+        if (PersonDayManager.isAbsenceIncompatibleWithReperibility(templateRow.absence)
             && absenceResponse.isDayInReperibility()) {
           templateRow.absenceWarnings.add(AbsenceError.builder().absence(templateRow.absence)
               .absenceProblem(AbsenceProblem.InReperibility).build());

@@ -40,6 +40,7 @@ import models.query.QContract;
 import models.query.QContractMandatoryTimeSlot;
 import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
+import models.query.QVacationPeriod;
 import org.joda.time.LocalDate;
 
 /**
@@ -338,5 +339,28 @@ public class ContractDao extends DaoBase {
                 contract.beginDate.before(contract.previousContract.beginDate)));
     return getQueryFactory().selectFrom(contract)
         .where(contractEqPreviousCondition.or(previousConditionAfterCurrentContract)).fetch();
+  }
+
+  /**
+   * Lista dei contratti terminati che hanno almeno un piano ferie oltre la loro data di fine
+   * (calculatedEnd): piani che finiscono dopo o che non hanno fine. Succede per esempio quando
+   * un contratto a tempo indeterminato viene chiuso senza accorciare i piani ferie.
+   *
+   * @return la lista dei contratti con piani ferie oltre la data di fine.
+   */
+  public List<Contract> getContractsWithVacationPeriodsAfterEnd() {
+    QContract contract = QContract.contract;
+    QVacationPeriod vacationPeriod = QVacationPeriod.vacationPeriod;
+    BooleanBuilder afterEndContract = new BooleanBuilder(contract.endContract.isNotNull()
+        .and(vacationPeriod.endDate.isNull()
+            .or(vacationPeriod.endDate.after(contract.endContract))));
+    BooleanBuilder afterEndDate = new BooleanBuilder(contract.endContract.isNull()
+        .and(contract.endDate.isNotNull())
+        .and(vacationPeriod.endDate.isNull()
+            .or(vacationPeriod.endDate.after(contract.endDate))));
+    return getQueryFactory().selectDistinct(contract).from(vacationPeriod)
+        .join(vacationPeriod.contract, contract)
+        .where(afterEndContract.or(afterEndDate))
+        .orderBy(contract.id.asc()).fetch();
   }
 }

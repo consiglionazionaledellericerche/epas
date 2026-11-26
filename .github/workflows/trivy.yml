@@ -1,0 +1,101 @@
+name: Trivy
+
+# Analisi delle vulnerabilità note (SCA) dell'immagine docker costruita dal commit:
+# pacchetti del sistema operativo e jar di Play e dell'applicazione. Dependabot non
+# legge conf/dependencies.yml, quindi per le librerie Java è l'unico controllo.
+#
+# Il job fallisce se trova vulnerabilità CRITICAL o HIGH non elencate in
+# .trivyignore.yaml, dove ogni eccezione ha il motivo e una data di scadenza. La
+# scansione settimanale fa emergere le vulnerabilità pubblicate dopo l'ultimo commit.
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '17 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trivy-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Immagine fissata per digest: un tag può essere spostato.
+  TRIVY_IMAGE: aquasec/trivy:0.76.1@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Build dell'immagine docker
+        run: |
+          docker build -t epas:trivy .
+          docker save epas:trivy -o epas.tar
+      -
+        # Database delle vulnerabilità (generale e Java): la chiave cambia ogni giorno,
+        # così il database è al più di un giorno prima e non viene riscaricato a ogni job.
+        # La cache dei layer analizzati resta in memoria (--cache-backend memory), così
+        # .trivy-cache contiene solo i database e non cresce con le immagini costruite.
+        name: Data per la cache del database
+        id: date
+        run: echo "day=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+      -
+        name: Cache del database di Trivy
+        uses: actions/cache@v4
+        with:
+          path: .trivy-cache
+          key: trivy-db-${{ steps.date.outputs.day }}
+          restore-keys: trivy-db-
+      -
+        # Report completo (tutte le severità, eccezioni comprese) da archiviare: non
+        # fa fallire il job.
+        name: Report completo
+        run: |
+          mkdir -p .trivy-cache
+          docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/work" -w /work "$TRIVY_IMAGE" image \
+            --cache-dir /work/.trivy-cache --cache-backend memory --skip-version-check \
+            --input epas.tar --scanners vuln --format json --output trivy-report.json
+      -
+        # Il gate: CRITICAL e HIGH al netto di .trivyignore.yaml. Il report completo ha
+        # già aggiornato il database, quindi qui non si riscarica. L'esito è letto senza
+        # pipe, così non dipende da pipefail: il riepilogo è scritto anche se il gate fallisce.
+        name: Vulnerabilità CRITICAL e HIGH
+        run: |
+          docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/work" -w /work "$TRIVY_IMAGE" image \
+            --cache-dir /work/.trivy-cache --cache-backend memory --skip-db-update \
+            --skip-java-db-update --skip-version-check --quiet --input epas.tar \
+            --scanners vuln --severity CRITICAL,HIGH --ignorefile .trivyignore.yaml \
+            --exit-code 1 --format table --table-mode detailed --show-suppressed \
+            --output trivy-gate.txt \
+            && status=0 || status=$?
+          touch trivy-gate.txt
+          cat trivy-gate.txt
+          {
+            echo '## Trivy: vulnerabilità CRITICAL e HIGH'
+            echo
+            echo 'Le eccezioni (Suppressed) sono motivate in `.trivyignore.yaml`; il report completo, con tutte le severità, è negli artifact del job.'
+            echo
+            echo '```'
+            cat trivy-gate.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit $status
+      -
+        name: Archivia i report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report
+          path: |
+            trivy-report.json
+            trivy-gate.txt
+          if-no-files-found: ignore

@@ -193,16 +193,52 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   }
 
   /**
+   * Ritorna i piani ferie del contratto limitati alla sua data di fine (calculatedEnd): quelli
+   * che iniziano dopo vengono ignorati e quelli che la superano (o sono senza fine) sono
+   * sostituiti da una copia (non persistita) che termina alla fine del contratto. Se il
+   * contratto non ha fine ritorna i piani ferie così come sono.
+   *
+   * @return i piani ferie del contratto compresi nel suo intervallo.
+   */
+  @Transient
+  public List<VacationPeriod> getVacationPeriodsWithinContract() {
+    List<VacationPeriod> within = new ArrayList<VacationPeriod>();
+    LocalDate end = calculatedEnd();
+    for (VacationPeriod period : getVacationPeriods()) {
+      if (end == null) {
+        within.add(period);
+        continue;
+      }
+      if (period.getBeginDate().isAfter(end)) {
+        continue;
+      }
+      if (period.getEndDate() == null || period.getEndDate().isAfter(end)) {
+        VacationPeriod trimmed = new VacationPeriod();
+        trimmed.setContract(this);
+        trimmed.setVacationCode(period.getVacationCode());
+        trimmed.setBeginDate(period.getBeginDate());
+        trimmed.setEndDate(end);
+        within.add(trimmed);
+      } else {
+        within.add(period);
+      }
+    }
+    return within;
+  }
+
+  /**
    * Ritorna la lista dei vacationPeriods del contratto e del precedente se presente.
+   * I piani ferie del contratto precedente sono limitati alla sua data di fine (vedi
+   * {@link #getVacationPeriodsWithinContract()}), in modo che non si sovrappongano ai piani
+   * ferie del contratto attuale.
    *
    * @return i vacationPeriods del contratto più quelli del contratto precedente se presente.
-   * 
    */
   @Transient
   public List<VacationPeriod> getExtendedVacationPeriods() {
     List<VacationPeriod> vp = new ArrayList<VacationPeriod>(getVacationPeriods());
     if (getPreviousContract() != null) {
-      vp.addAll(getPreviousContract().getVacationPeriods());
+      vp.addAll(getPreviousContract().getVacationPeriodsWithinContract());
     }
     return vp;
   }

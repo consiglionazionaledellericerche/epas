@@ -11,6 +11,79 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     In permissions.drl tre regole sui flussi di approvazione usano isManagerApproved() e
     simili al posto del confronto della data con null, non più accettato (#698).
 
+## [2.43.0] - 2026-11-19
+### Changed
+  - Gli allegati delle assenze si scaricano con un nome composto da anno, mese, giorno, codice
+    di assenza, cognome e nome del dipendente (es. 2026-11-18-111-Rossi-Mario.pdf), sia
+    singolarmente sia nello zip mensile per codice, che prima conteneva file senza nome
+    leggibile e senza estensione (#703).
+  - L'endpoint REST /rest/absences/attachment restituisce l'allegato con lo stesso nome
+    (prima era assenza-Nome-Cognome-data.ext): le integrazioni che usano il nome del file
+    indicato nel Content-Disposition devono adeguarsi (#703).
+  - Il menu dei flussi di lavoro, presente in tutte le pagine, calcola i conteggi delle
+    richieste da approvare una sola volta per richiesta HTTP, leggendo una sola volta i ruoli
+    dell'utente e i gruppi della sede: per un responsabile di sede sono circa 27 query in meno
+    per pagina. Il badge delle richieste di congedo parentale da approvare, prima mai
+    valorizzato, mostra il numero di richieste ed è incluso nel totale del menu (#708).
+  - Salvando un'assenza (per esempio ferie programmate) a due o più mesi da oggi non vengono più
+    ricalcolati tutti i riepiloghi mensili del contratto dall'inizio: i riepiloghi arrivano al
+    mese corrente e per i mesi successivi non c'è nulla da costruire (#710).
+
+### Fixed
+  - Chiudendo o accorciando un contratto i giorni del cartellino successivi alla fine del
+    contratto vengono azzerati e non maturano più residuo. L'evoluzione 231 azzera i giorni
+    già presenti fuori da ogni contratto (#693).
+  - Le assenze orarie non impediscono più la reperibilità: nel calendario di reperibilità,
+    nell'avviso mostrato inserendo un'assenza in un giorno di reperibilità e nel riepilogo
+    delle incongruenze sono considerate solo le assenze giornaliere con codice non compatibile
+    con la reperibilità (#702).
+  - Ricalcolando i riepiloghi mensili da un mese di cui manca il riepilogo precedente, dopo la
+    ricostruzione completa il mese richiesto e i successivi venivano ricalcolati di nuovo senza
+    riepilogo precedente, azzerando i residui portati avanti (#710).
+
+### Fixed
+  - Inserimento delle ferie con errore TwoPeriods per i contratti collegati al precedente
+    quando i piani ferie del contratto precedente vanno oltre la sua data di fine: nel calcolo
+    sono considerati solo fino alla fine del contratto precedente (#719).
+  - Collegando un contratto al precedente, i piani ferie del precedente oltre la sua data di
+    fine non sono più considerati: prima un 28+4 rimasto oltre la fine faceva partire il nuovo
+    contratto col 28+4 dal primo giorno, invece che dopo tre anni dall'inizio del 26+4 (#719).
+  - All'avvio un job limita alla data di fine i piani ferie dei contratti terminati che vanno
+    oltre e segnala nel log (WARN) i contratti collegati al precedente senza il piano 28+4 che
+    dovrebbero avere per la continuità. Per le persone interessate il riepilogo di ferie e
+    permessi può cambiare, perché prima i periodi sovrapposti entravano nel calcolo (#719).
+
+## [2.42.0] - 2026-11-18
+### Added
+  - Content Security Policy in modalità di sola segnalazione: le pagine sono inviate con
+    l'header Content-Security-Policy-Report-Only e le violazioni segnalate dai browser sono
+    scritte nel log (WARN), senza bloccare nulla. Il comportamento si configura con csp.mode
+    (CSP_MODE nel docker: off, report, enforce) e la policy con csp.policy (#687).
+  - Workflow GitHub Actions che analizza con Trivy l'immagine docker (pacchetti del sistema
+    operativo e jar) a ogni pull request, su main e ogni settimana. Fallisce con vulnerabilità
+    CRITICAL o HIGH non elencate in .trivyignore.yaml, dove ogni eccezione è motivata e ha una
+    scadenza (#705).
+
+### Changed
+  - Le azioni del vecchio calendario di reperibilità e turni (/reperibility/{type}/... e
+    /shift/{type}/..., usate in passato dal portale sistorg) verificano che la reperibilità o
+    il turno siano di una sede su cui l'utente ha il ruolo, e registrano ogni chiamata nel log
+    a livello INFO ("API del vecchio calendario"). L'interfaccia di ePAS non le usa più: in
+    assenza di chiamate saranno rimosse in una prossima versione. Non cambiano le esportazioni
+    PDF e i calendari iCal (#696).
+  - Gli script e i fogli di stile caricati dai CDN hanno gli attributi integrity (Subresource
+    Integrity) e crossorigin: il browser li usa solo se corrispondono all'hash indicato nella
+    pagina. Fanno eccezione il loader di Google Charts e il css di Google Fonts, che non hanno
+    un contenuto fisso. Gli indirizzi senza protocollo (//...) sono ora in https (#690).
+  - ivy 2.4.0 di play è sostituita dalla 2.5.2, usata da play all'avvio per caricare i
+    moduli. ant non è più inclusa nell'immagine docker, così come la cartella lib-test di play,
+    che serve solo alla sua compilazione (#684).
+  - La presenza giornaliera legge in blocco giorni, timbrature, assenze e contratti di tutte
+    le persone della sede, invece di qualche query per ogni persona, e per il giorno corrente
+    non rilegge più il mese di ogni persona in servizio per calcolare un progressivo che la
+    pagina non mostra. Vale anche per la presenza giornaliera del responsabile di gruppo e per
+    il sorteggio del controllo green pass (#709).
+
 ## [2.41.0] - 2026-11-16
 ### Added
   - Test end-to-end con Playwright (cartella e2e/), eseguiti in un browser contro l'immagine

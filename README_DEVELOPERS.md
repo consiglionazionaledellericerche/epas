@@ -99,6 +99,19 @@ play autotest
 I test end-to-end con Playwright (template e javascript in un browser vero) sono nella
 cartella `e2e/`: vedi [e2e/README.md](e2e/README.md).
 
+Il workflow `.github/workflows/trivy.yml` analizza l'immagine docker con Trivy e fallisce con
+vulnerabilità CRITICAL o HIGH non elencate in `.trivyignore.yaml`. Per ripetere il controllo in
+locale:
+
+```
+docker build -t epas:trivy . && docker save epas:trivy -o epas.tar
+docker run --rm -v "$PWD:/work" -w /work aquasec/trivy:0.76.1 image --input epas.tar \
+  --scanners vuln --severity CRITICAL,HIGH --ignorefile .trivyignore.yaml --show-suppressed
+```
+
+Una nuova eccezione in `.trivyignore.yaml` va motivata (perché ePAS non è esposto, o quale issue
+la risolve) e legata al percorso del jar, con una data di scadenza.
+
 QueryDSL
 --------
 Per ricompilare i Q<model>:
