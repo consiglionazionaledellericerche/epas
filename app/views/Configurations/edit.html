@@ -57,6 +57,12 @@
 		#{f.hidden 'configuration.id', value:configuration.id /}
 		
 		#{f.hidden 'confirmed' /}
+		#{if !confirmed && configuration.epasParam.periodic && validityBeginLimit}
+		  <p class="text-muted text-center">
+		    L'inizio della validità non può essere precedente al
+		    <strong>${validityBeginLimit.format()}</strong>.
+		  </p>
+		#{/if}
 		#{configuration.typeform configuration:configuration, confirmed:confirmed, 
 		configurationDto:configurationDto /}
 		

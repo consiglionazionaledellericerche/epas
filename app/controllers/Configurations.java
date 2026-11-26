@@ -49,6 +49,7 @@ import models.Office;
 import models.Person;
 import models.PersonConfiguration;
 import models.base.IPropertyInPeriod;
+import models.enumerate.AccountRole;
 import models.enumerate.AttachmentType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -335,6 +336,35 @@ public class Configurations extends Controller {
   }
 
   /**
+   * Per gli utenti che non sono amministratori di sistema l'inizio della validità di un
+   * parametro periodico della sede non può essere precedente al primo gennaio dell'anno
+   * precedente (#731): una data più vecchia farebbe ricalcolare anni di dati per tutta la sede.
+   *
+   * @param configurationDto i dati della modifica
+   */
+  private static void checkValidityBeginLimit(ConfigurationDto configurationDto) {
+    LocalDate limit = validityBeginLimit();
+    if (limit != null && configurationDto.validityBegin != null
+        && configurationDto.validityBegin.isBefore(limit)) {
+      Validation.addError("configurationDto.validityBegin",
+          "non può essere precedente al " + limit.toString("dd/MM/yyyy") + ".");
+    }
+  }
+
+  /**
+   * L'inizio più vecchio ammesso per la validità di un parametro periodico della sede per
+   * l'utente corrente.
+   *
+   * @return il primo gennaio dell'anno precedente, null per gli amministratori di sistema.
+   */
+  private static LocalDate validityBeginLimit() {
+    if (Security.getUser().get().hasAccountRoles(AccountRole.DEVELOPER, AccountRole.ADMIN)) {
+      return null;
+    }
+    return ConfigurationManager.minValidityBegin(LocalDate.now());
+  }
+
+  /**
    * Aggiunge al riepilogo il costo del ricalcolo della sede: persone e giornate coinvolte.
    *
    * @param recomputeRecap il riepilogo del ricalcolo
@@ -394,8 +424,9 @@ public class Configurations extends Controller {
       configurationDto.validityBegin = ConfigurationManager.proposedValidityBegin(
           configuration.getBeginDate(), configuration.calculatedEnd(), LocalDate.now());
     }
+    LocalDate validityBeginLimit = validityBeginLimit();
 
-    render(configuration, configurationDto);
+    render(configuration, configurationDto, validityBeginLimit);
   }
 
   /**
@@ -413,13 +444,18 @@ public class Configurations extends Controller {
 
     rules.checkIfPermitted(configuration);
 
+    if (configuration.getEpasParam().isPeriodic()) {
+      checkValidityBeginLimit(configurationDto);
+    }
+
     Configuration newConfiguration = (Configuration) compute(configuration,
         configuration.getEpasParam(), configurationDto);
 
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors: {}", validation.errorsMap());
-      render("@edit", configuration, configurationDto);
+      LocalDate validityBeginLimit = validityBeginLimit();
+      render("@edit", configuration, configurationDto, validityBeginLimit);
     }
 
     Verify.verifyNotNull(newConfiguration);

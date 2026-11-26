@@ -30,6 +30,8 @@ import models.Configuration;
 import models.Office;
 import models.Person;
 import models.Role;
+import models.User;
+import models.enumerate.AccountRole;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 import play.db.jpa.JPA;
@@ -39,7 +41,9 @@ import play.test.FunctionalTest;
 
 /**
  * Test funzionali sulla modifica dei parametri periodici della sede (#731): la validità
- * proposta parte dal mese corrente e la pagina di conferma mostra il costo del ricalcolo.
+ * proposta parte dal mese corrente, per chi non è amministratore di sistema non può iniziare
+ * prima del primo gennaio dell'anno precedente e la pagina di conferma mostra il costo del
+ * ricalcolo.
  *
  * <p>Le richieste HTTP sono eseguite in un'altra transazione: i dati preparati dal test sono
  * resi visibili con il commit della transazione corrente.</p>
@@ -75,17 +79,51 @@ public class OfficeConfigurationsTest extends FunctionalTest {
     String content = getContent(response);
     assertTrue(content.contains("value=\"" + format(currentMonthBegin()) + "\""));
     assertFalse(content.contains("value=\"" + format(OFFICE_BEGIN) + "\""));
+    assertTrue(content.matches("(?s).*non può essere precedente al\\s*<strong>"
+        + format(validityBeginLimit()) + "</strong>.*"));
   }
 
   /**
-   * Applicando il nuovo valore dall'inizio del periodo la conferma mostra persone e giornate
-   * da ricalcolare, l'avviso per il ricalcolo di più di un anno e l'alternativa di applicarlo
-   * dal mese corrente. Senza conferma non cambia nulla.
+   * L'amministratore del personale non può applicare il nuovo valore da prima del primo
+   * gennaio dell'anno precedente: il form è ripresentato con l'errore. Da quella data in poi
+   * la modifica arriva alla conferma.
+   */
+  @Test
+  public void updateBeforeLimitRejectedForPersonnelAdmin() {
+    Office office = officeWithEmployee();
+    String username = personnelAdmin(office);
+    Configuration lunchInterval = lunchInterval(office);
+    commit();
+
+    login(username);
+    Response response = POST(updateUrl(), updateParams(lunchInterval, OFFICE_BEGIN, false));
+    assertStatus(400, response);
+    String content = getContent(response);
+    assertTrue(content.contains(
+        "non può essere precedente al " + format(validityBeginLimit()) + "."));
+    assertFalse(content.contains("Persone coinvolte"));
+
+    response = POST(updateUrl(), updateParams(lunchInterval, validityBeginLimit(), false));
+    assertStatus(400, response);
+    content = getContent(response);
+    assertFalse(content.contains("non può essere precedente al"));
+    assertTrue(content.contains("dal <strong>" + format(validityBeginLimit()) + "</strong>"));
+    assertTrue(content.contains("Persone coinvolte: <strong>1</strong>"));
+
+    JPA.em().clear();
+    assertEquals(DEFAULT_LUNCH_INTERVAL,
+        ((Configuration) Configuration.findById(lunchInterval.id)).getFieldValue());
+  }
+
+  /**
+   * L'amministratore di sistema può applicare il nuovo valore dall'inizio del periodo: la
+   * conferma mostra persone e giornate da ricalcolare, l'avviso per il ricalcolo di più di un
+   * anno e l'alternativa di applicarlo dal mese corrente. Senza conferma non cambia nulla.
    */
   @Test
   public void updateFromPeriodBeginShowsCostAndSuggestion() {
     Office office = officeWithEmployee();
-    String username = personnelAdmin(office);
+    String username = systemAdmin(office);
     Configuration lunchInterval = lunchInterval(office);
     commit();
 
@@ -158,6 +196,10 @@ public class OfficeConfigurationsTest extends FunctionalTest {
     // Periodo concluso
     assertEquals(OFFICE_BEGIN, ConfigurationManager.proposedValidityBegin(
         OFFICE_BEGIN, new LocalDate(2025, 12, 31), today));
+    // Limite all'inizio della validità: primo gennaio dell'anno precedente
+    assertEquals(new LocalDate(2025, 1, 1), ConfigurationManager.minValidityBegin(today));
+    assertEquals(new LocalDate(2025, 1, 1),
+        ConfigurationManager.minValidityBegin(new LocalDate(2026, 1, 1)));
   }
 
   /**
@@ -169,6 +211,16 @@ public class OfficeConfigurationsTest extends FunctionalTest {
     return person.getOffice();
   }
 
+  /**
+   * Amministratore del personale della sede che è anche amministratore di sistema.
+   */
+  private String systemAdmin(Office office) {
+    User user = h2Examples.userWithOfficeRole(office, Role.PERSONNEL_ADMIN);
+    user.getRoles().add(AccountRole.ADMIN);
+    user.save();
+    return user.getUsername();
+  }
+
   private String personnelAdmin(Office office) {
     return h2Examples.userWithOfficeRole(office, Role.PERSONNEL_ADMIN).getUsername();
   }
@@ -176,6 +228,10 @@ public class OfficeConfigurationsTest extends FunctionalTest {
   private Configuration lunchInterval(Office office) {
     return Configuration.find("office = ?1 and epasParam = ?2", office,
         EpasParam.LUNCH_INTERVAL).first();
+  }
+
+  private static LocalDate validityBeginLimit() {
+    return new LocalDate(LocalDate.now().getYear() - 1, 1, 1);
   }
 
   private static LocalDate currentMonthBegin() {

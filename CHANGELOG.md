@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     della validità il primo giorno del mese corrente invece dell'inizio del periodo in corso,
     che spesso coincide con l'attivazione della sede e faceva ricalcolare anni di dati. Una data
     passata resta possibile se scelta esplicitamente (#731).
+  - L'inizio della validità di un parametro periodico della sede non può essere precedente al
+    primo gennaio dell'anno precedente, salvo per gli amministratori di sistema (#731).
   - La conferma della modifica di un parametro della sede mostra le persone coinvolte e le
     giornate da ricalcolare; se il ricalcolo riguarda più di un anno è evidenziato con un avviso
     e si può applicare il nuovo valore dal mese corrente senza reinserirlo (#731).

@@ -306,6 +306,18 @@ public class ConfigurationManager {
   }
 
   /**
+   * La data più vecchia ammessa come inizio della validità di un parametro periodico della sede
+   * per gli utenti che non sono amministratori di sistema: il primo gennaio dell'anno
+   * precedente (#731).
+   *
+   * @param today la data odierna
+   * @return il primo gennaio dell'anno precedente a quello di today
+   */
+  public static LocalDate minValidityBegin(LocalDate today) {
+    return new LocalDate(today.getYear() - 1, 1, 1);
+  }
+
+  /**
    * Verifica se l'utente può modificare il parametro di configurazione della persona.
    * Il limite personale di lavoro agile è modificabile solo dagli amministratori di sistema
    * e dai gestori dell'anagrafica.
