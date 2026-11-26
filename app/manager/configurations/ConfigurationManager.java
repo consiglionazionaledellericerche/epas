@@ -281,6 +281,43 @@ public class ConfigurationManager {
   }
 
   /**
+   * L'inizio della validità da proporre nella modifica di un periodo di un parametro periodico.
+   *
+   * <p>Per un periodo in corso iniziato prima del mese corrente si propone il primo giorno del
+   * mese corrente: proporre l'inizio del periodo farebbe applicare il nuovo valore anche a tutti
+   * i giorni passati e ricalcolare anni di dati (#731). Per un periodo futuro, iniziato nel mese
+   * corrente o già concluso si mantiene il suo inizio.</p>
+   *
+   * @param periodBegin l'inizio del periodo
+   * @param periodEnd la fine del periodo, null se indeterminata
+   * @param today la data odierna
+   * @return la data da proporre come inizio della validità
+   */
+  public static LocalDate proposedValidityBegin(LocalDate periodBegin, LocalDate periodEnd,
+      LocalDate today) {
+    LocalDate currentMonthBegin = today.dayOfMonth().withMinimumValue();
+    if (periodBegin == null || !periodBegin.isBefore(currentMonthBegin)) {
+      return periodBegin;
+    }
+    if (periodEnd != null && periodEnd.isBefore(today)) {
+      return periodBegin;
+    }
+    return currentMonthBegin;
+  }
+
+  /**
+   * La data più vecchia ammessa come inizio della validità di un parametro periodico della sede
+   * per gli utenti che non sono amministratori di sistema: il primo gennaio dell'anno
+   * precedente (#731).
+   *
+   * @param today la data odierna
+   * @return il primo gennaio dell'anno precedente a quello di today
+   */
+  public static LocalDate minValidityBegin(LocalDate today) {
+    return new LocalDate(today.getYear() - 1, 1, 1);
+  }
+
+  /**
    * Verifica se l'utente può modificare il parametro di configurazione della persona.
    * Il limite personale di lavoro agile è modificabile solo dagli amministratori di sistema
    * e dai gestori dell'anagrafica.

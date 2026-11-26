@@ -1,7 +1,7 @@
  *{
     recomputeRecap: il recap delle modifiche
  }*
- #{if _recomputeRecap.initMissing}
+ #{if _recomputeRecap.initMissing || _recomputeRecap.longRecomputation}
   %{ color = 'danger' }%
  #{/if}
  #{else}
@@ -23,7 +23,22 @@
 		 	        dal <strong>${_recomputeRecap.recomputeFrom.format()}</strong>
 		 	        al <strong>${_recomputeRecap.recomputeTo.get().format()}</strong> 
 		 	        per un totale di <strong>${_recomputeRecap.days}</strong> giorni.
-		 	  </p>			
+		 	  </p>
+			  #{if _recomputeRecap.persons != null}
+			  <p>
+			        Persone coinvolte: <strong>${_recomputeRecap.persons}</strong>,
+			        per un totale di <strong>${_recomputeRecap.personDays}</strong> giornate da ricalcolare.
+			  </p>
+			  #{/if}
+			  #{if _recomputeRecap.longRecomputation}
+			  <p>
+			        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+			        <strong>Attenzione:</strong> il ricalcolo riguarda più di un anno di dati.
+			        Il nuovo valore sarà applicato anche ai mesi passati, compresi quelli già chiusi,
+			        modificandone tempi a lavoro, residui e buoni pasto. L'operazione può richiedere
+			        molto tempo.
+			  </p>
+			  #{/if}
 	  #{/if}	
 	  #{else}
 		      <p>Per questa modifica non sono necessari ricalcoli.</p>

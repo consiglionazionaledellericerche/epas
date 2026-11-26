@@ -49,6 +49,7 @@ import models.Office;
 import models.Person;
 import models.PersonConfiguration;
 import models.base.IPropertyInPeriod;
+import models.enumerate.AccountRole;
 import models.enumerate.AttachmentType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -335,6 +336,76 @@ public class Configurations extends Controller {
   }
 
   /**
+   * Per gli utenti che non sono amministratori di sistema l'inizio della validità di un
+   * parametro periodico della sede non può essere precedente al primo gennaio dell'anno
+   * precedente (#731): una data più vecchia farebbe ricalcolare anni di dati per tutta la sede.
+   *
+   * @param configurationDto i dati della modifica
+   */
+  private static void checkValidityBeginLimit(ConfigurationDto configurationDto) {
+    LocalDate limit = validityBeginLimit();
+    if (limit != null && configurationDto.validityBegin != null
+        && configurationDto.validityBegin.isBefore(limit)) {
+      Validation.addError("configurationDto.validityBegin",
+          "non può essere precedente al " + limit.toString("dd/MM/yyyy") + ".");
+    }
+  }
+
+  /**
+   * L'inizio più vecchio ammesso per la validità di un parametro periodico della sede per
+   * l'utente corrente.
+   *
+   * @return il primo gennaio dell'anno precedente, null per gli amministratori di sistema.
+   */
+  private static LocalDate validityBeginLimit() {
+    if (Security.getUser().get().hasAccountRoles(AccountRole.DEVELOPER, AccountRole.ADMIN)) {
+      return null;
+    }
+    return ConfigurationManager.minValidityBegin(LocalDate.now());
+  }
+
+  /**
+   * Aggiunge al riepilogo il costo del ricalcolo della sede: persone e giornate coinvolte.
+   *
+   * @param recomputeRecap il riepilogo del ricalcolo
+   * @param office la sede
+   */
+  private static void setRecomputationCost(RecomputeRecap recomputeRecap, Office office) {
+    if (!recomputeRecap.needRecomputation || recomputeRecap.epasParam.recomputationTypes.isEmpty()
+        || recomputeRecap.recomputeFrom == null || !recomputeRecap.recomputeTo.isPresent()) {
+      return;
+    }
+    recomputeRecap.persons = personDao.countActiveInInterval(office,
+        recomputeRecap.recomputeFrom, recomputeRecap.recomputeTo.get());
+    recomputeRecap.personDays = recomputeRecap.persons * recomputeRecap.days;
+    recomputeRecap.longRecomputation =
+        recomputeRecap.recomputeFrom.isBefore(LocalDate.now().minusYears(1));
+  }
+
+  /**
+   * L'inizio della validità da suggerire nella pagina di conferma, al posto di quello scelto,
+   * quando il ricalcolo parte da prima del mese corrente.
+   *
+   * @param epasParam il parametro
+   * @param configurationDto i dati della modifica
+   * @param recomputeRecap il riepilogo del ricalcolo
+   * @return la data da suggerire, null se non c'è un'alternativa più recente.
+   */
+  private static LocalDate suggestedBegin(EpasParam epasParam,
+      ConfigurationDto configurationDto, RecomputeRecap recomputeRecap) {
+    if (!epasParam.isPeriodic() || epasParam.recomputationTypes.isEmpty()
+        || !recomputeRecap.needRecomputation) {
+      return null;
+    }
+    LocalDate suggested = ConfigurationManager.proposedValidityBegin(
+        configurationDto.validityBegin, configurationDto.validityEnd, LocalDate.now());
+    if (suggested == null || suggested.equals(configurationDto.validityBegin)) {
+      return null;
+    }
+    return suggested;
+  }
+
+  /**
    * Edit del parametro di configurazione.
    *
    * @param configurationId l'id della configurazione da editare.
@@ -349,8 +420,13 @@ public class Configurations extends Controller {
         configuration.getBeginDate(), configuration.calculatedEnd(),
         configurationManager.parseValue(
             configuration.getEpasParam(), configuration.getFieldValue()));
+    if (configuration.getEpasParam().isPeriodic()) {
+      configurationDto.validityBegin = ConfigurationManager.proposedValidityBegin(
+          configuration.getBeginDate(), configuration.calculatedEnd(), LocalDate.now());
+    }
+    LocalDate validityBeginLimit = validityBeginLimit();
 
-    render(configuration, configurationDto);
+    render(configuration, configurationDto, validityBeginLimit);
   }
 
   /**
@@ -368,13 +444,18 @@ public class Configurations extends Controller {
 
     rules.checkIfPermitted(configuration);
 
+    if (configuration.getEpasParam().isPeriodic()) {
+      checkValidityBeginLimit(configurationDto);
+    }
+
     Configuration newConfiguration = (Configuration) compute(configuration,
         configuration.getEpasParam(), configurationDto);
 
     if (Validation.hasErrors()) {
       response.status = 400;
       log.warn("validation errors: {}", validation.errorsMap());
-      render("@edit", configuration, configurationDto);
+      LocalDate validityBeginLimit = validityBeginLimit();
+      render("@edit", configuration, configurationDto, validityBeginLimit);
     }
 
     Verify.verifyNotNull(newConfiguration);
@@ -387,10 +468,14 @@ public class Configurations extends Controller {
     recomputeRecap.epasParam = configuration.getEpasParam();
 
     if (!confirmed) {
+      setRecomputationCost(recomputeRecap, configuration.getOffice());
+      LocalDate suggestedBegin = suggestedBegin(configuration.getEpasParam(), configurationDto,
+          recomputeRecap);
 
       response.status = 400;
       confirmed = true;
-      render("@edit", confirmed, recomputeRecap, configuration, configurationDto);
+      render("@edit", confirmed, recomputeRecap, configuration, configurationDto,
+          suggestedBegin);
     }
 
     periodManager.updatePeriods(newConfiguration, true);
@@ -462,6 +547,9 @@ public class Configurations extends Controller {
             ? personBegin : personBegin.plusMonths(1).dayOfMonth().withMinimumValue();
       }
       configurationDto.validityBegin = begin;
+    } else if (configuration.getEpasParam().isPeriodic()) {
+      configurationDto.validityBegin = ConfigurationManager.proposedValidityBegin(
+          rowBegin, configuration.calculatedEnd(), LocalDate.now());
     }
 
     render(configuration, configurationDto);
