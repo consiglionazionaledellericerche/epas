@@ -75,6 +75,24 @@
 		 #{/else}
 	    
 	 #{/form}
+
+	 #{if confirmed && suggestedBegin}
+	   <!-- Alternativa: applicare il nuovo valore solo dal mese corrente (#731) -->
+	   #{form action:@Configurations.update(), method:'POST', autocomplete:false,
+		    class:'form form-horizontal', 'data-async':'#page_content',
+		    'data-async-error':'#configData', 'data-spinner':'#defaultSpinner'}
+	     #{configuration.suggestedBeginFields configuration:configuration,
+	       configurationDto:configurationDto, suggestedBegin:suggestedBegin /}
+	     <p class="text-center">
+	       Se il nuovo valore deve valere solo da ora in avanti, è possibile applicarlo
+	       dal <strong>${suggestedBegin.format()}</strong>: saranno ricalcolati solo i giorni
+	       del mese corrente.
+	     </p>
+	     #{b.buttons center:true}
+	       #{b.submit 'Applica dal ' + suggestedBegin.format(), color:'default', fa:'calendar' /}
+	     #{/b.buttons}
+	   #{/form}
+	 #{/if}
      </div>	  
  
    </div>

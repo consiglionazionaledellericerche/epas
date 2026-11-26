@@ -47,4 +47,12 @@ public class RecomputeRecap {
   public boolean needRecomputation;
 
   public int days;
+
+  //Dati da utilizzare in caso di modifica di una configurazione della sede.
+  //Persone con un contratto nel periodo da ricalcolare, null se il ricalcolo non è della sede.
+  public Long persons;
+  //Giornate da ricalcolare: giorni del periodo per persone coinvolte.
+  public long personDays;
+  //Il ricalcolo riguarda più di un anno di dati.
+  public boolean longRecomputation;
 }

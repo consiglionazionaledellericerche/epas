@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+  - Modificando un parametro periodico della sede o di una persona, il form propone come inizio
+    della validità il primo giorno del mese corrente invece dell'inizio del periodo in corso,
+    che spesso coincide con l'attivazione della sede e faceva ricalcolare anni di dati. Una data
+    passata resta possibile se scelta esplicitamente (#731).
+  - La conferma della modifica di un parametro della sede mostra le persone coinvolte e le
+    giornate da ricalcolare; se il ricalcolo riguarda più di un anno è evidenziato con un avviso
+    e si può applicare il nuovo valore dal mese corrente senza reinserirlo (#731).
+
 ## [2.43.0] - 2026-11-19
 ### Changed
   - Gli allegati delle assenze si scaricano con un nome composto da anno, mese, giorno, codice
