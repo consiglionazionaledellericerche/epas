@@ -15,9 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - gli esiti dei controlli senza target (le voci dei menu, circa il 90% dei controlli di una
       pagina) sono condivisi tra le richieste dello stesso utente per 60 secondi, configurabili
       con security.checks.cacheSeconds (variabile SECURITY_CHECKS_CACHE_SECONDS nel Docker,
-      0 per disattivare). Un cambio di ruoli vale subito; le modifiche alle configurazioni
-      della sede o della persona e alle impostazioni generali che abilitano voci di menu
-      valgono entro questo tempo.
+      0 per disattivare). Un cambio di ruoli vale subito.
+  - Gli esiti dei controlli dei permessi condivisi tra le richieste vengono invalidati dopo il
+    salvataggio dei dati letti dalle regole (persona, qualifica, sede, utente, configurazioni
+    della sede e della persona, impostazioni generali, categorie di turno, tipi di
+    reperibilità e reperibilità) e al ricaricamento delle regole: prima, ad esempio, chi
+    veniva tolto da un turno poteva gestirlo ancora per 60 secondi. Con più istanze
+    dell'applicazione le altre vedono la modifica entro la durata della cache. Un valore non
+    numerico di security.checks.cacheSeconds non blocca più tutte le richieste: viene
+    ignorato e vale 60 secondi (#737).
 
 ## [2.43.0] - 2026-11-19
 ### Changed

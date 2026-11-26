@@ -96,7 +96,10 @@ public class SecureRulesPlugin extends PlayPlugin {
               + builder.getErrors().size() + " errors");
     }
 
-    knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();
-    knowledgeBase.addKnowledgePackages(builder.getKnowledgePackages());
+    final KnowledgeBase rules = KnowledgeBaseFactory.newKnowledgeBase();
+    rules.addKnowledgePackages(builder.getKnowledgePackages());
+    knowledgeBase = rules;
+    // gli esiti calcolati con le regole precedenti non valgono più.
+    SharedChecksCache.invalidateAll();
   }
 }

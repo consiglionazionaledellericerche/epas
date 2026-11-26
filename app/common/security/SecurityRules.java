@@ -70,9 +70,8 @@ public class SecurityRules {
     currentAction = action;
     knowledge = knowledgeBase;
     this.checks = checks;
-    this.sharedChecks = new SharedChecksCache(Long.parseLong(Play.configuration.getProperty(
-        SharedChecksCache.TTL_SECONDS,
-        String.valueOf(SharedChecksCache.DEFAULT_TTL_SECONDS)).trim()));
+    this.sharedChecks = new SharedChecksCache(SharedChecksCache.ttlSeconds(
+        Play.configuration.getProperty(SharedChecksCache.TTL_SECONDS)));
   }
 
   /**
@@ -153,8 +152,11 @@ public class SecurityRules {
 
     final User user = currentUser.get().orNull();
     final boolean shareable = check.getTarget() == null;
+    // letta prima del calcolo: un esito calcolato con dati poi modificati resta nella
+    // generazione precedente e non viene riusato.
+    final long generation = SharedChecksCache.generation();
     final Boolean shared =
-        shareable ? sharedChecks.get(knowledge.get(), user, check.getAction()) : null;
+        shareable ? sharedChecks.get(generation, user, check.getAction()) : null;
     if (shared != null) {
       if (shared) {
         check.grant();
@@ -162,7 +164,7 @@ public class SecurityRules {
     } else {
       doCheck(check, user);
       if (shareable) {
-        sharedChecks.put(knowledge.get(), user, check.getAction(), check.isGranted());
+        sharedChecks.put(generation, user, check.getAction(), check.isGranted());
       }
     }
     // salviamo il risultato per le iterazioni successive.

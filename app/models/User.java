@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 import common.security.PasswordHasher;
+import common.security.PermissionsDataListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,6 +34,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
@@ -62,6 +64,7 @@ import play.libs.Codec;
  */
 @Getter
 @Setter
+@EntityListeners(PermissionsDataListener.class)
 @Entity
 @Audited
 @Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = {"username"})})

@@ -18,9 +18,11 @@
 package models;
 
 import com.google.common.collect.Lists;
+import common.security.PermissionsDataListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
@@ -42,6 +44,7 @@ import play.data.validation.Unique;
  */
 @Getter
 @Setter
+@EntityListeners(PermissionsDataListener.class)
 @Entity
 @Audited
 @Table(name = "shift_categories")
