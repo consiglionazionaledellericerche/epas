@@ -33,6 +33,7 @@ import org.drools.command.CommandFactory;
 import org.drools.event.rule.AfterActivationFiredEvent;
 import org.drools.event.rule.DefaultAgendaEventListener;
 import org.drools.runtime.StatelessKnowledgeSession;
+import play.Play;
 import play.mvc.results.Forbidden;
 
 /**
@@ -54,6 +55,10 @@ public class SecurityRules {
   private final Provider<String> currentAction;
   private final Provider<KnowledgeBase> knowledge;
   private final Provider<Map<PermissionCheckKey, Boolean>> checks;
+  /**
+   * Esiti dei controlli senza target condivisi tra le richieste dello stesso utente.
+   */
+  private final SharedChecksCache sharedChecks;
 
   @Inject
   SecurityRules(Provider<Optional<User>> user,
@@ -65,6 +70,9 @@ public class SecurityRules {
     currentAction = action;
     knowledge = knowledgeBase;
     this.checks = checks;
+    this.sharedChecks = new SharedChecksCache(Long.parseLong(Play.configuration.getProperty(
+        SharedChecksCache.TTL_SECONDS,
+        String.valueOf(SharedChecksCache.DEFAULT_TTL_SECONDS)).trim()));
   }
 
   /**
@@ -130,8 +138,9 @@ public class SecurityRules {
    * Se il check fornito è già stato verificato, viene restituito il precedente già valorizzato,
    * altrimenti viene creato e valorizzato il nuovo check, salvandolo per le successive iterazioni.
    *
-   * <p>Ovviamente il risultato della verifica è valida soltanto per la richiesta in corso
-   * (ThreadLocal).</p>
+   * <p>Il risultato della verifica è valido per la richiesta in corso (ThreadLocal). Gli esiti
+   * dei controlli senza target sono anche condivisi tra le richieste dello stesso utente per un
+   * tempo limitato, vedi {@link SharedChecksCache}.</p>
    *
    * <p>Questa funzione ha l'effetto collaterale di impostare il check.granted.</p>
    *
@@ -142,7 +151,20 @@ public class SecurityRules {
       return checks.get().get(check.getKey());
     }
 
-    doCheck(check, currentUser.get().orNull());
+    final User user = currentUser.get().orNull();
+    final boolean shareable = check.getTarget() == null;
+    final Boolean shared =
+        shareable ? sharedChecks.get(knowledge.get(), user, check.getAction()) : null;
+    if (shared != null) {
+      if (shared) {
+        check.grant();
+      }
+    } else {
+      doCheck(check, user);
+      if (shareable) {
+        sharedChecks.put(knowledge.get(), user, check.getAction(), check.isGranted());
+      }
+    }
     // salviamo il risultato per le iterazioni successive.
     // Nota bene: il risultato viene salvato per l'utente corrente.
     checks.get().put(check.getKey(), check.isGranted());
