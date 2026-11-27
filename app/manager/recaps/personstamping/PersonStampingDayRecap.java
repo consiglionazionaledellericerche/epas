@@ -86,13 +86,16 @@ public class PersonStampingDayRecap {
    * @param numberOfInOut        numero di colonne del tabellone a livello mensile.
    * @param considerExitingNow   se considerare nel calcolo l'uscita in questo momento
    * @param monthContracts       il riepiloghi del mese
+   * @param withProgressive      se calcolare il progressivo del giorno corrente uscendo in questo
+   *                             momento: richiede la lettura dei giorni del mese per trovare il
+   *                             giorno precedente.
    */
   public PersonStampingDayRecap(PersonDayManager personDayManager,
       StampingTemplateFactory stampingTemplateFactory,
       StampTypeManager stampTypeManager, IWrapperFactory wrapperFactory,
       ConfigurationManager configurationManager, PersonDay personDay,
       int numberOfInOut, boolean considerExitingNow,
-      Optional<List<Contract>> monthContracts) {
+      Optional<List<Contract>> monthContracts, boolean withProgressive) {
 
     this.personDay = personDay;
 
@@ -129,7 +132,8 @@ public class PersonStampingDayRecap {
       
       // se siamo nel caso di compute e se la persona è attiva effetto il que sera sera.
       personDayManager.queSeraSera(personDay, LocalDateTime.now(), 
-          wrPersonDay.getPreviousForProgressive(), wttd.get(), 
+          withProgressive ? wrPersonDay.getPreviousForProgressive() : Optional.<PersonDay>absent(),
+          wttd.get(), 
           wrPersonDay.isFixedTimeAtWork(), lunchInterval, workInterval);
     } else { 
       // altrimenti setto le sole valid stamping

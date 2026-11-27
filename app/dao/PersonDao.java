@@ -33,6 +33,7 @@ import helpers.JodaConverters;
 import helpers.jpa.ModelQuery;
 import helpers.jpa.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateInterval;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,6 +65,7 @@ import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibility;
 import models.query.QPersonShift;
 import models.query.QPersonShiftShiftType;
+import models.query.QPersonalWorkingTime;
 import models.query.QUser;
 import models.query.QWorkingTimeType;
 import models.query.QWorkingTimeTypeDay;
@@ -200,6 +202,29 @@ public final class PersonDao extends DaoBase {
   public List<Person> byOffice(Office office) {
     return personQuery(Optional.absent(), ImmutableSet.of(office), false, Optional.absent(),
         Optional.absent(), false, Optional.absent(), Optional.absent(), false).fetch();
+  }
+
+  /**
+   * Numero delle persone della sede con un contratto attivo in almeno un giorno
+   * dell'intervallo.
+   *
+   * @param office la sede
+   * @param begin inizio dell'intervallo
+   * @param end fine dell'intervallo
+   * @return il numero delle persone.
+   */
+  public long countActiveInInterval(Office office, LocalDate begin, LocalDate end) {
+    final QPerson person = QPerson.person;
+    final QContract contract = QContract.contract;
+
+    final BooleanBuilder condition = new BooleanBuilder();
+    filterOffices(condition, ImmutableSet.of(office));
+    filterContract(condition, Optional.of(begin), Optional.of(end));
+
+    Long count = getQueryFactory().select(person.id.countDistinct()).from(person)
+        .join(person.contracts, contract)
+        .where(condition).fetchOne();
+    return count == null ? 0 : count;
   }
 
   /**
@@ -470,6 +495,37 @@ public final class PersonDao extends DaoBase {
         .leftJoin(contract.contractStampProfile, csp).fetchAll()
         .where(person.id.eq(personId)).distinct()
         .fetchOne();
+  }
+
+  /**
+   * Carica con due query, per tutte le persone indicate, i contratti con i profili timbratura,
+   * le tipologie orario e gli orari personalizzati, cioè quanto serve per calcolare la
+   * situazione di un giorno. Le entità restano nel contesto di persistenza: le persone passate
+   * come parametro hanno così le collezioni già inizializzate.
+   *
+   * @param people le persone
+   */
+  public void fetchContractsForDayComputation(Collection<Person> people) {
+    if (people.isEmpty()) {
+      return;
+    }
+    final QPerson person = QPerson.person;
+    final QContract contract = QContract.contract;
+
+    getQueryFactory().selectFrom(person).distinct()
+        .leftJoin(person.contracts, contract).fetchJoin()
+        .leftJoin(contract.contractStampProfile, QContractStampProfile.contractStampProfile)
+        .fetchJoin()
+        .where(person.in(people))
+        .fetch();
+
+    final QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
+    getQueryFactory().selectFrom(contract).distinct()
+        .leftJoin(contract.contractWorkingTimeType, cwtt).fetchJoin()
+        .leftJoin(contract.personalWorkingTimes, QPersonalWorkingTime.personalWorkingTime)
+        .fetchJoin()
+        .where(contract.person.in(people))
+        .fetch();
   }
 
   /**

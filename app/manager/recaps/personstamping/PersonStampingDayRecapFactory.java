@@ -68,7 +68,24 @@ public class PersonStampingDayRecapFactory {
 
     return new PersonStampingDayRecap(personDayManager, stampingTemplateFactory, stampTypeManager,
         wrapperFactory, configurationManager,
-        personDay, numberOfInOut, considerExitingNow, monthContracts);
+        personDay, numberOfInOut, considerExitingNow, monthContracts, true);
+  }
+
+  /**
+   * Come {@link #create(PersonDay, int, boolean, Optional)}, per le pagine che non mostrano il
+   * progressivo (presenza giornaliera): per il giorno corrente il tempo a lavoro e la differenza
+   * sono calcolati uscendo in questo momento, ma senza leggere i giorni del mese per il
+   * progressivo.
+   *
+   * @param personDay     personDay
+   * @param numberOfInOut numero di colonne delle timbrature.
+   * @return personStampingDayRecap con il progressivo non significativo per il giorno corrente
+   */
+  public PersonStampingDayRecap createWithoutProgressive(PersonDay personDay, int numberOfInOut) {
+
+    return new PersonStampingDayRecap(personDayManager, stampingTemplateFactory, stampTypeManager,
+        wrapperFactory, configurationManager,
+        personDay, numberOfInOut, true, Optional.absent(), false);
   }
 
 }

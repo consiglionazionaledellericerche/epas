@@ -1,0 +1,17 @@
+*{
+   Campi nascosti per ripresentare la conferma di una modifica di un parametro periodico
+   con l'inizio della validità suggerito al posto di quello scelto (#731).
+
+   configuration: la configurazione da modificare
+   configurationDto: i dati della modifica
+   suggestedBegin: l'inizio della validità suggerito
+}*
+<input type="hidden" name="configuration.id" value="${_configuration.id}"/>
+<input type="hidden" name="confirmed" value="false"/>
+<input type="hidden" name="configurationDto.validityBegin" value="${_suggestedBegin.format()}"/>
+<input type="hidden" name="configurationDto.validityEnd" value="${_configurationDto.validityEnd?.format()}"/>
+<input type="hidden" name="configurationDto.booleanNewValue" value="${_configurationDto.booleanNewValue}"/>
+<input type="hidden" name="configurationDto.integerNewValue" value="${_configurationDto.integerNewValue}"/>
+<input type="hidden" name="configurationDto.stringNewValue" value="${_configurationDto.stringNewValue}"/>
+<input type="hidden" name="configurationDto.localdateNewValue" value="${_configurationDto.localdateNewValue?.format()}"/>
+<input type="hidden" name="configurationDto.blockTypeNewValue" value="${_configurationDto.blockTypeNewValue?.name()}"/>

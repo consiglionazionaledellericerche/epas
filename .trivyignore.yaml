@@ -1,0 +1,94 @@
+# Eccezioni al controllo Trivy della CI (.github/workflows/trivy.yml).
+#
+# Ogni voce è legata al percorso del jar nell'immagine: se la libreria viene aggiornata
+# o rimossa, il percorso cambia e l'eccezione smette di valere. Alla scadenza
+# (expired_at) la voce non vale più e il job fallisce: va rivalutata, non solo prorogata.
+#
+# Una nuova eccezione richiede il motivo per cui ePAS non è esposto, o la issue che la
+# risolve. Baseline del 2026-11-18 su main ddd66838b, Trivy 0.76.1.
+
+vulnerabilities:
+
+  # --- Netty 3 (server HTTP di Play 1.5.3) ---------------------------------------
+  # Netty 3 non è più mantenuto e non riceverà correzioni: si toglie solo cambiando
+  # versione di Play. Le richieste arrivano a ePAS attraverso il reverse proxy, che
+  # normalizza e ricompone le richieste HTTP (documentazione e compose della #631).
+
+  - id: CVE-2019-20444
+    paths: ["opt/play/play-1.5.3/framework/lib/netty-3.10.6.Final.jar"]
+    statement: >-
+      Request smuggling con header senza due punti: mitigata dal reverse proxy, che
+      rifiuta le righe di header malformate (Apache con HttpProtocolOptions Strict,
+      default dalla 2.4.24; nginx). docs/sysadmin/reverseProxy.rst richiede che la
+      porta 9000 sia raggiungibile solo dal proxy: nel docker-compose.yml di esempio è
+      pubblicata solo su 127.0.0.1.
+    expired_at: 2027-05-18
+
+  - id: CVE-2019-16869
+    paths: ["opt/play/play-1.5.3/framework/lib/netty-3.10.6.Final.jar"]
+    statement: >-
+      Request smuggling con spazi prima dei due punti: mitigata dal reverse proxy come
+      CVE-2019-20444.
+    expired_at: 2027-05-18
+
+  - id: CVE-2021-37136
+    paths: ["opt/play/play-1.5.3/framework/lib/netty-3.10.6.Final.jar"]
+    statement: >-
+      Riguarda Bzip2Decoder, che la pipeline HTTP di Play non usa.
+    expired_at: 2027-05-18
+
+  - id: CVE-2021-37137
+    paths: ["opt/play/play-1.5.3/framework/lib/netty-3.10.6.Final.jar"]
+    statement: >-
+      Riguarda SnappyFrameDecoder, che la pipeline HTTP di Play non usa.
+    expired_at: 2027-05-18
+
+  # --- Hibernate di Play 1.5.3 ---------------------------------------------------
+
+  - id: CVE-2020-25638
+    paths: ["opt/play/play-1.5.3/framework/lib/hibernate-core-5.4.1.Final.patched.jar"]
+    statement: >-
+      SQL injection solo con hibernate.use_sql_comments attivo, che in
+      conf/application.conf è commentato (default false).
+    expired_at: 2027-05-18
+
+  - id: CVE-2017-7536
+    paths: ["opt/play/play-1.5.3/framework/lib/hibernate-validator-5.4.1.Final.jar"]
+    statement: >-
+      Riguarda l'esecuzione con un SecurityManager Java, che ePAS non usa.
+    expired_at: 2027-05-18
+
+  # --- Drools 5.6 (regole dei permessi) ------------------------------------------
+  # Da togliere con l'aggiornamento a Drools 9.44 (#698).
+
+  - id: CVE-2021-41411
+    paths: ["home/epas/epas/lib/drools-core-5.6.0.Final.jar"]
+    statement: >-
+      XXE nella lettura di kmodule.xml: ePAS compila solo conf/permissions.drl, che
+      fa parte dell'applicazione. Si chiude con #698.
+    expired_at: 2027-02-28
+
+  - id: CVE-2014-8125
+    paths: ["home/epas/epas/lib/drools-core-5.6.0.Final.jar"]
+    statement: >-
+      XXE nei processi BPMN2 di jBPM, che ePAS non usa. Si chiude con #698.
+    expired_at: 2027-02-28
+
+  # --- Altre librerie dell'applicazione ------------------------------------------
+
+  - id: CVE-2024-49203
+    paths:
+      - "home/epas/epas/lib/querydsl-jpa-4.2.2.jar"
+      - "home/epas/epas/lib/querydsl-apt-4.2.2.jar"
+    statement: >-
+      HQL injection solo se il criterio di orderBy arriva dall'utente: in app/dao tutti
+      gli orderBy usano percorsi fissi delle classi Q. Nessuna versione corretta
+      pubblicata.
+    expired_at: 2027-05-18
+
+  - id: CVE-2017-9096
+    paths: ["home/epas/epas/modules/pdf-0.9/lib/itext-2.1.7.jar"]
+    statement: >-
+      XXE nel parser XML di iText (XFA, XmlParser): il modulo pdf genera i PDF dai
+      template dell'applicazione e non legge PDF o XML caricati dagli utenti.
+    expired_at: 2027-05-18

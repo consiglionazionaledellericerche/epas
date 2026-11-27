@@ -663,7 +663,7 @@ public class ServiceFactories {
       log.debug("Controllo la reperibilità per {} nel giorno {}", 
           person, absence.getAbsenceDate());
       //check sulla reperibilità
-      if (!absence.getAbsenceType().isReperibilityCompatible() 
+      if (PersonDayManager.isAbsenceIncompatibleWithReperibility(absence) 
           && personReperibilityDayDao.getPersonReperibilityDay(
               person, absence.getAbsenceDate()).isPresent()) {
         genericErrors.addAbsenceWarning(absence, AbsenceProblem.InReperibility);
