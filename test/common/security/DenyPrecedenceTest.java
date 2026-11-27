@@ -13,6 +13,8 @@ import models.User;
 import models.UsersRolesOffices;
 import models.enumerate.AccountRole;
 import models.enumerate.AttachmentType;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Test;
 import play.test.UnitTest;
 
@@ -25,6 +27,14 @@ import play.test.UnitTest;
  * permissions.drl, senza database.</p>
  */
 public class DenyPrecedenceTest extends UnitTest {
+
+  /** Ruoli di sede combinati con i ruoli di sistema nei casi a matrice; null = nessun ruolo. */
+  private static final List<String> OFFICE_ROLES = Arrays.asList(null, Role.EMPLOYEE,
+      Role.PERSONNEL_ADMIN, Role.SEAT_SUPERVISOR, Role.TECHNICAL_ADMIN, Role.PERSONNEL_ADMIN_MINI);
+
+  /** Ruoli di sistema combinati con i ruoli di sede; null = nessun ruolo. */
+  private static final List<AccountRole> ACCOUNT_ROLES =
+      Arrays.asList(null, AccountRole.ADMIN, AccountRole.DEVELOPER);
 
   private static User user(Integer qualification, String... roleNames) {
     User user = new User();
@@ -52,6 +62,17 @@ public class DenyPrecedenceTest extends UnitTest {
       uro.setRole(role);
       uro.setOffice(office);
       user.getUsersRolesOffices().add(uro);
+    }
+    return user;
+  }
+
+  /**
+   * Utente con un ruolo di sede (o nessuno, se null) e un ruolo di sistema (o nessuno).
+   */
+  private static User user(AccountRole accountRole, String officeRole) {
+    User user = officeRole == null ? user(5) : user(5, officeRole);
+    if (accountRole != null) {
+      user.getRoles().add(accountRole);
     }
     return user;
   }
@@ -135,8 +156,10 @@ public class DenyPrecedenceTest extends UnitTest {
 
   @Test
   public void overtimesDeniedToResearchersAndTechnologists() {
-    assertFalse("qualifica 3", check(user(3, Role.EMPLOYEE), "CompetenceRequests.overtimes", null));
-    assertTrue("qualifica 4", check(user(4, Role.EMPLOYEE), "CompetenceRequests.overtimes", null));
+    assertFalse("qualifica 3",
+        check(user(3, Role.EMPLOYEE), "CompetenceRequests.overtimes", null));
+    assertTrue("qualifica 4",
+        check(user(4, Role.EMPLOYEE), "CompetenceRequests.overtimes", null));
   }
 
   @Test
@@ -146,5 +169,69 @@ public class DenyPrecedenceTest extends UnitTest {
     assertFalse(check(user, "Charts.excelFile", null));
     assertFalse(check(user, "Administration.emergency", null));
     assertTrue(check(user, "Administration.generalSetting", null));
+  }
+
+  @Test
+  public void disabledUserIsDeniedWhateverTheRoles() {
+    for (AccountRole account : AccountRole.values()) {
+      for (String role : OFFICE_ROLES) {
+        User user = user(account, role);
+        user.setDisabled(true);
+        for (String action : Arrays.asList("Application.index", "Stampings.stampings",
+            "Persons.list", "Administration.generalSetting")) {
+          assertFalse(account + "/" + role + "/" + action, check(user, action, null));
+        }
+      }
+    }
+  }
+
+  @Test
+  public void officeRolesCannotRestoreActionsRevokedToAdmin() {
+    for (String role : OFFICE_ROLES) {
+      User user = user(AccountRole.ADMIN, role);
+      for (String action : Arrays.asList("Charts.excelFile", "PrintTags.showTag",
+          "PersonMonths.trainingHours", "HealthCheck.shutdown")) {
+        assertFalse(role + "/" + action, check(user, action, null));
+      }
+      assertTrue(role + "", check(user, "Administration.generalSetting", null));
+    }
+  }
+
+  @Test
+  public void autocertificationAttachmentAcrossAccountRoles() {
+    for (AccountRole account : ACCOUNT_ROLES) {
+      for (String role : Arrays.asList(Role.PERSONNEL_ADMIN, Role.SEAT_SUPERVISOR)) {
+        for (boolean enabled : new boolean[] {true, false}) {
+          User user = user(account, role);
+          Office office = user.getPerson().getOffice();
+          office.getConfigurations().add(configuration(
+              office, EpasParam.TR_AUTOCERTIFICATION, String.valueOf(enabled)));
+          Attachment attachment = attachment(office, AttachmentType.TR_AUTOCERTIFICATION);
+          String label = account + "/" + role + "/" + enabled;
+          assertEquals(label, !enabled,
+              check(user, "Configurations.removeAttachment", attachment));
+          assertTrue(label, check(user, "Configurations.getAttachment", attachment));
+        }
+      }
+    }
+  }
+
+  @Test
+  public void technicianRecoveryLimitsAcrossAccountRoles() {
+    for (AccountRole account : ACCOUNT_ROLES) {
+      for (String role : OFFICE_ROLES) {
+        if (role == null) {
+          continue;
+        }
+        User user = user(account, role);
+        for (EpasParam param : Arrays.asList(
+            EpasParam.MAX_RECOVERY_DAYS_49, EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_49)) {
+          Configuration configuration =
+              configuration(user.getPerson().getOffice(), param, "10");
+          assertFalse(account + "/" + role + "/" + param,
+              check(user, "Configurations.update", configuration));
+        }
+      }
+    }
   }
 }
