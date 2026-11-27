@@ -224,12 +224,15 @@ public final class ContentSecurityPolicy {
      * percorso (es. /stampings/personStamping/12345), che sono sostituiti con {id}. Per gli
      * script inline e gli attributi onclick il sorgente è la pagina stessa e il numero di
      * riga cambia con i dati mostrati: la chiave usa allora l'estratto dello script invece
-     * della riga.</p>
+     * della riga. Se il browser non invia l'estratto (la policy configurata non contiene
+     * 'report-sample') resta la riga, altrimenti script diversi della stessa pagina
+     * avrebbero la stessa chiave.</p>
      */
     public String dedupKey() {
       final boolean inline = source.isEmpty() || source.equals(document);
-      return String.join("|", directive, withoutIds(blocked), withoutIds(document),
-          inline ? "" : withoutIds(source) + ":" + line, sample);
+      final String position = inline && !sample.isEmpty() ? "" : withoutIds(source) + ":" + line;
+      return String.join("|", directive, withoutIds(blocked), withoutIds(document), position,
+          sample);
     }
   }
 

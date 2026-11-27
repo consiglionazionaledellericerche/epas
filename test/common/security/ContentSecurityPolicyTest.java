@@ -159,6 +159,15 @@ public class ContentSecurityPolicyTest extends UnitTest {
   }
 
   @Test
+  public void inlineViolationWithoutSampleKeepsLineInKey() {
+    // con una policy senza 'report-sample' il browser non invia l'estratto
+    final String page = "https://epas.example.org/stampings/personStamping/12345";
+    assertFalse(key(report(page, page, 2, "")).equals(key(report(page, page, 5, ""))));
+    assertEquals(key(report(page, page, 2, "")),
+        key(report(page.replace("12345", "678"), page.replace("12345", "678"), 2, "")));
+  }
+
+  @Test
   public void externalSourceKeepsLineInKey() {
     final String page = "https://epas.example.org/absences/absenceTypes/42";
     final String script = "https://epas.example.org/public/js/app.js";
