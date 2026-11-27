@@ -22,6 +22,7 @@ import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.util.regex.Pattern;
 import play.Play;
 
 /**
@@ -71,7 +72,9 @@ public final class ContentSecurityPolicy {
       "default-src 'self'",
       "script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net"
           + " https://cdn.datatables.net https://code.jquery.com"
-          + " https://maxcdn.bootstrapcdn.com https://oss.maxcdn.com https://www.gstatic.com",
+          + " https://maxcdn.bootstrapcdn.com https://oss.maxcdn.com https://www.gstatic.com"
+          // le segnalazioni riportano l'inizio dello script inline o dell'attributo onclick
+          + " 'report-sample'",
       // gli attributi style e gli stili impostati dalle librerie javascript sono ammessi
       "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net"
           + " https://cdn.datatables.net https://maxcdn.bootstrapcdn.com"
@@ -87,6 +90,12 @@ public final class ContentSecurityPolicy {
       "frame-ancestors 'self'");
 
   private static final int MAX_FIELD_LENGTH = 200;
+  // i browser inviano al massimo 40 caratteri dello script
+  private static final int MAX_SAMPLE_LENGTH = 40;
+  // segmenti del percorso che identificano un oggetto: numeri e uuid
+  private static final Pattern ID_SEGMENT = Pattern.compile("(?<=/)(?:\\d+"
+      + "|\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12})(?=/|$)");
+  private static final Pattern DIGITS = Pattern.compile("\\d+");
 
   private ContentSecurityPolicy() {
   }
@@ -122,14 +131,27 @@ public final class ContentSecurityPolicy {
   /**
    * Riassume in una riga la segnalazione di violazione inviata dal browser.
    *
-   * <p>La segnalazione arriva da una richiesta non autenticata: sono riportati solo i campi
-   * che servono a correggere la pagina, senza query string (può contenere dati personali),
-   * senza caratteri di controllo e con una lunghezza massima.</p>
-   *
    * @param body il corpo della richiesta (JSON con l'oggetto csp-report)
    * @return la descrizione della violazione, null se il corpo non è una segnalazione
+   * @see #parseReport(String)
    */
   public static String describeReport(String body) {
+    final Report report = parseReport(body);
+    return report == null ? null : report.description();
+  }
+
+  /**
+   * Legge la segnalazione di violazione inviata dal browser.
+   *
+   * <p>La segnalazione arriva da una richiesta non autenticata: sono letti solo i campi
+   * che servono a correggere la pagina, senza query string (può contenere dati personali),
+   * senza caratteri di controllo e con una lunghezza massima. Nell'estratto dello script le
+   * cifre sono sostituite con #, perché possono essere id di persone.</p>
+   *
+   * @param body il corpo della richiesta (JSON con l'oggetto csp-report)
+   * @return la segnalazione, null se il corpo non è una segnalazione
+   */
+  public static Report parseReport(String body) {
     final JsonObject report;
     try {
       final JsonElement root = new JsonParser().parse(Strings.nullToEmpty(body));
@@ -149,13 +171,70 @@ public final class ContentSecurityPolicy {
     if (directive.isEmpty() && blocked.isEmpty()) {
       return null;
     }
-    final String description = String.format("directive=%s, blocked=%s, document=%s",
-        directive, blocked, withoutQuery(field(report, "document-uri")));
-    final String source = withoutQuery(field(report, "source-file"));
-    if (source.isEmpty()) {
-      return description;
+    String sample = field(report, "script-sample");
+    if (sample.length() > MAX_SAMPLE_LENGTH) {
+      sample = sample.substring(0, MAX_SAMPLE_LENGTH);
     }
-    return description + ", source=" + source + ":" + field(report, "line-number");
+    return new Report(directive, blocked, withoutQuery(field(report, "document-uri")),
+        withoutQuery(field(report, "source-file")), field(report, "line-number"),
+        DIGITS.matcher(sample).replaceAll("#"));
+  }
+
+  /**
+   * Una segnalazione di violazione, con i campi già ripuliti.
+   */
+  public static final class Report {
+
+    private final String directive;
+    private final String blocked;
+    private final String document;
+    private final String source;
+    private final String line;
+    private final String sample;
+
+    Report(String directive, String blocked, String document, String source, String line,
+        String sample) {
+      this.directive = directive;
+      this.blocked = blocked;
+      this.document = document;
+      this.source = source;
+      this.line = line;
+      this.sample = sample;
+    }
+
+    /**
+     * La descrizione da scrivere nel log.
+     */
+    public String description() {
+      final StringBuilder description = new StringBuilder(String.format(
+          "directive=%s, blocked=%s, document=%s", directive, blocked, document));
+      if (!source.isEmpty()) {
+        description.append(", source=").append(source).append(':').append(line);
+      }
+      if (!sample.isEmpty()) {
+        description.append(", sample=").append(sample);
+      }
+      return description.toString();
+    }
+
+    /**
+     * La chiave con cui la violazione è scritta nel log una sola volta.
+     *
+     * <p>La stessa violazione arriva da pagine che differiscono solo per gli id nel
+     * percorso (es. /stampings/personStamping/12345), che sono sostituiti con {id}. Per gli
+     * script inline e gli attributi onclick il sorgente è la pagina stessa e il numero di
+     * riga cambia con i dati mostrati: la chiave usa allora l'estratto dello script invece
+     * della riga.</p>
+     */
+    public String dedupKey() {
+      final boolean inline = source.isEmpty() || source.equals(document);
+      return String.join("|", directive, withoutIds(blocked), withoutIds(document),
+          inline ? "" : withoutIds(source) + ":" + line, sample);
+    }
+  }
+
+  static String withoutIds(String uri) {
+    return ID_SEGMENT.matcher(uri).replaceAll("{id}");
   }
 
   private static String field(JsonObject report, String name) {

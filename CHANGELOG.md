@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+  - Le segnalazioni di violazione della Content Security Policy (/csp/report) non aprono più
+    una transazione e non prendono una connessione dal pool del database. Il loro numero è
+    nella metrica csp_reports_total, distinta per esito (logged, duplicate, rate_limited,
+    invalid) (#733).
+  - Una violazione è scritta nel log una sola volta all'ora anche se arriva da pagine che
+    differiscono solo per gli id nel percorso o, per gli script inline, per il numero di riga.
+    La policy chiede ai browser l'inizio dello script che viola la policy (report-sample),
+    riportato nel log senza cifre per trovare più facilmente il punto da correggere (#733).
+
 ## [2.43.1] - 2026-11-27
 ### Changed
   - Modificando un parametro periodico della sede o di una persona, il form propone come inizio
