@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Nelle sedi con il flusso di richiesta assenza attivo la pagina di accesso negato era
     mostrata come semplice testo "Access forbidden": il menu dei flussi falliva quando
     l'utente corrente non era ancora disponibile alla pagina (#742).
+  - I dipendenti potevano accedere all'inserimento delle proprie assenze anche senza alcun
+    parametro di auto inserimento attivo: alla regola dei permessi bastava che la
+    configurazione esistesse. Ora serve almeno un parametro attivo, compresi il lavoro agile
+    e i congedi parentali, prima abilitati solo grazie a questo errore (#742).
 
 ## [2.43.1] - 2026-11-27
 ### Changed

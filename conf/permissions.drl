@@ -3188,16 +3188,19 @@ rule Absences_person
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- PersonConfiguration(epasParam == EpasParam.ADDITIONAL_HOURS
- 				|| epasParam == EpasParam.COVID_19
+ /* Il dipendente deve avere attivo almeno uno dei parametri di auto inserimento (#742):
+    le parentesi sono necessarie, senza bastava che esistesse la configurazione. */
+ PersonConfiguration((epasParam == EpasParam.ADDITIONAL_HOURS
  				|| epasParam == EpasParam.RIGHT_TO_STUDY
  				|| epasParam == EpasParam.DISABLED_PERSON_PERMISSION
  				|| epasParam == EpasParam.DISABLED_RELATIVE_PERMISSION
  				|| epasParam == EpasParam.TELEWORK
  				|| epasParam == EpasParam.ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME
+ 				|| epasParam == EpasParam.AGILE_WORK
  				|| epasParam == EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE
- 				|| epasParam == EpasParam.SMARTWORKING
- 				|| epasParam == EpasParam.PARENTAL_LEAVE_FOR_FATHERS && fieldValue == true) from $p.personConfigurations
+ 				|| epasParam == EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS
+ 				|| epasParam == EpasParam.PARENTAL_LEAVE_FOR_FATHERS)
+ 				&& fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
     "AbsenceGroups.insert",
     "AbsenceGroups.edit",

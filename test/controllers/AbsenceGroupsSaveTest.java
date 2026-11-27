@@ -178,6 +178,41 @@ public class AbsenceGroupsSaveTest extends FunctionalTest {
     assertEquals("103", absenceType.getCertificateCode());
   }
 
+  /**
+   * Un dipendente senza alcun parametro di auto inserimento attivo non può inserirsi assenze:
+   * prima bastava che esistessero le configurazioni della persona, anche disattivate (#742).
+   */
+  @Test
+  public void employeeWithoutSelfInsertParamsCannotSaveAbsences() {
+    absenceService.enumInitializator();
+    Person employee = h2Examples.activeNormalEmployee(BEGIN_2026);
+    addRole(employee, Role.EMPLOYEE);
+    commit();
+
+    login(employee);
+    assertStatus(403, POST(saveUrl(), saveParams(employee, DefaultGroup.G_LAGILE,
+        "LAGILE", JustifiedTypeName.assign_all_day)));
+    assertEquals(0, absences(employee));
+  }
+
+  /**
+   * Un dipendente abilitato al solo lavoro agile può inserirsi il codice di lavoro agile (#742).
+   */
+  @Test
+  public void employeeWithAgileWorkCanSaveAgileWorkForHimself() {
+    absenceService.enumInitializator();
+    Person employee = h2Examples.activeNormalEmployee(BEGIN_2026);
+    configurationManager.updateBoolean(EpasParam.AGILE_WORK, employee, true,
+        Optional.of(BEGIN_2026), Optional.absent(), true);
+    addRole(employee, Role.EMPLOYEE);
+    commit();
+
+    login(employee);
+    assertStatus(302, POST(saveUrl(), saveParams(employee, DefaultGroup.G_LAGILE,
+        "LAGILE", JustifiedTypeName.assign_all_day)));
+    assertEquals(1, absences(employee));
+  }
+
   private Person teleworkEmployee() {
     Person person = h2Examples.activeNormalEmployee(BEGIN_2026);
     configurationManager.updateBoolean(EpasParam.TELEWORK, person, true,
