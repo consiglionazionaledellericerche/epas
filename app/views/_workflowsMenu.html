@@ -62,7 +62,7 @@
 
       %{
          absenceRequestLabel = 
-           (currentUser.person != null && currentUser.person.isTopQualification() && !templateUtility.absenceRequestAuthorizationTopLevelEnabled()) ? 'AbsenceRequests.vacationsTopLevel' : 'AbsenceRequests.vacations'
+           (currentUser?.person != null && currentUser.person.isTopQualification() && !templateUtility.absenceRequestAuthorizationTopLevelEnabled()) ? 'AbsenceRequests.vacationsTopLevel' : 'AbsenceRequests.vacations'
       }%
       #{b.li @AbsenceRequests.vacations(), label:absenceRequestLabel}
         <i class="fa fa-plane" aria-hidden="true"></i>

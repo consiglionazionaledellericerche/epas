@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+  - Nella pagina dei parametri di configurazione della sede non compaiono più, e non possono
+    essere modificati da nessuno, i parametri che non sono più una scelta della singola sede
+    (#742):
+    - integrazione con la piattaforma Missioni, sempre abilitata;
+    - numero di colonne di entrata/uscita da visualizzare, sempre 2;
+    - flusso di richiesta assenza e flussi informativi, sempre abilitati, anche per le nuove
+      sedi;
+    - data di inizio della gestione dei ticket restaurant, che mantiene il valore attuale.
+  - I parametri annuali sulla fruizione delle ferie e dei riposi compensativi dell'anno
+    precedente (giorno massimo per le ferie, mese massimo per i residui e numero massimo di
+    giorni di recupero per i livelli I-III e IV-VIII) restano visibili ma possono essere
+    modificati solo dagli amministratori di sistema (#742).
+### Fixed
+  - Nelle sedi con il flusso di richiesta assenza attivo la pagina di accesso negato era
+    mostrata come semplice testo "Access forbidden": il menu dei flussi falliva quando
+    l'utente corrente non era ancora disponibile alla pagina (#742).
+
 ## [2.43.1] - 2026-11-27
 ### Changed
   - Modificando un parametro periodico della sede o di una persona, il form propone come inizio

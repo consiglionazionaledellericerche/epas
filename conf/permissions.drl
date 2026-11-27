@@ -1619,16 +1619,33 @@ then
  $c.grant();
 end
 
-rule CanModifyTechinicianExpiryRecoveryDays
-when 
- $uro: UsersRolesOffices()
- $target: Configuration(office == $uro.office, epasParam in(EpasParam.MAX_RECOVERY_DAYS_49, EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_49))
- $c: PermissionCheck(action in (
-		"Configurations.show",
-		"Configurations.edit",
-		"Configurations.update"
+/*******************************************************************************
+ * I parametri della sede nascosti (#742) hanno un valore fisso oppure non sono più
+ * una scelta della singola sede: nessuno può modificarli.
+ * La salience negativa fa scattare la revoca dopo tutte le regole che concedono.
+ ******************************************************************************/
+rule hiddenConfigurationCannotBeEdited
+salience -10
+when
+ $target: Configuration(epasParam.hidden == true)
+ $c: PermissionCheck(action in ("Configurations.edit", "Configurations.update"),
+     target == $target)
+then
+ $c.revoke();
+end
 
-        ), target == $target)
+/*******************************************************************************
+ * I parametri annuali sulla fruizione delle ferie e dei riposi compensativi
+ * dell'anno precedente possono essere modificati solo dagli amministratori di
+ * sistema (#742): gli altri utenti ne vedono il valore senza poterlo cambiare.
+ ******************************************************************************/
+rule onlySystemUsersCanEditRestrictedConfiguration
+salience -10
+when
+ $target: Configuration(epasParam.systemUsersEditOnly == true)
+ not AccountRole(this in (AccountRole.DEVELOPER, AccountRole.ADMIN))
+ $c: PermissionCheck(action in ("Configurations.edit", "Configurations.update"),
+     target == $target)
 then
  $c.revoke();
 end

@@ -529,7 +529,7 @@ public enum EpasParam {
       EpasParamCategory.FLOWS,
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(false),
+      EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
 
@@ -919,7 +919,7 @@ public enum EpasParam {
       EpasParamCategory.INFORMATION_FLOWS,
       EpasParamTimeType.GENERAL,
       EpasParamValueType.BOOLEAN,
-      EpasParamValueType.formatValue(false),
+      EpasParamValueType.formatValue(true),
       Lists.<RecomputationType>newArrayList(),
       Office.class),
   
@@ -1128,6 +1128,42 @@ public enum EpasParam {
    */
   public boolean isPeriodic() {
     return this.epasParamTimeType.equals(EpasParamTimeType.PERIODIC);
+  }
+
+  /**
+   * Verifica se il parametro è nascosto (#742): non viene mostrato nella pagina delle
+   * configurazioni della sede e non può essere modificato da nessuno. Il suo valore è fisso
+   * per tutte le sedi oppure non è più una scelta della singola sede.
+   */
+  public boolean isHidden() {
+    switch (this) {
+      case ENABLE_MISSIONS_INTEGRATION:
+      case NUMBER_OF_VIEWING_COUPLE:
+      case DATE_START_MEAL_TICKET:
+      case ENABLE_FLOWS:
+      case ENABLE_INFORMATION_FLOWS:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Verifica se il parametro può essere modificato solo dagli amministratori di sistema
+   * (ruoli DEVELOPER e ADMIN) (#742). Gli altri utenti ne vedono il valore senza poterlo
+   * cambiare.
+   */
+  public boolean isSystemUsersEditOnly() {
+    switch (this) {
+      case EXPIRY_VACATION_PAST_YEAR:
+      case MONTH_EXPIRY_RECOVERY_DAYS_13:
+      case MONTH_EXPIRY_RECOVERY_DAYS_49:
+      case MAX_RECOVERY_DAYS_13:
+      case MAX_RECOVERY_DAYS_49:
+        return true;
+      default:
+        return false;
+    }
   }
 
   /**
