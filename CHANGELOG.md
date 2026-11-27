@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     precedente (giorno massimo per le ferie, mese massimo per i residui e numero massimo di
     giorni di recupero per i livelli I-III e IV-VIII) restano visibili ma possono essere
     modificati solo dagli amministratori di sistema (#742).
+  - Nella pagina dei parametri di configurazione della persona non compaiono più, e non possono
+    essere modificati da nessuno, gli auto inserimenti per l'emergenza COVID-19 e per lo
+    smartworking, i cui codici sono scaduti nel 2022 e nel 2021: vengono disattivati per tutti.
+    Sono state rimosse anche le due opzioni della configurazione generale che ne abilitavano la
+    visualizzazione (#742).
 ### Fixed
   - Nelle sedi con il flusso di richiesta assenza attivo la pagina di accesso negato era
     mostrata come semplice testo "Access forbidden": il menu dei flussi falliva quando

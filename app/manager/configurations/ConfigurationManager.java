@@ -321,12 +321,16 @@ public class ConfigurationManager {
    * Verifica se l'utente può modificare il parametro di configurazione della persona.
    * Il limite personale di lavoro agile è modificabile solo dagli amministratori di sistema
    * e dai gestori dell'anagrafica.
+   * I parametri nascosti non sono modificabili da nessuno (#742).
    *
    * @param configuration la configurazione della persona
    * @param user l'utente
    * @return true se l'utente può modificare il parametro, false altrimenti.
    */
   public boolean isEditableBy(PersonConfiguration configuration, User user) {
+    if (configuration.getEpasParam().isHidden()) {
+      return false;
+    }
     if (!configuration.getEpasParam().equals(EpasParam.AGILE_WORK_MONTHLY_LIMIT)) {
       return true;
     }

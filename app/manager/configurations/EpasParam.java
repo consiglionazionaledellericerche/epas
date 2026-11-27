@@ -1132,8 +1132,9 @@ public enum EpasParam {
 
   /**
    * Verifica se il parametro è nascosto (#742): non viene mostrato nella pagina delle
-   * configurazioni della sede e non può essere modificato da nessuno. Il suo valore è fisso
-   * per tutte le sedi oppure non è più una scelta della singola sede.
+   * configurazioni della sede o della persona e non può essere modificato da nessuno. Il suo
+   * valore è fisso per tutti, non è più una scelta della singola sede oppure il parametro
+   * abilita codici di assenza scaduti (COVID19, SMART).
    */
   public boolean isHidden() {
     switch (this) {
@@ -1142,6 +1143,8 @@ public enum EpasParam {
       case DATE_START_MEAL_TICKET:
       case ENABLE_FLOWS:
       case ENABLE_INFORMATION_FLOWS:
+      case COVID_19:
+      case SMARTWORKING:
         return true;
       default:
         return false;
