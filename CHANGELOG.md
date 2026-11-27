@@ -6,6 +6,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+  - Aggiornato Drools, il motore delle regole dei permessi, dalla 5.6.0 alla 9.44.0. Insieme a
+    Drools 5.6 escono dal classpath antlr 3.3, janino, mvel2 2.1.8 e jaxb-impl 2.2.5; entrano
+    istack-commons-runtime e txw2, richieste da jaxb-runtime di Play. In permissions.drl due
+    regole sulla cancellazione delle richieste di assenza e di informazioni usano
+    isManagerApproved() e simili al posto del confronto della data con null, non più accettato
+    (#698).
+  - Nei controlli dei permessi un diniego (revoke) prevale sempre sulle concessioni, qualunque
+    sia l'ordine in cui il motore esegue le regole: con Drools 9 l'ordine è cambiato e alcune
+    concessioni annullavano i dinieghi. Di conseguenza ricercatori e tecnologi (qualifica fino
+    al III livello) non vedono più la pagina delle richieste di straordinario: la regola che lo
+    prevedeva non aveva mai avuto effetto. Allo stesso modo le azioni negate all'account ADMIN
+    non possono più essere concesse da un ruolo di sede (#698).
+### Fixed
+  - Gli esiti dei controlli dei permessi condivisi tra le richieste vengono invalidati dopo il
+    salvataggio dei dati letti dalle regole (persona, qualifica, sede, utente, configurazioni
+    della sede e della persona, impostazioni generali, categorie di turno, turnisti, tipi di
+    reperibilità e reperibilità) e al ricaricamento delle regole: prima, ad esempio, chi
+    veniva tolto da un turno poteva gestirlo ancora per 60 secondi. Con più istanze
+    dell'applicazione le altre vedono la modifica entro la durata della cache. Un valore non
+    numerico di security.checks.cacheSeconds non blocca più tutte le richieste: viene
+    ignorato e vale 60 secondi (#737).
+  - I dipendenti abilitati a inserirsi i congedi parentali possono inserire anche i codici
+    provvisori all'80% (24PROV, 242PROV, 243PROV, 244PROV, 245PROV), quelli del quinto figlio
+    (235, 255, 255A, malattia quinto figlio) e del genitore unico (25S, 252S): la form li
+    proponeva ma selezionarli dava errore. Con il congedo di paternità abilitato possono
+    inserire anche 212P e 213P (#740).
+  - La form di inserimento assenze propone solo le tipologie che l'utente può inserire per la
+    persona, invece di tutte quelle della tab (es. congedi prenatali o matrimoniali per i
+    dipendenti), e aprendo una tab seleziona la prima tipologia permessa (#740).
+
+## [2.43.1] - 2026-11-27
+### Changed
+  - Modificando un parametro periodico della sede o di una persona, il form propone come inizio
+    della validità il primo giorno del mese corrente invece dell'inizio del periodo in corso,
+    che spesso coincide con l'attivazione della sede e faceva ricalcolare anni di dati. Una data
+    passata resta possibile se scelta esplicitamente (#731).
+  - L'inizio della validità di un parametro periodico della sede non può essere precedente al
+    primo gennaio dell'anno precedente, salvo per gli amministratori di sistema (#731).
+  - La conferma della modifica di un parametro della sede mostra le persone coinvolte e le
+    giornate da ricalcolare; se il ricalcolo riguarda più di un anno è evidenziato con un avviso
+    e si può applicare il nuovo valore dal mese corrente senza reinserirlo (#731).
   - I controlli dei permessi costano meno e tengono meno a lungo il lock di Drools, condiviso da
     tutte le richieste, che sotto carico rallentava tutte le pagine fino a esaurire il pool di
     connessioni al database (#735):
@@ -15,15 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - gli esiti dei controlli senza target (le voci dei menu, circa il 90% dei controlli di una
       pagina) sono condivisi tra le richieste dello stesso utente per 60 secondi, configurabili
       con security.checks.cacheSeconds (variabile SECURITY_CHECKS_CACHE_SECONDS nel Docker,
-      0 per disattivare). Un cambio di ruoli vale subito.
-  - Gli esiti dei controlli dei permessi condivisi tra le richieste vengono invalidati dopo il
-    salvataggio dei dati letti dalle regole (persona, qualifica, sede, utente, configurazioni
-    della sede e della persona, impostazioni generali, categorie di turno, turnisti, tipi di
-    reperibilità e reperibilità) e al ricaricamento delle regole: prima, ad esempio, chi
-    veniva tolto da un turno poteva gestirlo ancora per 60 secondi. Con più istanze
-    dell'applicazione le altre vedono la modifica entro la durata della cache. Un valore non
-    numerico di security.checks.cacheSeconds non blocca più tutte le richieste: viene
-    ignorato e vale 60 secondi (#737).
+      0 per disattivare). Un cambio di ruoli vale subito; le modifiche alle configurazioni
+      della sede o della persona e alle impostazioni generali che abilitano voci di menu
+      valgono entro questo tempo.
 
 ## [2.43.0] - 2026-11-19
 ### Changed

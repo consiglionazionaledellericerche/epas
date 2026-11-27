@@ -205,6 +205,29 @@ public final class PersonDao extends DaoBase {
   }
 
   /**
+   * Numero delle persone della sede con un contratto attivo in almeno un giorno
+   * dell'intervallo.
+   *
+   * @param office la sede
+   * @param begin inizio dell'intervallo
+   * @param end fine dell'intervallo
+   * @return il numero delle persone.
+   */
+  public long countActiveInInterval(Office office, LocalDate begin, LocalDate end) {
+    final QPerson person = QPerson.person;
+    final QContract contract = QContract.contract;
+
+    final BooleanBuilder condition = new BooleanBuilder();
+    filterOffices(condition, ImmutableSet.of(office));
+    filterContract(condition, Optional.of(begin), Optional.of(end));
+
+    Long count = getQueryFactory().select(person.id.countDistinct()).from(person)
+        .join(person.contracts, contract)
+        .where(condition).fetchOne();
+    return count == null ? 0 : count;
+  }
+
+  /**
    * Lista delle persone appartenenti all'istituto.
    *
    * @param institute l'istituto passato come parametro
