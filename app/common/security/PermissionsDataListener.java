@@ -29,7 +29,7 @@ import play.db.jpa.JPA;
  * Invalida gli esiti condivisi dei controlli dei permessi ({@link SharedChecksCache}) quando
  * cambia un'entità letta dalle regole senza target: persona (qualifica, sede), utente, sede,
  * configurazioni della sede e della persona, impostazioni generali, categorie di turno,
- * tipi di reperibilità e reperibilità.
+ * turnisti, tipi di reperibilità e reperibilità.
  *
  * <p>Le relazioni molti-a-molti (es. i responsabili di una categoria di turno) appartengono
  * all'entità che ne è proprietaria: una loro modifica ne incrementa la versione e passa da

@@ -39,10 +39,10 @@ import models.UsersRolesOffices;
  *
  * <p>La chiave contiene anche una generazione, che {@link #invalidateAll()} incrementa: gli esiti
  * calcolati prima diventano irraggiungibili. La invalidano il salvataggio dei dati letti dalle
- * regole (persona, qualifica, sede, configurazioni, turni, reperibilità, impostazioni generali,
- * vedi {@link PermissionsDataListener}) e il ricaricamento delle regole. La generazione è letta
- * prima di calcolare l'esito ({@link #generation()}): un esito calcolato con i dati precedenti a
- * una modifica finisce sotto la generazione vecchia e non viene riusato.</p>
+ * regole (persona, qualifica, sede, configurazioni, turni e turnisti, reperibilità, impostazioni
+ * generali, vedi {@link PermissionsDataListener}) e il ricaricamento delle regole. La
+ * generazione è letta prima di calcolare l'esito ({@link #generation()}): un esito calcolato con
+ * i dati precedenti a una modifica finisce sotto la generazione vecchia e non viene riusato.</p>
  *
  * <p>L'invalidazione vale per la sola JVM: con più istanze dell'applicazione le altre vedono le
  * modifiche entro la durata della cache. I controlli con un target non passano da qui.</p>

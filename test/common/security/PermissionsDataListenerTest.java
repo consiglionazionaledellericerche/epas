@@ -22,6 +22,7 @@ import db.h2support.H2Examples;
 import javax.inject.Inject;
 import javax.persistence.EntityTransaction;
 import models.Person;
+import models.PersonShift;
 import models.ShiftCategories;
 import org.joda.time.LocalDate;
 import org.junit.After;
@@ -84,6 +85,28 @@ public class PermissionsDataListenerTest extends UnitTest {
     commit();
 
     assertTrue("un nuovo responsabile del turno vale subito",
+        SharedChecksCache.generation() > before);
+  }
+
+  @Test
+  public void newPersonShiftInvalidates() {
+    Person person = h2Examples.activeNormalEmployee(new LocalDate(2026, 1, 1));
+    commit();
+
+    long before = SharedChecksCache.generation();
+    // l'associazione appartiene a PersonShift: la persona non cambia
+    PersonShift personShift = new PersonShift();
+    personShift.setPerson(person);
+    personShift.setBeginDate(new LocalDate(2026, 1, 1));
+    personShift.save();
+    commit();
+    assertTrue("un nuovo turnista vede subito il calendario dei turni",
+        SharedChecksCache.generation() > before);
+
+    before = SharedChecksCache.generation();
+    personShift.delete();
+    commit();
+    assertTrue("chi non è più turnista non vede più il calendario dei turni",
         SharedChecksCache.generation() > before);
   }
 
