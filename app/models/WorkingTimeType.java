@@ -35,6 +35,7 @@ import javax.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import models.base.BaseModel;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.DateTimeConstants;
@@ -90,6 +91,7 @@ public class WorkingTimeType extends BaseModel {
   @Column(name = "disabled")
   private boolean disabled = false;
 
+  @BatchSize(size = 16)
   @Getter
   @OneToMany(mappedBy = "workingTimeType", fetch = FetchType.EAGER)
   @OrderBy("dayOfWeek")

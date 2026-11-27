@@ -34,6 +34,7 @@ import lombok.Getter;
 import lombok.Setter;
 import models.absences.definitions.DefaultTakable;
 import models.base.BaseModel;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.envers.Audited;
 import org.testng.collections.Sets;
 
@@ -55,6 +56,7 @@ public class TakableAbsenceBehaviour extends BaseModel {
   @Column(name = "name")
   private String name;
   
+  @BatchSize(size = 16)
   @OneToMany(mappedBy = "takableAbsenceBehaviour", fetch = FetchType.LAZY)
   private Set<GroupAbsenceType> groupAbsenceTypes = Sets.newHashSet();
   

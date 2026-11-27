@@ -48,6 +48,7 @@ import models.absences.definitions.DefaultGroup;
 import models.base.BaseModel;
 import models.enumerate.MealTicketBehaviour;
 import models.enumerate.QualificationMapping;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.envers.Audited;
@@ -116,6 +117,7 @@ public class AbsenceType extends BaseModel {
       inverseJoinColumns = { @JoinColumn(name = "justified_types_id") })
   private Set<JustifiedType> justifiedTypesPermitted = Sets.newHashSet();
   
+  @BatchSize(size = 16)
   @OneToMany(mappedBy = "absenceType")
   private Set<AbsenceTypeJustifiedBehaviour> justifiedBehaviours = Sets.newHashSet();
   
@@ -132,15 +134,19 @@ public class AbsenceType extends BaseModel {
   @LazyCollection(LazyCollectionOption.EXTRA)
   private Set<Absence> absences = Sets.newHashSet();
 
+  @BatchSize(size = 16)
   @ManyToMany(mappedBy = "takenCodes")
   private Set<TakableAbsenceBehaviour> takenGroup = Sets.newHashSet();
 
+  @BatchSize(size = 16)
   @ManyToMany(mappedBy = "takableCodes")
   private Set<TakableAbsenceBehaviour> takableGroup = Sets.newHashSet();
   
+  @BatchSize(size = 16)
   @ManyToMany(mappedBy = "complationCodes")
   private Set<ComplationAbsenceBehaviour> complationGroup = Sets.newHashSet();
   
+  @BatchSize(size = 16)
   @ManyToMany(mappedBy = "replacingCodes")
   private Set<ComplationAbsenceBehaviour> replacingGroup = Sets.newHashSet();
   

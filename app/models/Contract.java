@@ -50,6 +50,7 @@ import models.base.IPropertiesInPeriodOwner;
 import models.base.IPropertyInPeriod;
 import models.base.PeriodModel;
 import models.enumerate.ContractType;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -127,6 +128,7 @@ public class Contract extends PeriodModel implements IPropertiesInPeriodOwner {
   @ManyToOne(fetch = FetchType.LAZY)
   private Person person;
 
+  @BatchSize(size = 16)
   @Getter
   @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
   @OrderBy("beginDate")
