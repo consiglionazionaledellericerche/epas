@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+  - Aggiornato Drools, il motore delle regole dei permessi, dalla 5.6.0 alla 9.44.0. Insieme a
+    Drools 5.6 escono dal classpath antlr 3.3, janino, mvel2 2.1.8 e jaxb-impl 2.2.5; entrano
+    istack-commons-runtime e txw2, richieste da jaxb-runtime di Play. In permissions.drl due
+    regole sulla cancellazione delle richieste di assenza e di informazioni usano
+    isManagerApproved() e simili al posto del confronto della data con null, non più accettato
+    (#698).
+  - Nei controlli dei permessi un diniego (revoke) prevale sempre sulle concessioni, qualunque
+    sia l'ordine in cui il motore esegue le regole: con Drools 9 l'ordine è cambiato e alcune
+    concessioni annullavano i dinieghi. Di conseguenza ricercatori e tecnologi (qualifica fino
+    al III livello) non vedono più la pagina delle richieste di straordinario: la regola che lo
+    prevedeva non aveva mai avuto effetto. Allo stesso modo le azioni negate all'account ADMIN
+    non possono più essere concesse da un ruolo di sede (#698).
   - Le segnalazioni di violazione della Content Security Policy (/csp/report) non aprono più
     una transazione e non prendono una connessione dal pool del database. Il loro numero è
     nella metrica csp_reports_total, distinta per esito (logged, duplicate, rate_limited,
@@ -14,6 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     differiscono solo per gli id nel percorso o, per gli script inline, per il numero di riga.
     La policy chiede ai browser l'inizio dello script che viola la policy (report-sample),
     riportato nel log senza cifre per trovare più facilmente il punto da correggere (#733).
+### Fixed
+  - I dipendenti abilitati a inserirsi i congedi parentali possono inserire anche i codici
+    provvisori all'80% (24PROV, 242PROV, 243PROV, 244PROV, 245PROV), quelli del quinto figlio
+    (235, 255, 255A, malattia quinto figlio) e del genitore unico (25S, 252S): la form li
+    proponeva ma selezionarli dava errore. Con il congedo di paternità abilitato possono
+    inserire anche 212P e 213P (#740).
+  - La form di inserimento assenze propone solo le tipologie che l'utente può inserire per la
+    persona, invece di tutte quelle della tab (es. congedi prenatali o matrimoniali per i
+    dipendenti), e aprendo una tab seleziona la prima tipologia permessa (#740).
 
 ## [2.43.1] - 2026-11-27
 ### Changed
