@@ -18,6 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     al III livello) non vedono più la pagina delle richieste di straordinario: la regola che lo
     prevedeva non aveva mai avuto effetto. Allo stesso modo le azioni negate all'account ADMIN
     non possono più essere concesse da un ruolo di sede (#698).
+### Fixed
+  - I dipendenti abilitati a inserirsi i congedi parentali possono inserire anche i codici
+    provvisori all'80% (24PROV, 242PROV, 243PROV, 244PROV, 245PROV), quelli del quinto figlio
+    (235, 255, 255A, malattia quinto figlio) e del genitore unico (25S, 252S): la form li
+    proponeva ma selezionarli dava errore. Con il congedo di paternità abilitato possono
+    inserire anche 212P e 213P (#740).
+  - La form di inserimento assenze propone solo le tipologie che l'utente può inserire per la
+    persona, invece di tutte quelle della tab (es. congedi prenatali o matrimoniali per i
+    dipendenti), e aprendo una tab seleziona la prima tipologia permessa (#740).
 
 ## [2.43.1] - 2026-11-27
 ### Changed

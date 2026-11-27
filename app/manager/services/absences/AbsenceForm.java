@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.stream.Collectors;
 import models.Person;
 import models.absences.AbsenceType;
 import models.absences.CategoryGroupAbsenceType;
@@ -134,7 +135,15 @@ public class AbsenceForm {
         this.categoryTabSelected.getCategoryGroupAbsenceTypes();
 
     for (CategoryGroupAbsenceType categoryInTab : personCategoryGroupsInTab) {
-      
+
+      // Solo i gruppi che l'utente può inserire per la persona: scegliere un gruppo non
+      // permesso fallirebbe la verifica in AbsenceService.buildAbsenceForm.
+      List<GroupAbsenceType> groupsInCategory = categoryInTab.orderedGroupsInCategory(true)
+          .stream().filter(groupsPermitted::contains).collect(Collectors.toList());
+      if (groupsInCategory.isEmpty()) {
+        continue;
+      }
+
       // aggiungo la categoria alla mappa
       Set<CategoryGroupAbsenceType> categoriesSamePriority = 
           this.categoriesByPriority.get(categoryInTab.getPriority());
@@ -144,7 +153,7 @@ public class AbsenceForm {
       }
       categoriesSamePriority.add(categoryInTab);
       
-      groupsByCategory.put(categoryInTab, categoryInTab.orderedGroupsInCategory(true));
+      groupsByCategory.put(categoryInTab, groupsInCategory);
     }
     
     // i tipi assenza selezionabili
