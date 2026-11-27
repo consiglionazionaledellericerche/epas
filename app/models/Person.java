@@ -52,6 +52,7 @@ import models.base.PeriodModel;
 import models.enumerate.CertificationType;
 import models.flows.Affiliation;
 import models.flows.Group;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -152,6 +153,7 @@ public class Person extends PeriodModel implements IPropertiesInPeriodOwner {
   @OneToMany(mappedBy = "supervisor")
   private List<PersonReperibilityType> reperibilityTypes = Lists.newArrayList();
 
+  @BatchSize(size = 16)
   @Getter
   @NotAudited
   @OneToMany(mappedBy = "person", cascade = {CascadeType.REMOVE})

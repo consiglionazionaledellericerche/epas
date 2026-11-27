@@ -36,6 +36,7 @@ import lombok.Setter;
 import models.absences.definitions.DefaultAbsenceType;
 import models.absences.definitions.DefaultComplation;
 import models.base.BaseModel;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.envers.Audited;
 
 /**
@@ -54,6 +55,7 @@ public class ComplationAbsenceBehaviour extends BaseModel {
   @Column(name = "name")
   private String name;
   
+  @BatchSize(size = 16)
   @OneToMany(mappedBy = "complationAbsenceBehaviour", fetch = FetchType.LAZY)
   private Set<GroupAbsenceType> groupAbsenceTypes = Sets.newHashSet();
   

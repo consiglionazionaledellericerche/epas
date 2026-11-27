@@ -29,11 +29,13 @@ import lombok.Getter;
 import lombok.Setter;
 import models.absences.definitions.DefaultTab;
 import models.base.BaseModel;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.envers.Audited;
 
 /**
  * Categorie di tab da mostrare nel menu per la gestione delle assenze.
  */
+@BatchSize(size = 16)
 @Getter
 @Setter
 @Audited

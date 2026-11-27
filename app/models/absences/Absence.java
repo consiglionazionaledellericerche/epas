@@ -42,6 +42,7 @@ import models.TimeVariation;
 import models.absences.JustifiedBehaviour.JustifiedBehaviourName;
 import models.absences.JustifiedType.JustifiedTypeName;
 import models.base.BaseModel;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -83,6 +84,7 @@ public class Absence extends BaseModel {
   @ManyToOne(fetch = FetchType.LAZY)
   private JustifiedType justifiedType;
 
+  @BatchSize(size = 16)
   @NotAudited
   @OneToMany(mappedBy = "absence", cascade = {CascadeType.REMOVE})
   private Set<AbsenceTrouble> troubles = Sets.newHashSet();

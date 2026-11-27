@@ -30,6 +30,7 @@ import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import models.base.BaseModel;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.envers.Audited;
 
 /**
@@ -38,6 +39,7 @@ import org.hibernate.envers.Audited;
  * @author dario
  *
  */
+@BatchSize(size = 16)
 @Getter
 @Setter
 @Audited

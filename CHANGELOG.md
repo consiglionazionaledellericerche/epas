@@ -5,7 +5,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+  - Statistiche delle query per ogni richiesta e job: alla chiusura della sessione Hibernate
+    vengono registrati nel log l'azione, il numero di statement JDBC, il tempo speso a eseguirli
+    e la durata. Le sessioni con almeno `jpa.queryStats.threshold` statement (default 100)
+    sono registrate a INFO, le altre a DEBUG (#707).
 ### Changed
+  - Caricamento a blocchi (`@BatchSize`) delle associazioni che generavano una query per
+    elemento: anomalie delle assenze, gruppi e comportamenti dei tipi assenza, contratti e
+    periodi ferie delle persone, utenti, tipi di giustificazione, tab delle categorie, giorni
+    dei tipi orario. Le query diminuiscono da 112 a 67 nel cartellino del dipendente, da 111
+    a 64 in quello visto dall'amministratore, da 172 a 70 nella presenza giornaliera e da 349
+    a 75 nella lista delle persone. Non si usa `hibernate.default_batch_fetch_size` globale:
+    caricava anche configurazioni, ruoli e riepiloghi di altre sedi e rallentava fino a 2
+    volte le pagine dell'amministratore (#707).
   - Aggiornato Drools, il motore delle regole dei permessi, dalla 5.6.0 alla 9.44.0. Insieme a
     Drools 5.6 escono dal classpath antlr 3.3, janino, mvel2 2.1.8 e jaxb-impl 2.2.5; entrano
     istack-commons-runtime e txw2, richieste da jaxb-runtime di Play. In permissions.drl due

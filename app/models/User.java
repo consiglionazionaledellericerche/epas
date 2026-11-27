@@ -48,6 +48,7 @@ import lombok.Getter;
 import lombok.Setter;
 import models.base.BaseModel;
 import models.enumerate.AccountRole;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -60,6 +61,7 @@ import play.libs.Codec;
 /**
  * Un utente di ePAS.
  */
+@BatchSize(size = 16)
 @Getter
 @Setter
 @Entity
