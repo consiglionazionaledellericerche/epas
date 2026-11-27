@@ -27,7 +27,7 @@ import common.injection.AutoRegister;
 import controllers.Security;
 import java.util.Map;
 import models.User;
-import org.drools.KnowledgeBase;
+import org.kie.api.KieBase;
 import play.Play;
 import play.mvc.Http;
 
@@ -96,7 +96,7 @@ public class SecurityModule implements Module {
   }
 
   @Provides
-  public KnowledgeBase knowledgeBase() {
+  public KieBase knowledgeBase() {
     return SecureRulesPlugin.knowledgeBase;
   }
 

@@ -52,13 +52,13 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.drools.KnowledgeBase;
-import org.drools.KnowledgeBaseFactory;
-import org.drools.builder.KnowledgeBuilder;
-import org.drools.builder.KnowledgeBuilderFactory;
-import org.drools.builder.ResourceType;
-import org.drools.io.ResourceFactory;
-import org.drools.runtime.StatelessKnowledgeSession;
+import org.drools.kiesession.rulebase.InternalKnowledgeBase;
+import org.drools.kiesession.rulebase.KnowledgeBaseFactory;
+import org.kie.api.io.ResourceType;
+import org.kie.api.runtime.StatelessKieSession;
+import org.kie.internal.builder.KnowledgeBuilder;
+import org.kie.internal.builder.KnowledgeBuilderFactory;
+import org.kie.internal.io.ResourceFactory;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.junit.Test;
@@ -385,11 +385,11 @@ public class LibraryUpgradesTest extends UnitTest {
     KnowledgeBuilder builder = KnowledgeBuilderFactory.newKnowledgeBuilder();
     builder.add(ResourceFactory.newByteArrayResource(drl.getBytes()), ResourceType.DRL);
     assertFalse(builder.getErrors().toString(), builder.hasErrors());
-    KnowledgeBase knowledge = KnowledgeBaseFactory.newKnowledgeBase();
-    knowledge.addKnowledgePackages(builder.getKnowledgePackages());
+    InternalKnowledgeBase knowledge = KnowledgeBaseFactory.newKnowledgeBase();
+    knowledge.addPackages(builder.getKnowledgePackages());
 
     List<Object> results = new ArrayList<>();
-    StatelessKnowledgeSession session = knowledge.newStatelessKnowledgeSession();
+    StatelessKieSession session = knowledge.newStatelessKieSession();
     session.setGlobal("results", results);
     session.execute(ImmutableList.of("epas", "altro"));
 
