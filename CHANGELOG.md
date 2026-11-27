@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+  - I cookie di Play (sessione, flash, errori) hanno l'attributo SameSite=Lax: il browser non
+    li invia nelle richieste che partono da un altro sito, tranne quando l'utente arriva su
+    ePAS da un link o da un redirect (come al ritorno dal login OIDC o Shibboleth). Il valore
+    si configura con application.session.sameSite (SESSION_SAMESITE nel docker: Lax, Strict,
+    None). L'attributo è gestito dalla nuova immagine docker di base
+    (ghcr.io/criluc/play1:1.5.3-temurin-11-patched-2): chi sviluppa con un play locale deve
+    sostituire il play-1.5.3.jar con quello dell'immagine, altrimenti il parametro è ignorato
+    (#700).
+
 ## [2.43.1] - 2026-11-27
 ### Changed
   - Modificando un parametro periodico della sede o di una persona, il form propone come inizio
@@ -111,14 +122,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     dei test avvia ePAS con CSRF_MODE=enforce (#677).
 
 ### Changed
-  - I cookie di Play (sessione, flash, errori) hanno l'attributo SameSite=Lax: il browser non
-    li invia nelle richieste che partono da un altro sito, tranne quando l'utente arriva su
-    ePAS da un link o da un redirect (come al ritorno dal login OIDC o Shibboleth). Il valore
-    si configura con application.session.sameSite (SESSION_SAMESITE nel docker: Lax, Strict,
-    None). L'attributo è gestito dalla nuova immagine docker di base
-    (ghcr.io/criluc/play1:1.5.3-temurin-11-patched-2): chi sviluppa con un play locale deve
-    sostituire il play-1.5.3.jar con quello dell'immagine, altrimenti il parametro è ignorato
-    (#700).
   - Nella modifica di un contratto via REST (/rest/v2/contracts/update) il campo onCertificate
     non è più ignorato: se è passato senza contractType e ha un valore diverso da quello
     attuale, il contratto diventa dipendente strutturato (true) o non strutturato (false). I
