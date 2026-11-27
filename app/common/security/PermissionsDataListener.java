@@ -58,6 +58,7 @@ public class PermissionsDataListener {
    */
   static void invalidateAfterTransaction() {
     if (JPA.isInsideTransaction() && JPA.em().getTransaction().isActive()) {
+      SharedChecksCache.markPendingChanges();
       try {
         JPA.em().unwrap(Session.class).getTransaction()
             .registerSynchronization(new Synchronization() {

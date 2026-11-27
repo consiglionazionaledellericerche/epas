@@ -54,6 +54,10 @@ import play.mvc.Http;
  * oggetti già caricati (es. l'utente corrente in {@code request.args}), quindi deve continuare a
  * usare la generazione letta al suo inizio.</p>
  *
+ * <p>Una richiesta che modifica dati letti dalle regole non usa né condivide esiti fino alla
+ * fine dell'invocazione ({@link #hasPendingChanges()}): prima del commit i suoi esiti dipendono
+ * da dati che le altre richieste non vedono ancora.</p>
+ *
  * <p>L'invalidazione vale per la sola JVM: con più istanze dell'applicazione le altre vedono le
  * modifiche entro la durata della cache. I controlli con un target non passano da qui.</p>
  */
@@ -73,6 +77,12 @@ public class SharedChecksCache {
    * Generazione letta all'inizio dell'invocazione (richiesta o job) in corso sul thread.
    */
   private static final ThreadLocal<Long> INVOCATION_GENERATION = new ThreadLocal<>();
+
+  /**
+   * Vero se l'invocazione in corso ha modificato, senza ancora committarli, dati letti dalle
+   * regole.
+   */
+  private static final ThreadLocal<Boolean> PENDING_CHANGES = new ThreadLocal<>();
 
   /**
    * Chiave di {@code request.args} con la generazione letta all'inizio della richiesta HTTP.
@@ -128,6 +138,7 @@ public class SharedChecksCache {
    * riusa la generazione letta all'inizio della richiesta.
    */
   public static void beginInvocation() {
+    PENDING_CHANGES.remove();
     final Http.Request request = Http.Request.current();
     if (request == null) {
       INVOCATION_GENERATION.set(GENERATION.get());
@@ -148,6 +159,25 @@ public class SharedChecksCache {
    */
   public static void endInvocation() {
     INVOCATION_GENERATION.remove();
+    PENDING_CHANGES.remove();
+  }
+
+  /**
+   * Annota che l'invocazione in corso ha modificato dati letti dalle regole, non ancora
+   * committati.
+   */
+  static void markPendingChanges() {
+    PENDING_CHANGES.set(Boolean.TRUE);
+  }
+
+  /**
+   * Vero se l'invocazione in corso ha modificato dati letti dalle regole: da quel momento i suoi
+   * controlli non usano gli esiti condivisi, calcolati con i dati precedenti, e non condividono
+   * i propri, calcolati con dati che le altre richieste non vedono ancora (e che un rollback
+   * può annullare).
+   */
+  public static boolean hasPendingChanges() {
+    return Boolean.TRUE.equals(PENDING_CHANGES.get());
   }
 
   /**

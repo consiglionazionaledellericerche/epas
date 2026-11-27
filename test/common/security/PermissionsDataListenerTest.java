@@ -111,6 +111,25 @@ public class PermissionsDataListenerTest extends UnitTest {
   }
 
   @Test
+  public void uncommittedChangeBypassesSharedResults() {
+    Person person = h2Examples.activeNormalEmployee(new LocalDate(2026, 1, 1));
+    commit();
+    SharedChecksCache.beginInvocation();
+    try {
+      assertFalse(SharedChecksCache.hasPendingChanges());
+      person.setName("Cambiato");
+      person.save();
+      JPA.em().flush();
+      assertTrue("gli esiti calcolati prima del commit non vanno condivisi",
+          SharedChecksCache.hasPendingChanges());
+    } finally {
+      SharedChecksCache.endInvocation();
+    }
+    assertFalse("la richiesta successiva sul thread riparte pulita",
+        SharedChecksCache.hasPendingChanges());
+  }
+
+  @Test
   public void changeWithoutTransactionInvalidatesImmediately() {
     JPA.em().getTransaction().commit();
     long before = SharedChecksCache.generation();

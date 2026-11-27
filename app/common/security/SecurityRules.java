@@ -151,7 +151,9 @@ public class SecurityRules {
     }
 
     final User user = currentUser.get().orNull();
-    final boolean shareable = check.getTarget() == null;
+    // chi ha modificato dati letti dalle regole non usa e non condivide esiti fino al commit
+    final boolean shareable =
+        check.getTarget() == null && !SharedChecksCache.hasPendingChanges();
     // letta all'inizio della richiesta, prima che carichi i dati: un esito calcolato con dati
     // poi modificati resta nella generazione precedente e non viene riusato.
     final long generation = SharedChecksCache.invocationGeneration();
