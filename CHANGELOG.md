@@ -9,11 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - I cookie di Play (sessione, flash, errori) hanno l'attributo SameSite=Lax: il browser non
     li invia nelle richieste che partono da un altro sito, tranne quando l'utente arriva su
     ePAS da un link o da un redirect (come al ritorno dal login OIDC o Shibboleth). Il valore
-    si configura con application.session.sameSite (SESSION_SAMESITE nel docker: Lax, Strict,
-    None). L'attributo è gestito dalla nuova immagine docker di base
-    (ghcr.io/criluc/play1:1.5.3-temurin-11-patched-2): chi sviluppa con un play locale deve
-    sostituire il play-1.5.3.jar con quello dell'immagine, altrimenti il parametro è ignorato
-    (#700).
+    si configura con application.session.sameSite (SESSION_SAMESITE nel docker: Lax, Strict o
+    None, con le maiuscole; Lax se non è impostata). L'attributo è gestito dalla nuova immagine
+    docker di base (ghcr.io/criluc/play1:1.5.3-temurin-11-patched-2): chi sviluppa con un play
+    locale deve sostituire il play-1.5.3.jar con quello dell'immagine, altrimenti il parametro
+    è ignorato (#700).
 
 ## [2.43.1] - 2026-11-27
 ### Changed

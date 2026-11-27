@@ -185,7 +185,8 @@ case "${SESSION_SAMESITE}" in
     ;;
   *)
     echo "ERROR: "
-    echo "  SESSION_SAMESITE accetta solo i valori \"Lax\", \"Strict\" o \"None\"."
+    echo "  SESSION_SAMESITE accetta solo i valori \"Lax\", \"Strict\" o \"None\","
+    echo "  scritti esattamente così (contano le maiuscole): valore attuale \"${SESSION_SAMESITE}\"."
     exit 1
     ;;
 esac
