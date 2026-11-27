@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+  - I dipendenti abilitati a inserirsi i congedi parentali possono inserire anche i codici
+    provvisori all'80% (24PROV, 242PROV, 243PROV, 244PROV, 245PROV), quelli del quinto figlio
+    (235, 255, 255A, malattia quinto figlio) e del genitore unico (25S, 252S): la form li
+    proponeva ma selezionarli dava errore. Con il congedo di paternità abilitato possono
+    inserire anche 212P e 213P (#740).
+  - La form di inserimento assenze propone solo le tipologie che l'utente può inserire per la
+    persona, invece di tutte quelle della tab (es. congedi prenatali o matrimoniali per i
+    dipendenti), e aprendo una tab seleziona la prima tipologia permessa (#740).
+
 ## [2.43.1] - 2026-11-27
 ### Changed
   - Modificando un parametro periodico della sede o di una persona, il form propone come inizio
