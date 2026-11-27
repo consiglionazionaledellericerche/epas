@@ -58,22 +58,6 @@ vulnerabilities:
       Riguarda l'esecuzione con un SecurityManager Java, che ePAS non usa.
     expired_at: 2027-05-18
 
-  # --- Drools 5.6 (regole dei permessi) ------------------------------------------
-  # Da togliere con l'aggiornamento a Drools 9.44 (#698).
-
-  - id: CVE-2021-41411
-    paths: ["home/epas/epas/lib/drools-core-5.6.0.Final.jar"]
-    statement: >-
-      XXE nella lettura di kmodule.xml: ePAS compila solo conf/permissions.drl, che
-      fa parte dell'applicazione. Si chiude con #698.
-    expired_at: 2027-02-28
-
-  - id: CVE-2014-8125
-    paths: ["home/epas/epas/lib/drools-core-5.6.0.Final.jar"]
-    statement: >-
-      XXE nei processi BPMN2 di jBPM, che ePAS non usa. Si chiude con #698.
-    expired_at: 2027-02-28
-
   # --- Altre librerie dell'applicazione ------------------------------------------
 
   - id: CVE-2024-49203

@@ -6,10 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
-  - Aggiornato Drools, il motore delle regole dei permessi, dalla 5.6.0 alla 9.44.0. Con la
-    vecchia versione non sono più incluse antlr 3.3, janino, mvel2 2.1.8 e jaxb-impl 2.2.5.
-    In permissions.drl tre regole sui flussi di approvazione usano isManagerApproved() e
-    simili al posto del confronto della data con null, non più accettato (#698).
+  - Aggiornato Drools, il motore delle regole dei permessi, dalla 5.6.0 alla 9.44.0. Insieme a
+    Drools 5.6 escono dal classpath antlr 3.3, janino, mvel2 2.1.8 e jaxb-impl 2.2.5; entrano
+    istack-commons-runtime e txw2, richieste da jaxb-runtime di Play. In permissions.drl due
+    regole sulla cancellazione delle richieste di assenza e di informazioni usano
+    isManagerApproved() e simili al posto del confronto della data con null, non più accettato
+    (#698).
 
 ## [2.43.1] - 2026-11-27
 ### Changed
