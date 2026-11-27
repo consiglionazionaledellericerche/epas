@@ -1,0 +1,1 @@
+${new com.google.gson.Gson().toJson([error: "Errore interno del server"]).raw()}

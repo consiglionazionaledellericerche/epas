@@ -109,6 +109,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Test end-to-end per le schede caricate con data-async, le notifiche, l'escape dei dati
     nella finestra di gestione del giorno e il token anti-CSRF nelle chiamate ajax. Lo stack
     dei test avvia ePAS con CSRF_MODE=enforce (#677).
+  - API REST self-service per il dipendente autenticato (/rest/v4/me), pensate per l'app mobile:
+    profilo, situazione mensile e giornaliera, ferie e permessi, buoni pasto residui e gestione
+    delle proprie richieste di assenza (elenco, dettaglio, inserimento e ritiro). Documentate in
+    docs/rest/meServices.rst (#618).
+  - Aggiunto il parametro keycloak.additional_client_ids (KEYCLOAK_ADDITIONAL_CLIENT_IDS nel
+    docker) con gli altri client OIDC dello stesso realm, per esempio l'app mobile, i cui access
+    token sono accettati dalle API REST (#618).
 
 ### Changed
   - Nella modifica di un contratto via REST (/rest/v2/contracts/update) il campo onCertificate
@@ -123,6 +130,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Aggiornate le librerie postgresql (42.7.14), poi (4.1.2), snakeyaml (2.7) e assertj
     (3.27.7). protobuf-java non è più inclusa: drools la usa solo per serializzare le sessioni
     (#682).
+  - La logica di inserimento delle richieste di assenza è spostata in AbsenceRequestManager.
+    Le richieste dei responsabili di sede o di gruppo che si auto approvano sono ora approvate
+    direttamente al salvataggio, invece che tramite il passaggio dalla pagina di approvazione
+    (#618).
 
   - La verifica anti-CSRF distingue nel log il token assente, il token diverso da quello
     della sessione (di solito di una pagina aperta prima di un nuovo login), il token inviato

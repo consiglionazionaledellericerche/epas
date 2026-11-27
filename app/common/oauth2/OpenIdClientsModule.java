@@ -1,10 +1,13 @@
 package common.oauth2;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import common.injection.AutoRegister;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Set;
 import javax.inject.Named;
 import lombok.extern.slf4j.Slf4j;
 import play.Play;
@@ -25,6 +28,7 @@ public class OpenIdClientsModule extends AbstractModule {
   private static final long JWKS_CACHE_DURATION = 10; // minuti
 
   static final String KEYCLOAK_CLIENT_ID = "keycloak.client_id";
+  static final String KEYCLOAK_ADDITIONAL_CLIENT_IDS = "keycloak.additional_client_ids";
   private static final String KEYCLOAK_CLIENT_SECRET = "keycloak.client_secret";
   private static final String KEYCLOAK_CLIENT_CONFIG_URI = "keycloak.config.uri";
 
@@ -38,12 +42,14 @@ public class OpenIdClientsModule extends AbstractModule {
   @Provides
   public OpenIdConnectClient openIdConnectClient(@Named(KEYCLOAK_CLIENT_ID) String clientId,
       @Named(KEYCLOAK_CLIENT_SECRET) String clientSecret,
+      @Named(KEYCLOAK_ADDITIONAL_CLIENT_IDS) Set<String> additionalClientIds,
       @Named(KEYCLOAK_CLIENT_CONFIG_URI) String configUrl,
       @Named(KEYCLOAK_JWT_FIELD) Optional<String> jwtField) {
     try {
       return new OpenIdConnectClient(configUrl,
           () -> Router.getFullUrl("Resecure.oauthCallback"),
-          clientId, clientSecret, jwtField.orElse(null), JWKS_CACHE_SIZE, JWKS_CACHE_DURATION);
+          clientId, clientSecret, additionalClientIds, jwtField.orElse(null), JWKS_CACHE_SIZE,
+          JWKS_CACHE_DURATION);
     } catch (IOException e) {
       log.error("Error retrieving configuration from keycloak {}",  e.getMessage());
       throw new RuntimeException(e);
@@ -54,6 +60,19 @@ public class OpenIdClientsModule extends AbstractModule {
   @Named(KEYCLOAK_CLIENT_ID)
   public String keycloakClientId() {
     return Play.configuration.getProperty(KEYCLOAK_CLIENT_ID);
+  }
+
+  /**
+   * Gli altri client OAuth (separati da virgola) i cui access token sono accettati dalle API
+   * REST, ad esempio quello pubblico dell'app mobile.
+   *
+   * @return l'insieme dei client aggiuntivi, vuoto se non configurati
+   */
+  @Provides
+  @Named(KEYCLOAK_ADDITIONAL_CLIENT_IDS)
+  public Set<String> keycloakAdditionalClientIds() {
+    return ImmutableSet.copyOf(Splitter.on(',').trimResults().omitEmptyStrings()
+        .split(Play.configuration.getProperty(KEYCLOAK_ADDITIONAL_CLIENT_IDS, "")));
   }
 
   @Provides
