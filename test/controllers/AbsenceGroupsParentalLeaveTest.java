@@ -18,18 +18,26 @@
 package controllers;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import common.injection.StaticInject;
 import dao.absences.AbsenceComponentDao;
 import db.h2support.H2Examples;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
 import manager.services.absences.AbsenceService;
 import models.Person;
+import models.PersonChildren;
 import models.Role;
 import models.UsersRolesOffices;
+import models.absences.Absence;
 import models.absences.GroupAbsenceType;
+import models.absences.JustifiedType.JustifiedTypeName;
 import models.absences.definitions.DefaultGroup;
 import models.absences.definitions.DefaultTab;
 import org.joda.time.DateTimeConstants;
@@ -37,6 +45,7 @@ import org.joda.time.LocalDate;
 import org.junit.Test;
 import play.db.jpa.JPA;
 import play.mvc.Http.Response;
+import play.mvc.Router;
 import play.test.FunctionalTest;
 
 /**
@@ -127,6 +136,43 @@ public class AbsenceGroupsParentalLeaveTest extends FunctionalTest {
         + group(DefaultGroup.G_213P).id));
   }
 
+  /**
+   * Un dipendente abilitato ai congedi parentali salva un codice provvisorio all'80% per il
+   * secondo figlio (242PROV), prima non inseribile.
+   */
+  @Test
+  public void parentalLeaveEmployeeCanSaveProvisionalCode() {
+    absenceService.enumInitializator();
+    Person employee = employeeWith(EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS);
+    child(employee, new LocalDate(2023, 3, 1));
+    child(employee, new LocalDate(2025, 5, 1));
+    commit();
+
+    login(employee);
+    assertStatus(302, POST(saveUrl(), saveParams(employee, DefaultGroup.G_242PROV, "242PROV")));
+    assertEquals(Lists.newArrayList("242PROV"), absenceCodes(employee));
+  }
+
+  /**
+   * Il congedo di paternità del secondo figlio (212P) si salva solo con il parametro
+   * della paternità: un dipendente abilitato ai soli congedi parentali riceve 403.
+   */
+  @Test
+  public void paternityOfSecondChildRequiresFathersParameter() {
+    absenceService.enumInitializator();
+    Person father = employeeWith(EpasParam.PARENTAL_LEAVE_FOR_FATHERS);
+    Person employee = employeeWith(EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS);
+    commit();
+
+    login(employee);
+    assertStatus(403, POST(saveUrl(), saveParams(employee, DefaultGroup.G_212P, "212P")));
+    assertTrue(absenceCodes(employee).isEmpty());
+
+    login(father);
+    assertStatus(302, POST(saveUrl(), saveParams(father, DefaultGroup.G_212P, "212P")));
+    assertEquals(Lists.newArrayList("212P"), absenceCodes(father));
+  }
+
   private Person employeeWith(EpasParam param) {
     Person person = h2Examples.activeNormalEmployee(BEGIN_2026);
     configurationManager.updateBoolean(param, person, true,
@@ -147,6 +193,40 @@ public class AbsenceGroupsParentalLeaveTest extends FunctionalTest {
     uro.setOffice(person.getOffice());
     uro.setRole(role);
     uro.save();
+  }
+
+  private void child(Person person, LocalDate bornDate) {
+    PersonChildren child = new PersonChildren();
+    child.setPerson(person);
+    child.setName("Figlio");
+    child.setSurname("Di " + person.getSurname());
+    child.setBornDate(bornDate);
+    child.save();
+  }
+
+  private Map<String, String> saveParams(Person person, DefaultGroup group, String code) {
+    String date = lastWorkingDay().toString("dd/MM/yyyy");
+    Map<String, String> params = new HashMap<>();
+    params.put("personId", person.id.toString());
+    params.put("from", date);
+    params.put("to", date);
+    params.put("groupAbsenceType.id", group(group).id.toString());
+    params.put("absenceType.id",
+        absenceComponentDao.absenceTypeByCode(code).get().id.toString());
+    params.put("justifiedType.id",
+        absenceComponentDao.getOrBuildJustifiedType(JustifiedTypeName.all_day).id.toString());
+    return params;
+  }
+
+  private String saveUrl() {
+    return Router.reverse("AbsenceGroups.save").url;
+  }
+
+  private List<String> absenceCodes(Person person) {
+    JPA.em().clear();
+    List<Absence> absences = Absence.find("personDay.person.id = ?1", person.id).fetch();
+    return absences.stream().map(absence -> absence.getAbsenceType().getCode())
+        .collect(Collectors.toList());
   }
 
   private GroupAbsenceType group(DefaultGroup group) {
