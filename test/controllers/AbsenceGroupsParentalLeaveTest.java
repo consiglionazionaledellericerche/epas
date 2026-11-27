@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import common.injection.StaticInject;
 import dao.absences.AbsenceComponentDao;
 import db.h2support.H2Examples;
+import java.util.regex.Pattern;
 import javax.inject.Inject;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
@@ -91,10 +92,7 @@ public class AbsenceGroupsParentalLeaveTest extends FunctionalTest {
     Response response = GET(insertUrl(employee) + "&groupAbsenceType.id="
         + group(DefaultGroup.G_23).id);
     assertStatus(200, response);
-    // solo le opzioni della select dei gruppi: gli id dei tipi assenza possono coincidere
-    String content = getContent(response);
-    content = content.substring(content.indexOf("name=\"groupAbsenceType.id\""));
-    content = content.substring(0, content.indexOf("</select>"));
+    String content = groupSelect(getContent(response));
     assertTrue(content.contains(option(DefaultGroup.G_24PROV)));
     assertTrue(content.contains(option(DefaultGroup.G_242PROV)));
     assertFalse(content.contains(option(DefaultGroup.G_CONGEDI_PRENATALI)));
@@ -115,9 +113,14 @@ public class AbsenceGroupsParentalLeaveTest extends FunctionalTest {
 
     login(employee);
     GroupAbsenceType paternity = group(DefaultGroup.G_21P);
-    assertStatus(200, GET(insertUrl(employee) + "&categoryTab.id="
-        + paternity.getCategory().getTab().id));
     assertEquals(DefaultTab.CONGEDI_PARENTALI.name(), paternity.getCategory().getTab().getName());
+    Response response = GET(insertUrl(employee) + "&categoryTab.id="
+        + paternity.getCategory().getTab().id);
+    assertStatus(200, response);
+    // la tab si apre sulla paternità, non sul primo gruppo della tab (23)
+    String groupSelect = groupSelect(getContent(response));
+    assertTrue(groupSelect, isSelected(groupSelect, DefaultGroup.G_21P));
+    assertFalse(groupSelect.contains(option(DefaultGroup.G_23)));
     assertStatus(200, GET(insertUrl(employee) + "&groupAbsenceType.id="
         + group(DefaultGroup.G_212P).id));
     assertStatus(200, GET(insertUrl(employee) + "&groupAbsenceType.id="
@@ -148,6 +151,19 @@ public class AbsenceGroupsParentalLeaveTest extends FunctionalTest {
 
   private GroupAbsenceType group(DefaultGroup group) {
     return absenceComponentDao.groupAbsenceTypeByName(group.name()).get();
+  }
+
+  /**
+   * Solo le opzioni della select dei gruppi: gli id dei tipi assenza possono coincidere.
+   */
+  private String groupSelect(String content) {
+    content = content.substring(content.indexOf("name=\"groupAbsenceType.id\""));
+    return content.substring(0, content.indexOf("</select>"));
+  }
+
+  private boolean isSelected(String groupSelect, DefaultGroup group) {
+    return Pattern.compile(Pattern.quote(option(group)) + "\\s*selected")
+        .matcher(groupSelect).find();
   }
 
   private String option(DefaultGroup group) {
