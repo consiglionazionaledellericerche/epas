@@ -25,6 +25,7 @@ import org.hibernate.Session;
 import org.hibernate.boot.spi.SessionFactoryOptions;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.junit.Test;
+import play.Play;
 import play.db.jpa.JPA;
 import play.test.UnitTest;
 
@@ -80,5 +81,24 @@ public class QueryStatsListenerTest extends UnitTest {
     assertEquals(2, stats.getExecuted());
     // la chiusura della sessione con statement non deve sollevare eccezioni
     stats.end();
+  }
+
+  @Test
+  public void listenerEndsSessionWithoutStatements() {
+    // con soglia 0 anche una sessione senza statement viene registrata: non deve sollevare
+    // eccezioni né richiedere una richiesta HTTP corrente
+    String previous = Play.configuration.getProperty(QueryStatsListener.THRESHOLD_KEY);
+    try {
+      Play.configuration.setProperty(QueryStatsListener.THRESHOLD_KEY, "0");
+      QueryStatsListener stats = new QueryStatsListener();
+      stats.end();
+      assertEquals(0, stats.getPrepared());
+    } finally {
+      if (previous == null) {
+        Play.configuration.remove(QueryStatsListener.THRESHOLD_KEY);
+      } else {
+        Play.configuration.setProperty(QueryStatsListener.THRESHOLD_KEY, previous);
+      }
+    }
   }
 }

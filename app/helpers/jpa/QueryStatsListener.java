@@ -30,8 +30,9 @@ import play.mvc.Http;
  * {@code conf/hibernate.properties}. Alla chiusura della sessione registra nel log l'azione,
  * il numero di statement JDBC preparati ed eseguiti, il tempo speso a eseguirli e la durata
  * della sessione. Il log è a livello DEBUG; diventa INFO quando gli statement preparati sono
- * almeno il valore di {@code jpa.queryStats.threshold} (default {@value #DEFAULT_THRESHOLD},
- * 0 per registrare sempre a INFO).</p>
+ * almeno il valore di {@code jpa.queryStats.threshold} (default {@value #DEFAULT_THRESHOLD}).
+ * Le sessioni senza statement non sono registrate, tranne con soglia 0, che registra a INFO
+ * tutte le sessioni, anche quelle senza statement.</p>
  *
  * <p>Un'istanza per sessione: non serve sincronizzazione.</p>
  */
@@ -91,11 +92,11 @@ public class QueryStatsListener extends BaseSessionEventListener {
 
   @Override
   public void end() {
-    if (prepared == 0) {
+    final int threshold = threshold();
+    if (prepared == 0 && threshold > 0) {
       return;
     }
     captureAction();
-    final int threshold = threshold();
     final boolean heavy = prepared >= threshold;
     if (heavy ? !log.isInfoEnabled() : !log.isDebugEnabled()) {
       return;
