@@ -24,7 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     della sede e della persona, impostazioni generali, categorie di turno, turnisti, tipi di
     reperibilità e reperibilità) e al ricaricamento delle regole: prima, ad esempio, chi
     veniva tolto da un turno poteva gestirlo ancora per 60 secondi. Con più istanze
-    dell'applicazione le altre vedono la modifica entro la durata della cache. Un valore non
+    dell'applicazione le altre vedono la modifica entro la durata della cache. Gli esiti
+    calcolati con dati modificati e non ancora salvati restano della sola richiesta, e dopo un
+    salvataggio la richiesta stessa ricalcola i controlli già fatti. Un valore non
     numerico di security.checks.cacheSeconds non blocca più tutte le richieste: viene
     ignorato e vale 60 secondi (#737).
   - I dipendenti abilitati a inserirsi i congedi parentali possono inserire anche i codici

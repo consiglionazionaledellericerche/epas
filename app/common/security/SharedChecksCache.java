@@ -56,7 +56,9 @@ import play.mvc.Http;
  *
  * <p>Una richiesta che modifica dati letti dalle regole non usa né condivide esiti fino alla
  * fine dell'invocazione ({@link #hasPendingChanges()}): prima del commit i suoi esiti dipendono
- * da dati che le altre richieste non vedono ancora.</p>
+ * da dati che le altre richieste non vedono ancora. Allo stesso modo non condivide esiti
+ * finché ha dati delle regole modificati in memoria e non salvati
+ * ({@link PermissionsDataListener#hasUnsavedChanges()}).</p>
  *
  * <p>L'invalidazione vale per la sola JVM: con più istanze dell'applicazione le altre vedono le
  * modifiche entro la durata della cache. I controlli con un target non passano da qui.</p>

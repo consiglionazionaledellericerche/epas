@@ -165,7 +165,9 @@ public class SecurityRules {
       }
     } else {
       doCheck(check, user);
-      if (shareable) {
+      // gli esiti calcolati con dati modificati in memoria e non salvati restano della richiesta
+      if (shareable && sharedChecks.isEnabled() && user != null
+          && !PermissionsDataListener.hasUnsavedChanges()) {
         sharedChecks.put(generation, user, check.getAction(), check.isGranted());
       }
     }

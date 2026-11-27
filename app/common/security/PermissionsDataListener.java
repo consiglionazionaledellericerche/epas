@@ -17,12 +17,21 @@
 
 package common.security;
 
+import java.util.Arrays;
+import java.util.Map;
+import javax.persistence.EntityListeners;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import javax.transaction.Synchronization;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
+import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.engine.spi.EntityEntry;
+import org.hibernate.engine.spi.PersistenceContext;
+import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.Status;
+import org.hibernate.internal.util.collections.IdentityMap;
 import play.db.jpa.JPA;
 
 /**
@@ -43,6 +52,23 @@ import play.db.jpa.JPA;
 @Slf4j
 public class PermissionsDataListener {
 
+  /**
+   * Vero per le entità che hanno questo listener, cioè i cui dati sono letti dalle regole.
+   */
+  private static final ClassValue<Boolean> PERMISSIONS_DATA = new ClassValue<Boolean>() {
+    @Override
+    protected Boolean computeValue(Class<?> type) {
+      for (Class<?> c = type; c != null; c = c.getSuperclass()) {
+        final EntityListeners listeners = c.getAnnotation(EntityListeners.class);
+        if (listeners != null
+            && Arrays.asList(listeners.value()).contains(PermissionsDataListener.class)) {
+          return true;
+        }
+      }
+      return false;
+    }
+  };
+
   @PostPersist
   @PostUpdate
   @PostRemove
@@ -59,6 +85,7 @@ public class PermissionsDataListener {
   static void invalidateAfterTransaction() {
     if (JPA.isInsideTransaction() && JPA.em().getTransaction().isActive()) {
       SharedChecksCache.markPendingChanges();
+      SecurityModule.clearRequestChecks();
       try {
         JPA.em().unwrap(Session.class).getTransaction()
             .registerSynchronization(new Synchronization() {
@@ -80,5 +107,48 @@ public class PermissionsDataListener {
       return;
     }
     SharedChecksCache.invalidateAll();
+  }
+
+  /**
+   * Vero se la transazione corrente ha dati letti dalle regole modificati in memoria e non
+   * salvati, ad esempio dal binding dei parametri della richiesta su un'entità caricata: gli
+   * esiti calcolati con quei dati non vanno condivisi con le altre richieste.
+   *
+   * <p>Play salva solo le entità su cui è stato chiamato save(), quindi queste modifiche non
+   * arrivano mai al database e non passano dai metodi di questo listener: si confronta lo stato
+   * di ogni entità interessata con quello letto dal database.</p>
+   */
+  static boolean hasUnsavedChanges() {
+    if (!JPA.isInsideTransaction()) {
+      return false;
+    }
+    final SessionImplementor session = JPA.em().unwrap(SessionImplementor.class);
+    final PersistenceContext context = session.getPersistenceContext();
+    for (Map.Entry<Object, EntityEntry> managed : context.reentrantSafeEntityEntries()) {
+      final EntityEntry entry = managed.getValue();
+      if (!PERMISSIONS_DATA.get(entry.getPersister().getMappedClass())) {
+        continue;
+      }
+      if (entry.getStatus() != Status.MANAGED || entry.getLoadedState() == null) {
+        return true;
+      }
+      final Object entity = managed.getKey();
+      final int[] dirty = entry.getPersister().findDirty(
+          entry.getPersister().getPropertyValues(entity), entry.getLoadedState(), entity,
+          session);
+      if (dirty != null && dirty.length > 0) {
+        return true;
+      }
+    }
+    for (Map.Entry<?, ?> collection
+        : IdentityMap.concurrentEntries(context.getCollectionEntries())) {
+      final PersistentCollection persistent = (PersistentCollection) collection.getKey();
+      final Object owner = persistent.getOwner();
+      if (persistent.isDirty() && owner != null
+          && PERMISSIONS_DATA.get(session.getEntityPersister(null, owner).getMappedClass())) {
+        return true;
+      }
+    }
+    return false;
   }
 }
