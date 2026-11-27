@@ -75,31 +75,7 @@
         <th>Valore</th>
       </tr>
       #{list generals, as:'conf'}
-      #{if conf.epasParam == manager.configurations.EpasParam.ENABLE_MISSIONS_INTEGRATION}
-      #{secure.check 'Configurations.disableMissionsIntegration'} 
-      <tr>
-        <td>        		
-        	#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
-        		&{conf.epasParam}
-        	#{/secure.link}        	
-        </td>
-        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
-      </tr>
-      #{/secure.check}
-      #{/if}
-      #{elseif conf.epasParam == manager.configurations.EpasParam.DATE_START_MEAL_TICKET}
-      #{secure.check 'Configurations.disableDateStartMealTicket'} 
-      <tr>
-        <td>        		
-        	#{secure.link @Configurations.edit(conf.id), target: conf, 'data-async-modal':'#defaultModal'}
-        		&{conf.epasParam}
-        	#{/secure.link}        	
-        </td>
-        <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
-      </tr>
-      #{/secure.check}
-      #{/elseif}
-	  #{elseif conf.epasParam == manager.configurations.EpasParam.HANDLE_OVERTIME}
+      #{if conf.epasParam == manager.configurations.EpasParam.HANDLE_OVERTIME}
 	  #{secure.check 'Configurations.disableHandleOvertime'} 
 	  <tr>
 	    <td>        		
@@ -110,7 +86,7 @@
 	    <td>${templateUtility.getObjectInConfiguration(conf.epasParam, conf.fieldValue).label()}</td>
 	  </tr>
 	  #{/secure.check}
-	  #{/elseif}
+	  #{/if}
       #{else}
       <tr>
         <td>   

@@ -260,8 +260,11 @@ public class Configurations extends Controller {
       paramCategory = EpasParam.EpasParamCategory.GENERAL;
     }
 
+    // I parametri nascosti hanno un valore fisso o non sono più una scelta della sede (#742).
     final List<Configuration> configurations = configurationManager
-        .getOfficeConfigurationsByDate(office, LocalDate.now());
+        .getOfficeConfigurationsByDate(office, LocalDate.now()).stream()
+        .filter(conf -> !conf.getEpasParam().isHidden())
+        .collect(Collectors.toList());
 
     final List<Configuration> generals = configurations.stream()
         .filter(conf -> conf.getEpasParam().category == EpasParam.EpasParamCategory.GENERAL)

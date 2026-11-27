@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import manager.configurations.ConfigurationManager;
 import manager.configurations.EpasParam;
+import manager.configurations.EpasParam.EpasParamCategory;
 import manager.services.absences.AbsenceService;
 import models.Configuration;
 import models.Office;
@@ -35,6 +36,7 @@ import models.enumerate.AccountRole;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 import play.db.jpa.JPA;
+import play.i18n.Messages;
 import play.mvc.Http.Response;
 import play.mvc.Router;
 import play.test.FunctionalTest;
@@ -200,6 +202,103 @@ public class OfficeConfigurationsTest extends FunctionalTest {
     assertEquals(new LocalDate(2025, 1, 1), ConfigurationManager.minValidityBegin(today));
     assertEquals(new LocalDate(2025, 1, 1),
         ConfigurationManager.minValidityBegin(new LocalDate(2026, 1, 1)));
+  }
+
+  /**
+   * Le nuove sedi hanno il flusso di richiesta assenza e i flussi informativi abilitati (#742).
+   */
+  @Test
+  public void newOfficeHasFlowsEnabled() {
+    Office office = officeWithEmployee();
+    assertEquals(Boolean.TRUE, configurationManager.configValue(office, EpasParam.ENABLE_FLOWS));
+    assertEquals(Boolean.TRUE,
+        configurationManager.configValue(office, EpasParam.ENABLE_INFORMATION_FLOWS));
+    assertEquals(Boolean.TRUE,
+        configurationManager.configValue(office, EpasParam.ENABLE_MISSIONS_INTEGRATION));
+    assertEquals(2, configurationManager.configValue(office,
+        EpasParam.NUMBER_OF_VIEWING_COUPLE));
+  }
+
+  /**
+   * I parametri nascosti non compaiono nella pagina delle configurazioni della sede, nemmeno
+   * per l'amministratore di sistema, e non possono essere modificati da nessuno (#742).
+   */
+  @Test
+  public void hiddenParamsAreNotShownNorEditable() {
+    Office office = officeWithEmployee();
+    String personnelAdmin = personnelAdmin(office);
+    String systemAdmin = systemAdmin(office);
+    commit();
+
+    for (String username : new String[] {personnelAdmin, systemAdmin}) {
+      login(username);
+      for (EpasParamCategory category : new EpasParamCategory[] {
+          EpasParamCategory.GENERAL, EpasParamCategory.FLOWS,
+          EpasParamCategory.INFORMATION_FLOWS}) {
+        Response response = GET(showUrl(office, category));
+        assertIsOk(response);
+        String content = getContent(response);
+        for (EpasParam param : HIDDEN_PARAMS) {
+          assertFalse(username + " vede " + param,
+              content.contains(Messages.get(param.name()).trim()));
+          assertFalse(username + " vede il link di " + param,
+              content.contains(editUrl(configuration(office, param)) + "\""));
+        }
+      }
+      for (EpasParam param : HIDDEN_PARAMS) {
+        assertStatus(403, GET(editUrl(configuration(office, param))));
+      }
+    }
+  }
+
+  /**
+   * I parametri annuali sulla fruizione dei residui dell'anno precedente sono visibili a tutti
+   * ma modificabili solo dagli amministratori di sistema (#742).
+   */
+  @Test
+  public void yearlyRecoveryParamsEditableOnlyBySystemUsers() {
+    Office office = officeWithEmployee();
+    String personnelAdmin = personnelAdmin(office);
+    String systemAdmin = systemAdmin(office);
+    commit();
+
+    login(personnelAdmin);
+    String content = getContent(GET(showUrl(office, EpasParamCategory.YEARLY)));
+    for (EpasParam param : SYSTEM_USERS_PARAMS) {
+      Configuration conf = configuration(office, param);
+      assertTrue("non vede " + param, content.contains(Messages.get(param.name()).trim()));
+      assertFalse("vede il link di " + param, content.contains(editUrl(conf) + "\""));
+      assertStatus(403, GET(editUrl(conf)));
+    }
+
+    login(systemAdmin);
+    content = getContent(GET(showUrl(office, EpasParamCategory.YEARLY)));
+    for (EpasParam param : SYSTEM_USERS_PARAMS) {
+      Configuration conf = configuration(office, param);
+      assertTrue("non vede il link di " + param, content.contains(editUrl(conf) + "\""));
+      assertIsOk(GET(editUrl(conf)));
+    }
+  }
+
+  private static final EpasParam[] HIDDEN_PARAMS = {
+      EpasParam.ENABLE_MISSIONS_INTEGRATION, EpasParam.NUMBER_OF_VIEWING_COUPLE,
+      EpasParam.DATE_START_MEAL_TICKET, EpasParam.ENABLE_FLOWS,
+      EpasParam.ENABLE_INFORMATION_FLOWS};
+
+  private static final EpasParam[] SYSTEM_USERS_PARAMS = {
+      EpasParam.EXPIRY_VACATION_PAST_YEAR, EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_13,
+      EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_49, EpasParam.MAX_RECOVERY_DAYS_13,
+      EpasParam.MAX_RECOVERY_DAYS_49};
+
+  private Configuration configuration(Office office, EpasParam param) {
+    return Configuration.find("office = ?1 and epasParam = ?2", office, param).first();
+  }
+
+  private String showUrl(Office office, EpasParamCategory category) {
+    Map<String, Object> args = new HashMap<>();
+    args.put("officeId", office.id);
+    args.put("paramCategory", category.name());
+    return Router.reverse("Configurations.show", args).url;
   }
 
   /**

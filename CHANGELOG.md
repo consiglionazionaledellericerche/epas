@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+  - Nella pagina dei parametri di configurazione della sede non compaiono più, e non possono
+    essere modificati da nessuno, i parametri che non sono più una scelta della singola sede
+    (#742):
+    - integrazione con la piattaforma Missioni, sempre abilitata;
+    - numero di colonne di entrata/uscita da visualizzare, sempre 2;
+    - flusso di richiesta assenza e flussi informativi, sempre abilitati, anche per le nuove
+      sedi;
+    - data di inizio della gestione dei ticket restaurant, che mantiene il valore attuale.
+  - I parametri annuali sulla fruizione delle ferie e dei riposi compensativi dell'anno
+    precedente (giorno massimo per le ferie, mese massimo per i residui e numero massimo di
+    giorni di recupero per i livelli I-III e IV-VIII) restano visibili ma possono essere
+    modificati solo dagli amministratori di sistema (#742).
+  - Nella pagina dei parametri di configurazione della persona non compaiono più, e non possono
+    essere modificati da nessuno, gli auto inserimenti per l'emergenza COVID-19 e per lo
+    smartworking, i cui codici sono scaduti nel 2022 e nel 2021: vengono disattivati per tutti.
+    Sono state rimosse anche le due opzioni della configurazione generale che ne abilitavano la
+    visualizzazione (#742).
   - I cookie di Play (sessione, flash, errori) hanno l'attributo SameSite=Lax: il browser non
     li invia nelle richieste che partono da un altro sito, tranne quando l'utente arriva su
     ePAS da un link o da un redirect (come al ritorno dal login OIDC o Shibboleth). Il valore
@@ -39,6 +56,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     La policy chiede ai browser l'inizio dello script che viola la policy (report-sample),
     riportato nel log senza cifre per trovare più facilmente il punto da correggere (#733).
 ### Fixed
+  - Nelle sedi con il flusso di richiesta assenza attivo la pagina di accesso negato era
+    mostrata come semplice testo "Access forbidden": il menu dei flussi falliva quando
+    l'utente corrente non era ancora disponibile alla pagina (#742).
+  - I dipendenti potevano accedere all'inserimento delle proprie assenze anche senza alcun
+    parametro di auto inserimento attivo: alla regola dei permessi bastava che la
+    configurazione esistesse. Ora serve almeno un parametro attivo, compresi il lavoro agile
+    e i congedi parentali, prima abilitati solo grazie a questo errore (#742).
   - Gli esiti dei controlli dei permessi condivisi tra le richieste vengono invalidati dopo il
     salvataggio dei dati letti dalle regole (persona, qualifica, sede, utente, configurazioni
     della sede e della persona, impostazioni generali, categorie di turno, turnisti, tipi di

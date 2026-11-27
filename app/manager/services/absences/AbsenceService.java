@@ -25,7 +25,6 @@ import com.google.gdata.util.common.base.Preconditions;
 import controllers.Security;
 import dao.PersonChildrenDao;
 import dao.absences.AbsenceComponentDao;
-import helpers.TemplateUtility;
 import it.cnr.iit.epas.DateUtility;
 import java.util.Comparator;
 import java.util.List;
@@ -87,7 +86,6 @@ public class AbsenceService {
   private final ConfigurationManager confManager;
   private final SecureManager secureManager;
   private final ConfigurationManager configurationManager;
-  private final TemplateUtility templateUtility;
 
   /**
    * Costruttore injection.
@@ -102,7 +100,7 @@ public class AbsenceService {
       AbsenceEngineUtility absenceEngineUtility, ServiceFactories serviceFactories,
       AbsenceComponentDao absenceComponentDao, PersonChildrenDao personChildrenDao,
       ConfigurationManager confManager, SecureManager secureManager,
-      EnumAllineator enumAllineator, TemplateUtility templateUtility) {
+      EnumAllineator enumAllineator) {
     this.configurationManager = configurationManager;
     this.absenceEngineUtility = absenceEngineUtility;
     this.serviceFactories = serviceFactories;
@@ -111,7 +109,6 @@ public class AbsenceService {
     this.confManager = confManager;
     this.secureManager = secureManager;
     this.enumAllineator = enumAllineator;
-    this.templateUtility = templateUtility;
   }
 
   /**
@@ -642,7 +639,7 @@ public class AbsenceService {
       groupsPermitted.remove(thirdDisabledRelativeAbsence);
       groupsPermitted.remove(thirdDisabledRelativeAbsenceHourly);
       for (AbsenceType abt : smart.getCategory().getAbsenceTypes()) {
-        if (abt.isExpired() || !templateUtility.enableSmartworking()) {
+        if (abt.isExpired()) {
           groupsPermitted.remove(smart);
         }
       }

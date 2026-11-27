@@ -1619,16 +1619,33 @@ then
  $c.grant();
 end
 
-rule CanModifyTechinicianExpiryRecoveryDays
-when 
- $uro: UsersRolesOffices()
- $target: Configuration(office == $uro.office, epasParam in(EpasParam.MAX_RECOVERY_DAYS_49, EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_49))
- $c: PermissionCheck(action in (
-		"Configurations.show",
-		"Configurations.edit",
-		"Configurations.update"
+/*******************************************************************************
+ * I parametri della sede nascosti (#742) hanno un valore fisso oppure non sono più
+ * una scelta della singola sede: nessuno può modificarli.
+ * La salience negativa fa scattare la revoca dopo tutte le regole che concedono.
+ ******************************************************************************/
+rule hiddenConfigurationCannotBeEdited
+salience -10
+when
+ $target: Configuration(epasParam.hidden == true)
+ $c: PermissionCheck(action in ("Configurations.edit", "Configurations.update"),
+     target == $target)
+then
+ $c.revoke();
+end
 
-        ), target == $target)
+/*******************************************************************************
+ * I parametri annuali sulla fruizione delle ferie e dei riposi compensativi
+ * dell'anno precedente possono essere modificati solo dagli amministratori di
+ * sistema (#742): gli altri utenti ne vedono il valore senza poterlo cambiare.
+ ******************************************************************************/
+rule onlySystemUsersCanEditRestrictedConfiguration
+salience -10
+when
+ $target: Configuration(epasParam.systemUsersEditOnly == true)
+ not AccountRole(this in (AccountRole.DEVELOPER, AccountRole.ADMIN))
+ $c: PermissionCheck(action in ("Configurations.edit", "Configurations.update"),
+     target == $target)
 then
  $c.revoke();
 end
@@ -3171,16 +3188,19 @@ rule Absences_person
 when
  $uro: UsersRolesOffices(role.name == Role.EMPLOYEE)
  $p: Person() from currentOperator.person
- PersonConfiguration(epasParam == EpasParam.ADDITIONAL_HOURS
- 				|| epasParam == EpasParam.COVID_19
+ /* Il dipendente deve avere attivo almeno uno dei parametri di auto inserimento (#742):
+    le parentesi sono necessarie, senza bastava che esistesse la configurazione. */
+ PersonConfiguration((epasParam == EpasParam.ADDITIONAL_HOURS
  				|| epasParam == EpasParam.RIGHT_TO_STUDY
  				|| epasParam == EpasParam.DISABLED_PERSON_PERMISSION
  				|| epasParam == EpasParam.DISABLED_RELATIVE_PERMISSION
  				|| epasParam == EpasParam.TELEWORK
  				|| epasParam == EpasParam.ENABLE_TELEWORK_STAMPINGS_FOR_WORKTIME
+ 				|| epasParam == EpasParam.AGILE_WORK
  				|| epasParam == EpasParam.AGILE_WORK_OR_DISABLED_PEOPLE_ASSISTANCE
- 				|| epasParam == EpasParam.SMARTWORKING
- 				|| epasParam == EpasParam.PARENTAL_LEAVE_FOR_FATHERS && fieldValue == true) from $p.personConfigurations
+ 				|| epasParam == EpasParam.PARENTAL_LEAVE_AND_CHILD_ILLNESS
+ 				|| epasParam == EpasParam.PARENTAL_LEAVE_FOR_FATHERS)
+ 				&& fieldValue == true) from $p.personConfigurations
  $c: PermissionCheck(action in (
     "AbsenceGroups.insert",
     "AbsenceGroups.edit",

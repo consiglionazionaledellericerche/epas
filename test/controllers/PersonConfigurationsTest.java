@@ -32,9 +32,12 @@ import manager.services.absences.AbsenceService;
 import models.Person;
 import models.PersonConfiguration;
 import models.Role;
+import models.User;
+import models.enumerate.AccountRole;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 import play.db.jpa.JPA;
+import play.i18n.Messages;
 import play.mvc.Http.Response;
 import play.mvc.Router;
 import play.test.FunctionalTest;
@@ -225,6 +228,47 @@ public class PersonConfigurationsTest extends FunctionalTest {
         EpasParam.AGILE_WORK_MONTHLY_LIMIT, new LocalDate(2026, 12, 1)));
     assertEquals(4, configurationManager.configValue(reloaded,
         EpasParam.AGILE_WORK_MONTHLY_LIMIT, BEGIN_2027));
+  }
+
+  /**
+   * I parametri della persona per i codici scaduti COVID19 e SMART sono nascosti: non compaiono
+   * nella pagina, nemmeno all'amministratore di sistema, e nessuno può modificarli (#742).
+   * Gli altri parametri generali restano visibili e modificabili.
+   */
+  @Test
+  public void hiddenPersonParamsAreNotShownNorEditable() {
+    Person person = employeeWithThreePeriods();
+    String registryManager = userWithOfficeRole(person, Role.REGISTRY_MANAGER);
+    User systemAdmin = h2Examples.userWithOfficeRole(person.getOffice(), Role.REGISTRY_MANAGER);
+    systemAdmin.getRoles().add(AccountRole.ADMIN);
+    systemAdmin.save();
+    PersonConfiguration telework = generalParam(person, EpasParam.TELEWORK);
+    commit();
+
+    for (String username : new String[] {registryManager, systemAdmin.getUsername()}) {
+      login(username);
+      Response response = GET(personShowUrl(person));
+      assertIsOk(response);
+      String content = getContent(response);
+      assertTrue(content.contains(Messages.get(EpasParam.TELEWORK.name()).trim()));
+      assertTrue(content.contains(personEditUrl(telework) + "\""));
+      for (EpasParam param : new EpasParam[] {EpasParam.COVID_19, EpasParam.SMARTWORKING}) {
+        PersonConfiguration hidden = generalParam(person, param);
+        assertFalse(username + " vede " + param,
+            content.contains(Messages.get(param.name()).trim()));
+        assertFalse(content.contains(personEditUrl(hidden) + "\""));
+        assertStatus(403, GET(personEditUrl(hidden)));
+        assertStatus(403, POST(personUpdateUrl(), ImmutableMap.of(
+            "configurationId", hidden.id.toString(),
+            "configurationDto.booleanNewValue", "true",
+            "confirmed", "true")));
+        assertEquals("false", reload(hidden).getFieldValue());
+      }
+    }
+  }
+
+  private PersonConfiguration generalParam(Person person, EpasParam param) {
+    return PersonConfiguration.find("person = ?1 and epasParam = ?2", person, param).first();
   }
 
   /**

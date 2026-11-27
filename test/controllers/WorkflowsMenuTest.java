@@ -17,13 +17,10 @@
 
 package controllers;
 
-import com.google.common.base.Optional;
 import common.injection.StaticInject;
 import db.h2support.H2Examples;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
-import manager.configurations.ConfigurationManager;
-import manager.configurations.EpasParam;
 import models.Office;
 import models.Person;
 import models.Role;
@@ -52,8 +49,6 @@ public class WorkflowsMenuTest extends FunctionalTest {
 
   @Inject
   private static H2Examples h2Examples;
-  @Inject
-  private static ConfigurationManager configurationManager;
 
   /**
    * Il responsabile di sede vede il numero di richieste di ferie da approvare sul menu e sulla
@@ -63,7 +58,6 @@ public class WorkflowsMenuTest extends FunctionalTest {
   public void seatSupervisorSeesPendingVacationRequests() {
     Person colleague = h2Examples.activeNormalEmployee(BEGIN_2026);
     Office office = colleague.getOffice();
-    enableFlows(office);
     User supervisor = h2Examples.userWithOfficeRole(office, Role.SEAT_SUPERVISOR);
     pendingVacationRequest(colleague, supervisor);
     commit();
@@ -91,7 +85,6 @@ public class WorkflowsMenuTest extends FunctionalTest {
   @Test
   public void employeeWithoutApprovalRolesHasNoBadge() {
     Person employee = h2Examples.activeNormalEmployee(BEGIN_2026);
-    enableFlows(employee.getOffice());
     Role role = Role.find("byName", Role.EMPLOYEE).first();
     if (role == null) {
       role = new Role();
@@ -111,12 +104,6 @@ public class WorkflowsMenuTest extends FunctionalTest {
     assertIsOk(response);
     assertFalse(Pattern.compile("fa-recycle fa-fw\"></i>\\s*<span class=\"label")
         .matcher(getContent(response)).find());
-  }
-
-  private void enableFlows(Office office) {
-    configurationManager.updateBoolean(EpasParam.ENABLE_FLOWS, office, true,
-        Optional.of(BEGIN_2026), Optional.absent(), true);
-    office.refresh();
   }
 
   private void pendingVacationRequest(Person person, User owner) {
