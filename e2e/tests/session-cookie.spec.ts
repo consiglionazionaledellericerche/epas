@@ -1,4 +1,5 @@
 import { test, expect } from '../support/fixtures';
+import { ADMIN_USERNAME, adminPassword } from '../support/env';
 
 const SESSION_COOKIE = 'PLAY_SESSION';
 
@@ -39,6 +40,23 @@ test.describe('cookie di sessione', () => {
       for (const value of issued) {
         expect(value).toMatch(/;\s*SameSite=Lax/);
       }
+    });
+
+    test('il cookie del "Remember me" ha gli stessi attributi della sessione', async ({ request }) => {
+      // il modulo secure lo crea senza HttpOnly e Secure: li aggiunge RememberMeCookiePlugin
+      const response = await request.post('/secure/authenticate', {
+        form: { username: ADMIN_USERNAME, password: adminPassword(), remember: 'true' },
+        maxRedirects: 0,
+      });
+      const rememberMe = response.headersArray()
+        .filter((h) => h.name.toLowerCase() === 'set-cookie')
+        .map((h) => h.value)
+        .find((value) => value.startsWith('rememberme='));
+
+      expect(rememberMe, 'cookie rememberme emesso dal login').toBeDefined();
+      expect(rememberMe).toMatch(/;\s*HttpOnly/i);
+      expect(rememberMe).toMatch(/;\s*Secure/i);
+      expect(rememberMe).toMatch(/;\s*SameSite=Lax/);
     });
   });
 

@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     docker di base (ghcr.io/criluc/play1:1.5.3-temurin-11-patched-2): chi sviluppa con un play
     locale deve sostituire il play-1.5.3.jar con quello dell'immagine, altrimenti il parametro
     è ignorato (#700).
+  - Il cookie del "Remember me" del login (rememberme) ha gli stessi attributi HttpOnly e Secure
+    del cookie di sessione: il modulo secure di Play lo emetteva senza, quindi era leggibile da
+    JavaScript, viaggiava anche in http e con SESSION_SAMESITE=None il browser lo rifiutava
+    (#700).
 
 ## [2.43.1] - 2026-11-27
 ### Changed
