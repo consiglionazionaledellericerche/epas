@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     regole sulla cancellazione delle richieste di assenza e di informazioni usano
     isManagerApproved() e simili al posto del confronto della data con null, non più accettato
     (#698).
+  - Nei controlli dei permessi un diniego (revoke) prevale sempre sulle concessioni, qualunque
+    sia l'ordine in cui il motore esegue le regole: con Drools 9 l'ordine è cambiato e alcune
+    concessioni annullavano i dinieghi. Di conseguenza ricercatori e tecnologi (qualifica fino
+    al III livello) non vedono più la pagina delle richieste di straordinario: la regola che lo
+    prevedeva non aveva mai avuto effetto. Allo stesso modo le azioni negate all'account ADMIN
+    non possono più essere concesse da un ruolo di sede (#698).
 
 ## [2.43.1] - 2026-11-27
 ### Changed
