@@ -12,10 +12,13 @@ Dal prompt ricava il bersaglio; se non è indicato usa il branch corrente contro
 destinazione della PR (di solito `main`). Per un branch esegui `git fetch origin <destinazione>`
 e usa sempre `<base>` = `origin/<destinazione>`, non il branch locale: se il fetch fallisce,
 procedi con il riferimento che hai ma scrivilo nel risultato (la base potrebbe essere vecchia).
+Se `origin/<destinazione>` non esiste (`git rev-parse --verify origin/<destinazione>` fallisce),
+fermati e riporta l'errore: senza base non c'è nulla da rivedere.
 Prepara la frase `<BERSAGLIO>` da mettere all'inizio delle istruzioni per Codex:
 - branch: "Rivedi le modifiche del branch corrente rispetto a <base> (usa
   `git diff <base>...HEAD` e `git log <base>..HEAD`)."
-- commit singolo: "Rivedi le modifiche introdotte dal commit <sha> (usa `git show <sha>`)."
+- commit singolo: "Rivedi le modifiche introdotte dal commit <sha> (usa
+  `git diff <sha>^1 <sha>`)." (non `git show`: per un merge senza conflitti non mostra nulla)
 - modifiche non committate: "Rivedi le modifiche non committate, staged, unstaged e i file
   non tracciati (usa `git status`, `git diff HEAD` e leggi i file nuovi)."
 
@@ -26,7 +29,7 @@ istruzioni la review non sarebbe avversaria.
 Il diff da esaminare (per il controllo qui sotto e per l'eventuale ripiego del punto 2) si
 ottiene così, mai con un `git diff` senza argomenti:
 - branch: `git diff <base>...HEAD` (e `git log <base>..HEAD`);
-- commit: `git show <sha>`;
+- commit: `git diff <sha>^1 <sha>` (vale anche per i merge);
 - non committate: `git diff HEAD` più i file non tracciati elencati da
   `git status --porcelain` (righe `??`).
 
@@ -45,8 +48,11 @@ risolta solo in parte, con il motivo. Poi cerca con attenzione i problemi introd
 correzioni stesse, e infine eventuali problemi nel resto del bersaglio sfuggiti in
 precedenza."
 
-Se `<sha-prima>` non esiste più (ad esempio dopo un rebase), dillo e confronta le segnalazioni
-con il codice attuale senza quel diff.
+Usa il diff delle correzioni solo se `git merge-base --is-ancestor <sha-prima> HEAD` riesce.
+Se fallisce (sha inesistente, oppure branch ribasato: dopo un rebase lo sha di solito esiste
+ancora, ma `git diff <sha-prima>..HEAD` mescolerebbe le modifiche del nuovo `main` con le
+correzioni), dillo nel risultato, togli dal `<BERSAGLIO>` la frase sul diff delle correzioni e
+confronta le segnalazioni con il codice attuale.
 
 ## 2. Codex è disponibile?
 
@@ -72,16 +78,29 @@ background (`run_in_background: true`) e aspetta la notifica di fine, senza inte
 l'output a intervalli. Non consegnare il risultato finché Codex non ha finito: un rapporto
 senza l'esito di Codex non è una review.
 
+Il testo per Codex contiene backtick, `$` e virgolette: non metterlo mai tra virgolette sulla
+riga di comando (la shell eseguirebbe i comandi tra backtick e incollerebbe il loro output, e
+un diff grande supera il limite di lunghezza degli argomenti). Scrivilo in un file con un
+heredoc dal delimitatore quotato e passalo a Codex da stdin con `-`:
+
 ```
-OUT=$(mktemp -t codex-review.XXXXXX); echo "$OUT"
-timeout 900 codex review -c sandbox_mode="read-only" "<BERSAGLIO> <ISTRUZIONI>" >"$OUT" 2>&1
+DIR=$(mktemp -d -t codex-review.XXXXXX); echo "$DIR"
+cat >"$DIR/prompt.txt" <<'FINE_PROMPT'
+<BERSAGLIO>
+
+<ISTRUZIONI>
+FINE_PROMPT
+timeout 900 codex review -c sandbox_mode="read-only" - <"$DIR/prompt.txt" >"$DIR/out.txt" 2>&1
 echo "exit=$?"
 ```
+
+Il percorso stampato da `echo "$DIR"` serve per leggere l'output nella chiamata successiva:
+le variabili non sopravvivono tra due comandi Bash.
 
 Se il comando `timeout` non esiste (exit 127, ad esempio su macOS senza coreutils), rilancia
 senza `timeout 900`.
 
-Alla fine leggi la parte finale dell'output (`tail -c 60000 "$OUT"`): la segnalazione
+Alla fine leggi la parte finale dell'output (`tail -c 60000 <DIR>/out.txt`): la segnalazione
 conclusiva di Codex può comparire due volte, contala una sola volta.
 
 dove `<ISTRUZIONI>` è:
