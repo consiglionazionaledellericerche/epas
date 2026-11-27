@@ -50,6 +50,20 @@ public class SecureRulesPlugin extends PlayPlugin {
     loadRulesIfNecessary();
   }
 
+  /**
+   * Annota la generazione degli esiti condivisi dei permessi prima che l'invocazione apra la
+   * transazione e carichi dati, vedi {@link SharedChecksCache}.
+   */
+  @Override
+  public void beforeInvocation() {
+    SharedChecksCache.beginInvocation();
+  }
+
+  @Override
+  public void invocationFinally() {
+    SharedChecksCache.endInvocation();
+  }
+
   @Override
   public void detectChange() {
     loadRulesIfNecessary();

@@ -103,6 +103,42 @@ public class SharedChecksCacheTest extends UnitTest {
     assertNull(cache.get(generation, user, ACTION));
   }
 
+  /**
+   * Una richiesta che ha caricato i dati prima di una modifica e controlla i permessi dopo il
+   * commit della modifica non deve conservare l'esito, calcolato con i dati precedenti.
+   */
+  @Test
+  public void requestStartedBeforeInvalidationDoesNotStoreResults() {
+    SharedChecksCache cache = new SharedChecksCache(60);
+    User user = user();
+    try {
+      SharedChecksCache.beginInvocation();
+      // un'altra richiesta modifica i dati e fa commit
+      SharedChecksCache.invalidateAll();
+      // il controllo parte dopo l'invalidazione, ma con i dati caricati prima
+      long generation = SharedChecksCache.invocationGeneration();
+      assertTrue(generation < SharedChecksCache.generation());
+      cache.put(generation, user, ACTION, true);
+    } finally {
+      SharedChecksCache.endInvocation();
+    }
+
+    assertNull("esito calcolato con dati precedenti alla modifica",
+        cache.get(SharedChecksCache.generation(), user, ACTION));
+  }
+
+  @Test
+  public void outsideInvocationUsesCurrentGeneration() {
+    SharedChecksCache.endInvocation();
+    assertEquals(SharedChecksCache.generation(), SharedChecksCache.invocationGeneration());
+    SharedChecksCache.beginInvocation();
+    long started = SharedChecksCache.invocationGeneration();
+    SharedChecksCache.invalidateAll();
+    assertEquals(started, SharedChecksCache.invocationGeneration());
+    SharedChecksCache.beginInvocation();
+    assertEquals(SharedChecksCache.generation(), SharedChecksCache.invocationGeneration());
+  }
+
   @Test
   public void invalidTtlFallsBackToDefault() {
     assertEquals(SharedChecksCache.DEFAULT_TTL_SECONDS, SharedChecksCache.ttlSeconds(null));

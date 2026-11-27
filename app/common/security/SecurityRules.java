@@ -152,9 +152,9 @@ public class SecurityRules {
 
     final User user = currentUser.get().orNull();
     final boolean shareable = check.getTarget() == null;
-    // letta prima del calcolo: un esito calcolato con dati poi modificati resta nella
-    // generazione precedente e non viene riusato.
-    final long generation = SharedChecksCache.generation();
+    // letta all'inizio della richiesta, prima che carichi i dati: un esito calcolato con dati
+    // poi modificati resta nella generazione precedente e non viene riusato.
+    final long generation = SharedChecksCache.invocationGeneration();
     final Boolean shared =
         shareable ? sharedChecks.get(generation, user, check.getAction()) : null;
     if (shared != null) {

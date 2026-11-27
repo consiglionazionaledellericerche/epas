@@ -40,9 +40,13 @@ import models.UsersRolesOffices;
  * <p>La chiave contiene anche una generazione, che {@link #invalidateAll()} incrementa: gli esiti
  * calcolati prima diventano irraggiungibili. La invalidano il salvataggio dei dati letti dalle
  * regole (persona, qualifica, sede, configurazioni, turni e turnisti, reperibilità, impostazioni
- * generali, vedi {@link PermissionsDataListener}) e il ricaricamento delle regole. La
- * generazione è letta prima di calcolare l'esito ({@link #generation()}): un esito calcolato con
- * i dati precedenti a una modifica finisce sotto la generazione vecchia e non viene riusato.</p>
+ * generali, vedi {@link PermissionsDataListener}) e il ricaricamento delle regole.</p>
+ *
+ * <p>Ogni richiesta usa la generazione letta al suo inizio ({@link #beginInvocation()}), prima
+ * che apra la transazione e carichi i dati: una richiesta che ha già letto i dati prima di una
+ * modifica può calcolare esiti superati, che finiscono sotto la generazione vecchia e non vengono
+ * riusati. Leggerla al momento del controllo non basta: gli oggetti già caricati dalla richiesta
+ * restano quelli precedenti al commit della modifica.</p>
  *
  * <p>L'invalidazione vale per la sola JVM: con più istanze dell'applicazione le altre vedono le
  * modifiche entro la durata della cache. I controlli con un target non passano da qui.</p>
@@ -58,6 +62,11 @@ public class SharedChecksCache {
    * Generazione corrente degli esiti, condivisa da tutte le istanze della cache.
    */
   private static final AtomicLong GENERATION = new AtomicLong();
+
+  /**
+   * Generazione letta all'inizio dell'invocazione (richiesta o job) in corso sul thread.
+   */
+  private static final ThreadLocal<Long> INVOCATION_GENERATION = new ThreadLocal<>();
 
   private final long ttlSeconds;
   private final Cache<String, Boolean> results;
@@ -96,11 +105,34 @@ public class SharedChecksCache {
   }
 
   /**
-   * La generazione corrente, da leggere prima di calcolare un esito e da passare a
-   * {@link #get} e {@link #put}.
+   * La generazione corrente.
    */
   public static long generation() {
     return GENERATION.get();
+  }
+
+  /**
+   * Annota la generazione corrente all'inizio di un'invocazione, prima che apra la transazione
+   * e carichi dati.
+   */
+  public static void beginInvocation() {
+    INVOCATION_GENERATION.set(GENERATION.get());
+  }
+
+  /**
+   * Dimentica la generazione dell'invocazione conclusa.
+   */
+  public static void endInvocation() {
+    INVOCATION_GENERATION.remove();
+  }
+
+  /**
+   * La generazione da passare a {@link #get} e {@link #put}: quella letta all'inizio
+   * dell'invocazione in corso, o la corrente fuori da un'invocazione.
+   */
+  public static long invocationGeneration() {
+    final Long generation = INVOCATION_GENERATION.get();
+    return generation != null ? generation : GENERATION.get();
   }
 
   /**
