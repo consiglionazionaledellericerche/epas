@@ -17,9 +17,11 @@
 
 package models;
 
+import common.security.PermissionsDataListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -33,6 +35,7 @@ import models.base.PeriodModel;
  */
 @Getter
 @Setter
+@EntityListeners(PermissionsDataListener.class)
 @Entity
 @Table(name = "person_shift")
 public class PersonShift extends PeriodModel {

@@ -17,7 +17,9 @@
 
 package models;
 
+import common.security.PermissionsDataListener;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -31,6 +33,7 @@ import org.hibernate.envers.Audited;
 @Getter
 @Setter
 @ToString
+@EntityListeners(PermissionsDataListener.class)
 @Entity
 @Audited
 public class GeneralSetting extends BaseModel {

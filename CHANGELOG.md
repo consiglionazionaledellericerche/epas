@@ -39,6 +39,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     La policy chiede ai browser l'inizio dello script che viola la policy (report-sample),
     riportato nel log senza cifre per trovare più facilmente il punto da correggere (#733).
 ### Fixed
+  - Gli esiti dei controlli dei permessi condivisi tra le richieste vengono invalidati dopo il
+    salvataggio dei dati letti dalle regole (persona, qualifica, sede, utente, configurazioni
+    della sede e della persona, impostazioni generali, categorie di turno, turnisti, tipi di
+    reperibilità e reperibilità) e al ricaricamento delle regole: prima, ad esempio, chi
+    veniva tolto da un turno poteva gestirlo ancora per 60 secondi. Con più istanze
+    dell'applicazione le altre vedono la modifica entro la durata della cache. Gli esiti
+    calcolati con dati modificati e non ancora salvati restano della sola richiesta, e dopo un
+    salvataggio la richiesta stessa ricalcola i controlli già fatti. Un valore non
+    numerico di security.checks.cacheSeconds non blocca più tutte le richieste: viene
+    ignorato e vale 60 secondi (#737).
   - I dipendenti abilitati a inserirsi i congedi parentali possono inserire anche i codici
     provvisori all'80% (24PROV, 242PROV, 243PROV, 244PROV, 245PROV), quelli del quinto figlio
     (235, 255, 255A, malattia quinto figlio) e del genitore unico (25S, 252S): la form li

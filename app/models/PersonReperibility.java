@@ -18,11 +18,13 @@
 package models;
 
 import com.google.common.collect.Range;
+import common.security.PermissionsDataListener;
 import java.util.Comparator;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -47,6 +49,7 @@ import play.data.validation.Required;
 @Setter
 @ToString
 @Audited
+@EntityListeners(PermissionsDataListener.class)
 @Entity
 @Table(name = "person_reperibility")
 public class PersonReperibility extends BaseModel {

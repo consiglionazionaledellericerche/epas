@@ -22,7 +22,10 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.enumerate.AccountRole;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import play.mvc.Http;
 import play.test.UnitTest;
 
 /**
@@ -30,7 +33,24 @@ import play.test.UnitTest;
  */
 public class SharedChecksCacheTest extends UnitTest {
 
-  private static final Object RULES = new Object();
+  private Http.Request runnerRequest;
+
+  /**
+   * I test sull'invocazione partono senza richiesta HTTP corrente: il runner dei test può averne
+   * una (quella che li ha lanciati).
+   */
+  @Before
+  public void withoutCurrentRequest() {
+    runnerRequest = Http.Request.current();
+    Http.Request.current.remove();
+  }
+
+  @After
+  public void restoreCurrentRequest() {
+    SharedChecksCache.endInvocation();
+    Http.Request.current.set(runnerRequest);
+  }
+
   private static final String ACTION = "Persons.list";
 
   private long ids = 100;
@@ -69,12 +89,128 @@ public class SharedChecksCacheTest extends UnitTest {
     SharedChecksCache cache = new SharedChecksCache(60);
     User user = user();
     addRole(user, office(), role(Role.PERSONNEL_ADMIN));
-    assertNull(cache.get(RULES, user, ACTION));
-    cache.put(RULES, user, ACTION, true);
-    assertEquals(Boolean.TRUE, cache.get(RULES, user, ACTION));
-    assertNull(cache.get(RULES, user, "Stampings.dailyPresence"));
-    assertNull("un altro utente non usa l'esito", cache.get(RULES, user(), ACTION));
-    assertNull("regole ricaricate", cache.get(new Object(), user, ACTION));
+    long generation = SharedChecksCache.generation();
+    assertNull(cache.get(generation, user, ACTION));
+    cache.put(generation, user, ACTION, true);
+    assertEquals(Boolean.TRUE, cache.get(generation, user, ACTION));
+    assertNull(cache.get(generation, user, "Stampings.dailyPresence"));
+    assertNull("un altro utente non usa l'esito", cache.get(generation, user(), ACTION));
+  }
+
+  @Test
+  public void invalidateAllHidesPreviousResults() {
+    SharedChecksCache cache = new SharedChecksCache(60);
+    User user = user();
+    long generation = SharedChecksCache.generation();
+    cache.put(generation, user, ACTION, true);
+
+    SharedChecksCache.invalidateAll();
+
+    long current = SharedChecksCache.generation();
+    assertTrue(current > generation);
+    assertNull("esito calcolato prima dell'invalidazione", cache.get(current, user, ACTION));
+  }
+
+  @Test
+  public void resultComputedBeforeInvalidationIsNotStored() {
+    SharedChecksCache cache = new SharedChecksCache(60);
+    User user = user();
+    // il calcolo parte prima di una modifica ai dati e finisce dopo
+    long generation = SharedChecksCache.generation();
+    SharedChecksCache.invalidateAll();
+    cache.put(generation, user, ACTION, true);
+
+    assertNull(cache.get(SharedChecksCache.generation(), user, ACTION));
+    assertNull(cache.get(generation, user, ACTION));
+  }
+
+  /**
+   * Una richiesta che ha caricato i dati prima di una modifica e controlla i permessi dopo il
+   * commit della modifica non deve conservare l'esito, calcolato con i dati precedenti.
+   */
+  @Test
+  public void requestStartedBeforeInvalidationDoesNotStoreResults() {
+    SharedChecksCache cache = new SharedChecksCache(60);
+    User user = user();
+    try {
+      SharedChecksCache.beginInvocation();
+      // un'altra richiesta modifica i dati e fa commit
+      SharedChecksCache.invalidateAll();
+      // il controllo parte dopo l'invalidazione, ma con i dati caricati prima
+      long generation = SharedChecksCache.invocationGeneration();
+      assertTrue(generation < SharedChecksCache.generation());
+      cache.put(generation, user, ACTION, true);
+    } finally {
+      SharedChecksCache.endInvocation();
+    }
+
+    assertNull("esito calcolato con dati precedenti alla modifica",
+        cache.get(SharedChecksCache.generation(), user, ACTION));
+  }
+
+  /**
+   * Una richiesta sospesa con await riprende con una nuova invocazione ma con gli oggetti già
+   * caricati (es. l'utente corrente in request.args): deve usare la generazione letta al suo
+   * inizio, non quella del momento della ripresa.
+   */
+  @Test
+  public void requestResumedAfterAwaitKeepsItsGeneration() {
+    Http.Request request = new Http.Request();
+    Http.Request.current.set(request);
+    SharedChecksCache.beginInvocation();
+    long started = SharedChecksCache.invocationGeneration();
+    // la richiesta si sospende con await
+    SharedChecksCache.endInvocation();
+
+    // durante la sospensione un'altra richiesta modifica i dati e fa commit
+    SharedChecksCache.invalidateAll();
+
+    // la ripresa è una nuova invocazione della stessa richiesta
+    SharedChecksCache.beginInvocation();
+    assertEquals(started, SharedChecksCache.invocationGeneration());
+    assertTrue(SharedChecksCache.invocationGeneration() < SharedChecksCache.generation());
+
+    SharedChecksCache cache = new SharedChecksCache(60);
+    User user = user();
+    cache.put(SharedChecksCache.invocationGeneration(), user, ACTION, true);
+    assertNull("esito calcolato con l'utente caricato prima della modifica",
+        cache.get(SharedChecksCache.generation(), user, ACTION));
+  }
+
+  @Test
+  public void newRequestUsesCurrentGeneration() {
+    Http.Request.current.set(new Http.Request());
+    SharedChecksCache.beginInvocation();
+    long first = SharedChecksCache.invocationGeneration();
+    SharedChecksCache.endInvocation();
+    SharedChecksCache.invalidateAll();
+
+    Http.Request.current.set(new Http.Request());
+    SharedChecksCache.beginInvocation();
+    assertEquals(SharedChecksCache.generation(), SharedChecksCache.invocationGeneration());
+    assertTrue(SharedChecksCache.invocationGeneration() > first);
+  }
+
+  @Test
+  public void outsideInvocationUsesCurrentGeneration() {
+    SharedChecksCache.endInvocation();
+    assertEquals(SharedChecksCache.generation(), SharedChecksCache.invocationGeneration());
+    SharedChecksCache.beginInvocation();
+    long started = SharedChecksCache.invocationGeneration();
+    SharedChecksCache.invalidateAll();
+    assertEquals(started, SharedChecksCache.invocationGeneration());
+    SharedChecksCache.beginInvocation();
+    assertEquals(SharedChecksCache.generation(), SharedChecksCache.invocationGeneration());
+  }
+
+  @Test
+  public void invalidTtlFallsBackToDefault() {
+    assertEquals(SharedChecksCache.DEFAULT_TTL_SECONDS, SharedChecksCache.ttlSeconds(null));
+    assertEquals(SharedChecksCache.DEFAULT_TTL_SECONDS, SharedChecksCache.ttlSeconds(" "));
+    assertEquals(SharedChecksCache.DEFAULT_TTL_SECONDS, SharedChecksCache.ttlSeconds("1m"));
+    assertEquals(SharedChecksCache.DEFAULT_TTL_SECONDS, SharedChecksCache.ttlSeconds("60s"));
+    assertEquals(30, SharedChecksCache.ttlSeconds(" 30 "));
+    assertEquals(0, SharedChecksCache.ttlSeconds("0"));
   }
 
   @Test
@@ -83,18 +219,18 @@ public class SharedChecksCacheTest extends UnitTest {
     Office office = office();
     Role employee = role(Role.EMPLOYEE);
     addRole(user, office, employee);
-    String before = SharedChecksCache.key(RULES, user, ACTION);
+    String before = SharedChecksCache.key(1, user, ACTION);
 
     addRole(user, office, role(Role.PERSONNEL_ADMIN));
-    String withOfficeRole = SharedChecksCache.key(RULES, user, ACTION);
+    String withOfficeRole = SharedChecksCache.key(1, user, ACTION);
     assertNotEquals(before, withOfficeRole);
 
     user.getUsersRolesOffices().get(1).setOffice(office());
-    String otherOffice = SharedChecksCache.key(RULES, user, ACTION);
+    String otherOffice = SharedChecksCache.key(1, user, ACTION);
     assertNotEquals(withOfficeRole, otherOffice);
 
     user.getRoles().add(AccountRole.DEVELOPER);
-    assertNotEquals(otherOffice, SharedChecksCache.key(RULES, user, ACTION));
+    assertNotEquals(otherOffice, SharedChecksCache.key(1, user, ACTION));
   }
 
   @Test
@@ -105,17 +241,18 @@ public class SharedChecksCacheTest extends UnitTest {
     User user = user();
     addRole(user, office, employee);
     addRole(user, office, admin);
-    String key = SharedChecksCache.key(RULES, user, ACTION);
+    String key = SharedChecksCache.key(1, user, ACTION);
     java.util.Collections.reverse(user.getUsersRolesOffices());
-    assertEquals(key, SharedChecksCache.key(RULES, user, ACTION));
+    assertEquals(key, SharedChecksCache.key(1, user, ACTION));
   }
 
   @Test
   public void zeroSecondsDisablesTheCache() {
     SharedChecksCache cache = new SharedChecksCache(0);
     User user = user();
-    cache.put(RULES, user, ACTION, true);
+    long generation = SharedChecksCache.generation();
+    cache.put(generation, user, ACTION, true);
     assertFalse(cache.isEnabled());
-    assertNull(cache.get(RULES, user, ACTION));
+    assertNull(cache.get(generation, user, ACTION));
   }
 }
