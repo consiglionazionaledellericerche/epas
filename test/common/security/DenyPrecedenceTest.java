@@ -146,11 +146,15 @@ public class DenyPrecedenceTest extends UnitTest {
     }
   }
 
+  /**
+   * Un parametro né nascosto né riservato agli amministratori di sistema (#742) resta
+   * modificabile dall'amministratore del personale.
+   */
   @Test
   public void otherConfigurationsCanBeEdited() {
     User user = user(5, Role.PERSONNEL_ADMIN);
     Configuration configuration = configuration(
-        user.getPerson().getOffice(), EpasParam.MAX_RECOVERY_DAYS_13, "10");
+        user.getPerson().getOffice(), EpasParam.DAY_OF_PATRON, "10-11");
     assertTrue(check(user, "Configurations.update", configuration));
   }
 
@@ -216,19 +220,25 @@ public class DenyPrecedenceTest extends UnitTest {
     }
   }
 
+  /**
+   * I parametri annuali riservati agli amministratori di sistema (#742) sono modificabili
+   * solo con l'account ADMIN o DEVELOPER: nessun ruolo di sede concede la modifica.
+   */
   @Test
-  public void technicianRecoveryLimitsAcrossAccountRoles() {
+  public void systemUsersEditOnlyConfigurationsAcrossAccountRoles() {
     for (AccountRole account : ACCOUNT_ROLES) {
       for (String role : OFFICE_ROLES) {
         if (role == null) {
           continue;
         }
         User user = user(account, role);
-        for (EpasParam param : Arrays.asList(
-            EpasParam.MAX_RECOVERY_DAYS_49, EpasParam.MONTH_EXPIRY_RECOVERY_DAYS_49)) {
+        for (EpasParam param : EpasParam.values()) {
+          if (!param.isSystemUsersEditOnly()) {
+            continue;
+          }
           Configuration configuration =
               configuration(user.getPerson().getOffice(), param, "10");
-          assertFalse(account + "/" + role + "/" + param,
+          assertEquals(account + "/" + role + "/" + param, account != null,
               check(user, "Configurations.update", configuration));
         }
       }
