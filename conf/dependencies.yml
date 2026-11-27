@@ -46,16 +46,72 @@ require:
     - org.assertj -> assertj-guava 3.27.7:
        exclude:
         - org.ow2.asm -> asm *
-    # xstream è dichiarata sotto in versione aggiornata. protobuf serve a drools solo per
-    # serializzare le sessioni (marshalling), non usato dalle regole di sicurezza
-    - org.drools -> drools-core 5.6.0.Final:
-       exclude:
-        - com.thoughtworks.xstream -> xstream
-        - com.google.protobuf -> protobuf-java
-    - org.drools -> drools-compiler 5.6.0.Final:
-       exclude:
-        - com.thoughtworks.xstream -> xstream
-        - com.google.protobuf -> protobuf-java
+    # drools: i moduli sono elencati uno per uno perché la risoluzione di play deps (ivy) non
+    # segue le dipendenze transitive di drools-engine
+    - org.kie -> kie-api 9.44.0.Final:
+       transitive: false
+    - org.kie -> kie-internal 9.44.0.Final:
+       transitive: false
+    - org.kie -> kie-memory-compiler 9.44.0.Final:
+       transitive: false
+    - org.kie -> kie-util-maven-support 9.44.0.Final:
+       transitive: false
+    - org.kie -> kie-util-xml 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-base 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-canonical-model 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-codegen-common 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-commands 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-compiler 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-core 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-drl-ast 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-drl-extensions 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-drl-parser 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-ecj 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-io 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-kiesession 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-model-codegen 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-model-compiler 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-mvel-compiler 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-mvel-parser 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-mvel 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-tms 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-util 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-wiring-api 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-wiring-dynamic 9.44.0.Final:
+       transitive: false
+    - org.drools -> drools-wiring-static 9.44.0.Final:
+       transitive: false
+    - org.mvel -> mvel2 2.5.0.Final
+    - org.antlr -> antlr-runtime 3.5.2:
+       transitive: false
+    - com.github.javaparser -> javaparser-core 3.25.1
+    # richieste da jaxb-runtime 2.3.1 di Play (usata da hibernate): prima arrivavano da
+    # jaxb-impl 2.2.5, transitiva di drools 5.6
+    - com.sun.istack -> istack-commons-runtime 3.0.7:
+       transitive: false
+    - org.glassfish.jaxb -> txw2 2.3.1:
+       transitive: false
     - net.lingala.zip4j -> zip4j 2.8.0
     - com.querydsl -> querydsl-codegen 4.2.2:
         exclude:

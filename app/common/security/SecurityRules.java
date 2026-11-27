@@ -27,12 +27,12 @@ import java.util.Map;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.User;
-import org.drools.KnowledgeBase;
-import org.drools.command.Command;
-import org.drools.command.CommandFactory;
-import org.drools.event.rule.AfterActivationFiredEvent;
-import org.drools.event.rule.DefaultAgendaEventListener;
-import org.drools.runtime.StatelessKnowledgeSession;
+import org.kie.api.KieBase;
+import org.kie.api.command.Command;
+import org.kie.api.event.rule.AfterMatchFiredEvent;
+import org.kie.api.event.rule.DefaultAgendaEventListener;
+import org.kie.api.runtime.StatelessKieSession;
+import org.kie.internal.command.CommandFactory;
 import play.Play;
 import play.mvc.results.Forbidden;
 
@@ -53,7 +53,7 @@ public class SecurityRules {
    */
   private final Provider<Optional<User>> currentUser;
   private final Provider<String> currentAction;
-  private final Provider<KnowledgeBase> knowledge;
+  private final Provider<KieBase> knowledge;
   private final Provider<Map<PermissionCheckKey, Boolean>> checks;
   /**
    * Esiti dei controlli senza target condivisi tra le richieste dello stesso utente.
@@ -63,7 +63,7 @@ public class SecurityRules {
   @Inject
   SecurityRules(Provider<Optional<User>> user,
       @Named("request.action") Provider<String> action,
-      Provider<KnowledgeBase> knowledgeBase,
+      Provider<KieBase> knowledgeBase,
       @Named(SecurityModule.REQUESTS_CHECKS)
           Provider<Map<PermissionCheckKey, Boolean>> checks) {
     currentUser = user;
@@ -173,7 +173,7 @@ public class SecurityRules {
 
   private void doCheck(final PermissionCheck check, final User user) {
 
-    final StatelessKnowledgeSession session = knowledge.get().newStatelessKnowledgeSession();
+    final StatelessKieSession session = knowledge.get().newStatelessKieSession();
     session.addEventListener(new AgendaLogger());
 
     log.debug("SecurityRules: currentUser = " + user);
@@ -194,9 +194,9 @@ public class SecurityRules {
 
   private static class AgendaLogger extends DefaultAgendaEventListener {
     @Override
-    public void afterActivationFired(AfterActivationFiredEvent event) {
+    public void afterMatchFired(AfterMatchFiredEvent event) {
       log.debug("RULE {} {}",
-          event.getActivation().getRule().getName(), event.getActivation().getFactHandles());
+          event.getMatch().getRule().getName(), event.getMatch().getFactHandles());
     }
   }
 }
