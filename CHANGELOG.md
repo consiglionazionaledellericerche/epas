@@ -30,6 +30,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     al III livello) non vedono più la pagina delle richieste di straordinario: la regola che lo
     prevedeva non aveva mai avuto effetto. Allo stesso modo le azioni negate all'account ADMIN
     non possono più essere concesse da un ruolo di sede (#698).
+  - Le segnalazioni di violazione della Content Security Policy (/csp/report) non aprono più
+    una transazione e non prendono una connessione dal pool del database. Il loro numero è
+    nella metrica csp_reports_total, distinta per esito (logged, duplicate, rate_limited,
+    invalid) (#733).
+  - Una violazione è scritta nel log una sola volta all'ora anche se arriva da pagine che
+    differiscono solo per gli id nel percorso o, per gli script inline, per il numero di riga.
+    La policy chiede ai browser l'inizio dello script che viola la policy (report-sample),
+    riportato nel log senza cifre per trovare più facilmente il punto da correggere (#733).
 ### Fixed
   - I dipendenti abilitati a inserirsi i congedi parentali possono inserire anche i codici
     provvisori all'80% (24PROV, 242PROV, 243PROV, 244PROV, 245PROV), quelli del quinto figlio

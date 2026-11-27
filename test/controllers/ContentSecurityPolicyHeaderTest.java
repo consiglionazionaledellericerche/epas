@@ -18,10 +18,14 @@
 package controllers;
 
 import common.security.ContentSecurityPolicy;
+import io.micrometer.core.instrument.Counter;
+import org.hibernate.Session;
+import org.hibernate.stat.Statistics;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import play.Play;
+import play.db.jpa.JPA;
 import play.mvc.Http.Response;
 import play.test.FunctionalTest;
 
@@ -96,5 +100,47 @@ public class ContentSecurityPolicyHeaderTest extends FunctionalTest {
     }
     huge.append("\"}}");
     assertStatus(204, POST("/csp/report", "application/csp-report", huge.toString()));
+  }
+
+  private static double reports(CspReports.Outcome outcome) {
+    final Counter counter = CspReports.registry.find(CspReports.METRIC)
+        .tag("outcome", outcome.tag).counter();
+    return counter == null ? 0 : counter.count();
+  }
+
+  @Test
+  public void reportOpensNoTransactionAndIsCounted() {
+    final Statistics statistics = ((Session) JPA.em().getDelegate()).getSessionFactory()
+        .getStatistics();
+    final boolean enabled = statistics.isStatisticsEnabled();
+    statistics.setStatisticsEnabled(true);
+    try {
+      final double invalid = reports(CspReports.Outcome.INVALID);
+      final long transactions = statistics.getTransactionCount();
+      assertStatus(204, POST("/csp/report", "application/csp-report", "non è json"));
+      assertEquals(transactions, statistics.getTransactionCount());
+      assertEquals(invalid + 1, reports(CspReports.Outcome.INVALID), 0);
+      // controprova: una pagina dell'applicazione apre una transazione
+      GET("/login");
+      assertTrue(statistics.getTransactionCount() > transactions);
+    } finally {
+      statistics.setStatisticsEnabled(enabled);
+    }
+  }
+
+  @Test
+  public void sameViolationForAnotherPersonIsDuplicate() throws InterruptedException {
+    final String page = "https://epas.example.org/test-" + System.nanoTime() + "/";
+    // il limite di una riga al secondo accumula un permesso dopo un secondo di inattività
+    Thread.sleep(1100);
+    assertEquals(CspReports.Outcome.LOGGED, CspReports.handle(
+        ContentSecurityPolicy.parseReport(violation(page + "12"))));
+    assertEquals(CspReports.Outcome.DUPLICATE, CspReports.handle(
+        ContentSecurityPolicy.parseReport(violation(page + "34"))));
+  }
+
+  private static String violation(String document) {
+    return "{\"csp-report\":{\"document-uri\":\"" + document + "\","
+        + "\"effective-directive\":\"script-src-elem\",\"blocked-uri\":\"inline\"}}";
   }
 }
