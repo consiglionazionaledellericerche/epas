@@ -31,6 +31,8 @@ import models.Person;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 import org.hibernate.envers.NotAudited;
+import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.proxy.HibernateProxyHelper;
 import org.jadira.usertype.dateandtime.joda.PersistentYearMonthAsString;
 import org.joda.time.YearMonth;
 import play.db.jpa.GenericModel;
@@ -69,6 +71,54 @@ public abstract class BaseModel extends GenericModel {
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this).add("id", id).toString();
+  }
+
+  /**
+   * Due entità sono uguali se sono la stessa istanza oppure se hanno lo stesso id e la stessa
+   * classe (i proxy Hibernate sono confrontati con la classe dell'entità, senza inizializzarli).
+   *
+   * <p>Sostituisce JPABase.equals, che a ogni chiamata cerca per reflection il campo chiave:
+   * il confronto è usato di continuo dalle regole Drools dei permessi (es. "contains" sui ruoli
+   * della sede), eseguite mentre è preso il lock della rulebase condiviso da tutte le richieste.
+   * Come in JPABase, un'entità senza id è uguale solo a sé stessa.</p>
+   */
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    }
+    if (!(other instanceof BaseModel)) {
+      return false;
+    }
+    final Long key = identifier(this);
+    if (key == null) {
+      return false;
+    }
+    final Class<?> thisClass = HibernateProxyHelper.getClassWithoutInitializingProxy(this);
+    final Class<?> otherClass = HibernateProxyHelper.getClassWithoutInitializingProxy(other);
+    if (!thisClass.isAssignableFrom(otherClass) && !otherClass.isAssignableFrom(thisClass)) {
+      return false;
+    }
+    return key.equals(identifier((BaseModel) other));
+  }
+
+  /**
+   * L'hashCode dell'id (0 per le entità senza id, come in JPABase).
+   */
+  @Override
+  public int hashCode() {
+    final Long key = identifier(this);
+    return key == null ? 0 : key.hashCode();
+  }
+
+  /**
+   * L'id dell'entità; per un proxy Hibernate è letto dal proxy stesso, senza caricare l'entità.
+   */
+  private static Long identifier(BaseModel model) {
+    if (model instanceof HibernateProxy) {
+      return (Long) ((HibernateProxy) model).getHibernateLazyInitializer().getIdentifier();
+    }
+    return model.getId();
   }
 
   /**

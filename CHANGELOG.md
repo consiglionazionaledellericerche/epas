@@ -11,6 +11,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     In permissions.drl tre regole sui flussi di approvazione usano isManagerApproved() e
     simili al posto del confronto della data con null, non più accettato (#698).
 
+## [2.43.1] - 2026-11-27
+### Changed
+  - Modificando un parametro periodico della sede o di una persona, il form propone come inizio
+    della validità il primo giorno del mese corrente invece dell'inizio del periodo in corso,
+    che spesso coincide con l'attivazione della sede e faceva ricalcolare anni di dati. Una data
+    passata resta possibile se scelta esplicitamente (#731).
+  - L'inizio della validità di un parametro periodico della sede non può essere precedente al
+    primo gennaio dell'anno precedente, salvo per gli amministratori di sistema (#731).
+  - La conferma della modifica di un parametro della sede mostra le persone coinvolte e le
+    giornate da ricalcolare; se il ricalcolo riguarda più di un anno è evidenziato con un avviso
+    e si può applicare il nuovo valore dal mese corrente senza reinserirlo (#731).
+  - I controlli dei permessi costano meno e tengono meno a lungo il lock di Drools, condiviso da
+    tutte le richieste, che sotto carico rallentava tutte le pagine fino a esaurire il pool di
+    connessioni al database (#735):
+    - le entità confrontano id e classe in equals/hashCode invece di cercare il campo chiave
+      per reflection a ogni chiamata, come faceva JPABase: le regole dei permessi eseguono
+      di continuo questi confronti (circa 3 volte meno tempo per controllo in un benchmark);
+    - gli esiti dei controlli senza target (le voci dei menu, circa il 90% dei controlli di una
+      pagina) sono condivisi tra le richieste dello stesso utente per 60 secondi, configurabili
+      con security.checks.cacheSeconds (variabile SECURITY_CHECKS_CACHE_SECONDS nel Docker,
+      0 per disattivare). Un cambio di ruoli vale subito; le modifiche alle configurazioni
+      della sede o della persona e alle impostazioni generali che abilitano voci di menu
+      valgono entro questo tempo.
+
 ## [2.43.0] - 2026-11-19
 ### Changed
   - Gli allegati delle assenze si scaricano con un nome composto da anno, mese, giorno, codice
