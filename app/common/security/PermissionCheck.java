@@ -30,6 +30,7 @@ public class PermissionCheck {
 
   private final PermissionCheckKey key;
   private boolean granted = false;
+  private boolean denied = false;
 
   public PermissionCheck(Object target, String action) {
     key = new PermissionCheckKey(target, action);
@@ -43,11 +44,22 @@ public class PermissionCheck {
     return key.getTarget();
   }
 
+  /**
+   * Concede il permesso, a meno che una regola non l'abbia già negato con {@link #revoke()}.
+   */
   public void grant() {
-    this.granted = true;
+    if (!denied) {
+      this.granted = true;
+    }
   }
 
+  /**
+   * Nega il permesso in modo definitivo: le concessioni successive non hanno effetto. L'esito
+   * non dipende così dall'ordine in cui il motore esegue le regole, che a parità di salience
+   * è cambiato tra Drools 5.6 e Drools 9 (#698).
+   */
   public void revoke() {
+    this.denied = true;
     this.granted = false;
   }
 

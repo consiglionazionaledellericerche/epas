@@ -27,12 +27,12 @@ import java.util.Map;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import models.User;
-import org.drools.KnowledgeBase;
-import org.drools.command.Command;
-import org.drools.command.CommandFactory;
-import org.drools.event.rule.AfterActivationFiredEvent;
-import org.drools.event.rule.DefaultAgendaEventListener;
-import org.drools.runtime.StatelessKnowledgeSession;
+import org.kie.api.KieBase;
+import org.kie.api.command.Command;
+import org.kie.api.event.rule.AfterMatchFiredEvent;
+import org.kie.api.event.rule.DefaultAgendaEventListener;
+import org.kie.api.runtime.StatelessKieSession;
+import org.kie.internal.command.CommandFactory;
 import play.Play;
 import play.mvc.results.Forbidden;
 
@@ -53,7 +53,7 @@ public class SecurityRules {
    */
   private final Provider<Optional<User>> currentUser;
   private final Provider<String> currentAction;
-  private final Provider<KnowledgeBase> knowledge;
+  private final Provider<KieBase> knowledge;
   private final Provider<Map<PermissionCheckKey, Boolean>> checks;
   /**
    * Esiti dei controlli senza target condivisi tra le richieste dello stesso utente.
@@ -63,16 +63,15 @@ public class SecurityRules {
   @Inject
   SecurityRules(Provider<Optional<User>> user,
       @Named("request.action") Provider<String> action,
-      Provider<KnowledgeBase> knowledgeBase,
+      Provider<KieBase> knowledgeBase,
       @Named(SecurityModule.REQUESTS_CHECKS)
           Provider<Map<PermissionCheckKey, Boolean>> checks) {
     currentUser = user;
     currentAction = action;
     knowledge = knowledgeBase;
     this.checks = checks;
-    this.sharedChecks = new SharedChecksCache(Long.parseLong(Play.configuration.getProperty(
-        SharedChecksCache.TTL_SECONDS,
-        String.valueOf(SharedChecksCache.DEFAULT_TTL_SECONDS)).trim()));
+    this.sharedChecks = new SharedChecksCache(SharedChecksCache.ttlSeconds(
+        Play.configuration.getProperty(SharedChecksCache.TTL_SECONDS)));
   }
 
   /**
@@ -152,17 +151,24 @@ public class SecurityRules {
     }
 
     final User user = currentUser.get().orNull();
-    final boolean shareable = check.getTarget() == null;
+    // chi ha modificato dati letti dalle regole non usa e non condivide esiti fino al commit
+    final boolean shareable =
+        check.getTarget() == null && !SharedChecksCache.hasPendingChanges();
+    // letta all'inizio della richiesta, prima che carichi i dati: un esito calcolato con dati
+    // poi modificati resta nella generazione precedente e non viene riusato.
+    final long generation = SharedChecksCache.invocationGeneration();
     final Boolean shared =
-        shareable ? sharedChecks.get(knowledge.get(), user, check.getAction()) : null;
+        shareable ? sharedChecks.get(generation, user, check.getAction()) : null;
     if (shared != null) {
       if (shared) {
         check.grant();
       }
     } else {
       doCheck(check, user);
-      if (shareable) {
-        sharedChecks.put(knowledge.get(), user, check.getAction(), check.isGranted());
+      // gli esiti calcolati con dati modificati in memoria e non salvati restano della richiesta
+      if (shareable && sharedChecks.isEnabled() && user != null
+          && !PermissionsDataListener.hasUnsavedChanges()) {
+        sharedChecks.put(generation, user, check.getAction(), check.isGranted());
       }
     }
     // salviamo il risultato per le iterazioni successive.
@@ -173,7 +179,7 @@ public class SecurityRules {
 
   private void doCheck(final PermissionCheck check, final User user) {
 
-    final StatelessKnowledgeSession session = knowledge.get().newStatelessKnowledgeSession();
+    final StatelessKieSession session = knowledge.get().newStatelessKieSession();
     session.addEventListener(new AgendaLogger());
 
     log.debug("SecurityRules: currentUser = " + user);
@@ -194,9 +200,9 @@ public class SecurityRules {
 
   private static class AgendaLogger extends DefaultAgendaEventListener {
     @Override
-    public void afterActivationFired(AfterActivationFiredEvent event) {
+    public void afterMatchFired(AfterMatchFiredEvent event) {
       log.debug("RULE {} {}",
-          event.getActivation().getRule().getName(), event.getActivation().getFactHandles());
+          event.getMatch().getRule().getName(), event.getMatch().getFactHandles());
     }
   }
 }

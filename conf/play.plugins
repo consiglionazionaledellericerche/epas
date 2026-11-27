@@ -3,3 +3,4 @@
 1005:helpers.jpa.JpaReferencePlugin
 150:common.security.LoginParamsPlugin
 160:common.security.ContentSecurityPolicyPlugin
+170:common.security.RememberMeCookiePlugin

@@ -84,6 +84,7 @@ public class ContentSecurityPolicyTest extends UnitTest {
         header.indexOf(";", header.indexOf("script-src")));
     assertFalse(scriptSrc.contains("'unsafe-inline'"));
     assertFalse(scriptSrc.contains("'unsafe-eval'"));
+    assertTrue(scriptSrc.contains("'report-sample'"));
     assertTrue(header.contains("object-src 'none'"));
     assertTrue(header.endsWith("; report-uri " + Play.ctxPath + "/csp/report"));
   }
@@ -121,6 +122,65 @@ public class ContentSecurityPolicyTest extends UnitTest {
     assertFalse(description.contains("\r"));
     assertTrue(description.startsWith("directive=img-srcRiga falsa, blocked=https://evil"));
     assertTrue(description.length() < 300);
+  }
+
+  private static String report(String document, String sourceFile, int line, String sample) {
+    return "{\"csp-report\":{\"document-uri\":\"" + document + "\","
+        + "\"effective-directive\":\"script-src-attr\",\"blocked-uri\":\"inline\","
+        + "\"source-file\":\"" + sourceFile + "\",\"line-number\":" + line + ","
+        + "\"script-sample\":\"" + sample + "\"}}";
+  }
+
+  private static String key(String body) {
+    return ContentSecurityPolicy.parseReport(body).dedupKey();
+  }
+
+  @Test
+  public void sampleIsLoggedWithoutDigits() {
+    final String page = "https://epas.example.org/persons/edit/123";
+    assertEquals("directive=script-src-attr, blocked=inline, document=" + page
+        + ", source=" + page + ":7, sample=deletePerson(#, '#-#-#')",
+        ContentSecurityPolicy.describeReport(
+            report(page + "?x=1", page, 7, "deletePerson(123, '2026-11-27')")));
+  }
+
+  @Test
+  public void inlineViolationOfSamePageIsOneKeyForAllPeople() {
+    final String first = "https://epas.example.org/stampings/personStamping/12345/2026/11";
+    final String second = "https://epas.example.org/stampings/personStamping/678/2025/1";
+    assertEquals(key(report(first, first, 120, "return confirm('x')")),
+        key(report(second, second, 345, "return confirm('x')")));
+    assertEquals("script-src-attr|inline|https://epas.example.org/stampings/personStamping"
+        + "/{id}/{id}/{id}||return confirm('x')",
+        key(report(first, first, 120, "return confirm('x')")));
+    // un altro script inline della stessa pagina è una violazione diversa
+    assertFalse(key(report(first, first, 120, "return confirm('x')"))
+        .equals(key(report(first, first, 120, "$('#form').submit()"))));
+  }
+
+  @Test
+  public void inlineViolationWithoutSampleKeepsLineInKey() {
+    // con una policy senza 'report-sample' il browser non invia l'estratto
+    final String page = "https://epas.example.org/stampings/personStamping/12345";
+    assertFalse(key(report(page, page, 2, "")).equals(key(report(page, page, 5, ""))));
+    assertEquals(key(report(page, page, 2, "")),
+        key(report(page.replace("12345", "678"), page.replace("12345", "678"), 2, "")));
+  }
+
+  @Test
+  public void externalSourceKeepsLineInKey() {
+    final String page = "https://epas.example.org/absences/absenceTypes/42";
+    final String script = "https://epas.example.org/public/js/app.js";
+    assertEquals(key(report(page, script, 10, "")), key(report(page + "?a=b", script, 10, "")));
+    assertFalse(key(report(page, script, 10, "")).equals(key(report(page, script, 11, ""))));
+  }
+
+  @Test
+  public void onlyIdSegmentsAreNormalized() {
+    assertEquals("https://h/a/{id}/b2/{id}/x99y", ContentSecurityPolicy.withoutIds(
+        "https://h/a/12/b2/0f8fad5b-d9cb-469f-a165-70867728950e/x99y"));
+    assertEquals("https://h:8080/v1/p2026", ContentSecurityPolicy.withoutIds(
+        "https://h:8080/v1/p2026"));
   }
 
   @Test

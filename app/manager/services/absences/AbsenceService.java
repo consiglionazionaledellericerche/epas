@@ -26,6 +26,7 @@ import controllers.Security;
 import dao.PersonChildrenDao;
 import dao.absences.AbsenceComponentDao;
 import it.cnr.iit.epas.DateUtility;
+import java.util.Comparator;
 import java.util.List;
 import javax.inject.Inject;
 import lombok.ToString;
@@ -57,6 +58,7 @@ import models.User;
 import models.absences.Absence;
 import models.absences.AbsenceTrouble.AbsenceProblem;
 import models.absences.AbsenceType;
+import models.absences.CategoryGroupAbsenceType;
 import models.absences.CategoryTab;
 import models.absences.GroupAbsenceType;
 import models.absences.GroupAbsenceType.GroupAbsenceTypePattern;
@@ -186,9 +188,14 @@ public class AbsenceService {
       categoryTab = groupAbsenceType.getCategory().getTab();
     } else {
       if (categoryTab != null) {
-        groupAbsenceType =
-            categoryTab.firstByPriority().orderedGroupsInCategory(true).iterator().next();
-        Verify.verify(groupsPermitted.contains(groupAbsenceType));
+        // il primo gruppo della tab, per priorità, fra quelli permessi
+        final List<GroupAbsenceType> permitted = groupsPermitted;
+        groupAbsenceType = categoryTab.getCategoryGroupAbsenceTypes().stream()
+            .sorted(Comparator.comparing(CategoryGroupAbsenceType::getPriority))
+            .flatMap(category -> category.orderedGroupsInCategory(true).stream())
+            .filter(permitted::contains)
+            .findFirst().orElse(null);
+        Verify.verifyNotNull(groupAbsenceType);
       } else {
         // selezionare missione?
         for (GroupAbsenceType group : groupsPermitted) {
@@ -728,6 +735,8 @@ public class AbsenceService {
       if ((Boolean) confManager.configValue(person, EpasParam.PARENTAL_LEAVE_FOR_FATHERS)) {
         groupsPermitted.add(parentalLeaveForFathers);
         groupsPermitted.add(parentalLeaveTwinsForFathers);
+        groupsPermitted.addAll(absenceComponentDao.groupsAbsenceTypeByName(
+            Lists.newArrayList(DefaultGroup.G_212P.name(), DefaultGroup.G_213P.name())));
       }
 
       log.debug("groupPermitted = {}", groupsPermitted);
@@ -751,12 +760,23 @@ public class AbsenceService {
     names.add(DefaultGroup.G_252A.name());
     names.add(DefaultGroup.G_253A.name());
     names.add(DefaultGroup.G_254A.name());
+    names.add(DefaultGroup.G_235.name());
+    names.add(DefaultGroup.G_255.name());
+    names.add(DefaultGroup.G_255A.name());
+    names.add(DefaultGroup.G_25S.name());
+    names.add(DefaultGroup.G_252S.name());
+    names.add(DefaultGroup.G_24PROV.name());
+    names.add(DefaultGroup.G_242PROV.name());
+    names.add(DefaultGroup.G_243PROV.name());
+    names.add(DefaultGroup.G_244PROV.name());
+    names.add(DefaultGroup.G_245PROV.name());
     names.add(DefaultGroup.MALATTIA_FIGLIO_1.name());
     names.add(DefaultGroup.MALATTIA_FIGLIO_2.name());
     names.add(DefaultGroup.MALATTIA_FIGLIO_3.name());
     names.add(DefaultGroup.MALATTIA_FIGLIO_4.name());
+    names.add(DefaultGroup.MALATTIA_FIGLIO_5.name());
     names.add(DefaultGroup.G_25P.name());
-    
+
     return names;
   }
 

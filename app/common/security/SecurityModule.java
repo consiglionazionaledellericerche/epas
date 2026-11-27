@@ -27,7 +27,7 @@ import common.injection.AutoRegister;
 import controllers.Security;
 import java.util.Map;
 import models.User;
-import org.drools.KnowledgeBase;
+import org.kie.api.KieBase;
 import play.Play;
 import play.mvc.Http;
 
@@ -66,6 +66,17 @@ public class SecurityModule implements Module {
   /**
    * Fornisce la mappa con l'esito dei controlli correnti per l'injection.
    */
+  /**
+   * Dimentica gli esiti dei controlli già calcolati nella richiesta corrente, se c'è: servono
+   * dopo una modifica ai dati letti dalle regole.
+   */
+  static void clearRequestChecks() {
+    final Http.Request request = Http.Request.current();
+    if (request != null && request.args.get(REQUESTS_CHECKS) instanceof Map) {
+      ((Map<?, ?>) request.args.get(REQUESTS_CHECKS)).clear();
+    }
+  }
+
   @Named(REQUESTS_CHECKS)
   @Provides
   public Map<PermissionCheckKey, Boolean> currentChecks() {
@@ -96,7 +107,7 @@ public class SecurityModule implements Module {
   }
 
   @Provides
-  public KnowledgeBase knowledgeBase() {
+  public KieBase knowledgeBase() {
     return SecureRulesPlugin.knowledgeBase;
   }
 

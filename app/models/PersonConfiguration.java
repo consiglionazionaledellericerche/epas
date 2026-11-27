@@ -17,8 +17,10 @@
 
 package models;
 
+import common.security.PermissionsDataListener;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
@@ -40,6 +42,7 @@ import play.data.binding.NoBinding;
 @Getter
 @Setter
 @Audited
+@EntityListeners(PermissionsDataListener.class)
 @Entity
 @Table(name = "person_configurations")
 public class PersonConfiguration extends PropertyInPeriod {

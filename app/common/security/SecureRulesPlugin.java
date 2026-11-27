@@ -17,19 +17,30 @@
 
 package common.security;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+import java.nio.file.Files;
 import java.util.Properties;
-import org.drools.KnowledgeBase;
-import org.drools.KnowledgeBaseFactory;
-import org.drools.builder.KnowledgeBuilder;
-import org.drools.builder.KnowledgeBuilderConfiguration;
-import org.drools.builder.KnowledgeBuilderFactory;
-import org.drools.builder.ResourceType;
-import org.drools.io.ResourceFactory;
+import org.drools.kiesession.rulebase.InternalKnowledgeBase;
+import org.drools.kiesession.rulebase.KnowledgeBaseFactory;
+import org.kie.api.KieBase;
+import org.kie.api.io.ResourceType;
+import org.kie.internal.builder.KnowledgeBuilder;
+import org.kie.internal.builder.KnowledgeBuilderConfiguration;
+import org.kie.internal.builder.KnowledgeBuilderFactory;
+import org.kie.internal.io.ResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.Play;
 import play.Play.Mode;
 import play.PlayPlugin;
+import play.classloading.ApplicationClasses.ApplicationClass;
 import play.vfs.VirtualFile;
 
 /**
@@ -42,12 +53,26 @@ public class SecureRulesPlugin extends PlayPlugin {
   private static final Logger log = LoggerFactory.getLogger(SecureRulesPlugin.class);
   private static final String FILENAME = "permissions.drl";
 
-  static KnowledgeBase knowledgeBase;
+  static KieBase knowledgeBase;
   Long lastModified;
 
   @Override
   public void onApplicationStart() {
     loadRulesIfNecessary();
+  }
+
+  /**
+   * Annota la generazione degli esiti condivisi dei permessi prima che l'invocazione apra la
+   * transazione e carichi dati, vedi {@link SharedChecksCache}.
+   */
+  @Override
+  public void beforeInvocation() {
+    SharedChecksCache.beginInvocation();
+  }
+
+  @Override
+  public void invocationFinally() {
+    SharedChecksCache.endInvocation();
   }
 
   @Override
@@ -76,15 +101,16 @@ public class SecureRulesPlugin extends PlayPlugin {
 
   private void loadRules(byte[] rulesContent) {
 
-    // Configure the drools compiler to use Janino, instead of JDT, with the
-    // Play classloader, so that compilation will load model classes from
-    // the classloader, and not as .class file resources.
-    // https://jira.jboss.org/browse/JBRULES-1229
+    // Le regole sono compilate con il compilatore Eclipse (JDT), che legge il bytecode dei
+    // tipi importati come risorse .class: il classloader ponte le espone per le classi
+    // applicative. Il livello del linguaggio è fissato perché la versione di JDT nel
+    // classpath non conosce quello della JVM in uso.
     Properties properties = new Properties();
-    properties.put("drools.dialect.java.compiler", "JANINO");
+    properties.put("drools.dialect.java.compiler", "ECLIPSE");
+    properties.put("drools.dialect.java.compiler.lnglevel", "1.8");
     Thread.currentThread().setContextClassLoader(Play.classloader);
     final KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory
-            .newKnowledgeBuilderConfiguration(properties, Play.classloader);
+            .newKnowledgeBuilderConfiguration(properties, new BytecodeBridge(Play.classloader));
     final KnowledgeBuilder builder = KnowledgeBuilderFactory
             .newKnowledgeBuilder(configuration);
 
@@ -96,7 +122,69 @@ public class SecureRulesPlugin extends PlayPlugin {
               + builder.getErrors().size() + " errors");
     }
 
-    knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();
-    knowledgeBase.addKnowledgePackages(builder.getKnowledgePackages());
+    InternalKnowledgeBase kbase = KnowledgeBaseFactory.newKnowledgeBase();
+    kbase.addPackages(builder.getKnowledgePackages());
+    knowledgeBase = kbase;
+    // gli esiti calcolati con le regole precedenti non valgono più.
+    SharedChecksCache.invalidateAll();
+  }
+
+  /**
+   * Espone come risorse .class il bytecode delle classi applicative, che il classloader di Play
+   * non rende disponibile: è preso dalle classi compilate in memoria o da quelle precompilate.
+   */
+  private static final class BytecodeBridge extends ClassLoader {
+
+    BytecodeBridge(ClassLoader parent) {
+      super(parent);
+    }
+
+    @Override
+    protected URL findResource(String name) {
+      final byte[] bytecode = bytecode(name);
+      if (bytecode == null) {
+        return null;
+      }
+      try {
+        return new URL(null, "bytecode:" + name, new URLStreamHandler() {
+          @Override
+          protected URLConnection openConnection(URL url) {
+            return new URLConnection(url) {
+              @Override
+              public void connect() {
+                // il contenuto è già in memoria
+              }
+
+              @Override
+              public InputStream getInputStream() {
+                return new ByteArrayInputStream(bytecode);
+              }
+            };
+          }
+        });
+      } catch (MalformedURLException e) {
+        return null;
+      }
+    }
+
+    private static byte[] bytecode(String name) {
+      if (!name.endsWith(".class")) {
+        return null;
+      }
+      String className = name.substring(0, name.length() - ".class".length()).replace('/', '.');
+      ApplicationClass applicationClass = Play.classes.getApplicationClass(className);
+      if (applicationClass != null && applicationClass.enhancedByteCode != null) {
+        return applicationClass.enhancedByteCode;
+      }
+      File precompiled = Play.getFile("precompiled/java/" + name);
+      if (Play.usePrecompiled && precompiled.exists()) {
+        try {
+          return Files.readAllBytes(precompiled.toPath());
+        } catch (IOException e) {
+          log.warn("bytecode precompilato non leggibile: {}", precompiled, e);
+        }
+      }
+      return null;
+    }
   }
 }
