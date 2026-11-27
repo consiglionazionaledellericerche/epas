@@ -19,6 +19,7 @@ package models;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import common.security.PermissionsDataListener;
 import helpers.validators.CodiceFiscaleCheck;
 import helpers.validators.UniqueEppnCheck;
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -70,6 +72,7 @@ import play.data.validation.Unique;
 @Getter
 @Setter
 @Slf4j
+@EntityListeners(PermissionsDataListener.class)
 @Entity
 @Audited
 @Table(name = "persons")

@@ -19,6 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     a 75 nella lista delle persone. Non si usa `hibernate.default_batch_fetch_size` globale:
     caricava anche configurazioni, ruoli e riepiloghi di altre sedi e rallentava fino a 2
     volte le pagine dell'amministratore (#707).
+  - I cookie di Play (sessione, flash, errori) hanno l'attributo SameSite=Lax: il browser non
+    li invia nelle richieste che partono da un altro sito, tranne quando l'utente arriva su
+    ePAS da un link o da un redirect (come al ritorno dal login OIDC o Shibboleth). Il valore
+    si configura con application.session.sameSite (SESSION_SAMESITE nel docker: Lax, Strict o
+    None, con le maiuscole; Lax se non è impostata). L'attributo è gestito dalla nuova immagine
+    docker di base (ghcr.io/criluc/play1:1.5.3-temurin-11-patched-2): chi sviluppa con un play
+    locale deve sostituire il play-1.5.3.jar con quello dell'immagine, altrimenti il parametro
+    è ignorato (#700).
+  - Il cookie del "Remember me" del login (rememberme) ha gli stessi attributi HttpOnly e Secure
+    del cookie di sessione: il modulo secure di Play lo emetteva senza, quindi era leggibile da
+    JavaScript, viaggiava anche in http e con SESSION_SAMESITE=None il browser lo rifiutava
+    (#700).
   - Aggiornato Drools, il motore delle regole dei permessi, dalla 5.6.0 alla 9.44.0. Insieme a
     Drools 5.6 escono dal classpath antlr 3.3, janino, mvel2 2.1.8 e jaxb-impl 2.2.5; entrano
     istack-commons-runtime e txw2, richieste da jaxb-runtime di Play. In permissions.drl due
@@ -31,7 +43,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     al III livello) non vedono più la pagina delle richieste di straordinario: la regola che lo
     prevedeva non aveva mai avuto effetto. Allo stesso modo le azioni negate all'account ADMIN
     non possono più essere concesse da un ruolo di sede (#698).
+  - Le segnalazioni di violazione della Content Security Policy (/csp/report) non aprono più
+    una transazione e non prendono una connessione dal pool del database. Il loro numero è
+    nella metrica csp_reports_total, distinta per esito (logged, duplicate, rate_limited,
+    invalid) (#733).
+  - Una violazione è scritta nel log una sola volta all'ora anche se arriva da pagine che
+    differiscono solo per gli id nel percorso o, per gli script inline, per il numero di riga.
+    La policy chiede ai browser l'inizio dello script che viola la policy (report-sample),
+    riportato nel log senza cifre per trovare più facilmente il punto da correggere (#733).
 ### Fixed
+  - Gli esiti dei controlli dei permessi condivisi tra le richieste vengono invalidati dopo il
+    salvataggio dei dati letti dalle regole (persona, qualifica, sede, utente, configurazioni
+    della sede e della persona, impostazioni generali, categorie di turno, turnisti, tipi di
+    reperibilità e reperibilità) e al ricaricamento delle regole: prima, ad esempio, chi
+    veniva tolto da un turno poteva gestirlo ancora per 60 secondi. Con più istanze
+    dell'applicazione le altre vedono la modifica entro la durata della cache. Gli esiti
+    calcolati con dati modificati e non ancora salvati restano della sola richiesta, e dopo un
+    salvataggio la richiesta stessa ricalcola i controlli già fatti. Un valore non
+    numerico di security.checks.cacheSeconds non blocca più tutte le richieste: viene
+    ignorato e vale 60 secondi (#737).
   - I dipendenti abilitati a inserirsi i congedi parentali possono inserire anche i codici
     provvisori all'80% (24PROV, 242PROV, 243PROV, 244PROV, 245PROV), quelli del quinto figlio
     (235, 255, 255A, malattia quinto figlio) e del genitore unico (25S, 252S): la form li

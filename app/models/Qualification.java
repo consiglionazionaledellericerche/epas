@@ -18,8 +18,10 @@
 package models;
 
 import com.google.common.collect.Lists;
+import common.security.PermissionsDataListener;
 import java.util.List;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -39,6 +41,7 @@ import play.data.validation.Required;
  */
 @Getter
 @Setter
+@EntityListeners(PermissionsDataListener.class)
 @Entity
 @Audited
 @Table(name = "qualifications")

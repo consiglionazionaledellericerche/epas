@@ -19,6 +19,7 @@ package models;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import common.security.PermissionsDataListener;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +28,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -53,6 +55,7 @@ import play.data.validation.Unique;
  */
 @Getter
 @Setter
+@EntityListeners(PermissionsDataListener.class)
 @Entity
 @Audited
 public class Office extends PeriodModel implements IPropertiesInPeriodOwner {

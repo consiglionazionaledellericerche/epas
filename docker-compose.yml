@@ -38,6 +38,8 @@ services:
       #- PROTOCOL=https                         # default: http  -- (http,https) -- impostare https se il proxy serve ePAS in https
       #- SESSION_SECURE=false                   # default: true con PROTOCOL=https, altrimenti false -- (true,false) -- con true i cookie
                                                 # di sessione sono inviati solo in https: impostare false solo se ePAS è raggiunto anche in http
+      #- SESSION_SAMESITE=                      # default: Lax -- (Lax,Strict,None) -- attributo SameSite dei cookie di sessione: con Lax il browser
+                                                # non li invia nelle richieste che partono da altri siti, tranne quando l'utente arriva da un link
       #- HTTP_PATH=${HTTP_PATH}                 # default: / -- da utilizzare per non servire l'applicazione come root path ( / )
                                                 # se è specificata la variabile HTTP_PATH questa deve cominciare con uno slash ( / ), es.: HTTP_PATH=/epas
       #- EPAS_SHIB_LOGIN=                       # default: false  -- (true,false)

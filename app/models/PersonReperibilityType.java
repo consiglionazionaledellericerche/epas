@@ -18,12 +18,14 @@
 package models;
 
 import com.google.common.collect.Lists;
+import common.security.PermissionsDataListener;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -49,6 +51,7 @@ import play.data.validation.Unique;
 @Getter
 @Setter
 @Audited
+@EntityListeners(PermissionsDataListener.class)
 @Entity
 @Table(name = "person_reperibility_types")
 public class PersonReperibilityType extends BaseModel {

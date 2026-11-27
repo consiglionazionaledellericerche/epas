@@ -1,4 +1,5 @@
 import { test, expect } from '../support/fixtures';
+import { ADMIN_USERNAME, adminPassword } from '../support/env';
 
 const SESSION_COOKIE = 'PLAY_SESSION';
 
@@ -7,7 +8,7 @@ test.describe('cookie di sessione', () => {
   test.describe('utente non autenticato', () => {
     test.use({ storageState: { cookies: [], origins: [] } });
 
-    test('è emesso con gli attributi HttpOnly e Secure', async ({ page, context }) => {
+    test('è emesso con gli attributi HttpOnly, Secure e SameSite=Lax', async ({ page, context }) => {
       const response = await page.goto('/login');
       const setCookie = (await response!.headersArray())
         .filter((h) => h.name.toLowerCase() === 'set-cookie')
@@ -16,11 +17,46 @@ test.describe('cookie di sessione', () => {
       expect(setCookie, 'header Set-Cookie della sessione').toBeDefined();
       expect(setCookie).toMatch(/;\s*HttpOnly/i);
       expect(setCookie).toMatch(/;\s*Secure/i);
+      expect(setCookie).toMatch(/;\s*SameSite=Lax/);
 
       const cookie = (await context.cookies()).find((c) => c.name === SESSION_COOKIE);
       expect(cookie, 'cookie accettato dal browser').toBeDefined();
       expect(cookie!.httpOnly).toBe(true);
       expect(cookie!.secure).toBe(true);
+      expect(cookie!.sameSite).toBe('Lax');
+    });
+
+    test('anche gli altri cookie di Play hanno SameSite=Lax', async ({ request }) => {
+      // un login fallito imposta il cookie del flash con il messaggio di errore
+      const response = await request.post('/secure/authenticate', {
+        form: { username: 'utente.inesistente', password: 'password-sbagliata' },
+        maxRedirects: 0,
+      });
+      const issued = response.headersArray()
+        .filter((h) => h.name.toLowerCase() === 'set-cookie')
+        .map((h) => h.value);
+
+      expect(issued.some((value) => value.startsWith('PLAY_FLASH=')), 'cookie del flash').toBe(true);
+      for (const value of issued) {
+        expect(value).toMatch(/;\s*SameSite=Lax/);
+      }
+    });
+
+    test('il cookie del "Remember me" ha gli stessi attributi della sessione', async ({ request }) => {
+      // il modulo secure lo crea senza HttpOnly e Secure: li aggiunge RememberMeCookiePlugin
+      const response = await request.post('/secure/authenticate', {
+        form: { username: ADMIN_USERNAME, password: adminPassword(), remember: 'true' },
+        maxRedirects: 0,
+      });
+      const rememberMe = response.headersArray()
+        .filter((h) => h.name.toLowerCase() === 'set-cookie')
+        .map((h) => h.value)
+        .find((value) => value.startsWith('rememberme='));
+
+      expect(rememberMe, 'cookie rememberme emesso dal login').toBeDefined();
+      expect(rememberMe).toMatch(/;\s*HttpOnly/i);
+      expect(rememberMe).toMatch(/;\s*Secure/i);
+      expect(rememberMe).toMatch(/;\s*SameSite=Lax/);
     });
   });
 
@@ -46,6 +82,7 @@ test.describe('cookie di sessione', () => {
     for (const value of issued) {
       expect(value).toMatch(/;\s*HttpOnly/i);
       expect(value).toMatch(/;\s*Secure/i);
+      expect(value).toMatch(/;\s*SameSite=Lax/);
     }
 
     expect(await page.evaluate(() => document.cookie)).not.toContain(SESSION_COOKIE);
@@ -54,5 +91,6 @@ test.describe('cookie di sessione', () => {
     expect(cookie, 'cookie di sessione nel browser').toBeDefined();
     expect(cookie!.httpOnly).toBe(true);
     expect(cookie!.secure).toBe(true);
+    expect(cookie!.sameSite).toBe('Lax');
   });
 });
