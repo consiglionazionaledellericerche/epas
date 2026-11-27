@@ -46,7 +46,7 @@
 	         </a>
 	      #{/if}
 	      #{else}
-	        <a class="btn btn btn-info btn-xs" href="@{Synchronizations.importOffice(seat.perseoId)}">Importa</a>
+	        <a data-method="post" class="btn btn btn-info btn-xs" href="@{Synchronizations.importOffice(seat.perseoId)}">Importa</a>
 	      #{/else}
         </p>
      #{/list}

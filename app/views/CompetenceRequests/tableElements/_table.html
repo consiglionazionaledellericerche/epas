@@ -113,7 +113,7 @@
 				<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}" data-async-modal="#defaultModal" color="primary" title="Approva">
         		#{/if}
         		#{else}
-        		<a class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}" color="success" title="Approva">
+        		<a data-method="post" class="btn btn-success btn-xs" href="@{CompetenceRequests.approval(item.id)}" color="success" title="Approva">
         		#{/else}
         		Approva
       			</a>

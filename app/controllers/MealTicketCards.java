@@ -20,6 +20,7 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.ContractDao;
 import dao.ContractMonthRecapDao;
@@ -132,6 +133,7 @@ public class MealTicketCards extends Controller {
    * @param person la persona cui associarla
    * @param office la sede proprietaria che associa la tessea
    */
+  @PostOnly
   public static void saveNewCard(MealTicketCard mealTicketCard, Person person, Office office) {
     notFoundIfNull(person);
     notFoundIfNull(office);
@@ -245,6 +247,7 @@ public class MealTicketCards extends Controller {
    * @param cardId l'identificativo della card elettronica
    * @param personId l'identificativo della persona
    */
+  @PostOnly
   public static void assignOrphanElectronicMealTickets(Long cardId, Long personId) {
     java.util.Optional<MealTicketCard> card = mealTicketCardDao.getMealTicketCardById(cardId);
     
@@ -284,6 +287,7 @@ public class MealTicketCards extends Controller {
    * @param tickets il numero di buoni da caricare
    * @param expireDate la data di scadenza dei buoni
    */
+  @PostOnly
   public static void submitPersonMealTicket(Long personId, MealTicketCard card, 
       LocalDate deliveryDate, Integer tickets, @Valid @Required LocalDate expireDate) {
 
@@ -397,6 +401,7 @@ public class MealTicketCards extends Controller {
    * @param last       al
    * @param confirmed  conferma
    */
+  @PostOnly
   public static void performDeletePersonCodeBlock(Long contractId, String codeBlock,
       int first, int last, boolean confirmed) {
 

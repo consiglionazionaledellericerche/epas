@@ -24,6 +24,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.AbsenceDao;
 import dao.ContractDao;
@@ -184,6 +185,7 @@ public class Contracts extends Controller {
    * @param contract il contratto da splittare
    * @param dateToSplit la data a cui splittarlo
    */
+  @PostOnly
   public static void splitContract(@Valid Contract contract, @Required LocalDate dateToSplit, 
       boolean attestatiSync) {
     notFoundIfNull(contract);
@@ -289,6 +291,7 @@ public class Contracts extends Controller {
    * @param contract il contratto attuale
    * @param previousContract il contratto precedente
    */
+  @PostOnly
   public static void mergeContract(@Valid Contract contract, @Valid Contract previousContract, 
       boolean attestatiSync) {
     notFoundIfNull(contract);
@@ -370,6 +373,7 @@ public class Contracts extends Controller {
    * @param contract      contract
    * @param confirmed     step di conferma
    */
+  @PostOnly
   public static void update(@Valid Contract contract, 
       boolean confirmed, Boolean isTemporaryMissing,
       LocalDate sourceDateRecoveryDay, @Min(0) @Max(100) Integer sourceRecoveryDayUsed,
@@ -485,6 +489,7 @@ public class Contracts extends Controller {
    * @param contract contract
    * @param wtt      il tipo orario
    */
+  @PostOnly
   public static void save(@Valid Contract contract, @Valid WorkingTimeType wtt) {
 
     notFoundIfNull(contract);
@@ -516,6 +521,7 @@ public class Contracts extends Controller {
    *
    * @param contractId contractId
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void delete(Long contractId, boolean confirmed) {
 
     Contract contract = contractDao.getContractById(contractId);
@@ -569,6 +575,7 @@ public class Contracts extends Controller {
    * @param cwtt      nuovo periodo di orario.
    * @param confirmed se conferma ricevuta.
    */
+  @PostOnly
   public static void saveContractWorkingTimeType(ContractWorkingTimeType cwtt, boolean confirmed) {
 
     // IMPORTANTE!!! Rimosso @Valid da cwtt e effettuata la validazione mancante a mano.
@@ -661,6 +668,7 @@ public class Contracts extends Controller {
    * @param pwt l'orario di lavoro personalizzato
    * @param confirmed conferma se true
    */
+  @PostOnly
   public static void savePersonalWorkingTime(PersonalWorkingTime pwt, boolean confirmed) {
     
     notFoundIfNull(pwt);
@@ -738,6 +746,7 @@ public class Contracts extends Controller {
    * @param id identificativo dell'orario da cancellare
    * @param confirmed conferma se true
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void deletePersonalWorkingTime(Long id, boolean confirmed) {
     
     PersonalWorkingTime pwt = PersonalWorkingTime.findById(id);
@@ -797,6 +806,7 @@ public class Contracts extends Controller {
    * @param cmts nuovo periodo di fascia oraria obbligatoria.
    * @param confirmed se conferma ricevuta.
    */
+  @PostOnly
   public static void saveContractMandatoryTimeSlot(
       ContractMandatoryTimeSlot cmts, boolean confirmed) {
 
@@ -938,6 +948,7 @@ public class Contracts extends Controller {
    * @param vp nuovo periodo ferie
    * @param confirmed se conferma ricevuta.
    */
+  @PostOnly
   public static void saveContractVacationPeriod(@Valid VacationPeriod vp, boolean confirmed) {
 
     notFoundIfNull(vp);
@@ -1020,6 +1031,7 @@ public class Contracts extends Controller {
    * @param csp       nuovo periodo di presenza automatica.
    * @param confirmed se conferma ricevuta.
    */
+  @PostOnly
   public static void saveContractStampProfile(@Valid ContractStampProfile csp, boolean confirmed) {
 
     notFoundIfNull(csp);
@@ -1164,6 +1176,7 @@ public class Contracts extends Controller {
    * @param sourceDateResidual nuova data inizializzazione.
    * @param confirmedResidual  step di conferma ricevuta.
    */
+  @PostOnly
   public static void saveResidualSourceContract(Long contractId, 
       @Valid final LocalDate sourceDateResidual, 
       Integer hoursLastYear, Integer minutesLastYear,
@@ -1258,6 +1271,7 @@ public class Contracts extends Controller {
   /**
    * Salva l'inizializzazione ore.
    */
+  @PostOnly
   public static void saveVacationSourceContract(Long contractId, 
       @Valid final LocalDate sourceDateVacation, Integer sourceVacationLastYearUsed,
       Integer sourceVacationCurrentYearUsed, Integer sourcePermissionUsed,
@@ -1338,6 +1352,7 @@ public class Contracts extends Controller {
    * @param sourceDateMealTicket nuova data inizializzazione.
    * @param confirmedMeal        step di conferma ricevuta.
    */
+  @PostOnly
   public static void saveMealTicketSourceContract(@Valid final Contract contract,
       @Valid final LocalDate sourceDateMealTicket,
       boolean confirmedMeal) {

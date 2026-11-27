@@ -27,7 +27,7 @@
         #{if contractualReference.length > 0}
         	#{f.edit 'file'}
         		<i class="fa fa-download"></i> <a href="@{getFile(contractualReference.id)}">${contractualReference.filename}</a>
-		        <a class="label label-badge label-danger" href="@{deleteFile(contractualReference.id)}" 
+		        <a data-method="post" class="label label-badge label-danger" href="@{deleteFile(contractualReference.id)}" 
 		        	webui-popover-hover data-content="Rimuovi File">
 		          <i class="fa fa-trash"></i> &{'crud.delete'}
 		        </a>
@@ -41,7 +41,7 @@
 				
         <div class="container center">
 	        <input class="btn btn-primary" type="submit" value="Ok">
-	        <a class="btn btn-danger" href="@{delete(contractualReference.id)}">Elimina</a>
+	        <a data-method="post" class="btn btn-danger" href="@{delete(contractualReference.id)}">Elimina</a>
 	        <a class="btn btn-default" href="@{list()}">Torna alla lista</a>
         </div>
    #{/form}

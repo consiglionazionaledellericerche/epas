@@ -13,7 +13,7 @@
     <p>Rimozione di <strong>${person.fullname}</strong> dal software ePAS</p>
 	<p>Attenzione!!! Questa operazione non potrà essere annullata.</p>
 	<p>
-	<a href="@{Persons.deletePersonConfirmed(person.id)}">
+	<a data-method="post" href="@{Persons.deletePersonConfirmed(person.id)}">
       <input value="Conferma Elimina" class="btn btn-danger" type="button">
     </a>
     </p>

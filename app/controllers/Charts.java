@@ -20,6 +20,7 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
@@ -193,6 +194,7 @@ public class Charts extends Controller {
    * @param year l'anno di riferimento
    * @throws IOException eccezione in formazione del file
    */
+  @PostOnly
   public static void export(Integer year) throws IOException {
     rules.checkIfPermitted(Security.getUser().get().getPerson().getOffice());
 
@@ -228,6 +230,7 @@ public class Charts extends Controller {
    * @param personId l'id della persona di cui si vogliono le informazioni
    * @throws IOException eventuale eccezione generata dalla creazione del file
    */
+  @PostOnly
   public static void exportDataSituation(Long personId) throws IOException {
     rules.checkIfPermitted(Security.getUser().get().getPerson().getOffice());
 

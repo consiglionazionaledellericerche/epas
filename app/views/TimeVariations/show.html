@@ -41,7 +41,7 @@
 					    #{list items:dto.absence.timeVariations, as:'tv'}
 					  		<li class="list-group-item">
 					  		<div class="pull-left btn-group">
-					  			<a class="btn btn-danger btn-xs" href="@{TimeVariations.removeVariation(tv.id)}">
+					  			<a data-method="post" class="btn btn-danger btn-xs" href="@{TimeVariations.removeVariation(tv.id)}">
         					Rimuovi
       						</a>   
       						</div>

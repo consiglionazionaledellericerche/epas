@@ -60,7 +60,7 @@
 				    	  </a>    
 				    	  #{if ts.getAssociatedActiveContract(office).size() == 0 }
 				    	    #{secure.check 'TimeSlots.toogle'}
-				    	    <a href="@{TimeSlots.toogle(ts.value.id)}">
+				    	    <a data-method="post" href="@{TimeSlots.toogle(ts.value.id)}">
 				    	      <i data-toggle="tooltip" data-placement="bottom" title="Disattiva fascia oraria non associata ad alcun contratto attivo" class="fa fa-power-off"></i>
 				    	    </a>
 				    	    #{/secure.check}
@@ -79,7 +79,7 @@
 				          ${ts.getAssociatedContract().size()}
 				          #{if ts.getAssociatedContract().size() == 0 }
 				            #{secure.check 'TimeSlots.toogle'}
-				    	    <a href="@{TimeSlots.delete(ts.value.id)}">
+				    	    <a data-method="post" href="@{TimeSlots.delete(ts.value.id)}">
 				    	      <i data-toggle="tooltip" data-placement="bottom" 
 				    	      	title="Elimina fascia oraria non associata ad alcun contratto" class="fa fa-trash-o"></i>
 				    	    </a>
@@ -128,7 +128,7 @@
 				        <td class="center">${ts.value.office.name}</td>
 	
 				        <td class="center">
-				          <a href="@{TimeSlots.toogle(ts.value.id)}">
+				          <a data-method="post" href="@{TimeSlots.toogle(ts.value.id)}">
 				    	    <i data-toggle="tooltip" data-placement="bottom" title="Riattiva tipo orario" class="fa fa-power-off"></i>
 				    	  </a>
 				        </td>
@@ -136,7 +136,7 @@
 				        <td  class="center">
 				          ${ts.getAssociatedContract().size()}
 				          #{if ts.getAssociatedContract().size() == 0 }
-				    	    <a href="@{TimeSlots.delete(ts.value.id)}">
+				    	    <a data-method="post" href="@{TimeSlots.delete(ts.value.id)}">
 				    	      <i data-toggle="tooltip" data-placement="bottom" 
 				    	      	title="Elimina fascia oraria non associata ad alcun contratto" class="fa fa-trash-o"></i>
 				    	    </a>

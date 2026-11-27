@@ -46,7 +46,7 @@
         <div class="container center">
             <a class="btn btn-default" href="@{list()}">Torna alla lista</a>
 	        <input class="btn btn-primary" type="submit" value="Ok">
-	        <a class="btn btn-danger" href="@{delete(contractualClause.id)}">Elimina</a>
+	        <a data-method="post" class="btn btn-danger" href="@{delete(contractualClause.id)}">Elimina</a>
         </div>
    #{/form}
 

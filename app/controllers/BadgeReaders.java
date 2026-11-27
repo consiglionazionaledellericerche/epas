@@ -21,6 +21,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.querydsl.core.QueryResults;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.BadgeDao;
 import dao.BadgeReaderDao;
@@ -132,6 +133,7 @@ public class BadgeReaders extends Controller {
    *
    * @param id identificativo del badge reader da eliminare.
    */
+  @PostOnly
   public static void delete(Long id) {
 
     final BadgeReader badgeReader = BadgeReader.findById(id);
@@ -161,6 +163,7 @@ public class BadgeReaders extends Controller {
    *
    * @param badgeReader l'oggetto per cui si vogliono cambiare le impostazioni.
    */
+  @PostOnly
   public static void updateInfo(@Valid BadgeReader badgeReader, @Valid Office owner) {
 
     if (Validation.hasErrors()) {
@@ -186,6 +189,7 @@ public class BadgeReaders extends Controller {
    * @param user Utente a cui modificare la password.
    * @param newPass nuova password da associare al lettore.
    */
+  @PostOnly
   public static void changePassword(@Valid User user,
       @MinSize(5) @Required String newPass) {
 
@@ -214,6 +218,7 @@ public class BadgeReaders extends Controller {
    * @param badgeReader l'oggetto badge reader da salvare.
    * @param user l'utente creato a partire dal badge reader.
    */
+  @PostOnly
   public static void save(@Valid BadgeReader badgeReader, @Valid Office office, @Valid User user) {
 
     log.info("BadgeReaders::save badgeReader = {}", badgeReader);
@@ -257,6 +262,7 @@ public class BadgeReaders extends Controller {
   /**
    * Salva la nuova associazione.
    */
+  @PostOnly
   public static void saveBadgeSystems(@Valid BadgeReader badgeReader, boolean confirmed) {
 
     rules.checkIfPermitted(badgeReader.getUser().getOwner());

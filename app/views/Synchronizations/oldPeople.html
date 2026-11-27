@@ -39,7 +39,7 @@
 	      #{if wrPerson.value.perseoId == null}
 	         #{if  perseoPerson.qualification != null}
 		       <!-- Associa e warning-->
-		       <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinPerson(wrPerson.value.id, perseoPerson?.perseoId)}">Associa</a>
+		       <a data-method="post" class="btn btn btn-info btn-xs" href="@{Synchronizations.joinPerson(wrPerson.value.id, perseoPerson?.perseoId)}">Associa</a>
 		       #{if wrPerson.value.qualification == null || wrPerson.value.qualification.qualification != perseoPerson.qualification.qualification }
 		          <i class="fa fa-warning text-danger" aria-hidden="true"
 		           popover-hover-2 data-content="Le qualifiche non corrispondono..."></i> 
@@ -81,7 +81,7 @@
 
 #{alert color:'info'}
   <p>Associa tutte le persone non ancora associate. Verificare bene per tutti il join suggerito sulla base della matricola.
-    <a class="btn btn btn-info btn-xs" href="@{Synchronizations.joinAllPersonInOffice(office.id)}">Associa</a>
+    <a data-method="post" class="btn btn btn-info btn-xs" href="@{Synchronizations.joinAllPersonInOffice(office.id)}">Associa</a>
   </p>
 #{/alert}  
 </div>

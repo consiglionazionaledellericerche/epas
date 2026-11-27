@@ -25,7 +25,7 @@
 	      <div class="center">
 	      <p>Tutti i giorni sono stati correttamente definiti. Puoi modificarli cliccando
 	      sui singoli giorni oppure creare l'orario definitivamente.</p>
-	        <a class="btn btn-primary" href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, externalId, 1, reproportionEnabled, false, true)}">Crea Orario</a>
+	        <a data-method="post" class="btn btn-primary" href="@{WorkingTimes.insertVerticalWorkingTime(office.id, name, externalId, 1, reproportionEnabled, false, true)}">Crea Orario</a>
 	      </div> 
 	    #{/else}
     #{/alert}  

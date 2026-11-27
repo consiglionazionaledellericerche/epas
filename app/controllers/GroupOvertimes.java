@@ -18,6 +18,7 @@
 package controllers;
 
 import com.google.common.collect.Maps;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,7 @@ public class GroupOvertimes extends Controller {
   @Inject
   private static SecurityRules rules;
 
+  @PostOnly
   public static void save(int year, GroupOvertime groupOvertime, Long groupId) {
     
     Group group = groupDao.byId(groupId).get();

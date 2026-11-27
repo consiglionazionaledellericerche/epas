@@ -12,7 +12,7 @@
     #{else}
       <strong>Trovati ${contracts.size()} contratti da correggere</strong>
         #{b.link @administration.fixContractsWithWrongPreviousContract(),
-            class:'btn warning', title:'Correggi tutti' /}
+            'data-method':'post', class:'btn warning', title:'Correggi tutti' /}
       <ul>
       #{list items:contracts, as:'contract'}
         <li>
@@ -20,7 +20,7 @@
           #{b.link @Contracts.personContracts(contract.person.id),
              class:'primary', title:'Visualizza' /}
           #{b.link @administration.fixPreviousContract(contract.id),
-            class:'btn warning', title:'Correggi' /}
+            'data-method':'post', class:'btn warning', title:'Correggi' /}
           <br />
           Contratto id: ${contract.id} 
             - data inizio: ${contract.beginDate}

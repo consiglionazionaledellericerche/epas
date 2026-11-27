@@ -38,7 +38,8 @@ falliscono. Se `CSRF_MODE` è impostata anche per Playwright con un valore diver
 `enforce`, il test sulle richieste rifiutate è saltato.
 
 Non lanciare i test contro un ePAS con dati reali: `global-setup.ts` crea due persone e i
-test modificano la nota di un giorno del suo cartellino (poi ripristinano il valore precedente).
+test modificano la nota di un giorno del suo cartellino (poi ripristinano il valore precedente)
+e inseriscono una timbratura (poi la eliminano).
 
 ## Struttura
 

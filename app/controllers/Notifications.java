@@ -18,6 +18,7 @@ package controllers;
 
 import com.google.common.base.Optional;
 import com.querydsl.core.QueryResults;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.NotificationDao;
 import dao.NotificationDao.NotificationFilter;
@@ -106,6 +107,7 @@ public class Notifications extends Controller {
   /**
    * Questa chiamata si assume che sia sempre POST+ajax.
    */
+  @PostOnly
   public static void readAll(String message, NotificationFilter filter) {
 
     rules.checkIfPermitted();

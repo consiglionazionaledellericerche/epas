@@ -68,7 +68,7 @@
 			<li class="list-group-item clearfix">
 				<strong><em>${uro.role}</em></strong> della sede di <strong><em>${uro.office}</em></strong>
 				#{secure.check 'Users.removeRole', target: uro }
-        <a href="@{removeRole(uro.id)}" class="badge" style="color:white;">
+        <a data-method="post" href="@{removeRole(uro.id)}" class="badge" style="color:white;">
           &{'crud.delete'} <i class="fa fa-trash" aria-hidden="true"></i>
         </a>
 				#{/secure.check}

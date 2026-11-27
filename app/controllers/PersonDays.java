@@ -23,6 +23,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -105,6 +106,7 @@ public class PersonDays extends Controller {
   /**
    * Action di approvazione del lavoro festivo.
    */
+  @PostOnly
   public static void approveWorkingHoliday(Long personDayId, Integer hours, Integer minutes) {
 
     PersonDay personDay = personDayDao.getPersonDayById(personDayId);
@@ -158,6 +160,7 @@ public class PersonDays extends Controller {
   /**
    * Action di approvazione del lavoro fuori fascia.
    */
+  @PostOnly
   public static void approveWorkingOutOpening(Long personDayId, Integer hours, Integer minutes) {
 
     PersonDay personDay = personDayDao.getPersonDayById(personDayId);
@@ -213,6 +216,7 @@ public class PersonDays extends Controller {
    * @param hours
    * @param minutes
    */
+  @PostOnly
   public static void approveWorkingOutPartTime(Long personDayId, Integer hours, Integer minutes) {
     PersonDay personDay = personDayDao.getPersonDayById(personDayId);
     Preconditions.checkNotNull(personDay);
@@ -241,6 +245,7 @@ public class PersonDays extends Controller {
   /**
    * Inserimento di note associate ad un personDay.
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void note(Long personDayId, boolean confirmed, String note) {
     PersonDay personDay = personDayDao.getPersonDayById(personDayId);
     Preconditions.checkNotNull(personDay);
@@ -266,6 +271,7 @@ public class PersonDays extends Controller {
   /**
    * Forza la decisione sul buono pasto di un giorno specifico per un dipendente.
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void forceMealTicket(Long personDayId, boolean confirmed,
       MealTicketDecision mealTicketDecision) {
 
@@ -397,6 +403,7 @@ public class PersonDays extends Controller {
   /**
    * Mostra la form per impostare di ignore il calcolo del permesso breve su un giorno.
    */
+  @PostOnly(confirmParam = "confirmed")
   public static void ignoreShortLeave(Long personDayId, boolean confirmed, 
       boolean ignoreShortLeave) {
     PersonDay personDay = personDayDao.getPersonDayById(personDayId);

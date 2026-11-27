@@ -20,6 +20,7 @@ package controllers;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import common.security.PostOnly;
 import common.security.SecurityRules;
 import dao.GeneralSettingDao;
 import dao.OfficeDao;
@@ -436,6 +437,7 @@ public class Configurations extends Controller {
    * @param configurationDto l'oggetto contenente la nuova configurazione.
    * @param confirmed        se siamo nel caso della conferma o no.
    */
+  @PostOnly
   public static void update(Configuration configuration,
       ConfigurationDto configurationDto, boolean confirmed) {
 
@@ -562,6 +564,7 @@ public class Configurations extends Controller {
    * @param configurationDto l'oggetto contenente la configurazione nuova.
    * @param confirmed        se siamo nello stato di conferma delle operazioni.
    */
+  @PostOnly
   public static void personUpdate(Long configurationId,
       ConfigurationDto configurationDto, boolean confirmed) {
 
@@ -638,6 +641,7 @@ public class Configurations extends Controller {
    * @param file file allegato.
    * @throws FileNotFoundException in casi di problemi con il file allegato.
    */
+  @PostOnly
   public static void uploadAttachment(Long officeId, File file) throws FileNotFoundException {
 
     final Office office = officeDao.getOfficeById(officeId);
@@ -665,6 +669,7 @@ public class Configurations extends Controller {
    *
    * @param attachmentId l'identificativo dell'allegato da rimuovere
    */
+  @PostOnly
   public static void removeAttachment(Long attachmentId) {
 
     final Attachment attachment = Attachment.findById(attachmentId);
@@ -696,6 +701,7 @@ public class Configurations extends Controller {
     renderBinary(attachment.getFile().get(), attachment.getFilename(), false);
   }
 
+  @PostOnly
   public static void copyConfiguration(Office sourceOffice, Office destinationOffice) {
     Preconditions.checkNotNull(sourceOffice);
     Preconditions.checkNotNull(destinationOffice);

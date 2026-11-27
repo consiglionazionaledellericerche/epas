@@ -225,7 +225,7 @@
         #{/secure.link}
 
         #{secure.check 'Configurations.removeAttachment', target: autocert}
-        <a class="label label-badge label-danger" href="@{removeAttachment(autocert.id)}" webui-popover-hover data-content="Rimuovi File">
+        <a data-method="post" class="label label-badge label-danger" href="@{removeAttachment(autocert.id)}" webui-popover-hover data-content="Rimuovi File">
           <i class="fa fa-trash"></i> &{'crud.delete'}
         </a>
         #{/secure.check}
