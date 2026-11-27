@@ -38,8 +38,8 @@ _play-1.5.3.jar_ dell'installazione di play va sostituito con quello dell'immagi
 nella riga FROM del _Dockerfile_:
 
 ```
-docker run --rm ghcr.io/criluc/play1:1.5.3-temurin-11-patched-2 \
-  cat /opt/play/play-1.5.3/framework/play-1.5.3.jar > play-1.5.3.jar
+docker run --rm --entrypoint cat ghcr.io/criluc/play1:1.5.3-temurin-11-patched-2 \
+  /opt/play/play-1.5.3/framework/play-1.5.3.jar > play-1.5.3.jar
 cp play-1.5.3.jar <installazione di play>/framework/
 ```
 
