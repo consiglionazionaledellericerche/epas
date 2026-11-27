@@ -1,6 +1,6 @@
 ---
 name: codex-avversario
-description: Review avversaria delle modifiche del branch corrente (o di un commit, o delle modifiche non committate) eseguita con Codex CLI, con verifica di ogni segnalazione sul codice. Se Codex non è installato o non è autenticato lo dice e ripiega su una review avversaria fatta da Claude, dichiarandolo. Da usare prima di aprire una PR (CLAUDE.md lo richiede).
+description: Review avversaria delle modifiche del branch corrente (o di un commit, o delle modifiche non committate) eseguita con Codex CLI, con verifica di ogni segnalazione sul codice. Se Codex non è installato o non è autenticato lo dice e ripiega su una review avversaria fatta da Claude, dichiarandolo. Da usare prima di aprire una PR (CLAUDE.md lo richiede) e, in modalità verifica, dopo aver corretto le segnalazioni di una review precedente.
 tools: Bash, Read, Grep, Glob
 ---
 
@@ -31,6 +31,22 @@ ottiene così, mai con un `git diff` senza argomenti:
   `git status --porcelain` (righe `??`).
 
 Se con questi comandi non ci sono differenze, fermati e dillo.
+
+### Modalità verifica
+
+Se il prompt contiene lo sha del commit della review precedente (`<sha-prima>`) e l'elenco
+delle segnalazioni corrette, è una review di verifica dopo le correzioni. Il bersaglio resta
+lo stesso (tutto il branch), ma a `<BERSAGLIO>` aggiungi:
+
+"Questa è una review di verifica dopo le correzioni. Le correzioni sono in
+`git diff <sha-prima>..HEAD`. Segnalazioni della review precedente che dovrebbero essere
+risolte: <elenco con titolo, file:riga e scenario>. Per ciascuna dì se è risolta, non risolta o
+risolta solo in parte, con il motivo. Poi cerca con attenzione i problemi introdotti dalle
+correzioni stesse, e infine eventuali problemi nel resto del bersaglio sfuggiti in
+precedenza."
+
+Se `<sha-prima>` non esiste più (ad esempio dopo un rebase), dillo e confronta le segnalazioni
+con il codice attuale senza quel diff.
 
 ## 2. Codex è disponibile?
 
@@ -93,11 +109,19 @@ il codice citato (e i chiamanti se serve) e classificala:
 - **PLAUSIBILE**: dipende da condizioni che non puoi escludere dal codice;
 - **FALSA**: il codice la smentisce (indica dove).
 
+In modalità verifica controlla anche tu, sul codice, ogni segnalazione precedente e
+classificala come **RISOLTA**, **NON RISOLTA** o **PARZIALE**, senza fidarti del solo giudizio
+di Codex.
+
 ## 5. Risultato
 
 In italiano, in questo ordine:
-1. chi ha fatto la review (Codex, oppure Claude come ripiego e perché) e su quale bersaglio;
-2. le segnalazioni CONFERMATE e PLAUSIBILI, dalla più grave, ciascuna con `file:riga`,
-   descrizione, scenario di fallimento e classificazione;
-3. le FALSE, una riga ciascuna con il motivo;
-4. se non resta nulla, dillo esplicitamente.
+1. chi ha fatto la review (Codex, oppure Claude come ripiego e perché), su quale bersaglio e,
+   in modalità verifica, rispetto a quale `<sha-prima>`;
+2. solo in modalità verifica: l'esito di ogni segnalazione precedente (RISOLTA, NON RISOLTA,
+   PARZIALE) con il motivo;
+3. le segnalazioni nuove CONFERMATE e PLAUSIBILI, dalla più grave, ciascuna con `file:riga`,
+   descrizione, scenario di fallimento e classificazione (in modalità verifica indica se sono
+   state introdotte dalle correzioni);
+4. le FALSE, una riga ciascuna con il motivo;
+5. se non resta nulla (tutte le precedenti RISOLTE e nessuna nuova), dillo esplicitamente.
