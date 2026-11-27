@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+  - I cookie di Play (sessione, flash, errori) hanno l'attributo SameSite=Lax: il browser non
+    li invia nelle richieste che partono da un altro sito, tranne quando l'utente arriva su
+    ePAS da un link o da un redirect (come al ritorno dal login OIDC o Shibboleth). Il valore
+    si configura con application.session.sameSite (SESSION_SAMESITE nel docker: Lax, Strict o
+    None, con le maiuscole; Lax se non è impostata). L'attributo è gestito dalla nuova immagine
+    docker di base (ghcr.io/criluc/play1:1.5.3-temurin-11-patched-2): chi sviluppa con un play
+    locale deve sostituire il play-1.5.3.jar con quello dell'immagine, altrimenti il parametro
+    è ignorato (#700).
+  - Il cookie del "Remember me" del login (rememberme) ha gli stessi attributi HttpOnly e Secure
+    del cookie di sessione: il modulo secure di Play lo emetteva senza, quindi era leggibile da
+    JavaScript, viaggiava anche in http e con SESSION_SAMESITE=None il browser lo rifiutava
+    (#700).
   - Aggiornato Drools, il motore delle regole dei permessi, dalla 5.6.0 alla 9.44.0. Insieme a
     Drools 5.6 escono dal classpath antlr 3.3, janino, mvel2 2.1.8 e jaxb-impl 2.2.5; entrano
     istack-commons-runtime e txw2, richieste da jaxb-runtime di Play. In permissions.drl due

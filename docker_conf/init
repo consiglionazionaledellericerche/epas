@@ -165,6 +165,33 @@ case "${SESSION_SECURE}" in
 esac
 sed 's#{{SESSION_SECURE}}#'"${SESSION_SECURE}"'#' -i ${APP_HOME}/conf/prod.conf
 
+### Attributo SameSite dei cookie di Play
+SESSION_SAMESITE=${SESSION_SAMESITE:-Lax}
+case "${SESSION_SAMESITE}" in
+  "Lax") ;;
+  "Strict")
+    echo "Cookie di sessione con SameSite=Strict"
+    echo "  WARNING: il browser non invia i cookie quando l'utente arriva da un altro sito:"
+    echo "  il login con OIDC o Shibboleth non funziona."
+    ;;
+  "None")
+    echo "Cookie di sessione con SameSite=None: inviati anche nelle richieste da altri siti."
+    if [ "${SESSION_SECURE}" != "true" ]; then
+      echo "ERROR: "
+      echo "  SESSION_SAMESITE=None richiede SESSION_SECURE=true: i browser rifiutano i cookie"
+      echo "  con SameSite=None senza l'attributo Secure."
+      exit 1
+    fi
+    ;;
+  *)
+    echo "ERROR: "
+    echo "  SESSION_SAMESITE accetta solo i valori \"Lax\", \"Strict\" o \"None\","
+    echo "  scritti esattamente così (contano le maiuscole): valore attuale \"${SESSION_SAMESITE}\"."
+    exit 1
+    ;;
+esac
+sed 's#{{SESSION_SAMESITE}}#'"${SESSION_SAMESITE}"'#' -i ${APP_HOME}/conf/prod.conf
+
 sed 's#{{EVOLUTIONS_ENABLED}}#'"${EVOLUTIONS_ENABLED}"'#' -i ${APP_HOME}/conf/prod.conf
 
 ### Creazione e configurazione dell'application secret
