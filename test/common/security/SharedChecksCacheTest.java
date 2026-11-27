@@ -22,13 +22,34 @@ import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.enumerate.AccountRole;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import play.mvc.Http;
 import play.test.UnitTest;
 
 /**
  * Verifica la cache degli esiti dei controlli senza target condivisa tra le richieste.
  */
 public class SharedChecksCacheTest extends UnitTest {
+
+  private Http.Request runnerRequest;
+
+  /**
+   * I test sull'invocazione partono senza richiesta HTTP corrente: il runner dei test può averne
+   * una (quella che li ha lanciati).
+   */
+  @Before
+  public void withoutCurrentRequest() {
+    runnerRequest = Http.Request.current();
+    Http.Request.current.remove();
+  }
+
+  @After
+  public void restoreCurrentRequest() {
+    SharedChecksCache.endInvocation();
+    Http.Request.current.set(runnerRequest);
+  }
 
   private static final String ACTION = "Persons.list";
 
@@ -125,6 +146,49 @@ public class SharedChecksCacheTest extends UnitTest {
 
     assertNull("esito calcolato con dati precedenti alla modifica",
         cache.get(SharedChecksCache.generation(), user, ACTION));
+  }
+
+  /**
+   * Una richiesta sospesa con await riprende con una nuova invocazione ma con gli oggetti già
+   * caricati (es. l'utente corrente in request.args): deve usare la generazione letta al suo
+   * inizio, non quella del momento della ripresa.
+   */
+  @Test
+  public void requestResumedAfterAwaitKeepsItsGeneration() {
+    Http.Request request = new Http.Request();
+    Http.Request.current.set(request);
+    SharedChecksCache.beginInvocation();
+    long started = SharedChecksCache.invocationGeneration();
+    // la richiesta si sospende con await
+    SharedChecksCache.endInvocation();
+
+    // durante la sospensione un'altra richiesta modifica i dati e fa commit
+    SharedChecksCache.invalidateAll();
+
+    // la ripresa è una nuova invocazione della stessa richiesta
+    SharedChecksCache.beginInvocation();
+    assertEquals(started, SharedChecksCache.invocationGeneration());
+    assertTrue(SharedChecksCache.invocationGeneration() < SharedChecksCache.generation());
+
+    SharedChecksCache cache = new SharedChecksCache(60);
+    User user = user();
+    cache.put(SharedChecksCache.invocationGeneration(), user, ACTION, true);
+    assertNull("esito calcolato con l'utente caricato prima della modifica",
+        cache.get(SharedChecksCache.generation(), user, ACTION));
+  }
+
+  @Test
+  public void newRequestUsesCurrentGeneration() {
+    Http.Request.current.set(new Http.Request());
+    SharedChecksCache.beginInvocation();
+    long first = SharedChecksCache.invocationGeneration();
+    SharedChecksCache.endInvocation();
+    SharedChecksCache.invalidateAll();
+
+    Http.Request.current.set(new Http.Request());
+    SharedChecksCache.beginInvocation();
+    assertEquals(SharedChecksCache.generation(), SharedChecksCache.invocationGeneration());
+    assertTrue(SharedChecksCache.invocationGeneration() > first);
   }
 
   @Test

@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import models.User;
 import models.UsersRolesOffices;
+import play.mvc.Http;
 
 /**
  * Esiti dei controlli dei permessi senza target (es. le voci dei menu), condivisi tra le
@@ -48,6 +49,11 @@ import models.UsersRolesOffices;
  * riusati. Leggerla al momento del controllo non basta: gli oggetti già caricati dalla richiesta
  * restano quelli precedenti al commit della modifica.</p>
  *
+ * <p>Per le richieste HTTP la generazione è conservata anche negli argomenti della richiesta:
+ * una richiesta sospesa con {@code await} riprende con una nuova invocazione, ma con gli stessi
+ * oggetti già caricati (es. l'utente corrente in {@code request.args}), quindi deve continuare a
+ * usare la generazione letta al suo inizio.</p>
+ *
  * <p>L'invalidazione vale per la sola JVM: con più istanze dell'applicazione le altre vedono le
  * modifiche entro la durata della cache. I controlli con un target non passano da qui.</p>
  */
@@ -67,6 +73,11 @@ public class SharedChecksCache {
    * Generazione letta all'inizio dell'invocazione (richiesta o job) in corso sul thread.
    */
   private static final ThreadLocal<Long> INVOCATION_GENERATION = new ThreadLocal<>();
+
+  /**
+   * Chiave di {@code request.args} con la generazione letta all'inizio della richiesta HTTP.
+   */
+  static final String REQUEST_GENERATION = "sharedChecksGeneration";
 
   private final long ttlSeconds;
   private final Cache<String, Boolean> results;
@@ -113,10 +124,23 @@ public class SharedChecksCache {
 
   /**
    * Annota la generazione corrente all'inizio di un'invocazione, prima che apra la transazione
-   * e carichi dati.
+   * e carichi dati. Se l'invocazione riprende una richiesta HTTP sospesa con {@code await},
+   * riusa la generazione letta all'inizio della richiesta.
    */
   public static void beginInvocation() {
-    INVOCATION_GENERATION.set(GENERATION.get());
+    final Http.Request request = Http.Request.current();
+    if (request == null) {
+      INVOCATION_GENERATION.set(GENERATION.get());
+      return;
+    }
+    final Object started = request.args.get(REQUEST_GENERATION);
+    if (started instanceof Long) {
+      INVOCATION_GENERATION.set((Long) started);
+    } else {
+      final long generation = GENERATION.get();
+      request.args.put(REQUEST_GENERATION, generation);
+      INVOCATION_GENERATION.set(generation);
+    }
   }
 
   /**
